@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <title>VC-SEARCHBAR</title>
+  <script src="/vcomet/vcomet.js"></script>
+
+  <script>
+    vcomet.import([
+    "/vcomet/ui/vc-searchbar.html",
+    "/vcomet/ui/vc-datebox.html",
+    "/vcomet/ui/vc-datepicker.html",
+    "/vcomet/ui/vc-item.html"
+    ]);
+  </script>
+
+  <style media="screen">
+    html,
+    body {
+      align-items: center;
+      display: flex;
+      justify-content: space-around;
+      flex-direction: column;
+      background-color: #404040;
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    .filterTestContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    vc-searchbar .filters .content {
+      display: flex;
+      flex-direction: column;
+      color: #c1c1c1;
+      margin: 10px;
+      opacity: 1;
+      flex-grow: 1;
+    }
+
+    vc-searchbar .filters .content .row {
+      justify-content: space-around;
+      display: flex;
+      color: #c1c1c1;
+      margin: 10px;
+      flex-grow: 1;
+    }
+
+    .onlyInput .field {
+      background-color: transparent !important;
+      margin-left: 10px;
+    }
+
+    .onlyInput .field input {
+      outline: none;
+      background: transparent;
+      border: none;
+      color: #c1c1c1;
+      padding: 0 10px;
+    }
+
+    .toFilterOnlyInput {
+      background-color: #3a3a3a;
+      margin-top: 30px;
+      padding: 20px;
+      color: #c1c1c1;
+      height: 250px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      box-sizing: border-box;
+      align-items: center;
+      box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .toFilterOnlyInput div {
+      padding: 10px 10px;
+      display: none;
+    }
+
+    .toFilterOnlyInput div.visible {
+      display: flex;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <vc-searchbar class="dates">
+    <vc-datebox name="startDate"
+         mask="DDMMYYYY"
+         weekstart="monday"
+         weekdaysformat="short"
+         valueformat="YYYY/MM/DD"
+         width=200
+         pickerfontsize=14.4
+         pickerwidth=200
+         pickerheight=180
+         toolbar="true"
+         pickerposition="bottom"
+         pickerselectable="dmy"> </vc-datebox>
+    <vc-datebox name="endDate"
+         mask="DDMMYYYY"
+         weekstart="monday"
+         weekdaysformat="short"
+         valueformat="YYYY/MM/DD"
+         width=200
+         pickerfontsize=14.4
+         pickerwidth=200
+         pickerheight=180
+         toolbar="true"
+         pickerposition="bottom"
+         pickerselectable="dmy"> </vc-datebox>
+    <vc-item type="filters">
+      <div class="content">
+        <div class="row">
+          <label><input type="checkbox" name="one" id="cbox1" value="first_checkbox"> Checkbox 1</label><br>
+          <label><input type="checkbox" name="two" id="cbox2" value="first_checkbox"> Checkbox 2</label><br>
+        </div>
+        <div class="row">
+          <label><input type="checkbox" name="three" id="cbox3" value="first_checkbox"> Checkbox 1</label><br>
+          <label><input type="checkbox" name="four" id="cbox4" value="first_checkbox"> Checkbox 2</label><br>
+        </div>
+        <div class="row">
+          <label><input type="checkbox" name="five" id="cbox5" value="first_checkbox"> Checkbox 1</label><br>
+          <label><input type="checkbox" name="six" id="cbox6" value="first_checkbox"> Checkbox 2</label><br>
+        </div>
+      </div>
+    </vc-item>
+  </vc-searchbar>
+
+  <div class="filterTestContainer">
+
+    <vc-searchbar class="onlyInput">
+      <input type="text" name="name" value="" onkeyup='document.querySelector(".onlyInput").search(document.querySelector(".onlyInput"));'>
+    </vc-searchbar>
+
+    <div class="toFilterOnlyInput">
+      <div value="Manuel Perez"
+           class="visible">Manuel Perez</div>
+      <div value="Carla Jimenez"
+           class="visible">Carla Jimenez</div>
+      <div value="Manuel Ruiz"
+           class="visible">Manuel Ruiz</div>
+      <div value="Manuel Angel Augusto"
+           class="visible">Manuel Angel Augusto</div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    vcomet.onReady(function () {
+      document.querySelector(".onlyInput").onSearch(function(filters) {
+
+        var name = filters.name;
+        var toFilterChilds = document.querySelector(".toFilterOnlyInput").children;
+
+        for (var i = 0; i < toFilterChilds.length; i++) {
+
+          if (toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) > -1) {
+            toFilterChilds[i].classList.add("visible");
+          } else {
+            toFilterChilds[i].classList.remove("visible");
+          }
+        }
+
+      });
+
+      document.querySelector(".dates").onSearch(function(filters) {
+        console.log(filters);
+      });
+    });
+  </script>
+
+</body>
+
+</html>

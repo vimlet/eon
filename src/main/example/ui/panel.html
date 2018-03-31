@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>VC-PANEL</title>
+
+    <!-- Import vcomet js  -->
+    <script src="/vcomet/vcomet.js"></script>
+
+    <!-- Example style -->
+    <link rel="stylesheet" href="/example/ui/css/style.css">
+    <link rel="stylesheet" href="/example/ui/css/panel.css">
+
+    <script>
+        vcomet.import("/vcomet/ui/vc-panel");
+        vcomet.import("/vcomet/ui/vc-scroll.html");
+    </script>
+
+</head>
+
+<body>
+    <div class="container main">
+        <div class="card">
+            <h1>PANEL</h1>
+
+            <vc-panel allow-scroll="false" class="panel">
+
+                <template>
+
+                    <div id="content11" class="content"></div>
+
+                </template>
+
+                <template>
+
+                    <div id="content21" class="content"></div>
+                    <div id="content22" class="content"></div>
+
+                </template>
+
+            </vc-panel>
+
+            <vc-panel href="util/panel/panelHrefTest.html" class="panel">
+            </vc-panel>
+
+            <script>
+                var panel = document.querySelector("vc-panel");
+                var panelAjax = document.querySelectorAll("vc-panel")[1];
+
+                // Load lazy content
+                panel.onReady(function () {
+                    panel.render();
+                });
+
+                setTimeout(function() {
+                    // Load lazy content
+                    panelAjax.onReady(function () {
+                        panelAjax.render();
+                    });
+                }, 1000);
+
+                setTimeout(function() {
+
+                    panelAjax.onReady(function () {
+                        // Refresh with another source content
+                        panelAjax.href = "util/panel/panelHrefTest1.html";
+                        panelAjax.refresh();
+                        // Load lazy content
+                        panelAjax.onLoad(function(){
+                            setTimeout(function() {
+                                panelAjax.render();
+                                
+                            }, 500);
+                        });
+                    });
+
+                }, 2000);
+
+            </script>
+        </div>
+    </div>
+</body>
+
+</html>

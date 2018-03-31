@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>VC-TREE</title>
+
+   <!-- Import vcomet js  -->
+   <script src="/vcomet/vcomet.js"></script>
+
+   <!-- Example style -->
+   <link rel="stylesheet"
+        href="/example/ui/css/style.css">
+   <link rel="stylesheet"
+        href="/example/ui/css/tree.css">
+
+   <!-- UI components -->
+   <script>
+     vcomet.import([
+      "/vcomet/ui/vc-tree.html",
+      "/vcomet/ui/vc-scroll.html",
+      "/vcomet/data/store/vc-store.html",
+      "/vcomet/ui/vc-button"
+     ]);
+
+   </script>
+
+</head>
+
+<body>
+  <div class="container main">
+    <div class="card">
+
+      <h1>DECLARATIVE TREE</h1>
+
+      <div class="example">
+
+        <!-- TREE -->
+        <vc-tree id="declarativeTree">
+
+          <vc-treenode name="dir" path="dir"></vc-treenode>
+          <vc-treenode type="file" name="file1" path="file1"></vc-treenode>
+          <vc-treenode name="dir2" path="dir2" ></vc-treenode>
+          <vc-treenode path="dir2/dir2.1/dir2.1.1"></vc-treenode>
+          <vc-treenode path="dir2/dir2.1/dir2.1.2"></vc-treenode>
+          <vc-treenode type="file" path="dir2/dir2.1/dir2.1.1/dir2.1.1.1/file2"></vc-treenode>
+          <vc-treenode name="dir2.1.2.1.1" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.1"></vc-treenode>
+          <vc-treenode name="dir2.1.2.1.2" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.2"></vc-treenode>
+          <vc-treenode type="file" extension="js" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.2/file3"></vc-treenode>
+
+        </vc-tree>
+
+        <!-- ::::::: -->
+
+      </div>
+
+    </div>
+    <div class="card">
+
+      <h1>STORE BASED TREE</h1>
+
+      <div id="progrmContainer" class="example">
+
+        <!-- <vc-tree id="storeTree">
+          <vc-store type="memory" url="util/tree/data.json" id-property="path"></vc-store>
+        </vc-tree> -->
+
+      </div>
+
+    </div>
+  </div>
+  
+  <script type="text/javascript">
+  vcomet.onReady(function(){
+
+    var dTree = document.querySelector("#declarativeTree");
+    var sTree = document.querySelector("#storeTree");
+    
+    // INTERPOLATION TEST
+    // setTimeout(function() {
+      //   document.querySelector("vc-treenode[path='dir/subdir/subdir2/subdir3']").data.name = "almondigas";
+      // }, 2000);
+      
+      var progrmContainer = document.querySelector("#progrmContainer");
+      var tree = document.createElement("vc-tree");
+      var fragment = document.createDocumentFragment();
+      var elm;
+      var paths = [
+        "dir",
+        "dir/subdir",
+        "dir/subdir",
+        "dir/subdir/file",
+        "dir/subdir/subdir2/subdir3/subdir4/subdir5/subdir6/subdir7/subdir8/subdir9"
+      ];
+      for (var i = 0; i < paths.length; i++) {
+        
+        elm = document.createElement("vc-treenode");
+        elm.path = paths[i];
+        fragment.appendChild(elm);
+        
+      }
+
+      tree.appendChild(fragment);
+      progrmContainer.appendChild(tree);
+      
+      dTree.onReady(function(){
+          var newNode = document.createElement("vc-treenode");
+          newNode.setAttribute("name", "dir6");
+          newNode.path = "Juan";
+          newNode.parent = "";
+
+      // dTree.createNode(newNode.path);
+      // setTimeout(function() {
+
+      //   setTimeout(function() {
+      //     dTree.refresh("file6");
+      //   }, 1000);
+
+      // }, 2000);
+      
+     });
+
+    });
+
+  </script>
+
+</body>
+
+</html>

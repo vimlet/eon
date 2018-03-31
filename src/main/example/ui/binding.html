@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>VCOMET BINDING</title>
+
+    <!-- Import VimletJS  -->
+    <script src="/vcomet/vcomet.js"></script>
+
+    <script>
+        vcomet.import("/vcomet/ui/vc-data.html");
+        vcomet.import("/vcomet/ui/vc-variable.html");
+        vcomet.import("/vcomet/ui/vc-test.html");
+        vcomet.import("/vcomet/data/store/vc-store.html");
+    </script>
+
+    <style>
+        html,
+        body {
+            height: 95%;
+            margin: 0;
+            background-color: #2d2d2d;
+            display: flex;
+            justify-content: center;
+            align-content: center;
+        }
+
+        .main {
+            height: 90%;
+            width: 90%;
+        }
+
+        vc-variable {
+            background: #bd0000;
+            /* opacity: 1 !important; */
+        }
+
+        vc-meta {
+            background: #2300bd;
+            /* opacity: 1 !important; */
+        }
+
+        .card {
+            padding: 30px;
+            background-color: #4e4e4e;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="main">
+        <div class="card">
+
+            <template id="declarative" data="{ name : 'Vimlet' }">
+                <!-- <vc-data id="declarative" data="{ name : 'Vimlet' }"> -->
+
+                Welcome, {{= data.name }}
+
+                <vc-test id="Tale1" data='{ "name":"Richard", "age": "23"}'>
+
+                    {{ var friend = "Peter"; }}
+
+                    <br> This is the tale of {{= data.name.toLowerCase() }},
+                    <br>
+                    <br> {{= data.name }} was {{= data.age }} years old and he had a friend called {{= friend.toLowerCase()}}.
+
+                    <vc-test id="Tale2" data='{ "name":"Richard" }'>
+                        <br> This is another tale, this time the main character is named {{= data.name }}
+                    </vc-test>
+
+                </vc-test>
+
+                <!-- </vc-data> -->
+            </template>
+
+        </div>
+
+    </div>
+
+
+
+
+
+
+    <script>
+        vcomet.data.init(document.querySelector("template"), { name: "Sergio" });
+    </script>
+
+    <script>
+
+        vcomet.onReady(function () {
+
+            var tale1 = document.querySelector("#Tale1");
+            var tale2 = document.querySelector("#Tale2");
+
+            setTimeout(function () {
+
+                tale1.data.name = "Jose";
+                tale1.data.age = "50";
+
+                tale1.hyphenTest = "Jose";
+
+            }, 3000);
+
+            setTimeout(function () {
+
+                tale2.data.name = "Juan";
+
+            }, 4000);
+
+            setTimeout(function () {
+
+                var vcometData = document.querySelector("vc-data")
+
+                vcometData.data.name = "Dumbledore";
+
+            }, 5000);
+
+            // setTimeout(function() {
+            //     tale1.setAttribute("hyphen-test", "Vimlet");
+            //     tale1.setAttribute("simple-attribute", "Not so simple");
+            // }, 6000);
+
+        })
+
+    </script>
+
+
+
+</body>
+
+</html>

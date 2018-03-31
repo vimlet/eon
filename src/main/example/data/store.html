@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <!-- Import VimletJS  -->
+  <title>VC-STORE</title>
+  <script src="/vcomet/vcomet.js"></script>
+
+  <!-- UI components -->
+  <script>
+    vcomet.import("/vcomet/data/store/vc-store.html");
+  </script>
+
+  <!-- Example style -->
+  <link rel="stylesheet"
+      href="/example/data/css/style.css">
+  <link rel="stylesheet"
+      href="/example/data/css/store.css">
+
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="card">
+      <h1>MEMORY</h1>
+
+      <div class="row">
+
+        <button onclick="get()">
+          GET
+        </button>
+        <button onclick="create()">
+          CREATE
+        </button>
+        <button onclick="update()">
+          UPDATE
+        </button>
+        <button onclick="replace()">
+          REPLACE
+        </button>
+        <button onclick="remove()">
+          REMOVE
+        </button>
+
+      </div>
+      <vc-store id="memoryStore"
+           type="memory"
+           url="util/store/data.json">
+      </vc-store>
+      <div class="twoRows">
+        <div class="twoColumns"
+             style="margin-bottom: 6px;">
+
+          <div class="example twoRows">
+            <h4 class="title">REQUEST</h4>
+            <h5 class="title">ID</h5>
+            <input class="subCard input"
+                 style="margin-bottom: 10px;"
+                 id="memoryId" />
+            <h5 class="title">JSON</h5>
+            <textarea class="flexStretch subCard"
+                 style="font-family: monospace;"
+                 contentEditable="true"
+                 id="memoryJson"></textarea>
+          </div>
+          <div class="example">
+            <h4 class="title">DATA</h4>
+            <pre class="flexStretch"
+                 id="memoryData"></pre>
+          </div>
+
+        </div>
+        <div style="padding: 5px">
+          <div class="example twoRows">
+            <h4 class="title">RESULT</h4>
+            <h5 id="memoryRequestType"
+                 class="subTitle"></h5>
+            <pre id="memoryResult" class="flexStretch"></pre>
+          </div>
+        </div>
+        <div class="row">
+          <button onclick="list()">
+            LIST
+          </button>
+          <button onclick="filter()">
+            FILTER
+          </button>
+          <button onclick="range()">
+            RANGE
+          </button>
+          <button onclick="sort()">
+            SORT
+          </button>
+        </div>
+        <vc-store id="memorySecondaryStore"
+             type="memory"
+             url="util/store/data.json">
+        </vc-store>
+        <div class="twoRows">
+          <div class="twoColumns"
+               style="margin-bottom: 6px;">
+
+            <div class="example twoRows">
+              <h4 class="title">REQUEST</h4>
+              <h5 class="title">KEY</h5>
+              <input class="subCard input"
+                   style="margin-bottom: 10px;"
+                   id="memoryKeys" />
+              <h5 class="title">DESCENDING</h5>
+              <div class="">
+                <input type="checkbox" class="subCard input"
+                     style="margin-bottom: 10px;"
+                     id="memoryDescending" />
+              </div>
+              <h5 class="title">START</h5>
+              <input class="subCard input"
+                   style="margin-bottom: 10px;"
+                   id="memoryStart" />
+              <h5 class="title">LIMIT</h5>
+              <input class="subCard input"
+                   style="margin-bottom: 10px;"
+                   id="memoryLimit"/>
+            </div>
+            <div class="example">
+              <h4 class="title">DATA</h4>
+              <pre class="flexStretch"
+                  id="memoryListData"></pre>
+            </div>
+
+          </div>
+          <div style="padding: 5px">
+            <div class="example twoRows">
+              <h4 class="title">RESULT</h4>
+              <h5 id="memoryListRequestType"
+                   class="subTitle"></h5>
+              <pre id="memoryListResult" class="flexStretch"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var store = document.querySelector("#memoryStore")
+      var secndStore = document.querySelector("#memorySecondaryStore")
+      var memoryListData = document.querySelector("#memoryListData")
+      var memoryListRequestType = document.querySelector("#memoryListRequestType")
+      var memoryListResult = document.querySelector("#memoryListResult")
+      var memoryKeys = document.querySelector("#memoryKeys")
+      var memoryDescending = document.querySelector("#memoryDescending")
+      var memoryStart = document.querySelector("#memoryStart")
+      var memoryLimit = document.querySelector("#memoryLimit")
+
+      var memoryData = document.querySelector("#memoryData")
+      var memoryRequestType = document.querySelector("#memoryRequestType")
+      var memoryId = document.querySelector("#memoryId")
+      var memoryJson = document.querySelector("#memoryJson")
+      var memoryResult = document.querySelector("#memoryResult")
+
+      //TODO - TESTING ON FIREFOX
+      store.onCreated(function() {
+        store.onLoaded(function() {
+          store.listRemote(function() {
+            memoryData.innerHTML = JSON.stringify(store.data.asArray(), null, 2);
+            secndStore.setData(store.data.asArray());
+            memoryListData.innerHTML = JSON.stringify(secndStore.data.asArray(), null, 2);
+          });
+        });
+      });
+
+      // -- MEMORY --
+      function get() {
+        var id = !memoryId.value ? "0" : memoryId.value;
+        memoryRequestType.innerHTML = "Get request";
+        memoryResult.innerHTML = JSON.stringify(store.get(id), null, 2);
+      }
+
+      function create() {
+        var item = memoryJson.value;
+        try {
+          item = JSON.parse(item);
+          memoryRequestType.innerHTML = "Create request";
+          memoryResult.innerHTML = JSON.stringify(store.create(item), null, 2);
+          refreshData(memoryData, objectToArray(store.data.asObject()));
+        } catch (err) {
+          console.warn("Example warning: Invalid json format")
+        }
+      }
+
+      function update() {
+        var item = memoryJson.value;
+        var id = !memoryId.value ? "0" : memoryId.value;
+        try {
+          item = JSON.parse(item);
+          memoryRequestType.innerHTML = "Update request";
+          memoryResult.innerHTML = JSON.stringify(store.update(id, item), null, 2);
+          refreshData(memoryData, objectToArray(store.data.asObject()));
+        } catch (err) {
+          console.warn("Example warning: Invalid json format")
+        }
+      }
+
+      function replace() {
+        var item = memoryJson.value;
+        var id = !memoryId.value ? "0" : memoryId.value;
+        try {
+          item = JSON.parse(item);
+          memoryRequestType.innerHTML = "Replace request";
+          memoryResult.innerHTML = JSON.stringify(store.replace(id, item), null, 2);
+          refreshData(memoryData, objectToArray(store.data.asObject()));
+        } catch (err) {
+          console.warn("Example warning: Invalid json format")
+        }
+        refreshData(memoryData, objectToArray(store.data.asObject()));
+      }
+
+      function remove() {
+        var id = !memoryId.value ? "0" : memoryId.value;
+        memoryRequestType.innerHTML = "Remove request";
+        memoryResult.innerHTML = JSON.stringify(store.remove(id), null, 2);
+        refreshData(memoryData, objectToArray(store.data.asObject()));
+      }
+
+      function list() {
+        var attrb;
+        try {
+          attrb = !memoryKeys.value ? undefined : eval(memoryKeys.value);
+        } catch (err) {
+          console.warn("Example warning: Invalid keys array format")
+        }
+        memoryListRequestType.innerHTML = "List request";
+        memoryListResult.innerHTML = JSON.stringify(store.list(attrb).asObject(), null, 2);
+      }
+      function filter() {
+        var filterObj;
+        try {
+          filterObj = !memoryKeys.value ? undefined : JSON.parse(memoryKeys.value);
+        } catch (err) {
+          console.warn("Example warning: Invalid filter keys object format")
+        }
+        memoryListRequestType.innerHTML = "Filter request";
+        memoryListResult.innerHTML = JSON.stringify(store.filter(filterObj).asObject(), null, 2);
+      }
+      function range() {
+        var start = memoryStart.value;
+        var limit = memoryLimit.value;
+        memoryListRequestType.innerHTML = "Range request";
+        memoryListResult.innerHTML = JSON.stringify(store.getRange(start, limit).asObject(), null, 2);
+      }
+      function sort() {
+        var key = memoryKeys.value;
+        var desc = memoryDescending.checked;
+        memoryListRequestType.innerHTML = "Sort request";
+        memoryListResult.innerHTML = JSON.stringify(store.sortList(key, desc).asArray(), null, 2);
+      }
+
+      // ----------
+
+      // -- REST --
+
+      // ----------
+
+      function refreshData(el, data) {
+        el.innerHTML = JSON.stringify(data, null, 2);
+      }
+
+      function objectToArray(data) {
+        var object = data.constructor === Object ? data : JSON.parse(data);
+        var array = [];
+        for (var key in object) {
+          array.push(object[key]);
+        }
+        return array;
+      }
+    </script>
+
+  </div>
+
+</body>
+
+</html>

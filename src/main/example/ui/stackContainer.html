@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <title>VC-STACKCONTAINER</title>
+  <script src="/vcomet/vcomet.js"></script>
+
+  <script>
+    vcomet.import([
+    "/vcomet/ui/vc-stackcontainer.html",
+    "/vcomet/ui/vc-container.html"
+    ]);
+  </script>
+
+  <style media="screen">
+    html,
+    body {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      background-color: #404040;
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      font-family: arial;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .menu div {
+      padding: 15px 20px;
+      font-weight: bold;
+      color: #f1f1f1;
+      opacity: 0.8;
+    }
+
+    .menu div:hover {
+      opacity: 1;
+      cursor: pointer;
+    }
+
+    .stackContainerWrapper {
+      width: 600px;
+      height: 500px;
+      background-color: #f1f1f1;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+
+    .first,
+    .second,
+    .third {
+      height: 200px;
+    }
+
+    .first {
+      background-color: green;
+    }
+
+    .second {
+      background-color: yellow;
+    }
+
+    .third {
+      background-color: blue;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="main">
+    <div class="menu">
+      <div onclick='document.querySelector("vc-stackcontainer").swapToContainerByIndex(0)'>
+        Colors
+      </div>
+      <div onclick='document.querySelector("vc-stackcontainer").swapToContainerById("wikipedia")'>
+        Wikipedia
+      </div>
+    </div>
+    <div class="stackContainerWrapper">
+      <vc-stackcontainer>
+        <vc-container target="stackcontainer"
+             id="colors">
+          <div class="container">
+            <div class="first"></div>
+            <div class="second"></div>
+            <div class="third"></div>
+          </div>
+        </vc-container>
+        <vc-container target="stackcontainer"
+             id="wikipedia">
+          <iframe src="http://en.wikipedia.org/wiki/Framekiller"
+               width="100%"
+               height="100%"
+               style="border: none;"></iframe>
+        </vc-container>
+      </vc-stackcontainer>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+  vcomet.ready(function(){
+    setTimeout(function() {
+      document.querySelector("vc-stackcontainer").swapToContainerByIndex(1);
+    }, 1000);
+    document.querySelector("vc-stackcontainer").onSwapped(function(previous, target) {
+      console.log("previous", previous.id, "target", target.id);
+    });
+  })
+  </script>
+
+</body>
+
+</html>

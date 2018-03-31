@@ -1,0 +1,501 @@
+<link rel="stylesheet" data-href="style.css">
+<template>
+    <div class="vc-contextmenu-wrapper bg2-boxshadow">
+        <!-- Only small devices -->
+        <div class="vc-contextmenu-close bg2">
+            <i class="vc-contextmenu-closeIcon vicon vicon-close"></i>
+        </div>
+        <vc-scroll arrowScrolls="true">
+            <div class="vc-contextmenu-contextmenu bg2 unselectable"></div>
+        </vc-scroll>
+
+    </div>
+</template>
+
+<script>
+    vcomet.element("vc-contextmenu", {
+        dependencies: [
+            "../vc-item",
+            "../vc-scroll"
+        ],
+
+        properties: {
+            /*
+              @property {String} name 
+              @description Contextmenu name that associates it with trigger component
+            */
+            name: {
+                value: "",
+                reflect: true
+            },
+        },
+
+        privateProperties: {
+            /*
+              @property (private) {Object} _triggerNode 
+              @description Store contextmenu trigger node
+            */
+            triggerNode: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _hideEvent 
+              @description Store hide event
+            */
+            hideEvent: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _contextmenuEvent
+              @description Store contextmenu event
+            */
+            contextmenuEvent: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _clickContextmenuEvent
+              @description Store contextmenu samll devices event
+            */
+            clickContextmenuEvent: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _lastDevice
+              @description Store last device
+            */
+            lastDevice: {
+                value: ""
+            },
+        },
+
+        privateFunctions: {
+            /*
+              @function (private) _setContextmenuEvent
+              @description Set event to open contextmenu
+            */
+            setContextmenuEvent: function (triggerElement) {
+                var el = this;
+                var posX;
+                var posY;
+
+                if (el.getAttribute("version") == "desktop") {
+
+                    triggerElement.addEventListener("contextmenu", contextmenuEvent);
+
+                    function contextmenuEvent(e) {
+
+                        posX = e.clientX;
+                        posY = e.clientY;
+                        el.show(posX, posY);
+
+                        var exceedsObject = el._exceedsWindow();
+
+                        (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
+
+                    };
+
+                    el._contextmenuEvent = contextmenuEvent;
+                }
+
+                // Long touch event functionality
+                if (el.getAttribute("version") == "smalldevice") {
+                    var onLongTouch;
+                    var timer, lockerTimer;
+                    var touchDuration = 800;
+
+                    function touchStart(event) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        timer = setTimeout(onLongTouch, touchDuration);
+                    }
+
+                    function touchEnd() {
+                        // Stops short touches from firing the event
+                        if (timer) {
+                            clearTimeout(timer);
+                        }
+
+                    }
+
+                    onLongTouch = function () {
+                        el.show();
+                    }
+
+                    // Events for small devices
+                    if (navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i)) {
+                        triggerElement.addEventListener("touchstart", touchStart, false);
+                        triggerElement.addEventListener("touchend", touchEnd, false);
+
+                        // Events for small resized screens
+                    } else {
+                        triggerElement.addEventListener("pointerdown", touchStart, false);
+                        triggerElement.addEventListener("pointerup", touchEnd, false);
+                    }
+                }
+            },
+
+            /*
+              @function (private) {Object} _exceedsWindow
+              @description Check if contextmenu is going to exceed window limits
+            */
+            exceedsWindow: function () {
+                var el = this;
+                var elementRect = el.getBoundingClientRect();
+                var returnObject = {};
+
+                returnObject.exceeds = false;
+                returnObject.sides = {};
+
+                if (elementRect.left < 0) {
+                    returnObject.sides["left"] = true;
+                    returnObject.exceeds = true;
+                }
+
+                if ((elementRect.left + elementRect.width) > window.innerWidth) {
+                    returnObject.sides["right"] = true;
+                    returnObject.exceeds = true;
+                }
+
+                if (elementRect.top < 0) {
+                    returnObject.sides["top"] = true;
+                    returnObject.exceeds = true;
+                }
+
+                if (elementRect.top + elementRect.height > window.innerHeight) {
+                    returnObject.sides["bottom"] = true;
+                    returnObject.exceeds = true;
+                }
+
+                return returnObject;
+            },
+
+            /* 
+              @function (private) _relocateContextmenu
+              @description Relocate contextmenu correctly without exceed window limits
+              @param {Number} posX [Position X of mouse event click]
+              @param {Number} posY [Position Y of mouse event click]
+              @param {Object} exceedsObject [Side where contextmenu exceed window limits]
+            */
+            relocateContextmenu: function (posX, posY, exceedsObject) {
+
+                this.style.left = (exceedsObject.sides.right) ? posX - (this.clientWidth - 1) + "px" : this.style.left;
+                this.style.top = (exceedsObject.sides.bottom) ? posY - (this.clientHeight - 1) + "px" : this.style.top;
+
+            },
+
+            /*
+             @function (private) _setupItems
+             @description Set up declarative user contextmenu items
+             @param {Object} sourceNodes [Contextmenu node items]
+           */
+            setupItems: function (sourceNodes) {
+                var el = this;
+                var itemsDocFragment = document.createDocumentFragment();
+                var length = sourceNodes.length;
+                var item;
+
+                while (sourceNodes.length) {
+                    item = sourceNodes.shift();
+
+                    (item.value) ? this._setupSpan(item) : null;
+                    item.classList.add("bg2-hoverable");
+                    (item.getAttribute("icon")) ? el._setupIcon(item) : null;
+
+                    itemsDocFragment.appendChild(item);
+
+                }
+
+                // Move documentFragment to shadowRoot
+                el._contextmenuNode.appendChild(itemsDocFragment);
+
+            },
+
+            /*
+              @function (private) _setupSpan
+              @description Set up span with name of app
+              @param {Object} item [Contextmenu node icon]
+           */
+            setupSpan: function (item) {
+                var itemSpan = document.createElement("span");
+
+                itemSpan.innerHTML = item.value;
+                itemSpan.classList.add("vc-contextmenu-itemSpan");
+                item.appendChild(itemSpan)
+            },
+
+            /*
+              @function (private) _setupIcon
+              @description Set up contextmenu icon
+              @param {Object} item [Contextmenu node icon]
+           */
+            setupIcon: function (item) {
+                var iconAttribute = item.icon;
+                var iconPosition = item.iconPosition;
+                var icon;
+
+
+                if (iconAttribute.indexOf("</i>") !== -1) {
+                    var tempDiv = document.createElement("div");
+
+                    tempDiv.innerHTML = iconAttribute;
+                    icon = tempDiv.querySelector("i");
+                    icon.classList.add("vc-contextmenu-itemIcon");
+
+                } else {
+                    icon = document.createElement("div");
+                    icon.style.backgroundImage = "url('" + iconAttribute + "')";
+                    icon.classList.add("vc-contextmenu-icon");
+                }
+
+                if (iconPosition == "left") {
+                    item.insertBefore(icon, item.childNodes[0]);
+
+                } else {
+                    item.appendChild(icon);
+                    item.style.justifyContent = "space-between";
+                }
+            },
+
+            /*
+              @function (private) _setResponsiveClose
+              @description Set close button for opening by click version for small devices
+           */
+            setResponsiveClose: function () {
+                var el = this;
+
+                if (!el.classList.contains("vc-contextmenu-responsive")) {
+                    el._closeNode.classList.add("vc-contextmenu-closeVisible");
+                    el._closeIconNode.addEventListener("click", hideEvent);
+
+                    function hideEvent() {
+                        el.setAttribute("visible", "false");
+                        document.body.removeEventListener("click", hideEvent);
+                        vcomet.triggerCallback("onHide", this);
+                    }
+                }
+
+            },
+
+            /*
+              @function (private) _verifyScreenResolution
+              @description Set device type
+            */
+            verifyScreenResolution: function () {
+                var el = this;
+
+                // Small devices view
+                if (window.innerWidth <= vcomet.tabletWidth || navigator.userAgent.match(/Tablet|iPad|iPod/i)) {
+                    el.setAttribute("version", "smalldevice");
+
+                    // Desktop view
+                } else {
+                    el.setAttribute("version", "desktop");
+                }
+
+                if (el.getAttribute("version") != el._lastDevice) {
+                    el._lastDevice = el.getAttribute("version");
+                    el._updateDeviceOptions();
+                }
+
+            },
+
+
+            /*
+              @function (private) _updateDeviceOptions
+              @description Update device options and set events
+            */
+            updateDeviceOptions: function () {
+                var el = this;
+                var triggerLength = el._triggerNode.length;
+
+                for (var i = 0; i < triggerLength; i++) {
+
+                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el.getAttribute("version") == "desktop") {
+                        el._triggerNode[i].setAttribute("oncontextmenu", "return false");
+                        el._triggerNode[i].removeEventListener("click", el._clickContextmenuEvent);
+                        el._setContextmenuEvent(el._triggerNode[i]);
+                    }
+
+                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el.getAttribute("version") != "desktop") {
+                        el._triggerNode[i].removeAttribute("oncontextmenu");
+                        el._triggerNode[i].removeEventListener("contextmenu", el._contextmenuEvent);
+                        el._setContextmenuEvent(el._triggerNode[i]);
+                    }
+
+                }
+            },
+
+            /*
+              @function (private) _verifyOpenContextmenu
+              @description Check if there is already a contextmenu open and close it
+              @param {Array} openContextmenu [Stores the node of open contextmenu]
+            */
+            verifyOpenContextmenu: function (openContextmenu) {
+                var el = this;
+
+                if (openContextmenu.length == 1) {
+                    openContextmenu[0].element.setAttribute("visible", "false");
+                    openContextmenu.splice(0);
+                }
+
+            }
+
+        },
+
+        functions: {
+            /*
+              @function show
+              @description Show contextmenu at position where clicked
+              @param {Number} posX [Position X of mouse event click]
+              @param {Number} posY [Position Y of mouse event click]
+            */
+            show: function (posX, posY) {
+                var el = this;
+
+                // Contextmenu opened by a click event for the responsive functionality
+                if (posX == undefined && posY == undefined) {
+                    el._setResponsiveClose();
+                    el.setAttribute("click-open", "true");
+                    el.setAttribute("visible", "true");
+                    el.classList.add("bg1-modal");
+
+                } else {
+                    var openContextmenu = vcomet.contextmenu.openContextmenu;
+                    var openContextmenuObject = {};
+
+                    // In case that previously the contextmenu was open with the click event
+                    // is necessary to remove its functionality
+                    if (el.hasAttribute("click-open")) {
+                        // var close = el.querySelector(".vc-contextmenu-close");
+                        el._closeNode.classList.remove("vc-contextmenu-closeVisible");
+
+                        el.classList.remove("vc-contextmenu-responsive");
+                        el.classList.remove("bg1-modal");
+                        el.removeAttribute("click-open");
+                        // close.parentNode.removeChild(close);
+                    }
+
+                    el._verifyOpenContextmenu(openContextmenu);
+                    openContextmenuObject.element = el;
+                    vcomet.contextmenu.openContextmenu.push(openContextmenuObject);
+                    el.style.top = posY + "px";
+                    el.style.left = posX + "px";
+                    el.setAttribute("visible", "true");
+                    el.hide();
+                }
+
+                vcomet.triggerCallback("onShow", this);
+                el._wrapperNode.vcometScroll.update();
+
+            },
+
+            /*
+             @function hide
+             @description Hide contextmenu
+            */
+            hide: function () {
+                var el = this;
+
+                document.body.addEventListener("click", hideEvent);
+
+                function hideEvent(e) {
+                    var verticalScroll = el.querySelector(".vc-contextmenu-wrapper .vc-scroll-verticalScroll");
+
+                    if ((!verticalScroll && (el.getAttribute("visible") == "true")) || ((el.getAttribute("visible") == "true") && (verticalScroll.isOnPath == false))) {
+                        ((el.getAttribute("visible") == "true")) ? el.setAttribute("visible", "false") : null;
+                        document.body.removeEventListener("click", hideEvent);
+                    }
+
+                    vcomet.triggerCallback("onHide", this);
+                }
+
+                el._hideEvent = hideEvent;
+
+            },
+
+            /*
+              @function addItem
+              @description Add new contextmenu node item programmaticaly
+              @param {Object} item [Node to add to contextmenu]
+            */
+            addItem: function (item) {
+                var itemSpan = item.querySelector("span");
+
+                (item.icon) ? this._setupIcon(item) : null;
+                (item.value) ? this._setupSpan(item) : null;
+                item.classList.add("bg2-hoverable");
+
+                this._contextmenuNode.appendChild(item);
+
+            },
+
+            /*
+              @function removeItem 
+              @description Remove node item passed as parameter
+              @param {Object} item [Node to removes from contextmenu] 
+             */
+            removeItem: function (item) {
+                this._contextmenuNode.removeChild(item);
+            },
+
+            /*
+              @function replaceItem 
+              @description Replace old node item with a new one
+              @param {Object} newItem [Node that replaces old one]
+              @param {Object} oldItem [Node to be replaced]
+             */
+            replaceItem: function (newItem, oldItem) {
+                var itemSpan = newItem.querySelector("span");
+
+                (newItem.value) ? this._setupSpan(newItem) : null;
+                (newItem.icon) ? this._setupIcon(newItem) : null;
+                newItem.classList.add("bg2-hoverable");
+
+                this._contextmenuNode.replaceChild(newItem, oldItem);
+
+            }
+
+        },
+
+        onCreated: function () {
+            var el = this;
+
+            // Create callbacks
+            vcomet.createCallback("onShow", this);
+            vcomet.createCallback("onHide", this);
+
+            // Global contextemenu variables
+            vcomet.contextmenu = vcomet.contextmenu || {
+                openContextmenu: []
+            };
+
+            el._contextmenuNode = el.template.querySelector(".vc-contextmenu-contextmenu");
+            el._wrapperNode = el.template.querySelector(".vc-contextmenu-wrapper");
+            el._closeNode = el.template.querySelector(".vc-contextmenu-close");
+            el._closeIconNode = el.template.querySelector(".vc-contextmenu-closeIcon");
+
+        },
+
+        onBubbleRender: function () {
+            var el = this;
+            var sourceNodes = el.getSourceElements();
+
+            el._triggerNode = document.querySelectorAll('[vc-contextmenu]');
+            triggerLength = el._triggerNode.length;
+
+            el._verifyScreenResolution();
+            el._setupItems(sourceNodes);
+
+            el._wrapperNode.vcometScroll.onVerticalScrollCreated(function (verticalScroll) {
+                vcomet.registerPathListener(verticalScroll);
+            });
+
+        },
+
+        onWindowResize: function (event) {
+            this._verifyScreenResolution();
+        }
+
+    });
+
+</script>
