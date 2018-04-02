@@ -3390,7 +3390,7 @@ window.$1 = window.$1 || vcomet.$1;
 
 // Create imports reade callback
 vcomet.createCallback("onImportsReady", vcomet, "ready");
-vcomet.createCallback("onScriptsReady", vcomet, "always");
+vcomet.createCallback("onScriptsReady", vcomet, "ready");
 
 // Imports the requested custom element file, admits arrays and strings
 vcomet.import = function (param) {
@@ -3411,10 +3411,11 @@ vcomet.import = function (param) {
 
 vcomet.insertImport = function (href) {
 
-    var elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
-
-    href = (href.indexOf(".html") > -1) ? href : href + "/index.html";
-
+    var elementName;
+    
+    href = (href.indexOf(".html") > -1) ? href : href + ".html";
+    elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
+    
     vcomet.imports = vcomet.imports || {
         count: 0,
         total: 0,
@@ -3422,7 +3423,6 @@ vcomet.insertImport = function (href) {
     };
 
     vcomet.imports.style = vcomet.imports.style || "";
-    // vcomet.imports.script = vcomet.imports.script || "";
 
     vcomet.imports.scripts = vcomet.imports.scripts || {};
     vcomet.imports.links = vcomet.imports.links || {};
@@ -3519,11 +3519,13 @@ vcomet.insertImport = function (href) {
                             
                             // Handles the dependencies and returns a boolean for whether there are pendings imports or not
                             var hasPendingImports = vcomet.handleDependencies();
-                            
+
                             // If there are no more dependencies to handle trigger onImportsReady
                             if (!hasPendingImports && !vcomet.imports.ready && vcomet.imports.count == vcomet.imports.total && vcomet.imports.total == Object.keys(vcomet.imports.config).length) {
                                 vcomet.imports.ready = true;
                                 vcomet.triggerCallback('onImportsReady', vcomet);
+                            } else {
+                                vcomet.__onScriptsReady__triggered = false;
                             }
 
                         });
@@ -3622,7 +3624,7 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
     }
     
     var scriptsReadyScript = document.createElement("script");
-
+    
     scriptsReadyScript.innerHTML = "vcomet.triggerCallback('onScriptsReady', vcomet);";
     document.head.appendChild(scriptsReadyScript);
 
