@@ -1,0 +1,484 @@
+<template>
+
+  <div class="comboboxWrapper">
+    <div class="combobox">
+      <input type="text">
+      <i class="material-icons dropButton">expand_more</i>
+    </div>
+    <span class="underline"></span>
+  </div>
+  <span></span>
+  <div class="dropdown">
+  </div>
+
+</template>
+
+<script type="text/javascript">
+  vcomet.element("vc-combobox", {
+
+    themed: true,
+
+    dependencies: [
+      "vc-scroll"
+    ],
+
+    privateProperties: {
+      /*
+      @property (private) {string} _formelement 
+      @description Necessary property for a form
+      */
+      formelement: {
+        value: "combobox"
+      },
+      /*
+      @property {object} _refs
+      @description Object with references to relevant element nodes
+      */
+      refs: {
+        value: {},
+        reflect: false
+      }
+    },
+
+    properties: {
+      /*
+      @property {string} name
+      @description Name of the combobox
+      */
+      name: {
+        value: "combobox",
+        reflect: true
+      },
+      /*
+      @property {string} placeholder
+      @description Sets the placeholder for the input
+      */
+      placeholder: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {string} mustmatch
+      @description whether the input must match the given options or not
+      */
+      mustmatch: {
+        value: "false",
+        reflect: true
+      },
+      /*
+      @property {string} value
+      @description The value of the dropdown
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {string} displayValue
+      @description The displayValue of the item
+      */
+      displayValue: {
+        value: "",
+        reflect: true
+      },
+    },
+
+    privateFunctions: {
+      /*
+      @function setupRefs
+      @description Creates some fast access elements so that theres no need for calling the QuerySelector all the time.
+      */
+      setupRefs: function () {
+
+        var el = this;
+
+        el._refs.userInput = el.template.querySelector("input");
+        el._refs.dropDown = el.template.querySelector(".dropdown");
+        el._refs.dropDownButton = el.template.querySelector(".dropButton");
+        el._refs.store = el.source.querySelector("vc-store");
+        el._refs.underline = el.template.querySelector(".underline");
+
+      },
+      /*
+      @function _setupScroll
+      @description Assigns some quick access to some node to avoid using same querySelectors all the time
+      */
+      setupScroll: function () {
+
+        var el = this;
+
+        el._refs.scroll = document.createElement("vc-scroll");
+        el._refs.scroll.thickness = 8;
+
+        el._refs.dropDown.appendChild(el._refs.scroll);
+        
+      },
+      /*
+      @function setupTriggers
+      @description Sets up the listener to the click events
+      */
+      setupTriggers: function () {
+
+        var el = this;
+
+        el._refs.dropDownButton.addEventListener("click", function () {
+          el._toggleDropdown(el);
+        });
+
+        document.body.addEventListener("click", function (e) {
+          el._customBlur(e, el);
+        });
+
+      },
+      /*
+      @function setupAnimations
+      @description Here we will setup the animations for the input
+      */
+      setupAnimations: function () {
+
+        var el = this;
+
+        el._refs.userInput.addEventListener("focus", function () {
+          el._refs.underline.classList.add("animate");
+        });
+
+        el._refs.userInput.addEventListener("blur", function () {
+          el._refs.underline.classList.remove("animate");
+        });
+
+      },
+      /*
+      @function setupItems
+      @description Sets up the declarative user items for the combobox
+      */
+      setupItems: function () {
+
+        var el = this;
+
+        if (el._refs.store) {
+
+          el._refs.store.onCreated(function () {
+
+            el._refs.store.onLoaded(function () {
+
+              el._refs.store.listRemote(function () {
+                el._setupStoreItems(el);
+              });
+
+              el._refs.store.onSourceChanged(function () {
+                el._setupStoreItems(el);
+              });
+
+            });
+
+          });
+
+        } else {
+
+          var sourceNodes = this.getSourceElements();
+          var itemsDocFragment = document.createDocumentFragment();
+          var length = sourceNodes.length;
+          var item;
+
+          for (var i = 0; i < length; i++) {
+
+            item = sourceNodes[i];
+
+            el._setupItem(item);
+
+            itemsDocFragment.appendChild(item);
+
+          }
+          
+          el._refs.scroll.content.appendChild(itemsDocFragment);
+
+        }
+
+      },
+      setupItem: function (item) {
+
+        var el = this;
+
+        item.onRender(function () {
+
+          var span = document.createElement("span");
+
+          this.classList.add("result");
+          this.matches = "true";
+          this.value = this.getAttribute("value");
+          this.displayValue = this.getAttribute("display-value") || this.value;
+
+          span.innerHTML = this.displayValue;
+
+          this.appendChild(span);
+          this.addEventListener("click", function () { el.select(this) });
+
+        });
+
+      },
+      /*
+      @function setupStoreItems
+      @description Here we setup our items depending on the store data
+      */
+      setupStoreItems: function () {
+
+        var el = this;
+
+        var dropdown = el._refs.dropDown;
+        var itemsDocFragment = document.createDocumentFragment();
+        var displayValue = (el.displayValue) ? el.displayValue : el.value;
+        var storeData = el._refs.store.data.asObject();
+        var item;
+
+        for (var key in storeData) {
+
+          item = document.createElement("vc-item");
+
+          item.matches = "true";
+          item.value = storeData[key][el.value];
+          item.displayValue = storeData[key][displayValue];
+
+          item.onRender(function () {
+
+            var span = document.createElement("span");
+
+            span.innerHTML = this.displayValue;
+            this.appendChild(span);
+            this.addEventListener("click", function () { el.select(this) });
+          });
+
+          itemsDocFragment.appendChild(item);
+
+        }
+
+        el._refs.scroll.content.appendChild(itemsDocFragment);
+
+      },
+      /*
+      @function filterResults
+      @description Filters the items based on the user input
+      @param {object} input [User input element]
+      */
+      filterResults: function (input) {
+        var el = this;
+        var items = el._refs.dropDown.querySelectorAll("vc-item");
+        var value = input.value.toLowerCase();
+
+        //If the input is empty we will hide the options and enable all the options to be active
+        if (value == "") {
+
+          if (el._refs.dropDown.classList.contains("expanded")) {
+            el.shrink();
+          }
+
+          var hiddenItems = el._refs.dropDown.querySelectorAll('[matches="false"]');
+          for (var i = 0; i < hiddenItems.length; i++) {
+            hiddenItems[i].setAttribute("matches", "true");
+            hiddenItems[i].classList.remove("hidden");
+          }
+
+        } else {
+          //Check if its already expanded, if its not then expand it
+          if (!el._refs.dropDown.classList.contains("expanded")) {
+
+            document.body.addEventListener("click", function (e) {
+              el._customBlur(e);
+            });
+
+            el.expand();
+          }
+          //Loop to find matches and hide those that do not match
+          for (var i = 0; i < items.length; i++) {
+            if (!(items[i].innerText.toLowerCase().indexOf(value) > -1)) {
+              if (!items[i].classList.contains("hidden")) {
+                items[i].classList.add("hidden");
+                items[i].setAttribute("matches", "false");
+              }
+            } else {
+              if (items[i].classList.contains("hidden")) {
+                items[i].classList.remove("hidden");
+                items[i].setAttribute("matches", "true");
+              }
+            }
+          }
+        }
+        //Depending on the musmatch propertie we will show errors and change color ... o no :)
+        if (el.mustmatch == "true") {
+          var matchedItems = el._refs.dropDown.querySelectorAll('[matches="true"]');
+          var matchingError = el._refs.dropDown.querySelector("#matchingError");
+          if (matchedItems.length == 0) {
+            if (!matchingError) {
+              matchingError = document.createElement("div");
+              matchingError.setAttribute("id", "matchingError");
+              matchingError.classList.add("matchingError");
+              matchingError.innerHTML = "No matches found";
+              el._refs.dropDown.appendChild(matchingError);
+
+              el.querySelector(".comboboxWrapper").classList.add("comboboxWrapperNoMatches");
+              el.querySelector(".underline").classList.add("underlineNoMatches");
+
+            }
+          } else {
+            if (matchingError) {
+              matchingError.parentNode.removeChild(matchingError);
+
+              el.querySelector(".comboboxWrapper").classList.remove("comboboxWrapperNoMatches");
+              el.querySelector(".underline").classList.remove("underlineNoMatches");
+            }
+          }
+        } else {
+          if (matchingError) {
+            matchingError.parentNode.removeChild(matchingError);
+
+            el.querySelector(".comboboxWrapper").classList.remove("comboboxWrapperNoMatches");
+            el.querySelector(".underline").classList.remove("underlineNoMatches");
+          }
+        }
+
+      },
+      /*
+      @function customBlur
+      @description Checks if the user clicked outside the dropdown, if so it shrinks the dropdown
+      @param {object} e
+      */
+      customBlur: function (e) {
+
+        var el = this;
+
+        if (el.isOnPath == false) {
+          el.shrink();
+        }
+      },
+      /*
+      @function toggleDropdown
+      @description Toggles the dropdown when clicking on the dropdown button
+      */
+      toggleDropdown: function () {
+
+        var el = this;
+
+        if (el._refs.dropDown.classList.contains("expanded")) {
+          el.shrink();
+        } else {
+          el.expand();
+        }
+      },
+
+    },
+
+    functions: {
+      /*
+      @function (private) setValue
+      @description Updates the value
+      @param {String} value 
+      */
+      setValue: function (value, displayValue) {
+
+        var el = this;
+
+        el.value = value;
+        el.displayValue = displayValue ? displayValue : value;
+        el._refs.userInput.value = displayValue ? displayValue : value;
+
+        el._filterResults(el._refs.userInput)
+
+      },
+      /*
+      @function addItem
+      @description Adding a new option item programmaticaly
+      @param {object} item 
+      */
+      addItem: function (item) {
+
+        var el = this;
+        item.onRender(function () {
+          var span = document.createElement("span");
+          span.innerHTML = this.displayValue;
+          this.appendChild(span);
+          this.setAttribute("matches", "true");
+          this.addEventListener("click", function () { el.select(this) });
+        });
+
+        el._refs.dropDown.appendChild(item);
+        el._refs.scroll.update();
+      },
+      /*
+      @function select
+      @description Sets the item as the inputs value and hide the options div
+      @param {object} item
+      */
+      select: function (item) {
+        var el = this;
+
+        var value = item.getAttribute("value") || item.value;
+        var displayValue = item.getAttribute("display-value");
+
+        el.setAttribute("value", value);
+        el.value = value;
+        el._refs.userInput.value = item.displayValue;
+
+        vcomet.triggerCallback("onSelected", el, el, [item]);
+
+        el.shrink();
+
+      },
+      /*
+      @function expand
+      @description Expands the items dropdown
+      */
+      expand: function () {
+
+        var el = this;
+
+        if (!el._refs.dropDown.classList.contains("expanded")) {
+          el._refs.dropDown.classList.add("expanded");
+          el._refs.underline.classList.add("animate");
+          el._refs.scroll.update();
+        }
+      },
+      /*
+      @function shrink
+      @description Shrinks the items dropdown
+      */
+      shrink: function () {
+
+        var el = this;
+
+        el._refs.dropDown.classList.remove("expanded");
+        el._refs.underline.classList.remove("animate");
+
+      }
+
+    },
+
+    onCreated: function () {
+
+      var el = this;
+
+      el._setupRefs();
+      el._setupScroll();
+
+      vcomet.createCallback("onSelected", el);
+
+    },
+
+    onRender: function () {
+
+      var el = this;
+      var declarativePlaceholder = el.getAttribute("placeholder");
+
+      vcomet.registerPathListener(el);
+
+      el._setupTriggers();
+      el._setupItems();
+      el._setupAnimations()
+
+      if (declarativePlaceholder) el._refs.userInput.placeholder = declarativePlaceholder;
+
+      el._refs.userInput.addEventListener("keyup", function () {
+        el._filterResults(el._refs.userInput)
+      });
+
+    }
+  });
+</script>

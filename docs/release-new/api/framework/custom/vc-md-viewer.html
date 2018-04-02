@@ -1,0 +1,1017 @@
+<style>
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background-color: #fff;
+        overflow: hidden;
+        color: #6b6b6b !important;
+    }
+
+    vc-md-viewer {
+        width: 100%;
+        height: 100%;
+    }
+
+    vc-md-viewer > vc-scroll > .vc-scroll-content {
+         padding: 20px !important; 
+    }
+
+    #vc-md-viewer-content {
+        width: 100%;
+        height: 100%;
+    }
+
+    .vc-md-viewer-t1 {
+        font-size: 36px;
+        line-height: 40px;
+    }
+
+    .vc-md-viewer-t2 {
+        font-size: 30px;
+        line-height: 40px;
+    }
+
+    .vc-md-viewer-t3 {
+        font-size: 24px;
+        line-height: 40px;
+    }
+
+    .vc-md-viewer-t4 {
+        font-size: 18px;
+        line-height: 40px;
+    }
+
+    .vc-md-viewer-t5 {
+        font-size: 12px;
+        line-height: 40px;
+    }
+
+    .vc-md-viewer-t6 {
+        font-size: 6px;
+        line-height: 40px;
+    }
+
+    vc-md-viewer blockquote {
+        margin: 0px 0px 0px 40px;
+        padding-left: 1.5em;
+        border-left: 5px solid rgba(0, 0, 0, .5);
+    }
+
+    vc-md-viewer pre>code {
+        overflow-x: auto;
+        white-space: pre;
+        background-color: rgba(0, 0, 0, .1);
+        display: block;
+        padding: .5em;
+        -webkit-text-size-adjust: none;
+        white-space: pre-wrap;
+    }
+
+    vc-md-viewer code {
+        background-color: rgba(0, 0, 0, .1);
+        border-radius: 2px;
+        padding: 2px 4px;
+    }
+
+    vc-md-viewer ol {
+        display: block;
+        list-style-type: decimal;
+        -webkit-margin-before: 1em;
+        -webkit-margin-after: 1em;
+        -webkit-margin-start: 1em;
+        -webkit-margin-end: 1em;
+        -webkit-padding-start: 40px;
+    }
+
+    vc-md-viewer vc-video{
+        margin-bottom:20px;
+    }
+</style>
+
+<template>
+    <vc-scroll>
+        <div id="vc-md-viewer-content"></div>
+    </vc-scroll>
+</template>
+
+<script>
+    vcomet.element("vc-md-viewer", {
+
+
+
+        properties: {
+            src: {
+                value: "",
+                reflect: true
+            },
+            root: {
+                value: "",
+                reflect: true
+            },
+            head:{
+                value:"",
+                reflect:false
+            }
+        },
+
+        privateProperties: {
+            parseData: {
+                value: {}
+            },
+            regex: {
+                value: {
+                    link: new RegExp(
+                        "\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])*\\).*",
+                        "gm"
+                    ),
+                    image: new RegExp(
+                        "!\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])*\\)",
+                        "gm"
+                    ),
+                    inner: new RegExp(
+                        "\\[.*\\]",
+                        "gm"
+                    ),
+                    url: new RegExp(
+                        "\\(.*\\)",
+                        "gm"
+                    ),
+                    urlTitle: new RegExp(
+                        "(\"|\').*(\"|\')",
+                        "gm"
+                    ),
+                    hr: new RegExp(
+                        "(^(-|-\\s){3,}$|^(\\*|\\*\\s){3,}$)",
+                        "gm"
+                    ),
+                    indented: new RegExp(
+                        "^ {4,}.+",
+                        "gm"
+                    ),
+                    quotes: new RegExp(
+                        "^( *> *)",
+                        "gm"
+                    ),
+                    unorderedList: new RegExp(
+                        "^(- |\\* |\\+ )",
+                        "gm"
+                    ),
+                    orderedList: new RegExp(
+                        "^(\\d+\\. )",
+                        "gm"
+                    ),
+                    title: new RegExp(
+                        "^( *#+ +)",
+                        "gm"
+                    ),
+                    strong: new RegExp(
+                        "(\\*\\*\\S(?:(?!\\*)[\\s\\S])*\\S\\*\\*|__\\S(?:(?!\\_)[\\s\\S])*\\S__)",
+                        "g"
+                    ),
+                    italic: new RegExp(
+                        "(\\*\\S(?:(?!\\*)[\\s\\S])*\\S\\*|_\\S(?:(?!\\_)[\\s\\S])*\\S_)",
+                        "g"
+                    ),
+                    paragraph: new RegExp(
+                        "^.*\\s*$",
+                        //     "^.+((\\r\\n|\\r|\\n).+)*$",  //TODO truly split paragraph (1 empty line for new paragraph)
+                        "gm"
+                    ),
+                    codeBlock: new RegExp(
+                        "```(?:(?!```)[\\s\\S])*```",
+                        "g"
+                    ),
+                    codeBlockLanguage: new RegExp(
+                        "^\\[(?:(?!\\[)[\\s\\S])*\\](\\r\\n|\\r|\\n){1}",
+                        "g"
+                    ),
+                    code: new RegExp(
+                        "`(?:(?!`)[\\s\\S])*`",
+                        "g"
+                    ),
+                    video: new RegExp(
+                        "\\*\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])+\\)",
+                        "g"
+                    ),
+                    videoImg: new RegExp(
+                        "\\[(?:(?!\\[)[\\s\\S])*\\]",
+                        "g"
+                    ),
+                    videoSrc: new RegExp(
+                        "\\((?:(?!\\()[\\s\\S])+\\)",
+                        "g"
+                    ),
+                    playground: new RegExp(
+                        "@\\((?:(?!@\\()[\\s\\S])*\\)@(\\r\\n|\\r|\\n){0,1}",
+                        "g"
+                    ),
+                    playgroundHTML: new RegExp(
+                        "\\[html\\](?:(?!\\[html\\])[\\s\\S])*\\[\\/html\\]",
+                        "g"
+                    ),
+                    playgroundJS: new RegExp(
+                        "\\[js\\](?:(?!\\[js\\])[\\s\\S])*\\[\\/js\\]",
+                        "g"
+                    ),
+                    playgroundCSS: new RegExp(
+                        "\\[css\\](?:(?!\\[css\\])[\\s\\S])*\\[\\/css\\]",
+                        "g"
+                    ),
+                    laterReplace: new RegExp(
+                        "@@\\[\\d+\\]@@",
+                        "g"
+                    ),
+                    br: new RegExp(
+                        "^\\s*(\\r\\n|\\r|\\n){1,}",
+                        "gm"
+                    ),
+                    table: new RegExp(
+                        "^\\|(?:(?!(\\r\\n|\\r|\\n))[\\s\\S])*\\|",
+                        "gm"
+                    ),
+                    tableHeader: new RegExp(
+                        "^[>\\s]*\\|-+\\|(-+\\|)*",
+                        "gm"
+                    ),
+                    htmlHead: new RegExp(
+                        "<head>[\\s\\S]*<\\/head>",
+                        "g"
+                    ),
+                    htmlBody: new RegExp(
+                        "<body>[\\s\\S]*<\\/body>",
+                        "g"
+                    )
+                }
+            },
+            misc: {
+                value: {}
+            }
+        },
+
+        functions: {
+            //@function parse (public) [Parse markdown file and show within vc-md-viewer] @param data {string}
+            parse: function (data) {
+                this._parse(data);
+            }
+        },
+
+        privateFunctions: {
+            //@function parse (private) [Parse markdown file and show within vc-md-viewer] @param data {string}
+            parse: function (data) {
+                var el = this;
+                var mdContent = el.querySelector("#vc-md-viewer-content");
+                mdContent.innerHTML = "";
+                el._parseData.docFrag = document.createDocumentFragment();
+                el._parse.later = [];
+
+                data = el._prepareData(data);
+                el._splitParagraph(data);
+
+                mdContent.appendChild(el._parseData.docFrag);
+            },
+            // @function replaceEscaped (private) {string} [Markdonw has some characters escaped by default] @param str {string}
+            replaceEscaped: function (str) {
+                return str
+                    .replace(/\\\!/g, '&#33;')
+                    .replace(/\\\./g, '&#46;')
+                    .replace(/\\\-/g, '&#45;')
+                    .replace(/\\\+/g, '&#43;')
+                    .replace(/\\\#/g, '&#35;')
+                    .replace(/\\\)/g, '&#41;')
+                    .replace(/\\\(/g, '&#40;')
+                    .replace(/\\\}/g, '&#125;')
+                    .replace(/\\\{/g, '&#123;')
+                    .replace(/\\\]/g, '&#93;')
+                    .replace(/\\\[/g, '&#91;')
+                    .replace(/\\\_/g, '&#95;')
+                    .replace(/\\\`/g, '&#96;')
+                    .replace(/\\\\/g, '&#92;')
+                    .replace(/\\\*/g, '&#42;');
+            },
+            // @function replaceSpecial (private) {string} [Markdonw has some characters escaped by default] @param str {string}
+            replaceSpecial: function (str) {
+                return str
+                    .replace(/#/g, '&#35;')
+                    .replace(/\!/g, '&#33;')
+                    .replace(/\./g, '&#46;')
+                    .replace(/\-/g, '&#45;')
+                    .replace(/\+/g, '&#43;')
+                    .replace(/\)/g, '&#41;')
+                    .replace(/\(/g, '&#40;')
+                    .replace(/\}/g, '&#125;')
+                    .replace(/\{/g, '&#123;')
+                    .replace(/\]/g, '&#93;')
+                    .replace(/\[/g, '&#91;')
+                    .replace(/_/g, '&#95;')
+                    .replace(/`/g, '&#96;')
+                    .replace(/\\/g, '&#92;')
+                    .replace(/\*/g, '&#42;');
+            },
+            // @function prepareData {string} (private) [Modification to markdown string before parse lines] @param data {string}
+            prepareData: function (data) {
+                var el = this;
+                // Easy white spaces for regex
+                data = data
+                    .replace(/\r\n|\r/g, '\n')
+                    .replace(/\t/g, '    ')
+                    .replace(/\u00a0/g, ' ')
+                    .replace(/\u2424/g, '\n');          
+                // Replace especial escaped characters
+                data = el._preparse(data);
+                data = el._replaceEscaped(data);
+                return data;
+            },
+            // @function parseHr (private) {string} [Parse horizontal rules] @param data {string}
+            parseHr: function (data) {
+                var el = this;
+                var result = "";
+                var matches = data.match(el._regex.hr);
+                var parsedResult = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var res = document.createElement("hr");
+                        parsedResult.push(res);
+                    }
+                }
+                var j = 0;
+                result = data.replace(el._regex.hr, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = parsedResult[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function parseBr (private) {string} [Parse horizontal rules] @param data {string}
+            parseBr: function (data) {
+                var el = this;
+                var result = "";
+                var matches = data.match(el._regex.br);
+                var parsedResult = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var res = document.createElement("br");
+                        parsedResult.push(res);
+                    }
+                }
+                var j = 0;
+                result = data.replace(el._regex.br, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = parsedResult[j++];
+                    return "@@[" + count + "]@@\n";
+                });
+                return result;
+            },
+            // @function splitLanguage (private) {string} [Extract language from codeblock] @param data {string}
+            splitLanguage: function (tag) {
+                var el = this;
+                var result = "";
+                var matches = tag.match(el._regex.codeBlockLanguage);
+
+                if (matches) {
+                    var language = el._cleanMatch(matches[0], "[", "]");
+                    var cleanData = tag.replace(matches[0], "");
+                    return [language, cleanData];
+                }
+                return [null, tag];
+            },
+            // @function parseCodeBlock (private) {string} @param data {string}
+            parseCodeBlock: function (data) {
+                var el = this;
+                var result = "";
+                var matches = data.match(el._regex.codeBlock);
+                var codeBlockResults = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var cleanMatch = el._cleanMatch(matches[i], "```", "```");
+                        var splitted = el._splitLanguage(cleanMatch);
+                        var vcEditor = document.createElement("vc-editor");
+                        vcEditor.value = splitted[1];
+                        vcEditor.language = splitted[0];
+                        codeBlockResults.push(vcEditor);
+                    }
+                }
+                var j = 0;
+                result = data.replace(el._regex.codeBlock, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = codeBlockResults[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function parseCode (private) {string} @param data {string}
+            parseCode: function (data) {
+                var el = this;
+                var result = "";
+                var matches = data.match(el._regex.code);
+                var codeResults = [];
+
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var cleanMatch = el._cleanMatch(matches[i], "`", "`");
+                        var splitted = el._splitLanguage(cleanMatch);
+                        var code = document.createElement("code");
+                        code.innerText = splitted[1];
+                        codeResults.push(code);
+                    }
+                }
+                var j = 0;
+
+                result = data.replace(el._regex.code, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = codeResults[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function videoImg (private) [Get image cover from video tag] {string} @param tag {string}
+            videoImg: function (tag) {
+                el = this;
+                var videoImgMatches = tag.match(el._regex.videoImg);
+                var result;
+                if (videoImgMatches) {
+                    //  result = el._replaceSpecial(el._cleanMatch(videoImgMatches[0], "[", "]"));
+                    result = encodeURIComponent(el._cleanMatch(videoImgMatches[0], "[", "]"));
+                    if (!result) {
+                        result = null;
+                    }
+                }
+                return result;
+            },
+            // @function videoSrc [Get video src from video tag] (private) {string} @param tag {string}
+            videoSrc: function (tag) {
+                el = this;
+                var result = "";
+                var videoSrcMatches = tag.match(el._regex.videoSrc);
+                if (videoSrcMatches) {
+                    return encodeURIComponent(el._cleanMatch(videoSrcMatches[0], "(", ")"));
+                    //   return el._replaceSpecial(el._cleanMatch(videoSrcMatches[0], "(", ")"));
+                }
+            },
+            // @function parseVideo (private) {string} @param data {string}
+            parseVideo: function (data) {
+
+                el = this;
+                var result = "";
+                var matches = data.match(el._regex.video);
+
+                var videoResults = [];
+
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var poster = '';
+                        if (el._videoImg(matches[i])) {
+                            poster += el._videoImg(matches[i]);
+                        }
+                        var res = document.createElement("vc-video");
+                        res.src = el._linkResolve(decodeURIComponent(el._videoSrc(matches[i])));
+                        res.poster = el._linkResolve(decodeURIComponent(poster));
+                        res.type = "video/webm, video/mp4";
+                        videoResults.push(res);
+                    }
+                }
+                var j = 0;
+                result = data.replace(el._regex.video, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = videoResults[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function getCode [Get code from vGround tag] (private) {string} @param tag {string} @param regex @param open [Open tag] @param close [Close tag]
+            getCode: function (tag, regex, open, close) {
+                el = this;
+                var result = "";
+                var codeMatches = tag.match(regex);
+                if (codeMatches) {
+                    result = el._cleanMatch(codeMatches[0], open, close);
+                    if (!result) {
+                        result = "";
+                    }
+                }
+                return result;
+            },
+            // @function split head from body from an html playground string
+            splitHeadBody: function (str) {
+                el = this;
+                var result = {};
+                var headMatches = str.match(el._regex.htmlHead);
+                if (headMatches) {
+                    var cleanHead = el._cleanMatch(headMatches[0], "<head>", "</head>");
+                    result.head = cleanHead;
+                    result.body = el._getBody(str);
+                } else {    // Without head, body may contains <body> tags, else the string without tags will be considered as body content
+                    result.head = el.head || null;
+                    result.body = el._getBody(str);
+                    if(!result.body){
+                        result.body = str;
+                    }
+                }
+                return result;
+            },
+            // @function getBody (private) [Get content within <body> tags from string] @param str {string}
+            getBody: function (str) {
+                var bodyMatches = str.match(el._regex.htmlBody);
+                if (bodyMatches) {
+                    return el._cleanMatch(bodyMatches[0], "<body>", "</body>");
+                }
+                return null;
+            },
+            // @function setVground (private) [Split playground content by subtag] {string} @param tag {string}
+            setVground: function (tag) {
+                el = this;
+                var html = el._getCode(tag, el._regex.playgroundHTML, "[html]", "[/html]");
+                var htmlSplit = el._splitHeadBody(html);
+                var js = el._getCode(tag, el._regex.playgroundJS, "[js]", "[/js]");
+                var css = el._getCode(tag, el._regex.playgroundCSS, "[css]", "[/css]");
+                var playground = document.createElement("vc-playground");
+                if(htmlSplit.head){
+                playground.head = htmlSplit.head;
+                }
+                playground.body = htmlSplit.body;
+                playground.js = js;
+                playground.css = css;
+                return playground;
+            },
+            // @function parsePlayground (private) {string} @param data {string}
+            parsePlayground: function (data) {
+                el = this;
+
+                var result = "";
+                var matches = data.match(el._regex.playground);
+
+                var groundResults = [];
+
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        groundResults.push(el._setVground(matches[i]));
+                    }
+                }
+                var j = 0;
+                result = data.replace(el._regex.playground, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = groundResults[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function preparse (private) [Parse data before split lines or paragraphs. It is designed to parse full line tags]
+            preparse: function (data) {
+                var el = this;     
+                data = el._parsePlayground(data);   
+                data = el._parseCodeBlock(data);
+                data = el._parseCode(data); // Order mathers, code must be parsed first because its content must not be parsed    
+                data = el._parseBr(data);     
+                data = el._parseVideo(data);
+                data = el._parseImages(data); // Images must be parsed before links, structure is the same                
+                data = el._parseLinks(data);
+                data = el._parseHr(data);
+                return data;
+            },
+            // @function isIndented (private) {boolean} [Is current paragraph indented]
+            isIndented: function (p) {
+                if (p.match(el._regex.indented)) {
+                    return true;
+                }
+                return false;
+            },
+            // @function preParseParagraph (private) [Parse blockquotes before check paragraph itself] @param paragraph
+            preParseParagraph: function (paragraph) {
+                var el = this;
+                el._parseData.indented = el._isIndented(paragraph);
+                return el._getQuotes(0, paragraph);
+            },
+            // @function getQuotes (private) [Recursive function to parse nested blockquotes] @param deep {int} [Nested deep] @param paragraph
+            getQuotes: function (deep, paragraph) {
+                var matches = paragraph.match(el._regex.quotes);
+                if (matches) {
+                    deep++;
+                    paragraph = paragraph.replace(el._regex.quotes, "");
+                    el._getQuotes(deep, paragraph);
+                } else {
+                    if (deep > 0) {
+                        if (!el._parseData.blockquote) {
+                            el._parseData.blockquote = document.createElement("blockquote");
+                        }
+                        var parentNode = el._parseData.blockquote;
+                        while (deep > 1) {
+                            if (parentNode.querySelector("blockquote")) {
+                                parentNode = parentNode.querySelector("blockquote");
+                            } else {
+                                parentNode.appendChild(document.createElement("blockquote"));
+                                parentNode = parentNode.querySelector("blockquote");
+                            }
+                            deep--;
+                        }
+                        parentNode.appendChild(el._parseParagraph(paragraph));
+                        return null;
+                    } else {
+                        var res = [];
+                        if (el._parseData.blockquote) {
+                            res.push(el._parseData.blockquote);
+                            el._parseData.blockquote = null;
+                        }
+                        res.push(el._parseParagraph(paragraph));
+                        return res;
+                    }
+                }
+            },
+            // @function parseParagraph (private) [Parse a paragraph]
+            parseParagraph: function (paragraph) {
+                var el = this;
+                var docFragment = document.createDocumentFragment();
+                // Check the beginning of each paragraph
+                // Unordered list
+                if (paragraph.match(el._regex.unorderedList)) {
+                    var exist = true;
+                    if (!el._parseData.ul) {
+                        el._parseData.ul = document.createElement("ul");
+                        exist = false;
+                    }
+                    var li = document.createElement("li");
+                    li.appendChild(el._parseText(paragraph.replace(el._regex.unorderedList, "")));
+                    el._parseData.ul.appendChild(li);
+                    el._cleanMultiParagraph(docFragment, "unorderedList");
+                    if (!exist) {
+                        return el._parseData.ul;
+                    }
+                }
+                // Ordered list
+                else if (paragraph.match(el._regex.orderedList)) {
+                    var exist = true;
+                    if (!el._parseData.ol) {
+                        el._parseData.ol = document.createElement("ol");
+                        var orderedListMatch = paragraph.match(el._regex.orderedList)[0];
+                        var start = orderedListMatch.substring(0, orderedListMatch.length - 2);
+                        el._parseData.ol.setAttribute("start", start);
+                        exist = false;
+                    }
+                    var li = document.createElement("li");
+                    li.appendChild(el._parseText(paragraph.replace(el._regex.orderedList, "")));
+                    el._parseData.ol.appendChild(li);
+                    el._cleanMultiParagraph(docFragment, "orderedList");
+                    if (!exist) {
+                        return el._parseData.ol;
+                    }
+                }
+                // Title
+                else if (paragraph.match(el._regex.title)) {
+                    var counter = 0;
+                    for (var i = 0; i < 6; i++) { // TODO I assume
+                        if (paragraph[i] === "#") {
+                            counter++;
+                        }
+                    }
+                    cleanParagraph = paragraph.trim().substring(counter, paragraph.length);
+
+                    var appended = false;
+                    if (el._parseData.indented) {
+                        appended = el._appendIndented(el._createDiv(el._parseText(cleanParagraph), "vc-md-viewer-t" +
+                            counter));
+                    }
+                    if (!appended) {
+                        docFragment.appendChild(el._createDiv(el._parseText(cleanParagraph), "vc-md-viewer-t" +
+                            counter));
+                        el._cleanMultiParagraph(docFragment);
+                    }
+                }
+                // Table
+                else if (paragraph.match(el._regex.table)) {
+                    var exist = true;
+                    if (el._nextLine().match(el._regex.tableHeader)) {
+                        var header = el._cleanMatch(paragraph.match(el._regex.table)[0], "|", "|");
+                        header = header.replace(new RegExp("\\|", "g"), ",");
+                        if (!el._parseData.table) {
+                            el._parseData.table = document.createElement("vc-doc-table");
+                            el._parseData.table.setAttribute("cTitle", header);
+                            exist = false;
+                        }
+                    } else if (el._parseData.table) { // If this table line belong to an existing table and its not header |---|
+                        if (!paragraph.match(el._regex.tableHeader)) {
+                            var row = document.createElement("vc-row");
+                            var rowData = el._cleanMatch(paragraph.match(el._regex.table)[0], "|", "|");
+                            rowData = rowData.split("|");
+                            rowData.forEach(function (paramCell) {
+                                var cell = document.createElement("vc-cell");
+                                cell.innerText = paramCell;
+                                row.appendChild(cell);
+                            });
+                            el._parseData.table.appendChild(row);
+                        }
+                    }
+                    el._cleanMultiParagraph(docFragment, "table");
+                    if (!exist) {
+                        return el._parseData.table;
+                    }
+                } else {
+                    var appended = false;
+                    if (el._parseData.indented) {
+                        appended = el._appendIndented(el._createDiv(
+                            el._parseText(paragraph)));
+                    }
+                    if (!appended) {
+                        docFragment.appendChild(el._createDiv(el._parseText(paragraph)));
+                        el._cleanMultiParagraph(docFragment, null, el._parseData.indented);
+                    }
+                }
+                return docFragment;
+            },
+            // @function appendIndented (private) [Append indented paragraph]
+            appendIndented: function (content) {
+                var appended = false;
+                if (el._parseData.ul) {
+                    appended = true;
+                    el._parseData.ul.childNodes[el._parseData.ul.childNodes.length - 1].appendChild(content);
+                }
+                if (el._parseData.ol) {
+                    appended = true;
+                    el._parseData.ol.childNodes[el._parseData.ol.childNodes.length - 1].appendChild(content);
+                }
+                return appended;
+            },
+            // @function parseText (private) [Parse plain text. It may contain emphasis tags and it also replace tags before append]
+            parseText: function (str) {
+                el = this;
+
+                str = el._parseEmphasis(str);
+
+                str = el._replaceLaterTags(str);
+
+                return str;
+            },
+            // @function replaceLaterTags (private) [Append components to document fragment by searching custom tag withing data string]
+            replaceLaterTags: function (str) {
+                el = this;
+                var matches = str.match(el._regex.laterReplace);
+                if (!matches) {
+                    var span = document.createElement("span");
+                    span.innerHTML = str;
+                    return span;
+                } else {
+                    var docFragment = document.createDocumentFragment();
+                    for (var i = 0; i < matches.length; i++) {
+                        if (i === 0) {
+                            var first = str.substring(0, str.indexOf(matches[i]));
+                            if (first.length > 0) {
+                                var firstSpan = document.createElement("span");
+                                firstSpan.innerHTML = first;
+                                docFragment.appendChild(firstSpan);
+                            }
+                            var count = el._cleanMatch(matches[i], "@@[", "]@@");
+                            docFragment.appendChild(el._parse.later[count]);
+                        } else {
+                            var currentText = str.substring(str.indexOf(matches[i - 1]) + matches[i - 1].length,
+                                str.indexOf(matches[i]));
+                            var currentSpan = document.createElement("span");
+                            currentSpan.innerHTML = currentText;
+                            docFragment.appendChild(currentSpan);
+                            var count = el._cleanMatch(matches[i], "@@[", "]@@");
+                            docFragment.appendChild(el._parse.later[count]);
+                        }
+                        if (i === matches.length - 1) {
+                            var last = str.substring(str.indexOf(matches[i]) + matches[i].length);
+                            if (last.length > 0) {
+                                var lastSpan = document.createElement("span");
+                                lastSpan.innerHTML = last;
+                                docFragment.appendChild(lastSpan);
+                            }
+                        }
+                    }
+                    return docFragment;
+                }
+
+            },
+            // @function getInner (private) {string} [Get inner html from link tag] @param tag
+            getInner: function (tag) {
+                var matches = tag.match(el._regex.inner);
+                if (matches) {
+                    tag = el._cleanMatch(matches[0], "[", "]");
+                } else {
+                    tag = "";
+                }
+                return tag;
+            },
+            // @function getTitle (private) {string} [Get title from link tag] @param tag
+            getTitle: function (tag) {
+                var matches = tag.match(el._regex.urlTitle);
+                if (matches) {
+                    tag = el._cleanMatch(matches[0], "'", "'").trim();
+                } else {
+                    tag = null;
+                }
+                return tag;
+            },
+            // @function getUrl (private) {string} [Get url from link tag] @param tag
+            getUrl: function (tag) {
+                var matches = tag.match(el._regex.url);
+                if (matches) {
+                    tag = el._cleanMatch(matches[0], "(", ")");
+                } else {
+                    tag = "";
+                }
+                var title = el._getTitle(tag);
+                var url = tag.replace(el._regex.urlTitle, "").trim();
+                return [url, title];
+
+            },
+            // @function getParseLink (private) {string[]} [Return an array with the inner text, path and title of a link or alt text, path and title of an image]
+            getParseLink: function (tag) {
+                var inner = el._getInner(tag);
+                var fullUrl = el._getUrl(tag);
+                return [inner, fullUrl[0], fullUrl[1]];
+            },
+            // @function setLink (private) {html object} [Generate href element] @param tag
+            setLink: function (tag) {
+                var linkData = el._getParseLink(tag);
+                var link = document.createElement("a");
+                link.setAttribute("href", linkData[1]);
+                if (linkData[2]) {
+                    link.setAttribute("Title", linkData[2]);
+                }
+                link.innerHTML = linkData[0];
+                return link;
+            },
+            // @function parseLinks (private) {string} @param str
+            parseLinks: function (str) {
+                el = this;
+
+                var result = "";
+                var matches = str.match(el._regex.link);
+                var parsedResult = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        parsedResult.push(el._setLink(matches[i]));
+                    }
+                }
+                var j = 0;
+                result = str.replace(el._regex.link, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = parsedResult[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function setImage (private) {html object} [Generate img element] @param tag
+            setImage: function (tag) {
+                el = this;
+                var linkData = el._getParseLink(tag);
+                var link = document.createElement("img");
+                link.setAttribute("src", el._linkResolve(linkData[1]));
+                if (linkData[2]) {
+                    link.setAttribute("Title", linkData[2]);
+                }
+                link.setAttribute("alt", linkData[0]);
+                return link;
+            },
+            // @function linkResolve (private) {string} [Add root path to relative paths] @param path
+            linkResolve: function (path) {
+                if (path && path.length > 0 && !path.includes("http")) {
+                    path = decodeURIComponent(el.root) + path;
+                }
+                return path;
+            },
+            // @function parseImages (private) {string} @param str
+            parseImages: function (str) {
+                el = this;
+
+                var result = "";
+                var matches = str.match(el._regex.image);
+                var parsedResult = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        parsedResult.push(el._setImage(matches[i]));
+                    }
+                }
+                var j = 0;
+
+                result = str.replace(el._regex.image, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = parsedResult[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function parseSingleEmphasis (private) {string} [Parse given emphasis tag] @param str {string} @param tag {string} @param regex {string} @param element {string} [Html element to create]
+            parseSingleEmphasis: function (str, tag, regex, element) {
+                var result = "";
+                var matches = str.match(regex);
+                var parsedResult = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var res = document.createElement(element);
+                        res.innerHTML = el._cleanMatch(matches[i], tag, tag);
+                        parsedResult.push(res);
+                    }
+                }
+                var j = 0;
+                result = str.replace(regex, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = parsedResult[j++];
+                    return "@@[" + count + "]@@";
+                    //   return parsedResult[j++];
+                });
+                return result;
+            },
+            // @function parseEmphasis (private) {string} [Review given string and replace emphasis tags] @param str {string}
+            parseEmphasis: function (str) {
+                el = this;
+                str = el._parseSingleEmphasis(str, "**", el._regex.strong, "strong");
+                str = el._parseSingleEmphasis(str, "*", el._regex.italic, "em");
+                return str;
+            },
+
+            //@function cleanMultiParagraph (private) [At the begining of each line, check if we are inside of a multiline paragraph like lists]
+            cleanMultiParagraph: function (docFragment, currentMatch, isIndented) {
+                el = this;
+                if (currentMatch != "unorderedList" || !currentMatch) {
+                    if (el._parseData.ul) {
+                        el._parseData.ul = null;
+                    }
+                }
+                if (currentMatch != "orderedList" || !currentMatch) {
+                    if (el._parseData.ol) {
+                        el._parseData.ol = null;
+                    }
+                }
+                if (currentMatch != "table" || !currentMatch) {
+                    if (el._parseData.table) {
+                        el._parseData.table = null;
+                    }
+                }
+            },
+            // @function createDiv (private) {html object} @param content @param className
+            createDiv: function (content, className) {
+                var currentDiv = document.createElement("div");
+                if (className) {
+                    currentDiv.classList.add(className);
+                }
+                currentDiv.appendChild(content);
+                return currentDiv;
+            },
+            // @function nextLine {string} [Return next line if exists]
+            nextLine: function () {
+                var result = null;
+                if (el._misc.currentIndex + 1 < el._misc.lines.length) {
+                    result = el._misc.lines[el._misc.currentIndex + 1];
+                }
+                return result;
+            },
+            // @function splitParagraph (private) {string} @param data
+            splitParagraph: function (data) {
+                var el = this;
+                el._misc.lines = data.match(el._regex.paragraph);
+                var docFragment = document.createDocumentFragment();
+                for (var lineIndex = 0; lineIndex < el._misc.lines.length; lineIndex++) {
+                    el._misc.currentIndex = lineIndex;
+                    var element = el._preParseParagraph(el._misc.lines[lineIndex]);
+                    if (element) {
+                        if (Array.isArray(element)) {
+                            element.forEach(function (e) {
+                                el._parseData.docFrag.appendChild(e);
+                            });
+                        } else {
+                            el._parseData.docFrag.appendChild(element);
+                        }
+                    }
+                }
+            },
+            // @function cleanMatch (private) {string} @param match @param open [Open tag] @param close [Close tag]
+            cleanMatch: function (match, open, close) {
+                match = match.trim();
+                match = match.substring(open.length, match.length - close.length).trim();
+                return match;
+            },
+            // @function getRequest (private) {string} @param path @param callback
+            getRequest: function (path, callback) { // Generic html get request
+                var httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (httpRequest.readyState === 4) {
+                        if (httpRequest.status === 200) {
+                            var data = httpRequest.responseText;
+                            if (callback) {
+                                callback(data);
+                            }
+                        }
+                    }
+                };
+                httpRequest.open('GET', path);
+                httpRequest.send();
+            }
+        },
+
+
+        onRender: function () {
+            var el = this;
+            if (el.src) {
+                el._getRequest(el.src, function (data) {
+                    el._parse(data);
+                });
+            }
+        }
+
+
+    });
+</script>
