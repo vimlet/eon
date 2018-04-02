@@ -1,0 +1,116 @@
+<style>
+    vc-editor {
+        height: 100%;
+        width: 100%;
+    }
+
+    #vc-editor-content {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        box-sizing: border-box;
+    }
+
+    .editor-container {
+        height: calc(100% - 35px);
+    }
+</style>
+
+<template>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <div id="vc-editor-content"></div>
+</template>
+
+<script>
+    vcomet.element("vc-editor", {
+
+        properties: {
+            value: {
+                value: "",
+                reflect: true
+            },
+            language: {
+                value: "html",
+                reflect: true
+            },
+            readonly: {
+                value: "readonly",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            }
+        },
+
+        functions: {
+            // @function setValue (public) @param value {string}
+            setValue: function (value) {
+                this._refs.editor.setValue(value);
+            },
+            // @function getValue (public) {string}
+            getValue: function () {
+                return this._refs.editor.getValue();
+            }
+        },
+
+        privateFunctions: {
+            // @function init (private) create monaco editor @param data @param language
+            init: function (data, language) {
+                var el = this;
+                var readonly = false;
+                if(el.readonly === "readonly"){
+                    readonly = true;
+                }
+                if (el.language === "js") {
+                    el.language = "javascript";
+                }
+                require.config({
+                    paths: {
+                        'vs': 'framework/custom/vc-editor/vs'
+                    }
+                });
+                require(['vs/editor/editor.main'], function () {
+                    el._refs.editor = monaco.editor.create(el.querySelector("#vc-editor-content"), {
+                        value: el.value,
+                        language: el.language,
+                        theme: 'vs-dark',
+                        scrollbar: {
+                            // Subtle shadows to the left & top. Defaults to true.
+                            useShadows: false,
+                            vertical: 'auto',
+                            horizontal: 'visible'
+                        },
+                        automaticLayout: true, // TODO "checks every 100ms if its container has changed its size" Optimizate via editor.layout({ width: ..., height: ... })
+                        readOnly: readonly,
+                        scrollBeyondLastLine: false // Remove scrollbar when it is not needed
+                    });
+                    
+                    // Ugly solution to know when monaco is ready because there is not an onReady function implemented yet
+                    var didScrollChangeDisposable = el._refs.editor.onDidScrollChange(function (
+                        event) {
+                        didScrollChangeDisposable.dispose();                        
+                        vcomet.triggerCallback("onEditorReady", el, el, [el]);
+                    });
+                });
+            }
+        },
+
+        onCreated: function () {
+            // Custom callback to know when monaco editor is ready to be used
+            vcomet.createCallback("onEditorReady", this);
+        },
+
+        onReady: function () {
+            var el = this;
+            el._init();
+        },
+
+        onRender: function () {}
+
+
+    });
+</script>

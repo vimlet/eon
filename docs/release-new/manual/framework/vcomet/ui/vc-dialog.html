@@ -1,0 +1,1854 @@
+<template>
+  <div class="vc-dialog-dialog unselectable">
+    <div class="vc-dialog-heading unselectable">
+      <i class="vc-dialog-close vicon vicon-close"></i>
+    </div>
+    <vc-scroll arrowScrolls="true">
+      <div class="vc-dialog-content unselectable"></div>
+    </vc-scroll>
+  </div>
+</template>
+
+<script type="text/javascript">
+  vcomet.element("vc-dialog", {
+    themed: true,
+    dependencies: [
+      "vc-section",
+      "vc-scroll"
+    ],
+    properties: {
+      /*
+        @property {String} heading 
+        @description Dialog title
+        Default: undefined
+      */
+      heading: {
+        value: undefined,
+        reflect: true
+      },
+      /*
+        @property {Boolean} closable 
+        @description Dialog may have a button that will close it
+        Values can be: true or false
+        Default: true
+      */
+      closable: {
+        value: "true",
+        reflect: true
+      },
+      /*
+        @property {Boolean} blur 
+        @description Dialog is closed when click outside it
+        Values can be: true or false
+        Default: false
+      */
+      blur: {
+        value: "false",
+        reflect: true
+      },
+      /*
+        @property {Boolean} modal 
+        @description Allow page components ineccessible until interact with dialog
+        Values can be: true or false
+        Default: false
+      */
+      modal: {
+        value: "false",
+        reflect: true
+      },
+      /*
+        @property {Boolean} drag 
+        @description Dialog draggable
+        Values can be: true or false
+        Default: false
+      */
+      drag: {
+        value: "false",
+        reflect: true
+      },
+      /*
+        @property {Boolean} resize 
+        @description Dialog resizable
+        Values can be: true or false
+        Default: false
+      */
+      resize: {
+        value: "false",
+        reflect: true
+      },
+      /*
+        @property {Boolean} maximize 
+        @description Dialog maximizable
+        Values can be: true or false
+        Default: false
+      */
+      maximize: {
+        value: "false",
+        reflect: true
+      },
+      /*
+        @property {Boolean} minimize 
+        @description Dialog minimizable
+        Values can be: true or false
+        Default: false
+      */
+      minimize: {
+        value: "false",
+        reflect: true
+      },
+      /*
+        @property {String} multiposition 
+        @description Position of more than one open dialogs
+        Values can be: centered or scaled
+        Default: centered
+      */
+      multiposition: {
+        value: "centered",
+        reflect: true
+      },
+      /*
+        @property {String} maxWidth 
+        @description Dialog maximum width
+        Values can be: auto or number
+        Default: auto
+      */
+      maxWidth: {
+        value: "auto",
+        reflect: true
+      },
+      /*
+        @property {Number} maxHeight 
+        @description Dialog maximum height
+        Value must be int number 
+        Default: 500
+      */
+      maxHeight: {
+        value: "500",
+        reflect: true
+      },
+      /*
+        @property {Number} minWidth 
+        @description Dialog minimum width
+        Value must be int number 
+        Default: 250
+      */
+      minWidth: {
+        value: "250",
+        reflect: true
+      },
+      /*
+        @property {Number} minHeight 
+        @description Dialog minimum height
+        Value must be int number 
+        Default: 200
+      */
+      minHeight: {
+        value: "200",
+        reflect: true
+      },
+      /*
+        @property {Number} scaleBreak 
+        @description Distance in pixels between scaled dialogs
+        Value must be int number 
+        Default: 20
+      */
+      scaleBreak: {
+        value: "20",
+        reflect: true
+      },
+      /*
+        @property {Boolean} responsiveRatio 
+        @description Adjustment of dialog size on small devices
+        Values can be: true or false
+        Default: true (Keeps the original size proportionally)
+      */
+      responsiveRatio: {
+        value: "true",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property (private) {Object} _dialogNode 
+        @description Store dialog node
+      */
+      dialogNode: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _headingNode 
+        @description Store heading dialog node
+      */
+      headingNode: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _misc 
+        @description Stores dialog useful data.
+      */
+      misc: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _dragEvent
+        @description Store dialog drag event
+      */
+      dragEvent: {
+        value: {}
+      },
+      /*
+        @property (private) {Number} _lastWindowHeight
+        @description Store window height before resize.
+      */
+      lastWindowHeight: {
+        value: window.innerHeight
+      },
+      /*
+        @property (private) {Boolean} _windowRightHooked
+        @description Control variable. Control that dialog has been hooked to right of window.
+        Default: false
+      */
+      windowRightHooked: {
+        value: false
+      },
+      /*
+        @property (private) {Boolean} _windowBottomHooked
+        @description Control variable. Control that dialog has been hooked to bottom of window.
+        Default: false
+      */
+      windowBottomHooked: {
+        value: false
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _addDragListeners
+        @description Activate drag functionality
+      */
+      addDragListeners: function () {
+        var el = this;
+
+        // Avoid adding listeners more than once
+        if (!el.addDragListeners) {
+          el.addDragListeners = true;
+          var selected = null; // Object of the element to be moved
+          var xPos = 0;
+          var yPos = 0; // Stores x & y coordinates of the mouse pointer
+          var xElem = 0;
+          var yElem = 0; // Stores top, left values (edge) of the element
+          var moved = false;
+          var windowWidth;
+          var windowHeight;
+          var myIndex;
+
+          if (el.drag == true || el.drag == "true") {
+            // Will be called when user dragging an element
+            window.addEventListener("mousemove", function (e) {
+              xPos = document.all ? window.event.clientX : e.pageX;
+              yPos = document.all ? window.event.clientY : e.pageY;
+              windowWidth = window.innerWidth - 5;
+              windowHeight = window.innerHeight - 5;
+
+              if (selected !== null) {
+                selected.style.left = (xPos - xElem) + "px";
+                selected.style.top = (yPos - yElem) + "px";
+                // Call method to establish movement of dialog limits
+                el._dragLimits(selected, windowWidth, windowHeight);
+
+                // Adds a class and an attribute to the element to control that it has been moved
+                // And removes the dialog from the array of scaled dialogs
+                if (!moved) {
+                  el.dataset.centered = (el.multiposition == "scaled") ? "false" : el.dataset.centered;
+                  el.classList.add("vc-dialog-moved");
+                  moved = true;
+                  myIndex = vcomet.Dialog.scaleDialogs.indexOf(el);
+
+                  // If myIndex value is different than -1 it is in the array, so deletes it
+                  (myIndex != -1) ? vcomet.Dialog.scaleDialogs.splice(myIndex, 1) : null;
+                }
+
+              }
+
+            }, false);
+
+            // Destroy the object when we are done
+            window.addEventListener("mouseup", function (e) {
+              selected = null;
+            }, false);
+
+            // Will be called when user starts dragging an element
+            el.addEventListener("mousedown", dragEvent);
+
+            function dragEvent(e) {
+              // Drag a dialog without heading
+              if (e.button == 0 && el.heading === undefined && el.closable == "true" && el._userFooterNode) {
+
+                // Store the object of the element which needs to be moved
+                selected = el;
+                xElem = xPos - selected.offsetLeft;
+                yElem = yPos - selected.offsetTop;
+
+                // Drag a dialog with heading
+              } else if (e.button == 0) {
+                var underEl = document.elementFromPoint(e.clientX, e.clientY);
+
+                if ((underEl.classList.contains("vc-dialog-heading") || underEl.classList.contains("vc-dialog-title")) && !el._dialogNode.classList.contains("vc-dialog-minim")) {
+                  // Store the object of the element which needs to be moved
+                  selected = el;
+                  xElem = xPos - selected.offsetLeft;
+                  yElem = yPos - selected.offsetTop;
+                }
+
+              }
+
+              // When previously the dialog has reached the maximum limit of the window,
+              // when doing drag to the dialog will restablishes the values of top and left
+              // Width resize
+              el.style.right = (el.style.right == "5px") ? "auto" : el.style.right;
+              el.style.left = (el.style.right == "5px") ? (window.innerWidth - el.offsetWidth) + "px" : el.style.left;
+              // Height resize
+              el.style.bottom = (el.style.bottom == "5px") ? "auto" : el.style.bottom;
+              el.style.top = (el.style.bottom == "5px") ? (window.innerHeight - el.offsetHeight) + "px" : el.style.top;
+
+              // More than one dialog, the selected dialog will have a higher zIndex
+              el._updateZindex();
+            }
+
+            el._dragEvent = dragEvent;
+          }
+
+        }
+      },
+      /*
+        @function (private) _addDragListeners
+        @description Establish limits for dialog movement
+        @param {Object} selected [dragged dialog node]
+        @param {Number} windowWidth 
+        @param {Number} windowHeight
+      */
+      dragLimits: function (selected, windowWidth, windowHeight) {
+        selected.style.left = (selected.offsetLeft < 5) ? selected.style.left = 5 + "px" : selected.style.left;
+        selected.style.top = (selected.offsetTop < 5) ? selected.style.top = 5 + "px" : selected.style.top;
+
+        selected.style.left = ((selected.offsetLeft + selected.offsetWidth) > windowWidth) ? windowWidth - selected.offsetWidth + "px" : selected.style.left;
+        selected.style.top = ((selected.offsetTop + selected.offsetHeight) > windowHeight) ? windowHeight - selected.offsetHeight + "px" : selected.style.top;
+      },
+      /*
+        @function (private) _initializeScalePosition
+        @description Itialize _misc.scalePosition, top lace dialog correctly
+      */
+      initializeScalePosition: function () {
+        var scaleDialogLength = vcomet.Dialog.scaleDialogs.length;
+
+        this._misc.scalePosition = scaleDialogLength == 0 ? 0 : vcomet.Dialog.scaleDialogs[vcomet.Dialog.scaleDialogs.length - 1]._misc.scalePosition + 1;
+        vcomet.Dialog.scaleDialogs.push(this);
+        this._dialogNode.setAttribute("scale", "initialize");
+
+      },
+      /*
+        @function (private) _handleDialogResizePosition
+        @description On window resize dialogs will be centered depending its position
+      */
+      handleDialogResizePosition: function () {
+        var el = this;
+
+        // Behavior when dialog has NOT been moved
+        if (el.classList.contains("vc-dialog-moved") != true) {
+          var centerWidth = (window.innerWidth - el.offsetWidth) / 2;
+          var centerHeight = (window.innerHeight - el.offsetHeight) / 2;
+
+          // If it is a scaled dialog
+          // the necessary calculations are made to know where it shouls be placed
+          if (el.multiposition == "scaled" && el.getAttribute("version") !== "tablet" && el.getAttribute("version") !== "mobile") {
+            var myIndex = vcomet.Dialog.scaleDialogs.indexOf(el);
+
+            // Calculations of first position scale dialog:
+            if (myIndex == 0) {
+              // When first opened scaled dialog is moved, and the following not,
+              // the new first positioned is the reference for the other scaled dialogs
+              if (el._misc.scalePosition != 0) {
+                // Stores the position of the dialog before the scaled dialogs index is reorganized
+                var previousScalePosition = el._misc.scalePosition;
+
+                // Reorder the scaling indexes
+                // subtracting the positions of the dialogs that have been moved
+                for (var i = 0; i < vcomet.Dialog.scaleDialogs.length; i++) {
+                  vcomet.Dialog.scaleDialogs[i]._misc.scalePosition = parseInt(vcomet.Dialog.scaleDialogs[i]._misc.scalePosition) - previousScalePosition;
+                }
+
+                // Sets the top and left that corresponds to the dialog
+                // in relation to its previous position in the scale
+                el.style.left = vcomet.Dialog.firstScalePosition.left + (previousScalePosition * el.scaleBreak) + "px";
+                el.style.top = vcomet.Dialog.firstScalePosition.top + (previousScalePosition * el.scaleBreak) + "px";
+
+                // Sets the percentage of where the dialog should be placed when do the window resize
+                el._misc.resizeLeftPercentage = (parseInt(el.style.left) / window.innerWidth) * 100;
+                el._misc.resizeTopPercentage = (parseInt(el.style.top) / window.innerHeight) * 100;
+
+                // When the positioning calculations have already been
+                // for the new first position scale dialog or the first dialog has not been moved
+              } else {
+                var hasBeenResized = (el._misc.resizeLeftPercentage || el._misc.resizeTopPercentage);
+
+                // Sets the positioning of the new first dialog using the percentages previously calculated
+                // If first dialog of the scale has not moved, it remains centered standard
+                el.style.left = hasBeenResized ? ((el._misc.resizeLeftPercentage * window.innerWidth) / 100) + "px" : centerWidth + (el._misc.scalePosition * el.scaleBreak) + "px";
+                el.style.top = hasBeenResized ? ((el._misc.resizeTopPercentage * window.innerHeight) / 100) + "px" : centerHeight + (el._misc.scalePosition * el.scaleBreak) + "px";
+
+              }
+
+              // After doing the calculations to place the firt dialog, its top and left is saved
+              // for the following dialog are placed in relation to this dialog
+              vcomet.Dialog.firstScalePosition.left = parseInt(el.style.left);
+              vcomet.Dialog.firstScalePosition.top = parseInt(el.style.top);
+            }
+
+            // If the dialog is NOT scaled, it is always placed in the center
+          } else {
+            el.style.left = centerWidth + "px";
+            el.style.top = centerHeight + "px";
+          }
+
+          // If is a moved dialog, it will not center when resize,
+          // will call the method to control when it reaches the limits of the window
+        } else {
+          el._resizeWindowPosition(window.innerWidth, window.innerHeight, event);
+        }
+
+      },
+      /*
+        @function (private) {Number} _getElementIndex 
+        @description Return position in wich dialog is stored in openDialogs
+        @param {Array} openDialogs [Store node and zIndex of open dialogs]
+      */
+      getElementIndex: function (openDialogs) {
+        var elIndex = -1;
+
+        for (var i = 0; i < openDialogs.length; i++) {
+          if (openDialogs[i].element == this) {
+            elIndex = i;
+            break;
+          }
+
+        }
+
+        return elIndex;
+      },
+      /*
+        @function (private) {Number} _getLastDialogZindex
+        @description Return last open dialog zIndex
+        @param {Array} openDialogs [Store node and zIndex of open dialogs]
+      */
+      getLastDialogZindex: function (openDialogs) {
+        var zIndex = 0;
+
+        for (var i = 0; i < openDialogs.length; i++) {
+          if (openDialogs[i].element.style.zIndex > zIndex) {
+            zIndex = openDialogs[i].element.style.zIndex;
+            openDialogs[i].zIndex = openDialogs[i].element.style.zIndex;
+          }
+
+        }
+
+        return zIndex;
+
+      },
+      /*
+        @function (private) _dialogPositioner
+        @description Positions dialog correctly
+      */
+      dialogPositioner: function () {
+        var el = this;
+
+        // Scaled dialog on screen view
+        if (el.multiposition == "scaled" && el.getAttribute("version") === "desktop") {
+          el._handleDialogScale()
+        }
+
+        // Centered dialog or all dialogs on tablet and movile view
+        if (el.multiposition == "centered" || vcomet.util.isTrue(el.modal) || el.getAttribute("version") !== "desktop") {
+          el._handleDialogCenter()
+        }
+
+      },
+      /*
+        @function (private) _resizeWindowPosition
+        @description Control when dialog reach limits of window when doresize
+        @param {Number} windowWidth 
+        @param {Number} windowHeight 
+        @param {Object} event 
+      */
+      resizeWindowPosition: function (windowWidth, windowHeight, event) {
+        var el = this;
+
+        if (event.type == "resize") {
+          // Call method to update the window resize status
+          el._updateWindowResizeBehavior(windowWidth);
+
+          // Prevents the decreasing of the dialog width
+          // when it reaches the right window edge on resize window
+          el._dialogNode.style.width = (el.maxWidth != "auto" && el.offsetLeft > 5 && el._misc.dialogWidth == el.offsetWidth) ? el._misc.dialogWidth + "px" : el._dialogNode.style.width;
+
+          // Call method to set right and bottom window limits
+          el._handleResizeLimits(windowWidth, windowHeight);
+          // Call method to hooked the dialog on window resize
+          el._handleResizeHooked(windowWidth, windowHeight);
+        }
+
+      },
+      /*
+        @function (private) _updateWindowResizeBehavior
+        @description Establishe status of window resize (increase or decrease)
+        @param {Number} windowWidth 
+      */
+      updateWindowResizeBehavior: function (windowWidth) {
+        var el = this;
+
+        // Set the window width if it does not exist
+        el._misc.previousSize = (!el._misc.previousSize) ? windowWidth : el._misc.previousSize;
+        // When previousSize is smaller than windowWidth the window is increasing
+        el._misc.windowResizeBehavior = (el._misc.previousSize < windowWidth) ? "increasing" : el._misc.windowResizeBehavior;
+        // When previousSize is bigger than windowWidth the window is decreasing
+        el._misc.windowResizeBehavior = (el._misc.previousSize >= windowWidth) ? "decreasing" : el._misc.windowResizeBehavior;
+        // Update previousSize with the new value of windowWidth
+        el._misc.previousSize = windowWidth;
+      },
+      /*
+        @function (private) _handleResizeLimits
+        @description Push dialog to right or to top depending if reach right or bottom window limit
+        @param {Number} windowWidth 
+        @param {Number} windowHeight 
+      */
+      handleResizeLimits: function (windowWidth, windowHeight) {
+        var el = this;
+
+        // Right limit
+        if ((el.offsetLeft + el.offsetWidth) > windowWidth) {
+          el.style.left = "auto";
+          el.style.right = 5 + "px";
+          el._misc.resizeWindowWidth = windowWidth;
+          el._windowRightHooked = true;
+
+          // Bottom limit
+        } else if ((el.offsetTop + el.offsetHeight) > windowHeight) {
+          el.style.top = "auto";
+          el.style.bottom = 5 + "px";
+          el._misc.resizeWindowHeight = windowHeight;
+          el._windowBottomHooked = true;
+        }
+
+      },
+      /*
+        @function (private) _handleResizeHooked
+        @description Hook dialog right or bottom when do window resize reach edge of window
+        @param {Number} windowWidth 
+        @param {Number} windowHeight 
+      */
+      handleResizeHooked: function (windowWidth, windowHeight) {
+        var el = this;
+
+        // Right window hooked
+        if (el._windowRightHooked == true && el.offsetLeft > 0) {
+          // Update window width variable (_misc.resizeWindowWidth) when window becomes smaller
+          if ((windowWidth - 5) <= el._misc.resizeWindowWidth) {
+            el._misc.resizeWindowWidth = windowWidth;
+
+            // When the window increases, _misc.resizeWindowWidth has a lower value
+            // than windowWidth, so will unhook the dialog
+          } else {
+
+            el.style.right = "auto";
+            el.style.left = (windowWidth - el.offsetWidth) + "px";
+            el._windowRightHooked = false;
+          }
+
+        }
+
+        // Bottom window hooked
+        if (el._windowBottomHooked == true && el.offsetTop > 0) {
+          // Update window height variable (_misc.resizeWindowHeight) when window becomes smaller
+          if ((windowHeight - 5) <= el._misc.resizeWindowHeight) {
+            el._misc.resizeWindowHeight = windowHeight;
+
+            // When the window increases, _misc.resizeWindowHeight has a lower value
+            // than windowHeight, so will unhook the dialog
+          } else {
+            el.style.bottom = "auto";
+            el.style.top = (windowHeight - el.offsetHeight) + "px";
+            el._windowBottomHooked = false;
+          }
+
+        }
+
+      },
+      /*
+        @function (private) _handleDialogCenter
+        @description Place dialog on center of window
+      */
+      handleDialogCenter: function () {
+        var el = this;
+        setTimeout(function () {
+          var windowWidth = window.innerWidth;
+          var windowHeight = window.innerHeight;
+          var centerWidth = (windowWidth - el.offsetWidth) / 2;
+          var centerHeight = (windowHeight - el.offsetHeight) / 2;
+          el.style.left = centerWidth + "px";
+          el.style.top = centerHeight + "px";
+          el.style.opacity = 1;
+        }, 0);
+      },
+      /*
+        @function (private) _handleDialogScale
+        @description Place dialog on scale
+      */
+      handleDialogScale: function () {
+        var el = this;
+        var windowWidth = window.innerWidth;
+        var windowHeight = window.innerHeight;
+        var centerWidth = (windowWidth - el.offsetWidth) / 2;
+        var centerHeight = (windowHeight - el.offsetHeight) / 2;
+        var dialogLeft = vcomet.Dialog.firstScalePosition.left + (el._misc.scalePosition * el.scaleBreak);
+        var dialogTop = vcomet.Dialog.firstScalePosition.top + (el._misc.scalePosition * el.scaleBreak);
+        var myIndex;
+
+        // When it is the first dialog, it will be placed centered
+        // and will be the reference for the following scaled dialogs
+        if (vcomet.Dialog.scaleDialogs.length == 1) {
+          dialogLeft = centerWidth;
+          dialogTop = centerHeight;
+          vcomet.Dialog.firstScalePosition.left = dialogLeft;
+          vcomet.Dialog.firstScalePosition.top = dialogTop;
+        }
+
+        // If the dialog goes over the right limit or bottom limit, it will be placed in the corner
+        // if (((dialogLeft + el.offsetWidth > windowWidth) || (dialogTop + el.offsetHeight > windowHeight) || el._misc.cornered == true) && !el.hasAttribute("beforeResponsive")) {
+        if (((dialogLeft + el.offsetWidth > windowWidth) || (dialogTop + el.offsetHeight > windowHeight) || el._misc.cornered == true)) {
+          dialogLeft = windowWidth - el.offsetWidth;
+          dialogTop = windowHeight - el.offsetHeight;
+          el.classList.add("vc-dialog-moved");
+          el._misc.cornered = true;
+          myIndex = vcomet.Dialog.scaleDialogs.indexOf(el);
+
+          // If myIndex value is different than -1 it is in the array, so deletes it
+          (myIndex != -1) ? vcomet.Dialog.scaleDialogs.splice(myIndex, 1) : null;
+        }
+
+        el.style.left = dialogLeft + "px";
+        el.style.top = dialogTop + "px";
+
+      },
+      /*
+        @function (private) _updateZindex
+        @description Update dialog zIndex
+        @param {Boolean} isFirstTimeOpen 
+      */
+      updateZindex: function (isFirstTimeOpen) {
+        var el = this;
+        var openDialogs = vcomet.Dialog.openDialogs;
+        var count = openDialogs.length - 1;
+        var elIndex;
+
+        // First dialog open will be centerd
+        if (openDialogs.length == 1) {
+          el.style.zIndex = 2000;
+          openDialogs[0].zIndex = 2000;
+
+        } else {
+          // Modal dialog always centered
+          if (vcomet.util.isTrue(el.modal)) {
+            var modalOverlay = document.querySelector("#vcometOverlay");
+            modalOverlay.style.zIndex = 4000 + count;
+            el.style.zIndex = 4000 + count + 1;
+
+          } else {
+            // Call method to update the z-index of following opens dialogs
+            el._followingDialogsZindex(openDialogs, elIndex, count, isFirstTimeOpen);
+          }
+
+        }
+
+        vcomet.Dialog.lastzIndex = el.style.zIndex;
+
+      },
+      /*
+        @function (private) _followingDialogsZindex
+        @description Update z-index of differents dialogs when there are open more than one
+        @param {Array} openDialogs [Store node and zIndex of open dialogs]
+        @param {Number} elIndex [position in wich dialog is stored in openDialogs]
+        @param {Number} count [number of open dialogs]
+        @param {Boolean} isFirstTimeOpen 
+      */
+      followingDialogsZindex: function (openDialogs, elIndex, count, isFirstTimeOpen) {
+        var el = this;
+
+        for (var i = 0; i < openDialogs.length; i++) {
+          // Find the index of th current dialog
+          elIndex = (openDialogs[i].element == el) ? i : elIndex;
+
+          // Control NOT current dialogs, but current dialog NOT the first time open and
+          // z-Index of current dialog NOT match vcomet.Dialog.lastzIndex
+          if (!isFirstTimeOpen && (openDialogs[i].element != el) && (el.style.zIndex != vcomet.Dialog.lastzIndex)) {
+            // Decrements the z-index of the other dialogs when current dialog is put ahead of all
+            openDialogs[i].element.style.zIndex = openDialogs[i].element.style.zIndex - 1;
+            openDialogs[i].zIndex = openDialogs[i].element.style.zIndex - 1;
+          }
+
+        }
+
+        el.style.zIndex = 2000 + count;
+        openDialogs[elIndex].zIndex = 2000 + count;
+      },
+      /*
+        @function (private) _dialogModal
+        @description Set or remove modal overlay for modal option
+      */
+      dialogModal: function () {
+        var modalOverlay = document.querySelector("#vcometOverlay");
+
+        if ((this.modal == true || this.modal == "true") && this._dialogNode.classList.contains("vc-dialog-open")) {
+
+          // First open modal dialog
+          if (!modalOverlay) {
+            var modalOverlay = document.createElement("div");
+            modalOverlay.id = "vcometOverlay";
+            modalOverlay.classList.add("vc-dialog-modal");
+            document.body.appendChild(modalOverlay);
+
+            // If the previous modal dialog was minimized, another modal dialog can be opens
+          } else if (vcomet.Dialog.minimizedModal == true) {
+            modalOverlay.style.display = "block";
+          }
+
+        } else {
+          // When opens a no modal dialog and there is no other modal dialog minimized,
+          // the overlay will be removed
+          (modalOverlay && vcomet.Dialog.minimizedModal == false) ? document.body.removeChild(modalOverlay) : null;
+        }
+
+      },
+      /*
+        @function (private) _dialogModal
+        @description Set dialog rezise functionality
+      */
+      dialogResize: function () {
+        var el = this;
+        var resizerTop = document.createElement("div");
+        var resizerRight = document.createElement("div");
+        var resizerBottom = document.createElement("div");
+        var resizerLeft = document.createElement("div");
+        var resizerTL = document.createElement("div");
+        var resizerTR = document.createElement("div");
+        var resizerBL = document.createElement("div");
+        var resizerBR = document.createElement("div");
+        resizerTop.classList.add("vc-dialog-resizerTop");
+        resizerTop.classList.add("vc-dialog-resizerLine");
+        resizerTop.classList.add("vc-dialog-resize");
+        resizerRight.classList.add("vc-dialog-resizerRight");
+        resizerRight.classList.add("vc-dialog-resizerLine");
+        resizerRight.classList.add("vc-dialog-resize");
+        resizerBottom.classList.add("vc-dialog-resizerBottom");
+        resizerBottom.classList.add("vc-dialog-resizerLine");
+        resizerBottom.classList.add("vc-dialog-resize");
+        resizerLeft.classList.add("vc-dialog-resizerLeft");
+        resizerLeft.classList.add("vc-dialog-resizerLine");
+        resizerLeft.classList.add("vc-dialog-resize");
+        resizerTL.classList.add("vc-dialog-resizerTL");
+        resizerTL.classList.add("vc-dialog-resizerCorner");
+        resizerTL.classList.add("vc-dialog-resize");
+        resizerTR.classList.add("vc-dialog-resizerTR");
+        resizerTR.classList.add("vc-dialog-resizerCorner");
+        resizerTR.classList.add("vc-dialog-resize");
+        resizerBL.classList.add("vc-dialog-resizerBL");
+        resizerBL.classList.add("vc-dialog-resizerCorner");
+        resizerBL.classList.add("vc-dialog-resize");
+        resizerBR.classList.add("vc-dialog-resizerBR");
+        resizerBR.classList.add("vc-dialog-resizerCorner");
+        resizerBR.classList.add("vc-dialog-resize");
+        el._dialogNode.appendChild(resizerTop);
+        el._dialogNode.appendChild(resizerRight);
+        el._dialogNode.appendChild(resizerBottom);
+        el._dialogNode.appendChild(resizerLeft);
+        el._dialogNode.appendChild(resizerTL);
+        el._dialogNode.appendChild(resizerTR);
+        el._dialogNode.appendChild(resizerBL);
+        el._dialogNode.appendChild(resizerBR);
+        el._dialogNode.classList.add("vc-dialog-resizer");
+
+        // Avoid adding listeners more than once
+        if (!el.dialogResize) {
+          el.dialogResize = true;
+          var startX;
+          var startY;
+          var startWidth;
+          var startHeight;
+          var resizerTop = el.querySelector(".vc-dialog-resizerTop");
+          var resizerRight = el.querySelector(".vc-dialog-resizerRight");
+          var resizerBottom = el.querySelector(".vc-dialog-resizerBottom");
+          var resizerLeft = el.querySelector(".vc-dialog-resizerLeft");
+          var resizerTL = el.querySelector(".vc-dialog-resizerTL");
+          var resizerTR = el.querySelector(".vc-dialog-resizerTR");
+          var resizerBL = el.querySelector(".vc-dialog-resizerBL");
+          var resizerBR = el.querySelector(".vc-dialog-resizerBR");
+          resize(resizerTop, "height", "opposite");
+          resize(resizerRight, "width", "default");
+          resize(resizerBottom, "height", "default");
+          resize(resizerLeft, "width", "opposite");
+          resize(resizerTL, "corner", "tl");
+          resize(resizerTR, "corner", "tr");
+          resize(resizerBL, "corner", "bl");
+          resize(resizerBR, "corner", "br");
+
+          function resize(resizer, type, direction) {
+            // Listener for start the dialog resizer
+            resizer.addEventListener("mousedown", function (e) {
+              // When there is a mousedown event of the dialogDrag,
+              // using preventDefault and stopPropagation, it will not return.
+              // So there will be no conflict with the resize method
+              e.preventDefault();
+              e.stopPropagation();
+              startX = e.clientX;
+              startY = e.clientY;
+              startWidth = parseInt(document.defaultView.getComputedStyle(el._dialogNode).width, 10);
+              startHeight = parseInt(document.defaultView.getComputedStyle(el._dialogNode).height, 10);
+
+              document.documentElement.addEventListener("mousemove", doResize, false);
+              document.documentElement.addEventListener("mouseup", function stopResize(e) {
+
+                document.documentElement.removeEventListener("mousemove", doResize, false);
+                document.documentElement.removeEventListener("mouseup", stopResize, false);
+                el._misc.widthBeforeResize = el.offsetWidth;
+              }, false);
+            }, false);
+
+            // Doing the resize of the dialog
+            function doResize(e) {
+              var windowWidth = window.innerWidth - 5;
+              var windowHeight = window.innerHeight - 5;
+              var myIndex = vcomet.Dialog.scaleDialogs.indexOf(el);
+
+              // Call method to do resize in all directions
+              el._resizeCalcs(resizer, type, direction, windowWidth, windowHeight, startX, startY, startWidth, startHeight, e);
+              // When resizing the dialog, it is cataloged as a moved dialog
+              // and it it is a scaled dialog, it is removed from the scaled array
+              el.classList.add("vc-dialog-moved");
+              el._dialogNode.classList.add("vc-dialog-resized");
+
+              (myIndex != -1) ? vcomet.Dialog.scaleDialogs.splice(myIndex, 1) : null;
+            }
+          }
+        }
+
+      },
+
+      /*
+        @function (private) _resizeCalcs
+        @description Do resize in all directions 
+        @param {Object} resizer [resizer node] 
+        @param {String} type [resize type, height, width or corner]
+        @param {String} direction [side of dialog that is being resize]
+        @param {Number} windowWidth 
+        @param {Number} windowHeight 
+        @param {Number} startX [position of Xclient when clicking to initialize resize]
+        @param {Number} startY [position of Yclient when clicking to initialize resize]
+        @param {Number} startWidth [dialog width when start resize]
+        @param {Number} startHeight [dialog height when start resize]
+        @param {Object} event [mouse event]
+      */
+      resizeCalcs: function (resizer, type, direction, windowWidth, windowHeight, startX, startY, startWidth, startHeight, event) {
+        var el = this;
+        var minDialogWidth = parseInt(window.getComputedStyle(el._dialogNode).getPropertyValue("min-width"));
+        var minDialogHeight = parseInt(window.getComputedStyle(el._dialogNode).getPropertyValue("min-height"));
+        // Initialize conditions variables
+        var leftWindowLimit = event.clientX > 5;
+        var topWindowLimit = event.clientY > 5;
+        var rightWindowLimit = event.clientX < windowWidth;
+        var bottomWindowLimit = event.clientY < windowHeight;
+        var minWidthController = (startWidth + startX - event.clientX) > minDialogWidth;
+        var minHeightController = (startHeight + startY - event.clientY) > minDialogHeight;
+        var maxWidthController = (startWidth + startX - event.clientX) < el.maxWidth;
+        var maxHeightController = (startHeight + startY - event.clientY) < el.maxHeight;
+        var oppositeDirection = direction == "opposite";
+        var resizerRight = resizer.classList.contains("vc-dialog-resizerRight");
+        var resizerBottom = resizer.classList.contains("vc-dialog-resizerBottom");
+        var resizerTR = resizer.classList.contains("vc-dialog-resizerTR");
+        var resizerBR = resizer.classList.contains("vc-dialog-resizerBR");
+
+        // When there is NOT a maxwidth the condition is always true
+        maxWidthController = (el.maxWidth == "auto") ? true : maxWidthController;
+
+        // When there is NOT a maxheight the condition is always true
+        maxHeightController = (el.maxHeight == "auto") ? true : maxHeightController;
+
+        switch (type) {
+          // Corners resize
+          case "corner":
+            switch (direction) {
+              // Top-left corner
+              case "tl":
+
+                if (leftWindowLimit && topWindowLimit && minWidthController && minHeightController && maxWidthController && maxHeightController) {
+                  // When the dialog reaches the minimum size or exceeds the maximum size,
+                  // doesn't continue to move in the direction that the mouse is moving
+                  el.style.left = event.clientX + "px";
+                  el._dialogNode.style.width = (startWidth + startX - event.clientX) + "px";
+                  el.style.top = event.clientY + "px";
+                  el._dialogNode.style.height = (startHeight + startY - event.clientY) + "px";
+                }
+
+                break;
+              // Top-right corner
+              case "tr":
+
+                if (topWindowLimit && rightWindowLimit && minHeightController && maxHeightController && resizerTR) {
+                  el._dialogNode.style.width = (startWidth + event.clientX - startX) + "px";
+                  el.style.top = event.clientY + "px";
+                  el._dialogNode.style.height = (startHeight + startY - event.clientY) + "px";
+                }
+
+                break;
+              // Bottom-left corner
+              case "bl":
+
+                if (leftWindowLimit && bottomWindowLimit && minWidthController && maxWidthController) {
+                  el.style.left = event.clientX + "px";
+                  el._dialogNode.style.width = (startWidth + startX - event.clientX) + "px";
+                  el._dialogNode.style.height = (startHeight + event.clientY - startY) + "px";
+                }
+
+                break;
+              // Bottom-right corner
+              case "br":
+
+                if (bottomWindowLimit && rightWindowLimit && resizerBR) {
+                  el._dialogNode.style.width = (startWidth + event.clientX - startX) + "px";
+                  el._dialogNode.style.height = (startHeight + event.clientY - startY) + "px";
+                }
+
+                break;
+            }
+            break;
+          // Width resize
+          case "width":
+
+            // Left resize
+            if (oppositeDirection && leftWindowLimit && minWidthController && maxWidthController) {
+              // When the dialog reaches the minimum width or exceeds the maximum width,
+              // doesn't continue to move in the direction that the mouse is moving
+              el.style.left = event.clientX + "px";
+              el._dialogNode.style.width = (startWidth + startX - event.clientX) + "px";
+
+              // Right resize
+            } else if (rightWindowLimit && resizerRight) {
+              el._dialogNode.style.width = (startWidth + event.clientX - startX) + "px";
+            }
+
+            break;
+
+          // Height resize
+          case "height":
+
+            // Top resize
+            if (oppositeDirection && topWindowLimit && minHeightController && maxHeightController) {
+              // When the dialog reaches the minimum height or exceeds the maximum height,
+              // doesn't continue to move in the direction that the mouse is moving
+              el.style.top = event.clientY + "px";
+              el._dialogNode.style.height = (startHeight + startY - event.clientY) + "px";
+
+              // Bottom resize
+            } else if (bottomWindowLimit && resizerBottom) {
+              el._dialogNode.style.height = (startHeight + event.clientY - startY) + "px";
+            }
+
+            break;
+        }
+      },
+      /*
+        @function (private) _removeResizeSizes
+        @description Store sizes of resize dialog and remove that size from the dialog
+      */
+      removeResizeSizes: function () {
+        var minimMaxComprobation = (!this._dialogNode.classList.contains("vc-dialog-minim") && !this._dialogNode.classList.contains("vc-dialog-max"));
+        var resizerComprobation = this._dialogNode.classList.contains("vc-dialog-resizer");
+
+        this._misc.resizeWidth = minimMaxComprobation ? this._dialogNode.offsetWidth : this._misc.resizeWidth;
+        this._misc.resizeHeigth = minimMaxComprobation ? this._dialogNode.offsetHeight : this._misc.resizeHeigth;
+        this._dialogNode.style.width = resizerComprobation ? "auto" : this._dialogNode.style.width;
+        this._dialogNode.style.height = resizerComprobation ? "auto" : this._dialogNode.style.height;
+
+
+      },
+      /*
+        @function (private) _returnResizeSizes
+        @description Re-establishes resize dialog sizes
+      */
+      returnResizeSizes: function () {
+        var resizerComprobation = this._dialogNode.classList.contains("vc-dialog-resizer");
+
+        this._dialogNode.style.width = resizerComprobation ? this._misc.resizeWidth + "px" : this._dialogNode.style.width;
+        this._dialogNode.style.height = resizerComprobation ? this._misc.resizeHeigth + "px" : this._dialogNode.style.height;
+
+      },
+      /*
+        @function (private) _dialogMaximize
+        @description Set maximize functionality to dialog
+      */
+      dialogMaximize: function () {
+        var el = this;
+        var footer = el._footerNode;
+        var maximize = document.createElement("div");
+        var resizer = el.querySelectorAll(".vc-dialog-resize");
+        maximize.classList.add("vc-dialog-maximize");
+        maximize.innerHTML = '<i class="vc-dialog-maxIcon vicon vicon-maximize"></i>';
+        el._headingNode.classList.add("vc-dialog-fullscreen");
+        el._headingNode.insertBefore(maximize, el._headingNode.childNodes[1]);
+
+        // Maximize listener
+        maximize.addEventListener("click", function (e) {
+          var minBar = document.querySelector(".vc-dialog-minBar");
+          el._dialogNode.classList.contains("vc-dialog-max") ? el._undoMaximize(resizer, maximize, minBar) : el._doMaximize(resizer, maximize, minBar);;
+        }, false);
+
+      },
+      /*
+        @function (private) _doMaximize
+        @description Maximize dialog
+        @param {Object} resizer [store dialog resize nodes]
+        @param {Object} maximize [node that apply maximized]
+        @param {Object} minBar [minimize bar node]
+      */
+      doMaximize: function (resizer, maximize, minBar) {
+        var i;
+
+        // Call method to remove sizes
+        this._removeResizeSizes();
+        this._updateZindex();
+        this._dialogNode.classList.add("vc-dialog-max");
+        maximize.innerHTML = '<i class="vc-dialog-maxExitIcon vicon vicon-restore"></i>';
+
+        // Hide the resizer elements
+        if (resizer) {
+          for (i = 0; i < resizer.length; i++) {
+            resizer[i].style.display = "none";
+          }
+        }
+
+        (minBar) ? minBar.classList.add("vc-dialog-hideMinBar") : null;
+
+        // Control if dialog was previously was minimized
+        if (this._dialogNode.classList.contains("vc-dialog-minim")) {
+          var minimize = this.querySelector(".vc-dialog-minimize");
+          document.body.appendChild(this);
+          this.classList.remove("vc-dialog-hostMinim");
+          this._dialogNode.classList.remove("vc-dialog-minim");
+          minimize.innerHTML = '<i class="vc-dialog-minimIcon vicon vicon-minimize"></i>';
+        }
+
+      },
+      /*
+        @function (private) _undoMaximize
+        @description Return to its size and place before maximized
+        @param {Object} resizer [store dialog resize nodes]
+        @param {Object} maximize [node that apply maximized]
+        @param {Object} minBar [minimize bar node]
+      */
+      undoMaximize: function (resizer, maximize, minBar) {
+        var i;
+        this._dialogNode.classList.remove("vc-dialog-max");
+        maximize.innerHTML = '<i class="vc-dialog-maxIcon vicon vicon-maximize"></i>';
+        // Call method to re-establishes sizes
+        this._returnResizeSizes();
+
+        // Modal dialog previously minimized
+        if (this.modal == "true" && vcomet.Dialog.minimizedModal == true) {
+          var modalOverlay = document.querySelector("#vcometOverlay");
+
+          modalOverlay.style.zIndex = this.style.zIndex - 1;
+          modalOverlay.style.display = "block";
+        }
+
+        // Display the resizer elements
+        if (resizer) {
+          for (i = 0; i < resizer.length; i++) {
+            resizer[i].style.display = "flex";
+          }
+        }
+
+        (minBar) ? minBar.classList.remove("vc-dialog-hideMinBar") : null;
+
+      },
+      /*
+        @function (private) _dialogMinimize
+        @description Set minimize functionality to dialog
+      */
+      dialogMinimize: function () {
+        var el = this;
+        var minimize = document.createElement("div");
+        var resizer = el.querySelectorAll(".vc-dialog-resize");
+        minimize.classList.add("vc-dialog-minimize");
+        minimize.innerHTML = '<i class="vc-dialog-minimIcon vicon vicon-minimize"></i>';
+        el._headingNode.classList.add("vc-dialog-fullscreen");
+        el._headingNode.insertBefore(minimize, el._headingNode.childNodes[1]);
+
+        if (!vcomet.Dialog.minBar) {
+          var minBar = document.createElement("div");
+          minBar.classList.add("vc-dialog-minBar");
+          document.body.appendChild(minBar);
+          vcomet.Dialog.minBar = true;
+        }
+
+        // Minimize click listener
+        minimize.addEventListener("click", function (e) {
+          var minBar = document.querySelector(".vc-dialog-minBar");
+
+          el._dialogNode.classList.contains("vc-dialog-minim") ? el._undoMinimize(resizer, minimize) : el._doMinimize(minBar, minimize, resizer);
+        }, false);
+      },
+      /*
+        @function (private) _undoMinimize
+        @description Return to its size and place before minimized
+        @param {Object} resizer [store dialog resize nodes]
+        @param {Object} maximize [node that apply minimized]
+      */
+      undoMinimize: function (resizer, minimize) {
+        var i;
+        document.body.appendChild(this);
+        this.classList.remove("vc-dialog-hostMinim");
+        this._dialogNode.classList.remove("vc-dialog-minim");
+        this._dialogNode.style.maxwidth = "inherit";
+
+        this.getAttribute("version") !== "tablet" && this.getAttribute("version") !== "mobile" ? this._updateZindex() : null;
+
+        // Call method to re-establishes sizes
+        this._returnResizeSizes();
+
+        // Modal dialog
+        if (this.modal == "true") {
+          var modalOverlay = document.querySelector("#vcometOverlay");
+
+          modalOverlay.style.display = "block";
+          modalOverlay.style.zIndex = this.style.zIndex - 1;
+          vcomet.Dialog.minimizedModal = false;
+        }
+
+        // Display the resizer elements
+        if (resizer) {
+          for (i = 0; i < resizer.length; i++) {
+            resizer[i].style.display = "flex";
+          }
+        }
+
+        // Only scale, not moved dialogs and only on screen view
+        if (this.multiposition == "scaled" && !this.classList.contains("vc-dialog-moved") && this.getAttribute("version") !== "tablet" && this.getAttribute("version") !== "mobile") {
+          this._initializeScalePosition();
+          this._handleDialogScale();
+        }
+
+      },
+
+      /*
+        @function (private) _doMinimize
+        @description Minimize dialog
+        @param {Object} minBar [minimize bar node]
+        @param {Object} minimize [node that apply minimized]
+        @param {Object} resizer [store dialog resize nodes]
+      */
+      doMinimize: function (minBar, minimize, resizer) {
+        var i;
+
+        // Call method to remove sizes
+        this._removeResizeSizes();
+        minBar.appendChild(this);
+        this.classList.add("vc-dialog-hostMinim");
+        this._dialogNode.classList.add("vc-dialog-minim");
+        this._dialogNode.style.maxwidth = "250px";
+
+        // Modal dialog
+        if (this.modal == "true") {
+          var modalOverlay = document.querySelector("#vcometOverlay");
+
+          modalOverlay.style.display = "none";
+          vcomet.Dialog.minimizedModal = true;
+        }
+
+        // Hide the resizer elements
+        if (resizer) {
+          for (i = 0; i < resizer.length; i++) {
+            resizer[i].style.display = "none";
+          }
+        }
+
+        // Control if dialog was previously was maximized
+        if (this._dialogNode.classList.contains("vc-dialog-max")) {
+          var maximize = this.querySelector(".vc-dialog-maximize");
+
+          this._dialogNode.classList.remove("vc-dialog-max");
+          minBar.classList.remove("vc-dialog-hideMinBar");
+          maximize.innerHTML = '<i class="vc-dialog-maxIcon vicon vicon-maximize"></i>';
+        }
+
+        //If the dialog exists in the cascade dialog array we remove it
+        var myIndex = vcomet.Dialog.scaleDialogs.indexOf(this);
+
+        if (myIndex != -1) {
+          vcomet.Dialog.scaleDialogs.splice(myIndex, 1);
+          this.setAttribute("minimizeTrace", "true");
+        }
+
+      },
+
+      /*
+        @function (private) _addBlurEvent
+        @description Add listener that give blur functionality to dialog
+      */
+      addBlurEvent: function () {
+        var el = this;
+
+        vcomet.registerPathListener(el);
+        el.classList.add("vc-dialog-blurElement");
+
+        document.body.addEventListener("mousedown", function (e) {
+
+          if (el.isOnPath == false) {
+            el.close();
+            el.classList.remove("vc-dialog-blurElement");
+          }
+
+        }, false);
+
+      },
+
+      /*
+        @function (private) _addHeadingHeading
+        @description Add dialog heading and its differents options
+        @param {String} newHeading
+      */
+      addHeadingHeading: function (newHeading) {
+        var el = this;
+        var dialogClose = el._closeNode;
+        var content = el._contentNode;
+
+        // Dialog with close option but heading not defined by user
+        if (newHeading === undefined) {
+
+          // With footer the close botton becomes into a cancel button on the footer
+          if (el.closable == "true" && el._userFooterNode) {
+            el._setCancelButton(dialogClose, content, el);
+
+          } else {
+            if (el.closable == "false") {
+              dialogClose.style.display = "none";
+              el._headingNode.style.display = "none";
+
+              // If the user does not define a footer the heading is maintained with the close button
+            } else {
+              el._headingNode.style.justifyContent = "flex-end";
+              el._addCloseEvent();
+            }
+
+          }
+
+          // Dialog with heading
+        } else {
+          var title = document.createElement("span");
+
+          title.classList.add("vc-dialog-title");
+          title.innerHTML = newHeading;
+
+          // And setting the title passed as parameter by the user
+          if (el.closable == "true") {
+            el._headingNode.insertBefore(title, el._headingNode.childNodes[0]);
+            el._addCloseEvent();
+
+            // Heading without close option
+          } else {
+            el._headingNode.insertBefore(title, el._headingNode.childNodes[0]);
+            dialogClose.style.display = "none";
+            dialogClose.classList.remove("vc-dialog-close");
+          }
+        }
+      },
+
+      /*
+      @function (private) _addCloseEvent
+      @description Add listener that give close functionality
+      */
+      addCloseEvent: function functionName() {
+        var el = this;
+        var dialogClose = el._closeNode;
+
+        // Add listener to close the dialog
+        dialogClose.addEventListener("click", function (e) {
+          // If dialog was minimized before closing
+          if (el.classList.contains("vc-dialog-hostMinim")) {
+            var minimize = el.querySelector(".vc-dialog-minimize");
+            document.body.appendChild(el);
+            el.classList.remove("vc-dialog-hostMinim");
+            el._dialogNode.classList.remove("vc-dialog-minim");
+            minimize.innerHTML = '<i class="vicon vicon-minimize"></i>';
+          }
+
+          el.close();
+        }, false);
+      },
+
+      /*
+      @function (private) _setCancelButton
+      @description Set cancel button to the footer
+      @param {Object} dialogClose [Dialog close node]
+      @param {Object} content [Dialog content node]
+      @param {Object} el [Current element]
+      */
+      setCancelButton: function functionName(dialogClose, content, el) {
+        dialogClose.style.display = "none";
+        el._headingNode.style.display = "none";
+
+        if (el.closable == "true") {
+          var cancel = document.createElement("vc-button");
+          var buttonsFooter;
+
+          cancel.value = "CANCEL";
+          cancel.classList.add("vc-dialog-cancel");
+
+          el.onFooter(function () {
+            buttonsFooter = el._buttonsFooterNode;
+            buttonsFooter.appendChild(cancel);
+            dialogClose = el.querySelector(".vc-dialog-cancel");
+
+            dialogClose.addEventListener("click", function (e) {
+              el.close();
+            }, false);
+          });
+        }
+
+        (el.drag == "true") ? content.classList.add("vc-dialog-contentDrag") : null;
+      },
+
+      /*
+        @function (private) _addContent
+        @description Add dialog content
+        @param {Object} content [Cotent node]
+      */
+      addContent: function (content) {
+        var dialogContent = this._contentNode;
+
+        (content) ? dialogContent.appendChild(content) : null;
+      },
+
+      /*
+        @function (private) _addFooter
+        @description Add dialog footer and its differents options
+        @param {Object} footerSection [footer node]
+      */
+      // TODO: FOOTER
+      addFooter: function (footerSection) {
+        var el = this;
+
+        if (footerSection) {
+          var footerSectionNodes = footerSection.getSourceElements();
+          var footerSectionLength = footerSectionNodes.length;
+          var buttonsFooter = document.createElement("div");
+          var documentFragment = document.createDocumentFragment();
+          var i;
+
+          for (i = 0; i < footerSectionLength; i++) {
+            documentFragment.appendChild(footerSectionNodes[0]);
+          }
+
+          this.addFooter(documentFragment, footerSection.location);
+        }
+
+      },
+      /*
+        @function (private) _verifyScreenResolution
+        @description Control different versions of screens
+      */
+      verifyScreenResolution: function () {
+        var el = this;
+
+        // TABLET view
+        if (window.innerWidth <= vcomet.tabletWidth && window.innerWidth > vcomet.mobileWidth) {
+          el.setAttribute("version", "tablet");
+          el._removeDesktopFunctionality();
+
+          // MOBILE view
+        } else if (window.innerWidth <= vcomet.mobileWidth) {
+          el.setAttribute("version", "mobile");
+          el._removeDesktopFunctionality();
+
+          // DESKTOP view
+        } else {
+          el.setAttribute("version", "desktop");
+
+          // If resize attribute it's true, set resize functionality
+          el.resize == "true" && !el._dialogNode.classList.contains("vc-dialog-resizer") ? el._dialogResize() : null;
+
+          // If maximize attribute it's true, set maximize functionality
+          if (el.maximize == "true" && !el._dialogNode.classList.contains("vc-dialog-hasMaximize")) {
+            el._dialogMaximize();
+            el._dialogNode.classList.add("vc-dialog-hasMaximize");
+          }
+
+          // If minimize attribute it's true, set minize functionality
+          if (el.minimize == "true" && !el._dialogNode.classList.contains("vc-dialog-hasMinimize")) {
+            el._dialogMinimize();
+            el._dialogNode.classList.add("vc-dialog-hasMinimize");
+          }
+
+          // If drag attribute it's true, set drag functionality
+          if (el.drag == "true" && !el._dialogNode.classList.contains("vc-dialog-hasDragListeners")) {
+            el._addDragListeners();
+            el._dialogNode.classList.add("vc-dialog-hasDragListeners");
+          }
+
+          if (el.hasAttribute("moved")) {
+            el._initializeScalePosition();
+            el.removeAttribute("moved");
+          }
+
+          if (el.hasAttribute("wasResponsive")) {
+            el._dialogNode.style.height = "auto";
+            (!document.querySelector("#vcometOverlay")) ? el._updateZindex() : null;
+            el.removeAttribute("wasResponsive");
+          }
+
+        }
+      },
+      /*
+        @function (private) _removeDesktopFunctionality
+        @description Remove desktop functionality on small devices view
+      */
+      removeDesktopFunctionality: function () {
+        var el = this;
+        var maximize = el.querySelectorAll(".vc-dialog-maximize");
+        var minimize = el.querySelectorAll(".vc-dialog-minimize");
+        var resizer = el.querySelectorAll(".vc-dialog-resize");
+        var minBar = document.querySelector(".vc-dialog-minBar");
+        var i;
+        var parent;
+        var child;
+
+        el._dialogNode.style.width = "auto";
+        // el._dialogNode.style.height = "auto";
+        el.setAttribute("wasResponsive", "true");
+
+        // Remove resize functionality on tablet and mobile versions
+        if (el.resize == true || el.resize == "true" && el._dialogNode.classList.contains("vc-dialog-resizer")) {
+          el._dialogNode.classList.remove("vc-dialog-resizer");
+          el.dialogResize = false;
+          child = el._dialogNode.querySelectorAll(".vc-dialog-resize");
+
+          for (var i = 0; i < child.length; i++) {
+            el._dialogNode.removeChild(child[i]);
+          }
+        }
+
+        // Remove maximize functionality on tablet and mobile versions
+        if (el.maximize == true || el.maximize == "true" && el._dialogNode.classList.contains("vc-dialog-hasMaximize")) {
+          el._dialogNode.classList.remove("vc-dialog-hasMaximize");
+          parent = el._headingNode;
+          child = el.querySelector(".vc-dialog-maximize");
+
+          el._undoMaximize(resizer, maximize, minBar, i);
+          parent.removeChild(child);
+        }
+
+        // Remove minimize functionality on tablet and mobile versions
+        if ((el.minimize == true || el.minimize == "true") && el._dialogNode.classList.contains("vc-dialog-hasMinimize")) {
+          el._dialogNode.classList.remove("vc-dialog-hasMinimize");
+          parent = el._headingNode;
+          child = el.querySelector(".vc-dialog-minimize");
+          el._undoMinimize(resizer, minimize, i);
+          parent.removeChild(child);
+        }
+
+        // Remove drag functionality on tablet and mobile versions
+        if (el.drag == "true" && el._dialogNode.classList.contains("vc-dialog-hasDragListeners")) {
+          el._dialogNode.classList.remove("vc-dialog-hasDragListeners");
+          el.removeEventListener("mousedown", el._dragEvent, false);
+          el.addDragListeners = false;
+        }
+
+        // Remove functionality of a moved dialog
+        if (el.classList.contains("vc-dialog-moved")) {
+          el.classList.remove("vc-dialog-moved");
+          el.setAttribute("moved", "true");
+          el._windowRightHooked = false;
+        }
+
+        // Remove the bottom and right values estrablishes when do the resize
+        //  of the window and the dialog reaches the limits
+        el.style.bottom = (el.style.bottom == "5px") ? el.style.bottom = "auto" : el.style.bottom;
+        el.style.right = (el.style.right == "5px") ? el.style.right = "auto" : el.style.right;
+
+        // When the dialog was minimized before reaching the mobile o tablet version
+        // was removed from the position scale array, so is necessary to give it a position again
+        // for when it returns to the screen version it will be centered correctly
+        if (el.hasAttribute("minimizeTrace")) {
+          el._initializeScalePosition();
+          el.removeAttribute("minimizeTrace");
+        }
+
+        // When the dialog was resized on desktop version, is necessary
+        // to remove the class for have correct width when comes back to desktop version
+        (el._dialogNode.classList.contains("vc-dialog-resized")) ? el._dialogNode.classList.remove("vc-dialog-resized") : null;
+
+      },
+
+      /*
+        @function (private) _adaptDialogHeight
+        @description Adapt dialog height when resize windnow height 
+      */
+      adaptDialogHeight: function () {
+        var el = this;
+        var windowSmallerControl = (el._lastWindowHeight == 0 || el._lastWindowHeight >= window.innerHeight) && el._dialogNode.offsetHeight >= (window.innerHeight - 100);
+        var windowBiggerControl = (el._dialogNode.offsetHeight <= window.innerHeight && el._dialogNode.offsetHeight < el._misc.dialogHeight && el._lastWindowHeight != window.innerHeight);
+
+        // Controls when window height resize become smaller
+        el._dialogNode.style.height = windowSmallerControl ? (window.innerHeight - 100) + "px" : el._dialogNode.style.height;
+        // Controls when window height resize become bigger
+        el._dialogNode.style.height = windowBiggerControl ? (window.innerHeight - 100) + "px" : el._dialogNode.style.height;
+
+        el._lastWindowHeight = window.innerHeight;
+
+      }
+    },
+    functions: {
+      /*
+        @function open
+        @description open dialog
+      */
+      open: function () {
+        var el = this;
+        var i;
+        var isFirstTimeOpen = (!el.querySelector(".vc-dialog-open"));
+        el._dialogNode.style.maxWidth = (el.maxWidth == "auto") ? el.maxWidth : el.maxWidth + "px";
+        el._dialogNode.style.maxHeight = (el.maxHeight == "auto") ? el.maxHeight : el.maxHeight + "px";
+        el._dialogNode.style.minWidth = el.minWidth + "px";
+        el._dialogNode.style.minHeight = el.minHeight + "px";
+        var dialogContent = el._contentNode;
+
+        el._verifyScreenResolution();
+
+        el.setAttribute("open", "true");
+
+        if (isFirstTimeOpen) {
+          var openDialogObject = {};
+          vcomet.triggerCallback("onOpen", el);
+
+          // When the dialog is opened the blur listener will be added
+          (el.blur == "true") ? el._addBlurEvent() : null;
+
+          openDialogObject.element = el;
+          vcomet.Dialog.openDialogs.push(openDialogObject);
+          el._dialogNode.classList.add("vc-dialog-open");
+          el._dialogNode.style.display = "flex";
+          el._dialogModal();
+
+          el.dataset.centered = (el.multiposition == "scaled") ? "true" : el.dataset.centered;
+
+          // Call method to initialize _misc.scalePosition
+          // if (!vcomet.util.isTrue(el.modal) && el.multiposition != "centered" && el.getAttribute("version") !== "tablet" && el.getAttribute("version") !== "mobile") {
+          if (!vcomet.util.isTrue(el.modal) && el.multiposition == "scaled" && el.getAttribute("version") == "desktop") {
+            el._initializeScalePosition();
+          }
+
+          // Stores the width and height of the dialog
+          el._misc.dialogWidth = el._dialogNode.offsetWidth;
+          el._misc.dialogHeight = el._dialogNode.offsetHeight;
+
+          // In small devices handles height of dialogs
+          var heightComprobation = (el.responsiveRatio == "true" && (el.getAttribute("version") == "tablet" || el.getAttribute("version") == "mobile"));
+          heightComprobation ? el._adaptDialogHeight() : null;
+
+          // In desktop view sets a fixed width to the dialog when its width is equal to the maxwidth
+          var widthComprobation = ((el.getAttribute("version") == "desktop") && (el._dialogNode.offsetWidth == el.maxWidth) && !el._dialogNode.classList.contains("vc-dialog-resized") && !el._dialogNode.classList.contains("vc-dialog-minim") && !el._dialogNode.classList.contains("vc-dialog-max"));
+          el._dialogNode.style.width = widthComprobation ? el.maxWidth + "px" : el._dialogNode.style.width;
+
+          // Will center the dialog when it opens
+          el._dialogPositioner();
+          vcomet.triggerCallback("onOpened", el);
+        }
+
+        el._updateZindex(isFirstTimeOpen);
+
+        // IE solution: flex-grow with min-height does not work on IE
+        // So is necessary to determinate a fixed height
+        el._dialogNode.style.height = (navigator.userAgent.indexOf("Trident") != -1) ? el._misc.dialogHeight + "px" : el._misc.dialogHeight;
+        el._dialogNode.vcometScroll.update();
+
+      },
+      /*
+      @function close
+      @description close dialog
+      */
+      close: function () {
+        var el = this;
+        var openDialogs = vcomet.Dialog.openDialogs;
+        var elIndex;
+
+        vcomet.triggerCallback("onClose", el);
+        el._dialogNode.style.display = "none";
+        el._dialogNode.classList.remove("vc-dialog-open");
+
+        // Maximize dialog
+        if (el._dialogNode.classList.contains("vc-dialog-max")) {
+          var resizer = el.querySelectorAll(".vc-dialog-resize");
+          var maximize = el.querySelector(".vc-dialog-maximize");
+          var minBar = document.querySelector(".vc-dialog-minBar");
+          var i;
+
+          el._undoMaximize(resizer, maximize, minBar, i);
+        }
+
+        // Minimize dialog
+        if (el._dialogNode.classList.contains("vc-dialog-minim")) {
+          var resizer = el.querySelectorAll(".vc-dialog-resize");
+          var minimize = el.querySelector(".vc-dialog-minimize");
+          var i;
+
+          el._undoMinimize(resizer, minimize, i);
+        }
+
+        // Modal dialog
+        if (vcomet.util.isTrue(el.modal)) {
+          var modalOverlay = document.querySelector("#vcometOverlay");
+
+          if (modalOverlay) {
+            document.body.removeChild(modalOverlay);
+            vcomet.Dialog.minimizedModal = false;
+          }
+
+        }
+
+        // Call method to decrement dialog centered counter
+        el.dataset.centered = "false";
+        elIndex = el._getElementIndex(openDialogs);
+
+        if (elIndex > -1) {
+          vcomet.Dialog.openDialogs.splice(elIndex, 1);
+          el.style.zIndex = "";
+          vcomet.Dialog.lastzIndex = el._getLastDialogZindex(openDialogs);
+        }
+
+        var myIndex = vcomet.Dialog.scaleDialogs.indexOf(el);
+        (myIndex != -1) ? vcomet.Dialog.scaleDialogs.splice(myIndex, 1) : null;
+
+        vcomet.triggerCallback("onClosed", el);
+        el.removeAttribute("open", "true");
+        el.style.opacity = 0;
+      },
+
+      /*
+        @function addContent
+        @description Add new content to dialog
+        @param {Object} content [Content node]
+      */
+      addContent: function (content) {
+        this._addContent(content);
+      },
+
+      /*
+        @function addFooter
+        @description Add new footer to dialog
+        @param {Object} footer [Footer node]
+        @param {String} location [Footer location]
+      */
+      addFooter: function (footer, location) {
+        if (this._footerNode) {
+          var dialogFooter = this._footerNode;
+          var buttonsFooter = this._buttonsFooterNode;
+
+        } else {
+          var dialogFooter = document.createElement("div");
+          var buttonsFooter = document.createElement("div");
+
+          this._footerNode = dialogFooter;
+          this._buttonsFooterNode = buttonsFooter;
+
+          dialogFooter.classList.add("vc-dialog-footer");
+          buttonsFooter.classList.add("vc-dialog-buttonsFooter");
+          this._dialogNode.appendChild(dialogFooter);
+          dialogFooter.appendChild(buttonsFooter);
+        }
+
+        dialogFooter.setAttribute("location", location);
+        buttonsFooter.appendChild(footer);
+
+        // Call onFooter callback
+        vcomet.triggerCallback("onFooter", this);
+      },
+
+      /*
+        @function setHeading
+        @description Replaces old dialog heading with the new value
+        @param {String} newHeading [New heading text]
+      */
+      setHeading: function (newHeading) {
+        if (this.querySelector(".vc-dialog-title")) {
+          this.querySelector(".vc-dialog-title").innerHTML = newHeading;
+        } else {
+          this._addHeadingHeading(newHeading);
+        }
+
+        this._dialogPositioner();
+      },
+
+      /*
+        @function setContent
+        @description Replaces old dialog content with the new value
+        @param {Object} newContent [New content node]
+      */
+      setContent: function (newContent) {
+        var dialogContent = this._contentNode;
+        var oldContent;
+
+        // When the dialog content has been added declaratively
+        // the vc-section must be taken into account
+        if (dialogContent.querySelector("vc-section")) {
+          var dialogSection = dialogContent.querySelector("vc-section");
+          oldContent = dialogSection.querySelector("span");
+          dialogSection.replaceChild(newContent, oldContent);
+
+          // When the dialog content has been added programmatically
+          // the vc-section is not added
+        } else {
+          oldContent = dialogContent.querySelector("span");
+          dialogContent.replaceChild(newContent, oldContent);
+        }
+
+        this._dialogPositioner();
+      },
+
+      /*
+        @function setFooter
+        @description Replaces old buttons of the footer with the new value
+        @param {Object} newFooter [New footer node]
+        @param {String} newLocation [New footer location]
+      */
+      setFooter: function (newFooter, newLocation) {
+        var buttonsFooter = el._buttonsFooterNode;
+
+        buttonsFooter.innerHTML = "";
+        this.addFooter(newFooter, newLocation);
+        this._dialogPositioner();
+      },
+
+      /*
+        @function setButtonLocation
+        @description Replaces old buttons location with the new value
+        @param {String} newLocation [New footer location]
+      */
+      setButtonLocation: function (newLocation) {
+        var buttonsFooter = this._buttonsFooterNode;
+        buttonsFooter.setAttribute("location", newLocation);
+      },
+
+      /*
+        @function removeFooterButton
+        @description Removes a button from footer
+        @param {Object} button [button to remove]
+      */
+      removeFooterButton: function (button) {
+        var buttonsFooter = this._buttonsFooterNode;
+        var removeButton = buttonsFooter.querySelector("vc-button[value='" + button.value + "']");
+
+        buttonsFooter.removeChild(removeButton);
+        this._dialogPositioner();
+      }
+    },
+
+    onCreated: function () {
+      var el = this;
+      
+      // Create callbacks
+      vcomet.createCallback("onOpen", this);
+      vcomet.createCallback("onOpened", this);
+      vcomet.createCallback("onClose", this);
+      vcomet.createCallback("onClosed", this);
+      vcomet.createCallback("onFooter", this);
+
+      // Global dialogs variables
+      vcomet.Dialog = vcomet.Dialog || {
+        lastzIndex: 0,
+        firstScalePosition: {},
+        firstTop: false,
+        minBar: false,
+        minimizedModal: false,
+        scaleDialogs: [],
+        openDialogs: []
+      };
+
+      el.header = "Dialog title";
+
+      el._dialogNode = el.template.querySelector(".vc-dialog-dialog");
+      el._headingNode = el.template.querySelector(".vc-dialog-heading");
+      el._contentNode = el.template.querySelector(".vc-dialog-content");
+      el._footerNode = el.template.querySelector(".vc-dialog-footer");
+      el._buttonsFooterNode = el.template.querySelector(".vc-dialog-buttonsFooter");
+      el._closeNode = el.template.querySelector(".vc-dialog-close");
+
+      el._userFooterNode = el.source.querySelector("[type='footer']");
+      el._userContentNode = el.source.querySelector("[type='content']");
+    },
+
+    onInit: function () {
+      var el = this;
+      
+      (vcomet.util.isTrue(el.modal)) ? el._dialogModal() : null;
+
+      // Initialize scale separation
+      el.scaleBreak = parseInt(el.scaleBreak);
+
+      el.multiposition = (el.multiposition == "scaled" && vcomet.util.isTrue(el.modal)) ? "centered" : el.multiposition;
+
+      // Moving the dialog on the same level as the body
+      document.body.appendChild(el);
+    },
+
+    onRender: function () {
+      var el = this;
+
+      // Call method to add dialog heading and its features
+      el._addHeadingHeading(el.heading);
+      // Call method to add dialog content
+      el._addContent(el._userContentNode);
+      // Call method to add dialog footer and its features
+      el._addFooter(el._userFooterNode);
+
+    },
+
+    onWindowResize: function (event) {
+      var el = this;
+
+      // Only when dialog is open
+      if (el._dialogNode.classList.contains("vc-dialog-open")) {
+        var heightComprobation = (el.responsiveRatio == "true" && (el.getAttribute("version") == "tablet" || el.getAttribute("version") == "mobile"));
+        var scaleComprobation = (!el._dialogNode.hasAttribute("scale") && el.modal != "true" && el.multiposition != "centered" && el.getAttribute("version") !== "tablet" && el.getAttribute("version") !== "mobile");
+
+        el._verifyScreenResolution();
+        heightComprobation ? el._adaptDialogHeight() : null;
+        //When resizing the window, is necessary check if has the desktop view
+        // to give to the dialog its scale position
+        scaleComprobation ? el._initializeScalePosition() : null;
+        (!el.classList.contains("vc-dialog-moved")) ? el._dialogPositioner() : null;
+        // Center the dialog when resizing the window.
+        el._handleDialogResizePosition();
+
+      }
+
+    },
+
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case "drag":
+          (this.getAttribute("version") !== "tablet" && this.getAttribute("version") !== "mobile") ? this._addDragListeners() : null;
+          break;
+
+        case "modal":
+          this._dialogModal();
+          break;
+      }
+    }
+  });
+
+</script>

@@ -1,0 +1,229 @@
+<template>
+  <input class="vc-checkbox-checkbox" type="checkbox">
+  <label class="vc-checkbox-label unselectable">
+    <div class="labelText"></div>
+  </label>
+</template>
+
+<script>
+  vcomet.element("vc-checkbox", {
+
+    themed: true,
+
+    properties: {
+      /*
+        @property {String} name 
+        @description Checkbox name
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} value 
+        @description Checkbox value
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} label 
+        @description Checkbox label
+      */
+      label: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} disable 
+        @description Checkbox desactivation
+        Values can be: true or false
+        Default: false
+      */
+      disable: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} checked 
+        @description Checkbox checked status
+        Values can be: true or false
+        Default: false
+      */
+      checked: {
+        value: false,
+        reflect: true
+      }
+    },
+
+    privateProperties: {
+      /*
+        @property (private) {String} _formelement 
+        @description Set that  checkbox is a form element
+        Value: checkbox
+      */
+      formelement: {
+        value: "checkbox"
+      },
+      /*
+        @property (private) {Object} _checkboxNode 
+        @description Store checkbox input node
+      */
+      checkboxNode: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _labelNode 
+        @description Store checkbox label node
+      */
+      labelNode: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _spanNode 
+        @description Store checkbox span node
+      */
+      spanNode: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _currentvalue
+        @description Current checkbox value
+     */
+      currentvalue: {
+        value: ""
+      }
+    },
+
+    functions: {
+      /*
+        @function setValue
+        @description Set new checkbox value
+        @param {String} newVal [New checkbox value]
+      */
+      setValue: function (newVal) {
+
+        this.value = newVal;
+        this._currentvalue = newVal;
+        vcomet.triggerCallback("onChange", this);
+
+      }
+    },
+
+    privateFunctions: {
+      /*
+        @function (private) _updateDisable
+        @description Update disable status
+        @param {String} newVal [New value of disabled]
+      */
+      updateDisable: function (newVal) {
+        var el = this;
+
+        if (!vcomet.util.isTrue(newVal)) {
+          el._checkboxNode.removeAttribute("disabled");
+
+          // For Edge bug (not solved yet) that when enable o diable an input dynamically,
+          // it is not automatically associated with the corresponding css,
+          // so is necessary to add a css property to activate the process
+          el._labelNode.style.visibility = (navigator.userAgent.indexOf("Edge") != -1) ? "inherit" : el._labelNode.style.visibility;
+          el._spanNode.style.visibility = (navigator.userAgent.indexOf("Edge") != -1) ? "inherit" : el._spanNode.style.visibility;
+
+        } else {
+          el._checkboxNode.setAttribute("disabled", "true");
+
+          el._labelNode.style.visibility = (navigator.userAgent.indexOf("Edge") != -1) ? "visible" : el._labelNode.style.visibility;
+          el._spanNode.style.visibility = (navigator.userAgent.indexOf("Edge") != -1) ? "visible" : el._spanNode.style.visibility;
+
+        }
+      },
+
+      /* 
+        @function (private) _updateCheck
+        @description Update checked status
+        @param {String} newVal [New value of checked]
+      */
+      updateCheck: function (newVal) {
+        var el = this;
+
+        if (!vcomet.util.isTrue(newVal)) {
+          el._checkboxNode.checked = false;
+          el._checkboxNode.removeAttribute("checked");
+          el._checkboxNode.classList.remove("vc-checkbox-checked");
+          vcomet.triggerCallback("onUncheck", el);
+
+        } else {
+          el._checkboxNode.checked = true;
+          el._checkboxNode.setAttribute("checked", "true");
+          // Required for set style correctly when checkbox is checked and disabled
+          el._checkboxNode.classList.add("vc-checkbox-checked");
+          vcomet.triggerCallback("onCheck", el);
+
+        }
+
+      },
+
+
+    },
+
+    onCreated: function () {
+      vcomet.createCallback("onChange", this);
+      vcomet.createCallback("onCheck", this);
+      vcomet.createCallback("onUncheck", this);
+    },
+
+    onRender: function () {
+      var el = this;
+      el._checkboxNode = el.querySelector(".vc-checkbox-checkbox");
+      el._labelNode = el.querySelector(".vc-checkbox-label");
+      var labelText = el.querySelector(".labelText");
+      var span = document.createElement("span");
+      el._spanNode = span;
+
+      if (!el.name) {
+        el.name = "";
+      }
+
+      el._labelNode.insertBefore(el._spanNode, el._labelNode.firstChild);
+      el._checkboxNode.setAttribute("name", el.name);
+      el._checkboxNode.setAttribute("value", el.value);
+      el._checkboxNode.setAttribute("id", el.value);
+      el._labelNode.setAttribute("for", el.value);
+      el._spanNode.classList.add("checkboxSpan");
+      el._currentvalue = el.value;
+
+      el.querySelector(".labelText").innerHTML = el.label;
+
+
+      // Checking or unchecking the checkbox
+      el.addEventListener("click", function (e) {
+        // The click event is triggered by two elements, the real input and the
+        // visual custom element. So it is necessary to control one of the two elements
+        // fot not activate the action twice.
+        if (!vcomet.util.isTrue(el.disable) && e.target.type !== "checkbox") {
+          el.checked = vcomet.util.isTrue(el.checked) ? false : true;
+        }
+
+      }, false);
+
+      el._updateDisable(el.disable);
+      el._updateCheck(el.checked);
+
+    },
+
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case "disable":
+          this._updateDisable(newVal);
+          break;
+        case "checked":
+          this._updateCheck(newVal);
+          break;
+        case "label":
+          this.querySelector(".labelText").innerHTML = newVal;
+          break;
+      }
+    }
+  });
+
+</script>
