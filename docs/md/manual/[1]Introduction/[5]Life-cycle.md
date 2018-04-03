@@ -34,3 +34,5 @@ Recurrent events might be triggered more than once:
 
 - **onAttributeChanged** - Triggers each time an attribute is changed.
 
+- **onDataChanged** - Triggers each time data property is changed.
+
