@@ -10,16 +10,39 @@
         min-height: 300px;
         box-sizing: border-box;
     }
-
+    vc-editor vc-loading{
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        box-sizing: border-box;
+    }
+    #vc-editor-loading {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        box-sizing: border-box;
+        background-color:red;
+    }
     .editor-container {
         height: calc(100% - 35px);
+    }
+
+    
+    vc-tabs .tabContent span {
+        font-family: Consolas, "Courier New", monospace !important;
+        font-size: 14px !important;
+    }
+
+    .vc-editor-until-render{
+        display:none;
     }
 </style>
 
 <template>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <div id="vc-editor-content"></div>
+    <vc-loading></vc-loading>
+    <div id="vc-editor-content" class="vc-editor-until-render"></div>
 </template>
 
 <script>
@@ -92,16 +115,28 @@
                     // Ugly solution to know when monaco is ready because there is not an onReady function implemented yet
                     var didScrollChangeDisposable = el._refs.editor.onDidScrollChange(function (
                         event) {
-                        didScrollChangeDisposable.dispose();                        
-                        vcomet.triggerCallback("onEditorReady", el, el, [el]);
+                        didScrollChangeDisposable.dispose(); 
+                        el._show();                       
+                        vcomet.triggerCallback("oneditorready", el, el, [el]);
+                    });
+                    
+                    el._refs.editor.model.onDidChangeContent((event) => {   
+                        vcomet.triggerCallback("onchange", el, el, [el]);
                     });
                 });
+            },
+            // @function show (private) [Hides loading mask and shows editor]
+            show: function(){
+                var el = this;
+                el.querySelector("#vc-editor-content").classList.remove("vc-editor-until-render");
+                el.querySelector("vc-loading").hide();
             }
         },
 
         onCreated: function () {
             // Custom callback to know when monaco editor is ready to be used
-            vcomet.createCallback("onEditorReady", this);
+            vcomet.createCallback("oneditorready", this);
+            vcomet.createCallback("onchange", this);
         },
 
         onReady: function () {

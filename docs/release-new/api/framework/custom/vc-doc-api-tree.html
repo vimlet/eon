@@ -195,6 +195,25 @@
                 value: {
                     folderNodeOrderRegex: new RegExp("\\[\\d+\\]", "gm")
                 }
+            },
+            regex: {
+                value: {
+                    treeLink: new RegExp(
+                        "^\\[(?:(?!\\[)[\\s\\S])+\\]<(?:(?!<)[\\s\\S])*>(\\r\\n|\\r|\\n){1}",
+                        "gm"
+                    ),
+                    inner: new RegExp(
+                        "\\[.*\\]",
+                        "gm"
+                    ),
+                    optionalTitle: new RegExp(
+                        "<.*>",
+                        "gm"
+                    )
+                }
+            },
+            waitUntilTreeSetUp: {
+                value: 0
             }
         },
 
@@ -242,11 +261,17 @@
                     }
                 });
             },
-            // @function loadDocument (public) [Load document from path and open in content window] @param path @param namePath [Name to show in the url]
-            loadDocument: function (path, namePath) {
+            // @function loadDocument (public) [Load document from path and open in content window] @param path @param namePath [Name to show in the url] @param-optional link [Tree node maybe a link to a markdown document]
+            loadDocument: function (path, namePath, link) {
                 var el = this;
-                el._urlOpenView(namePath);
-                el.setContent(el.src + decodeURIComponent(path));
+                if (!el._misc.openedDocument || el._misc.openedDocument != namePath) {
+                    el._urlOpenView(namePath);
+                    el.setContent(el.src + decodeURIComponent(path));
+                }
+                if (link) {
+                    el._goTo("treeLink" + link);
+                }
+                el._misc.openedDocument = namePath;
                 el.closeMobileTree();
             },
             // @function openMobileTree (public) [Shows mobile menu]
@@ -294,6 +319,12 @@
 
                 customCss.innerHTML = fullcss;
                 document.body.appendChild(customCss);
+            }, // @function goTo (public) [Scroll to id position] @param element @param id
+            goTo(id) {
+                var scroll = this.querySelector("vc-doc-article").querySelector("vc-scroll");                
+                scroll.scrollTo(0);
+                scroll.scrollTo(document.querySelector("#" + id).getBoundingClientRect()
+                    .top - 100);
             },
             // @function setTreeIcons (private) [Configure icons to be shown at tree]
             setTreeIcons: function () {
@@ -350,7 +381,7 @@
                 el._refs.tree.onNodeSelected(function () {
                     if (el._refs.tree.selectedNode.type != "directory") {
                         el.loadDocument(el._refs.tree.selectedNode.realPath, el._refs.tree.selectedNode
-                            .namePath);
+                            .namePath, el._refs.tree.selectedNode.link);
                     }
                 });
             },
@@ -366,8 +397,8 @@
                 node.namePath = el._sanitizeUrl(node.namePath);
                 return node;
             },
-            // @function addSortedFiles (private) [Add files sorted manually to the tree] @param tNode @param fragment
-            addSortedFiles: function (tNode, fragment) {
+            // @function addSortedFiles (private) [Add files sorted manually to the tree] @param tNode
+            addSortedFiles: function (tNode) {
                 var el = this;
                 var pathWithoutFile = tNode.path.substring(0, tNode.path.lastIndexOf("/"));
 
@@ -391,7 +422,7 @@
                                 currentElm.type = "directory";
                                 currentPath = el._removeEntries(currentPath);
                                 currentElm.path = currentPath;
-                                fragment.appendChild(currentElm);
+                                el._refs.treeFragment.appendChild(currentElm);
                             }
                         }
                     }
@@ -401,13 +432,14 @@
             // @function addTreeNodes (private) {element} [Fullfil tree with nodes] @param data
             addTreeNodes: function (data) {
                 var el = this;
-                var fragment = document.createDocumentFragment();
+                el._refs.treeFragment = document.createDocumentFragment();
+                el._waitUntilTreeSetUp = data.files.length;
                 data.files.forEach(function (tNode) {
                     elm = document.createElement("vc-treenode");
 
                     tNode = el._sanitizeNode(tNode);
 
-                    el._addSortedFiles(tNode, fragment);
+                    el._addSortedFiles(tNode);
 
                     //Set node order and replace name[order]
                     var nodeOrderRegex = new RegExp("^\\[\\d+\\]", "gm");
@@ -418,27 +450,98 @@
                         tNode.name = tNode.name.replace(nodeOrderRegex, ""); // Remove order from tree node name
                     }
 
-                    // Set node data         
-                    var realPath = tNode.path;
-                    var cleanPath = tNode.path.replace(el._misc.folderNodeOrderRegex, "");
-                    cleanPath = el._removeEntries(cleanPath);
-                    elm.name = tNode.name;
-                    elm.path = cleanPath; // Without [sort]
-                    elm.realPath = realPath; // Real path with [sort] to find files at disk
+                    el._setTreeNodeLinks(tNode);
+                    tNode = el._toggleNodeExtension(tNode);
+
+                    elm = el._setNodeData(tNode, elm);
 
                     elm.namePath = tNode.namePath.replace(el._misc.folderNodeOrderRegex, ""); // Name path to show at url
-                    elm.type = "file";
                     el._misc.firstElem = el._misc.firstElem || elm;
-                    fragment.appendChild(elm);
+                    el._refs.treeFragment.appendChild(elm);
                 });
-                return fragment;
+                //    return el._refs.treeFragment;
+            },
+            // @function setNodeData (private) [Set node path, name and real path] @param tNode @description Node data @param elm [Current tree node]
+            setNodeData: function (tNode, elm) {
+                var el = this;
+                // Set node data         
+                var realPath = tNode.path;
+                var cleanPath = tNode.path.replace(el._misc.folderNodeOrderRegex, "");
+                cleanPath = el._removeEntries(cleanPath);
+                elm.name = tNode.name;
+                elm.path = cleanPath; // Without [sort]
+                elm.realPath = realPath; // Real path with [sort] to find files at disk
+                elm.type = "file";
+                return elm;
+            },
+            // @function setTreeNodeLinks (private) [Set treenodes for document links] @param tNode
+            setTreeNodeLinks: function (tNode) {
+                var el = this;
+                var extIndex = tNode.name.lastIndexOf(".");
+                var ext = tNode.name.substring(extIndex + 1);
+                if (ext === "md") {
+                    el._getRequest(el.src + tNode.path, function (data) {
+                        var matches = data.match(el._regex.treeLink);
+                        var parsedResult = [];
+                        if (matches) {
+                            for (var i = 0; i < matches.length; i++) {
+                                var inner = el._getInner(matches[i]);
+                                var optionalTitle = el._getOptionalTitle(matches[i]);
+                                var linkSubDir = optionalTitle || inner;
+                                var thisPath = tNode.name.substring(0, extIndex);
+                                thisPath += "/" + linkSubDir;
+                                elm = document.createElement("vc-treenode");
+                                elm = el._setNodeData(tNode, elm);
+                                elm.path = thisPath;
+                                elm.name = linkSubDir;
+                                elm.link = inner;
+                                el._refs.treeFragment.appendChild(elm);
+                                elm.namePath = tNode.namePath.replace(el._misc.folderNodeOrderRegex,
+                                    ""); // Name path to show at url
+                            }
+                        }
+                        el._setupTreeCallback();
+                    });
+                } else {
+                    el._setupTreeCallback();
+                }
+            },
+            // @function getInner (private) {string} [Get inner html from link tag] @param tag
+            getInner: function (tag) {
+                var el = this;
+                var matches = tag.match(el._regex.inner);
+                if (matches) {
+                    tag = el._cleanMatch(matches[0], "[", "]");
+                } else {
+                    tag = "";
+                }
+                return tag;
+            },
+            // @function getInner (private) {string} [Get optional title from link tag] @param tag
+            getOptionalTitle: function (tag) {
+                var el = this;
+                var matches = tag.match(el._regex.optionalTitle);
+                if (matches) {
+                    tag = el._cleanMatch(matches[0], "<", ">");
+                } else {
+                    tag = null;
+                }
+                return tag;
+            },
+            // @function toggleNodeExtension (private) [Toggle extensions at tree following config] @param tnode
+            toggleNodeExtension: function (tNode) {
+                var el = this;
+                if (el._treeData.config) {
+                    var extIndex = tNode.name.lastIndexOf(".");
+                    tNode.name = tNode.name.substring(0, extIndex);
+                }
+                return tNode;
             },
             // @function setupTree (private) @param data
             setupTree: function (data) {
                 var el = this;
                 this._treeData = data;
                 el._misc.folderAdded = []; // Store which folder I've added manually to avoid repetitions
-                var treeContainer = document.querySelector("#vc-doc-api-tree");
                 el._refs.tree = document.createElement("vc-tree");
                 el._refs.tree.setAttribute("icons", el._setTreeIcons());
                 el._setupCss();
@@ -446,9 +549,20 @@
                 el._misc.firstElem = null;
                 el._treeOnReady();
                 el._treeOnNodeSelected();
-                var fragment = el._addTreeNodes(data);
-                el._refs.tree.appendChild(fragment);
-                treeContainer.appendChild(el._refs.tree);
+                // var fragment = el._addTreeNodes(data);
+                el._addTreeNodes(data);
+                // el._refs.tree.appendChild(fragment);
+                // treeContainer.appendChild(el._refs.tree);
+            },
+            // @function setupTreeCallback (private) [Tree reads each file to look for links. Tree must be appended after all files have been parsed]
+            setupTreeCallback: function () {
+                var el = this;
+                var treeContainer = document.querySelector("#vc-doc-api-tree");
+                el._waitUntilTreeSetUp--;
+                if (el._waitUntilTreeSetUp <= 0) {
+                    el._refs.tree.appendChild(el._refs.treeFragment);
+                    treeContainer.appendChild(el._refs.tree);
+                }
             },
             // @function removeEntries (private) [Remove entries folder from path] @param path
             removeEntries: function (path) {
