@@ -29,7 +29,7 @@ vcomet.insertImport = function (href) {
     
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
-    console.log('href', href);
+
     vcomet.imports = vcomet.imports || {
         count: 0,
         total: 0,
