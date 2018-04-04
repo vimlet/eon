@@ -4321,7 +4321,6 @@ vcomet.declareCallbacks = function (el) {
     vcomet.createCallback("onRender", el, "ready");
     vcomet.createCallback("onBubbleRender", el, "ready");
     vcomet.createCallback("onReady", el, "ready");
-    vcomet.createCallback("onDataChanged", el);
     vcomet.createCallback("onPropertyChanged", el);
     vcomet.createCallback("onAttributeChanged", el);
     vcomet.createCallback("onDataChanged", el);

@@ -15,8 +15,7 @@
 
     </div>
 
-    <div class="vc-selector-dropdown bg2 bg2-boxshadow hidden">
-    </div>
+    <div class="vc-selector-dropdown bg2 bg2-boxshadow hidden"></div>
 
 </template>
 
@@ -58,10 +57,10 @@
                 reflect: true
             },
             /*
-            @property {string} name
-            @description Whether its going to act as a combobox or not
+            @property {string} filter
+            @description Whether the input will be enabled to filter the dropdown options
             */
-            editable: {
+            filter: {
                 value: "false",
                 reflect: true
             },
@@ -79,14 +78,6 @@
             */
             label: {
                 value: "",
-                reflect: true
-            },
-            /*
-            @property {string} mustmatch
-            @description whether the input must match the given options or not
-            */
-            mustmatch: {
-                value: "false",
                 reflect: true
             },
             /*
@@ -146,13 +137,32 @@
             @description Depending on user specifications we will prepare the element
             */
             setupType: function () {
-                
+
                 var el = this;
 
-                if (!vcomet.util.isTrue(el.editable)) {
-                    
+                if (!vcomet.util.isTrue(el.filter)) {
+
                     el._refs.main.classList.add("fg1-hoverable");
-                    el._refs.main.classList.add("unselectable");
+                    el._refs.main.querySelector("input").setAttribute("disabled", "disabled");
+
+                } else {
+
+                    el._refs.userInput.addEventListener("blur", function () {
+
+                        if (!el.isOnPath && !el._refs.dropDown.isOnPath) {
+                            var classListFunction = (!(el.getAttribute("value") != "") && el._refs.userInput.value != "") ? "add" : "remove";
+                            el.classList[classListFunction]("noMatches");
+                        }
+
+                    });
+
+                    el._refs.userInput.addEventListener("focus", function (e) {
+                        el.classList.remove("noMatches");
+                    });
+
+                    el._refs.userInput.addEventListener("keyup", function (e) {
+                        el._filterResults();
+                    });
 
                 }
 
@@ -164,8 +174,9 @@
             setupTriggers: function () {
 
                 var el = this;
+                var clickTarget = vcomet.util.isTrue(el.filter) ? el._refs.dropDownButton : el._refs.main;
 
-                el._refs.dropDownButton.addEventListener("click", function () {
+                clickTarget.addEventListener("click", function () {
                     el._toggleDropdown(el);
                 });
 
@@ -325,10 +336,11 @@
             @description Filters the items based on the user input
             @param {object} input [User input element]
             */
-            filterResults: function (input) {
+            filterResults: function () {
                 var el = this;
+
                 var items = el._refs.dropDown.querySelectorAll("vc-item");
-                var value = input.value.toLowerCase();
+                var value = el._refs.userInput.value.toLowerCase();
 
                 //If the input is empty we will hide the options and enable all the options to be active
                 if (value == "") {
@@ -338,6 +350,7 @@
                     }
 
                     var hiddenItems = el._refs.dropDown.querySelectorAll('[matches="false"]');
+
                     for (var i = 0; i < hiddenItems.length; i++) {
                         hiddenItems[i].setAttribute("matches", "true");
                         hiddenItems[i].classList.remove("hidden");
@@ -355,48 +368,42 @@
                     }
                     //Loop to find matches and hide those that do not match
                     for (var i = 0; i < items.length; i++) {
-                        if (!(items[i].innerText.toLowerCase().indexOf(value) > -1)) {
+
+                        if (!(items[i].getAttribute("display-value").toLowerCase().match("^" + value))) {
+
                             if (!items[i].classList.contains("hidden")) {
                                 items[i].classList.add("hidden");
                                 items[i].setAttribute("matches", "false");
                             }
+
                         } else {
+
                             if (items[i].classList.contains("hidden")) {
                                 items[i].classList.remove("hidden");
                                 items[i].setAttribute("matches", "true");
                             }
+
                         }
+
                     }
+
                 }
-                //Depending on the musmatch propertie we will show errors and change color ... o no :)
-                if (el.mustmatch == "true") {
 
-                    var matchedItems = el._refs.dropDown.querySelectorAll('[matches="true"]');
-                    var matchingError = el._refs.dropDown.querySelector(".matchingError");
+                var matchedItems = el._refs.dropDown.querySelectorAll('[matches="true"]');
+                var matchingError = el._refs.dropDown.querySelector(".vc-selector-matchingError");
 
-                    if (matchedItems.length == 0) {
+                if (matchedItems.length == 0) {
 
-                        if (!matchingError) {
+                    if (!matchingError) {
 
-                            matchingError = document.createElement("div");
-                            matchingError.classList.add("matchingError");
-                            matchingError.innerHTML = "No matches found";
-                            el._refs.dropDown.vcometScroll.content.appendChild(matchingError);
-                            
-                            el.classList.add("noMatches");
+                        matchingError = document.createElement("div");
+                        matchingError.classList.add("vc-selector-matchingError");
+                        matchingError.innerHTML = "No matches found";
+                        el._refs.dropDown.vcometScroll.content.appendChild(matchingError);
 
-                        }
-                    } else {
-
-                        if (matchingError) {
-
-                            matchingError.parentNode.removeChild(matchingError);
-                            el.classList.remove("noMatches");
-
-                        }
+                        el.classList.add("noMatches");
 
                     }
-
                 } else {
 
                     if (matchingError) {
@@ -405,8 +412,11 @@
                         el.classList.remove("noMatches");
 
                     }
-                    
+
                 }
+
+                el.setAttribute("value", "");
+                el.setAttribute("display-value", "");
 
             },
             /*
@@ -453,7 +463,7 @@
                 el.displayValue = displayValue ? displayValue : value;
                 el._refs.userInput.value = displayValue ? displayValue : value;
 
-                el._filterResults(el._refs.userInput)
+                el._filterResults()
 
             },
             /*
@@ -487,9 +497,11 @@
                 var displayValue = item.getAttribute("display-value");
 
                 el.setAttribute("value", value);
+                el.setAttribute("display-value", displayValue);
+
                 el.value = value;
                 el._refs.userInput.value = item.displayValue;
-
+                console.log('selected');
                 vcomet.triggerCallback("onSelected", el, el, [item]);
 
                 el.shrink();
@@ -503,12 +515,12 @@
 
                 var el = this;
 
-                el._refs.dropDown.style.top = el.offsetTop + el.offsetHeight + 2 + "px";
+                el._refs.dropDown.style.top = el.offsetTop + el.offsetHeight + 1 + "px";
                 el._refs.dropDown.style.left = el.offsetLeft + "px";
                 el._refs.dropDown.style.width = el.offsetWidth + "px";
 
                 document.body.appendChild(el._refs.dropDown);
-                
+
                 el._refs.dropDown.classList.remove("hidden");
                 el._refs.underline.classList.add("animate");
 
@@ -523,7 +535,7 @@
             shrink: function () {
 
                 var el = this;
-                
+
                 el._refs.dropDown.classList.add("hidden");
                 el._refs.underline.classList.remove("animate");
 
@@ -539,10 +551,18 @@
 
             el._setupRefs();
             el._setupScroll();
-            el._setupType();
+
             el._handleLabel();
 
             vcomet.createCallback("onSelected", el);
+
+        },
+
+        onInit: function () {
+
+            var el = this;
+
+            el._setupType();
 
         },
 
@@ -552,16 +572,13 @@
             var declarativePlaceholder = el.getAttribute("placeholder");
 
             vcomet.registerPathListener(el);
+            vcomet.registerPathListener(el._refs.dropDown);
 
             el._setupTriggers();
             el._setupItems();
             el._setupAnimations()
 
             if (declarativePlaceholder) el._refs.userInput.placeholder = declarativePlaceholder;
-
-            el._refs.userInput.addEventListener("keyup", function () {
-                el._filterResults(el._refs.userInput)
-            });
 
         }
     });
