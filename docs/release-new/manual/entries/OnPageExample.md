@@ -52,7 +52,7 @@ vComet imported components can be added **declarative** using html tags or **pro
 
 In order to be able to use vComet components, first they must be imported, since this operation is fully asynchronous its recommend to declare component imports on the `head` section. You may access the a wide library of components under the `ui` directory or any other custom element in a directory of your choice.
 
-```
+```[html]
 <!DOCTYPE html>
 <html>
 <head>
@@ -67,7 +67,7 @@ In order to be able to use vComet components, first they must be imported, since
 
 Although the import function can be called multiple times its recommend to follow the following array pattern.
 
-```
+```[html]
 <!DOCTYPE html>
 <html>
 <head>
@@ -88,7 +88,7 @@ Although the import function can be called multiple times its recommend to follo
 
 To use vComet components declaratively simply use their name tag as any other regular html element eg. `<div>, <span>, etc...`
 
-```
+```[html]
 <body>
 ...
 
@@ -103,7 +103,7 @@ To use vComet components declaratively simply use their name tag as any other re
 
 The programmatic approach is preferred when vComet components need to be added or modified on the fly, to achieve this simply create them using the vanilla DOM API.
 
-```
+```[html]
 <script>
   var button = document.createElement("vc-button");
   document.body.appendChild(button);
@@ -112,7 +112,7 @@ The programmatic approach is preferred when vComet components need to be added o
 
 Since imports are asynchronous vComet components properties and functions are declare dynamically and in order to ensure they are accessible we need use a `onCreated` callback.
 
-```
+```[html]
 <script>
   var button = document.createElement("vc-button");
   document.body.appendChild(button);
@@ -140,7 +140,7 @@ ui-custom/my-element.html
 
 2. Add `<template>` tag with the desired layout of your component, this is the default content of your vComent component
 
-```
+```[html]
 <template>
   Hello vComet!
 </template>
@@ -148,7 +148,7 @@ ui-custom/my-element.html
 
 3. Add `<script>` tag, this is where we will register the behaviour of our element by calling vcomet.element function.
 
-```
+```[html]
 <script>
   vcomet.element("my-element");
 </script>
@@ -156,7 +156,7 @@ ui-custom/my-element.html
 
 4. You can also add a `<style>` tag to the file but this is not mandatory specially since most of the style will be handled by the theming mechanism.
 
-```
+```[html]
 <style>
   my-element {
     color: blue;
@@ -167,7 +167,7 @@ ui-custom/my-element.html
 The resultant file `ui-custom/my-element.html` will look something like this:
 
 
-```
+```[html]
 <style>
   my-element {
     color: blue;
@@ -191,7 +191,7 @@ Now you can use your custom vComet component importing in a declaratively or pro
 Now we mastered the basics of vComet component creation, we can play with components configuration.
 When declaring a new component through `vcomet.element` function you can pass a config object as a second parameter, where properties and functions can be declared and callbacks to element life-cycle can be use to add additional behaviour.
 
-```
+```[html]
 <script>
   vcomet.element("my-element", {
 
@@ -269,7 +269,7 @@ In order to get started with interpolation we are going to explore a basic data 
 Let's create a basic element with interpolation:
 
 hello-world.html
-```
+```[html]
 <template>
   Hello {{@ name }}!
 </template>
@@ -288,7 +288,7 @@ Now when `<hellow-world></hellow-world>` is used the text 'Hello World' is displ
 
 Note that any change on `el.data.name` will immediately get reflected on the text, for example doing something like this:
 
-```
+```[javascript]
 var el = document.querySelector("hellow-world");
 el.data.name = "Vimlet";
 ```
@@ -304,7 +304,7 @@ Hello Vimlet!
 You can see there's an `@` after the interpolation open tags, this is a shorthand for bind(data) function.
 the same code could be written like so without the shorthand:
 
-```
+```[html]
 <template>
   Hello {{ bind("name"); }}!
 </template>
@@ -316,7 +316,7 @@ This is possible because vComet template engine treats interpolated code as plai
 
 The function echo(string) outputs text to the template, and it can be used with `=` shorthand.
 
-```
+```[html]
 <template>
   Hello {{ echo("I'm a text"); }}!
 </template>
@@ -324,7 +324,7 @@ The function echo(string) outputs text to the template, and it can be used with 
 
 or simply using its shorthand
 
-```
+```[html]
 <template>
   Hello {{@ "I'm a text" }}!
 </template>
@@ -340,7 +340,7 @@ Hello I'm a text!
 
 Since vComet template engine treats interpolated code as plain sanboxed javascript you can exploit it to your own advantage and create logic based content.
 
-```
+```[html]
 <template>  
   {{
       var text1 = "I'm text1";
@@ -374,7 +374,7 @@ Slotting aims to provide a simple solution to place any element inside its vCome
 
 For example, imagine we had simple container element named 'vc-container':
 
-```
+```[html]
 <template>
   <div class="vc-container-parent"></div>
 </template>
@@ -386,7 +386,7 @@ vcomet.element("vc-container");
 
 Once imported, in order to use it, we could do this:
 
-```
+```[html]
 <vc-container>
   <span>Hello</span>
 </vc-container>
@@ -395,7 +395,7 @@ Once imported, in order to use it, we could do this:
 This would display the element vc-container with a direct child span.
 Now lets say we want to place it inside the div with the class vc-container-parent instead. We can do so simply by using the `slot` attribute and a simple css selector.
 
-```
+```[html]
 <vc-container>
   <span slot=".vc-container-parent">Hello</span>
 </vc-container>
