@@ -37,13 +37,17 @@
         z-index: -1;
     }
 
-    vc-playground vc-gutter vc-editor{
-        margin-bottom:0px;
+    vc-playground vc-gutter vc-editor {
+        margin-bottom: 0px;
+    }
+
+    .vc-playground-until-render {
+        display: none;
     }
 </style>
 <template>
-    <div id="vc-playground-content"></div>
-
+    <vc-loading></vc-loading>
+    <div id="vc-playground-content" class="vc-playground-until-render"></div>
 </template>
 
 <script>
@@ -132,14 +136,14 @@
                 var bodySection = document.createElement("vc-section");
                 el._refs.html = {};
                 el._refs.html.head = document.createElement("vc-editor");
-                el._refs.html.head.onEditorReady(function (currentEditor) {
+                el._refs.html.head.oneditorready(function (currentEditor) {
                     el._editorsLoaded()
                 });
                 el._refs.html.head.value = el.head;
                 el._refs.html.head.language = "html";
                 el._refs.html.head.readonly = false;
                 el._refs.html.body = document.createElement("vc-editor");
-                el._refs.html.body.onEditorReady(function () {
+                el._refs.html.body.oneditorready(function () {
                     el._editorsLoaded();
                 });
                 el._refs.html.body.value = el.body;
@@ -155,13 +159,13 @@
                 return htmlTab;
             },
             // @function setJsTab (private) [Set up js tab editor]
-            setJsTab:function(){
+            setJsTab: function () {
                 var el = this;
                 var jsTab = document.createElement("vc-tab");
                 jsTab.name = "js";
                 jsTab.title = "Js";
                 el._refs.js = document.createElement("vc-editor");
-                el._refs.js.onEditorReady(function () {
+                el._refs.js.oneditorready(function () {
                     el._editorsLoaded();
                 });
                 el._refs.js.value = el.js;
@@ -171,13 +175,13 @@
                 return jsTab;
             },
             // @function setCssTab (private) [Set up css tab editor]
-            setCssTab:function(){
+            setCssTab: function () {
                 var el = this;
                 var cssTab = document.createElement("vc-tab");
                 cssTab.name = "css";
                 cssTab.title = "Css";
                 el._refs.css = document.createElement("vc-editor");
-                el._refs.css.onEditorReady(function () {
+                el._refs.css.oneditorready(function () {
                     el._editorsLoaded();
                 });
                 el._refs.css.value = el.css;
@@ -207,6 +211,7 @@
                 el._misc.editorsLoaded--;
                 if (el._misc.editorsLoaded === 0) {
                     el._showResult();
+                    el._show();
                 }
             },
             // @function refresh (private) [Update stored data to vc-editor]
@@ -240,6 +245,12 @@
                 iframeSrc += "<\/script>";
                 iframeSrc += "</body></html>";
                 return iframeSrc;
+            },
+            // @function show (private) [Hides loading mask and shows playground]
+            show: function(){
+                var el = this;
+                el.querySelector("#vc-playground-content").classList.remove("vc-playground-until-render");
+                el.querySelector("vc-loading").hide();
             }
         },
         functions: {

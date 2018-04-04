@@ -362,7 +362,7 @@
                 }
             },
             // @function goTo (public) [Scroll to id position] @param element @param id
-            goTo(element, id) { // Scroll to selected item in menu 
+            goTo(element, id) {
                 // Hide menu when clicked on an item
                 var parentDropdown = element.parentNode;
                 while (parentDropdown.getAttribute("type") != "dropdown") { // TODO Update with vcomet getParent
@@ -392,6 +392,29 @@
                 this._misc.apiContent = document.querySelector("#vc-doc-api-content");
                 this._misc.goToTop = document.querySelector("#vc-doc-api-goToTop");
             },
+            // @function createDiv (private) {html object} @param options
+            createDiv: function (options) {
+                var currentDiv = document.createElement("div");
+                if (options.class) {
+                    if (Array.isArray(options.class)) {
+                        options.class.forEach(function (cc) {
+                            currentDiv.classList.add(cc);
+                        });
+                    } else {
+                        currentDiv.classList.add(options.class);
+                    }
+                }
+                if (options.content) {
+                    currentDiv.appendChild(options.content);
+                }
+                if (options.innerText) {
+                    currentDiv.innerText = options.innerText;
+                }
+                if (options.id) {
+                    currentDiv.id = options.id;
+                }
+                return currentDiv;
+            },
             // @function scrollFunction (private) [vc-scroll onScrolled listener. Used to toggle go to top button]
             scrollFunction: function () {
                 if (this._misc.scroll._misc.vertical.position < 0) {
@@ -404,6 +427,7 @@
             },
             // @function setupData (private) [Set up document] @param data @param config
             setupData: function (data, config) {
+                var el = this;
                 //// Internal functions
                 var PRIVATE = "private";
                 var __hasPublicProperties = null;
@@ -569,7 +593,8 @@
                     if (hasPublicFunctions()) {
                         data.methods.forEach(function (method) {
                             if (!method.scope || method.scope != PRIVATE) {
-                                publicFunctionsDiv.innerHTML += printFunction(method);
+                               // publicFunctionsDiv.innerHTML += printFunction(method);
+                                publicFunctionsDiv.appendChild(printFunction(method));
                             }
                         });
                     }
@@ -581,7 +606,8 @@
                     if (hasPrivateFunctions()) {
                         data.methods.forEach(function (method) {
                             if (method.scope && method.scope === PRIVATE) {
-                                privateFunctionsDiv.innerHTML += printFunction(method, true);
+                               // privateFunctionsDiv.innerHTML += printFunction(method, true);
+                                privateFunctionsDiv.appendChild(printFunction(method, true));
                             }
                         });
                     }
@@ -589,95 +615,114 @@
 
                 // @function printFunction [Return function data as html string]
                 function printFunction(method, isPrivate) {
-                    var result = '<div class="vc-doc-api-functionDetail">';
-                    result += '<div class="vc-doc-api-t3">Details</div>';
+                    var fragment = document.createDocumentFragment();
+                    var result = el._createDiv({
+                        class: "vc-doc-api-functionDetail"
+                    });     
+                    var details = el._createDiv({
+                        class: "vc-doc-api-t3",
+                        innerText: "Details"
+                    });
+                    result.appendChild(details);
+                    var methodId = "";
                     if (isPrivate) {
-                        result += '<div class="vc-doc-api-t3 vc-doc-api-textColorFunction" id="funcpri' +
-                            method.name + '">';
+                        methodId = "funcpri" + method.name;
                     } else {
-                        result += '<div class="vc-doc-api-t3 vc-doc-api-textColorFunction" id="funcpub' +
-                            method.name + '">';
+                        methodId = "funcpub" + method.name;
                     }
-                    result += method.name;
+                    var fName = el._createDiv({
+                        class: ["vc-doc-api-t3", "vc-doc-api-textColorFunction"],
+                        id: methodId
+                    });
+                    var sName = document.createElement("span");
+                    sName.innerHTML = method.name + "(";
+                    fName.appendChild(sName);
                     if (method.params.length > 0) {
                         for (var methodParamI = 0; methodParamI < method.params.length; methodParamI++) {
-                            if (methodParamI === 0) {
-                                result += '(';
-                            }
-                            result += '<span class="vc-doc-api-textColorName">' + method.params[
-                                methodParamI].name;
+                            var currentParam = document.createElement("span");
+                            currentParam.classList.add("vc-doc-api-textColorName");
+                            currentParam.innerHTML = method.params[methodParamI].name;
                             if (method.params[methodParamI].optional) {
-                                result += '*';
+                                currentParam.innerHTML += '*';
                             }
-                            result += '</span>';
                             if (methodParamI < (method.params.length - 1)) {
-                                result += ', ';
-                            } else {
-                                result += ')';
+                                currentParam.innerHTML += ', ';
                             }
+                            fName.appendChild(currentParam);
                         }
-                    } else {
-                        result += '()';
                     }
-                    result += '</div>'; // textColorFunction div
+                    var sClose = document.createElement("span");
+                    sClose.innerHTML = ")";
+                    fName.appendChild(sClose);
+                    result.appendChild(fName);
                     if (method.description) {
-                        result += '<div>' + formatDescription(method.description) + '</div>';
+                        var desc = el._createDiv({
+                            innerText: formatDescription(method.description)
+                        }); // TODO Format description as innertext, better append
+                        result.appendChild(desc);
                     }
                     if (method.params.length > 0) {
-                        var table =
-                            '<vc-doc-table columntitle="Parameter, Type, Description" columnwidth="200px ,200px ,calc(100% - 400px)">';
+                        var table = document.createElement("vc-doc-table");
+                        table.columntitle = "Parameter, Type, Description";
+                        table.columnwidth = "200px ,200px ,calc(100% - 400px)";
                         var params = getParams(method);
                         params.forEach(function (param) {
-                            table += '<vc-row>'
+                            var row = document.createElement("vc-row");
                             param.forEach(function (paramCell) {
-                                table += '<vc-cell>' + paramCell + '</vc-cell>';
+                                var cell = document.createElement("vc-cell");
+                                cell.innerHTML = paramCell;
+                                row.appendChild(cell);
                             });
-                            table += '</vc-row>';
+                            table.appendChild(row);
                         });
-                        table += '</vc-doc-table>';
-                        result += table;
+                        result.appendChild(table);
                     }
                     if (method.return) {
-                        var table =
-                            '<vc-doc-table columntitle="Return, Description" columnwidth="200px ,calc(100% - 200px)">';
+                        var table = document.createElement("vc-doc-table");
+                        table.columntitle = "Return, Description";
+                        table.columnwidth = "200px ,calc(100% - 200px)";
                         var methodReturn = getReturn(method);
-                        table += '<vc-row>';
+                        var row = document.createElement("vc-row");
                         methodReturn.forEach(function (paramReturn) {
-                            table += '<vc-cell>' + paramReturn + '</vc-cell>';
+                            var cell = document.createElement("vc-cell");
+                            cell.innerHTML = paramReturn;
+                            row.appendChild(cell);
                         });
-                        table += '</vc-row>';
-                        table += '</vc-doc-table>';
-                        result += table;
+                        table.appendChild(row);
+                        result.appendChild(table);
                     } else {
                         if (config.__voidControl) {
-                            var table =
-                                '<vc-doc-table columntitle="Return, Description" columnwidth="200px ,calc(100% - 200px)">';
+                            var table = document.createElement("vc-doc-table");
+                            table.columntitle = "Return, Description";
+                            table.columnwidth = "200px ,calc(100% - 200px)";
                             var methodReturn = getReturn(method, true);
-                            table += '<vc-row>';
+                            var row = document.createElement("vc-row");
                             methodReturn.forEach(function (paramReturn) {
-                                result += '<vc-cell>' + paramReturn + '</vc-cell>';
+                                var cell = document.createElement("vc-cell");
+                                cell.innerHTML = paramReturn;
+                                row.appendChild(cell);
                             });
-                            table += '</vc-row>';
-                            table += '</vc-doc-table>';
-                            result += table;
+                            table.appendChild(row);
+                            result.appendChild(table);
                         }
                     }
                     if (method.exceptions.length > 0) {
-                        var table =
-                            '<vc-doc-table columntitle="Exception, Description" columnwidth="200px ,calc(100% - 200px)">';
+                        var table = document.createElement("vc-doc-table");
+                        table.columntitle = "Exception, Description";
+                        table.columnwidth = "200px ,calc(100% - 200px)";
                         var excepts = getExceptions(method);
                         excepts.forEach(function (except) {
-                            table += '<vc-row>';
+                            var row = document.createElement("vc-row");
                             except.forEach(function (exceptCell) {
-                                table += '<vc-cell>' + exceptCell + '</vc-cell>';
+                                var cell = document.createElement("vc-cell");
+                                cell.innerHTML = exceptCell;
+                                row.appendChild(cell);
                             });
-                            table += '</vc-row>';
+                            table.appendChild(row);
                         });
-                        table += '</vc-doc-table>';
-                        result += table;
+                        result.appendChild(table);
                     }
-                    result += '</div>'; // functionDetail div
-                    return result;
+                   return result;
                 }
 
 

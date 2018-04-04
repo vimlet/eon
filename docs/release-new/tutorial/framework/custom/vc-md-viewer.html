@@ -16,8 +16,8 @@
         height: 100%;
     }
 
-    vc-md-viewer > vc-scroll > .vc-scroll-content {
-         padding: 20px !important; 
+    vc-md-viewer>vc-scroll>.vc-scroll-content {
+        padding: 20px !important;
     }
 
     #vc-md-viewer-content {
@@ -87,8 +87,8 @@
         -webkit-padding-start: 40px;
     }
 
-    vc-md-viewer vc-video{
-        margin-bottom:20px;
+    vc-md-viewer vc-video {
+        margin-bottom: 20px;
     }
 </style>
 
@@ -112,9 +112,9 @@
                 value: "",
                 reflect: true
             },
-            head:{
-                value:"",
-                reflect:false
+            head: {
+                value: "",
+                reflect: false
             }
         },
 
@@ -126,6 +126,10 @@
                 value: {
                     link: new RegExp(
                         "\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])*\\).*",
+                        "gm"
+                    ),
+                    treeLink: new RegExp(
+                        "^\\[(?:(?!\\[)[\\s\\S])+\\]<(?:(?!<)[\\s\\S])*>(\\r\\n|\\r|\\n){1}",
                         "gm"
                     ),
                     image: new RegExp(
@@ -226,7 +230,8 @@
                         "g"
                     ),
                     br: new RegExp(
-                        "^\\s*(\\r\\n|\\r|\\n){1,}",
+                        // "^\\s*(\\r\\n|\\r|\\n){1,}",
+                        "^(\\r\\n|\\r|\\n)$",
                         "gm"
                     ),
                     table: new RegExp(
@@ -319,7 +324,7 @@
                     .replace(/\r\n|\r/g, '\n')
                     .replace(/\t/g, '    ')
                     .replace(/\u00a0/g, ' ')
-                    .replace(/\u2424/g, '\n');          
+                    .replace(/\u2424/g, '\n');
                 // Replace especial escaped characters
                 data = el._preparse(data);
                 data = el._replaceEscaped(data);
@@ -481,6 +486,29 @@
                 });
                 return result;
             },
+            // @function parseTreeLink (private) {string} [Remove tree links. This tag is used by vc-doc outside of vc-md-viewer scope] @param data {string}
+            parseTreeLink: function (data) {
+                var el = this;
+                var result = "";
+                var matches = data.match(el._regex.treeLink);
+                var parsedResult = [];
+
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var inner = el._getInner(matches[i]);
+                        var treeLink = el._createDiv(el._parseText(inner), "vc-md-viewer-t1");
+                        treeLink.id = "treeLink" + inner;
+                        parsedResult.push(treeLink);
+                    }
+                }                
+                var j = 0;
+                result = data.replace(el._regex.treeLink, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = parsedResult[j++];
+                    return "@@[" + count + "]@@\n";
+                });
+                return result;
+            },
             // @function getCode [Get code from vGround tag] (private) {string} @param tag {string} @param regex @param open [Open tag] @param close [Close tag]
             getCode: function (tag, regex, open, close) {
                 el = this;
@@ -503,10 +531,10 @@
                     var cleanHead = el._cleanMatch(headMatches[0], "<head>", "</head>");
                     result.head = cleanHead;
                     result.body = el._getBody(str);
-                } else {    // Without head, body may contains <body> tags, else the string without tags will be considered as body content
+                } else { // Without head, body may contains <body> tags, else the string without tags will be considered as body content
                     result.head = el.head || null;
                     result.body = el._getBody(str);
-                    if(!result.body){
+                    if (!result.body) {
                         result.body = str;
                     }
                 }
@@ -528,8 +556,8 @@
                 var js = el._getCode(tag, el._regex.playgroundJS, "[js]", "[/js]");
                 var css = el._getCode(tag, el._regex.playgroundCSS, "[css]", "[/css]");
                 var playground = document.createElement("vc-playground");
-                if(htmlSplit.head){
-                playground.head = htmlSplit.head;
+                if (htmlSplit.head) {
+                    playground.head = htmlSplit.head;
                 }
                 playground.body = htmlSplit.body;
                 playground.js = js;
@@ -560,11 +588,12 @@
             },
             // @function preparse (private) [Parse data before split lines or paragraphs. It is designed to parse full line tags]
             preparse: function (data) {
-                var el = this;     
-                data = el._parsePlayground(data);   
+                var el = this;
+                data = el._parseTreeLink(data);
+                data = el._parsePlayground(data);
                 data = el._parseCodeBlock(data);
                 data = el._parseCode(data); // Order mathers, code must be parsed first because its content must not be parsed    
-                data = el._parseBr(data);     
+                data = el._parseBr(data);
                 data = el._parseVideo(data);
                 data = el._parseImages(data); // Images must be parsed before links, structure is the same                
                 data = el._parseLinks(data);
@@ -669,11 +698,13 @@
 
                     var appended = false;
                     if (el._parseData.indented) {
-                        appended = el._appendIndented(el._createDiv(el._parseText(cleanParagraph), "vc-md-viewer-t" +
+                        appended = el._appendIndented(el._createDiv(el._parseText(cleanParagraph),
+                            "vc-md-viewer-t" +
                             counter));
                     }
                     if (!appended) {
-                        docFragment.appendChild(el._createDiv(el._parseText(cleanParagraph), "vc-md-viewer-t" +
+                        docFragment.appendChild(el._createDiv(el._parseText(cleanParagraph),
+                            "vc-md-viewer-t" +
                             counter));
                         el._cleanMultiParagraph(docFragment);
                     }
@@ -709,11 +740,12 @@
                 } else {
                     var appended = false;
                     if (el._parseData.indented) {
-                        appended = el._appendIndented(el._createDiv(
-                            el._parseText(paragraph)));
+                        //  appended = el._appendIndented(el._createDiv(el._parseText(paragraph)));   // TODO div for each line
+                        appended = el._appendIndented(el._parseText(paragraph));
                     }
                     if (!appended) {
-                        docFragment.appendChild(el._createDiv(el._parseText(paragraph)));
+                        //  docFragment.appendChild(el._createDiv(el._parseText(paragraph)));   // TODO div for each line
+                        docFragment.appendChild(el._parseText(paragraph));
                         el._cleanMultiParagraph(docFragment, null, el._parseData.indented);
                     }
                 }
@@ -786,6 +818,7 @@
             },
             // @function getInner (private) {string} [Get inner html from link tag] @param tag
             getInner: function (tag) {
+                var el = this;
                 var matches = tag.match(el._regex.inner);
                 if (matches) {
                     tag = el._cleanMatch(matches[0], "[", "]");
