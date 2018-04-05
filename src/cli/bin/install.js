@@ -11,8 +11,7 @@ var Sync = require("sync");
 var gh_owner = "vimlet";
 var gh_repo = "VimletComet";
 // var gh_credentials;
-var coreFileName = "vcomet-core.zip";
-var uiFileName = "vcomet-ui.zip";
+var vcometFileName;
 
 var vcometJsonObject = {};
 var actualPackages = {};
@@ -24,8 +23,6 @@ var localPath;
 var localVersionPath;
 var localCustomPath;
 var versionJsonObject = {};
-
-
 
 module.exports = function (result) {
 
@@ -115,12 +112,8 @@ function handleRemoteVersions(value, cb) {
             try {
                 var data = getLatestVcometRelease.sync(null);
 
-                if (!vcometJsonObject.core || vcometJsonObject.core == "latest") {
-                    vcometJsonObject.core = data;
-                }
-
-                if (!vcometJsonObject.ui || vcometJsonObject.ui == "latest") {
-                    vcometJsonObject.ui = data;
+                if (!vcometJsonObject.vcomet || vcometJsonObject.vcomet == "latest") {
+                    vcometJsonObject.vcomet = data;
                 }
 
             } catch (error) {
@@ -135,7 +128,7 @@ function handleRemoteVersions(value, cb) {
             singlePackageName = packageName;
             var packageVersion;
 
-            if (packageName == "core" || packageName == "ui") {
+            if (packageName == "vcomet") {
                 try {
                     var data = getLatestVcometRelease.sync(null);
                     packageVersion = valueArray.length == 2 ? valueArray[1] : data;
@@ -207,8 +200,9 @@ function handleLocalVersions(cb) {
     if (fs.existsSync(localVersionPath)) {
         try {
             versionJsonObject = JSON.parse(fs.readFileSync(localVersionPath).toString());
-            foundPackages.core = versionJsonObject.core;
-            foundPackages.ui = versionJsonObject.ui;
+            foundPackages.vcomet = versionJsonObject.vcomet;
+            // foundPackages.core = versionJsonObject.core;
+            // foundPackages.ui = versionJsonObject.ui;
         } catch (error) {
             cb("Unexpected syntax while reading version.json\n\n" + error);
         }
@@ -246,18 +240,15 @@ function installPackages(cb) {
         var summaryMessage = "";
 
         // Avoid checking things twice by using flags
-        var isCore = vcometJsonObject.core && actualPackages.core != vcometJsonObject.core;
-        var isUI = vcometJsonObject.ui && actualPackages.ui != vcometJsonObject.ui;
+        var isVcomet = vcometJsonObject.vcomet && actualPackages.vcomet != vcometJsonObject.vcomet;
+        // var isCore = vcometJsonObject.core && actualPackages.core != vcometJsonObject.core;
+        // var isUI = vcometJsonObject.ui && actualPackages.ui != vcometJsonObject.ui;
         var isSinglePackageDependency = singlePackageMode && (!(singlePackageName in actualPackages.dependencies) || actualPackages.dependencies[singlePackageName] != vcometJsonObject.dependencies[singlePackageName]);
         var isMultiplePackageDependency = !singlePackageMode && vcometJsonObject.dependencies;
 
         // Log install summary message
-        if (isCore) {
-            summaryMessage += formatSummaryMessage("core", actualPackages.core, vcometJsonObject.core);
-        }
-
-        if (isUI) {
-            summaryMessage += formatSummaryMessage("ui", actualPackages.ui, vcometJsonObject.ui);
+        if (isVcomet) {
+            summaryMessage += formatSummaryMessage("vcomet", actualPackages.vcomet, vcometJsonObject.vcomet);
         }
 
         if (isSinglePackageDependency) {
@@ -280,31 +271,20 @@ function installPackages(cb) {
             console.log('\nNothing to install\n');
         }
 
-        // Core
-        if (isCore) {
+        // vComet
+        if (isVcomet) {
 
             try {
-                var url = getGitHubDownloadURL.sync(null, coreFileName, vcometJsonObject.core);
-
-                cleanLocal("core");
-                downloadAndExtract.sync(null, url, localPath, vcometJsonObject.core);
-                updateVcometVersion("core", vcometJsonObject.core);
+                vcometFileName = "vcomet-" + vcometJsonObject.vcomet + ".zip";
+                var url = getGitHubDownloadURL.sync(null, vcometFileName, vcometJsonObject.vcomet);
+               
+                cleanLocal("vcomet");
+                downloadAndExtract.sync(null, url, localPath, vcometJsonObject.vcomet);
+                updateVcometVersion("vcomet", vcometJsonObject.vcomet);
             } catch (error) {
                 cb(error);
             }
 
-        }
-
-        // UI
-        if (isUI) {
-            try {
-                var url = getGitHubDownloadURL.sync(null, uiFileName, vcometJsonObject.core);
-                cleanLocal("ui");
-                downloadAndExtract.sync(null, url, localPath, vcometJsonObject.ui);
-                updateVcometVersion("ui", vcometJsonObject.ui);
-            } catch (error) {
-                cb(error);
-            }
         }
 
         if (isSinglePackageDependency) {
@@ -381,9 +361,9 @@ function cleanLocal(name) {
     if (fs.existsSync(localPath)) {
         var filePath;
 
-        if (name == "core") {
+        if (name == "vcomet") {
             fs.readdirSync(localPath).forEach(function (file) {
-                if (file != "custom" && file != "ui" && file != "version.json") {
+                if (file != "custom" && file != "version.json") {
                     filePath = path.join(localPath, file);
                     console.log("Removing: " + filePath);
                     // Using rimraf to avoid fs-extra not-empty errors
@@ -391,14 +371,6 @@ function cleanLocal(name) {
                     // fs.removeSync(filePath);   
                 }
             });
-        } else if (name === "ui") {
-            filePath = path.join(localPath, "ui");
-            if (fs.existsSync(filePath)) {
-                console.log("Removing: " + filePath);
-                // Using rimraf to avoid fs-extra not-empty errors
-                rimraf.sync(filePath);
-                // fs.removeSync(filePath);                
-            }
         } else {
             // Dependency
             filePath = path.join(localCustomPath, name);
@@ -417,11 +389,10 @@ function cleanLocal(name) {
 // Download and extract required packages
 function downloadAndExtract(file_url, extractPath, version, cb) {
     // Create local vcomet storage path
-    var downloadPath = path.join(os.homedir(), ".vcomet", version);
+    var downloadPath = path.join(os.homedir(), ".vcomet", "vcomet-" + version);
     var fileName = path.basename(url.parse(file_url).pathname);
     fs.mkdirsSync(downloadPath);
     var dest = path.join(downloadPath, fileName);
-
     // Check if already in local storage, if so extract only
     if (!fs.existsSync(dest)) {
         // Note: this is async
