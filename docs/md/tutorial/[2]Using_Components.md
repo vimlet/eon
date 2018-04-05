@@ -15,6 +15,8 @@ To create the To Do List we are going to use 4 components only:  `vc-text`, `vc-
 </script>
 ```
 
+Since we need to import multiple components we are passing an `Array` with their paths, but you can also pass a single `String` path if you only want to import one.
+
  ## Declare components
  We are going to declare components that will be loaded with the document, that is, those that are not created by the user interaction. In order to do this, we are going to use HTML tags, but with vComet nomenclature.
 
@@ -41,6 +43,8 @@ To create the To Do List we are going to use 4 components only:  `vc-text`, `vc-
     </div>
 </div>
 ```
+
+As you can see we have prepared a basic structure for our `To Do List` and we have included a scroll component that will let us scroll through
 
  ## Dynamic components
  Once the static components are declared, we establish dynamic functionality in order to add the list items.

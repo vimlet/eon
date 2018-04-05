@@ -4,7 +4,7 @@
   <div class="tabs unselectable">
 
     <div class="region">
-      <div id="tabs" class="wrapper"></div>
+      <div id="tabs" class="tabsWrapper"></div>
     </div>
 
     <div class="scrolls">
@@ -45,11 +45,19 @@
         value: {}
       },
       /*
-      @property (private) {object} _data
+      @property (private) {object} _misc
       @description Object with usefull information
       */
-      data: {
+      misc: {
         value: {}
+      },
+      /*
+      @property {object} _refs
+      @description Object with references to relevant element nodes
+      */
+      refs: {
+        value: {},
+        reflect: false
       }
     },
     properties: {
@@ -67,33 +75,45 @@
       @function (private) _setupScrolls
       @description Sets up the scrolls positions and its events
       */
-      setupScrolls: function () {
+      setupRefs: function () {
 
         var el = this;
 
-        var scrollsType = el.getAttribute("tabscroll");
-        var leftScroll = el.querySelector(".leftScroll");
-        var rightScroll = el.querySelector(".rightScroll");
-        var tabs = el.querySelector(".region");
+        el._refs.leftScroll = el.template.querySelector(".leftScroll");
+        el._refs.rightScroll = el.template.querySelector(".rightScroll");
 
-        leftScroll.onclick = function () {
+        el._refs.tabsRegion = el.template.querySelector(".region");
+        el._refs.tabsWrapper = el.template.querySelector(".tabsWrapper");
+        el._refs.tabsScrolls = el.template.querySelector(".scrolls");
+
+      },
+      /*
+      @function (private) _setupScrolls
+      @description Sets up the scrolls positions and its events
+      */
+      setupScrolls: function () {
+
+        var el = this;
+        var scrollsType = el.getAttribute("tabscroll");
+
+        el._refs.leftScroll.onclick = function () {
           el.scroll("left")
         };
-        rightScroll.onclick = function () {
+        el._refs.rightScroll.onclick = function () {
           el.scroll("right")
         };
 
         switch (scrollsType) {
           case "outer":
-            leftScroll.parentNode.insertBefore(leftScroll, tabs);
+            el._refs.leftScroll.parentNode.insertBefore(leftScroll, el._refs.tabsRegion);
             break;
           case "left":
-            leftScroll.parentNode.insertBefore(leftScroll, tabs);
-            rightScroll.parentNode.insertBefore(rightScroll, tabs);
+            el._refs.leftScroll.parentNode.insertBefore(leftScroll, el._refs.tabsRegion);
+            el._refs.rightScroll.parentNode.insertBefore(rightScroll, el._refs.tabsRegion);
             break;
           case "none":
-            leftScroll.style.display = "none";
-            rightScroll.style.display = "none";
+            el._refs.leftScroll.style.display = "none";
+            el._refs.rightScroll.style.display = "none";
             break;
           default:
 
@@ -117,10 +137,10 @@
           indicator.dataset.visible = "false";
           indicator.id = "dropIndicator";
 
-          el._data.dragging = {};
-          el._data.dragging.source = {};
-          el._data.dragging.target = {};
-          el._data.dragging.indicator = indicator;
+          el._misc.dragging = {};
+          el._misc.dragging.source = {};
+          el._misc.dragging.target = {};
+          el._misc.dragging.indicator = indicator;
 
           el.addEventListener('dragenter', function (e) {
             el._handleDragEnter(e, el);
@@ -138,32 +158,34 @@
         var el = this;
 
         var tabs = el.querySelector(".tabs");
-        var wrapper = tabs.querySelector(".wrapper");
-        var region = tabs.querySelector(".region");
-        var scrolls = tabs.querySelector(".scrolls");
         var dropArea = document.createElement("div");
 
         dropArea.classList.add("dropArea");
 
-        el._data.dragging.dropArea = dropArea;
+        el._misc.dragging.dropArea = dropArea;
 
         dropArea.addEventListener("dragover", function (e) {
           el._handleDragOver(e);
         });
 
-        wrapper.appendChild(dropArea);
+        el._refs.tabsWrapper.appendChild(dropArea);
 
-        vcomet.addResizeListener(wrapper, el.tagName + el.uid, function () {
-          if (wrapper.offsetWidth <= region.offsetWidth) {
-            scrolls.classList.remove("enabled");
-            wrapper.style.left = 0;
+        vcomet.addResizeListener(el._refs.tabsWrapper, el.tagName + el.uid, function () {
+
+          if (el._refs.tabsWrapper.offsetWidth <= el._refs.tabsRegion.offsetWidth) {
+
+            el._refs.tabsScroll.classList.remove("enabled");
+            el._refs.tabsScroll.style.left = 0;
+
           } else {
-            scrolls.classList.add("enabled");
+
+            el._refs.tabsScroll.classList.add("enabled");
+
           }
+
         });
 
         el.tabs = tabs;
-        el.tabs.wrapper = wrapper;
 
       },
       /*
@@ -192,12 +214,12 @@
 
         var el = this;
 
-        el._data.dragging.source = tab;
+        el._misc.dragging.source = tab;
 
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text', '');
 
-        el._data.isDragging = true;
+        el._misc.isDragging = true;
 
         if (e.dataTransfer.setDragImage) {
           e.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
@@ -210,7 +232,7 @@
       @param {object} e [event]
       */
       handleDragEnter: function (e) {
-        this._data.dragging.dropArea.style.visibility = "visible";
+        this._misc.dragging.dropArea.style.visibility = "visible";
       },
       /*
       @function (private) _handleDragOver
@@ -223,7 +245,7 @@
           e.preventDefault(); // Necessary. Allows us to drop.
         }
 
-        if (this._data.isDragging) {
+        if (this._misc.isDragging) {
 
           this._handleTabsDetection(e);
           e.dataTransfer.dropEffect = 'move';
@@ -245,19 +267,19 @@
           e.stopPropagation(); // Stops some browsers from redirecting.
         }
 
-        if (el._data.isDragging) {
+        if (el._misc.isDragging) {
 
-          var targetOrder = this._data.dragging.target.dataset.tabOrder;
+          var targetOrder = this._misc.dragging.target.dataset.tabOrder;
           var targetTab;
 
-          targetOrder = this._data.dragging.position === "left" ? parseInt(targetOrder) : parseInt(targetOrder) + 1;
+          targetOrder = this._misc.dragging.position === "left" ? parseInt(targetOrder) : parseInt(targetOrder) + 1;
           targetTab = this.tabs.wrapper.querySelector('vc-tab[data-tab-order="' + targetOrder + '"]');
 
-          el.tabs.wrapper.insertBefore(this._data.dragging.source, targetTab);
-          el._data.isDragging = false;
+          el._refs.tabsWrapper.insertBefore(this._misc.dragging.source, targetTab);
+          el._misc.isDragging = false;
 
-          el._data.dragging.dropArea.style.visibility = "hidden";
-          el._data.dragging.indicator.style.visibility = "hidden";
+          el._misc.dragging.dropArea.style.visibility = "hidden";
+          el._misc.dragging.indicator.style.visibility = "hidden";
 
           el._reorderTabs();
 
@@ -274,24 +296,24 @@
 
         var el = this;
 
-        var dropArea = el._data.dragging.dropArea;
-        var indicator = el._data.dragging.indicator;
-        var tabsLeft = el._data.dragging.dropArea.getBoundingClientRect().left;
-        var tabs = el.tabs.wrapper.querySelectorAll("vc-tab");
+        var dropArea = el._misc.dragging.dropArea;
+        var indicator = el._misc.dragging.indicator;
+        var tabsLeft = el._misc.dragging.dropArea.getBoundingClientRect().left;
+        var tabs = el._refs.tabsWrapper.querySelectorAll("vc-tab");
         var targetTabOrder, targetTab, targetTabRect, position, indicatorLeft;
 
-        el._data.dragging.target = el._data.dragging.target.nodeType ? el._data.dragging.target : document.createElement("div");
+        el._misc.dragging.target = el._misc.dragging.target.nodeType ? el._misc.dragging.target : document.createElement("div");
 
         targetTabOrder = Math.ceil((e.clientX - tabsLeft) / tabs[0].offsetWidth) - 1;
 
-        targetTab = el.tabs.wrapper.querySelector('vc-tab[data-tab-order="' + targetTabOrder + '"]');
+        targetTab = el._refs.tabsWrapper.querySelector('vc-tab[data-tab-order="' + targetTabOrder + '"]');
         targetTab = targetTab ? targetTab : tabs[tabs.length - 1];
 
         // Once we have our target tab we get and set all the info we need
         targetTabRect = targetTab.getBoundingClientRect();
         position = e.clientX < (targetTabRect.left + targetTabRect.width / 2) ? "left" : "right";
 
-        if ((el._data.dragging.target.isEqualNode(targetTab) && el._data.dragging.position != position) || !el._data.dragging.target.isEqualNode(targetTab)) {
+        if ((el._misc.dragging.target.isEqualNode(targetTab) && el._misc.dragging.position != position) || !el._misc.dragging.target.isEqualNode(targetTab)) {
 
           indicatorLeft = position == "right" ? targetTabRect.left + targetTabRect.width - indicator.offsetWidth / 2 : targetTabRect.left - indicator.offsetWidth / 2;
           indicatorLeft = indicatorLeft - tabsLeft;
@@ -303,8 +325,8 @@
             dropArea.appendChild(indicator);
           }
 
-          el._data.dragging.target = targetTab;
-          el._data.dragging.position = position;
+          el._misc.dragging.target = targetTab;
+          el._misc.dragging.position = position;
 
           this._reorderTabs();
 
@@ -384,7 +406,7 @@
         tab.setAttribute("name", name);
         tab.setAttribute("title", title);
 
-        el.tabs.wrapper.appendChild(tab);
+        el._refs.tabsWrapper.appendChild(tab);
       },
       //This functions captures the click of the tab, unselects the current tab and then selects the one we clicked
       /*
@@ -474,12 +496,12 @@
         var scrollConstant = 150;
 
         var tabsRegion = el.tabs.querySelector(".region");
-        var tabsWrapperLeft = el.tabs.wrapper.style.left ? parseInt(el.tabs.wrapper.style.left) : 0;
-        var scrollableAmount = el.tabs.wrapper.offsetWidth - tabsRegion.offsetWidth;
-        var tabWidth = el.tabs.wrapper.querySelector("vc-tab").offsetWidth;
+        var tabsWrapperLeft = el._refs.tabsWrapper.style.left ? parseInt(el._refs.tabsWrapper.style.left) : 0;
+        var scrollableAmount = el._refs.tabsWrapper.offsetWidth - tabsRegion.offsetWidth;
+        var tabWidth = el._refs.tabsWrapper.querySelector("vc-tab").offsetWidth;
         var rightProgress, halfwayTab, advanceNeeded, finalLeft;
 
-        if (el.tabs.wrapper.offsetWidth > tabsRegion.offsetWidth) {
+        if (el._refs.tabsWrapper.offsetWidth > tabsRegion.offsetWidth) {
 
           if (direction == "right") {
 
@@ -503,7 +525,7 @@
 
           }
 
-          el.tabs.wrapper.style.left = finalLeft + "px";
+          el._refs.tabsWrapper.style.left = finalLeft + "px";
 
         }
 
@@ -529,7 +551,8 @@
       for (var i = 0; i < elementTabs.length; i++) {
 
         tab = elementTabs[i];
-        el.tabs.wrapper.appendChild(tab);
+        el._refs.tabsWrapper.appendChild(tab);
+        
       }
 
     }
