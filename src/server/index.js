@@ -12,15 +12,15 @@ appDoc.use(express.static(path.join(__dirname, "../../docs/release-new")));
 rest.setup(app, bodyParser);
 
 // Main server
-var server = app.listen(8081, function() {
-  var host = server.address().address;
-  var port = server.address().port;
+var serverMain = app.listen(8081, function() {
+  var host = serverMain.address().address;
+  var port = serverMain.address().port;
   console.log("Main server listening at http://localhost:" + port);
 });
 
 // Doc server
-var server = appDoc.listen(8090, function() {
-  var host = server.address().address;
-  var port = server.address().port;
+var serverDoc = appDoc.listen(8090, function() {
+  var host = serverDoc.address().address;
+  var port = serverDoc.address().port;
   console.log("Documentation server listening at http://localhost:" + port);
 });
