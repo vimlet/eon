@@ -13,6 +13,10 @@
 
 <script type="text/javascript">
   vcomet.element("vc-headerpanel", "vc-headerpanel.css", {
+    dependencies: [
+      "../vc-scroll/vc-scroll"
+    ],
+
     properties: {
       // ** MANUAL: Content top could be shadowed emulating header overlapping
       /*
@@ -49,7 +53,7 @@
         @property {String} headerHeight
         @description Header default height
       */
-      headerHeight:{
+      headerHeight: {
         value: "50px",
         reflect: true
       },
@@ -57,7 +61,7 @@
         @property {String} headerTallHeight
         @description Growing header maximum height
       */
-      headerTallHeight:{
+      headerTallHeight: {
         value: "100px",
         reflect: true
       },
@@ -65,7 +69,7 @@
         @property {String} headerClass
         @description Header CSS class name
       */
-      headerClass:{
+      headerClass: {
         value: "",
         reflect: true
       },
@@ -82,7 +86,7 @@
         @description Weather or not a floating action button must be displayed
         Value: (function name), (other: default behaviour)
       */
-      actionButton:{
+      actionButton: {
         value: "", // function (click behaviour), other: default behaviour
         reflect: true
       },
@@ -90,7 +94,7 @@
         @property {String} actionButtonClass
         @description Action button CSS class name
       */
-      actionButtonClass:{
+      actionButtonClass: {
         value: "",
         reflect: true
       },
@@ -99,7 +103,7 @@
         @description Weather or not a close button must be displayed
         Value: (function name), (other: delete panel)
       */
-      closeButton:{
+      closeButton: {
         value: "",
         reflect: true
       },
@@ -108,17 +112,17 @@
         @description  Close button CSS class name
         Value: (function name), (other: delete panel)
       */
-      closeButtonClass:{
+      closeButtonClass: {
         value: "",
         reflect: true
       }
     },
-    privateFunctions:{
+    privateFunctions: {
       /*
         @function (private) _importContent
         @description Move panel content to the new panel structure
       */
-      importContent: function(){
+      importContent: function () {
         var el = this;
         // Get panel elements
         var documentFragment = document.createDocumentFragment();
@@ -137,10 +141,10 @@
         @function (private) _setPanelStyle
         @description Set panel main style
       */
-      setPanelStyle: function(){
+      setPanelStyle: function () {
         var el = this;
         // Configure panel buttons functionality and styling
-        if(el.panelClass){
+        if (el.panelClass) {
           el.classList.add(el.panelClass);
         }
       },
@@ -148,7 +152,7 @@
         @function (private) _setUpButtons
         @description Initialize panel buttons
       */
-      setUpButtons: function(){
+      setUpButtons: function () {
         var el = this;
         // Configure panel buttons functionality and styling
         el._configurePanelButton("actionButton");
@@ -159,17 +163,17 @@
         @description Display and configure panel button
         @param {String} btnType [Panel button type]
       */
-      configurePanelButton: function(btnType){
+      configurePanelButton: function (btnType) {
         var el = this;
         var btn = el.querySelector(".vc-headerpanel-" + btnType);
         btn.classList.add("unselectable");
         var btnFn = el[btnType];
         // Display button
-        if(btnFn){
+        if (btnFn) {
           // Button functionality
           el._createBtnListener(btn, "click", btnFn);
           // Add new fixed button color class to fixed button element
-          if(el[btnType + "Class"]){
+          if (el[btnType + "Class"]) {
             btn.classList.add(el[btnType + "Class"]);
           }
           // Display button
@@ -183,9 +187,9 @@
         @param {String} eventName [Listener target event]
         @param {Function} callback [Triggered event function]
       */
-      createBtnListener: function(btn, eventName, callback){
+      createBtnListener: function (btn, eventName, callback) {
         var el = this;
-        btn.addEventListener(eventName, function(){
+        btn.addEventListener(eventName, function () {
           try {
             // Execute button function
             eval(callback);
@@ -198,11 +202,11 @@
         @function (private) _displayHeader
         @description Display and configure header
       */
-      displayHeader: function(){
+      displayHeader: function () {
         var el = this;
         var header = el.querySelector(".vc-headerpanel-header");
         // Display header
-        if(el.headerContent){
+        if (el.headerContent) {
           header.style.display = "block";
           header.innerHTML = el.headerContent;
           // Set header dimensions
@@ -215,16 +219,16 @@
         @param {String} height [Standard header height]
         @param {String} tall [Grown header height]
       */
-      setHeaderDimensions: function(height, tall){
+      setHeaderDimensions: function (height, tall) {
         var el = this;
         var header = el.querySelector(".vc-headerpanel-header");
         // Add new header class to header element
         header.classList.add(".vc-headerpanel-header");
-        if(height){
+        if (height) {
           // Update header height
           header.style.height = height;
         }
-        if(el.header == "grow"){
+        if (el.header == "grow") {
           // Update header height
           header.style.height = tall;
         }
@@ -233,12 +237,12 @@
         @function (private) _setHeader
         @description Set header style
       */
-      setHeader: function(){
+      setHeader: function () {
         var el = this;
         var header = el.querySelector(".vc-headerpanel-header");
         header.classList.add("unselectable");
         // Check if css rules already exist
-        if(el.headerClass){
+        if (el.headerClass) {
           header.classList.add(el.headerClass);
         }
       },
@@ -247,20 +251,20 @@
         @description Create or remove scroll listener for growing header functionality
         @param {Boolean} remove [Whether or not listener should be removed]
       */
-      configureGrowingHeader: function(remove){
+      configureGrowingHeader: function (remove) {
         var el = this;
 
         // Monitor growing header for growing header type
-        if(el.header == "grow"){
+        if (el.header == "grow") {
           var header = el.querySelector(".vc-headerpanel-header");
           var content = el.querySelector(".vc-headerpanel-content");
           var mainContent = content.vcometScroll.content;
 
           var isHeaderTall = false;
           // Remove or create scroll listener
-          if(remove){
+          if (remove) {
             vcomet.removeCallback("onScrolled", content.vcometScroll, growingHeaderListener);
-          }else{
+          } else {
             // Scroll content listener
             content.vcometScroll.onScrolled(growingHeaderListener);
           }
@@ -268,21 +272,21 @@
            * Growing header listener
            * @return {[type]} [description]
            */
-          function growingHeaderListener(obj){
-            if (obj.trigger !== "resize"){
+          function growingHeaderListener(obj) {
+            if (obj.trigger !== "resize") {
 
               var padding = window.getComputedStyle(content, null)
                 .getPropertyValue("padding").split("px")[0];
-    
+
               var contentHeight = content.offsetHeight - (padding * 2);
               var mainContentHeight = mainContent.scrollHeight - 50;
               var scrollTop = Math.abs(obj.verticalTranslatePosition);
-              
-              if(!isHeaderTall && scrollTop > 0 && mainContentHeight > contentHeight){
+
+              if (!isHeaderTall && scrollTop > 0 && mainContentHeight > contentHeight) {
                 // Increase header height
                 header.style.height = el.headerHeight;
                 isHeaderTall = true;
-              }else if(scrollTop == 0){
+              } else if (scrollTop == 0) {
                 // Turn header back to its initial state
                 header.style.height = el.headerTallHeight;
                 isHeaderTall = false;
@@ -292,12 +296,12 @@
         }
       }
     },
-    functions:{
+    functions: {
       /*
         @function delete
         @description Remove panel
       */
-      delete: function(){
+      delete: function () {
         var el = this;
         el.parentNode.removeChild(el);
       }
@@ -305,7 +309,7 @@
     onCreated: function () {
       vcomet.createCallback("onLoad", this);
     },
-    onBubbleRender: function() {
+    onBubbleRender: function () {
       var el = this;
       // Display header if needed
       el._importContent();
@@ -316,7 +320,7 @@
       // Header color
       el._setHeader();
       // Apply header type
-      if(el.type == "shadowed"){
+      if (el.type == "shadowed") {
         // Show drop shadow div
         el.querySelector(".vc-headerpanel-shadowDrop").style.opacity = 1;
       }
