@@ -204,14 +204,18 @@
       */
       selectTab: function (tab) {
 
-        var contentId = this._misc.contents[tab.id];
-        var content = this.querySelector("#" + contentId);
+        var el = this;
+
+        var contentId = el._misc.contents[tab.id];
+        var content = el.querySelector("#" + contentId);
         //Add selected Tab class to the clicked Tab
         tab.classList.add("selected");
         tab.dataset.selected = true;
         //Show new clicked Content
         content.setAttribute("visible", "true");
         content.classList.remove("hidden");
+        
+        vcomet.triggerCallback("onTabSelected", el, el, [tab]);
       },
       /*
       @function (private) _handleDragStart
@@ -557,7 +561,12 @@
 
     },
     onCreated: function () {
-      this._setupRefs();
+
+      var el = this;
+
+      el._setupRefs();
+      vcomet.createCallback("onTabSelected", el);
+
     },
     onRender: function () {
 
