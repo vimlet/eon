@@ -1,21 +1,21 @@
 <template>
 
   <!--Begin tabs and scroll indicators container-->
-  <div class="tabs unselectable">
+  <div class="vc-tabs-tabsSection unselectable">
 
-    <div class="region">
-      <div id="tabs" class="tabsWrapper"></div>
+    <div class="vc-tabs-region">
+      <div class="vc-tabs-tabsWrapper"></div>
     </div>
 
-    <div class="scrolls">
+    <div class="vc-tabs-scrolls">
 
       <!-- Left scroll indicator-->
-      <div class="leftScroll" data-scroll-direction="left">
+      <div class="vc-tabs-leftScroll">
         <i class="material-icons">keyboard_arrow_left</i>
       </div>
 
       <!-- Right scroll indicator-->
-      <div class="rightScroll" data-scroll-direction="right">
+      <div class="vc-tabs-rightScroll">
         <i class="material-icons">keyboard_arrow_right</i>
       </div>
 
@@ -23,8 +23,8 @@
 
   </div>
   <!-- Begin contentsSection Section -->
-  <div class="contentsSection">
-    <div id="tabsContents" class="contentsWrapper"></div>
+  <div class="vc-tabs-contentsSection">
+    <div class="vc-tabs-contentsWrapper"></div>
   </div>
 
 </template>
@@ -38,21 +38,16 @@
     ],
     privateProperties: {
       /*
-      @property (private) {object} _tabContents
-      @description Object that contains data for all the content available
-      */
-      tabContents: {
-        value: {}
-      },
-      /*
-      @property (private) {object} _misc
+      @property (private) {Object} _misc
       @description Object with usefull information
       */
       misc: {
-        value: {}
+        value: {
+          contents: {}
+        }
       },
       /*
-      @property {object} _refs
+      @property (private) {Boolean} _refs
       @description Object with references to relevant element nodes
       */
       refs: {
@@ -62,13 +57,21 @@
     },
     properties: {
       /*
-      @property {boolean} allowdragging
+      @property {Boolean} dragging
       @description Whether the user wants the tabs to be draggables or not
       */
-      allowdragging: {
+      dragging: {
         value: true,
         reflect: true
       },
+      /*
+      @property {String} dragging
+      @description Whether the user wants the tabs to be draggables or not
+      */
+      tabsScroll: {
+        value: "right",
+        reflect: true
+      }
     },
     privateFunctions: {
       /*
@@ -79,12 +82,16 @@
 
         var el = this;
 
-        el._refs.leftScroll = el.template.querySelector(".leftScroll");
-        el._refs.rightScroll = el.template.querySelector(".rightScroll");
+        el._refs.leftScroll = el.template.querySelector(".vc-tabs-leftScroll");
+        el._refs.rightScroll = el.template.querySelector(".vc-tabs-rightScroll");
 
-        el._refs.tabsRegion = el.template.querySelector(".region");
-        el._refs.tabsWrapper = el.template.querySelector(".tabsWrapper");
-        el._refs.tabsScrolls = el.template.querySelector(".scrolls");
+        el._refs.tabsSection = el.template.querySelector(".vc-tabs-tabsSection");
+        el._refs.tabsRegion = el.template.querySelector(".vc-tabs-region");
+        el._refs.tabsWrapper = el.template.querySelector(".vc-tabs-tabsWrapper");
+        el._refs.tabsScrolls = el.template.querySelector(".vc-tabs-scrolls");
+
+        el._refs.contentsSection = el.template.querySelector(".vc-tabs-contentsSection");
+        el._refs.contentsWrapper = el.template.querySelector(".vc-tabs-contentsWrapper");
 
       },
       /*
@@ -94,22 +101,19 @@
       setupScrolls: function () {
 
         var el = this;
-        var scrollsType = el.getAttribute("tabscroll");
+        var scrollsType = el.getAttribute("tabs-scroll");
 
-        el._refs.leftScroll.onclick = function () {
+        el._refs.leftScroll.addEventListener('click', function () {
           el.scroll("left")
-        };
-        el._refs.rightScroll.onclick = function () {
+        }, false);
+
+        el._refs.rightScroll.addEventListener('click', function () {
           el.scroll("right")
-        };
+        }, false);
 
         switch (scrollsType) {
-          case "outer":
-            el._refs.leftScroll.parentNode.insertBefore(leftScroll, el._refs.tabsRegion);
-            break;
           case "left":
-            el._refs.leftScroll.parentNode.insertBefore(leftScroll, el._refs.tabsRegion);
-            el._refs.rightScroll.parentNode.insertBefore(rightScroll, el._refs.tabsRegion);
+            el._refs.tabsSection.insertBefore(el._refs.tabsScrolls, el._refs.tabsRegion)
             break;
           case "none":
             el._refs.leftScroll.style.display = "none";
@@ -128,7 +132,7 @@
 
         var el = this;
 
-        if (el.allowdragging = !false) {
+        if (el.dragging = !false) {
 
           var indicator;
 
@@ -156,8 +160,6 @@
       setupTabs: function () {
 
         var el = this;
-
-        var tabs = el.querySelector(".tabs");
         var dropArea = document.createElement("div");
 
         dropArea.classList.add("dropArea");
@@ -171,21 +173,28 @@
         el._refs.tabsWrapper.appendChild(dropArea);
 
         vcomet.addResizeListener(el._refs.tabsWrapper, el.tagName + el.uid, function () {
+          el._handleTabsScrollsStatus();
+        });
 
-          if (el._refs.tabsWrapper.offsetWidth <= el._refs.tabsRegion.offsetWidth) {
+      },
+      handleTabsScrollsStatus: function () {
 
-            el._refs.tabsScroll.classList.remove("enabled");
-            el._refs.tabsScroll.style.left = 0;
+        var el = this;
+
+        setTimeout(function () {
+          
+          if (el._refs.tabsRegion.scrollWidth <= el._refs.tabsRegion.offsetWidth) {
+
+            el._refs.tabsScrolls.classList.remove("enabled");
+            el._refs.tabsWrapper.style.left = 0;
 
           } else {
 
-            el._refs.tabsScroll.classList.add("enabled");
+            el._refs.tabsScrolls.classList.add("enabled");
 
           }
 
-        });
-
-        el.tabs = tabs;
+        }, 0);
 
       },
       /*
@@ -195,14 +204,18 @@
       */
       selectTab: function (tab) {
 
-        var contentId = this._tabContents[tab.id];
-        var content = this.querySelector("#" + contentId);
+        var el = this;
+
+        var contentId = el._misc.contents[tab.id];
+        var content = el.querySelector("#" + contentId);
         //Add selected Tab class to the clicked Tab
         tab.classList.add("selected");
         tab.dataset.selected = true;
         //Show new clicked Content
         content.setAttribute("visible", "true");
-        content.classList.remove("hiddenTabContent");
+        content.classList.remove("hidden");
+        
+        vcomet.triggerCallback("onTabSelected", el, el, [tab]);
       },
       /*
       @function (private) _handleDragStart
@@ -272,8 +285,8 @@
           var targetOrder = this._misc.dragging.target.dataset.tabOrder;
           var targetTab;
 
-          targetOrder = this._misc.dragging.position === "left" ? parseInt(targetOrder) : parseInt(targetOrder) + 1;
-          targetTab = this.tabs.wrapper.querySelector('vc-tab[data-tab-order="' + targetOrder + '"]');
+          targetOrder = el._misc.dragging.position === "left" ? parseInt(targetOrder) : parseInt(targetOrder) + 1;
+          targetTab = el._refs.tabsWrapper.querySelector('vc-tab[data-tab-order="' + targetOrder + '"]');
 
           el._refs.tabsWrapper.insertBefore(this._misc.dragging.source, targetTab);
           el._misc.isDragging = false;
@@ -339,7 +352,7 @@
       */
       reorderTabs: function () {
 
-        var tabs = this.querySelectorAll("#tabs vc-tab");
+        var tabs = this.querySelectorAll(".tabsWrapper vc-tab");
 
         if (tabs) {
 
@@ -379,10 +392,10 @@
       */
       wipeout: function (tab) {
 
-        var contentId = this._tabContents[tab.id];
+        var contentId = this._misc.contents[tab.id];
         var contentElement = this.querySelector("#" + contentId);
 
-        delete this._tabContents[tab.id];
+        delete this._misc.contents[tab.id];
 
         tab.parentNode.removeChild(tab);
         contentElement.parentNode.removeChild(contentElement);
@@ -407,6 +420,7 @@
         tab.setAttribute("title", title);
 
         el._refs.tabsWrapper.appendChild(tab);
+        el._handleTabsScrollsStatus();
       },
       //This functions captures the click of the tab, unselects the current tab and then selects the one we clicked
       /*
@@ -427,7 +441,7 @@
       */
       updateTabContent: function (tabId, content) {
 
-        var tabContent = this.querySelector("#" + this._tabContents[tabId]);
+        var tabContent = this.querySelector("#" + this._misc.contents[tabId]);
         if (tabContent) {
           tabContent.innerHTML = "";
           tabContent.appendChild(content);
@@ -444,6 +458,8 @@
       */
       closeTab: function (tab, e) {
 
+        var el = this;
+
         if (e) {
           e.stopPropagation();
         }
@@ -454,20 +470,21 @@
 
           var siblingTab = this._getSiblingTab(tab);
 
-          this._wipeout(tab);
+          el._wipeout(tab);
 
           // If there are still tabs in the tabsContainer then select it
           if (siblingTab) {
-            this._selectTab(siblingTab);
+            el._selectTab(siblingTab);
           }
 
         } else {
 
-          this._wipeout(tab);
+          el._wipeout(tab);
 
         }
 
-        this._reorderTabs();
+        el._reorderTabs();
+        el._handleTabsScrollsStatus();
       },
       /*
       @function unselectCurrentTab
@@ -482,7 +499,7 @@
 
         //Hide the previos Content
         this.querySelector("#" + previosContentId).setAttribute("visible", "false");
-        this.querySelector("#" + previosContentId).classList.add("hiddenTabContent");
+        this.querySelector("#" + previosContentId).classList.add("hidden");
       },
       /*
       @function scroll
@@ -493,39 +510,43 @@
 
         var el = this;
 
-        var scrollConstant = 150;
+        if (el._refs.tabsScrolls.classList.contains("enabled")) {
 
-        var tabsRegion = el.tabs.querySelector(".region");
-        var tabsWrapperLeft = el._refs.tabsWrapper.style.left ? parseInt(el._refs.tabsWrapper.style.left) : 0;
-        var scrollableAmount = el._refs.tabsWrapper.offsetWidth - tabsRegion.offsetWidth;
-        var tabWidth = el._refs.tabsWrapper.querySelector("vc-tab").offsetWidth;
-        var rightProgress, halfwayTab, advanceNeeded, finalLeft;
+          var scrollConstant = 150;
 
-        if (el._refs.tabsWrapper.offsetWidth > tabsRegion.offsetWidth) {
+          var tabsRegion = el._refs.tabsRegion;
+          var tabsWrapperLeft = el._refs.tabsWrapper.style.left ? parseInt(el._refs.tabsWrapper.style.left) : 0;
+          var scrollableAmount = el._refs.tabsWrapper.offsetWidth - tabsRegion.offsetWidth;
+          var tabWidth = el._refs.tabsWrapper.querySelector("vc-tab").offsetWidth;
+          var rightProgress, halfwayTab, advanceNeeded, finalLeft;
 
-          if (direction == "right") {
+          if (el._refs.tabsWrapper.offsetWidth > tabsRegion.offsetWidth) {
 
-            rightProgress = tabsWrapperLeft - tabsRegion.offsetWidth < 0 ? -(tabsWrapperLeft - tabsRegion.offsetWidth) : tabsWrapperLeft - tabsRegion.offsetWidth;
-            halfwayTab = Math.ceil(rightProgress / tabWidth);
-            advanceNeeded = (tabWidth * halfwayTab) - rightProgress;
+            if (direction == "right") {
 
-            finalLeft = tabsWrapperLeft - advanceNeeded;
-            finalLeft = finalLeft == tabsWrapperLeft && finalLeft != (-scrollableAmount) ? finalLeft - tabWidth : finalLeft;
-            finalLeft = finalLeft < (-scrollableAmount) ? (-scrollableAmount) : finalLeft;
+              rightProgress = tabsWrapperLeft - tabsRegion.offsetWidth < 0 ? -(tabsWrapperLeft - tabsRegion.offsetWidth) : tabsWrapperLeft - tabsRegion.offsetWidth;
+              halfwayTab = Math.ceil(rightProgress / tabWidth);
+              advanceNeeded = (tabWidth * halfwayTab) - rightProgress;
 
-          } else {
+              finalLeft = tabsWrapperLeft - advanceNeeded;
+              finalLeft = finalLeft == tabsWrapperLeft && finalLeft != (-scrollableAmount) ? finalLeft - tabWidth : finalLeft;
+              finalLeft = finalLeft < (-scrollableAmount) ? (-scrollableAmount) : finalLeft;
 
-            rightProgress = tabsWrapperLeft - tabsRegion.offsetWidth < 0 ? -(tabsWrapperLeft - tabsRegion.offsetWidth) : tabsWrapperLeft - tabsRegion.offsetWidth;
-            halfwayTab = Math.floor(rightProgress / tabWidth);
-            advanceNeeded = rightProgress - (tabWidth * halfwayTab);
+            } else {
 
-            finalLeft = tabsWrapperLeft + advanceNeeded;
-            finalLeft = finalLeft == tabsWrapperLeft && finalLeft != scrollableAmount ? finalLeft + tabWidth : finalLeft;
-            finalLeft = finalLeft > 0 ? 0 : finalLeft;
+              rightProgress = tabsWrapperLeft - tabsRegion.offsetWidth < 0 ? -(tabsWrapperLeft - tabsRegion.offsetWidth) : tabsWrapperLeft - tabsRegion.offsetWidth;
+              halfwayTab = Math.floor(rightProgress / tabWidth);
+              advanceNeeded = rightProgress - (tabWidth * halfwayTab);
+
+              finalLeft = tabsWrapperLeft + advanceNeeded;
+              finalLeft = finalLeft == tabsWrapperLeft && finalLeft != scrollableAmount ? finalLeft + tabWidth : finalLeft;
+              finalLeft = finalLeft > 0 ? 0 : finalLeft;
+
+            }
+
+            el._refs.tabsWrapper.style.left = finalLeft + "px";
 
           }
-
-          el._refs.tabsWrapper.style.left = finalLeft + "px";
 
         }
 
@@ -535,8 +556,16 @@
       @description Returns an array with the tabs id registered
       */
       getExistingTabsId: function () {
-        return Object.keys(this._tabContents);
+        return Object.keys(this._misc.contents);
       }
+
+    },
+    onCreated: function () {
+
+      var el = this;
+
+      el._setupRefs();
+      vcomet.createCallback("onTabSelected", el);
 
     },
     onRender: function () {
@@ -552,7 +581,7 @@
 
         tab = elementTabs[i];
         el._refs.tabsWrapper.appendChild(tab);
-        
+
       }
 
     }
