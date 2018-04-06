@@ -203,17 +203,18 @@
         var el = this;
         var ext, name;
         var icon = el.template.querySelector(".vc-treenode-icon");
+        var expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
         var tree = el._refs.hostTree;
 
         // Check if tree allows extensions
-        if ([true, "true"].indexOf(el._refs.hostTree.showExtension) > -1) {
+        if (vcomet.util.isTrue(el._refs.hostTree.showExtension)) {
           ext = (el.extension ? "." + el.extension : "");
         }
 
         // Set node name if not exits
         el.name = !el.name ? el.path.split("/").pop() : el.name;
         el.order = !el.order ? "" : parseInt(el.order);
-        name = el.name + ext;
+        name = ext ? el.name + ext : el.name;
         el._refs.head.querySelector(".vc-treenode-name").innerHTML += name;
 
         icon.style.display = ["all", "type"].indexOf(tree.icons) > -1 ? "inline-block" : "none";
@@ -229,7 +230,6 @@
               icon.innerHTML = "insert_drive_file";
             } else if (el.type === "directory" && !vcomet.util.isTrue(el.initExpanded)){
               el.expanded = false;
-              var expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
               expandIcon.innerHTML = ["expand","all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
               icon.innerHTML = "folder";
             }
@@ -237,12 +237,40 @@
 
         }
 
+        expandIcon.style.display = ["none", "type"].indexOf(tree.icons) > -1 ? "none" : "block";
+
         // TODO Check draggable behaviour
-        el.setAttribute("draggable", true);
+        if(vcomet.util.isTrue(el._refs.hostTree.drag)) {
+         el.setAttribute("draggable", true);
+         el.classList.add("vc-treenode-draggable");
+        }
         // Declare dragging monitor variables
         el._misc.dragging = {};
         el._misc.dragging.functions = {};
 
+      },
+      /*
+        @function (private) _splitExtension
+        @description
+      */
+      splitExtension: function (node) {
+        var extensionIndex = node.name.lastIndexOf(".");
+        if (extensionIndex > 0) {
+          var ext = node.name.substring(extensionIndex, node.path.length);
+          // TODO next situation is only contemplated for tree links where subfolders are appended after extension  
+          var extSub = ext.indexOf("/");
+          var subFolder = "";
+          if (extSub > 0) {
+            // subFolder = ext.substring(extSub, ext.length);
+            // ext = ext.substring(0, extSub);
+          } else {
+            node.extension = ext;
+            node.name = node.name.substring(0, extensionIndex) + subFolder;
+          }
+          // node.extension = ext;
+          // node.name = node.name.substring(0, extensionIndex) + subFolder;
+        }
+        return node;
       },
       /*
         @function (private) _makeParentExpandable
@@ -280,6 +308,7 @@
         icon.innerHTML = ["all","type"].indexOf(tree.icons) > -1 && vcomet.util.isTrue(el.initExpanded) ? "folder_open" : "folder";
 
         expandIcon.style.visibility = ["expand","all"].indexOf(tree.icons) > -1 ? "visible" : "";
+
         el._refs.wrapper.style.display = "flex";
         // Check previous functionality
         if (!el._expandFunction) {
@@ -437,7 +466,9 @@
         // Select tree node functionality
         el._setNodeClickListener();
         // Adds the basic dragging events to the tree node
-        el._setupDraggingEvents();
+        if(vcomet.util.isTrue(el._refs.hostTree.drag)) {
+         el._setupDraggingEvents();
+        }
 
       } else {
         // Remove source node if already exists on tree element
