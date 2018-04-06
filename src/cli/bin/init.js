@@ -10,7 +10,7 @@ var install = require("./install");
 
 var gh_owner = "vimlet";
 var gh_repo = "VimletComet";
-var fileName = "vcomet-core.zip";
+var fileName = "vcomet-";
 
 var projectPath;
 var cwd = process.cwd();
@@ -23,6 +23,7 @@ module.exports = function (result) {
     Sync(function () {
         try {
             var templateVersion = getLatestTemplateRealise.sync(null)
+            fileName = fileName + templateVersion + ".zip";
             var templateURL = getGitHubTemplateURL.sync(null, fileName, templateVersion);
 
             downloadAndExtractTemplate.sync(null, templateURL, projectPath, templateVersion);
@@ -87,7 +88,7 @@ function getGitHubTemplateURL(name, version, cb) {
 }
 
 function downloadAndExtractTemplate(file_url, projectPath, version, cb) {
-    var downloadPath = path.join(os.homedir(), ".vcomet", "template", version);
+    var downloadPath = path.join(os.homedir(), ".vcomet", "template-" + version, version);
     var fileName = path.basename(url.parse(file_url).pathname);
     fs.mkdirsSync(projectPath);
     var dest = path.join(downloadPath, fileName);
