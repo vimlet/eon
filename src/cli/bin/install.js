@@ -11,7 +11,7 @@ var Sync = require("sync");
 var gh_owner = "vimlet";
 var gh_repo = "VimletComet";
 // var gh_credentials;
-var vcometFileName;
+var vcometFileName = "vcomet-";
 
 var vcometJsonObject = {};
 var actualPackages = {};
@@ -275,7 +275,7 @@ function installPackages(cb) {
         if (isVcomet) {
 
             try {
-                vcometFileName = "vcomet-" + vcometJsonObject.vcomet + ".zip";
+                vcometFileName = vcometFileName + vcometJsonObject.vcomet + ".zip";
                 var url = getGitHubDownloadURL.sync(null, vcometFileName, vcometJsonObject.vcomet);
                
                 cleanLocal("vcomet");

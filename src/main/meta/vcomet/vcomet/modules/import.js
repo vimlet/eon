@@ -286,7 +286,8 @@ vcomet.handleConfigDependencies = function (name) {
             dependencyPath = elementConfig.dependencies[j];
             if (!(dependencyName in vcomet.imports.templates)) {
                 hasDependencies = true;
-                dependencyFile = vcomet.imports.paths[name] + dependencyPath + ".html";
+                dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
+                dependencyFile = vcomet.imports.paths[name] + dependencyPath;
                 vcomet.import(dependencyFile);
             }
         }
