@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core - Element</title>
+
+  <link rel="stylesheet" href="/tests/style.css">
+  <script src="/vcomet/vcomet.js"></script>
+  <script src="life-cycle/test.js"></script>
+  <script>
+    // Import elements
+    vcomet.import([
+      "life-cycle/vc-el1.html",
+      "life-cycle/vc-el2.html",
+      "life-cycle/vc-el3.html",
+      "life-cycle/vc-el4.html"
+    ]);
+  </script>
+
+</head>
+
+<body>
+  <h1 style="color:red">TODO: before and after domReady should be tested!</h1>
+  <h1>Test:
+    <span id="result">wait...</span>
+  </h1>
+
+  <div class="resultTable">
+
+    <div class="rr">
+      <h2>· Config Life-Cycle</h2>
+    </div>
+    <div class="rr">
+      <div class="rd">
+        <h3>Expected</h3>
+        <textarea id="configExpected" cols="30" rows="15"></textarea>
+      </div>
+      <div class="rd">
+        <h3>Current</h3>
+        <textarea id="configCurrent" cols="30" rows="15"></textarea>
+      </div>
+    </div>
+
+    <div class="rr">
+      <h2>· Element Life-Cycle</h2>
+    </div>
+    <div class="rr">
+      <div class="rd">
+        <h3>Expected</h3>
+        <textarea id="elementExpected" cols="30" rows="15"></textarea>
+      </div>
+      <div class="rd">
+        <h3>Current</h3>
+        <textarea id="elementCurrent" cols="30" rows="15"></textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Test elements -->
+  <vc-el1></vc-el1>
+  <vc-el2></vc-el2>
+
+
+  <script>
+
+    setTimeout(function () {
+
+      // Dynamic elements
+      var el3 = document.createElement("vc-el3");
+
+      el3.onCreated(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onCreated");
+      });
+      el3.onInit(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onInit");
+      });
+      el3.onTransformed(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onTransformed");
+      });
+      el3.onRender(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onRender");
+      });
+      el3.onBubbleRender(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onBubbleRender");
+      });
+      el3.onReady(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onReady");
+      });
+
+      var el4 = document.createElement("vc-el4");
+
+      el4.onCreated(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onCreated");
+      });
+      el4.onInit(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onInit");
+      });
+      el4.onTransformed(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onTransformed");
+      });
+      el4.onRender(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onRender");
+      });
+      el4.onBubbleRender(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onBubbleRender");
+      });
+      el4.onReady(function () {
+        vcomet.tests.core.elementLifeCycle.push(this.tagName.toLowerCase() + ":onReady");
+      });
+
+      var fragment = document.createDocumentFragment();
+      fragment.appendChild(el3);
+      fragment.appendChild(el4);
+
+      document.body.appendChild(fragment);
+
+
+      // Config life-cycle visualization
+      document.querySelector("#configExpected").value = JSON.stringify(vcomet.tests.core.configLifeCycleExpected, null, 2);
+      vcomet.onReady(function () {
+        document.querySelector("#configCurrent").value = JSON.stringify(vcomet.tests.core.configLifeCycle, null, 2);
+      });
+
+      // Element life-cycle visualization
+      document.querySelector("#elementExpected").value = JSON.stringify(vcomet.tests.core.elementLifeCycleExpected, null, 2);
+      vcomet.onReady(function () {
+        document.querySelector("#elementCurrent").value = JSON.stringify(vcomet.tests.core.elementLifeCycle, null, 2);
+      });
+
+      // Do the actual testing
+      test(function (error, data) {
+        var result = document.querySelector("#result");
+        if (data) {
+          result.classList.add("passed");
+          result.innerHTML = "PASSED";
+        } else {
+          result.classList.add("failed");
+          result.innerHTML = "FAILED";
+        }
+      });
+
+    }, 1000); // NOTE: This delay is used to trigger after domReady, and currently fails!
+
+
+  </script>
+
+</body>
+
+</html>

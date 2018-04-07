@@ -19,7 +19,7 @@ var serverMain = app.listen(8081, function() {
 });
 
 // Doc server
-var serverDoc = appDoc.listen(8090, function() {
+var serverDoc = appDoc.listen(8091, function() {
   var host = serverDoc.address().address;
   var port = serverDoc.address().port;
   console.log("Documentation server listening at http://localhost:" + port);
