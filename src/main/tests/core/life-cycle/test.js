@@ -1,78 +1,107 @@
 var vcomet = vcomet || {};
 vcomet.tests = vcomet.tests || {};
 vcomet.tests.core = vcomet.tests.core || {
-  configLifeCycle: [],
-  elementLifeCycle: [],
-  configLifeCycleExpected: [
-    "vc-el1:onCreated",
-    "vc-el1:onInit",
-    "vc-el2:onCreated",
-    "vc-el2:onInit",
-    "vc-el1:onTransformed",
-    "vc-el2:onTransformed",
-    "vc-el1:onRender",
-    "vc-el2:onRender",
-    "vc-el2:onBubbleRender",
-    "vc-el1:onBubbleRender",
-    "vc-el1:onReady",
-    "vc-el2:onReady"
+  configAfter: [],
+  configAfterExpected: [
+    "config-after1:onCreated",
+    "config-after1:onInit",
+    "config-after2:onCreated",
+    "config-after2:onInit",
+    "config-after1:onTransformed",
+    "config-after2:onTransformed",
+    "config-after1:onRender",
+    "config-after2:onRender",
+    "config-after2:onBubbleRender",
+    "config-after1:onBubbleRender",
+    "config-after1:onReady",
+    "config-after2:onReady"
   ],
-  elementLifeCycleExpected: [
-    "vc-el3:onCreated",
-    "vc-el3:onInit",
-    "vc-el4:onCreated",
-    "vc-el4:onInit",
-    "vc-el3:onTransformed",
-    "vc-el4:onTransformed",
-    "vc-el3:onRender",
-    "vc-el4:onRender",
-    "vc-el4:onBubbleRender",
-    "vc-el3:onBubbleRender",
-    "vc-el3:onReady",
-    "vc-el4:onReady"
+  configBefore: [],
+  configBeforeExpected: [
+    "config-before1:onCreated",
+    "config-before1:onInit",
+    "config-before2:onCreated",
+    "config-before2:onInit",
+    "config-before1:onTransformed",
+    "config-before2:onTransformed",
+    "config-before1:onRender",
+    "config-before2:onRender",
+    "config-before2:onBubbleRender",
+    "config-before1:onBubbleRender",
+    "config-before1:onReady",
+    "config-before2:onReady"
   ],
+  elementBefore: [],
+  elementBeforeExpected: [
+    "element-before1:onCreated",
+    "element-before1:onInit",
+    "element-before2:onCreated",
+    "element-before2:onInit",
+    "element-before1:onTransformed",
+    "element-before2:onTransformed",
+    "element-before1:onRender",
+    "element-before2:onRender",
+    "element-before2:onBubbleRender",
+    "element-before1:onBubbleRender",
+    "element-before1:onReady",
+    "element-before2:onReady"
+  ],
+  elementAfter: [],
+  elementAfterExpected: [
+    "element-after1:onCreated",
+    "element-after1:onInit",
+    "element-after2:onCreated",
+    "element-after2:onInit",
+    "element-after1:onTransformed",
+    "element-after2:onTransformed",
+    "element-after1:onRender",
+    "element-after2:onRender",
+    "element-after2:onBubbleRender",
+    "element-after1:onBubbleRender",
+    "element-after1:onReady",
+    "element-after2:onReady"
+  ]
 };
 
-function testConfigLifeCycle(cb) {
-  vcomet.onReady(function () {
-    try {
-      var configExpected = JSON.stringify(vcomet.tests.core.configLifeCycleExpected);
-      var configCurrent = JSON.stringify(vcomet.tests.core.configLifeCycle);
-      cb(null, configExpected == configCurrent);
-    } catch (error) {
-      cb(error, false)
-    }
-  });
+function isArrayEqual(a1, a2) {
+  return JSON.stringify(a1) == JSON.stringify(a2);
 }
 
-function testElementLifeCycle(cb) {
-  vcomet.onReady(function () {
-    try {
-      var elementExpected = JSON.stringify(vcomet.tests.core.elementLifeCycleExpected);
-      var elementCurrent = JSON.stringify(vcomet.tests.core.elementLifeCycle);
-      cb(null, elementExpected == elementCurrent);
-    } catch (error) {
-      cb(error, false)
-    }
-  });
+function loadExpected() {
+  // Expected life-cycle visualization
+  document.querySelector("#configBeforeExpected").value = JSON.stringify(vcomet.tests.core.configBeforeExpected, null, 2);
+  document.querySelector("#configAfterExpected").value = JSON.stringify(vcomet.tests.core.configAfterExpected, null, 2);
+  document.querySelector("#elementBeforeExpected").value = JSON.stringify(vcomet.tests.core.elementBeforeExpected, null, 2);
+  document.querySelector("#elementAfterExpected").value = JSON.stringify(vcomet.tests.core.elementAfterExpected, null, 2);
 }
 
-function test(cb) {
-  testConfigLifeCycle(function (error, configResult) {
-    if (error) {
-      cb(error, configResult);
-    } else {
-      testElementLifeCycle(function (error, elementResult) {
-        if (error) {
-          cb(error, elementResult);
-        } else {
-          if (configResult && elementResult) {
-            cb(null, true);
-          } else {
-            cb(null, false);
-          }
-        }
-      });
-    }
+function createElementRegistrable(name, registry) {
+  var el = document.createElement(name);
+
+  el.onCreated(function () {
+    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onCreated");
   });
+
+  el.onInit(function () {
+    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onInit");
+  });
+
+  el.onTransformed(function () {
+    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onTransformed");
+  });
+
+  el.onRender(function () {
+    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onRender");
+  });
+
+  el.onBubbleRender(function () {
+    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onBubbleRender");
+  });
+
+  el.onReady(function () {
+    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onReady");
+  });
+
+  return el;
+
 }
