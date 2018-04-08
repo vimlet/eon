@@ -27,9 +27,8 @@
 </head>
 
 <body>
-  
+
   <h1 style="color:red">TODO: After triggering, vcomet.onReady flag should reset each time a new element is attached to the dom</h1>
-  <h1 style="color:red">TODO: Actual testing with isArrayEqual(expected, current);</h1>
 
   <h1>Test:
     <span id="result">wait...</span>
@@ -100,7 +99,6 @@
   <config-before2></config-before2>
 
   <script>
-
     // Load expected results
     loadExpected();
 
@@ -108,21 +106,6 @@
     vcomet.onReady(function () {
       document.querySelector("#configBeforeCurrent").value = JSON.stringify(vcomet.tests.core.configBefore, null, 2);
     });
-
-    // Config Life-Cycle (After domReady)
-    setTimeout(function () {
-      var configAfter1 = document.createElement("config-after1");
-      var configAfter2 = document.createElement("config-after2");
-      var fragment = document.createDocumentFragment();
-      fragment.appendChild(configAfter1);
-      fragment.appendChild(configAfter2);
-      document.body.appendChild(fragment);
-
-      vcomet.onReady(function () {
-        document.querySelector("#configAfterCurrent").value = JSON.stringify(vcomet.tests.core.configAfter, null, 2);
-      });
-
-    }, 1000);
 
     // Element Life-Cycle (Before domReady)
     var elementBeforeFragment = document.createDocumentFragment();
@@ -134,8 +117,21 @@
       document.querySelector("#elementBeforeCurrent").value = JSON.stringify(vcomet.tests.core.elementBefore, null, 2);
     });
 
-    // Element Life-Cycle (After domReady)
     setTimeout(function () {
+
+      // Config Life-Cycle (After domReady)
+      var configAfter1 = document.createElement("config-after1");
+      var configAfter2 = document.createElement("config-after2");
+      var fragment = document.createDocumentFragment();
+      fragment.appendChild(configAfter1);
+      fragment.appendChild(configAfter2);
+      document.body.appendChild(fragment);
+
+      vcomet.onReady(function () {
+        document.querySelector("#configAfterCurrent").value = JSON.stringify(vcomet.tests.core.configAfter, null, 2);
+      });
+
+      // Element Life-Cycle (After domReady)
       var elementAfterFragment = document.createDocumentFragment();
       elementAfterFragment.appendChild(createElementRegistrable("element-after1", "elementAfter"));
       elementAfterFragment.appendChild(createElementRegistrable("element-after2", "elementAfter"));
@@ -145,21 +141,23 @@
         document.querySelector("#elementAfterCurrent").value = JSON.stringify(vcomet.tests.core.elementAfter, null, 2);
       });
 
+      // Do the actual testing
+      var configBeforeResult = isArrayEqual(vcomet.tests.core.configBeforeExpected, vcomet.tests.core.configBefore);
+      var configAfterResult = isArrayEqual(vcomet.tests.core.configAfterExpected, vcomet.tests.core.configAfter);
+      var elementBeforeResult = isArrayEqual(vcomet.tests.core.elementBeforeExpected, vcomet.tests.core.elementBefore);
+      var elementAfterResult = isArrayEqual(vcomet.tests.core.elementAfterExpected, vcomet.tests.core.elementAfter);
+
+      var result = document.querySelector("#result");
+      if (configBeforeResult && configAfterResult && elementBeforeResult && elementAfterResult) {
+        result.classList.add("passed");
+        result.innerHTML = "PASSED";
+      } else {
+        result.classList.add("failed");
+        result.innerHTML = "FAILED";
+      }
+
+
     }, 1000);
-
-    // Do the actual testing
-
-    // isArrayEqual(vcomet.tests.core.elementAfterExpected, vcomet.tests.core.elementAfter);
-
-    //   var result = document.querySelector("#result");
-    //   if (data) {
-    //     result.classList.add("passed");
-    //     result.innerHTML = "PASSED";
-    //   } else {
-    //     result.classList.add("failed");
-    //     result.innerHTML = "FAILED";
-    //   }
-    // });
 
 
   </script>
