@@ -1,4 +1,3 @@
-
 <template>
   <div class="vc-treenode-head unselectable">
     <i class="material-icons vc-treenode-expand">expand_more</i>
@@ -150,13 +149,13 @@
       toggleExpand: function (expandIcon) {
         var el = this;
         var expandIcon = !expandIcon ? el._refs.head.querySelector(".vc-treenode-expand") : expandIcon;
-        
+
         // Check expandable property
         if (!vcomet.util.isTrue(el.expanded) && vcomet.util.isTrue(el._expandable)) {
           // Expand node
           el._refs.wrapper.style.display = "flex";
           el.expanded = true;
-        } else if(vcomet.util.isTrue(el._expandable)){
+        } else if (vcomet.util.isTrue(el._expandable)) {
           // Collapse node
           el._refs.wrapper.style.display = "none";
           el.expanded = false;
@@ -169,13 +168,19 @@
       select: function () {
         var el = this;
         // Directories can not be selected
-        if ((!el.selected || el.selected == "false")) { 
+        if ((!el.selected || el.selected == "false")) {
           el._refs.hostTree.selectNode(el);
         }
         // Expand if directory
-        if(el.type === "directory"){  
+        if (el.type === "directory") {
           el.toggleExpand();
         }
+      },
+      // @function changeType (public) @param type
+      changeType: function (type) { // TODO        
+        var el = this;
+        el.type = type;        
+        el._refresh();
       }
     },
     privateFunctions: {
@@ -185,7 +190,7 @@
       */
       moveToWrapper: function () {
         var el = this;
-        
+
         // Check if node is at the top of the tree
         if (el._refs.parent) {
           // Append to parent wrapper node
@@ -195,6 +200,33 @@
           el._refs.hostTreeWrapper.appendChild(el);
         }
       },
+      // @function refresh (private)
+      refresh: function(){ // TODO  Ensure that it is correct to remove name and extension and take it from node path
+        var el = this;
+        el.name = null;
+        el.extension = null;        
+        el._setNodeName();
+      },
+      //@function (private) setNodeName
+      setNodeName: function () { // TODO
+        var el = this;
+        // Set node name if not exits
+        el.name = !el.name ? el.path.split("/").pop() : el.name;
+
+        if (!el.extension) {
+          el._splitExtension(); // TODO extension          
+        }
+
+        name = el.name;
+
+        // TODO extension
+        var showExt = (el._refs.hostTree.showExtension != "false");   
+        if (el.type != "directory" && showExt) {// TODO No sense to show extensions on directories 
+          name += el.extension;
+        }
+        el._refs.head.querySelector(".vc-treenode-name").innerHTML = name;
+      },
+
       /*
         @function (private) _setUpNode
         @description Build tree node structure
@@ -203,47 +235,41 @@
         var el = this;
         var ext, name;
         var icon = el.template.querySelector(".vc-treenode-icon");
-        var expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
         var tree = el._refs.hostTree;
 
         // Check if tree allows extensions
-        if (vcomet.util.isTrue(el._refs.hostTree.showExtension)) {
-          ext = (el.extension ? "." + el.extension : "");
-        }
+        //    if ([true, "true"].indexOf(el._refs.hostTree.showExtension) > -1) {           // TODO Don't know what happens here. And ext is not initalized so sometimes it shows "undefined"
+        //     ext = (el.extension ? "." + el.extension : "");
+        //   }
 
-        // Set node name if not exits
-        el.name = !el.name ? el.path.split("/").pop() : el.name;
+
         el.order = !el.order ? "" : parseInt(el.order);
-        name = ext ? el.name + ext : el.name;
-        el._refs.head.querySelector(".vc-treenode-name").innerHTML += name;
+
+        el._setNodeName();
 
         icon.style.display = ["all", "type"].indexOf(tree.icons) > -1 ? "inline-block" : "none";
 
         // Set node icon
-        if(["all", "type"].indexOf(tree.icons) > -1) {
-         
+        if (["all", "type"].indexOf(tree.icons) > -1) {
+
           if (el.icon) {
             icon.innerHTML = el.icon;
           } else {
             // Check icon
             if (el.type !== "directory") {
               icon.innerHTML = "insert_drive_file";
-            } else if (el.type === "directory" && !vcomet.util.isTrue(el.initExpanded)){
+            } else if (el.type === "directory" && !vcomet.util.isTrue(el.initExpanded)) {
               el.expanded = false;
-              expandIcon.innerHTML = ["expand","all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
+              var expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
+              expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
               icon.innerHTML = "folder";
             }
           }
 
         }
 
-        expandIcon.style.display = ["none", "type"].indexOf(tree.icons) > -1 ? "none" : "block";
-
         // TODO Check draggable behaviour
-        if(vcomet.util.isTrue(el._refs.hostTree.drag)) {
-         el.setAttribute("draggable", true);
-         el.classList.add("vc-treenode-draggable");
-        }
+        el.setAttribute("draggable", true);
         // Declare dragging monitor variables
         el._misc.dragging = {};
         el._misc.dragging.functions = {};
@@ -253,24 +279,18 @@
         @function (private) _splitExtension
         @description
       */
-      splitExtension: function (node) {
-        var extensionIndex = node.name.lastIndexOf(".");
+      splitExtension: function () {
+        var el = this;
+        var extensionIndex = el.name.lastIndexOf(".");
         if (extensionIndex > 0) {
-          var ext = node.name.substring(extensionIndex, node.path.length);
-          // TODO next situation is only contemplated for tree links where subfolders are appended after extension  
+          var ext = node.name.substring(extensionIndex, el.path.length);
           var extSub = ext.indexOf("/");
           var subFolder = "";
-          if (extSub > 0) {
-            // subFolder = ext.substring(extSub, ext.length);
-            // ext = ext.substring(0, extSub);
-          } else {
-            node.extension = ext;
-            node.name = node.name.substring(0, extensionIndex) + subFolder;
+          if (extSub <= 0) {
+            el.extension = ext;
+            el.name = el.name.substring(0, extensionIndex) + subFolder;
           }
-          // node.extension = ext;
-          // node.name = node.name.substring(0, extensionIndex) + subFolder;
         }
-        return node;
       },
       /*
         @function (private) _makeParentExpandable
@@ -305,9 +325,10 @@
         var icon = expandIcon.nextSibling.nextSibling;
         el._expandable = true;
         el.expanded = true;
-        icon.innerHTML = ["all","type"].indexOf(tree.icons) > -1 && vcomet.util.isTrue(el.initExpanded) ? "folder_open" : "folder";
+        icon.innerHTML = ["all", "type"].indexOf(tree.icons) > -1 && vcomet.util.isTrue(el.initExpanded) ?
+          "folder_open" : "folder";
 
-        expandIcon.style.visibility = ["expand","all"].indexOf(tree.icons) > -1 ? "visible" : "";
+        expandIcon.style.visibility = ["expand", "all"].indexOf(tree.icons) > -1 ? "visible" : "";
 
         el._refs.wrapper.style.display = "flex";
         // Check previous functionality
@@ -453,7 +474,7 @@
 
         // Parent node not exists
         if (parentPath && !parentNode) {
-          
+
           // Create parent node
           var node = document.createElement("vc-treenode");
           node.path = parentPath;
@@ -466,8 +487,8 @@
         // Select tree node functionality
         el._setNodeClickListener();
         // Adds the basic dragging events to the tree node
-        if(vcomet.util.isTrue(el._refs.hostTree.drag)) {
-         el._setupDraggingEvents();
+        if (vcomet.util.isTrue(el._refs.hostTree.drag)) {
+          el._setupDraggingEvents();
         }
 
       } else {
@@ -494,22 +515,22 @@
       var expandIcon, icon;
       var tree = el._refs.hostTree;
       expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
-      
+
       // Monitor _expandable property
       if (prop == "_expandable") {
         // Hide or show exapandable icon
-        expandIcon.style.visibility = value && ["expand","all"].indexOf(tree.icons) > -1 ? "visible" : "hidden";
+        expandIcon.style.visibility = value && ["expand", "all"].indexOf(tree.icons) > -1 ? "visible" : "hidden";
 
       } else if (prop == "expanded") {
         icon = expandIcon.nextSibling.nextSibling;
-        
+
         // Check expandable conditions
         if ((vcomet.util.isTrue(el.expanded)) && el._refs.wrapper.children[0]) {
-          expandIcon.innerHTML = ["expand","all"].indexOf(tree.icons) > -1 ? "expand_more" : "";
-          icon.innerHTML = ["type","all"].indexOf(tree.icons) > -1 ? "folder_open" : "";
+          expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "expand_more" : "";
+          icon.innerHTML = ["type", "all"].indexOf(tree.icons) > -1 ? "folder_open" : "";
         } else {
-          expandIcon.innerHTML = ["expand","all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
-          icon.innerHTML = ["type","all"].indexOf(tree.icons) > -1 ? "folder" : "";
+          expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
+          icon.innerHTML = ["type", "all"].indexOf(tree.icons) > -1 ? "folder" : "";
         }
       } else if (prop == "selected") {
         if (vcomet.util.isTrue(value)) {
