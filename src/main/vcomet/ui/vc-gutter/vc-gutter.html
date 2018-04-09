@@ -148,6 +148,26 @@
         reflect: true
       }
     },
+    functions: {
+      /*  
+        @function (private) 
+        @description
+      */
+      resize: function() {
+        var el = this;
+        var oldGutterSize = parseFloat(el._gutterSize);
+        var newGutterSize = parseFloat(el[el._sizeProp]);
+        if(newGutterSize !== oldGutterSize){
+          // Store gutter new size
+          el._gutterSize = newGutterSize;
+          // Handle gutter resize collapsed and no collapsed behaviour
+          el._splitterResize(oldGutterSize, newGutterSize);
+          el._sectionResize(oldGutterSize, newGutterSize);
+          // Update splitter drag limits
+          el._updateDragLimits();
+        }
+      }
+    },
     privateFunctions: {
       /*
         @function (private) setUpGutter
@@ -198,6 +218,7 @@
         secSection.classList.add("vc-gutter-sectionSecond");
         // Position splitter centered
         el._splitterPosition = splitter.style[el._posProp] = (parseFloat(el._gutterSize / 2)) + "px";
+   
         // ** Set size as a style property for collapsable configuration purposes
         var prop = vcomet.util.firstToLowerCase(el._sizeProp.split("offset")[1]);
         el._resizeSectionSize = secSection.style[prop] = parseFloat(el._gutterSize / 2);
@@ -233,19 +254,9 @@
         // Throttle event triggering for better performance
         var throttled = false;
         var delay = 10;
-        vcomet.addResizeListener(el, "resize", function(element){
+        vcomet.addResizeListener(el, "resize", function(){
           if (!throttled) {
-            var oldGutterSize = parseFloat(el._gutterSize);
-            var newGutterSize = parseFloat(el[el._sizeProp]);
-            if(newGutterSize !== oldGutterSize){
-              // Store gutter new size
-              el._gutterSize = newGutterSize;
-              // Handle gutter resize collapsed and no collapsed behaviour
-              el._splitterResize(oldGutterSize, newGutterSize);
-              el._sectionResize(oldGutterSize, newGutterSize);
-              // Update splitter drag limits
-              el._updateDragLimits();
-            }
+            el.resize();
             // Throttle
             throttled = true;
             // Set a timeout to un-throttle
@@ -264,6 +275,7 @@
       splitterResize: function(oldGutterSize, newGutterSize) {
         var el = this;
         var splitter = el.splitter;
+        var newSplitterPosition;
         // Check whether or not the gutter is collapsed
         if(el._collapsed){
           el._moveSplitter(3);
@@ -273,8 +285,12 @@
         }else{
           // Get splitter percentage position value
           el._storeSplitterPercentage(el._splitterPosition, oldGutterSize);
-          // Get new splitter position value from percentage
-          var newSplitterPosition = (newGutterSize * el._splitterPosition) / 100;
+           // Get new splitter position value from percentage
+          if (!oldGutterSize) {
+            newSplitterPosition = el._splitterPosition = splitter.style[el._posProp] = (parseFloat(el._gutterSize / 2));
+          } else {
+            newSplitterPosition = (newGutterSize * parseInt(el._splitterPosition)) / 100;
+          }
           // Position splitter according to the new gutter size
           splitter.style[el._posProp] = newSplitterPosition + "px";
         }
@@ -293,8 +309,14 @@
           var newSectionValue = (newGutterSize * parseFloat(el._sectionBeforeCollapse)) / oldGutterSize;
           el._sectionBeforeCollapse = newSectionValue;
         }else{
+
           // Resize sections
-          var newSectionValue = (newGutterSize * parseFloat(el._resizeSectionSize)) / oldGutterSize;
+          if (!oldGutterSize) {
+            newSectionValue = el.section[el._sizeProp];
+          } else {
+            newSectionValue = (newGutterSize * parseFloat(el._resizeSectionSize)) / oldGutterSize;
+          }
+
           el._setSectionSize(newSectionValue);
         }
       },
@@ -429,6 +451,7 @@
       moveSplitter: function(value){
         var el = this;
         el._splitterPosition = el.splitter.style[el._posProp] = value + "px";
+      
       },
       /*
         @function (private) setSectionSize
@@ -634,6 +657,7 @@
             el._splitterBeforeCollapse = (pos * 50) / midPos;
           }else{
             el._splitterPosition = (pos * 50) / midPos;
+            el._splitterPosition = !el._splitterPosition ? 0: el._splitterPosition;
           }
         }
       },

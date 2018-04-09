@@ -4286,9 +4286,12 @@ vcomet.constructClass = function (baseElement) {
 };
 
 vcomet.element = function (name, stylePath, config) {
+
+    stylePath = stylePath ? stylePath : "";
+    config = config ? config : {};
     
     // If the user provided a style path then we create its link and append it
-    if (stylePath && stylePath != "") {
+    if (stylePath != "") {
         
         var link = document.createElement("link");
         
@@ -4299,7 +4302,7 @@ vcomet.element = function (name, stylePath, config) {
 
     }
     
-    if (config && config.constructor === Object) {
+    if (config.constructor === Object) {
 
         vcomet.imports.config[name.toLowerCase()] = config;
         vcomet.triggerCallback('onScriptsReady', vcomet);
@@ -4680,7 +4683,7 @@ vcomet.triggerAllCallbackEvents = function (el, config, callback, params) {
 
 // vcomet.transform = function (name, config, el, elementDoc, template) {
 vcomet.transform = function (el, config) {
-
+    
     if (!vcomet.registry.isTransformed(el)) {
 
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
@@ -4722,7 +4725,7 @@ vcomet.getElementTheme = function (el) {
 }
 
 vcomet.registerMainTheme = function (theme) {
-
+    
     if (!vcomet.registry.isThemeRegistered("main", theme)) {
 
         var documentHead = document.querySelector("head");
