@@ -42,8 +42,8 @@ By default in a vc-slider that has the visible value, it will be placed under th
 ### Enable dynamically
 In this example the vc-slider is contained within a vc-form, and is disabled, and after a second it will be enabled.
 ``` [html]
-<!-- Initially slider disable -->
-<vc-slider id="mySlider" name="mySlider" disable="true"></vc-slider>
+<!-- Initially disabled slider -->
+<vc-slider id="mySlider" name="mySlider" disabled="true"></vc-slider>
 <vc-button type="submit" value="Submit"></vc-button>
 
 ```
@@ -54,7 +54,7 @@ vcomet.onReady(function () {
 
   setTimeout(function () {
     // Enables the slider
-    mySlider.disable = "false";
+    mySlider.disabled = "false";
   }, 1000);
 });
 ```

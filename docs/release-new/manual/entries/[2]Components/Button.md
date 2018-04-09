@@ -58,20 +58,20 @@ function changeIcon(button) {
 }
 ```
 
-### Disable Button
+### Disabled Button
 A vc-button can be disabled and enabled before a specified event.
 
 ``` [html]
-<!-- Click to enable the disable button -->
+<!-- Click to enable the disabled button -->
 <vc-button value="Click me!"  onclick="enableButton();"></vc-button>
-<vc-button id="disable" value="Disable" disable="true"></vc-button>
+<vc-button id="disabled" value="Disabled" disabled="true"></vc-button>
 ```
 ``` [javascript]
 function enableButton() {
-  var disButton = document.querySelector("#disable");
+  var disButton = document.querySelector("#disabled");
 
   // Enable de button and change its value
-  disButton.disable = "false";
+  disButton.disabled = "false";
   disButton.setValue("Enable");
 }
 ```
