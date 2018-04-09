@@ -19,7 +19,7 @@ To use it import vc-check in the head of the HTML document:
 <!-- Initially checkbox checked -->
 <vc-checkbox label="Checkbox 2"  name="options" value="myCheckbox2" checked="true"></vc-checkbox>
 <!-- Checkbox disabled -->
-<vc-checkbox label="Checkbox 3"  name="options" value="myCheckbox3" disable="true"></vc-checkbox>
+<vc-checkbox label="Checkbox 3"  name="options" value="myCheckbox3" disabled="true"></vc-checkbox>
 ```
 
 
@@ -46,7 +46,7 @@ vcomet.onReady(function () {
   myCheckbox3.label = "Checkbox 3";
   myCheckbox3.name = "options";
   myCheckbox3.value = "myCheckbox3";
-  myCheckbox3.disable = "true";
+  myCheckbox3.disabled = "true";
 
   // Append all vc-checkbox
   document.querySelector(".main").appendChild(myCheckbox1);
@@ -58,12 +58,12 @@ vcomet.onReady(function () {
 ## Examples
 
 ### Enable and check dynamically
-In this example one of the vc-checkbox is disable and other is checked, but after a second the disable and unchecked checkbox will be enable and checked.
+In this example one of the vc-checkbox is disabled and other is checked, but after a second the disabled and unchecked checkbox will be enable and checked.
 ``` [html]
 <!-- Initially checkbox checked -->
 <vc-checkbox label="Checkbox 1" name="options" value="myCheckbox1" checked="true"></vc-checkbox>
 <!-- Initially checkbox disabled -->
-<vc-checkbox id="myCheckbox2" label="Checkbox 2" name="options" value="myCheckbox2" disable="true"></vc-checkbox>
+<vc-checkbox id="myCheckbox2" label="Checkbox 2" name="options" value="myCheckbox2" disabled="true"></vc-checkbox>
 ```
 
 ``` [javascript]
@@ -73,7 +73,7 @@ vcomet.onReady(function () {
   setTimeout(function () {
     // Set new values of properties
     myCheckbox2.checked = true;
-    myCheckbox2.disable = false;
+    myCheckbox2.disabled = false;
   }, 1000);
 });
 ```

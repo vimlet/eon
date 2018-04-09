@@ -54,11 +54,11 @@
                 reflect: true
             },
             /*
-              @property {Boolean} disable 
+              @property {Boolean} disabled 
               @description Slider desactivation
               Default: false
             */
-            disable: {
+            disabled: {
                 value: false,
                 reflect: true
             },
@@ -341,29 +341,33 @@
             },
 
             /*
-              @function (private) _updateDisable
-              @description Updates disable status and activates the thumb motion when it is not disabled
+              @function (private) _updateDisabled
+              @description Updates disabled status and activates the thumb motion when it is not disabled
               @param {String} newVal [new value of disabled]
             */
-            updateDisable: function (newVal) {
+            updateDisabled: function (newVal) {
                 var shell = this.querySelector(".vc-slider-shell");
 
                 if (!vcomet.util.isTrue(newVal)) {
                     this._sliderNode.removeAttribute("disabled");
-                    shell.classList.remove("vc-slider-disable");
-                    this._rangeValue.classList.remove("bg1-disable");
-                    this._fillNode.classList.remove("fg1-disable");
-                    this._thumbNode.classList.remove("fg1-disable");
-                    this._trackNode.classList.remove("fg1-disable");
+                    shell.classList.remove("vc-slider-disabled");
+                    this._rangeValue.classList.remove("fg1-disabled");
+                    this._fillNode.classList.remove("bg1-disabled");
+                    this._thumbNode.classList.remove("bg1-disabled");
+                    this._fillNode.classList.add("fg1-active");
+                    this._thumbNode.classList.add("fg1-active");
+                    this._trackNode.classList.remove("bg1-disabled");
                     this._thumbMotion();
 
                 } else {
                     this._sliderNode.setAttribute("disabled", "true");
-                    shell.classList.add("vc-slider-disable");
-                    this._rangeValue.classList.add("bg1-disable");
-                    this._fillNode.classList.add("fg1-disable");
-                    this._thumbNode.classList.add("fg1-disable");
-                    this._trackNode.classList.add("fg1-disable");
+                    shell.classList.add("vc-slider-disabled");
+                    this._rangeValue.classList.add("fg1-disabled");
+                    this._fillNode.classList.add("bg1-disabled");
+                    this._thumbNode.classList.add("bg1-disabled");
+                    this._fillNode.classList.remove("fg1-active");
+                    this._thumbNode.classList.remove("fg1-active");
+                    this._trackNode.classList.add("bg1-disabled");
                     this._thumbNode.removeEventListener("pointerdown", this._thumbEvent, false);
                 }
 
@@ -448,7 +452,7 @@
                 el.displayPosition = "";
             }
 
-            el._updateDisable(el.disable);
+            el._updateDisabled(el.disabled);
 
         },
 
@@ -458,8 +462,8 @@
 
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
-                case "disable":
-                    this._updateDisable(newVal);
+                case "disabled":
+                    this._updateDisabled(newVal);
                     break;
             }
         }

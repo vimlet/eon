@@ -115,7 +115,7 @@ vcomet.registry.addToReadyQueue = function (el, fn) {
 vcomet.registry.triggerRenders = function () {
 
   if (Object.keys(vcomet.registry.elementStatus.attached).length == vcomet.registry.elementStatus.transformed.length) {
-
+    
     vcomet.registry.triggerRenderCallbacks();
     vcomet.registry.triggerBubbleRenderCallbacks();
     vcomet.registry.triggerReadyCallbacks();
@@ -194,14 +194,22 @@ vcomet.registry.updateElementStatus = function (el, status) {
     var uidFull = vcomet.registry.getUidFull(el);
 
     if (status == "attached") {
+
       vcomet.registry.elementStatus[status][uidFull] = el;
+
+      if (vcomet.registry.elementStatus.ready.length != Object.keys(vcomet.registry.elementStatus.attached).length) {
+        vcomet["__onReady__triggered"] = false;
+      }
+
     } else if (status != "detached") {
+
       vcomet.registry.elementStatus[status].push(el);
+      
     }
 
     if (status != "created" && status != "declared") {
       vcomet.registry.elementRegistry[uidFull][status] = true;
-    }  
+    }
 
   }
 
@@ -251,9 +259,9 @@ vcomet.registry.isReady = function (el) {
 
 // Trigger global onReady
 vcomet.onImportsReady(function () {
-  
+
   if (vcomet.registry.elementStatus.declared.length == 0) {
     vcomet.triggerCallback("onReady", vcomet);
   }
-  
+
 });

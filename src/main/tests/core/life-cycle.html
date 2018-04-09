@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core - Element</title>
+
+  <link rel="stylesheet" href="/tests/style.css">
+  <script src="/vcomet/vcomet.js"></script>
+  <script src="life-cycle/test.js"></script>
+
+  <script>
+    // Import elements
+    vcomet.import([
+      "life-cycle/config-before1.html",
+      "life-cycle/config-before2.html",
+      "life-cycle/config-after1.html",
+      "life-cycle/config-after2.html",
+      "life-cycle/element-before1.html",
+      "life-cycle/element-before2.html",
+      "life-cycle/element-after1.html",
+      "life-cycle/element-after2.html"
+    ]);
+  </script>
+
+</head>
+
+<body>
+
+  <h1>Test:
+    <span id="result">wait...</span>
+  </h1>
+
+  <div class="resultTable">
+
+    <div class="rr">
+      <h2>· Config Life-Cycle (Before domReady)</h2>
+    </div>
+    <div class="rr">
+      <div class="rd">
+        <h3>Expected</h3>
+        <textarea id="configBeforeExpected" cols="60" rows="15"></textarea>
+      </div>
+      <div class="rd">
+        <h3>Current</h3>
+        <textarea id="configBeforeCurrent" cols="60" rows="15"></textarea>
+      </div>
+    </div>
+
+    <div class="rr">
+      <h2>· Config Life-Cycle (After domReady)</h2>
+    </div>
+    <div class="rr">
+      <div class="rd">
+        <h3>Expected</h3>
+        <textarea id="configAfterExpected" cols="60" rows="15"></textarea>
+      </div>
+      <div class="rd">
+        <h3>Current</h3>
+        <textarea id="configAfterCurrent" cols="60" rows="15"></textarea>
+      </div>
+    </div>
+
+    <div class="rr">
+      <h2>· Element Life-Cycle (Before domReady)</h2>
+    </div>
+    <div class="rr">
+      <div class="rd">
+        <h3>Expected</h3>
+        <textarea id="elementBeforeExpected" cols="60" rows="15"></textarea>
+      </div>
+      <div class="rd">
+        <h3>Current</h3>
+        <textarea id="elementBeforeCurrent" cols="60" rows="15"></textarea>
+      </div>
+    </div>
+
+    <div class="rr">
+      <h2>· Element Life-Cycle (After domReady)</h2>
+    </div>
+    <div class="rr">
+      <div class="rd">
+        <h3>Expected</h3>
+        <textarea id="elementAfterExpected" cols="60" rows="15"></textarea>
+      </div>
+      <div class="rd">
+        <h3>Current</h3>
+        <textarea id="elementAfterCurrent" cols="60" rows="15"></textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Test config elements -->
+  <config-before1></config-before1>
+  <config-before2></config-before2>
+
+  <script>
+    // Load expected results
+    loadExpected();
+
+    // Config Life-Cycle (Before domReady)
+    vcomet.onReady(function () {
+      document.querySelector("#configBeforeCurrent").value = JSON.stringify(vcomet.tests.core.configBefore, null, 2);
+    });
+
+    // Element Life-Cycle (Before domReady)
+    var elementBeforeFragment = document.createDocumentFragment();
+    elementBeforeFragment.appendChild(createElementRegistrable("element-before1", "elementBefore"));
+    elementBeforeFragment.appendChild(createElementRegistrable("element-before2", "elementBefore"));
+    document.body.appendChild(elementBeforeFragment);
+
+    vcomet.onReady(function () {
+      document.querySelector("#elementBeforeCurrent").value = JSON.stringify(vcomet.tests.core.elementBefore, null, 2);
+    });
+
+    setTimeout(function () {
+
+      // Config Life-Cycle (After domReady)
+      var configAfterFragment = document.createDocumentFragment();
+      configAfterFragment.appendChild(document.createElement("config-after1"));
+      configAfterFragment.appendChild(document.createElement("config-after2"));
+      document.body.appendChild(configAfterFragment);
+
+      vcomet.onReady(function () {
+        document.querySelector("#configAfterCurrent").value = JSON.stringify(vcomet.tests.core.configAfter, null, 2);
+      });
+
+      // Element Life-Cycle (After domReady)
+      var elementAfterFragment = document.createDocumentFragment();
+      elementAfterFragment.appendChild(createElementRegistrable("element-after1", "elementAfter"));
+      elementAfterFragment.appendChild(createElementRegistrable("element-after2", "elementAfter"));
+      document.body.appendChild(elementAfterFragment);
+
+      vcomet.onReady(function () {
+        document.querySelector("#elementAfterCurrent").value = JSON.stringify(vcomet.tests.core.elementAfter, null, 2);
+      });
+
+      // Do the actual testing
+      vcomet.onReady(function () {
+        var configBeforeResult = isArrayEqual(vcomet.tests.core.configBeforeExpected, vcomet.tests.core.configBefore);
+        var configAfterResult = isArrayEqual(vcomet.tests.core.configAfterExpected, vcomet.tests.core.configAfter);
+        var elementBeforeResult = isArrayEqual(vcomet.tests.core.elementBeforeExpected, vcomet.tests.core.elementBefore);
+        var elementAfterResult = isArrayEqual(vcomet.tests.core.elementAfterExpected, vcomet.tests.core.elementAfter);
+
+        var result = document.querySelector("#result");
+        if (configBeforeResult && configAfterResult && elementBeforeResult && elementAfterResult) {
+          result.classList.add("passed");
+          result.innerHTML = "PASSED";
+        } else {
+          result.classList.add("failed");
+          result.innerHTML = "FAILED";
+        }
+      });
+
+    }, 1000);
+
+
+  </script>
+
+</body>
+
+</html>
