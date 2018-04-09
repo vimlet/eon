@@ -1,21 +1,6 @@
 var vcomet = vcomet || {};
 vcomet.tests = vcomet.tests || {};
 vcomet.tests.core = vcomet.tests.core || {
-  configAfter: [],
-  configAfterExpected: [
-    "config-after1:onCreated",
-    "config-after1:onInit",
-    "config-after2:onCreated",
-    "config-after2:onInit",
-    "config-after1:onTransformed",
-    "config-after2:onTransformed",
-    "config-after1:onRender",
-    "config-after2:onRender",
-    "config-after2:onBubbleRender",
-    "config-after1:onBubbleRender",
-    "config-after1:onReady",
-    "config-after2:onReady"
-  ],
   configBefore: [],
   configBeforeExpected: [
     "config-before1:onCreated",
@@ -30,6 +15,21 @@ vcomet.tests.core = vcomet.tests.core || {
     "config-before1:onBubbleRender",
     "config-before1:onReady",
     "config-before2:onReady"
+  ],
+  configAfter: [],
+  configAfterExpected: [
+    "config-after1:onCreated",
+    "config-after2:onCreated",
+    "config-after1:onInit",
+    "config-after2:onInit",
+    "config-after1:onTransformed",
+    "config-after2:onTransformed",
+    "config-after1:onRender",
+    "config-after2:onRender",
+    "config-after2:onBubbleRender",
+    "config-after1:onBubbleRender",
+    "config-after1:onReady",
+    "config-after2:onReady"
   ],
   elementBefore: [],
   elementBeforeExpected: [
@@ -49,8 +49,8 @@ vcomet.tests.core = vcomet.tests.core || {
   elementAfter: [],
   elementAfterExpected: [
     "element-after1:onCreated",
-    "element-after1:onInit",
     "element-after2:onCreated",
+    "element-after1:onInit",
     "element-after2:onInit",
     "element-after1:onTransformed",
     "element-after2:onTransformed",
