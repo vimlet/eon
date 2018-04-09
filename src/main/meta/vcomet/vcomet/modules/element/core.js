@@ -3,28 +3,28 @@ vcomet.element = function (name, stylePath, config) {
 
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
-    
+
     // If the user provided a style path then we create its link and append it
     if (stylePath != "") {
-        
+
         var link = document.createElement("link");
-        
+
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", vcomet.imports.paths[name.toLowerCase()] + stylePath);
 
         document.head.appendChild(link);
 
     }
-    
+
     if (config.constructor === Object) {
 
         vcomet.imports.config[name.toLowerCase()] = config;
         vcomet.triggerCallback('onScriptsReady', vcomet);
 
     } else if (config) {
-        
+
         vcomet.amd.require([vcomet.imports.paths[name.toLowerCase()] + config], function (config) {
-            
+
             vcomet.imports.config[name.toLowerCase()] = config;
             vcomet.triggerCallback('onScriptsReady', vcomet);
 
@@ -34,11 +34,51 @@ vcomet.element = function (name, stylePath, config) {
 
 };
 
-vcomet.define = function (config) {    
+vcomet.define = function (config) {
     vcomet.amd.define(function () {
         return config;
     });
-}
+};
+
+vcomet.createElement = function (name, config) {
+
+    var el = document.createElement(name);
+
+    if (config) {
+
+        var callbacks = ["onCreated", "onInit", "onTransformed", "onRender", "onBubbleRender", "onReady"];
+
+        for (var i = 0; i < callbacks.length; i++) {
+            if (config[callbacks[i]]) {
+                el[callbacks[i]](config[callbacks[i]]);
+            }
+        }
+
+        if (config.functions) {
+
+            var functions = Object.keys(config.functions);
+
+            for (var j = 0; j < functions.length; j++) {
+                el[functions[j]] = config.functions[functions[j]];
+            }
+
+        }
+
+        if (config.properties) {
+
+            var properties = Object.keys(config.properties);
+
+            for (var k = 0; k < properties.length; k++) {
+                el[properties[k]] = config.properties[properties[k]];
+            }
+
+        }
+
+    }
+
+    return el;
+
+};
 
 vcomet.hideElement = function (el) {
     el.classList.add("vcomet-until-rendered");
@@ -359,16 +399,16 @@ vcomet.importPrivate = function (el, config) {
 };
 
 vcomet.importTemplateClasses = function (el) {
-    
+
     var template = vcomet.imports.templates[el.tagName.toLowerCase()];
-    
+
     if (template && template.classList.length != 0) {
 
         var elClassesArray = Array.prototype.slice.call(el.classList);
         var templateClassesArray = Array.prototype.slice.call(template.classList);
 
         elClassesArray = templateClassesArray.concat(elClassesArray);
-        
+
         el.setAttribute("class", elClassesArray.join(" "));
 
     }
@@ -397,7 +437,7 @@ vcomet.triggerAllCallbackEvents = function (el, config, callback, params) {
 
 // vcomet.transform = function (name, config, el, elementDoc, template) {
 vcomet.transform = function (el, config) {
-    
+
     if (!vcomet.registry.isTransformed(el)) {
 
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
@@ -439,7 +479,7 @@ vcomet.getElementTheme = function (el) {
 }
 
 vcomet.registerMainTheme = function (theme) {
-    
+
     if (!vcomet.registry.isThemeRegistered("main", theme)) {
 
         var documentHead = document.querySelector("head");
