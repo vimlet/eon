@@ -49,13 +49,13 @@ vcomet.onReady(function () {
 ## Examples
 
 ### Enable and check dynamically
-In this example one of the vc-radio is disable and other is checked, but after a second the disable and unchecked radio will be enable and checked.
+In this example one of the vc-radio is disabled and other is checked, but after a second the disabled and unchecked radio will be enable and checked.
 ``` [html]
 <vc-radiogroup name="myRadiogroup">
   <!-- Initially radio checked -->
   <vc-radio label="Radio 1" value="myRadio1" check="true"></vc-radio>
-  <!-- Initially radio disable -->
-  <vc-radio id="myRadio2" label="Radio 2" value="myRadio2" disable="true"></vc-radio>
+  <!-- Initially radio disabled -->
+  <vc-radio id="myRadio2" label="Radio 2" value="myRadio2" disabled="true"></vc-radio>
 </vc-radiogroup>
 ```
 
@@ -66,7 +66,7 @@ vcomet.onReady(function () {
   setTimeout(function () {
     // Set new values of properties
     myRadio2.check = true;
-    myRadio2.disable = false;
+    myRadio2.disabled = false;
   }, 1000);
 });
 ```

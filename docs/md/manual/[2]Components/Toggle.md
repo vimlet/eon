@@ -36,8 +36,8 @@ vcomet.onReady(function () {
 ### Enable dynamically
 In this example the vc-toggle is disabled, but after a second it will be enabled.
 ``` [html]
-<!-- Initially toggle disable -->
-<vc-toggle label="Toggle" disable="true"></vc-toggle>
+<!-- Initially disabled toggle -->
+<vc-toggle label="Toggle" disabled="true"></vc-toggle>
 ```
 
 ``` [javascript]
@@ -46,7 +46,7 @@ vcomet.onReady(function () {
 
     setTimeout(function () {
         // Enables the spinner
-        myToggle.disable = false;
+        myToggle.disabled = false;
     }, 1000);
 });
 ```

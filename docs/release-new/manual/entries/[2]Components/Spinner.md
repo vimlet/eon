@@ -38,8 +38,8 @@ vcomet.onReady(function () {
 ### Enable dynamically
 In this example the vc-spinner is contained within a vc-form, and is disabled, and after a second it will be enabled.
 ``` [html]
-<!-- Initially spinner disable -->
-<vc-spinner label="Spinner number" name="mySpinner" disable="true"></vc-spinner>
+<!-- Initially disabled spinner -->
+<vc-spinner label="Spinner number" name="mySpinner" disabled="true"></vc-spinner>
 <vc-button type="submit" value="Submit"></vc-button>
 
 ```
@@ -50,7 +50,7 @@ vcomet.onReady(function () {
 
   setTimeout(function () {
     // Enables the spinner
-    mySpinner.disable = "false";
+    mySpinner.disabled = "false";
   }, 1000);
 });
 ```

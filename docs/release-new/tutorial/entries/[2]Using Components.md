@@ -45,7 +45,7 @@ Since we need to import multiple components we are passing an `Array` with their
 </div>
 ```
 
-As you can see we have prepared a basic structure for our `To Do List` and we have included a `scroll` component that will let us scroll through our list, we also have a `text` component so that the user can type any text that will be added to the list when our `buttom component` is triggered.
+As you can see we have prepared a basic structure for our `To Do List` and we have included a `scroll` component that will let us scroll through our list, we also have a `text` component so that the user can type any text that will be added to the list when our `button` component is triggered.
 
 If you take a closer look you might find some `attributes` you have never seen before, these are `exclusive` for each type of components that will let us configure the behavior we want for the components, for instance, you can see that in the scroll element there are two attributes we are using, `thickness` and `fillContainer`; the value of `thickness` will determine the size of the scroll bars, while the value of `fillContainer` will tell the scroll if we want it to fill the size of its parent or it will have its own size.
 
