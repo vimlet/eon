@@ -3004,14 +3004,6 @@ vcomet.createCallback = function (callback, obj, type) {
   if (!obj[callback]) {
     obj[callback] = function (fn, scope, args) {
 
-      // If an onReady callback is being added when new elements have been appended but are not ready yet, we set the triggered variable to false
-      // so that this callback is pushed to the array insted of triggered inmediately
-      if (obj == vcomet && callback == "onReady") {
-        if (vcomet.registry.elementStatus.ready.length != Object.keys(vcomet.registry.elementStatus.attached).length) {
-          obj["__" + callback + "__triggered"] = false;
-        }
-      }
-
       // If ready and triggered inmediately call the function else store it
       if (
         obj["__" + callback + "__type"] === "ready" &&
@@ -3044,31 +3036,27 @@ vcomet.triggerCallback = function (callback, obj, scope, args) {
 
       var scopeUndefinedOrNull = typeof scope === "undefined" || scope == null;
       var argsUndefinedOrNull = typeof args === "undefined" || args == null;
+      var callbackFunctions = obj["__" + callback];
+
+      // If the callback is of "ready" type we make a copy of the functions queue to trigger them and then clear the callback queue
+      if (obj["__" + callback + "__type"] == "ready") {
+        callbackFunctions = obj["__" + callback].slice(0);
+        obj["__" + callback] = [];
+      }
 
       // Trigger stored functions
-      var length = obj["__" + callback].length;
-      var fn;
-
-      for (var i = 0; i < length; i++) {
+      for (var i = 0; i < callbackFunctions.length; i++) {
 
         if (scopeUndefinedOrNull) {
-          scope = obj["__" + callback][i].scope ? obj["__" + callback][i].scope : obj;
+          scope = callbackFunctions[i].scope ? callbackFunctions[i].scope : obj;
         }
 
         if (argsUndefinedOrNull) {
-          args = obj["__" + callback][i].args ? obj["__" + callback][i].args : [];
+          args = callbackFunctions[i].args ? callbackFunctions[i].args : [];
         }
 
-        fn = obj["__" + callback][i].fn;
+        callbackFunctions[i].fn.apply(scope, args);
 
-        // This provides us with a safe nested callbacks, removing the current callback from the array
-        if (obj == vcomet && callback == "onReady") {
-          obj["__" + callback].shift();
-          length--;
-          i--;
-        }
-
-        fn.apply(scope, args);
       }
 
       // Store scope, args and tag as triggered
@@ -3827,7 +3815,7 @@ vcomet.registry.addToReadyQueue = function (el, fn) {
 vcomet.registry.triggerRenders = function () {
 
   if (Object.keys(vcomet.registry.elementStatus.attached).length == vcomet.registry.elementStatus.transformed.length) {
-
+    
     vcomet.registry.triggerRenderCallbacks();
     vcomet.registry.triggerBubbleRenderCallbacks();
     vcomet.registry.triggerReadyCallbacks();
@@ -3906,14 +3894,22 @@ vcomet.registry.updateElementStatus = function (el, status) {
     var uidFull = vcomet.registry.getUidFull(el);
 
     if (status == "attached") {
+
       vcomet.registry.elementStatus[status][uidFull] = el;
+
+      if (vcomet.registry.elementStatus.ready.length != Object.keys(vcomet.registry.elementStatus.attached).length) {
+        vcomet["__onReady__triggered"] = false;
+      }
+
     } else if (status != "detached") {
+
       vcomet.registry.elementStatus[status].push(el);
+      
     }
 
     if (status != "created" && status != "declared") {
       vcomet.registry.elementRegistry[uidFull][status] = true;
-    }  
+    }
 
   }
 
@@ -3963,11 +3959,11 @@ vcomet.registry.isReady = function (el) {
 
 // Trigger global onReady
 vcomet.onImportsReady(function () {
-  
+
   if (vcomet.registry.elementStatus.declared.length == 0) {
     vcomet.triggerCallback("onReady", vcomet);
   }
-  
+
 });
 
 vcomet.interpolation = vcomet.interpolation || {};
