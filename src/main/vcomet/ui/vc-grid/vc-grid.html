@@ -1,32 +1,32 @@
 <template>
 
-  <div class="header">
-    <div class="wrapper"></div>
+  <div class="vc-grid-header">
+    <div class="vc-grid-wrapper bg6"></div>
   </div>
 
-  <div class="rows">
+  <div class="vc-grid-rows">
     <vc-scroll prevent-render="false" arrowScrolls="false" type="auto" scrollsLength="auto" thickness="10" observers="true" rail-scrolls="false">
-      <div class="wrapper">
+      <div class="vc-grid-wrapper">
       </div>
     </vc-scroll>
   </div>
 
-  <div class="footer unselectable">
-    <div class="pagControls">
-      <i class="material-icons pagIcon" data-navigation="first">skip_previous</i>
-      <i class="material-icons pagIcon" data-navigation="previous">keyboard_arrow_left</i>
+  <div class="vc-grid-footer bg6 unselectable">
+    <div class="vc-grid-pagControls fg5">
+      <i class="material-icons vc-grid-pagIcon fg1-hoverable" data-navigation="first">skip_previous</i>
+      <i class="material-icons vc-grid-pagIcon fg1-hoverable" data-navigation="previous">keyboard_arrow_left</i>
       <div class="pageSelector"></div>
-      <i class="material-icons pagIcon" data-navigation="next">keyboard_arrow_right</i>
-      <i class="material-icons pagIcon" data-navigation="last">skip_next</i>
+      <i class="material-icons vc-grid-pagIcon fg1-hoverable" data-navigation="next">keyboard_arrow_right</i>
+      <i class="material-icons vc-grid-pagIcon fg1-hoverable" data-navigation="last">skip_next</i>
     </div>
-    <span class="entriesCount"></span>
+    <span class="vc-grid-entriesCount fg5"></span>
   </div>
 
 </template>
 
 <script type="text/javascript">
   vcomet.element("vc-grid", "vc-grid.css", {
-
+    themed: true,
     dependencies: [
       "../vc-row",
       "../vc-cell",
@@ -150,15 +150,15 @@
 
         var el = this;
 
-        el._refs.header = el.querySelector(".header");
-        el._refs.headersWrapper = el.querySelector(".header .wrapper");
-        el._refs.rowsWrapper = el.querySelector(".rows .wrapper");
-        el._refs.footer = el.querySelector(".footer");
+        el._refs.header = el.querySelector(".vc-grid-header");
+        el._refs.headersWrapper = el.querySelector(".vc-grid-header .vc-grid-wrapper");
+        el._refs.rowsWrapper = el.querySelector(".vc-grid-rows .vc-grid-wrapper");
+        el._refs.footer = el.querySelector(".vc-grid-footer");
 
         el.vcometScroll = el.querySelector("vc-scroll");
 
         el._refs.pageSelector = el.querySelector(".pageSelector");
-        el._refs.entriesCount = el.querySelector(".entriesCount");
+        el._refs.entriesCount = el.querySelector(".vc-grid-entriesCount");
         el.store = el.querySelector("vc-store");
       },
       /*
@@ -234,7 +234,7 @@
 
         var el = this;
 
-        var header = el.querySelector(".header .wrapper");
+        var header = el.querySelector(".vc-grid-header .vc-grid-wrapper");
         var columnsKeys = Object.keys(el._misc.columns);
         var docFragment = document.createDocumentFragment();
         var headerCell;
@@ -264,7 +264,7 @@
 
             headerResize = document.createElement("div");
 
-            headerResize.classList.add("resizeIndicator");
+            headerResize.classList.add("vc-grid-resizeIndicator");
             headerResize.dataset.columnTarget = i;
 
             headerResize.onmousedown = function (e) {
@@ -332,7 +332,7 @@
         }
 
         if (el._misc.pageSizeType == "auto") {
-          el._refs.rowsWrapper.classList.add("autofitRows");
+          el._refs.rowsWrapper.classList.add("vc-grid-autofitRows");
         }
 
       },
@@ -481,13 +481,16 @@
         var stripPageSelector = document.createElement("div");
         var currentStripPage = document.createElement("div");
 
-        stripPageSelector.classList.add("stripPageSelector");
+        stripPageSelector.classList.add("vc-grid-stripPageSelector");
 
         currentStripPage.id = "currentPage";
         currentStripPage.dataset.page = 1;
         currentStripPage.innerHTML = 1;
-        currentStripPage.classList.add("currentPage");
-        currentStripPage.classList.add("stripPage");
+        currentStripPage.classList.add("vc-grid-currentPage");
+        currentStripPage.classList.add("bg8");
+        currentStripPage.classList.add("fg2");
+        currentStripPage.classList.add("vc-grid-stripPage");
+        currentStripPage.classList.add("bg2-hoverable-border");
 
         el._misc.currentPage = 1;
 
@@ -508,7 +511,7 @@
         var separator = document.createElement("div");
         var totalPages = document.createElement("div");
 
-        inputPageSelector.classList.add("inputPageSelector");
+        inputPageSelector.classList.add("vc-grid-inputPageSelector");
 
         pageInput.classList.add("pageInput");
         pageInput.setAttribute("contenteditable", "true");
@@ -553,7 +556,7 @@
 
         var el = this;
 
-        el.querySelector(".pagControls").style.display = "none";
+        el.querySelector(".vc-grid-pagControls").style.display = "none";
         el._misc.infiniteScroll = {};
         el._misc.infiniteScroll.loadedPages = [];
         el._misc.infiniteScroll.checkedPages = [];
@@ -777,7 +780,9 @@
           dataObject = storeData[key];
 
           row = document.createElement("vc-row");
-          row.classList.add("entryRow");
+          row.classList.add("vc-grid-entryRow");
+          row.classList.add("bg3-border");
+          row.classList.add("bg2-hoverable");
           row.id = key;
 
           if (el._misc.infiniteScroll.loadedPages.indexOf(Math.floor(rowIndex / parseInt(el.pageSize)) + 1) == -1) {
@@ -1062,7 +1067,9 @@
           dataObject = storeData[key];
 
           row = document.createElement("vc-row");
-          row.classList.add("entryRow");
+          row.classList.add("vc-grid-entryRow");
+          row.classList.add("bg3-border");
+          row.classList.add("bg2-hoverable");
           row.dataset.entryId = dataObject[el.store.idProperty];
 
           //For each column we have in the grid we will look for its value on the dataObject
@@ -1076,7 +1083,7 @@
 
           if (el.autofit == "true" || el.autofit == true) {
 
-            row.classList.add("autofit");
+            row.classList.add("vc-grid-autofit");
 
           } else {
 
@@ -1126,7 +1133,9 @@
           dataObject = storeData[i];
 
           row = document.createElement("vc-row");
-          row.classList.add("entryRow");
+          row.classList.add("vc-grid-entryRow");
+          row.classList.add("bg3-border");
+          row.classList.add("bg2-hoverable");
           row.dataset.entryId = dataObject[el.store.idProperty];
 
           //For each column we have in the grid we will look for its value on the dataObject
@@ -1140,7 +1149,7 @@
 
           if (el.autofit == "true" || el.autofit == true) {
 
-            row.classList.add("autofit");
+            row.classList.add("vc-grid-autofit");
 
           } else {
 
@@ -1196,8 +1205,9 @@
 
           cell.onReady(function () {
 
-            var cellContent = this.querySelector(".cellContent");
+            var cellContent = this.querySelector(".vc-grid-cellContent");
 
+            // cellContent.classList.add("bg1-outline");
             cellContent.setAttribute("contenteditable", "true");
             cellContent.spellcheck = false;
 
@@ -1277,7 +1287,7 @@
         //One row will be the smallest number of rows possible, we will not allow pages with no rows
         if (rowsCapacity >= 1) {
 
-          var existingDummiesCount = el.querySelectorAll(".dummyRow").length;
+          var existingDummiesCount = el.querySelectorAll(".vc-grid-dummyRow").length;
           var totalPageRows = existingDummiesCount + entriesCount;
           var dummyRowsAmount = rowsCapacity - entriesCount;
 
@@ -1286,18 +1296,18 @@
           if (rowsCapacity < totalPageRows) {
 
             var rowsAmountDifference = totalPageRows - rowsCapacity;
-            var rows = el._refs.rowsWrapper.querySelectorAll(".entryRow, .dummyRow");
+            var rows = el._refs.rowsWrapper.querySelectorAll(".vc-grid-entryRow, .vc-grid-dummyRow");
             var rowsLength = rows.length;
             var lastRowIndex;
 
             for (var i = rowsAmountDifference; i > 0; i--) {
               lastRowIndex = rowsLength - 1;
 
-              if (rows[lastRowIndex].classList.contains("entryRow")) {
+              if (rows[lastRowIndex].classList.contains("vc-grid-entryRow")) {
                 el._decreaseEntriesCount();
               }
 
-              el._refs.rowsWrapper.removeChild(el._refs.rowsWrapper.querySelectorAll(".entryRow, .dummyRow")[lastRowIndex]);
+              el._refs.rowsWrapper.removeChild(el._refs.rowsWrapper.querySelectorAll(".vc-grid-entryRow, .vc-grid-dummyRow")[lastRowIndex]);
               rowsLength--;
             }
 
@@ -1310,8 +1320,8 @@
 
             for (var i = 0; i < newDummiesCount; i++) {
               dummyRow = document.createElement("div");
-              dummyRow.classList.add("autofit");
-              dummyRow.classList.add("dummyRow");
+              dummyRow.classList.add("vc-grid-autofit");
+              dummyRow.classList.add("vc-grid-dummyRow");
               dummyDocFragment.appendChild(dummyRow);
             }
 
@@ -1480,9 +1490,10 @@
         var columnRule = el._misc.columns[el._misc.resize.header.column].rule;
 
         //At the end of the resizing event we remove the header resizing indicator
-        var headersWithResizingClass = el._refs.headersWrapper.querySelectorAll(".resizingHeader");
+        var headersWithResizingClass = el._refs.headersWrapper.querySelectorAll(".vc-grid-resizingHeader");
         for (var i = 0; i < headersWithResizingClass.length; i++) {
-          headersWithResizingClass[i].classList.remove("resizingHeader");
+          headersWithResizingClass[i].classList.remove("vc-grid-resizingHeader");
+          headersWithResizingClass[i].classList.remove("bg8");
         }
 
         columnRule.style.minWidth = el._misc.resize.header.offsetWidth + "px";
@@ -1625,7 +1636,8 @@
         el._createResizeOverlay();
 
         //We add a class to the header of the columns we are resizing as an indicator
-        el._misc.resize.header.classList.add("resizingHeader");
+        el._misc.resize.header.classList.add("vc-grid-resizingHeader");
+        el._misc.resize.header.classList.add("bg8");
       },
       /*
       @function (private) _sortEntries
@@ -1635,7 +1647,7 @@
       */
       sortEntries: function (e, header) {
 
-        if (e.target != header.querySelector(".resizeIndicator")) {
+        if (e.target != header.querySelector(".vc-grid-resizeIndicator")) {
 
           var el = this;
 
@@ -1786,7 +1798,7 @@
       @param {Object} button
       */
       disableNavigationbutton: function (button) {
-        button.classList.add("disabled");
+        button.classList.add("vc-grid-disabled");
         button.dataset.enabled = "false";
       },
       /*
@@ -1795,7 +1807,7 @@
       @param {Object} button
       */
       enableNavigationButton: function (button) {
-        button.classList.remove("disabled");
+        button.classList.remove("vc-grid-disabled");
         button.dataset.enabled = "true";
       },
       /*
@@ -1813,7 +1825,7 @@
 
         var pagesToCreate = [];
 
-        el.querySelector(".stripPageSelector").innerHTML = "";
+        el.querySelector(".vc-grid-stripPageSelector").innerHTML = "";
 
         var loopStart;
         var loopEnd;
@@ -1860,7 +1872,8 @@
 
           pageItem = document.createElement("div");
 
-          pageItem.classList.add("stripPage");
+          pageItem.classList.add("vc-grid-stripPage");
+          pageItem.classList.add("bg2-hoverable-border");
           pageItem.dataset.page = pagesToCreate[i];
           pageItem.innerHTML = pagesToCreate[i];
           pageItem.onclick = function () {
@@ -1870,13 +1883,15 @@
 
           if (currentPage == pagesToCreate[i]) {
             pageItem.id = "currentPage";
-            pageItem.classList.add("currentPage");
+            pageItem.classList.add("vc-grid-currentPage");
+            pageItem.classList.add("bg8");
+            pageItem.classList.add("fg2");
             pageItem.setAttribute("selected", "true");
           }
           pageItemsDocFragment.appendChild(pageItem);
         }
 
-        el.querySelector(".stripPageSelector").appendChild(pageItemsDocFragment);
+        el.querySelector(".vc-grid-stripPageSelector").appendChild(pageItemsDocFragment);
       },
       /*
       @function (private) _updatePageSelector
@@ -1911,12 +1926,16 @@
         var newPageToSelect = pageSelector.querySelector('[data-page="' + page + '"]');
 
         if (previousSelectedPage) {
-          previousSelectedPage.classList.remove("currentPage");
+          previousSelectedPage.classList.remove("vc-grid-currentPage");
+          previousSelectedPage.classList.remove("bg8");
+          previousSelectedPage.classList.remove("fg2");
           previousSelectedPage.setAttribute("selected", "false");
         }
 
         if (newPageToSelect) {
-          newPageToSelect.classList.add("currentPage");
+          newPageToSelect.classList.add("vc-grid-currentPage");
+          newPageToSelect.classList.add("bg8");
+          newPageToSelect.classList.add("fg2");
           newPageToSelect.setAttribute("selected", "true");
         }
 
@@ -2089,6 +2108,9 @@
 
       var el = this;
       var sourceNodes = el.getSourceElements();
+
+      el.classList.add("bg7");
+      el.classList.add("bg2-boxshadow");
 
       el._setupRefs();
       el._setupNavigationButtons();
