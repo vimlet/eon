@@ -356,11 +356,14 @@ vcomet.importPublic = function (el, config) {
 
     if (config.properties) {
         var keys = Object.keys(config.properties);
-
+        var attributeKey;
+        
         for (var i = 0; i < keys.length; i++) {
+            attributeKey = vcomet.util.camelToHyphenCase(keys[i]);
+            // If the element has one of the reflected attributes we send that value as the value of the property
             vcomet.handleProperty(el, config, el.__reflectProperties, el.__observeProperties, {
                 key: keys[i],
-                value: config.properties[keys[i]]
+                value: el.hasAttribute(attributeKey) ? el.getAttribute(attributeKey) : config.properties[keys[i]]
             });
         }
     }
