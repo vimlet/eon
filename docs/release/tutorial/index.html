@@ -1,204 +1,54 @@
+<!DOCTYPE html>
+<html>
 
-  <!DOCTYPE html>
-  <html>
+<head>
+  <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="framework/materialIcons/material-icons.css">
+  <script src="framework/vcomet/vcomet.js"></script>
+  <script src="framework/custom/vc-editor/vs/loader.js"></script>
+  <script>
+    vcomet.import([
+      "framework/custom/vc-playground",
+      "framework/vcomet/ui/vc-layout",
+      "framework/custom/vc-doc-table",
+      "framework/custom/vc-doc-api",
+      "framework/custom/vc-doc-api-tree",
+      "framework/custom/vc-doc-article",
+      "framework/custom/vc-md-viewer",
+      "framework/custom/vc-editor",
+      "framework/custom/vc-loading",
+      "framework/custom/vc-searchbar", // TODO cojo el searchbar custom
+      "framework/custom/vc-doc-main",
+      "framework/vcomet/ui/vc-item",
+      "framework/vcomet/ui/vc-menu",
+      // "framework/custom/vc-dropdown",
+      //  "framework/vcomet/ui/vc-searchbar.html",
+      "framework/vcomet/ui/vc-scroll",
+      "framework/vcomet/data/store/vc-store.html",
+     "framework/vcomet/ui/vc-tree",
+     "framework/vcomet/ui/vc-treenode",
+      // "framework/custom/vc-tree",
+      // "framework/custom/vc-treenode",
+      "framework/vcomet/ui/vc-combobox",
+      "framework/vcomet/ui/vc-tabs",
+      "framework/vcomet/ui/vc-tab",
+      "framework/vcomet/ui/vc-button",
+      "framework/vcomet/ui/vc-panel",
+      "framework/vcomet/ui/vc-gutter",
+      "framework/vcomet/ui/vc-video",
+      "framework/vcomet/ui/vc-text"
+    ]);
+  </script>
 
-  <head>
-    <meta charset="utf-8"
-         name="viewport"
-         content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"
-         href="index.css">
-         </head>
-       <link rel="stylesheet" href="frameworks\fontAwesome\css\font-awesome.min.css">
+  <style>
+  </style>
 
+</head>
 
-<script src="frameworks\perfectScrollbar\perfect-scrollbar.js"></script>
-<link rel="stylesheet" href="frameworks\perfectScrollbar\perfect-scrollbar.css">
+<body>
+  <vc-doc-api-tree></vc-doc-api-tree>
+  <script type="text/javascript">
+  </script>
+</body>
 
-  <body>
-
-    <div id="container">
-    <div id="fakeMenuShadow"></div>
-      <div id="tree">
-        <input class="searchInput"
-             id="treeSearch"
-             type="text"
-             placeholder="Search"
-             onsearch="search(this.value);"
-             onkeyup="search(this.value);">
-             <div id="apiTreeSearchClose" class="searchInputCross fa fa-times" onclick="clearSearch();" style="display:none;"></div>
-             <div class="colorBand"></div>
-        <div id="treeData">
-          <div id="treeDataContent"><div class="treeLink treeSort" id="---1----Getting_Started" link="entries/[1]Getting_Started.html">Getting_Started<div class="treeClickableFile" onmouseover="treeHover(this, true);" onmouseout="treeHover(this, false);" onclick="openFile(event, this.parentNode.getAttribute('link')); treeSelected(this.parentNode); treeHover(this, false);" style="margin-left:-15px;:;"></div><div class="treeClickableFileHover" style="margin-left:-15px;:;"></div></div><div class="treeLink treeSort" id="---2----Using_Components" link="entries/[2]Using_Components.html">Using_Components<div class="treeClickableFile" onmouseover="treeHover(this, true);" onmouseout="treeHover(this, false);" onclick="openFile(event, this.parentNode.getAttribute('link')); treeSelected(this.parentNode); treeHover(this, false);" style="margin-left:-15px;:;"></div><div class="treeClickableFileHover" style="margin-left:-15px;:;"></div></div><div class="treeLink treeSort" id="---3----Create Components" link="entries/[3]Create Components.html">Create Components<div class="treeClickableFile" onmouseover="treeHover(this, true);" onmouseout="treeHover(this, false);" onclick="openFile(event, this.parentNode.getAttribute('link')); treeSelected(this.parentNode); treeHover(this, false);" style="margin-left:-15px;:;"></div><div class="treeClickableFileHover" style="margin-left:-15px;:;"></div></div><div class="treeLink treeSelectedParent" link="entries/Example.html">Example<div class="treeClickableFile treeSelected" onmouseover="treeHover(this, true);" onmouseout="treeHover(this, false);" onclick="openFile(event, this.parentNode.getAttribute('link')); treeSelected(this.parentNode); treeHover(this, false);" style="margin-left:-15px;:;"></div><div class="treeClickableFileHover" style="margin-left:-15px;:;"></div></div></div>
-        </div>
-        <div id=hideTreeButton class="fa fa-bars" onclick="toggleMobileTree();"></div>
-      </div>
-      <div id="explorer">
-      <div id="fakeMenu"></div>
-      <div class="colorBand"></div>
-        <iframe id="explorerIframe" src='entries\Example.html'></iframe>
-        <div id="treeClose" onclick="toggleMobileTree();"></div>
-      </div>
-    </div>
-
-
-    <script>
-  function init() {
-    if (window.location.href.indexOf("#") < 0) {
-      var articleUrl = 'entries/Example.html';
-      articleUrl = articleUrl.substring(0, articleUrl.length - 5);
-      parent.postMessage(articleUrl, "*");
-      window.location.href = window.location.href.split('#')[0] + "#!" + encodeURIComponent(articleUrl);
-    } else {
-      handleHashChange();
-    }
-  }
-
-  init();
-
-  
-  function handleHashChange() {
-    parent.postMessage(decodeURIComponent(window.location.href.split('#')[1]), "*");
-    var fileLocation;
-    if (window.location.href.indexOf("#!") >= 0) {
-      fileLocation = decodeURIComponent(window.location.href.split('#!')[1]);
-    } else {
-      fileLocation = decodeURIComponent(window.location.href.split('#')[1]);
-    }    
-    fileLocation = fileLocation.split("%20").join(" "); // Replace %20 added by browser cause url can not contain spaces
-    document.querySelector("#explorerIframe").contentWindow.location.replace(fileLocation + ".html");
-    var treeOptions = document.querySelectorAll(".treeLink");
-    treeOptions.forEach(function (treeOpt) {
-      if (treeOpt.getAttribute("link") === fileLocation + ".html") {
-        treeSelected(treeOpt);
-      }
-    });
-  }
-
-
-  window.onhashchange = function () {
-    handleHashChange();
-  };
-
-
-  function treeSelected(element) {
-    var elements = document.querySelectorAll(".treeLink");
-    elements.forEach(function (elem) {
-      elem.childNodes[1].classList.remove("treeSelected");
-      elem.classList.remove("treeSelectedParent");
-    });
-    element.childNodes[1].classList.add("treeSelected");
-    element.classList.add("treeSelectedParent");
-  }
-
-  function search(value) {
-    if (value) {
-      document.querySelector("#apiTreeSearchClose").setAttribute("style", "display:inline-block;");
-    } else {
-      document.querySelector("#apiTreeSearchClose").setAttribute("style", "display:none;");
-    }
-    val = value.toLowerCase().toLowerCase();
-    var elements = document.querySelectorAll(".treeLink, .treeFolder");
-    elements.forEach(function (elem) {
-      elem.classList.remove("menuSearchHide");
-      var inner = elem.innerText || elem.textContent;
-      if (inner.toLowerCase().indexOf(val) === -1) {
-        elem.classList.add("menuSearchHide");
-      }
-    });
-  }
-
-  function clearSearch() {
-    document.querySelector("#treeSearch").value = "";
-    search("");
-  }
-
-  function toggleMobileTree() {
-    document.querySelector('#tree').classList.toggle('showTreeMobile');
-    document.querySelector('#treeClose').classList.toggle('showTreeClose');
-  }
-
-
-  function toggleFolder(event, element) {
-    event.stopPropagation();
-    element.classList.toggle("treeFolderIsClosed");
-    var caretIcon = null;
-    var folderIcon = null;
-    Array.prototype.forEach.call(element.children, function (eC) {
-      if (eC.classList.contains("fa-caret-right") || eC.classList.contains("fa-caret-down")) {
-        caretIcon = eC;
-      } else if (eC.classList.contains("fa-folder-o") || eC.classList.contains("fa-folder-open-o")) {
-        folderIcon = eC;
-      }
-    });
-    if (caretIcon) {
-      caretIcon.classList.toggle("fa-caret-right");
-      caretIcon.classList.toggle("fa-caret-down");
-    }
-    if (folderIcon) {
-      folderIcon.classList.toggle("fa-folder-o");
-      folderIcon.classList.toggle("fa-folder-open-o");
-    }
-    var children = document.querySelectorAll("." + element.id);
-    if (element.classList.contains("treeFolderIsClosed")) {
-      children.forEach(function (child) {
-        child.classList.add("treeHideFiles");
-      });
-    } else {
-      children.forEach(function (child) {
-        var parent = document.querySelector("#" + child.getAttribute("parent"));
-        if (!parent.classList.contains("treeFolderIsClosed") && !parent.classList.contains("treeHideFiles")) {
-          child.classList.remove("treeHideFiles");
-        }
-      });
-    }
-  }
-
-  function openFile(event, url) {
-    event.stopPropagation();
-    // document.querySelector("#explorerIframe").setAttribute("src", url);
-    document.querySelector("#explorerIframe").contentWindow.location.replace(url);
-    var articleUrl = url.substring(0, url.length - 5);
-    window.location.href = window.location.href.split('#')[0] + "#!" + encodeURIComponent(articleUrl);
-    parent.postMessage(articleUrl, "*");
-    if (document.querySelector('#tree').classList.contains('showTreeMobile')) {
-      toggleMobileTree();
-    }
-  }
-
-  function treeHover(element, isIn) {
-    if (isIn) {
-      element.parentNode.querySelectorAll(".treeClickableFileHover")[0].classList.add("treeClickableFileHoverOn");
-      element.parentNode.classList.add("treeLinkHoverOn");
-    } else {
-      element.parentNode.querySelectorAll(".treeClickableFileHover")[0].classList.remove("treeClickableFileHoverOn");
-      element.parentNode.classList.remove("treeLinkHoverOn");
-    }
-  }
-
-  /* Detect click for closing menus */
-  document.onclick = function (event) {
-    if (event === undefined) event = window.event;
-    var target = 'target' in event ? event.target : event.srcElement;
-  };
-
-  var ps = new PerfectScrollbar('#treeData');
-
-  var tData = document.querySelector('#treeData');
-  var tContent = tData.querySelector("div");
-
-  if (tData.offsetHeight > tContent.offsetHeight) {
-    tData.querySelector(".ps__thumb-y").setAttribute("style", "height:0px");
-  }
-
-  window.onresize = function (event) {
-    ps.update();
-    if (tData.offsetHeight > tContent.offsetHeight) {
-      tData.querySelector(".ps__thumb-y").setAttribute("style", "height:0px");
-    }
-  };
-</script>
-
-  </body>
-
-  </html>
+</html>
