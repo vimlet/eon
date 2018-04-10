@@ -48,6 +48,14 @@
         reflect: true
       },
       /*
+        @property {Object} markedNode
+        @description Marked tree node reference
+      */
+      markedNode: {
+        value: "",
+        reflect: true
+      },
+      /*
         @property {Object} drag
         @description
       */
@@ -187,10 +195,33 @@
           el.selectedNode.selected = false;
           vcomet.triggerCallback("onNodeUnselected", el, el.selectedNode);
         }
+        if(el.markedNode){
+          el.markedNode.marked = false;
+        }
         // Select node
         el.selectedNode = node;
         node.selected = true;
         vcomet.triggerCallback("onNodeSelected", el, node);
+      },
+      /*
+        @function markNode
+        @description Mark given node at tree
+        @param {object} node [Tree node]
+      */
+      markNode: function (node) {
+        var el = this;
+        // Deselect previous selected node
+        if (el.markedNode) {
+          el.markedNode.marked = false;
+          vcomet.triggerCallback("onNodeUnmarked", el, el.markedNode);
+        }
+        if(el.selectedNode) {
+          el.selectedNode.selected = false;
+        }
+        // Select node
+        el.markedNode = node;
+        node.marked = true;
+        vcomet.triggerCallback("onNodeMarked", el, node);
       },
       /*
         @function create
@@ -654,6 +685,8 @@
       vcomet.createCallback("onDataReady", el);
       vcomet.createCallback("onNodeSelected", el);
       vcomet.createCallback("onNodeUnselected", el);
+      vcomet.createCallback("onNodeMarked", el);
+      vcomet.createCallback("onNodeUnmarked", el);
       vcomet.createCallback("onNodeRightClicked", el);
       vcomet.createCallback("onNodeCreate", el);
       vcomet.createCallback("onNodeCreated", el);
