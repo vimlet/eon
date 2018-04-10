@@ -1,0 +1,234 @@
+<template>
+
+<div class="main unselectable">
+  <div class="searchbar">
+    <div class="filtersButton">
+      <i class="material-icons">list</i>
+    </div>
+    <div class="fields">
+
+    </div>
+    <div class="searchButton">
+      <i class="material-icons">search</i>
+    </div>
+  </div>
+
+  </div>
+
+</template>
+
+<script>
+  vcomet.element("vc-searchbar", "vc-searchbar.css",{
+
+    privateProperties: {
+      /*
+      @property {object} fields
+      @description Node reference to the fields container
+      */
+      fields: {
+        value: {},
+        reflect: false
+      },
+      /*
+      @property {object} filters
+      @description Reference to the filters
+      */
+      filters: {
+        value: undefined,
+        reflect: false
+      },
+      /*
+      @property fieldsArray
+      @description Contains the fields to be used on the search
+      */
+      fieldsArray: {
+        value: [],
+        reflect: false
+      }
+    },
+    functions: {
+      /*
+      @function setup
+      @description Here we setup everything we need for the element
+      */
+      setup: function() {
+
+        var el = this;
+
+        el.setupSourceNodes();
+        el.setupEvents();
+        el.setupFilters();
+        el.setupFields();
+
+        vcomet.registerPathListener(el);
+      },
+      setupSourceNodes: function() {
+
+        var el = this;
+        var sourceNodes = el.getSourceElements();
+
+        el._fieldsArray = [];
+
+        for (var i = 0; i < sourceNodes.length; i++) {
+          if (sourceNodes[i].getAttribute("type") == "filters") {
+            el._filters = sourceNodes[i];
+          } else {
+            el._fieldsArray.push(sourceNodes[i]);
+          }
+        }
+
+      },
+      /*
+      @function setupEvents
+      @description Sets up the event listeners needed
+      @param {param_type} param_name [param_description]
+      */
+      setupEvents: function() {
+
+        var el = this;
+
+        //Creates the customBlur event listener
+        document.addEventListener("mousedown", function(e) {
+          if (e.button == 0) {
+            el.customBlur(e);
+          }
+        });
+
+        //Creates the search listener for the searchButton
+        el.querySelector(".searchButton").onclick = function() {
+          el.search();
+        };
+
+        //Creates the event for toggling the filters dropdown
+        el.querySelector(".filtersButton").onmousedown = function(e) {
+          el.toggleFilters(e);
+        };
+      },
+      /*
+      @function setupFilters
+      @description Sets up the filters dropdown with the user provided elements
+      */
+      setupFilters: function() {
+
+        var el = this;
+        var filtersDropdown = el._filters;
+
+        if (filtersDropdown) {
+
+          filtersDropdown.classList.add("filters");
+
+          el.children[0].appendChild(filtersDropdown);
+
+        } else {
+
+          el.querySelector(".filtersButton").style.display = "none";
+          vcomet.registerPathListener(el.querySelector(".filtersButton"));
+        }
+      },
+      /*
+      @function setupFields
+      @description Sets up the user provided elements as fields, we encapsulate them and add some style to it
+      */
+      setupFields: function() {
+
+        var fieldsContainer = this.querySelector(".fields");
+        var fragment = document.createDocumentFragment();
+        var field;
+
+        while (this._fieldsArray.length > 0) {
+
+          field = document.createElement("div");
+          field.classList.add("field");
+          field.appendChild(this._fieldsArray[0]);
+
+          fragment.appendChild(field);
+          this._fieldsArray.splice(0, 1);
+
+        }
+
+        fieldsContainer.appendChild(fragment);
+
+        this._fields = fieldsContainer;
+      },
+      /*
+      @function search
+      @description When the search function is triggered we also trigger the onSearch callback
+      */
+      search: function() {
+
+        var el = this;
+
+        var filters = el._filters ? el._filters.querySelectorAll("*[name]") : 0;
+
+        var filtersObj = {};
+        var field;
+
+        for (var i = 0; i < el._fields.children.length; i++) {
+
+          field = el._fields.children[i].firstChild;
+          filtersObj[field.getAttribute("name")] = field.getAttribute("value") || field.value;
+
+        }
+
+        for (var i = 0; i < filters.length; i++) {
+
+          var value;
+
+          if (filters[i].hasAttribute("checked") || ('checked' in filters[i])) {
+
+            value = filters[i].getAttribute("checked") || filters[i].checked;
+
+          } else {
+
+            value = filters[i].getAttribute("value") || field.value;
+
+          }
+
+          filtersObj[filters[i].getAttribute("name")] = value;
+        }
+        vcomet.triggerCallback("onSearch", el, el, [filtersObj]);
+      },
+      /*
+      @function customBlur
+      @description Hides the filters dropdown
+      */
+      customBlur: function(e) {
+
+        var el = this;
+
+        if (el._filters) {
+
+          if (el.isOnPath == false) {
+            el._filters.classList.remove("visible");
+          } else {
+            el._filters.classList.add("visible");
+          }
+
+        }
+      },
+      /*
+      @function toggleFilters
+      @description Toggles the visibility of the filters dropdown
+      @param {object} e [event]
+      */
+      toggleFilters: function(e) {
+
+        var el = this;
+
+        if (el._filters.classList.contains("visible") == true) {
+          el._filters.classList.remove("visible");
+        } else {
+          el._filters.classList.add("visible");
+        }
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    },
+    onCreated: function() {
+      vcomet.createCallback("onSearch", this);
+    },
+    onRender: function() {
+      this.setup();
+    }
+  });
+</script>

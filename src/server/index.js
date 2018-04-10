@@ -6,7 +6,7 @@ var app = express();
 var appDoc = express();
 
 app.use(express.static(path.join(__dirname, "../main")));
-appDoc.use(express.static(path.join(__dirname, "../../docs/release-new")));
+appDoc.use(express.static(path.join(__dirname, "../../docs/release")));
 
 // Examples REST
 rest.setup(app, bodyParser);
