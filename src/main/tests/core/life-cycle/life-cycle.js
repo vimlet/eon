@@ -108,7 +108,8 @@ function createElementRegistrable(name, registry) {
   return el;
 }
 
-function test() {
-  console.log("Test executed!");
-  return false;
+function internTest(callback) {
+  setTimeout(function(){
+    callback(true);
+  }, 1000);
 }
