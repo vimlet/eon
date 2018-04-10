@@ -98,6 +98,16 @@
         reflect: true
       },
       /*
+        @property {Boolean} marked 
+        @description Whether or not the tree node is marked
+        Values true, false
+        Default: false
+      */
+      marked: {
+        value: false,
+        reflect: true
+      },
+      /*
         @property {String} type 
         @description Tree node type
         Values: directory, file
@@ -168,7 +178,7 @@
       select: function () {
         var el = this;
         // Directories can not be selected
-        if ((!el.selected || el.selected == "false")) {
+        if (!vcomet.util.isTrue(el.selected)) {
           el._refs.hostTree.selectNode(el);
         }
         // Expand if directory
@@ -533,13 +543,13 @@
           expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
           icon.innerHTML = ["type", "all"].indexOf(tree.icons) > -1 ? "folder" : "";
         }
-      } else if (prop == "selected") {
+      } else if (prop == "selected" || prop == "marked") {
         if (vcomet.util.isTrue(value)) {
           // Select node style
-          el._refs.head.classList.add("vc-treenode-selected");
+          el._refs.head.classList.add("vc-treenode-" + prop);
         } else {
           // Deselect node style
-          el._refs.head.classList.remove("vc-treenode-selected");
+          el._refs.head.classList.remove("vc-treenode-" + prop);
         }
       }
 
