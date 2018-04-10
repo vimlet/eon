@@ -76,32 +76,34 @@ function loadExpected() {
 }
 
 function createElementRegistrable(name, registry) {
-  var el = document.createElement(name);
 
-  el.onCreated(function () {
-    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onCreated");
-  });
+  var el = vcomet.createElement(name, {
 
-  el.onInit(function () {
-    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onInit");
-  });
+    onCreated: function () {
+      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onCreated");
+    },
+  
+    onInit: function () {
+      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onInit");
+    },
+  
+    onTransformed: function () {
+      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onTransformed");
+    },
+  
+    onRender: function () {
+      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onRender");
+    },
+  
+    onBubbleRender: function () {
+      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onBubbleRender");
+    },
+  
+    onReady: function () {
+      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onReady");
+    }
 
-  el.onTransformed(function () {
-    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onTransformed");
-  });
-
-  el.onRender(function () {
-    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onRender");
-  });
-
-  el.onBubbleRender(function () {
-    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onBubbleRender");
-  });
-
-  el.onReady(function () {
-    vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onReady");
   });
 
   return el;
-
 }
