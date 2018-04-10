@@ -235,6 +235,7 @@
         var el = this;
         var ext, name;
         var icon = el.template.querySelector(".vc-treenode-icon");
+        var expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
         var tree = el._refs.hostTree;
 
         // Check if tree allows extensions
@@ -248,6 +249,7 @@
         el._setNodeName();
 
         icon.style.display = ["all", "type"].indexOf(tree.icons) > -1 ? "inline-block" : "none";
+        expandIcon.style.display = ["all", "expand"].indexOf(tree.icons) > -1 ? "block" : "none";
 
         // Set node icon
         if (["all", "type"].indexOf(tree.icons) > -1) {
@@ -260,7 +262,6 @@
               icon.innerHTML = "insert_drive_file";
             } else if (el.type === "directory" && !vcomet.util.isTrue(el.initExpanded)) {
               el.expanded = false;
-              var expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
               expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
               icon.innerHTML = "folder";
             }
@@ -283,7 +284,7 @@
         var el = this;
         var extensionIndex = el.name.lastIndexOf(".");
         if (extensionIndex > 0) {
-          var ext = node.name.substring(extensionIndex, el.path.length);
+          var ext = el.name.substring(extensionIndex, el.path.length);
           var extSub = ext.indexOf("/");
           var subFolder = "";
           if (extSub <= 0) {
