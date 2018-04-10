@@ -1,0 +1,472 @@
+<template>
+
+    <div class="vc-slider-wrapper unselectable">
+        <div class="vc-slider-shell">
+
+            <div class="vc-slider-track bg1-active"></div>
+            <input class="vc-slider-slider" type="range" />
+            <div class="vc-slider-fill fg1-active">
+                <div class="vc-slider-thumb fg1-active"></div>
+            </div>
+
+        </div>
+
+        <div class="vc-slider-display">0</div>
+    </div>
+
+</template>
+
+<script>
+    vcomet.element("vc-slider", "vc-slider.css", {
+        properties: {
+            /*
+              @property {String} name 
+              @description Slider name
+            */
+            name: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {String} value 
+              @description Slider value
+            */
+            value: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {Number} min 
+              @description Slider minimum range value
+              Value must be an integer
+            */
+            min: {
+                value: 0,
+                reflect: true
+            },
+            /*
+              @property {Number} max 
+              @description Slider maximum range value
+              Value must be an integer
+            */
+            max: {
+                value: 100,
+                reflect: true
+            },
+            /*
+              @property {Boolean} disabled 
+              @description Slider desactivation
+              Default: false
+            */
+            disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {String} orientation 
+              @description Slider orientation
+              Values can be: horizontal or vertical
+              Default: horizontal
+            */
+            orientation: {
+                value: "horizontal",
+                reflect: true
+            },
+            /*
+              @property {String} size 
+              @description Slider size respect to container
+              Value must be number percentage
+              Default: 50%
+            */
+            size: {
+                value: "50%",
+                reflect: true
+            },
+            /*
+              @property {Boolean} displayVisibility 
+              @description Slider range value visibility
+              Default: false
+            */
+            displayVisibility: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {String} displayAlign 
+              @description Slider range value align
+              Different depending the orientation of the slider
+              Vertical slider: center
+              Horizontal slider: center, left or right
+              Default: right
+            */
+            displayAlign: {
+                value: "right",
+                reflect: true
+            },
+            /*
+              @property {String} displayPosition 
+              @description Slider range value position
+              Different depending the orientation of the slider
+              Vertical slider: top, bottom, left or right
+              Horizontal slider: top & bottom
+              Default: valueless
+            */
+            displayPosition: {
+                value: "bottom",
+                reflect: true
+            },
+
+        },
+
+        privateProperties: {
+            /*
+              @property (private) {String} _formelement 
+              @description Set that slider is a form element
+              Value: slider
+            */
+            formelement: {
+                value: "slider"
+            },
+            /*
+              @property (private) {Object} _sliderNode 
+              @description Store slider input node
+            */
+            sliderNode: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _thumbNode 
+              @description Store slider thumb node
+            */
+            thumbNode: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _shellNode 
+              @description Store slider shell node
+            */
+            shellNode: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _trackNode 
+              @description Store slider track node
+            */
+            trackNode: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _fillNode
+              @description Store slider fill node
+            */
+            fillNode: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _rangeValue
+              @description Store slider range node
+            */
+            rangeValue: {
+                value: {}
+            },
+            /*
+              @property (private) {String} _currentvalue
+              @description Current slider value
+           */
+            currentvalue: {
+                value: ""
+            },
+            /*
+              @property (private) {Object} _thumbEvent
+              @description Store slider thumb event
+            */
+            thumbEvent: {
+                value: {}
+            }
+        },
+
+        functions: {
+            /*
+              @function setValue
+              @param {String} newVal [new slider value]
+              @description Set new slider value
+            */
+            setValue: function (newVal) {
+
+                this._sliderNode.value = newVal;
+                this._currentvalue = newVal;
+                this._updateSlider();
+                vcomet.triggerCallback("onChange", this);
+
+            }
+
+        },
+
+        privateFunctions: {
+            /*
+              @function (private) _updateSlider
+              @description Update slider view
+              @param {String} arg [control variable for vertical slider]
+            */
+            updateSlider: function (arg) {
+                var el = this;
+                var sliderVal = el._sliderNode.value;
+                var percentValue = (sliderVal - el._sliderNode.min) / (el._sliderNode.max - el._sliderNode.min); /* percentage slider value */
+                var thumbPosition = -5.7;
+                var fillSize = percentValue * 100;
+                el._rangeValue.innerHTML = sliderVal;
+                (el.orientation == "horizontal") ? el._horizontalSlider(percentValue) : el._verticalSlider(percentValue, fillSize, arg);
+
+                el.value = el._sliderNode.value;
+            },
+
+
+            /*
+            @function (private) _horizontalSlider
+            @description Specify horizontal slider view style
+            @param {Number} percentValue [percentage slider value]
+            */
+            horizontalSlider: function (percentValue) {
+                var trackSize = 100;
+
+                this._fillNode.style.width = (percentValue * trackSize) + "%";
+                this._trackNode.style.width = trackSize + "%"; /* adjust for border */
+            },
+
+            /*
+              @function (private) _verticalSlider
+              @description Specify vertical slider view style
+              @param {Number} percentValue [percentage slider value]
+              @param {Number} fillSize [Correspond to value of slider]
+              @param {String} arg [control variable to check first time update slider]
+            */
+            verticalSlider: function (percentValue, fillSize, arg) {
+
+                // If its the first the verticalSlider is called then we have
+                // to invert the width and height
+                if (arg && arg == "first") {
+                    // Stores the width of the input when it is horizontal,
+                    // then use it as height when it is vertical
+                    var actualNodeWidth = this.offsetWidth;
+
+                    // Sets an automatic width for the vertical slider, because the value of the height when
+                    // it was horizontal may not be a correct measurement
+                    this.style.width = "auto";
+                    this.style.height = actualNodeWidth + "px";
+
+                    (navigator.userAgent.indexOf("Firefox") != -1 || navigator.userAgent.indexOf("Trident") != -1) ? this._sliderNode.setAttribute("orient", "vertical") : null;
+
+                }
+
+                this.style.display = "inline-block";
+                this._fillNode.style.height = (percentValue * 100) + "%";
+
+            },
+
+            /*
+              @function (private) _thumbMotion
+              @description Slider thumb movement and update slider value
+            */
+            thumbMotion: function () {
+                var el = this;
+
+                el._thumbNode.addEventListener("pointerdown", startThumb, false);
+                el._thumbEvent = startThumb;
+
+                function startThumb(e) {
+                    el._startY = e.clientY;
+                    document.addEventListener("pointermove", moveThumb, false);
+                    document.addEventListener("pointerup", function stopThumb(e) {
+
+                        document.removeEventListener("pointermove", moveThumb, false);
+                        document.removeEventListener("pointerup", stopThumb, false);
+                    }, false);
+
+                }
+
+                function moveThumb(e) {
+                    el._interactionSlider(e);
+                    el._updateCurrentValue();
+                }
+
+            },
+
+            /*
+              @function (private) _interactionSlider
+              @description Funtionality when interacting with the slider
+              Only for thumb interaction and click interaction on iOS devices
+              @param {Object} e [Event]
+            */
+            interactionSlider: function (e) {
+                var el = this;
+                var trackSize;
+                var max = parseInt(el.max);
+                var min = parseInt(el.min);
+
+                if (el.orientation == "horizontal") {
+                    trackSize = el._sliderNode.offsetWidth;
+                    var shellLeft = el._shellNode.getBoundingClientRect().left;
+                    var trackRight = shellLeft + trackSize;
+
+                    if (e.clientX <= trackRight && e.clientX >= shellLeft) {
+                        el._sliderNode.value = (((e.clientX - shellLeft) / trackSize) * (max - min)) + min;
+                        el._updateSlider();
+                    }
+
+                } else {
+                    trackSize = el._sliderNode.offsetHeight;
+                    var shellTop = el._shellNode.getBoundingClientRect().top;
+                    var trackBottom = shellTop + trackSize;
+                    var sliderNode = parseInt(el._sliderNode.value);
+                    var positionDiff;
+
+                    if (e.clientY <= trackBottom && e.clientY >= shellTop) {
+
+                        // When interacion is moving the thumb
+                        if (el._startY) {
+                            positionDiff = el._startY - e.clientY;
+                            el._startY = e.clientY;
+
+                            // Vertical click slider on iOS
+                        } else {
+                            positionDiff = el._fillNode.getBoundingClientRect().top - e.clientY;
+                        }
+
+                        el._fillNode.style.height = (el._fillNode.offsetHeight + positionDiff) + "px";
+                        el._sliderNode.value = ((el._fillNode.offsetHeight / trackSize) * (max - min)) + min;
+                        el._rangeValue.innerHTML = el._sliderNode.value;
+                        el.value = el._sliderNode.value;
+                    }
+                }
+            },
+
+            /*
+              @function (private) _updateDisabled
+              @description Updates disabled status and activates the thumb motion when it is not disabled
+              @param {String} newVal [new value of disabled]
+            */
+            updateDisabled: function (newVal) {
+                var shell = this.querySelector(".vc-slider-shell");
+
+                if (!vcomet.util.isTrue(newVal)) {
+                    this._sliderNode.removeAttribute("disabled");
+                    shell.classList.remove("vc-slider-disabled");
+                    this._rangeValue.classList.remove("fg1-disabled");
+                    this._fillNode.classList.remove("bg1-disabled");
+                    this._thumbNode.classList.remove("bg1-disabled");
+                    this._fillNode.classList.add("fg1-active");
+                    this._thumbNode.classList.add("fg1-active");
+                    this._trackNode.classList.remove("bg1-disabled");
+                    this._thumbMotion();
+
+                } else {
+                    this._sliderNode.setAttribute("disabled", "true");
+                    shell.classList.add("vc-slider-disabled");
+                    this._rangeValue.classList.add("fg1-disabled");
+                    this._fillNode.classList.add("bg1-disabled");
+                    this._thumbNode.classList.add("bg1-disabled");
+                    this._fillNode.classList.remove("fg1-active");
+                    this._thumbNode.classList.remove("fg1-active");
+                    this._trackNode.classList.add("bg1-disabled");
+                    this._thumbNode.removeEventListener("pointerdown", this._thumbEvent, false);
+                }
+
+            },
+
+            /*
+              @function (private) _updateCurrentValue
+              @description Updates slider current vlaue and trigger onCHange callback
+            */
+            updateCurrentValue: function () {
+                var el = this;
+                (el.value !== el._currentvalue) ? vcomet.triggerCallback("onChange", el) : null;
+                el._currentvalue = (el.value !== el._currentvalue) ? el.value : el._currentvalue;
+            },
+
+            /*
+             @function (private) _verifyScreenResolution
+             @description Set device type
+           */
+            verifyScreenResolution: function () {
+                var el = this;
+
+                // Small devices view
+                if (window.innerWidth <= vcomet.tabletWidth) {
+                    el.setAttribute("version", "tablet");
+                    el.style.width = "100%";
+
+                    // Desktop view
+                } else {
+                    el.setAttribute("version", "desktop");
+                    el.style.width = (el.size) ? el.size : el.offsetWidth;
+                }
+
+                el._updateSlider("first");
+
+            },
+
+        },
+
+        onCreated: function () {
+            vcomet.createCallback("onChange", this);
+        },
+
+        onRender: function () {
+            var el = this;
+
+            el._shellNode = el.querySelector(".vc-slider-shell");
+            el._trackNode = el.querySelector(".vc-slider-track");
+            el._sliderNode = el.querySelector(".vc-slider-slider");
+            el._fillNode = el.querySelector(".vc-slider-fill");
+            el._thumbNode = el.querySelector(".vc-slider-thumb");
+            el._rangeValue = el.querySelector(".vc-slider-display");
+
+            el._sliderNode.setAttribute("name", el.name);
+            el._sliderNode.setAttribute("value", el.value);
+            el._sliderNode.setAttribute("min", el.min);
+            el._sliderNode.setAttribute("max", el.max);
+            el.setAttribute("touch-action", "none");
+            el._verifyScreenResolution();
+
+            el._currentvalue = el.value;
+
+            // On IE and IOS devices not work event "input"
+            // So is necessary a click event
+            if (vcomet.util.getBrowser() == "IE" || /iPad|iPhone|iPod/.test(navigator.platform)) {
+
+                el._sliderNode.addEventListener("click", function (event) {
+                    // On iOS devices clicking on the input does not update its status
+                    // Is is necessary  to do it programmatically
+                    /iPad|iPhone|iPod/.test(navigator.platform) ? el._interactionSlider(event) : el._updateSlider();
+                    el._updateCurrentValue();
+                }, false);
+
+            } else {
+                el._sliderNode.addEventListener("input", function (e) {
+                    el._updateSlider();
+                    el._updateCurrentValue();
+                }, false);
+            }
+
+            if (el.orientation == "horizontal" && el.displayAlign != "center") {
+                el.displayPosition = "";
+            }
+
+            el._updateDisabled(el.disabled);
+
+        },
+
+        onWindowResize: function (event) {
+            this._verifyScreenResolution();
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            switch (attrName) {
+                case "disabled":
+                    this._updateDisabled(newVal);
+                    break;
+            }
+        }
+    });
+
+</script>

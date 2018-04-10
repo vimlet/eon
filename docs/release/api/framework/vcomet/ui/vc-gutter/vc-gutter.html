@@ -1,0 +1,700 @@
+<script type="text/javascript">
+  vcomet.element("vc-gutter", "vc-gutter.css", {
+    privateProperties:{
+      /*
+        @property {Number} (private) initOffset
+        @description Natural maximum gutter drag value
+      */
+      max: {
+        value: ""
+      },
+      /*
+        @property {Boolean} (private) loaded
+        @description Whether or not the gutter element is loaded
+      */
+      loaded: {
+        value: false
+      },
+      /*
+        @property {String} (private) sizeProp
+        @description Size property name (dependes on gutter type)
+        Values: offsetWidth, offsetHeight
+        Default: offsetWidth
+      */ 
+      sizeProp: {
+        value: "offsetWidth" // offsetHeight
+      },
+      /*
+        @property {String} (private) posProp
+        @description CSS position property (dependes on gutter type)
+        Values: left, top
+        Default: left
+      */ 
+      posProp: {
+        value: "left"
+      },
+      /*
+        @property {Boolean} (private) collapsed
+        @description Whether or not the gutter element is collapsed
+      */
+      collapsed: {
+        value: false
+      },
+      /*
+        @property {Number} (private) splitterPosition
+        @description Splitter current position
+      */
+      splitterPosition: {
+        value: ""
+      },
+      /*
+        @property {Number} (private) resizeSectionSize
+        @description Second section current size value
+      */
+      resizeSectionSize: {
+        value: ""
+      },
+      /*
+        @property {Number} (private) gutterSize
+        @description Gutter size
+      */
+      gutterSize: {
+        value: ""
+      },
+      /*
+        @property {Number} (private) splitterBeforeCollapse
+        @description Splitter position value before being collapsed
+      */
+      splitterBeforeCollapse: {
+        value: ""
+      },
+      /*
+        @property {Number} (private) sectionBeforeCollapse
+        @description Second section size value before being collapsed
+      */
+      sectionBeforeCollapse: {
+        value: ""
+      },
+      /*
+        @property {Boolean} (private) desktop
+        @description Window resolution is between desktop resolution range values
+      */
+      desktop: {
+        value: true
+      }
+    },
+    properties: {
+      /*
+        @property {String} type
+        @description Gutter direction type
+        Values: horizontal, vertical
+        Default: horizontal
+      */
+      type: {
+        value: "horizontal",
+        reflect: true
+      },
+      /*
+        @property {Boolean} allowDrag
+        @description Whether or not the splitter can be draggable
+      */
+      allowDrag: {
+        value: true,
+        reflect: true
+      },
+      /*
+        @property {Boolean} collapsable
+        @description Whether or not the gutter can be collapsed
+      */
+      collapsable: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Object} splitter
+        @description Splitter node reference
+      */
+      splitter: {
+        value: {}
+      },
+      /*
+        @property {Object} section
+        @description First section node reference
+      */
+      section: {
+        value: {}
+      },
+      /*
+        @property {Object} secondSection
+        @description Second section node reference
+      */
+      secondSection: {
+        value: {}
+      },
+      /*
+        @property {Number} min
+        @description Minimum gutter drag value
+      */
+      min: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Number} max
+        @description Maximum gutter drag value
+      */
+      max: {
+        value: "",
+        reflect: true
+      }
+    },
+    functions: {
+      /*  
+        @function (private) 
+        @description
+      */
+      resize: function() {
+        var el = this;
+        var oldGutterSize = parseFloat(el._gutterSize);
+        var newGutterSize = parseFloat(el[el._sizeProp]);
+        if(newGutterSize !== oldGutterSize){
+          // Store gutter new size
+          el._gutterSize = newGutterSize;
+          // Handle gutter resize collapsed and no collapsed behaviour
+          el._splitterResize(oldGutterSize, newGutterSize);
+          el._sectionResize(oldGutterSize, newGutterSize);
+          // Update splitter drag limits
+          el._updateDragLimits();
+        }
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) setUpGutter
+        @description Apply gutter styling and user customizable behaviour
+      */
+      setUpGutter: function() {
+        var el = this;
+        // Set gutter type style
+        if(el.type == "vertical"){
+          el.classList.add("vc-gutter-vertical");
+          el._posProp = "top";
+          el._sizeProp = "offsetHeight";
+        }
+        // Check if its a nested gutter
+        // ** Solves Safari flex child fit parent bug
+        if(el.parentNode.tagName == "VC-SECTION"){
+          el.style.position = "absolute";
+        }
+        el._gutterSize = el[el._sizeProp];
+      },
+      /*
+        @function (private) setUpSection
+        @description Set sections styling
+      */
+      setUpSection: function() {
+        var el = this;
+        // Set gutter sections style
+        var children = el.getSourceElements();
+        for (var i = 0; i < children.length; i++) {
+          var section = children[i];
+          section.classList.add("vc-gutter-section");
+        }
+      },
+      /*
+        @function (private) createSeparator
+        @description Create splitter and configure it
+      */
+      createSeparator: function() {
+        var el = this;
+        // Create splitter element
+        var fragment = document.createDocumentFragment();
+        var splitter = document.createElement("div");
+        splitter.classList.add("vc-gutter-splitter");
+        splitter.classList.add("bg8");
+        fragment.appendChild(splitter);
+        // Make second section the target of size changes
+        var secSection = el.getSourceElements()[1];
+        secSection.classList.add("vc-gutter-sectionSecond");
+        // Position splitter centered
+        el._splitterPosition = splitter.style[el._posProp] = (parseFloat(el._gutterSize / 2)) + "px";
+   
+        // ** Set size as a style property for collapsable configuration purposes
+        var prop = vcomet.util.firstToLowerCase(el._sizeProp.split("offset")[1]);
+        el._resizeSectionSize = secSection.style[prop] = parseFloat(el._gutterSize / 2);
+        // Insert splitter
+        el.insertBefore(fragment, secSection);
+        // Store splitter position percentage in respect of gutter size
+        el._storeSplitterPercentage();
+        // Create collapsable icon
+        el._setCollapsable(splitter);
+      },
+      /*
+        @function (private) setUpQuickAccess
+        @description Set a quick access to the gutter structure elements
+      */
+      setUpQuickAccess: function() {
+        var el = this;
+        el.splitter = el.querySelector(".vc-gutter-splitter");
+
+        el.section = el.splitter.previousSibling;
+        el.secondSection = el.splitter.nextSibling;
+
+        if (el.splitter.previousSibling.tagName !== "VC-SECTION") {
+          el.section = el.splitter.previousSibling.previousSibling;
+        }
+
+      },
+      /*
+        @function (private) addGutterResizeListener
+        @description Resize listener for responsive purposes
+      */
+      addGutterResizeListener: function() {
+        var el = this;
+        // Throttle event triggering for better performance
+        var throttled = false;
+        var delay = 10;
+        vcomet.addResizeListener(el, "resize", function(){
+          if (!throttled) {
+            el.resize();
+            // Throttle
+            throttled = true;
+            // Set a timeout to un-throttle
+            setTimeout(function() {
+             throttled = false;
+            }, delay);
+          }
+        });
+      },
+      /*
+        @function (private) splitterResize
+        @description Reposition splitter after a gutter resize
+        @param {Number} oldGutterSize [Gutter size before resize]
+        @param {Number} newGutterSize [Gutter size after resize]
+      */
+      splitterResize: function(oldGutterSize, newGutterSize) {
+        var el = this;
+        var splitter = el.splitter;
+        var newSplitterPosition;
+        // Check whether or not the gutter is collapsed
+        if(el._collapsed){
+          el._moveSplitter(3);
+          // Update before collapse values
+          el._storeSplitterPercentage(el._splitterBeforeCollapse, oldGutterSize);
+          el._splitterBeforeCollapse = (newGutterSize * parseFloat(el._splitterBeforeCollapse)) / 100;
+        }else{
+          // Get splitter percentage position value
+          el._storeSplitterPercentage(el._splitterPosition, oldGutterSize);
+           // Get new splitter position value from percentage
+          if (!oldGutterSize) {
+            newSplitterPosition = el._splitterPosition = splitter.style[el._posProp] = (parseFloat(el._gutterSize / 2));
+          } else {
+            newSplitterPosition = (newGutterSize * parseInt(el._splitterPosition)) / 100;
+          }
+          // Position splitter according to the new gutter size
+          splitter.style[el._posProp] = newSplitterPosition + "px";
+        }
+      },
+      /*
+        @function (private) sectionResize
+        @description Reposition sections after a gutter resize
+        @param {Number} oldGutterSize [Gutter size before resize]
+        @param {Number} newGutterSize [Gutter size after resize]
+      */
+      sectionResize: function(oldGutterSize, newGutterSize) {
+        var el = this;
+        if(el._collapsed){
+          el._collapseSection();
+          // Update before collapse values
+          var newSectionValue = (newGutterSize * parseFloat(el._sectionBeforeCollapse)) / oldGutterSize;
+          el._sectionBeforeCollapse = newSectionValue;
+        }else{
+
+          // Resize sections
+          if (!oldGutterSize) {
+            newSectionValue = el.section[el._sizeProp];
+          } else {
+            newSectionValue = (newGutterSize * parseFloat(el._resizeSectionSize)) / oldGutterSize;
+          }
+
+          el._setSectionSize(newSectionValue);
+        }
+      },
+      /*
+        @function (private) drag
+        @description Mouse events listener needed for drag functionality
+      */
+      drag: function() {
+        var el = this;
+        if(el.allowDrag){
+          // Get gutter elements
+          var splitter = el.splitter;
+          // Draggable variables
+          var mousedown = false;
+          var moveValue = 0;
+          var delay = 0;
+          var throttled = false;
+          var axis = el.type == "horizontal" ? "clientX" : "clientY";
+          // Start slide on mouse down event
+          splitter.addEventListener("pointerdown", function(e){
+            // Needed to prevent bad mouseup event
+            e.preventDefault();
+            // Cross browser event path
+            var path = e.path|| (e.composedPath && e.composedPath());
+            // Only trigger mouse down on splitter element
+            if(e.button == 0){
+              mousedown = true;
+              // Get x/y value
+              moveValue = e[axis];
+            }
+          }, false);
+          // Slide element on mouse move
+          el.addEventListener("pointermove", function(e){
+            if(mousedown){
+              if (!throttled) {
+                // Get y/z translate pixels
+                var pixels = moveValue - e[axis];
+                // Set gutter no collapsed
+                if(el._collapsed && moveValue !== e[axis]){
+                  // Rotate arrow icon to its initial position
+                  el.splitter.querySelector(".vc-gutter-splitterCollapseIcon")
+                    .innerHTML = el.type =="vertical" ? "keyboard_arrow_up" : "keyboard_arrow_left";
+                  el._collapsed = false;
+                }
+                // Get top/left property value
+                var propertyMoveValue = parseFloat(splitter.style[el._posProp]) - pixels;
+                // Move splitter
+                el._checkMoveConstraints(pixels, propertyMoveValue);
+                // Section resize
+                el._checkResizeConstraints(pixels, propertyMoveValue);
+                // Update move value
+                moveValue = e[axis];
+                // Throttle
+                throttled = true;
+                // Set a timeout to un-throttle
+                setTimeout(function() {
+                  throttled = false;
+                }, delay);
+              }
+            }
+          });
+          // Stop slide on mouse up
+          document.addEventListener("pointerup", function(e){
+            // Make sure a movement has been fired
+            if(mousedown){
+              mousedown = false;
+            }
+          });
+          // Make sure css stule has been applied to splitter element
+          setTimeout(function () {
+            // Set splitter drag limits
+            el._updateDragLimits();
+          }, 0);
+        }
+      },
+      /*
+        @function (private) responsiveListener
+        @description Adapt gutter to smaller devices
+      */
+      responsiveListener: function() {
+        var el = this;
+        // Apply responsive under desktop resolution
+        el._applyResponsive();
+        // Throttle event triggering for better performance
+        var throttled = false;
+        var delay = 10;
+        window.addEventListener("resize", function(){
+          if (!throttled) {
+            el._applyResponsive();
+            // Throttle
+            throttled = true;
+            // Set a timeout to un-throttle
+            setTimeout(function() {
+             throttled = false;
+            }, delay);
+          }
+        });
+      },
+      /*
+        @function (private) applyResponsive
+        @description Check device resolution and change the splitter size
+      */
+      applyResponsive: function() {
+        var el = this;
+        // Increase splitter under desktop resolution
+        if(window.innerWidth <= 500 && el._desktop){
+          el._desktop = false;
+          el._changeSplitterSize(15);
+        }
+        // Set splitter standard size on desktop resolution
+        if(window.innerWidth > 500 && !el._desktop){
+          el._desktop = true;
+          el._changeSplitterSize(6);
+        }
+      },
+      /*
+        @function (private) changeSplitterSize
+        @description Change splitter style size property
+        @param {Number} value [New splitter size]
+      */
+      changeSplitterSize: function(value) {
+        var el = this;
+        var prop = el.type =="vertical" ? "height" : "width";
+        el.splitter.style[prop]= value + "px";
+        el._updateDragLimits();
+      },
+      /*
+        @function (private) moveSplitter
+        @description Move splitter to a specified position
+        @param {Number} value [New splitter position]
+      */
+      moveSplitter: function(value){
+        var el = this;
+        el._splitterPosition = el.splitter.style[el._posProp] = value + "px";
+      
+      },
+      /*
+        @function (private) setSectionSize
+        @description Resize gutters sections
+        @param {Number} value [New splitter position]
+      */
+      setSectionSize: function(value){
+        var el = this;
+        // Get style size property
+        var prop = vcomet.util.firstToLowerCase(el._sizeProp.split("offset")[1]);
+        el._resizeSectionSize = el.secondSection.style[prop] = value + "px";
+        el.section.style[prop] = (el._gutterSize - value) + "px";
+      },
+      /*
+        @function (private) checkMoveConstraints
+        @description Check drag limits before start
+        @param {Number} pixels [Move distance in pixels]
+        @param {Number} value [New splitter position]
+      */
+      checkMoveConstraints: function(pixels, value){
+        var el = this;
+        // Check border dragg limits
+        if(pixels < 0 && value < el._max){
+          // Under maximum value
+          el._moveSplitter(value);
+        }else if(pixels > 0 && value > el.min){
+          // Above minimum value
+          el._moveSplitter(value);
+        }
+      },
+      /*
+        @function (private) checkMoveConstraints
+        @description Check drag limits before resize sections
+        @param {Number} pixels [Move distance in pixels]
+        @param {Number} moveValue [New splitter position]
+      */
+      checkResizeConstraints: function(pixels, moveValue){
+        var el = this;
+        var value = el.secondSection[el._sizeProp] + pixels;
+        if(moveValue < el._max && moveValue > el.min){
+          // Get new section size value
+          var valPercentage = (value * 100) / el._gutterSize;
+          el._setSectionSize(value);
+        }
+      },
+      /*
+        @function (private) setCollapsable
+        @description Collapsable functionality
+        @param {Object} splitter [Splitter element reference]
+      */
+      setCollapsable: function(splitter) {
+        var el = this;
+        if(el.collapsable === true || el.collapsable === "true"){
+          // Create separator clickable div
+          var clickable = document.createElement("div");
+          clickable.setAttribute("class", "vc-gutter-splitterClickable");
+          clickable.classList.add("bg3");
+          clickable.classList.add("fg5");
+          clickable.classList.add("bg3-hoverable");
+          clickable.classList.add("fg3-hoverable");
+          clickable.setAttribute("touch-action", "none");
+          // TODO - Mobile miss click> create transaprent bigger child as clicable node
+          // Create icon
+          var icon = document.createElement("i");
+          icon.setAttribute("class", "unselectable material-icons vc-gutter-splitterCollapseIcon");
+          // Fix IE bad icon positioning on horizontal gutter
+          if(vcomet.util.getBrowser() === "IE" && el.type === "horizontal"){
+             icon.style.position = "relative";
+             icon.style.right = "4px";
+          }
+          icon.innerHTML = el.type =="vertical" ? "keyboard_arrow_up" : "keyboard_arrow_left";
+          clickable.appendChild(icon);
+          splitter.appendChild(clickable);
+          // Collapsable click functionality
+          el._clickCollapsable(splitter, splitter.nextSibling, clickable, icon);
+        }
+      },
+      /*
+        @function (private) clickCollapsable
+        @description Separator clickable zone click functionality
+        @param {Object} splitter [Splitter element reference]
+        @param {Object} secondSection [Gutter secondary section reference]
+        @param {Object} clickable [Gutter clickable node reference]
+        @param {Object} icon [Gutter clickable node icon reference]
+      */
+      clickCollapsable: function(splitter, secondSection, clickable, icon) {
+        var el = this;
+        // Store before collapse position values
+        el._splitterBeforeCollapse = parseFloat(splitter.style[el._posProp]);
+        var prop = vcomet.util.firstToLowerCase(el._sizeProp.split("offset")[1]);
+        el._sectionBeforeCollapse = el._gutterSize / 2;
+        var axis = el.type == "horizontal" ? "clientX" : "clientY";
+        var closeMargin = 3;
+        // Collapsable configuration variables
+        var mousedown = false;
+        var mousemove = false;
+        var initValue;
+        var moveValue;
+        // Set on mousedown listener
+        clickable.addEventListener("pointerdown", function(e){
+          if(e.button == 0){
+            initValue = moveValue = e[axis];
+            mousedown = true;
+          }
+        }, false);
+        // Set on mousemove listener
+        splitter.addEventListener("pointermove", function(e){
+          if(mousedown){
+            moveValue = e[axis];
+            mousemove = true;
+          }
+        });
+        // Set on mouseup listener
+        document.addEventListener("pointerup", function(){
+          var initMajor = initValue > moveValue;
+          var closeMarginReached = (moveValue - initValue) <= closeMargin ? true : false;
+          if(initMajor){
+             closeMarginReached = (initValue - moveValue) <= closeMargin ? true : false;
+          }
+          if(mousedown && (initValue === moveValue || closeMarginReached)){
+            if(el._collapsed){
+              // Set collapse animation style
+              el._toggleCollapseAnimation();
+              // Move splitter to its previous no collapsed position
+              el._moveSplitter(el._splitterBeforeCollapse);
+              el._setSectionSize(el._sectionBeforeCollapse);
+              // Rotate arrow icon to its initial position
+              icon.innerHTML = el.type == "vertical" ? "keyboard_arrow_up" : "keyboard_arrow_left";
+              el._collapsed = false;
+              // Stop animation
+              el._toggleCollapseAnimation(true);
+            }else{
+              // Set collapse animation style
+              el._toggleCollapseAnimation();
+              // Store new no collapsed values
+              el._splitterBeforeCollapse = parseFloat(splitter.style[el._posProp]);
+              el._sectionBeforeCollapse = parseFloat(secondSection.style[prop]) || el._gutterSize / 2;
+              // Move splitter
+              el._moveSplitter(3);
+              // Section resize
+              el._collapseSection();
+              // Rotate arrow icon
+              icon.innerHTML = el.type == "vertical" ? "keyboard_arrow_down" : "keyboard_arrow_right";
+              el._collapsed = true;
+              // Stop animation
+              el._toggleCollapseAnimation(true);
+            }
+          }else{
+            mousemove = false;
+          }
+          mousedown = false;
+        });
+      },
+      /*
+        @function (private) collapseSection
+        @description Collapse section
+      */
+      collapseSection: function() {
+        var el = this;
+        // Make second section 100% width subtracting splitter size
+        var splitterSize = el.splitter[el._sizeProp];
+        // Get new section size value
+        var value = el._gutterSize - splitterSize;
+        el._setSectionSize(value);
+      },
+      /*
+        @function (private) toggleCollapseAnimation
+        @description Add or remove animation styling for sections on collapse time
+        @param {Boolean} stop [Whether or not the animation should stop]
+      */
+      toggleCollapseAnimation: function(stop) {
+        var el = this;
+        var prop = vcomet.util.firstToLowerCase(el._sizeProp.split("offset")[1]);
+        if(stop){
+          // Stop animation
+          setTimeout(function () {
+            el.splitter.style.transition = "none";
+            el.section.style.transition = "none";
+            el.secondSection.style.transition = "none";
+          }, 200);
+        }else{
+          // Toggle animation
+          el.splitter.style.transition = el._posProp + ".2s";
+          el.section.style.transition = prop + ".2s";
+          el.secondSection.style.transition = prop + ".2s";
+        }
+      },
+      /*
+        @function (private) storeSplitterPercentage
+        @description Convert global splitter positions value to percentage
+        @param {Number} value [Splitter position value]
+        @param {Number} gutterSize [Gutter size value]
+      */
+      storeSplitterPercentage: function(value, gutterSize) {
+        var el = this;
+        if(typeof value !== "number" || el._collapsed){
+          // Get splitter position and gutter size
+          var pos = parseFloat(!value ? el._splitterPosition : value);
+          // Middle position value
+          var midPos = gutterSize ? gutterSize / 2 : el._gutterSize / 2;
+          // Calculate percentage position value
+          if(el._collapsed){
+            el._splitterBeforeCollapse = (pos * 50) / midPos;
+          }else{
+            el._splitterPosition = (pos * 50) / midPos;
+            el._splitterPosition = !el._splitterPosition ? 0: el._splitterPosition;
+          }
+        }
+      },
+      /*
+        @function (private) updateDragLimits
+        @description Update gutter drag limits on gutter resize
+      */
+      updateDragLimits: function() {
+        var el = this;
+        // Update maximum drag value
+        var splitterLimit = el.splitter[el._sizeProp];
+        var maxAllowed = el._gutterSize - splitterLimit;
+        // Update minimum value
+        el._max = !el.max ? maxAllowed : el.max > maxAllowed ? maxAllowed : el.max;
+        el.min = !el.min ? splitterLimit : el.min;
+      }
+    },
+    onRender: function() {
+      var el = this;
+      // Pointer events attribute required
+      el.setAttribute("touch-action", "none");
+      // Set up gutter
+      el._setUpGutter();
+      // Create splitter
+      el._createSeparator();
+      // Relevant gutter elements quick access
+      el._setUpQuickAccess();
+      // Set up sections
+      el._setUpSection();
+      // Drag functionality
+      el._drag();
+      // Control splitter position on window resize
+      el._addGutterResizeListener();
+      // Reponsive behavior
+      el._responsiveListener();
+      // Gutter completely set up
+      el._loaded = true;
+    }
+  });
+</script>
