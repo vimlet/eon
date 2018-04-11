@@ -54,13 +54,13 @@ module.exports = function (result) {
 
 function supportGitCredentials() {
     // Support credentials from .git/config    
-    var gitConfigPath = path.resolve(".git/config");      
+    var gitConfigPath = path.resolve(".git/config");
     if (fs.existsSync(gitConfigPath)) {
         try {
             var gitConfigString = fs.readFileSync(gitConfigPath).toString();
             var match = new RegExp("(http[s]*:\\/\\/)(.+:[^@]+)", "g").exec(gitConfigString);
             if (match && match.length == 3) {
-                gh_credentials =  match[2];                    
+                gh_credentials = match[2];
             }
         } catch (error) {
             // Do nothing
@@ -122,17 +122,19 @@ function handleRemoteVersions(value, cb) {
         } else {
             // Get name and version from value package@version
             // Install single package
-            singlePackageMode = true;
             var valueArray = value.split("@");
             var packageName = valueArray[0].toLowerCase();
-            singlePackageName = packageName;
             var packageVersion;
 
             
             if (packageName == "vcomet") {
                 try {
+                    
                     var data = getLatestVcometRelease.sync(null);
                     packageVersion = valueArray.length == 2 ? valueArray[1] : data;
+                    
+                    // TODO:
+                    // checkPackageExists.sync(null, packageName, packageVersion);
                     vcometJsonObject[packageName] = packageVersion;
 
                 } catch (error) {
@@ -140,6 +142,8 @@ function handleRemoteVersions(value, cb) {
                 }
 
             } else {
+                singlePackageMode = true;
+                singlePackageName = packageName;
                 packageVersion = valueArray.length == 2 ? valueArray[1] : getLatestDependencyRelease(packageName);
                 if (!vcometJsonObject.dependencies) {
                     vcometJsonObject.dependencies = {};
@@ -160,6 +164,35 @@ function handleRemoteVersions(value, cb) {
     });
 
 }
+
+// TODO:
+function checkPackageExists(name, version, cb) {
+    var url = "https://api.github.com/repos/" + gh_owner + "/" + gh_repo + "/releases/tags/" + version;
+
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                var responseObject = JSON.parse(xhttp.responseText);
+                var asset;
+                for (var i = 0; i < responseObject.assets.length; i++) {
+                    asset = responseObject.assets[i];
+                    if (asset.name.toLowerCase() == name.toLowerCase()) {
+                        cb(null, asset.browser_download_url);
+                        break;
+                    }
+                }
+            } else {
+                cb("Not valid version");
+            }
+        }
+    };
+
+    xhttp.open("GET", url, true);
+    xhttp.setRequestHeader("User-Agent", "vimlet");
+    xhttp.send();
+}
+
 
 // Search on GitHub the latest version of the required package
 function getLatestVcometRelease(cb) {
@@ -237,13 +270,10 @@ function handleLocalVersions(cb) {
 function installPackages(cb) {
 
     Sync(function () {
-
         var summaryMessage = "";
 
         // Avoid checking things twice by using flags
         var isVcomet = vcometJsonObject.vcomet && actualPackages.vcomet != vcometJsonObject.vcomet;
-        // var isCore = vcometJsonObject.core && actualPackages.core != vcometJsonObject.core;
-        // var isUI = vcometJsonObject.ui && actualPackages.ui != vcometJsonObject.ui;
         var isSinglePackageDependency = singlePackageMode && (!(singlePackageName in actualPackages.dependencies) || actualPackages.dependencies[singlePackageName] != vcometJsonObject.dependencies[singlePackageName]);
         var isMultiplePackageDependency = !singlePackageMode && vcometJsonObject.dependencies;
 
@@ -254,7 +284,6 @@ function installPackages(cb) {
 
         if (isSinglePackageDependency) {
             summaryMessage += formatSummaryMessage(singlePackageName, actualPackages.dependencies[singlePackageName], vcometJsonObject.dependencies[singlePackageName]);
-
         }
 
         if (isMultiplePackageDependency) {
@@ -278,7 +307,7 @@ function installPackages(cb) {
             try {
                 vcometFileName = vcometFileName + vcometJsonObject.vcomet + ".zip";
                 var url = getGitHubDownloadURL.sync(null, vcometFileName, vcometJsonObject.vcomet);
-               
+
                 cleanLocal("vcomet");
                 downloadAndExtract.sync(null, url, localPath, vcometJsonObject.vcomet);
                 updateVcometVersion("vcomet", vcometJsonObject.vcomet);
