@@ -128,6 +128,7 @@ function handleRemoteVersions(value, cb) {
             singlePackageName = packageName;
             var packageVersion;
 
+            
             if (packageName == "vcomet") {
                 try {
                     var data = getLatestVcometRelease.sync(null);
@@ -227,6 +228,7 @@ function handleLocalVersions(cb) {
     }
 
     actualPackages = foundPackages;
+    console.log('actualPackages', actualPackages);
     cb();
 }
 
