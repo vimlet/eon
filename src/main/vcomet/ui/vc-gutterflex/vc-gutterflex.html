@@ -11,8 +11,31 @@
         value: "horizontal",
         reflect: true
       },
+      /*
+        @property {String} spliiterSize
+        @description 
+      */
+      splitterSize: {
+        value: 6,
+        reflect: true
+      },
+      /*
+        @property {Boolean} allowDrag
+        @description
+      */
+      allowDrag: {
+        value: true,
+        reflect: true
+      }
     },
     privateProperties:{
+      /*
+        @property (private) {Object} _refs
+        @description
+      */
+      refs: {
+        value: {}
+      },
       /*
         @property (private) {Object} _misc 
         @description Tree internal used data
@@ -38,61 +61,131 @@
       setUpGutter: function() {
         var el = this;
         // Set gutter type style
-        if(el.type == "vertical"){
-          // el.classList.add("vc-gutter-vertical");
-          el._misc.posProp = el.type == "vertical" ? "top" : "left";
-          el._misc.sizeProp = el.type == "vertical" ? "offsetHeight" : "offsetWidth";
-        }
+        el._misc.posProp = el.type == "vertical" ? "top" : "left";
+        el._misc.sizeOffProp = el.type == "vertical" ? "offsetHeight" : "offsetWidth";
+        el._misc.sizeProp = el.type == "vertical" ? "height" : "width";
         // Check if it is a nested gutter
         // ** Solves Safari flex child fit parent bug
         if(el.parentNode.tagName == "VC-SECTION"){
           el.style.position = "absolute";
         }
-        el._misc.size = el[el._sizeProp];
+        el._misc.size = el[el._misc.sizeOffProp];
+      },
+      /*
+        @function (private) setUpSection
+        @description Set sections styling
+      */
+      setUpSection: function() {
+        var el = this;
+        var sectionSize;
+        var children = el.getSourceElements();
+        //
+        el._refs.section = children[0];
+        el._refs.secSection = children[1];
+        //
+        el._refs.section.classList.add("vc-gutterflex-section");
+        el._refs.secSection.classList.add("vc-gutterflex-section");
+        el._refs.secSection.classList.add("vc-gutterflex-secondary");
+        //
+        sectionSize = (el._misc.size / 2) - el.splitterSize;
+        el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";
       },
       /*
         @function (private) createSeparator
         @description Create splitter and configure it
       */
-      createSeparator: function() {
+      setUpSeparator: function() {
         var el = this;
         // Create splitter element
         var fragment = document.createDocumentFragment();
         var splitter = document.createElement("div");
-        splitter.classList.add("vc-gutter-splitter");
+        el._refs.splitter = splitter;
+        //
+        splitter.style[el._misc.sizeProp] = parseInt(el.splitterSize) + "px";  
+        splitter.classList.add("vc-gutterflex-splitter");
         splitter.classList.add("vc-bg8");
-        fragment.appendChild(splitter);
-
-        // Make second section the target of size changes
-        var secSection = el.getSourceElements()[1];
-        // secSection.classList.add("vc-gutter-sectionSecond");
-        // Position splitter centered
-
-        // el._misc.splitterPosition = splitter.style[el._posProp] = (parseFloat(el._misc.gutterSize / 2)) + "px";
-   
-        // ** Set size as a style property for collapsable configuration purposes
-        // var prop = vcomet.util.firstToLowerCase(el._sizeProp.split("offset")[1]);
-        // el._resizeSectionSize = secSection.style[prop] = parseFloat(el._gutterSize / 2);
-        // Insert splitter
-        console.log('secSection', secSection);
-        el.insertBefore(fragment, secSection);
-
-        // Store splitter position percentage in respect of gutter size
-        // el._storeSplitterPercentage();
-        // Create collapsable icon
-        // el._setCollapsable(splitter);
+        //
+        el.appendChild(splitter);
+        el.insertBefore(el._refs.splitter, el._refs.secSection);
       },
+      /*
+        @function (private) createSeparator
+        @description Create splitter and configure it
+      */
+      drag: function() {
+        var el = this;
+        if(vcomet.util.isTrue(el.allowDrag)){
+          // Draggable variables
+          var mousedown = false;
+          var moveValue = 0;
+          //TODO
+          var delay = 0;
+          var throttled = false;
+          var pixels;
+          var axis = el.type == "horizontal" ? "clientX" : "clientY";
+          // Start slide on mouse down event
+          splitter.addEventListener("pointerdown", function(e){
+            // Needed to prevent bad mouseup event
+            e.preventDefault();
+            // Cross browser event path
+            var path = e.path|| (e.composedPath && e.composedPath());
+            // Only trigger mouse down on splitter element
+            if(e.button == 0){
+              mousedown = true;
+              // Get x/y value
+              moveValue = e[axis];
+            }
+          }, false);
+           // Slide element on mouse move
+           el.addEventListener("pointermove", function(e){
+            if(mousedown){
+              if (!throttled) {
+                // Get y/z translate pixels
+                pixels = moveValue - e[axis];
+                // Set gutter no collapsed
+                if(el._misc.collapsed && moveValue !== e[axis]){
+                  // Rotate arrow icon to its initial position
+                  el.splitter.querySelector(".vc-gutter-splitterCollapseIcon")
+                    .innerHTML = el.type =="vertical" ? "keyboard_arrow_up" : "keyboard_arrow_left";
+                  el._collapsed = false;
+                }
+                // Get top/left property value
+                var propertyMoveValue = parseFloat(splitter.style[el._posProp]) - pixels;
+                // Move splitter
+                el._checkMoveConstraints(pixels, propertyMoveValue);
+                // Section resize
+                el._checkResizeConstraints(pixels, propertyMoveValue);
+                // Update move value
+                moveValue = e[axis];
+                // Throttle
+                throttled = true;
+                // Set a timeout to un-throttle
+                setTimeout(function() {
+                  throttled = false;
+                }, delay);
+              }
+            }
+          });
+        }
+        
+      }
     },
     onInit: function() {
       var el = this;
-      console.log('HEY');
       // Pointer events attribute required
       el.setAttribute("touch-action", "none");
       // Set up gutter
       el._setUpGutter();
-      // Create splitter
-      el._createSeparator();
-      
+      // Set up sections
+      el._setUpSection();
+    },
+    onTransformed: function () {
+      var el = this;
+       // Create splitter
+       el._setUpSeparator();
+       // Drag functionality
+       el._drag();
     }
+
   });
 </script>
