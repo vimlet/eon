@@ -32,13 +32,10 @@ function release(cb) {
         console.log(error);
       } else {
 
-        var src;
-        var dest;
-
         files.forEach(function (file) {
 
-          src = file;
-          dest = path.join("release/vcomet-" + packageObject.version, file.substring("src/main/vcomet".length));
+          var src = file;
+          var dest = path.join("release/vcomet-" + packageObject.version, file.substring("src/main/vcomet".length));
 
           if (fs.lstatSync(src).isFile()) {
             console.log("Copy: " + src + " => " + dest);
@@ -71,38 +68,36 @@ function releaseMin(cb) {
         console.log(error.message);
       }
 
-      var src;
-      var dest;
-      var extension;
-      var last = files[files.length - 1];
-
-      console.log("last:" + last);
+      var last
+      if (files.length > 0) {
+        last = files[files.length - 1];
+      }
 
       files.forEach(function (file) {
 
-        src = file;
-        dest = path.join("release/vcomet-" + packageObject.version + "-min", file.substring("src/main/vcomet".length));
+        var src = file;
+        var dest = path.join("release/vcomet-" + packageObject.version + "-min", file.substring("src/main/vcomet".length));
 
         if (fs.lstatSync(src).isFile()) {
 
-          extension = path.extname(src).toLowerCase();
+          var extension = path.extname(src).toLowerCase();
 
           if (extension == ".html" || extension == ".css" || extension == ".js") {
 
             minify(src, function (error, data) {
-
-              console.log("Minify: " + src + " => " + dest);
+              // Keep a copy of the variable in this scope
+              var srcCopy = src;
 
               if (error) {
-                console.log("Error found in " + src);
-                console.log(error);
+                console.log("Error found in " + srcCopy);
               } else {
+                console.log("Minify: " + srcCopy + " => " + dest);
+
                 fs.mkdirsSync(path.dirname(dest));
                 fs.writeFileSync(dest, data);
 
-                if (src === last) {
+                if (srcCopy === last) {
                   // Zip directory     
-                  console.log("TODO: should trigger once " + src + ":" + last);
                   commons.compress.pack(rootPath, rootPath + ".zip", "zip", null, null, cb);
                 }
               }
