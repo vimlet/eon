@@ -265,15 +265,13 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
 };
 
-vcomet.removeScriptsReadyScripts = function () {
-  
+vcomet.removeScriptsReadyScripts = function () {  
     var el = this;
     var scriptReadyScripts = document.head.querySelectorAll("script[scriptsready-script]");
 
-    for (let i = 0; i < scriptReadyScripts.length; i++) {
+    for (var i = 0; i < scriptReadyScripts.length; i++) {
         scriptReadyScripts[i].parentNode.removeChild(scriptReadyScripts[i]);
     }
-
 };
 
 vcomet.handleLinksAppend = function () {
