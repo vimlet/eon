@@ -31,11 +31,12 @@
     }
 
     #vc-doc-api-apiMenu {
-        padding-left: 50px;
+        padding-left: 0px;
         height: 50px;
         min-height: 50px;
-        background-color: #2b2b2b;
-        background-image: url("img/menu/menu.png");
+        /* background-color: #2b2b2b;
+        background-image: url("img/menu/menu.png"); */
+        background-color: transparent;
     }
 
     .vc-doc-colorBand {
@@ -102,7 +103,7 @@
         box-sizing: border-box;
         padding-right: 21px;
         padding-left: 25px;
-        padding-bottom: 50px;
+        margin-bottom: 300px;
         padding-top: 20px;
         height: calc(100% - 55px);
         min-width: 400px;
@@ -243,6 +244,13 @@
             bottom: -100px;
         }
     }
+
+
+    @media only screen and (max-width: 700px) {
+        #vc-doc-api-apiMenu {
+            padding-left: 50px;
+        }
+    }
 </style>
 
 <template>
@@ -252,14 +260,16 @@
             <vc-menu layout="horizontal" separators="false" background="true" direction="bottom-right">
                 <vc-item type="dropdown" name="Properties" class="vc-doc-api-menuDropdown" onclick="this.querySelector('vc-scroll').update()">
                     <vc-searchbar id="menuProperties" class="vc-doc-api-menuSearchBar">
-                        <input type="text" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));">
+                        <input type="text" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));"
+                            placeholder="Search">
                     </vc-searchbar>
                     <div id="menuPropertiesContainer"></div>
                 </vc-item>
 
                 <vc-item type="dropdown" name="Functions" class="vc-doc-api-menuDropdown" onclick="this.querySelector('vc-scroll').update()">
-                    <vc-searchbar id="menuFunctions" class="vc-doc-api-menuSearchBar">
-                        <input type="text" name="name" value="" onkeyup="document.querySelector('#menuFunctions').search(document.querySelector('#menuFunctions'));">
+                    <vc-searchbar id="menuFunctions" class="vc-doc-api-menuSearchBar" thickness="8">
+                        <input type="text" name="name" value="" onkeyup="document.querySelector('#menuFunctions').search(document.querySelector('#menuFunctions'));"
+                            placeholder="Search">
                     </vc-searchbar>
                     <div id="menuFunctionsContainer">
                     </div>
@@ -269,7 +279,7 @@
 
         </vc-layout>
         <div class="vc-doc-colorBand"></div>
-        <vc-scroll>
+        <vc-scroll thickness="8">
             <div id="vc-doc-api-content">
                 <div id="vc-doc-api-header">
                 </div>
@@ -599,7 +609,7 @@
                                     value: method.name,
                                     onclick: "this.parentNode.parentNode.parentNode.parentcomponent.goToFunction('funcpub" +
                                         method.name + "');",
-                                    color: "blue"
+                                    color: "#5264c3"
                                 });
                                 if (method.return) {
                                     currentPublicFSummary.data.push({
@@ -786,13 +796,13 @@
                         result.appendChild(table);
                     } else {
                         if (config.__voidControl) {
-                                el._misc.parsedCount++;
+                            el._misc.parsedCount++;
                             var table = document.createElement("vc-doc-table");
-                        table.ondrawn(function () {
-                            setTimeout(() => {
-                                document.querySelector('vc-doc-api')._onDrawn();
-                            }, 0);
-                        });
+                            table.ondrawn(function () {
+                                setTimeout(() => {
+                                    document.querySelector('vc-doc-api')._onDrawn();
+                                }, 0);
+                            });
                             table.columntitle = "Return, Description";
                             table.columnwidth = "200px ,calc(100% - 200px)";
                             var methodReturn = getReturn(method, true);
@@ -807,7 +817,7 @@
                         }
                     }
                     if (method.exceptions.length > 0) {
-                                el._misc.parsedCount++;
+                        el._misc.parsedCount++;
                         var table = document.createElement("vc-doc-table");
                         table.ondrawn(function () {
                             setTimeout(() => {
@@ -974,6 +984,7 @@
                 // Set properties menu
                 var propertiesMenuContainer = document.querySelector("#menuPropertiesContainer");
                 var propertiesMenuScroll = document.createElement("vc-scroll");
+                propertiesMenuScroll.thickness = 8;
                 data.properties.forEach(function (prop) {
                     var propItem = document.createElement("vc-item");
                     propItem.classList.add("vc-doc-api-menuSearchItem");
@@ -999,6 +1010,7 @@
                 // Set functions menu
                 var functionsMenuContainer = document.querySelector("#menuFunctionsContainer");
                 var functionsMenuScroll = document.createElement("vc-scroll");
+                functionsMenuScroll.thickness = 8;
                 data.methods.forEach(function (method) {
                     var funcItem = document.createElement("vc-item");
                     funcItem.classList.add("vc-doc-api-menuSearchItem");
@@ -1030,13 +1042,13 @@
 
             },
             // @function onDrawn (private) [Called when api is parsed and shown on screen]
-            onDrawn: function () {                
+            onDrawn: function () {
                 var el = this;
                 el._misc.parsedCount--;
                 if (el._misc.parsedCount <= 0) {
                     vcomet.triggerCallback("ondrawn", el, el, [el]);
                     var scrolls = document.querySelector("vc-doc-api").querySelectorAll("vc-scroll");
-                    scrolls.forEach(function(scr){
+                    scrolls.forEach(function (scr) {
                         scr.update();
                     });
                 }

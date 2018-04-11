@@ -9,7 +9,7 @@
         width: 100%;
         height: 100%;
         min-height: 80px;
-        box-sizing: border-box;
+    box-sizing: border-box;
     }
 
     vc-editor vc-loading {
@@ -39,6 +39,10 @@
 
     .vc-editor-until-render {
         display: none;
+    }
+
+    .monaco-editor {
+        padding: 10px 0px;
     }
 </style>
 
@@ -116,7 +120,8 @@
                         scrollBeyondLastLine: false, // Remove scrollbar when it is not needed
                         minimap: {
                             enabled: false
-                        }
+                        },
+                        mouseWheelScrollSensitivity:0
                     });
 
                     // Ugly solution to know when monaco is ready because there is not an onReady function implemented yet
@@ -139,11 +144,11 @@
                 el._setHeight(80, 300);
             },
             // @function setHeight (private) [Adjust editor height based on its content] @param min [Minimum height] @param max [Maximum height]
-            setHeight: function(min, max){
+            setHeight: function (min, max) {
                 var el = this;
                 var contentHeight = el._refs.editor.getScrollHeight();
                 contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
-                el.setAttribute("style","height:" + contentHeight + "px");
+                el.querySelector("#vc-editor-content").setAttribute("style", "height:" + contentHeight + "px");
             },
             // @function show (private) [Hides loading mask and shows editor]
             show: function () {
