@@ -228,7 +228,6 @@ function handleLocalVersions(cb) {
     }
 
     actualPackages = foundPackages;
-    console.log('actualPackages', actualPackages);
     cb();
 }
 
