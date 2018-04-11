@@ -790,3 +790,6 @@ vcomet.registerResizeListeners = function (el, config) {
     });
 
 };
+
+// Here we will register the main theme, the one declared by the user or our default one, its done here since this is the moment where this function exists
+vcomet.registerMainTheme(vcomet.theme);
