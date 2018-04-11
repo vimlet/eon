@@ -316,9 +316,9 @@
 
           //This event is to show the scrolls when the mouse hovers the container
           el.addEventListener("pointerenter", function (e) {
-            
+
             if (el._misc.pointerLeft) {
-              
+
               if (!vcomet.util.isTrue(el._misc.horizontal.drag.active) && !vcomet.util.isTrue(el._misc.vertical.drag.active)) {
                 el.showScrollbars(el._misc.hideScrollbarsMs);
               }
@@ -901,16 +901,16 @@
 
           //Here we use the computed style of the rail to get a more exact value of its height, we were using
           //offsetHeight before but it was returning a rounded integer, that caused missmatches when creating the bar height
-          el._misc.verticalBar.style.top = 0 + "px";
-          el._misc.verticalBar.style.height = Math.ceil(parseFloat(el.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight)) * el.growthConstant) + "px";
+          el._refs.verticalBar.style.top = 0 + "px";
+          el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight)) * el.growthConstant) + "px";
 
           //When left clicking on the scrollBar we will start the dragging event
-          el._misc.verticalBar.addEventListener("pointerdown", function (e) {
+          el._refs.verticalBar.addEventListener("pointerdown", function (e) {
             if (e.button == 0) {
               e.preventDefault();
               e.stopPropagation();
               el._misc.vertical.drag.active = true;
-              el._misc.vertical.drag.start = e.clientY - el._misc.verticalBar.getBoundingClientRect().top;
+              el._misc.vertical.drag.start = e.clientY - el._refs.verticalBar.getBoundingClientRect().top;
             }
           });
 
@@ -942,7 +942,7 @@
               e.preventDefault();
 
               // Handle the scroll if the mouse is not in an element that prevents it
-              if (el.verticalScroll.classList.contains("vc-scroll-active")) {
+              if (el._refs.verticalScroll.classList.contains("vc-scroll-active")) {
 
                 var preventDragScroll = false;
 
@@ -965,7 +965,7 @@
 
           });
 
-          el.verticalRail.addEventListener("pointerdown", function (e) {
+          el._refs.verticalRail.addEventListener("pointerdown", function (e) {
 
             if (el.railScrolls === true || el.railScrolls == "true") {
 
@@ -973,11 +973,11 @@
 
               var railScrollFunction = function () {
 
-                var railTop = el.verticalRail.getBoundingClientRect().top;
-                var railHeight = el.verticalRail.getBoundingClientRect().height;
+                var railTop = el._refs.verticalRail.getBoundingClientRect().top;
+                var railHeight = el._refs.verticalRail.getBoundingClientRect().height;
 
-                var barTop = el._misc.verticalBar.getBoundingClientRect().top;
-                var barHeight = el._misc.verticalBar.getBoundingClientRect().height;
+                var barTop = el._refs.verticalBar.getBoundingClientRect().top;
+                var barHeight = el._refs.verticalBar.getBoundingClientRect().height;
 
                 var isMeantToScrollUp = (railTop < e.clientY && e.clientY < barTop);
                 var isMeantToScrollDown = ((railTop + railHeight) > e.clientY && (barTop + barHeight) < e.clientY);
@@ -986,7 +986,7 @@
                 var currentVerticalPosition = el._misc.vertical.position;
                 var limit = el.offsetHeight - el.content.scrollHeight;
 
-                var shouldStop = parseFloat(el._misc.verticalBar.style.top) + barHeight > e.clientY && e.clientY > parseFloat(el._misc.verticalBar.style.top);
+                var shouldStop = parseFloat(el._refs.verticalBar.style.top) + barHeight > e.clientY && e.clientY > parseFloat(el._refs.verticalBar.style.top);
 
                 if (shouldStop) {
 
@@ -1028,7 +1028,7 @@
 
           el._misc.vertical.created = true;
 
-          vcomet.triggerCallback("onVerticalScrollCreated", el, el, [el.verticalScroll]);
+          vcomet.triggerCallback("onVerticalScrollCreated", el, el, [el._refs.verticalScroll]);
           // console.log("created vertical scroll");
         }
 
@@ -1047,16 +1047,16 @@
 
           //Here we use the computed style of the rail to get a more exact value of its width, we were using
           //offsetWidth before but it was returning a rounded integer, that caused missmatches when creating the bar width
-          el._misc.horizontalBar.style.left = 0 + "px";
-          el._misc.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
+          el._refs.horizontalBar.style.left = 0 + "px";
+          el._refs.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
 
           //When left clicking on the scrollBar we will start the dragging event
-          el._misc.horizontalBar.addEventListener("pointerdown", function (e) {
+          el._refs.horizontalBar.addEventListener("pointerdown", function (e) {
             if (e.button == 0) {
               e.preventDefault();
               e.stopPropagation();
               el._misc.horizontal.drag.active = true;
-              el._misc.horizontal.drag.start = e.clientX - el._misc.horizontalBar.getBoundingClientRect().left;
+              el._misc.horizontal.drag.start = e.clientX - el._refs.horizontalBar.getBoundingClientRect().left;
             }
           });
 
@@ -1079,7 +1079,7 @@
             el._misc.horizontal.drag.active = false;
           });
 
-          el.horizontalRail.addEventListener("pointerdown", function (e) {
+          el._refs.horizontalRail.addEventListener("pointerdown", function (e) {
 
             if (el.railScrolls === true || el.railScrolls == "true") {
 
@@ -1087,11 +1087,11 @@
 
               var railScrollFunction = function () {
 
-                var railLeft = el.horizontalRail.getBoundingClientRect().left;
-                var railWidth = el.horizontalRail.getBoundingClientRect().width;
+                var railLeft = el._refs.horizontalRail.getBoundingClientRect().left;
+                var railWidth = el._refs.horizontalRail.getBoundingClientRect().width;
 
-                var barLeft = el._misc.horizontalBar.getBoundingClientRect().left;
-                var barWidth = el._misc.horizontalBar.getBoundingClientRect().width;
+                var barLeft = el._refs.horizontalBar.getBoundingClientRect().left;
+                var barWidth = el._refs.horizontalBar.getBoundingClientRect().width;
 
                 var isMeantToScrollLeft = (railLeft < e.clientX && e.clientX < barLeft);
                 var isMeantToScrollRight = ((railLeft + railWidth) > e.clientX && (barLeft + barWidth) < e.clientX);
@@ -1100,7 +1100,7 @@
                 var currentHorizontalPosition = el._misc.horizontal.position;
                 var limit = el.offsetWidth - el.content.scrollWidth;
 
-                var shouldStop = parseFloat(el._misc.horizontalBar.style.left) + barWidth > e.clientX && e.clientX > parseFloat(el._misc.horizontalBar.style.left);
+                var shouldStop = parseFloat(el._refs.horizontalBar.style.left) + barWidth > e.clientX && e.clientX > parseFloat(el._refs.horizontalBar.style.left);
 
                 if (shouldStop) {
 
@@ -1133,7 +1133,7 @@
 
           el._misc.horizontal.created = true;
 
-          vcomet.triggerCallback("onHorizontalScrollCreated", el, el, [el.horizontalScroll]);
+          vcomet.triggerCallback("onHorizontalScrollCreated", el, el, [el._refs.horizontalScroll]);
           // console.log("created horizontal scroll");
         }
 
@@ -1158,7 +1158,7 @@
         if (direction == "vertical") {
 
           if (!el._misc.railScroll.hasVerticalListener) {
-            el._misc.verticalBar.addEventListener("transitionend", transitionEndFunction);
+            el._refs.verticalBar.addEventListener("transitionend", transitionEndFunction);
             el._misc.railScroll.hasVerticalListener = true;
           }
 
@@ -1169,7 +1169,7 @@
         } else {
 
           if (!el._misc.railScroll.hasHorizontalListener) {
-            el._misc.horizontalBar.addEventListener("transitionend", transitionEndFunction);
+            el._refs.horizontalBar.addEventListener("transitionend", transitionEndFunction);
             el._misc.railScroll.hasHorizontalListener = true;
           }
 
@@ -1229,7 +1229,7 @@
         square.style.height = el.thickness + "px";
         square.style.width = el.thickness + "px";
 
-        el.square = square;
+        el._refs.square = square;
         el.appendChild(square);
 
         el._misc.square.created = true;
@@ -1538,7 +1538,7 @@
               el._setupSquare();
             }
 
-            el.square.classList.add("vc-scroll-active");
+            el._refs.square.classList.add("vc-scroll-active");
             hasSquare = true;
           }
 
@@ -1559,7 +1559,7 @@
 
                 //We calculate the new bars width depending on the rail
                 el._handleVerticalScrollLength();
-                el.verticalScroll.classList.add("vc-scroll-active");
+                el._refs.verticalScroll.classList.add("vc-scroll-active");
 
                 el._updateVerticalPosition(-proportionalTranslatePosition);
                 el._updateVerticalBarPosition(el._misc.vertical.position);
@@ -1569,7 +1569,7 @@
                 }
 
                 //Changes the vertical bar size depending on the new vertical scroll height
-                el._misc.verticalBar.style.height = Math.ceil(parseFloat(el.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight)) * el.growthConstant) + "px";
+                el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight)) * el.growthConstant) + "px";
 
                 vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("resize", "vertical")]);
 
@@ -1578,21 +1578,21 @@
               //If theres no verticalScroll but we have the scroll, we will set the bar width to 100% and reposition it to fill the rail
               if (!hasVerticalScroll) {
 
-                el._misc.verticalBar.style.height = "100%";
-                el._misc.verticalBar.style.top = "0px";
+                el._refs.verticalBar.style.height = "100%";
+                el._refs.verticalBar.style.top = "0px";
 
                 //If the scroll is not static then we remove the active class to hide it
                 if (el._misc.vertical.static == false) {
-                  el.verticalScroll.classList.remove("vc-scroll-active");
+                  el._refs.verticalScroll.classList.remove("vc-scroll-active");
                 }
 
                 //If the square is created and the scroll is not static we can hide it
                 if (el._misc.square.created == true && el._misc.vertical.static == false) {
-                  el.square.classList.remove("vc-scroll-active");
+                  el._refs.square.classList.remove("vc-scroll-active");
                 }
 
-                if (el._misc.horizontal.created == true && el._misc.square.created == true && !el.square.classList.contains("vc-scroll-active")) {
-                  el.horizontalScroll.style.width = '100%';
+                if (el._misc.horizontal.created == true && el._misc.square.created == true && !el._refs.square.classList.contains("vc-scroll-active")) {
+                  el._refs.horizontalScroll.style.width = '100%';
                   el._updateHorizontalBarPosition();
                 }
 
@@ -1622,8 +1622,8 @@
 
                 //We calculate the new bars width depending on the rail
                 el._handleHorizontalScrollLength();
-                el.horizontalScroll.classList.add("vc-scroll-active");
-                el._misc.horizontalBar.style.width = Math.ceil((el.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
+                el._refs.horizontalScroll.classList.add("vc-scroll-active");
+                el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
 
                 el._updateHorizontalPosition(-proportionalTranslatePosition);
                 el._updateHorizontalBarPosition(el._misc.horizontal.position);
@@ -1633,7 +1633,7 @@
                 }
 
                 //Changes the vertical bar size depending on the new vertical scroll height
-                el._misc.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
+                el._refs.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
 
                 vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("resize", "horizontal")]);
 
@@ -1642,22 +1642,22 @@
               // If it doesnt have horizontal scroll we update some aspects of the scroll
               if (!hasHorizontalScroll) {
 
-                el._misc.horizontalBar.style.width = "100%";
-                el._misc.horizontalBar.style.left = "0px";
+                el._refs.horizontalBar.style.width = "100%";
+                el._refs.horizontalBar.style.left = "0px";
 
                 //If the scroll is not static then we remove the active class to hide it
                 if (el._misc.horizontal.static == false) {
-                  el.horizontalScroll.classList.remove("vc-scroll-active");
+                  el._refs.horizontalScroll.classList.remove("vc-scroll-active");
                 }
 
                 //If the square is created and the scroll is not static we can hide it
                 if (el._misc.square.created == true && el._misc.vertical.static == false) {
-                  el.square.classList.remove("vc-scroll-active");
+                  el._refs.square.classList.remove("vc-scroll-active");
                 }
 
-                if (el._misc.vertical.created == true && el._misc.square.created == true && !el.square.classList.contains("vc-scroll-active")) {
+                if (el._misc.vertical.created == true && el._misc.square.created == true && !el._refs.square.classList.contains("vc-scroll-active")) {
 
-                  el.verticalScroll.style.height = "100%";
+                  el._refs.verticalScroll.style.height = "100%";
                   el._updateVerticalBarPosition();
                 }
 
@@ -1712,7 +1712,7 @@
         var el = this;
         var currentVerticalPosition = el._misc.vertical.position;
 
-        var verticalRailRect = el.verticalRail.getBoundingClientRect();
+        var verticalRailRect = el._refs.verticalRail.getBoundingClientRect();
         var barTopProportion;
         var proportionalScrollTop;
 
@@ -1735,15 +1735,15 @@
 
             finalBarTopPosition = 0
 
-          } else if (pointerY > (verticalRailRect.top + verticalRailRect.height - el._misc.verticalBar.offsetHeight + parseFloat(el._misc.vertical.drag.start))) {
+          } else if (pointerY > (verticalRailRect.top + verticalRailRect.height - el._refs.verticalBar.offsetHeight + parseFloat(el._misc.vertical.drag.start))) {
 
-            finalBarTopPosition = parseFloat(window.getComputedStyle(el.verticalRail, null).getPropertyValue("height").split("px")[0] - el._misc.verticalBar.offsetHeight);
+            finalBarTopPosition = parseFloat(window.getComputedStyle(el._refs.verticalRail, null).getPropertyValue("height").split("px")[0] - el._refs.verticalBar.offsetHeight);
           }
 
-          el._misc.verticalBar.style.top = finalBarTopPosition + "px";
+          el._refs.verticalBar.style.top = finalBarTopPosition + "px";
 
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
-          barTopProportion = (el.verticalRail.offsetHeight - el._misc.verticalBar.offsetHeight) / parseFloat(el._misc.verticalBar.style.top.split("px")[0]);
+          barTopProportion = (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight) / parseFloat(el._refs.verticalBar.style.top.split("px")[0]);
           proportionalScrollTop = parseFloat(el.content.scrollHeight - el.offsetHeight) / barTopProportion;
 
           el._misc.vertical.position = -proportionalScrollTop;
@@ -1774,7 +1774,7 @@
         };
 
         if (!el._misc.wheelScroll.hasListener) {
-          el._misc.verticalBar.addEventListener("transitionend", transitionEndFunction);
+          el._refs.verticalBar.addEventListener("transitionend", transitionEndFunction);
           el._misc.wheelScroll.hasListener = true;
         }
 
@@ -1830,7 +1830,7 @@
         var el = this;
         var currentHorizontalPosition = el._misc.horizontal.position;
 
-        var horizontalRailRect = el.horizontalRail.getBoundingClientRect();
+        var horizontalRailRect = el._refs.horizontalRail.getBoundingClientRect();
         var barLeftProportion;
         var proportionalScrollLeft;
 
@@ -1853,15 +1853,15 @@
 
             finalBarLeftPosition = 0;
 
-          } else if (e.clientX > (horizontalRailRect.left + horizontalRailRect.width - el._misc.horizontalBar.offsetWidth + parseFloat(el._misc.horizontal.drag.start))) {
+          } else if (e.clientX > (horizontalRailRect.left + horizontalRailRect.width - el._refs.horizontalBar.offsetWidth + parseFloat(el._misc.horizontal.drag.start))) {
 
-            finalBarLeftPosition = parseFloat(window.getComputedStyle(el.horizontalRail, null).getPropertyValue("width").split("px")[0] - el._misc.horizontalBar.offsetWidth)
+            finalBarLeftPosition = parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] - el._refs.horizontalBar.offsetWidth)
           }
 
-          el._misc.horizontalBar.style.left = finalBarLeftPosition + "px";
+          el._refs.horizontalBar.style.left = finalBarLeftPosition + "px";
 
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
-          barLeftProportion = parseFloat(el.horizontalRail.offsetWidth - el._misc.horizontalBar.offsetWidth) / (parseFloat(el._misc.horizontalBar.style.left.split("px")[0]))
+          barLeftProportion = parseFloat(el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / (parseFloat(el._refs.horizontalBar.style.left.split("px")[0]))
           proportionalScrollLeft = (parseFloat(el.content.scrollWidth - el.offsetWidth) / barLeftProportion);
 
           el._updateHorizontalPosition(-proportionalScrollLeft);
@@ -1898,7 +1898,7 @@
         var el = this;
 
         if (el.scrollsLength != "fixed") {
-          el.verticalScroll.style.height = (el._misc.square.created && el.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+          el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
         }
       },
       /*
@@ -1910,7 +1910,7 @@
         var el = this;
 
         if (el.scrollsLength != "fixed") {
-          el.horizontalScroll.style.width = (el._misc.square.created && el.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+          el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
         }
 
       },
@@ -1925,9 +1925,9 @@
         var rail = document.createElement("div");
         var bar = document.createElement("div");
 
-        el.verticalScroll = scroll;
-        el.verticalRail = rail;
-        el._misc.verticalBar = bar;
+        el._refs.verticalScroll = scroll;
+        el._refs.verticalRail = rail;
+        el._refs.verticalBar = bar;
 
         scroll.classList.add("vc-scroll-verticalScroll");
         rail.classList.add("vc-scroll-verticalRail");
@@ -1966,9 +1966,9 @@
         var rail = document.createElement("div");
         var bar = document.createElement("div");
 
-        el.horizontalScroll = scroll;
-        el.horizontalRail = rail;
-        el._misc.horizontalBar = bar;
+        el._refs.horizontalScroll = scroll;
+        el._refs.horizontalRail = rail;
+        el._refs.horizontalBar = bar;
 
         scroll.classList.add("vc-scroll-horizontalScroll");
         rail.classList.add("vc-scroll-horizontalRail");
@@ -2045,8 +2045,11 @@
           el._handleArrowScroll(e, el, downButton);
         });
 
-        el.verticalScroll.insertBefore(upButton, el.verticalRail);
-        el.verticalScroll.appendChild(downButton);
+        el._refs.upArrowButton = upButton;
+        el._refs.downArrowButton = downButton;
+
+        el._refs.verticalScroll.insertBefore(upButton, el._refs.verticalRail);
+        el._refs.verticalScroll.appendChild(downButton);
 
       },
       /*
@@ -2073,6 +2076,9 @@
 
         leftButton.appendChild(leftIcon);
         leftButton.classList.add("vc-scroll-arrowButton");
+        leftButton.classList.add("bg1");
+        leftButton.classList.add("fg4");
+        leftButton.classList.add("fg1-hoverable");
         leftButton.classList.add("unselectable");
         leftButton.style.height = el.thickness + "px";
         leftButton.style.width = el.thickness + "px";
@@ -2084,6 +2090,9 @@
 
         rightButton.appendChild(rightIcon);
         rightButton.classList.add("vc-scroll-arrowButton");
+        rightButton.classList.add("bg1");
+        rightButton.classList.add("fg4");
+        rightButton.classList.add("fg1-hoverable");
         rightButton.classList.add("unselectable");
         rightButton.style.height = el.thickness + "px";
         rightButton.style.width = el.thickness + "px";
@@ -2093,8 +2102,11 @@
           el._handleArrowScroll(e, el, rightButton);
         });
 
-        el.horizontalScroll.insertBefore(leftButton, el.horizontalRail);
-        el.horizontalScroll.appendChild(rightButton);
+        el._refs.leftArrowButton = leftButton;
+        el._refs.rightArrowButton = rightButton;
+
+        el._refs.horizontalScroll.insertBefore(leftButton, el._refs.horizontalRail);
+        el._refs.horizontalScroll.appendChild(rightButton);
 
       },
       /*
@@ -2129,10 +2141,10 @@
         scrollTopProportion = (el.content.scrollHeight - el.offsetHeight) / translatePosition;
         scrollTopProportion = scrollTopProportion < 0 ? scrollTopProportion * -1 : scrollTopProportion;
 
-        proportionalBarTop = ((el.verticalRail.offsetHeight - el._misc.verticalBar.offsetHeight) / scrollTopProportion);
+        proportionalBarTop = ((el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight) / scrollTopProportion);
         proportionalBarTop = Math.floor(proportionalBarTop) == 0 ? Math.floor(proportionalBarTop) : proportionalBarTop;
 
-        el._misc.verticalBar.style.top = proportionalBarTop + "px";
+        el._refs.verticalBar.style.top = proportionalBarTop + "px";
       },
       /*
       @function (private) {Number} _getCurrentVertical
@@ -2142,8 +2154,8 @@
 
         var el = this;
 
-        var verticalBarTop = el._misc.verticalBar.offsetTop;
-        var verticalBarScrollable = el.verticalRail.offsetHeight - el._misc.verticalBar.offsetHeight;
+        var verticalBarTop = el._refs.verticalBar.offsetTop;
+        var verticalBarScrollable = el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight;
         var scrollTopProportion = (verticalBarTop / verticalBarScrollable) * (el.content.scrollHeight - el.offsetHeight);
 
         return scrollTopProportion;
@@ -2156,8 +2168,8 @@
 
         var el = this;
 
-        var horizontalBarLeft = el._misc.horizontalBar.offsetLeft;
-        var horizontalBarScrollable = el.horizontalRail.offsetWidth - el._misc.horizontalBar.offsetWidth;
+        var horizontalBarLeft = el._refs.horizontalBar.offsetLeft;
+        var horizontalBarScrollable = el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth;
         var scrollLeftProportion = (horizontalBarLeft / horizontalBarScrollable) * (el.content.scrollWidth - el.offsetWidth);
 
         return (scrollLeftProportion * -1);
@@ -2177,9 +2189,9 @@
         scrollLeftProportion = (el.content.scrollWidth - el.offsetWidth) / translatePosition;
         scrollLeftProportion = scrollLeftProportion < 0 ? scrollLeftProportion * -1 : scrollLeftProportion;
 
-        proportionalBarLeft = ((el.horizontalRail.offsetWidth - el._misc.horizontalBar.offsetWidth) / scrollLeftProportion);
+        proportionalBarLeft = ((el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / scrollLeftProportion);
 
-        el._misc.horizontalBar.style.left = proportionalBarLeft + "px";
+        el._refs.horizontalBar.style.left = proportionalBarLeft + "px";
       },
       /*
       @function updateHorizontalPosition
@@ -2278,6 +2290,64 @@
           this._container.style.position = "relative";
         }
 
+      },
+      updateThickness: function () {
+
+        var el = this;
+        
+        el.content.style.paddingRight = el.pushContent == "both" || el.pushContent == "vertical" ? el.thickness + "px" : "auto";
+        el.content.style.paddingBottom = el.pushContent == "both" || el.pushContent == "horizontal" ? el.thickness + "px" : "auto";
+
+        if (el._misc.square.created) {
+          el._refs.square.style.height = el.thickness + "px";
+          el._refs.square.style.width = el.thickness + "px";
+        }
+
+        if (el._refs.upArrowButton) {
+          el._refs.upArrowButton.style.height = el.thickness + "px";
+          el._refs.upArrowButton.style.width = el.thickness + "px";
+          el._refs.upArrowButton.style.fontSize = el.thickness + "px";
+          el._refs.upArrowButton.querySelector("i").style.fontSize = el.thickness + "px";
+        }
+
+        if (el._refs.downArrowButton) {
+          el._refs.downArrowButton.style.height = el.thickness + "px";
+          el._refs.downArrowButton.style.width = el.thickness + "px";
+          el._refs.downArrowButton.style.fontSize = el.thickness + "px";
+          el._refs.downArrowButton.querySelector("i").style.fontSize = el.thickness + "px";
+        }
+
+        if (el._refs.leftArrowButton) {
+          el._refs.leftArrowButton.style.height = el.thickness + "px";
+          el._refs.leftArrowButton.style.width = el.thickness + "px";
+          el._refs.leftArrowButton.style.fontSize = el.thickness + "px";
+          el._refs.leftArrowButton.querySelector("i").style.fontSize = el.thickness + "px";
+        }
+
+        if (el._refs.rightArrowButton) {
+          el._refs.rightArrowButton.style.height = el.thickness + "px";
+          el._refs.rightArrowButton.style.width = el.thickness + "px";
+          el._refs.rightArrowButton.style.fontSize = el.thickness + "px";
+          el._refs.rightArrowButton.querySelector("i").style.fontSize = el.thickness + "px";
+        }
+
+        if (el._refs.verticalScroll) {
+          el._refs.verticalScroll.style.width = el.thickness + "px";
+          if (el.scrollsLength != "fixed") {
+            el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+          }
+          el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight)) * el.growthConstant) + "px";
+        }
+
+        if (el._refs.horizontalScroll) {
+          el._refs.horizontalScroll.style.height = el.thickness + "px";
+          if (el.scrollsLength != "fixed") {
+            el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+          }
+          el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
+        }
+
+
       }
     },
     functions: {
@@ -2331,21 +2401,21 @@
       @description Shows the scrollbars
       */
       showScrollbars: function (hideScrollbarsMs) {
-        
+
         var el = this;
 
         clearTimeout(el._misc.hideScrollbarsTimeout);
 
-        if (el._misc.vertical.created == true && el.verticalScroll.classList.contains("vc-scroll-active") == true && el._misc.vertical.static == false) {
-          el.verticalScroll.style.opacity = 1;
+        if (el._misc.vertical.created == true && el._refs.verticalScroll.classList.contains("vc-scroll-active") == true && el._misc.vertical.static == false) {
+          el._refs.verticalScroll.style.opacity = 1;
         }
 
-        if (el._misc.horizontal.created == true && el.horizontalScroll.classList.contains("vc-scroll-active") == true && el._misc.horizontal.static == false) {
-          el.horizontalScroll.style.opacity = 1;
+        if (el._misc.horizontal.created == true && el._refs.horizontalScroll.classList.contains("vc-scroll-active") == true && el._misc.horizontal.static == false) {
+          el._refs.horizontalScroll.style.opacity = 1;
         }
 
         if (el._misc.square.created == true && el._misc.square.static == false) {
-          el.square.style.opacity = 1;
+          el._refs.square.style.opacity = 1;
         }
 
         if (hideScrollbarsMs) {
@@ -2368,15 +2438,15 @@
         el._misc.hideScrollbarsTimeout = setTimeout(function () {
 
           if (el._misc.vertical.created == true && el._misc.vertical.static == false) {
-            el.verticalScroll.style.opacity = 0;
+            el._refs.verticalScroll.style.opacity = 0;
           }
 
           if (el._misc.horizontal.created == true && el._misc.horizontal.static == false) {
-            el.horizontalScroll.style.opacity = 0;
+            el._refs.horizontalScroll.style.opacity = 0;
           }
 
           if (el._misc.square.created == true && el._misc.square.static == false) {
-            el.square.style.opacity = 0;
+            el._refs.square.style.opacity = 0;
           }
 
         }, miliseconds);
@@ -2431,6 +2501,15 @@
 
       el._setupContainerPosition();
       el._setupScrollBars();
+
+    },
+    onPropertyChanged: function (key, oldVal, newVal) {
+
+      var el = this;
+
+      if (key = "thickness") {
+        el._updateThickness();
+      }
 
     }
   });
