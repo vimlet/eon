@@ -26,6 +26,30 @@
       allowDrag: {
         value: true,
         reflect: true
+      },
+       /*
+        @property {Boolean} collapsable
+        @description Whether or not the gutter can be collapsed
+      */
+      collapsable: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Number} min
+        @description
+      */
+      min: {
+        value: 50,
+        reflect: true
+      },
+      /*
+        @property {Boolean} max
+        @description
+      */
+      max: {
+        value: 50,
+        reflect: true
       }
     },
     privateProperties:{
@@ -60,10 +84,11 @@
       */
       setUpGutter: function() {
         var el = this;
-        // Set gutter type style
+        // Set gutter type variables
         el._misc.posProp = el.type == "vertical" ? "top" : "left";
         el._misc.sizeOffProp = el.type == "vertical" ? "offsetHeight" : "offsetWidth";
         el._misc.sizeProp = el.type == "vertical" ? "height" : "width";
+        el._misc.axisProp = el.type == "vertical" ? "clientY" : "clientX";
         // Check if it is a nested gutter
         // ** Solves Safari flex child fit parent bug
         if(el.parentNode.tagName == "VC-SECTION"){
@@ -103,10 +128,75 @@
         //
         splitter.style[el._misc.sizeProp] = parseInt(el.splitterSize) + "px";  
         splitter.classList.add("vc-gutterflex-splitter");
-        splitter.classList.add("vc-bg8");
+        splitter.classList.add("bg8");
         //
         el.appendChild(splitter);
         el.insertBefore(el._refs.splitter, el._refs.secSection);
+        // Create collapsable icon
+        el._setCollapsable();
+      },
+      /*
+        @function (private) setCollapsable
+        @description Collapsable functionality
+        @param {Object} splitter [Splitter element reference]
+      */
+      setCollapsable: function() {
+        var el = this;
+        if(vcomet.util.isTrue(el.collapsable)){
+          // Create separator clickable div
+          var clickable = document.createElement("div");
+          clickable.setAttribute("class", "vc-gutterflex-splitterClickable");
+          // TODO - style encapsulation
+          clickable.classList.add("bg3");
+          clickable.classList.add("fg5");
+          clickable.classList.add("bg3-hoverable");
+          clickable.classList.add("fg3-hoverable");
+          clickable.setAttribute("touch-action", "none");
+          // TODO - Mobile miss click> create transparent bigger child as clickable node
+          // Create icon
+          var icon = document.createElement("i");
+          // TODO - style encapsulation
+          icon.setAttribute("class", "unselectable material-icons vc-gutterflex-splitterCollapseIcon");
+          // ** Fix IE bad icon positioning on horizontal gutter
+          if(vcomet.util.getBrowser() === "IE" && el.type === "horizontal"){
+             icon.style.position = "relative";
+             icon.style.right = "4px";
+          }
+          icon.innerHTML = el.type =="vertical" ? "keyboard_arrow_up" : "keyboard_arrow_left";
+          clickable.appendChild(icon);
+          el._refs.splitter.appendChild(clickable);
+          // Collapsable click functionality
+          el._clickCollapsable(clickable, icon);
+        }
+      },
+      /*
+        @function (private) clickCollapsable
+        @description Separator clickable zone click functionality
+        @param {Object} splitter [Splitter element reference]
+        @param {Object} secondSection [Gutter secondary section reference]
+        @param {Object} clickable [Gutter clickable node reference]
+        @param {Object} icon [Gutter clickable node icon reference]
+      */
+      clickCollapsable: function(clickable, icon) {
+        var el = this;
+        var closeMargin = 3;
+        // Store before collapse position values
+        el._misc.sizeBeforeCollapse = parseFloat(el._refs.section[el._misc.sizeOffProp]);
+        console.log('el._misc.sizeBeforeCollapse', el._misc.sizeBeforeCollapse);
+
+        // Set on mousedown listener
+        clickable.addEventListener("pointerdown", function(e){
+          if(e.button == 0){
+            console.log('', el._misc.collapsed);
+            if(!el._misc.collapsed){
+              el._refs.section.style[el._misc.sizeProp] = 0;
+              el._misc.collapsed = true;
+            } else {
+              el._refs.section.style[el._misc.sizeProp] = el._misc.sizeBeforeCollapse + "px";
+              el._misc.collapsed = false;
+            }
+          }
+        }, false);
       },
       /*
         @function (private) createSeparator
@@ -119,55 +209,66 @@
           var mousedown = false;
           var moveValue = 0;
           //TODO
-          var delay = 0;
-          var throttled = false;
           var pixels;
-          var axis = el.type == "horizontal" ? "clientX" : "clientY";
           // Start slide on mouse down event
-          splitter.addEventListener("pointerdown", function(e){
+          el._refs.splitter.addEventListener("pointerdown", function(e){
             // Needed to prevent bad mouseup event
             e.preventDefault();
-            // Cross browser event path
-            var path = e.path|| (e.composedPath && e.composedPath());
             // Only trigger mouse down on splitter element
             if(e.button == 0){
               mousedown = true;
               // Get x/y value
-              moveValue = e[axis];
+              moveValue = e[el._misc.axisProp];
             }
           }, false);
-           // Slide element on mouse move
-           el.addEventListener("pointermove", function(e){
+          // Slide element on mouse move
+          el.addEventListener("pointermove", function(e){
             if(mousedown){
-              if (!throttled) {
-                // Get y/z translate pixels
-                pixels = moveValue - e[axis];
-                // Set gutter no collapsed
-                if(el._misc.collapsed && moveValue !== e[axis]){
-                  // Rotate arrow icon to its initial position
-                  el.splitter.querySelector(".vc-gutter-splitterCollapseIcon")
-                    .innerHTML = el.type =="vertical" ? "keyboard_arrow_up" : "keyboard_arrow_left";
-                  el._collapsed = false;
-                }
-                // Get top/left property value
-                var propertyMoveValue = parseFloat(splitter.style[el._posProp]) - pixels;
-                // Move splitter
-                el._checkMoveConstraints(pixels, propertyMoveValue);
-                // Section resize
-                el._checkResizeConstraints(pixels, propertyMoveValue);
-                // Update move value
-                moveValue = e[axis];
-                // Throttle
-                throttled = true;
-                // Set a timeout to un-throttle
-                setTimeout(function() {
-                  throttled = false;
-                }, delay);
-              }
+              // Get y/z translate pixels
+              pixels = moveValue - e[el._misc.axisProp];
+
+                // TODO Set gutter no collapsed
+                // if(el._misc.collapsed && moveValue !== e[axis]){
+                //   // Rotate arrow icon to its initial position
+                //   el._refs.splitter.querySelector(".vc-gutter-splitterCollapseIcon")
+                //     .innerHTML = el.type =="vertical" ? "keyboard_arrow_up" : "keyboard_arrow_left";
+                //   el._collapsed = false;
+                // }
+              // Get top/left property value
+
+              var propertyMoveValue = parseFloat(el._refs.section[el._misc.sizeOffProp]) - pixels;
+              // Check splitter move constraints
+              el._checkMoveConstraints(pixels, propertyMoveValue);
+              
+              // REMOVE Section resize
+              // el._checkResizeConstraints(pixels, propertyMoveValue);
+
+              // Update move value
+              moveValue = e[el._misc.axisProp];
+            }
+          });
+          // Stop slide on mouse up
+          document.addEventListener("pointerup", function(e){
+            // Make sure a movement has been fired
+            if(mousedown){
+              mousedown = false;
             }
           });
         }
-        
+      },
+      /*
+        @function (private) checkMoveConstraints
+        @description Check drag limits before start
+        @param {Number} pixels [Move distance in pixels]
+        @param {Number} value [New splitter position]
+      */
+      checkMoveConstraints: function(pixels, value){
+        var el = this;
+        // Under maximum value or above minimum value
+        if((pixels > 0 && value >= el.min) || pixels < 0 && value <= (el._misc.size - el.max)){
+          // Update section size to change splitter position
+          el._refs.section.style[el._misc.sizeProp] = value + "px";
+        }
       }
     },
     onInit: function() {
