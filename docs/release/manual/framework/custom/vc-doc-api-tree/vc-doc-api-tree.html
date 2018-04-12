@@ -10,18 +10,20 @@
         height: 100%;
         width: 300px;
         /* background-color: rgb(36, 36, 41); */
-    background-color: transparent;
+        background-color: transparent;
         z-index: 300;
     }
 
     vc-tree {
         height: calc(100% - 55px) !important;
-    box-sizing: border-box;
+        box-sizing: border-box;
         background-color: rgb(36, 36, 41);
     }
-
-    vc-tree .vc-scroll-content{
-    padding-top: 20px !important;
+vc-tree .vc-tree-tree{
+    padding-left:10px !important;
+}
+    vc-tree .vc-scroll-content {
+        padding-top: 20px !important;
     }
 
     vc-tree .vc-treenode-name {
@@ -33,8 +35,8 @@
         height: 50px;
         overflow: hidden;
         /* background-image: url("img/menu/searchBack.png"); */
-    background-color: transparent;
-    margin-bottom: 5px;
+        background-color: transparent;
+        margin-bottom: 5px;
     }
 
     #vc-doc-api-treeSearch .vc-text-main {
@@ -66,10 +68,11 @@
     #vc-doc-api-tree-mobileFade {
         display: none;
         position: fixed;
+        top:0px;
         height: 100%;
         width: 100%;
         z-index: 299;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.9);
     }
 
     .vc-doc-api-tree-mobileFadeShow {
@@ -84,8 +87,8 @@
 
 
     vc-editor {
-    margin-top: 30px;
-    margin-bottom: 50px;
+        margin-top: 30px;
+        margin-bottom: 50px;
     }
 
     #vc-doc-api-tree-content {
@@ -100,12 +103,18 @@
         position: fixed;
         top: 0px;
         height: 55px;
-        z-index: 999;
+        z-index: 10;
         background-color: transparent;
         pointer-events: none;
         -webkit-box-shadow: 0px 2px 2x 0 rgba(0, 0, 0, 0.75);
         -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.75);
         box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.75);
+    }
+
+    
+    vc-doc-api-tree vc-searchbar .vc-bg8, vc-doc-api-tree vc-searchbar .vc-bg7{        
+        background: transparent !important;
+        border:none !important;
     }
 
     .vc-doc-api-tree-emptyMenu {
@@ -188,8 +197,7 @@
     <div id="vc-doc-api-tree">
         <div id="treeSearch">
             <vc-searchbar id="vc-doc-api-treeSearch" class="vc-doc-api-tree-menuSearchBar">
-                <!-- <input placeholder="Search" type="text" name="name" value="" onkeyup="document.querySelector('#vc-doc-api-treeSearch').search(document.querySelector('#menuProperties'));"> -->
-                <vc-text placeholder="Search" type="text" name="name" value="" onkeyup="document.querySelector('#vc-doc-api-treeSearch').search(document.querySelector('#menuProperties'));"></vc-text>
+                <vc-text placeholder="Search" type="search" name="name" value="" onkeyup="document.querySelector('#vc-doc-api-treeSearch').search(document.querySelector('#menuProperties'));"></vc-text>
             </vc-searchbar>
         </div>
         <!-- <div class="vc-doc-colorBand"></div> -->
@@ -352,13 +360,20 @@
                     " !important;} ";
                 fullcss += hoverColorText;
 
+                var apiMenuHover = " vc-doc-api .dropdownTrigger:hover {color: " + el
+                    ._treeData.config.__band +
+                    " !important;} ";
+                fullcss += apiMenuHover;
+
+
+
                 customCss.innerHTML = fullcss;
                 document.body.appendChild(customCss);
             },
             // @function setTreeIcons (private) [Configure icons to be shown at tree]
             setTreeIcons: function () {
                 var el = this;
-                var treeIcons = "none";                
+                var treeIcons = "none";
                 if (el._treeData.config
                     .__arrowIcon && el._treeData.config
                     .__folderIcon) {
@@ -379,7 +394,7 @@
                 var el = this;
                 el._refs.tree.onReady(function () {
 
-                    el._refs.tree.querySelector("vc-scroll").thickness = 8; // TODO not working
+                    el._refs.tree.vcometScroll.thickness = 8;
 
                     // Select first element if there are no element in url
                     if (window.location.href.indexOf("#") < 0) {
@@ -540,10 +555,10 @@
                                 thisPath += "/" + linkSubDir;
                                 elm = document.createElement("vc-treenode");
                                 elm = el._setNodeData(tNode, elm);
-                                //      elm.path = thisPath;
                                 elm.path = elm.path + "/" + linkSubDir;
                                 elm.name = linkSubDir;
                                 elm.link = inner;
+                                elm.order = i + 1;
                                 el._refs.treeFragment.childNodes.forEach(function (childNode) {
                                     if (elmO === childNode) {
                                         if (el._misc.firstElem === childNode) { // If firstElem becomes a directory, check next first element

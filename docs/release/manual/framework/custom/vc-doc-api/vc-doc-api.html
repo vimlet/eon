@@ -37,6 +37,7 @@
         /* background-color: #2b2b2b;
         background-image: url("img/menu/menu.png"); */
         background-color: transparent;
+        z-index: 10;
     }
 
     .vc-doc-colorBand {
@@ -88,8 +89,18 @@
         color: #c1c1c1;
         padding: 0 10px;
     }
+    
+    vc-doc-api .vc-bg4, .vc-bg3{        
+        background: transparent !important;
+    }
+    vc-doc-api .vc-menu-dropdown{
+    background-color: #3a3a3a !important;
+    }
+    vc-doc-api .dropdownTrigger{
+    background-color: transparent !important;
+    }
 
-    .vc-doc-api-menuDropdown .dropdown {
+    .vc-doc-api-menuDropdown .vc-menu-dropdown {
         min-width: 200px;
         z-index: 1000 !important;
     }
@@ -110,7 +121,10 @@
     }
 
     .vc-doc-api-t1 {
-        font-size: 2em;
+        font-size: 50px;
+        font-weight: bold;
+        margin-top: 65px !important;
+        margin-bottom: 35px !important;
     }
 
     .vc-doc-api-t2 {
@@ -185,7 +199,7 @@
         background-color: #333333;
         color: white;
         cursor: pointer;
-        padding: 15px;
+        padding: 10px;
         border-radius: 50%;
         -webkit-box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
         -moz-box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
@@ -193,9 +207,9 @@
     }
 
     .vc-doc-api-showGoToTop {
-        -webkit-animation: vc-doc-api-showGoToTopAnim 1.0s forwards;
+        -webkit-animation: vc-doc-api-showGoToTopAnim 0.7s forwards;
         /* for less modern browsers */
-        animation: vc-doc-api-showGoToTopAnim 1.0s forwards;
+        animation: vc-doc-api-showGoToTopAnim 0.7s forwards;
     }
 
     .vc-doc-api-hideGoToTop {
@@ -260,16 +274,18 @@
             <vc-menu layout="horizontal" separators="false" background="true" direction="bottom-right">
                 <vc-item type="dropdown" name="Properties" class="vc-doc-api-menuDropdown" onclick="this.querySelector('vc-scroll').update()">
                     <vc-searchbar id="menuProperties" class="vc-doc-api-menuSearchBar">
-                        <input type="text" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));"
-                            placeholder="Search">
+                        <vc-text placeholder="Search" type="search" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));"></vc-text>
+                        <!-- <input type="text" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));"
+                            placeholder="Search"> -->
                     </vc-searchbar>
                     <div id="menuPropertiesContainer"></div>
                 </vc-item>
 
                 <vc-item type="dropdown" name="Functions" class="vc-doc-api-menuDropdown" onclick="this.querySelector('vc-scroll').update()">
                     <vc-searchbar id="menuFunctions" class="vc-doc-api-menuSearchBar" thickness="8">
-                        <input type="text" name="name" value="" onkeyup="document.querySelector('#menuFunctions').search(document.querySelector('#menuFunctions'));"
-                            placeholder="Search">
+                        <vc-text placeholder="Search" type="search" name="name" value="" onkeyup="document.querySelector('#menuFunctions').search(document.querySelector('#menuFunctions'));"></vc-text>
+                        <!-- <input type="text" name="name" value="" onkeyup="document.querySelector('#menuFunctions').search(document.querySelector('#menuFunctions'));"
+                            placeholder="Search"> -->
                     </vc-searchbar>
                     <div id="menuFunctionsContainer">
                     </div>
@@ -985,6 +1001,7 @@
                 var propertiesMenuContainer = document.querySelector("#menuPropertiesContainer");
                 var propertiesMenuScroll = document.createElement("vc-scroll");
                 propertiesMenuScroll.thickness = 8;
+                var hasMenuPublicProp = false;
                 data.properties.forEach(function (prop) {
                     var propItem = document.createElement("vc-item");
                     propItem.classList.add("vc-doc-api-menuSearchItem");
@@ -997,12 +1014,21 @@
                         propItem.setAttribute("onclick",
                             'document.querySelector("vc-doc-api").goTo(this, "proppub' + prop.name +
                             '");');
+                            hasMenuPublicProp = true;
                     }
                     propItem.setAttribute("name", prop.name);
                     propItem.setAttribute("value", prop.name);
                     propItem.innerHTML = prop.name;
                     propertiesMenuScroll.appendChild(propItem);
                 });
+                if(!hasMenuPublicProp){
+                    var propItem = document.createElement("vc-item");
+                    propItem.setAttribute("name", "None");
+                    propItem.setAttribute("value", "None");
+                    propItem.innerHTML = "None";
+                    propItem.classList.add("vc-doc-api-menuSearchItem");
+                    propertiesMenuScroll.appendChild(propItem);                    
+                }
                 propertiesMenuContainer.appendChild(propertiesMenuScroll);
                 setTimeout(() => {
                     document.querySelector('vc-doc-api')._onDrawn();
@@ -1069,26 +1095,26 @@
             // Initialize menu search bars
             document.querySelector("#menuProperties").onSearch(function (filters) {
                 var name = filters.name;
-                var toFilterChilds = document.querySelector("#menuPropertiesContainer").children;
+                var toFilterChilds = document.querySelector("#menuPropertiesContainer").querySelector(".vc-scroll-content").children;
 
                 for (var i = 0; i < toFilterChilds.length; i++) {
-                    if (toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
+                    if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem") && toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem") && toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
                         -1) {
                         toFilterChilds[i].classList.remove("vc-doc-api-searchHide");
-                    } else {
+                    } else if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem")){
                         toFilterChilds[i].classList.add("vc-doc-api-searchHide");
                     }
                 }
             });
             document.querySelector("#menuFunctions").onSearch(function (filters) {
                 var name = filters.name;
-                var toFilterChilds = document.querySelector("#menuFunctionsContainer").children;
+                var toFilterChilds = document.querySelector("#menuFunctionsContainer").querySelector(".vc-scroll-content").children;
 
-                for (var i = 0; i < toFilterChilds.length; i++) {
-                    if (toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
+                for (var i = 0; i < toFilterChilds.length; i++) {                    
+                    if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem") && toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
                         -1) {
                         toFilterChilds[i].classList.remove("vc-doc-api-searchHide");
-                    } else {
+                    } else if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem")){
                         toFilterChilds[i].classList.add("vc-doc-api-searchHide");
                     }
                 }
