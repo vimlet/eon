@@ -2,6 +2,7 @@ var fs = require("fs-extra");
 var path = require("path");
 var commons = require("@vimlet/commons");
 var minify = require("minify");
+var CleanCSS = require("clean-css");
 var glob = require("glob");
 var Sync = require("sync");
 var rimraf = require("rimraf");
@@ -82,7 +83,7 @@ function releaseMin(cb) {
 
           var extension = path.extname(src).toLowerCase();
 
-          if (extension == ".html" || extension == ".css" || extension == ".js") {
+          if (extension == ".html" || extension == ".js") {
 
             minify(src, function (error, data) {
               // Keep a copy of the variable in this scope
@@ -90,6 +91,7 @@ function releaseMin(cb) {
 
               if (error) {
                 console.log("Error found in " + srcCopy);
+                console.log(error);
               } else {
                 console.log("Minify: " + srcCopy + " => " + dest);
 
@@ -104,6 +106,30 @@ function releaseMin(cb) {
 
             });
 
+          } else if(extension == ".css") {            
+            try {
+              var srcContent = fs.readFileSync(src).toString();
+              var cssCleanOutput = new CleanCSS({}).minify(srcContent);
+              var data = cssCleanOutput.styles;
+
+              if(cssCleanOutput.errors.length > 0) {
+                throw cssCleanOutput.errors;
+              }
+
+              console.log("Minify: " + src + " => " + dest);
+  
+              fs.mkdirsSync(path.dirname(dest));
+              fs.writeFileSync(dest, data);
+  
+              if (src === last) {
+                // Zip directory     
+                commons.compress.pack(rootPath, rootPath + ".zip", "zip", null, null, cb);
+              }
+
+            }catch (error) {
+              console.log("Error found in " + src);
+              console.log(error);
+            }
           } else {
             console.log("Copy: " + src + " => " + dest);
 
