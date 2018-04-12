@@ -936,26 +936,30 @@
           //This event is exclusive for the vertical scroll, it handles the mousewheel to scroll the content
           el.addEventListener("wheel", function (e) {
 
-            // We only want to do things if the native scroll its not being used
-            if (!vcomet.util.isTrue(el.getAttribute("native"))) {
+            if (el._misc.vertical.created) {
 
-              e.preventDefault();
+              // We only want to do things if the native scroll its not being used
+              if (!vcomet.util.isTrue(el.getAttribute("native"))) {
 
-              // Handle the scroll if the mouse is not in an element that prevents it
-              if (el._refs.verticalScroll.classList.contains("vc-scroll-active")) {
+                e.preventDefault();
 
-                var preventDragScroll = false;
+                // Handle the scroll if the mouse is not in an element that prevents it
+                if (el._refs.verticalScroll.classList.contains("vc-scroll-active")) {
 
-                for (var i = 0; i < el._preventDragNodes.length; i++) {
-                  if (el._preventDragNodes[i].isOnPath == true) {
-                    preventDragScroll = true;
-                    break;
+                  var preventDragScroll = false;
+
+                  for (var i = 0; i < el._preventDragNodes.length; i++) {
+                    if (el._preventDragNodes[i].isOnPath == true) {
+                      preventDragScroll = true;
+                      break;
+                    }
                   }
-                }
 
-                if (!preventDragScroll) {
+                  if (!preventDragScroll) {
 
-                  el._handleWheelScroll(e);
+                    el._handleWheelScroll(e);
+
+                  }
 
                 }
 
@@ -2284,6 +2288,11 @@
 
         return returnBoolean;
       },
+      /*
+      @function (private) _setupContainerPosition
+      @description Since we need our container to have a position different from static to work,
+       we set relative if no position was provided to the container or its static
+      */
       setupContainerPosition: function () {
 
         if (window.getComputedStyle(this._container, false).position == "static") {
@@ -2291,10 +2300,14 @@
         }
 
       },
+      /*
+      @function (private) _updateThickness
+      @description Called when thickness has changed, updates everything according to the new one
+      */
       updateThickness: function () {
 
         var el = this;
-        
+
         el.content.style.paddingRight = el.pushContent == "both" || el.pushContent == "vertical" ? el.thickness + "px" : "auto";
         el.content.style.paddingBottom = el.pushContent == "both" || el.pushContent == "horizontal" ? el.thickness + "px" : "auto";
 
@@ -2347,6 +2360,35 @@
           el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
         }
 
+
+      },
+      /*
+      @function (private) _updateType
+      @description Called when type has changed, removes all the scrolls and updates the scroll acording to the new one
+      */
+      updateType: function () {
+
+        var el = this;
+
+        if (el._misc.vertical.created) {
+          el._refs.verticalScroll.parentNode.removeChild(el._refs.verticalScroll);
+          el._misc.vertical.created = false;
+        }
+
+        if (el._misc.horizontal.created) {
+          el._refs.horizontalScroll.parentNode.removeChild(el._refs.horizontalScroll);
+          el._misc.horizontal.created = false;
+        }
+
+        el.update();
+
+        if (el._misc.vertical.created) {
+          el._updateVerticalBarPosition(el._misc.vertical.position);
+        }
+
+        if (el._misc.horizontal.created) {
+          el._updateHorizontalBarPosition(el._misc.horizontal.position);
+        }
 
       }
     },
@@ -2508,7 +2550,13 @@
       var el = this;
 
       if (key == "thickness") {
+
         el._updateThickness();
+
+      } else if (key == "type") {
+
+        el._updateType();
+
       }
 
     }
