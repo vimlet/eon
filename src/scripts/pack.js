@@ -29,24 +29,25 @@ function release(cb) {
     glob("src/main/vcomet/**/*", null, function (error, files) {
 
       if (error) {
-        console.log(error.message);
+        console.log(error);
+      } else {
+
+        files.forEach(function (file) {
+
+          var src = file;
+          var dest = path.join("release/vcomet-" + packageObject.version, file.substring("src/main/vcomet".length));
+
+          if (fs.lstatSync(src).isFile()) {
+            console.log("Copy: " + src + " => " + dest);
+            fs.mkdirsSync(path.dirname(dest));
+            fs.copySync(src, dest);
+          }
+
+        });
+
+        // Zip directory     
+        commons.compress.pack(rootPath, rootPath + ".zip", "zip", null, null, cb);
       }
-
-      files.forEach(function (file) {
-
-        var src = file;
-        var dest = path.join("release/vcomet-" + packageObject.version, file.substring("src/main/vcomet".length));
-
-        if (fs.lstatSync(src).isFile()) {
-          console.log("Copy: " + src + " => " + dest);
-          fs.mkdirsSync(path.dirname(dest));
-          fs.copySync(src, dest);
-        }
-
-      });
-
-      // Zip directory     
-      commons.compress.pack(rootPath, rootPath + ".zip", "zip", null, null, cb);
 
     });
   });
@@ -67,6 +68,11 @@ function releaseMin(cb) {
         console.log(error.message);
       }
 
+      var last
+      if (files.length > 0) {
+        last = files[files.length - 1];
+      }
+
       files.forEach(function (file) {
 
         var src = file;
@@ -77,28 +83,42 @@ function releaseMin(cb) {
           var extension = path.extname(src).toLowerCase();
 
           if (extension == ".html" || extension == ".css" || extension == ".js") {
-            console.log("Minify: " + src + " => " + dest);
 
             minify(src, function (error, data) {
+              // Keep a copy of the variable in this scope
+              var srcCopy = src;
+
               if (error) {
-                console.log(error.message);
+                console.log("Error found in " + srcCopy);
+              } else {
+                console.log("Minify: " + srcCopy + " => " + dest);
+
+                fs.mkdirsSync(path.dirname(dest));
+                fs.writeFileSync(dest, data);
+
+                if (srcCopy === last) {
+                  // Zip directory     
+                  commons.compress.pack(rootPath, rootPath + ".zip", "zip", null, null, cb);
+                }
               }
-              fs.mkdirsSync(path.dirname(dest));
-              fs.writeFileSync(dest, data);
+
             });
+
           } else {
             console.log("Copy: " + src + " => " + dest);
 
             fs.mkdirsSync(path.dirname(dest));
             fs.copySync(src, dest);
+
+            if (src === last) {
+              // Zip directory     
+              commons.compress.pack(rootPath, rootPath + ".zip", "zip", null, null, cb);
+            }
           }
 
         }
 
       });
-
-      // Zip directory     
-      commons.compress.pack(rootPath, rootPath + ".zip", "zip", null, null, cb);
 
     });
   });
