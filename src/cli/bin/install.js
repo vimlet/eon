@@ -36,7 +36,6 @@ module.exports = function (result) {
 
     Sync(function () {
         try {
-            //TODO:
             // supportGitCredentials();
             handleRemoteVersions.sync(null, result.install);
             // Find installed packages
@@ -110,10 +109,10 @@ function handleRemoteVersions(value, cb) {
         // General installation            
         if (value === true || value === "true") {
             try {
-                var data = getLatestVcometRelease.sync(null);
+                var packageVersion = getLatestVcometRelease.sync(null);
 
                 if (!vcometJsonObject.vcomet || vcometJsonObject.vcomet == "latest") {
-                    vcometJsonObject.vcomet = data;
+                    vcometJsonObject.vcomet = packageVersion;
                 }
 
             } catch (error) {
@@ -126,15 +125,16 @@ function handleRemoteVersions(value, cb) {
             var packageName = valueArray[0].toLowerCase();
             var packageVersion;
 
-            
             if (packageName == "vcomet") {
                 try {
                     
-                    var data = getLatestVcometRelease.sync(null);
-                    packageVersion = valueArray.length == 2 ? valueArray[1] : data;
+                    if (valueArray.length == 2) {
+                        checkPackageExists.sync(null, packageName, valueArray[1]);
+                        packageVersion = valueArray[1];
+                    } else {
+                        packageVersion = getLatestVcometRelease.sync(null);
+                    }
                     
-                    // TODO:
-                    // checkPackageExists.sync(null, packageName, packageVersion);
                     vcometJsonObject[packageName] = packageVersion;
 
                 } catch (error) {
@@ -145,15 +145,17 @@ function handleRemoteVersions(value, cb) {
                 singlePackageMode = true;
                 singlePackageName = packageName;
                 packageVersion = valueArray.length == 2 ? valueArray[1] : getLatestDependencyRelease(packageName);
+                
                 if (!vcometJsonObject.dependencies) {
                     vcometJsonObject.dependencies = {};
                 }
+                
                 vcometJsonObject.dependencies[packageName] = packageVersion;
             }
         }
 
         // Generate vcomet.json if it does not exist.
-        if (newVcometJson) {
+        if (newVcometJson && packageVersion) {
             var newVcometJsonPath = path.join(".", "vcomet.json");
             fs.createFileSync(newVcometJsonPath);
             fs.writeFileSync(newVcometJsonPath, JSON.stringify(vcometJsonObject, null, 2));
@@ -165,7 +167,7 @@ function handleRemoteVersions(value, cb) {
 
 }
 
-// TODO:
+// Check if the required version exists
 function checkPackageExists(name, version, cb) {
     var url = "https://api.github.com/repos/" + gh_owner + "/" + gh_repo + "/releases/tags/" + version;
 
@@ -173,17 +175,9 @@ function checkPackageExists(name, version, cb) {
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                var responseObject = JSON.parse(xhttp.responseText);
-                var asset;
-                for (var i = 0; i < responseObject.assets.length; i++) {
-                    asset = responseObject.assets[i];
-                    if (asset.name.toLowerCase() == name.toLowerCase()) {
-                        cb(null, asset.browser_download_url);
-                        break;
-                    }
-                }
+                cb(null);
             } else {
-                cb("Not valid version");
+                cb('Version "' + version + '" not valid');
             }
         }
     };
