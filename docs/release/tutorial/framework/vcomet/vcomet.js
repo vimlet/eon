@@ -3403,7 +3403,7 @@ vcomet.createCallback("onScriptsReady", vcomet, "ready");
 
 // Imports the requested custom element file, admits arrays and strings
 vcomet.import = function (param) {
-
+    
     if (param.constructor === Array) {
 
         for (var i = 0; i < param.length; i++) {
@@ -3419,9 +3419,9 @@ vcomet.import = function (param) {
 };
 
 vcomet.insertImport = function (href) {
-
-    var elementName;
     
+    var elementName;
+
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
 
@@ -3528,7 +3528,7 @@ vcomet.insertImport = function (href) {
                             
                             // Handles the dependencies and returns a boolean for whether there are pendings imports or not
                             var hasPendingImports = vcomet.handleDependencies();
-
+                            
                             // If there are no more dependencies to handle trigger onImportsReady
                             if (!hasPendingImports && !vcomet.imports.ready && vcomet.imports.count == vcomet.imports.total && vcomet.imports.total == Object.keys(vcomet.imports.config).length) {
                                 vcomet.imports.ready = true;
@@ -3588,41 +3588,57 @@ vcomet.handleTemplateInterpolation = function (name) {
 
 vcomet.handleStyleAppend = function () {
 
-    var combinedStyle = document.createElement("style");
-    combinedStyle.setAttribute("data-vcomet", "element-styles")
-    combinedStyle.innerHTML = vcomet.imports.style;
-    document.head.appendChild(combinedStyle);
+    if (vcomet.imports.style != "") {
+
+        var combinedStyle = document.createElement("style");
+
+        combinedStyle.setAttribute("data-vcomet", "element-styles")
+        combinedStyle.innerHTML = vcomet.imports.style;
+
+        // Resets style to avoid css rules style replication
+        vcomet.imports.style = "";
+
+        document.head.appendChild(combinedStyle);
+
+    }
 
 };
 
 vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
-
-    var elementNames = Object.keys(vcomet.imports.scripts);
-    var resume = elementIndex && scriptIndex ? true : false;
-    var elementScriptsKeys, elementScripts;
     
+    var elementNames = Object.keys(vcomet.imports.scripts);
+    var resume = Number.isInteger(elementIndex) && Number.isInteger(scriptIndex) ? true : false;
+    var elementScriptsKeys, elementScripts;
+
     // If it has to resume a previous scripts append we start from that index
     for (var i = resume ? elementIndex : 0; i < elementNames.length; i++) {
 
-        elementScriptsKeys = Object.keys(vcomet.imports.scripts[elementNames[i]]);
         elementScripts = vcomet.imports.scripts[elementNames[i]];
-        
+        elementScriptsKeys = Object.keys(elementScripts);
+
         // If it has to resume a previous scripts append we start from that index
         for (var j = (resume && i == elementIndex) ? scriptIndex : 0; j < elementScriptsKeys.length; j++) {
-            
+
             resume = false;
 
             if (elementScripts[elementScriptsKeys[j]].src) {
-                
+
                 // If the script has a src then we import it via require
                 vcomet.amd.require([elementScripts[elementScriptsKeys[j]].src], function () {
                     vcomet.handleScriptsAppend(i, j + 1);
                 });
-                
+
                 // Since we have to wait for the require to resumen our loops we break all the function execution
                 return;
 
             } else {
+
+                // Here we take the current script text and add our code to remove the script once its finished
+                elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML +
+                    "var elementNames = Object.keys(vcomet.imports.scripts);" +
+                    "var elementScripts = vcomet.imports.scripts[elementNames[" + i + "]];" +
+                    "var scriptKey = Object.keys(elementScripts)[" + j + "];" +
+                    "elementScripts[scriptKey].parentNode.removeChild(elementScripts[scriptKey]);";
 
                 document.head.appendChild(elementScripts[elementScriptsKeys[j]]);
 
@@ -3631,12 +3647,26 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
         }
 
     }
-    
+
+    // Since we are finished looping all the current element scripts we reset our scripts object to avoid looping through them again in case more elements are being imported after
+    vcomet.imports.scripts = {};
+
     var scriptsReadyScript = document.createElement("script");
-    
-    scriptsReadyScript.innerHTML = "vcomet.triggerCallback('onScriptsReady', vcomet);";
+
+    scriptsReadyScript.setAttribute("scriptsready-script", "");
+    scriptsReadyScript.innerHTML = "vcomet.triggerCallback('onScriptsReady', vcomet); vcomet.removeScriptsReadyScripts();";
+
     document.head.appendChild(scriptsReadyScript);
 
+};
+
+vcomet.removeScriptsReadyScripts = function () {  
+    var el = this;
+    var scriptReadyScripts = document.head.querySelectorAll("script[scriptsready-script]");
+
+    for (var i = 0; i < scriptReadyScripts.length; i++) {
+        scriptReadyScripts[i].parentNode.removeChild(scriptReadyScripts[i]);
+    }
 };
 
 vcomet.handleLinksAppend = function () {
@@ -3673,7 +3703,7 @@ vcomet.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = vcomet.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
-    
+
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
@@ -4642,11 +4672,14 @@ vcomet.importPublic = function (el, config) {
 
     if (config.properties) {
         var keys = Object.keys(config.properties);
-
+        var attributeKey;
+        
         for (var i = 0; i < keys.length; i++) {
+            attributeKey = vcomet.util.camelToHyphenCase(keys[i]);
+            // If the element has one of the reflected attributes we send that value as the value of the property
             vcomet.handleProperty(el, config, el.__reflectProperties, el.__observeProperties, {
                 key: keys[i],
-                value: config.properties[keys[i]]
+                value: el.hasAttribute(attributeKey) ? el.getAttribute(attributeKey) : config.properties[keys[i]]
             });
         }
     }
@@ -5073,6 +5106,9 @@ vcomet.registerResizeListeners = function (el, config) {
     });
 
 };
+
+// Here we will register the main theme, the one declared by the user or our default one, its done here since this is the moment where this function exists
+vcomet.registerMainTheme(vcomet.theme);
 vcomet.declare = function (name, baseElement) {
 
     // Specifies HTML element interface

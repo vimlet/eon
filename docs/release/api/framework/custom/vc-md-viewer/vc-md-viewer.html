@@ -23,14 +23,14 @@
     #vc-md-viewer-content {
         width: 100%;
         height: 100%;
-        margin-bottom:300px;
+        margin-bottom: 300px;
     }
 
     .vc-md-viewer-t1 {
         font-size: 50px;
         font-weight: bold;
-        margin-top: 100px !important;
-        margin-bottom: 50px !important;
+        margin-top: 65px !important;
+        margin-bottom: 35px !important;
     }
 
     .vc-md-viewer-t2 {
@@ -94,7 +94,8 @@
         -webkit-margin-end: 1em;
         -webkit-padding-start: 0px;
     }
-    vc-md-viewer ul{
+
+    vc-md-viewer ul {
         -webkit-padding-start: 20px;
     }
 
@@ -106,12 +107,87 @@
     vc-md-viewer vc-playground {
         margin: 30px 0px;
     }
+
+
+    #vc-md-viewer-goToTop {
+        display: block;
+        bottom: -100px;
+        position: fixed;
+        right: 30px;
+        z-index: 99;
+        border: none;
+        outline: none;
+        background-color: #333333;
+        color: white;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 50%;
+        -webkit-box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
+        -moz-box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
+        box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
+    }
+
+    .vc-md-viewer-showGoToTop {
+        -webkit-animation: vc-md-viewer-showGoToTopAnim 0.7s forwards;
+        /* for less modern browsers */
+        animation: vc-md-viewer-showGoToTopAnim 0.7s forwards;
+    }
+
+    .vc-md-viewer-hideGoToTop {
+        -webkit-animation: vc-md-viewer-hideGoToTopAnim 0.5s forwards;
+        /* for less modern browsers */
+        animation: vc-md-viewer-hideGoToTopAnim 0.5s forwards;
+    }
+
+
+    /* Safari 4.0 - 8.0 */
+
+    @-webkit-keyframes vc-md-viewer-showGoToTopAnim {
+        from {
+            bottom: -100px;
+        }
+        to {
+            bottom: 10px;
+        }
+    }
+
+    @keyframes vc-md-viewer-showGoToTopAnim {
+        from {
+            bottom: -100px;
+        }
+        to {
+            bottom: 10px;
+        }
+    }
+
+    /* Safari 4.0 - 8.0 */
+
+    @-webkit-keyframes vc-md-viewer-hideGoToTopAnim {
+        from {
+            bottom: 10px;
+        }
+        to {
+            bottom: -100px;
+        }
+    }
+
+    @keyframes vc-md-viewer-hideGoToTopAnim {
+        from {
+            bottom: 10px;
+        }
+        to {
+            bottom: -100px;
+        }
+    }
 </style>
 
 <template>
     <vc-scroll thickness="8">
         <div id="vc-md-viewer-content"></div>
     </vc-scroll>
+    <button id="vc-md-viewer-goToTop" onclick="document.querySelector('vc-md-viewer').goToTop();">
+        <i class="material-icons">arrow_upward</i>
+    </button>
 </template>
 
 <script>
@@ -282,35 +358,108 @@
             goTo(id) {
                 var el = this;
                 var scroll = el.querySelector("vc-scroll");
-                scroll.scrollTo(0);
                 var currentEl = el.querySelector("#" + id);
                 if (currentEl) {
                     var currentStyle = currentEl.currentStyle || window.getComputedStyle(currentEl);
                     var marginTop = currentStyle.marginTop;
-                    marginTop = marginTop.match(new RegExp("\\d+","g"));
-                    if(marginTop){
+                    marginTop = marginTop.match(new RegExp("\\d+", "g"));
+                    if (marginTop) {
                         marginTop = parseInt(marginTop) || 0;
                     }
-                    scroll.scrollTo(el.querySelector("#" + id).getBoundingClientRect()
-                        .top - (100 + marginTop), null, 0.2);
+                    scroll.scrollTo(el.querySelector("#" + id).offsetTop - (marginTop), null, 0.1);
+
                 }
+            },
+            // @function goToTop (public) [Scroll to top]
+            goToTop() { // Scroll to top
+                this.querySelector("vc-scroll").scrollTo(0, null, 0.05);
             }
         },
 
         privateFunctions: {
+            //@function ondrawCb (private) [Callback called each time an inside component is ready to know when the full document is drawn]
+            ondrawnCb: function () {
+                var el = this;
+                el._misc.tree = document.querySelector("vc-tree");
+                el._misc.ondrawnCont--;
+                if (el._misc.ondrawnCont <= 0) {
+                    vcomet.triggerCallback("ondrawn", el, el, [el]);
+                }
+            },
+            //@function onScrolled (private) [Handle user scroll. Useful when navigating inside a document which contains links]
+            onScrolled: function () {
+                var el = this;
+                var scroll = el.querySelector("vc-scroll");
+                el._misc.scrollCounter = 0; // Avoid first onscrolled events because its triggers itself sometimes.
+                scroll.onScrolled(function (data) {
+                    el._scrollFunction();
+
+                    el._misc.scrollCounter++;
+
+                    if (el._misc.scrollCounter > 10) {
+                        el._misc.scrollCounter = 0;
+                        var link = window.location.href.split('&link=')[1];
+                        if (link != "" && link != el.link) {
+                            if (el._misc.tree) {
+                                var treeLinks = el._misc.tree.querySelectorAll("vc-treeNode");
+                                var currentLink = el._misc.treeLinks[0];
+                                for (var currentLinkIndex = 0; currentLinkIndex < el._misc.treeLinks.length; currentLinkIndex++) {
+                                    if (el._misc.treeLinks[currentLinkIndex].getBoundingClientRect()
+                                        .top <
+                                        200) {
+                                        currentLink = el._misc.treeLinks[currentLinkIndex];
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                treeLinks.forEach(function (tLink) {
+                                    if (tLink.link && currentLink && tLink.link === currentLink.id) {
+                                        el._misc.tree.markNode(tLink);
+                                        clearInterval(el._misc.interval);
+                                        document.querySelector("vc-doc-article")._misc.isOnHashEnabled = false;
+                                        window.location.href = window.location.href.split(
+                                            '&link=')[0] + '&link=' + currentLink.id;
+                                        el._misc.interval = setInterval(function () {
+                                            document.querySelector("vc-doc-article")
+                                                ._misc
+                                                .isOnHashEnabled = true;
+                                        }, 300);
+                                    }
+                                });
+                            }
+                        }
+
+                    }
+                });
+            },
+            // @function scrollFunction (private) [vc-scroll onScrolled listener. Used to toggle go to top button]
+            scrollFunction: function () {
+                var el = this;
+                var scroll = el.querySelector("vc-scroll");
+                if (scroll._misc.vertical.position < 0) {
+                    el._misc.goToTop.classList.add("vc-md-viewer-showGoToTop");
+                    el._misc.goToTop.classList.remove("vc-md-viewer-hideGoToTop");
+                } else {
+                    el._misc.goToTop.classList.remove("vc-md-viewer-showGoToTop");
+                    el._misc.goToTop.classList.add("vc-md-viewer-hideGoToTop");
+                }
+            },
             //@function parse (private) [Parse markdown file and show within vc-md-viewer] @param data {string}
             parse: function (data) {
                 var el = this;
                 var mdContent = el.querySelector("#vc-md-viewer-content");
                 mdContent.innerHTML = "";
                 el._parseData.docFrag = document.createDocumentFragment();
+                el._misc.ondrawnCont = 0;
+                el._misc.treeLinks = [];
+                var scroll = el.querySelector("vc-scroll");
+                scroll.scrollTo(0);
                 el._parse.later = [];
 
                 data = el._prepareData(data);
                 el._splitParagraph(data);
-
                 mdContent.appendChild(el._parseData.docFrag);
-                setTimeout(() => {
+                setTimeout(function () {
                     vcomet.triggerCallback("onparsed", el, el, [el]);
                 }, 0);
             },
@@ -432,6 +581,12 @@
                         var vcEditor = document.createElement("vc-editor");
                         vcEditor.value = splitted[1];
                         vcEditor.language = splitted[0];
+
+                        el._misc.ondrawnCont++;
+                        vcEditor.oneditorready(function () {
+                            el._ondrawnCb();
+                        });
+
                         codeBlockResults.push(vcEditor);
                     }
                 }
@@ -508,6 +663,12 @@
                             poster += el._videoImg(matches[i]);
                         }
                         var res = document.createElement("vc-video");
+
+                        el._misc.ondrawnCont++;
+                        res.onReady(function () {
+                            el._ondrawnCb();
+                        });
+
                         res.src = el._linkResolve(decodeURIComponent(el._videoSrc(matches[i])));
                         res.poster = el._linkResolve(decodeURIComponent(poster));
                         res.type = "video/webm, video/mp4";
@@ -533,8 +694,9 @@
                     for (var i = 0; i < matches.length; i++) {
                         var inner = el._getInner(matches[i]);
                         var treeLink = el._createDiv(el._parseText(inner), ["vc-md-viewer-t1",
-                            "vc-md-viewer-t"
+                            "vc-md-viewer-t", "vc-md-viewer-treeLink"
                         ]);
+                        el._misc.treeLinks.push(treeLink);
                         treeLink.id = inner;
                         parsedResult.push(treeLink);
                     }
@@ -594,6 +756,12 @@
                 var js = el._getCode(tag, el._regex.playgroundJS, "[js]", "[/js]");
                 var css = el._getCode(tag, el._regex.playgroundCSS, "[css]", "[/css]");
                 var playground = document.createElement("vc-playground");
+
+                el._misc.ondrawnCont++;
+                playground.onReady(function () {
+                    el._ondrawnCb();
+                });
+
                 if (htmlSplit.head) {
                     playground.head = htmlSplit.head;
                 }
@@ -757,6 +925,12 @@
                         header = header.replace(new RegExp("\\|", "g"), ",");
                         if (!el._parseData.table) {
                             el._parseData.table = document.createElement("vc-doc-table");
+
+                            el._misc.ondrawnCont++;
+                            el._parseData.table.ondrawn(function () {
+                                el._ondrawnCb();
+                            });
+
                             el._parseData.table.setAttribute("cTitle", header);
                             exist = false;
                         }
@@ -1084,6 +1258,7 @@
 
         onCreated: function () {
             vcomet.createCallback("onparsed", this);
+            vcomet.createCallback("ondrawn", this);
         },
 
         onRender: function () {
@@ -1093,8 +1268,11 @@
                     el._parse(data);
                 });
             }
+        },
+
+        onReady: function () {
+            this._misc.goToTop = document.querySelector("#vc-md-viewer-goToTop");
+            this._onScrolled();
         }
-
-
     });
 </script>

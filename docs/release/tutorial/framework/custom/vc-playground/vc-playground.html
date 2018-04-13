@@ -1,12 +1,11 @@
 <style>
     vc-playground {
-        height: 100%;
-        height: 300px;
+        height: 600px;
         width: 100%;
         overflow: hidden;
     }
 
-    vc-playground vc-tab .closeButton {
+    vc-playground vc-tab .vc-tabs-closeButton {
         display: none !important;
     }
 
@@ -28,28 +27,29 @@
         box-sizing: border-box;
     }
 
-    vc-playground vc-tabs .vc-tabs-content {
-        position: absolute !important;
-    }
-
-    vc-playground vc-tabs .vc-tabs-content.hidden {
-        display: block !important;
-        z-index: -1;
-    }
-
     vc-playground vc-gutter vc-editor {
         margin-bottom: 0px;
     }
 
     vc-playground vc-editor {
-        min-height:100% !important;
-        margin-top:0px !important;
-        margin-bottom:0px !important;
+        min-height: 100% !important;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        max-height: 100% !important;
         box-sizing: border-box;
     }
 
     .vc-playground-until-render {
         display: none;
+    }
+
+    .vc-playground-fullScreenBttn {
+        cursor: pointer;
+        display:none;
+    }
+
+    .vc-playground-fullScreenBttn i {
+        line-height: 30px;
     }
 </style>
 <template>
@@ -101,19 +101,18 @@
             setTabs: function () {
                 var el = this;
                 el._refs.tabs = document.createElement("vc-tabs");
-                el._refs.tabs.onReady(function(){
+                el._refs.tabs.onReady(function () {
                     el._refs.tabs.dragging = false;
                 });
                 el._refs.tabs.onTabSelected(function (tab) {
                     switch (tab.name) {
                         case "result":
                             if (el._misc.editorsLoaded === 0) {
-                                el._showResult();
+                                // el._showResult();
                             }
                             break;
                         case "html":
                             el._refs.htmlPanel.querySelector("vc-gutter").resize();
-                     //       el._refs.htmlPanel.render();
                             break;
                     }
                 });
@@ -122,6 +121,9 @@
             setResultTab: function () {
                 var el = this;
                 var resultTab = document.createElement("vc-tab");
+                resultTab.onReady(function(){
+                    resultTab._refs.scroll.type = "none";
+                });
                 resultTab.name = "result";
                 resultTab.title = "Result";
                 el._refs.result = document.createElement("iframe");
@@ -131,6 +133,10 @@
                         el._editorsLoaded();
                     }
                 }
+                // el._refs.resultPanel = document.createElement("vc-panel");
+                // el._refs.resultPanel.setAttribute("allow-scroll", false);
+                // el._refs.resultPanel.appendChild(el._refs.result);
+                // resultTab.appendChild(el._refs.resultPanel);
                 resultTab.appendChild(el._refs.result);
                 return resultTab;
             },
@@ -147,6 +153,7 @@
                 var bodySection = document.createElement("vc-section");
                 el._refs.html = {};
                 el._refs.html.head = document.createElement("vc-editor");
+                el._refs.html.head.heightauto = "false";
                 el._refs.html.head.oneditorready(function (currentEditor) {
                     el._editorsLoaded()
                 });
@@ -154,6 +161,7 @@
                 el._refs.html.head.language = "html";
                 el._refs.html.head.readonly = false;
                 el._refs.html.body = document.createElement("vc-editor");
+                el._refs.html.body.heightauto = "false";
                 el._refs.html.body.oneditorready(function () {
                     el._editorsLoaded();
                 });
@@ -165,10 +173,8 @@
                 htmlGutter.appendChild(headSection);
                 htmlGutter.appendChild(bodySection);
                 el._refs.htmlPanel = document.createElement("vc-panel");
-
                 el._refs.htmlPanel.setAttribute("allow-scroll", false);
-
-                el._refs.htmlPanel.appendChild(htmlGutter);  
+                el._refs.htmlPanel.appendChild(htmlGutter);
                 htmlTab.appendChild(el._refs.htmlPanel);
                 return htmlTab;
             },
@@ -179,6 +185,7 @@
                 jsTab.name = "js";
                 jsTab.title = "Js";
                 el._refs.js = document.createElement("vc-editor");
+                el._refs.js.heightauto = "false";
                 el._refs.js.oneditorready(function () {
                     el._editorsLoaded();
                 });
@@ -195,6 +202,7 @@
                 cssTab.name = "css";
                 cssTab.title = "Css";
                 el._refs.css = document.createElement("vc-editor");
+                el._refs.css.heightauto = "false";
                 el._refs.css.oneditorready(function () {
                     el._editorsLoaded();
                 });
@@ -218,6 +226,20 @@
                 el._refs.tabs.appendChild(jsTab);
                 el._refs.tabs.appendChild(cssTab);
                 el.querySelector("#vc-playground-content").appendChild(el._refs.tabs);
+                el.querySelector("#vc-playground-content").querySelector(".vc-tabs-tabsSection").appendChild(
+                    el._setFullSCreenBttn());
+            },
+            setFullSCreenBttn: function () {
+                var el = this;
+                el._misc.fullscreen = false;
+                var fullScreenBtt = document.createElement("div");
+                fullScreenBtt.classList.add("vc-playground-fullScreenBttn");
+                el._refs.fullScreenIcon = document.createElement("i");
+                el._refs.fullScreenIcon.classList.add("material-icons");
+                el._refs.fullScreenIcon.innerHTML = "fullscreen";
+                fullScreenBtt.appendChild(el._refs.fullScreenIcon);
+                fullScreenBtt.setAttribute("onclick", "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
+                return fullScreenBtt;
             },
             // @function editorLoaded (private) [Each time that a component is loaded this function is called. When all components are loaded result is launched.]
             editorsLoaded: function () {
@@ -261,7 +283,7 @@
                 return iframeSrc;
             },
             // @function show (private) [Hides loading mask and shows playground]
-            show: function(){
+            show: function () {
                 var el = this;
                 el.querySelector("#vc-playground-content").classList.remove("vc-playground-until-render");
                 el.querySelector("vc-loading").hide();
@@ -284,6 +306,27 @@
                     el.js = data.body;
                 }
                 el._refresh();
+            },
+            // @function toggleFullScreen (public) [Toggle full screen mode]
+            toggleFullScreen: function () {
+                var el = this;
+                el._misc.fullscreen = !el._misc.fullscreen;
+                if(el._misc.fullscreen){
+                    el._refs.fullScreenIcon.innerHTML = "fullscreen_exit";
+                    el.style.height = "100%";
+                    el.style.width = "100%";
+                    el.style.position = "fixed";
+                    el.style.top = "0px";
+                    el.style.left = "0px";
+                    el.style.zIndex = "9999";                    
+                    el.parentNode.style.overflow ="hidden"; // TODO Needed a method to prevent vcomet scroll at parent. 
+                            // el._refs.htmlPanel.querySelector("vc-gutter").resize();  // TODO gutter get lost when fullscreen
+                }else{
+                    el._refs.fullScreenIcon.innerHTML = "fullscreen";
+                            // el._refs.htmlPanel.querySelector("vc-gutter").resize();
+                    el.parentNode.style = ""; // TODO Needed a method to prevent vcomet scroll at parent.Note that via js this may result in the loss of parentNodeStyle
+                    el.style = "";
+                }
             }
         },
 

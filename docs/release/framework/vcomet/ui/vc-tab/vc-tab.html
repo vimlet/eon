@@ -1,146 +1,156 @@
 <template>
-
-  <div class="vc-tabs-closeButton">
-    <i class="iconsSize material-icons">close</i>
-  </div>
-  <span class="vc-tabs-title">template</span>
-
-</template>
-
-<script type="text/javascript">
-  vcomet.element("vc-tab", null, {
-    properties: {
-      name: {
-        value: "",
-        reflect: true
-      },
-      host: {
-        value: {}
-      }
-    },
-    functions: {
-      configureAttributes: function (tab) {
-
-        var name = tab.getAttribute("name");
-        var tempId = name + "Tab";
-        var definitiveName = name;
-        var differentiatorNumber = 2;
-
-        if (tempId in tab.host._misc.contents) {
-
-          while (tempId in tab.host._misc.contents) {
-
-            tempId = name + differentiatorNumber + "Tab";
-            definitiveName = name + differentiatorNumber;
-            differentiatorNumber++;
+    
+      <div class="vc-tabs-closeButton">
+        <i class="iconsSize material-icons vc-fg5 vc-fg1-hoverable">close</i>
+      </div>
+      <span class="vc-tabs-title vc-fg5 vc-fg2-hoverable">template</span>
+    
+    </template>
+    
+    <script type="text/javascript">
+      vcomet.element("vc-tab", null, {
+        properties: {
+          name: {
+            value: "",
+            reflect: true
+          },
+          host: {
+            value: {}
           }
+        },
+        privateProperties: {
+          refs: {
+            value: {}
+          }
+        },
+        functions: {
+          configureAttributes: function (tab) {
+    
+            var name = tab.getAttribute("name");
+            var tempId = name + "Tab";
+            var definitiveName = name;
+            var differentiatorNumber = 2;
+            
+            if (tempId in tab.host._misc.contents) {
+    
+              while (tempId in tab.host._misc.contents) {
+    
+                tempId = name + differentiatorNumber + "Tab";
+                definitiveName = name + differentiatorNumber;
+                differentiatorNumber++;
+              }
+            }
+    
+            if (!tab.getAttribute("title")) {
+              tab.setAttribute("title", tab.getAttribute("name"));
+            }
+            
+            tab.setAttribute("name", definitiveName);
+          }
+        },
+        //Here we will just move the tab content to a template before its transformed
+        onInit: function () {
+          this.host = this.parentNode;
+        },
+        onRender: function () {
+    
+          var tab = this;
+          var tabTitleElement = tab.querySelector(".vc-tabs-title");
+          var content = document.createElement('div');
+          var scroll = document.createElement("vc-scroll");
+    
+          var mainTabsContainer = tab.host._refs.tabsWrapper;
+          var mainContentsContainer = tab.host._refs.contentsWrapper;
+    
+          var tabs = tab.parentNode;
+          var tabsCount = tab.host._refs.tabsWrapper.querySelectorAll("vc-tab").length;
+    
+          var sourceFragment = document.createDocumentFragment();
+          var sourceNodes = tab.getSourceElements();
+          var node;
+
+          tab._refs.scroll = scroll;
+    
+          for (var i = 0; i < tabsCount; i++) {
+            if (!tabs.querySelector('vc-tab[data-tab-order="' + i + '"]')) {
+              tab.dataset.tabOrder = i;
+              break;
+            }
+          }
+
+          tab.classList.add("vc-bg4-border");
+    
+          tab.querySelector(".vc-tabs-closeButton").onclick = function (e) {
+            tab.host.closeTab(tab, e)
+          };
+    
+          tab.configureAttributes(tab);
+    
+          var baseName = tab.getAttribute("name");
+          var id = baseName + "Tab";
+          var contentId = baseName + "Content";
+    
+          //Configuring content
+          content.id = contentId;
+          content.classList.add("vc-tabs-content");
+          content.classList.add("vc-fg3");
+          content.classList.add("selectable");
+          content.classList.add("hidden");
+          content.setAttribute("visible", "false");
+    
+          scroll.fit = true;
+    
+          // Appending source nodes to the content
+          while (sourceNodes.length) {
+            // From first to last...
+            node = sourceNodes.shift();
+            sourceFragment.appendChild(node);
+          }
+    
+          scroll.appendChild(sourceFragment);
+          content.appendChild(scroll);
+    
+          //Configuring tab
+          tab.id = id;
+          tab.dataset.selected = false;
+    
+          tab.addEventListener('click', function (e) {
+            tab.host.select(tab);
+            scroll.update();
+          }, false);
+    
+          tabTitleElement.innerHTML = tab.getAttribute("title");
+    
+          if (tab.host.getAttribute("dragging") != "false") {
+    
+            tab.setAttribute("draggable", "true");
+    
+            //Adding the draggable functionality, there are more available functions, but these are the ones we need
+            tab.addEventListener('dragstart', function (e) {
+              tab.host._handleDragStart(e, tab);
+            }, false);
+            tab.addEventListener("dragend", function (e) {
+              tab.host._handleDragEnd(e, tab);
+            });
+          }
+    
+          tab.host._misc.contents[id] = contentId;
+    
+          mainContentsContainer.appendChild(content);
+          mainTabsContainer.appendChild(tab);
+    
+          tab.host._handleTabsScrollsStatus();
+    
+          if (tab.dataset.tabOrder == 0) {
+            tab.host._selectTab(tab);
+          }
+    
+          // After a tab has been added, we append again the dropArea so its always on top of the tabs as its always the lastChild
+          tab.host.onRender(function () {
+            tab.host._refs.tabsWrapper.appendChild(tab.host._misc.dragging.dropArea);
+          });
+    
+    
         }
-
-        if (!tab.getAttribute("title")) {
-          tab.setAttribute("title", tab.getAttribute("name"));
-        }
-
-        tab.setAttribute("name", definitiveName);
-      }
-    },
-    //Here we will just move the tab content to a template before its transformed
-    onInit: function () {
-      this.host = this.parentNode;
-    },
-    onRender: function () {
-
-      var tab = this;
-      var tabTitleElement = tab.querySelector(".vc-tabs-title");
-      var content = document.createElement('div');
-      var scroll = document.createElement("vc-scroll");
-
-      var mainTabsContainer = tab.host._refs.tabsWrapper;
-      var mainContentsContainer = tab.host._refs.contentsWrapper;
-
-      var tabs = tab.parentNode;
-      var tabsCount = tab.host._refs.tabsWrapper.querySelectorAll("vc-tab").length;
-
-      var sourceFragment = document.createDocumentFragment();
-      var sourceNodes = tab.getSourceElements();
-      var node;
-
-      for (var i = 0; i < tabsCount; i++) {
-        if (!tabs.querySelector('vc-tab[data-tab-order="' + i + '"]')) {
-          tab.dataset.tabOrder = i;
-          break;
-        }
-      }
-
-      tab.querySelector(".vc-tabs-closeButton").onclick = function (e) {
-        tab.host.closeTab(tab, e)
-      };
-
-      tab.configureAttributes(tab);
-
-      var baseName = tab.getAttribute("name");
-      var id = baseName + "Tab";
-      var contentId = baseName + "Content";
-
-      //Configuring content
-      content.id = contentId;
-      content.classList.add("vc-tabs-content");
-      content.classList.add("selectable");
-      content.classList.add("hidden");
-      content.setAttribute("visible", "false");
-
-      scroll.fit = true;
-
-      // Appending source nodes to the content
-      while (sourceNodes.length) {
-        // From first to last...
-        node = sourceNodes.shift();
-        sourceFragment.appendChild(node);
-      }
-
-      scroll.appendChild(sourceFragment);
-      content.appendChild(scroll);
-
-      //Configuring tab
-      tab.id = id;
-      tab.dataset.selected = false;
-
-      tab.addEventListener('click', function (e) {
-        tab.host.select(tab);
-        scroll.update();
-      }, false);
-
-      tabTitleElement.innerHTML = tab.getAttribute("title");
-
-      if (tab.host.getAttribute("dragging") != "false") {
-
-        tab.setAttribute("draggable", "true");
-
-        //Adding the draggable functionality, there are more available functions, but these are the ones we need
-        tab.addEventListener('dragstart', function (e) {
-          tab.host._handleDragStart(e, tab);
-        }, false);
-        tab.addEventListener("dragend", function (e) {
-          tab.host._handleDragEnd(e, tab);
-        });
-      }
-
-      tab.host._misc.contents[id] = contentId;
-
-      mainContentsContainer.appendChild(content);
-      mainTabsContainer.appendChild(tab);
-
-      tab.host._handleTabsScrollsStatus();
-
-      if (tab.dataset.tabOrder == 0) {
-        tab.host._selectTab(tab);
-      }
-
-      // After a tab has been added, we append again the dropArea so its always on top of the tabs as its always the lastChild
-      tab.host.onRender(function () {
-        tab.host._refs.tabsWrapper.appendChild(tab.host._misc.dragging.dropArea);
       });
-
-
-    }
-  });
-</script>
+    </script>

@@ -4,14 +4,14 @@
 @([html]
 <head>
   <script>
-    alert("hey");
-    console.log("Richard");
+    alert("head alert");
+    console.log("head log");
   </script>
 </head>
 <body>
   <script>
-  alert("Jose");
-  console.log("log");
+  alert("body alert");
+  console.log("body log");
   </script>
   <div id="main">Main div</div>
   <button onclick="test();" type="button">Click Me!</button>
@@ -21,7 +21,7 @@
 function test() {
   alert("I'm JS");
 }
-console.log("Tamara")
+console.log("js log")
 [/js]
 
 [css]
@@ -48,7 +48,7 @@ button {
 function test() {
   alert("I'm JS");
 }
-console.log("Tamara")
+console.log("js log")
 [/js]
 
 [css]

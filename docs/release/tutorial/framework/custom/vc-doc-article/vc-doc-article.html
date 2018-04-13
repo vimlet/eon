@@ -10,12 +10,12 @@
         min-height: 50px;
         /* background-color: #2b2b2b;
         background-image: url("img/menu/menu.png"); */
-    background-color: transparent;
+        background-color: transparent;
     }
 
     #vc-doc-article-content {
         box-sizing: border-box;
-        height: calc(100% - 55px);
+        height: calc(100% - 50px);
         min-width: 400px;
     }
 </style>
@@ -51,6 +51,9 @@
         privateProperties: {
             refs: {
                 value: {}
+            },
+            misc: {
+                value: {}
             }
         },
 
@@ -59,8 +62,8 @@
             setString: function (data) {
                 var el = this;
                 el._refs.viewer = this.querySelector("vc-md-viewer");
-                el._refs.viewer.onparsed(function () {
-                        document.querySelector("vc-doc-article").checkUrlLink();    // Check url again to ensure that first time that a document is parsed, link is correctly used if any
+                el._refs.viewer.ondrawn(function () {
+                    document.querySelector("vc-doc-article").checkUrlLink(); // Check url again to ensure that first time that a document is parsed, link is correctly used if any
                 });
                 el._refs.viewer.onReady(function () {
                     el._refs.viewer.parse(data);
@@ -71,7 +74,7 @@
                 this.querySelector("vc-md-viewer").src = path;
             },
             // @function goTo (public) [Scroll to id position] @param element @param id
-            goTo(id) {
+            goTo(id) {                
                 var el = this;
                 el._refs.viewer.goTo(id);
             },
@@ -88,10 +91,15 @@
         privateFunctions: {
             // @function onHash (private) [Hash change listener. Check if link has changed]
             onHash: function () {
-                window.onhashchange = function () {                    
-                    var link = window.location.href.split('&link=')[1];
-                    if (link != "" && link != el.link) {
-                        document.querySelector("vc-doc-article").checkUrlLink();
+                window.onhashchange = function (e) {
+// var oldFile = e.oldURL.split('&file=')[1].split('&link=')[0];
+// var newFile = e.newURL.split('&file=')[1].split('&link=')[0];
+                    var article = document.querySelector("vc-doc-article");
+                    if (article && article._misc.isOnHashEnabled && article.querySelector("vc-scroll")._misc.requestedScroll.ended) {
+                        var link = window.location.href.split('&link=')[1];
+                        if (link != "" && link != el.link) {
+                            document.querySelector("vc-doc-article").checkUrlLink();
+                        }
                     }
                 };
             }
@@ -104,7 +112,8 @@
         },
 
         onReady: function () {
-            var el = this;
+            var el = this;            
+            el._misc.isOnHashEnabled = true;
             el._onHash();
         }
 
