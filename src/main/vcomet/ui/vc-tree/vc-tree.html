@@ -127,23 +127,23 @@
         } else {
 
           // Append new refreshed tree nodes
-          el._misc.srcNodes.forEach(function (cNode) {      
+          el._misc.srcNodes.forEach(function (cNode) {
             parentNode = cNode._refs.parentNode;
             if (filter && cNode.path.toLowerCase().includes(filter.toLowerCase())) {
               // Append node to its tree node parent
-              if(!filterNodes[parentNode.path]) {
+              if (!filterNodes[parentNode.path]) {
                 fragment.appendChild(cNode);
-              // Append node to the tree root
+                // Append node to the tree root
               } else {
                 parentNode._refs.wrapper.appendChild(cNode);
               }
               filterNodes[cNode.path] = cNode;
-            } else if (!filter){
+            } else if (!filter) {
               // Append node belonging to a tree node
-              if(parentNode.tagName.toLowerCase() == "vc-treenode") {
+              if (parentNode.tagName.toLowerCase() == "vc-treenode") {
                 parentNode._refs.wrapper.appendChild(cNode);
-              // Append root node
-              } else{
+                // Append root node
+              } else {
                 fragment.appendChild(cNode);
               }
             }
@@ -194,7 +194,7 @@
           el.selectedNode.selected = false;
           vcomet.triggerCallback("onNodeUnselected", el, el.selectedNode);
         }
-        if(el.markedNode){
+        if (el.markedNode) {
           el.markedNode.marked = false;
         }
         // Select node
@@ -214,7 +214,7 @@
           el.markedNode.marked = false;
           vcomet.triggerCallback("onNodeUnmarked", el, el.markedNode);
         }
-        if(el.selectedNode) {
+        if (el.selectedNode) {
           el.selectedNode.selected = false;
         }
         // Select node
@@ -394,7 +394,7 @@
           tree.removeChild(tree.lastChild);
         }
         // Reset tree nodes
-        if(cleanRefs) {
+        if (cleanRefs) {
           el.nodes = {};
         }
       },
@@ -431,6 +431,7 @@
         }
 
         // Sort alphabetically
+        // sortArray.sort();
         sortArray.sort(function (a, b) {
           x = a[0].toLowerCase();
           y = b[0].toLowerCase();
@@ -449,8 +450,21 @@
         });
         // Sort by order
         sortArray.sort(function (a, b) {
-          return a[1] - b[1];
+          var x = a[0].toLowerCase();
+          var y = b[0].toLowerCase();
+          if (x < y) { return -1; }
+          if (x > y) { return 1; }
+          return 0;
         });
+
+        // // Sort by type
+        // sortArray.sort(function (a, b) {
+        //   return a[2] - b[2];
+        // });
+        // // Sort by order
+        // sortArray.sort(function (a, b) {
+        //   return a[1] - b[1];
+        // });
 
         // Append sorted nodes
         for (var i = 0; i < sortArray.length; i++) {
@@ -586,7 +600,7 @@
       */
       moveLocal: function (dragNode, dropNode, callback, errCallback) {
         var el = this;
-       
+
         var parentNode = dragNode._refs.parentNode;
         // Check drop conditions
         if (dropNode.path.indexOf(dragNode.name + "/") == -1 &&
@@ -721,7 +735,7 @@
       var srcNodes = el.getSourceElements();
       var scroll = document.createElement('vc-scroll');
 
-      
+
       el._misc.srcNodes = [];
 
       el._misc.srcNodesPaths = {};
@@ -734,7 +748,7 @@
         //
         el._misc.srcNodesPaths[srcNode.getAttribute("path")] = { type: srcNode.getAttribute("type") };
 
-        
+
         el._misc.srcNodes.push(srcNode);
 
         if (srcNode.tagName.toLowerCase() !== "vc-scroll") {
