@@ -89,12 +89,17 @@
         el._misc.sizeOffProp = el.type == "vertical" ? "offsetHeight" : "offsetWidth";
         el._misc.sizeProp = el.type == "vertical" ? "height" : "width";
         el._misc.axisProp = el.type == "vertical" ? "clientY" : "clientX";
+        if(el.type == "vertical") {
+          el.classList.add("vc-gutterflex-vertical");
+        }
         // Check if it is a nested gutter
         // ** Solves Safari flex child fit parent bug
         if(el.parentNode.tagName == "VC-SECTION"){
           el.style.position = "absolute";
         }
-        el._misc.size = el[el._misc.sizeOffProp];
+        // ** Force gutter to fit its parent (no style applied yet)
+        el.style[el._misc.sizeProp] = "100%";
+        el._misc.size = el[el._misc.sizeOffProp];        
       },
       /*
         @function (private) setUpSection
@@ -185,7 +190,6 @@
         clickable.addEventListener("pointerdown", function(e){
           if(e.button == 0){
             initValue = moveValue = e[el._misc.axisProp];
-            console.log('initValue', initValue);
             mousedown = true;
           }
         }, false);
@@ -193,24 +197,21 @@
         el._refs.splitter.addEventListener("pointermove", function(e){
           if(mousedown){
             moveValue = e[el._misc.axisProp];
-            console.log('moveValue', moveValue);
             mousemove = true;
           }
         });
         // Set on mouseup listener
         document.addEventListener("pointerup", function(){
           // Check close limit margin 
-          isInitMajor = initValue > moveValue;
-          // console.log('initValue', initValue, "moveValue", moveValue, closeMargin);
-          // console.log('moveValue - initValue', moveValue - initValue);
-           // Shrink section
-          closeMarginReached = (moveValue - initValue) <= closeMargin ? true : false;
-          if(isInitMajor){
-            // Expanding section
-            closeMarginReached = (initValue - moveValue) <= closeMargin ? true : false;
-          }
+          // isInitMajor = initValue > moveValue;
+          //  // Shrink section
+          // closeMarginReached = (moveValue - initValue) <= closeMargin ? true : false;
+          // if(isInitMajor){
+          //   // Expanding section
+          //   closeMarginReached = (initValue - moveValue) <= closeMargin ? true : false;
+          // }
           // Check collapse constraints
-          if(mousedown && (initValue === moveValue || closeMarginReached)){
+          if(mousedown && (initValue === moveValue)){
             el._toggleCollapse();
           } else {
             mousemove = false;
@@ -225,12 +226,11 @@
       */
       toggleCollapse: function() {
         var el = this;
-
         if(!el._misc.collapsed){
           // Set collapse animation style
           el._toggleCollapseAnimation();
           // Store new no collapsed values
-          el._sectionBeforeCollapse = el._refs.section[el._misc.sizeOffProp];
+          el._misc.sizeBeforeCollapse = el._refs.section[el._misc.sizeOffProp];
           // Collapse
           el._refs.section.style[el._misc.sizeProp] = 0;
           // Rotate arrow icon
@@ -348,6 +348,27 @@
           // Update section size to change splitter position
           el._refs.section.style[el._misc.sizeProp] = value + "px";
         }
+      },
+       /*
+        @function (private) addGutterResizeListener
+        @description Resize listener for responsive purposes
+      */
+      addGutterResizeListener: function() {
+        var el = this;
+        // Throttle event triggering for better performance
+        var throttled = false;
+        var delay = 10;
+        vcomet.addResizeListener(el, "resize", function(){
+          if (!throttled) {
+            el.resize();
+            // Throttle
+            throttled = true;
+            // Set a timeout to un-throttle
+            setTimeout(function() {
+             throttled = false;
+            }, delay);
+          }
+        });
       }
     },
     onInit: function() {
@@ -365,6 +386,8 @@
        el._setUpSeparator();
        // Drag functionality
        el._drag();
+       // Control splitter position on window resize
+       el._addGutterResizeListener();
     }
 
   });
