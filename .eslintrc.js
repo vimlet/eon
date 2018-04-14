@@ -1,9 +1,10 @@
 module.exports = {
+    "extends": "eslint:recommended",
     "env": {
         "browser": true,
-        "node": true
+        "node": true,
+        "es6": false
     },
-    "extends": "eslint:recommended",
     "rules": {
         "indent": [
             "error",
@@ -21,15 +22,22 @@ module.exports = {
             "error",
             "always"
         ],
+        "curly": "error",
+        "no-multiple-empty-lines": [
+            "warn", {
+                "max": 1
+            }
+        ],
         "padded-blocks": [
             "error",
             "never"
         ],
-        curly: "error",
-        // "padding-line-between-statements": [
-        //     "error",
-        //     { "blankLine": "never", "prev": "*", "next": "*" }
-        // ],
+        "padding-line-between-statements": [
+            "error",
+            { "blankLine": "never", "prev": "*", "next": "*" },
+            { "blankLine": "always", "prev": "*", "next": "block-like" },
+            { "blankLine": "always", "prev": "*", "next": "multiline-expression" }
+        ],
         "no-console": 0
     }
 };
