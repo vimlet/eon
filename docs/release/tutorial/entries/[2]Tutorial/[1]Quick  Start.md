@@ -24,7 +24,8 @@ They are several ways to get the latest vComet release.
 
 - BROWSER: 
         
-    You can download it directly from the website download section [https://vimlet.com/downloads](https://vimlet.com/downloads). 
+    You can download it directly from the website download section:
+    [https://vimlet.com/downloads](https://vimlet.com/downloads). 
 
 ## Creating a project
 
@@ -74,8 +75,7 @@ vcomet.onReady(function () {
 
 ## Learn more...
 
-You can keep learning more about vComet components in the [Components Usage](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Usage.md) and [Components Creation](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Creation.md).
- tutorials.
+You can keep learning more about using vComet components in the To-Do List Tutorial and more about creating your own and managing state in the Game of Life Tutorial.
 
- You can also learn about the guts of vComet components and its patterns in the [manual section](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=manual&file=entries/Introduction.md&link=Welcome). 
+ You can also learn about the guts of vComet components and its patterns in the Core Introduction.
 
