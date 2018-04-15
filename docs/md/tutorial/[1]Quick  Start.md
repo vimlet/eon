@@ -24,6 +24,7 @@ They are several ways to get the latest vComet release.
 
 - BROWSER: 
     
+    
     You can download it directly from the website download section [https://vimlet.com/downloads](https://vimlet.com/downloads). 
 
 
