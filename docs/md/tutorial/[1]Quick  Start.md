@@ -36,7 +36,7 @@ Once vComet is downloaded to our working directory, simply add to the `head` of 
 </head>
 ```
 
-Note vcomet/vcomet.js is the default location but you can use other path if you wish.
+Note vcomet/vcomet.js is the default location but you can use any other path if you wish.
 
 ## Importing components
 
@@ -54,7 +54,7 @@ For now, we will use a simple button component as an example, but you can read m
 </head>
 ``` 
 
-One a component is imported it can be used as any other html element.
+Once a component is imported it can be used as any other html element.
 
 ```[html]
 <body>
