@@ -23,14 +23,12 @@ They are several ways to get the latest vComet release.
     This will download the latest version of vComet and extract it for you.
 
 - BROWSER: 
-    
-    
+        
     You can download it directly from the website download section [https://vimlet.com/downloads](https://vimlet.com/downloads). 
-
 
 ## Creating a project
 
-Once vComet is downloaded to our working directing, simply add to the `head` of your html file:
+Once vComet is downloaded to our working directory, simply add to the `head` of your html file:
 
 ```[html]
 <head>
