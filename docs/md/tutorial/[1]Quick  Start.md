@@ -1,6 +1,6 @@
 # Quick Start
 
-This tutorial assumes you are familiarized with the basics of [HTML ](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS ](https://developer.mozilla.org/en-US/docs/Web/CSS) and [JavaScript ](https://developer.mozilla.org/en-US/docs/Web/JavaScript/A_re-introduction_to_JavaScript).
+This tutorial assumes you are familiarized with the basics of HTML, CSS and JavaScript.
 
 ## Downloading vComet
 They are several ways to get the latest vComet release.
