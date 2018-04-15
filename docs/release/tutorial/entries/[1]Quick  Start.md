@@ -1,6 +1,6 @@
 # Quick Start
 
-This tutorial assumes you are familiarized with the basics of [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) and [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/A_re-introduction_to_JavaScript).
+This tutorial assumes you are familiarized with the basics of [HTML ](https://developer.mozilla.org/en-US/docs/Web/HTML), [CSS ](https://developer.mozilla.org/en-US/docs/Web/CSS) and [JavaScript ](https://developer.mozilla.org/en-US/docs/Web/JavaScript/A_re-introduction_to_JavaScript).
 
 ## Downloading vComet
 They are several ways to get the latest vComet release.
@@ -75,8 +75,7 @@ vcomet.onReady(function () {
 
 ## Learn more...
 
-You can keep learning more about vComet components in the [Components Usage](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Usage.md)
-and [Components Creation](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Creation.md).
+You can keep learning more about vComet components in the [Components Usage](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Usage.md) and [Components Creation](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Creation.md).
  tutorials.
 
  You can also learn about the guts of vComet components and its patterns in the [manual section](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=manual&file=entries/Introduction.md&link=Welcome). 
