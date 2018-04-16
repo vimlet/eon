@@ -75,10 +75,16 @@
         var el = this;
         var fragment = document.createDocumentFragment();
         var i, t;
+        var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
 
         // Get first generation template children
         for (i = 0, t = 0; i < dataNode.children.length; i++) {
           child = dataNode.children[i];
+          
+          if (reAppend) {
+            fragment.appendChild(child);
+          }
+
           if (child.tagName.toLowerCase() === "template") {
             // Store templates references
             el._refs.templates[t] = child;
@@ -87,7 +93,9 @@
         }
 
         // Move templates to the assigned body container 
-        if (!el.isEqualNode(dataNode)) { el._refs.wrapper.appendChild(dataNode) }
+        if (reAppend) {
+           el.content.appendChild(fragment);
+        }
 
         vcomet.triggerCallback("onLoad", el, el, []);
       },
@@ -98,7 +106,6 @@
       */
       removeTemplate: function (tmp) {
         var el = this;
-        var parent = tmp.parentNode;
         var children = tmp.children;
         var fragment = document.createDocumentFragment();
 
@@ -107,10 +114,10 @@
         }
 
         // Insert template content just before the template node
-        parent.insertBefore(fragment, tmp);
+        el.content.insertBefore(fragment, tmp);
 
         // Remove empty template
-        parent.removeChild(tmp);
+        el.content.removeChild(tmp);
       }
 
     },
@@ -121,7 +128,6 @@
         @param {Object} index [Template identifier]
       */
       render: function (index) {
-        
         var el = this;
         var tmp, i;
         var tmps = el._refs.templates;
@@ -141,7 +147,6 @@
             delete tmps[keys[i]];
           }
         }
-
       },
       /*
         @function refresh
@@ -158,29 +163,23 @@
       }
     },
     onCreated: function () {
+      var el = this;
       // Create content related callbacks
       vcomet.createCallback("onLoad", this);
       vcomet.createCallback("onContent", this);
-    },
-    onInit: function () {
-      var el = this;
       el._refs.templates = {};
 
       // Get body container
-      el._refs.wrapper = [true, "true"].indexOf(el.allowScroll) > -1 ? document.createElement("vc-scroll") : el;
-
+      el._refs.wrapper = vcomet.util.isTrue(el.allowScroll) ? document.createElement("vc-scroll") : el;
+      // Get body container
+      el.content = vcomet.util.isTrue(el.allowScroll)  ? el._refs.wrapper.content : el;
+    },
+    onInit: function () {
+      var el = this;
       // Import panel content from specific source
       el._importContent();
 
       if (!el._refs.wrapper.isEqualNode(el)) { el.appendChild(el._refs.wrapper) }
-
-    },
-    onBubbleRender: function () {
-      var el = this;
-
-      // Get body container
-      el.content = [true, "true"].indexOf(el.allowScroll) > -1 ? el._refs.wrapper.content : el;
-      
     }
   });
 </script>

@@ -1,8 +1,8 @@
 # Using Components
-In this tutorial we are going to make a simple To Do List to teach you about some of the most basic components vComet offers, and to show you how easy it is getting used to them.
+In this tutorial we are going to make a simple To-Do List to teach you about some of the most basic components vComet offers, and to show you how easy it is getting used to them.
 
 ## Import components
-To create the To Do List we are going to use 4 components only:  `vc-text`, `vc-button`, `vc-checkbox` and `vc-scroll`. The first thing do is import them into the html file:
+To create the To-Do List we are going to use 4 components only:  `vc-text`, `vc-button`, `vc-checkbox` and `vc-scroll`. The first thing do is import them into the html file:
 
 ```[html]
 <script>
@@ -18,13 +18,13 @@ To create the To Do List we are going to use 4 components only:  `vc-text`, `vc-
 Since we need to import multiple components we are passing an `Array` with their paths, but you can also pass a single `String` path if you only want to import one.
 
  ## Declare components
- We are going to declare components that will be loaded with the document, that is, those that are not created by the user interaction. In order to do this, we are going to use HTML tags, but with vComet nomenclature.
+ We are going to declare components that will be loaded with the document, that is, those that are not created by the user interaction. In order To-Do this, we are going to use HTML tags, but with vComet nomenclature.
 
 ```[html]
 <div class="main">
     <div class="absoluteContainer">
             <div class="todoContainer">
-                <span class="title">To Do list</span>
+                <span class="title">To-Do list</span>
 
                 <!-- Scroll component that will allow us to scroll through our list -->
                 <vc-scroll thickness="5" fillContainer="false">
@@ -45,7 +45,7 @@ Since we need to import multiple components we are passing an `Array` with their
 </div>
 ```
 
-As you can see we have prepared a basic structure for our `To Do List` and we have included a `scroll` component that will let us scroll through our list, we also have a `text` component so that the user can type any text that will be added to the list when our `button` component is triggered.
+As you can see we have prepared a basic structure for our `To-Do List` and we have included a `scroll` component that will let us scroll through our list, we also have a `text` component so that the user can type any text that will be added to the list when our `button` component is triggered.
 
 If you take a closer look you might find some `attributes` you have never seen before, these are `exclusive` for each type of components that will let us configure the behavior we want for the components, for instance, you can see that in the scroll element there are two attributes we are using, `thickness` and `fillContainer`; the value of `thickness` will determine the size of the scroll bars, while the value of `fillContainer` will tell the scroll if we want it to fill the size of its parent or it will have its own size.
 
