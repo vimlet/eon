@@ -3,37 +3,53 @@
   <div class="vc-tabs-closeButton">
     <i class="iconsSize material-icons vc-fg5 vc-fg1-hoverable">close</i>
   </div>
-  <span class="vc-tabs-title vc-fg5 vc-fg2-hoverable">template</span>
+  <span class="vc-tabs-title vc-fg5 vc-fg2-hoverable"></span>
 
 </template>
 
 <script type="text/javascript">
   vcomet.element("vc-tab", null, {
-    properties: {
-      name: {
-        value: "",
-        reflect: true
-      },
-      host: {
-        value: {}
-      }
-    },
     privateProperties: {
+      /*
+      @property (private) {Boolean} _refs
+      @description Object with references to relevant element nodes
+      */
       refs: {
         value: {}
       }
     },
+    properties: {
+      /*
+      @property {String} name
+      @description String to be used internally to link a tab to its content
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} tabTitle
+      @description String to be used as a visual text for the tab
+      */
+      tabTitle: {
+        value: "",
+        reflect: true
+      }
+    },
     privateFunctions: {
-
-      assignAttributes: function () {
+      /*
+      @function (private) _assignProperties
+      @description Assigns an id among other properties.
+      */
+      assignProperties: function () {
 
         var el = this;
 
-        var name = el.getAttribute("name");
+        var name = el.name;
         var tempId = name + "Tab";
         var definitiveName = name;
         var differentiatorNumber = 2;
-        
+
         if (tempId in el._refs.host._misc.contents) {
 
           while (tempId in el._refs.host._misc.contents) {
@@ -44,16 +60,16 @@
           }
         }
 
-        if (!el.getAttribute("title")) {
-          el.setAttribute("title", el.getAttribute("name"));
-        }
-
-        el.setAttribute("name", definitiveName);
-        el.setAttribute("data-selected", "false");
-        el.setAttribute("id", definitiveName + "Tab");
+        el.tabTitle = el.tabTitle == "" ? el.name : el.tabTitle;
+        el.name = definitiveName;
+        el.dataset.selected = false;
+        el.id = definitiveName + "Tab";
 
       },
-
+      /*
+      @function (private) _assignOrder
+      @description Assigns a tab order for the tab
+      */
       assignOrder: function () {
 
         var el = this;
@@ -66,20 +82,29 @@
           for (var i = 0; i < tabsCount; i++) {
 
             if (!tabs.querySelector('vc-tab[data-tab-order="' + i + '"]')) {
+
               el.dataset.tabOrder = i;
+
+              if (el.dataset.tabOrder == 0) {
+
+                el._refs.host.onReady(function () {
+                  el._refs.host._selectTab(el);
+                });
+
+              }
+
               break;
             }
 
           }
 
-        } else {
-
-          el.dataset.tabOrder = 0;
-
         }
 
       },
-
+      /*
+      @function (private) _setupEvents
+      @description Creates all the events for the tab (click, close, drag...)
+      */
       setupEvents: function () {
 
         var el = this;
@@ -92,38 +117,41 @@
 
         // Creates the close button event
         el.querySelector(".vc-tabs-closeButton").addEventListener('click', function (e) {
-          el._refs.host.closeTab(tab, e)
+          el._refs.host.closeTab(el, e)
         }, false);
 
         // Check if we need to assign dragging related events
-        if (el._refs.host.getAttribute("dragging") != "false") {
+        if (vcomet.util.isTrue(el._refs.host.dragging)) {
 
           el.setAttribute("draggable", "true");
 
           //Adding the draggable functionality, there are more available functions, but these are the ones we need
           el.addEventListener('dragstart', function (e) {
-            el._refs.host._handleDragStart(e, tab);
+            el._refs.host._handleDragStart(e, this);
           });
 
           el.addEventListener("dragend", function (e) {
-            el._refs.host._handleDragEnd(e, tab);
+            el._refs.host._handleDragEnd(e, this);
           });
         }
 
       },
-
+      /*
+      @function (private) _setupContent
+      @description Creates the vc-panel in which the tabs content will be placed
+      */
       setupContent: function () {
 
         var el = this;
 
         var sourceNodes = el.getSourceElements();
         var mainContentsContainer = el._refs.host._refs.contentsWrapper;
-        var contentId = el.getAttribute("name") + "Content";
+        var contentId = el.name + "Content";
 
         var contentPanel = document.createElement('vc-panel');
         var contentTemplate = document.createElement('template');
-
         var sourceFragment = document.createDocumentFragment();
+
         var node;
 
         contentPanel.onBubbleRender(function () {
@@ -133,7 +161,6 @@
         //Configuring content
         contentPanel.id = contentId;
         contentPanel.classList.add("vc-tabs-content", "vc-fg3", "selectable", "hidden");
-        contentPanel.setAttribute("visible", "false");
 
         // Appending source nodes to the content
         while (sourceNodes.length) {
@@ -147,52 +174,43 @@
 
         mainContentsContainer.appendChild(contentPanel);
 
-        el._refs.host._misc.contents[el.id] = contentId;
+        el._refs.host._misc.contents[el.id] = contentPanel;
         el._refs.contentPanel = contentPanel;
 
       }
 
     },
-    //Here we will just move the tab content to a template before its transformed
     onInit: function () {
-      this._refs.host = this.parentNode;
+
+      var el = this;
+
+      el._refs.host = this.parentNode;
+      el._refs.host._refs.tabsWrapper.appendChild(el);
+
     },
     onRender: function () {
 
-      var tab = this;
-      var tabTitleElement = tab.querySelector(".vc-tabs-title");
+      var el = this;
+      var tabTitleElement = el.querySelector(".vc-tabs-title");
+      var mainTabsContainer = el._refs.host._refs.tabsWrapper;
 
+      el.classList.add("vc-bg4-border");
 
-      var mainTabsContainer = tab._refs.host._refs.tabsWrapper;
+      el._assignProperties();
+      el._assignOrder();
 
+      el._setupContent();
+      el._setupEvents();
 
-      
-      tab.classList.add("vc-bg4-border");
+      tabTitleElement.innerHTML = el.tabTitle;
+      mainTabsContainer.appendChild(el);
 
-      tab._assignAttributes();
-      tab._assignOrder();
-
-      tab._setupContent();
-      tab._setupEvents();
-
-      tabTitleElement.innerHTML = tab.getAttribute("title");
-
-      mainTabsContainer.appendChild(tab);
-
-      tab._refs.host._handleTabsScrollsStatus();
-
-      if (tab.dataset.tabOrder == 0) {
-        tab._refs.host.onReady(function () {
-          tab._refs.host._selectTab(tab);
-          tab._refs.contentPanel.render();
-        });
-      }
-
-      // After a tab has been added, we append again the dropArea so its always on top of the tabs as its always the lastChild
-      tab._refs.host.onRender(function () {
-        tab._refs.host._refs.tabsWrapper.appendChild(tab._refs.host._misc.dragging.dropArea);
+      // After a tab has been added, we re-append again the dropArea so its always on top of the tabs as its always the lastChild
+      el._refs.host.onRender(function () {
+        el._refs.host._refs.tabsWrapper.appendChild(el._refs.host._misc.dragging.dropArea);
       });
 
+      el._refs.host._handleTabsScrollsStatus();
 
     }
   });
