@@ -1,5 +1,3 @@
-<!-- <link rel="stylesheet" data-href="style.css"> -->
-
 <template>
 
   <div class="vc-button-button vc-bg1-border vc-bg1-hoverable vc-fg1-hoverable vc-unselectable"></div>
@@ -11,6 +9,14 @@
 <script>
   vcomet.element("vc-button", "vc-button.css", {
     properties: {
+      /*
+        @property {String} label 
+        @description Button text
+      */
+      label: {
+        value: "",
+        reflect: true
+      },
       /*
         @property {String} value 
         @description Button text
@@ -81,11 +87,11 @@
       },
 
       /*
-        @function setValue
+        @function setLabel
         @description Set new button text
         @param {String} newVal [New button text]
       */
-      setValue: function (newVal) {
+      setLabel: function (newVal) {
         var el = this;
         var button = el.querySelector(".vc-button-button");
         var buttonText = document.createElement("div");
@@ -116,6 +122,15 @@
         // so if the button has icon it will be placed centered
         (!newVal) ? el.setAttribute("text", "false") : el.setAttribute("text", "true");
 
+      },
+
+      /*
+        @function setValue
+        @description Set new button text
+        @param {String} newVal [New button text]
+      */
+      setValue: function (newVal) {
+        this.setLabel(newVal);
       }
     },
 
@@ -187,7 +202,14 @@
       var el = this;
       var button = el.querySelector(".vc-button-button");
 
-      el.setValue(el.value);
+      if (el.label || (el.label && el.value) ) {
+        el.setValue(el.label);
+
+      } else {
+        el.setValue(el.value);
+        
+      }
+
       el._updateDisabled(el.disabled);
       el._setupIcon(el.icon);
       // When the button is a type form submit
