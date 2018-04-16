@@ -50,6 +50,14 @@
       max: {
         value: 50,
         reflect: true
+      },
+      /*
+        @property {Boolean} max
+        @description
+      */
+      responsiveLimit: {
+        value: 500,
+        reflect: true
       }
     },
     privateProperties:{
@@ -74,7 +82,15 @@
         @description
       */
       resize: function() {
-        
+        var el = this;
+        var oldGutterSize = parseFloat(el._misc.size);
+        var oldSectionSize = el._refs.section[el._misc.sizeOffProp];
+        // Store gutter new size
+        el._misc.size = parseFloat(el[el._misc.sizeOffProp]);
+        if(el._misc.size !== oldGutterSize){
+          // Update before collapse values
+          el._sectionResize(oldGutterSize, oldSectionSize);
+        }
       }
     },
     privateFunctions: {
@@ -99,7 +115,8 @@
         }
         // ** Force gutter to fit its parent (no style applied yet)
         el.style[el._misc.sizeProp] = "100%";
-        el._misc.size = el[el._misc.sizeOffProp];        
+        el._misc.size = el[el._misc.sizeOffProp];     
+        
       },
       /*
         @function (private) setUpSection
@@ -116,8 +133,9 @@
         el._refs.section.classList.add("vc-gutterflex-section");
         el._refs.secSection.classList.add("vc-gutterflex-section", "vc-gutterflex-secondary");
         //
-        sectionSize = (el._misc.size / 2) - el.splitterSize;
-        el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";
+        sectionSize = (el._misc.size / 2) - (el.splitterSize / 2);
+        el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";  
+        el._misc.gutterResizePercent = 50;  
       },
       /*
         @function (private) createSeparator
@@ -202,14 +220,6 @@
         });
         // Set on mouseup listener
         document.addEventListener("pointerup", function(){
-          // Check close limit margin 
-          // isInitMajor = initValue > moveValue;
-          //  // Shrink section
-          // closeMarginReached = (moveValue - initValue) <= closeMargin ? true : false;
-          // if(isInitMajor){
-          //   // Expanding section
-          //   closeMarginReached = (initValue - moveValue) <= closeMargin ? true : false;
-          // }
           // Check collapse constraints
           if(mousedown && (initValue === moveValue)){
             el._toggleCollapse();
@@ -241,7 +251,7 @@
         } else {
           // Set expand animation style
           el._toggleCollapseAnimation();
-          el._refs.section.style[el._misc.sizeProp] = el._misc.sizeBeforeCollapse + "px";
+          el._refs.section.style[el._misc.sizeProp] = (el._misc.sizeBeforeCollapse) + "px";
           // Rotate arrow icon
           el._rotateCollapseIcon();
           el._misc.collapsed = false;
@@ -320,8 +330,6 @@
               propertyMoveValue = parseFloat(el._refs.section[el._misc.sizeOffProp]) - pixels;
               // Check splitter move constraints
               el._checkMoveConstraints(pixels, propertyMoveValue);
-              // REMOVE Section resize
-              // el._checkResizeConstraints(pixels, propertyMoveValue);
               // Update move value
               moveValue = e[el._misc.axisProp];
             }
@@ -347,6 +355,7 @@
         if((pixels > 0 && value >= el.min) || pixels < 0 && value <= (el._misc.size - el.max)){
           // Update section size to change splitter position
           el._refs.section.style[el._misc.sizeProp] = value + "px";
+          el._misc.gutterResizePercent = value * 100 / el._misc.size;
         }
       },
        /*
@@ -369,6 +378,77 @@
             }, delay);
           }
         });
+      },
+      /*
+        @function (private) sectionResize
+        @description
+      */
+      sectionResize: function(oldGutterSize, oldSectionSize) {
+        var el = this;
+        var sectionSizePercent, newSectionSize;
+        //
+        if(!el._misc.collapsed){
+          // Get section size percentage before resize
+          sectionSizePercent = el._misc.gutterResizePercent;
+          // Set new section size
+          newSectionSize = sectionSizePercent * el._misc.size / 100;
+          // ** TODO? Check max value
+          el._refs.section.style[el._misc.sizeProp] = newSectionSize + "px";
+        } else {
+          // Get value set before been collapsed
+          sectionSizePercent = el._misc.sizeBeforeCollapse * 100 / oldGutterSize;
+          newSectionSize = sectionSizePercent * el._misc.size / 100;
+          el._misc.sizeBeforeCollapse = newSectionSize;
+        }
+      },
+      /*
+        @function (private) responsiveListener
+        @description Adapt gutter to smaller devices
+      */
+      responsiveListener: function() {
+        var el = this;
+        // Apply responsive
+        el._applyResponsive();
+        // Throttle event triggering for better performance
+        var throttled = false;
+        var delay = 10;
+        window.addEventListener("resize", function(){
+          if (!throttled) {
+            el._applyResponsive();
+            // Throttle
+            throttled = true;
+            // Set a timeout to un-throttle
+            setTimeout(function() {
+             throttled = false;
+            }, delay);
+          }
+        });
+      },
+       /*
+        @function (private) applyResponsive
+        @description Check device resolution and change the splitter size
+      */
+      applyResponsive: function() {
+        var el = this;
+        // Increase splitter under desktop resolution
+        if(window.innerWidth <= el.responsiveLimit && el._misc.desktop){
+          el._misc.desktop = false;
+          el._changeSplitterSize(15);
+        }
+        // Set splitter standard size on desktop resolution
+        if(window.innerWidth > el.responsiveLimit && !el._misc.desktop){
+          el._misc.desktop = true;
+          el._changeSplitterSize(6);
+        }
+      },
+      /*
+        @function (private) changeSplitterSize
+        @description Change splitter style size property
+        @param {Number} value [New splitter size]
+      */
+      changeSplitterSize: function(value) {
+        var el = this;
+        el._refs.splitter.style[el._misc.sizeProp]= value + "px";
       }
     },
     onInit: function() {
@@ -388,6 +468,13 @@
        el._drag();
        // Control splitter position on window resize
        el._addGutterResizeListener();
+       // Responsive behavior
+       el._responsiveListener();
+    },
+    onRender: function () {
+      var el = this;
+       // Make sure correct size calculation when integrated into other components
+       el.resize();
     }
 
   });
