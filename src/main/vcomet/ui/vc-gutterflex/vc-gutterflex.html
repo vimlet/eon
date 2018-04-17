@@ -166,9 +166,11 @@
         if(vcomet.util.isTrue(el.collapsable)){
           // Create separator clickable div
           var clickable = document.createElement("div");
+          var clickableZone = document.createElement("div");
           clickable.setAttribute("class", "vc-gutterflex-splitterClickable");
           // TODO - style encapsulation
           clickable.classList.add("vc-bg3","vc-fg5","vc-bg3-hoverable", "vc-fg3-hoverable");
+          clickableZone.classList.add("vc-gutterflex-clickableZone");
           clickable.setAttribute("touch-action", "none");
           // TODO - Mobile miss click > create transparent bigger child as clickable node
           // Create icon
@@ -183,6 +185,7 @@
           }
           el._rotateCollapseIcon();
           clickable.appendChild(icon);
+          clickable.appendChild(clickableZone);
           el._refs.splitter.appendChild(clickable);
           // Collapsable click functionality
           el._clickCollapsable(clickable, icon);
@@ -220,6 +223,7 @@
         });
         // Set on mouseup listener
         document.addEventListener("pointerup", function(){
+          
           // Check collapse constraints
           if(mousedown && (initValue === moveValue)){
             el._toggleCollapse();
@@ -407,6 +411,11 @@
       */
       responsiveListener: function() {
         var el = this;
+        el._misc.desktop = (window.innerWidth <= el.responsiveLimit) ? false : true;
+        // Set initial splitter size
+        if (!el._misc.desktop) {
+          el._changeSplitterSize(15);
+        }
         // Apply responsive
         el._applyResponsive();
         // Throttle event triggering for better performance
@@ -473,7 +482,7 @@
     },
     onRender: function () {
       var el = this;
-       // Make sure correct size calculation when integrated into other components
+       // Make sure correct size calculation when the gutter is a part of another component
        el.resize();
     }
 
