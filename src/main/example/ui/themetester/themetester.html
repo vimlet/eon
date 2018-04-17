@@ -57,7 +57,8 @@
           <vc-treenode id="checkbox" path="checkbox"></vc-treenode>
           <vc-treenode id="combobox" path="combobox"></vc-treenode>
           <vc-treenode id="contextmenu" path="contextmenu"></vc-treenode>
-          <vc-treenode id="date" path="date"></vc-treenode>
+          <vc-treenode id="datebox" path="datebox"></vc-treenode>
+          <vc-treenode id="datepicker" path="datepicker"></vc-treenode>
           <vc-treenode id="dialog" path="dialog"></vc-treenode>
           <vc-treenode id="appmenu" path="docker"></vc-treenode>
           <vc-treenode id="appmenu" path="drawer"></vc-treenode>
@@ -91,8 +92,13 @@
         </vc-tree>
       </vc-layout>
 
+      <!-- <vc-layout class="tViewContainer" id="tViewContent"> -->
       <vc-layout class="tViewContainer">
-        <h1>Welcome to the vComet Theme Tester!</h1>
+        <vc-scroll id="tViewContent" arrowScrolls="true" thickness="10" >
+
+          <h1>Welcome to the vComet Theme Tester!</h1>
+
+        </vc-scroll>
       </vc-layout>
 
     </vc-layout>
@@ -135,10 +141,11 @@
 
       function htmlAjaxCall(id) {
         var xhr = new XMLHttpRequest();
-        var container = document.querySelector(".tViewContainer");
+        var container = document.querySelector("#tViewContent");
         var file = "section/" + id + ".html";
 
-        container.innerHTML = "";
+        container.content.innerHTML = "";
+        // container.innerHTML = "";
 
         xhr.open('GET', file, true);
 
@@ -148,11 +155,17 @@
 
           var fragment = vcomet.fragmentFromString(this.responseText);
 
-          container.appendChild(fragment);
+          container.content.appendChild(fragment);
+          // container.appendChild(fragment);
+
+          vcomet.onReady(function () {
+            container.update();
+          });
 
         };
 
         xhr.send();
+
       }
 
     });

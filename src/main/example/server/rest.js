@@ -121,8 +121,8 @@ module.exports = {
     // DB
     var data = [
       {
-        name: "Richard",
-        lastname: "Illes",
+        name: "Roberto",
+        lastname: "Romero",
         age: 22,
         phone: 666666666,
         dni: "458545524F",
@@ -137,8 +137,8 @@ module.exports = {
         id: "1"
       },
       {
-        name: "B",
-        lastname: "Bunny",
+        name: "Alberto",
+        lastname: "Rubio",
         age: 24,
         phone: "2222222222",
         dni: "5451213546P",
