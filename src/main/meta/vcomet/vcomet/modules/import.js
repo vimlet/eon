@@ -212,7 +212,9 @@ vcomet.handleStyleAppend = function () {
 vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
     
     var elementNames = Object.keys(vcomet.imports.scripts);
-    var resume = Number.isInteger(elementIndex) && Number.isInteger(scriptIndex) ? true : false;
+    // var resume = elementIndex.constructor === Number && scriptIndex.constructor === Number ? true : false;
+     // var resume = (elementIndex == 0 || (elementIndex && elementIndex.constructor === Number)) && (scriptIndex == 0 || (scriptIndex &&scriptIndex.constructor === Number)) ? true : false;
+     var resume = !isNaN(elementIndex - 1) && !isNaN(scriptIndex - 1) ? true : false;
     var elementScriptsKeys, elementScripts;
 
     // If it has to resume a previous scripts append we start from that index

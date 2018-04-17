@@ -47,6 +47,13 @@ vcomet.needLocalStringPolyfill = function () {
   return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
 }
 
+vcomet.needClassListAddPolyfill = function () {
+  var div = document.createElement("div");
+  div.classList.add("class1", "class2");
+
+  return div.classList.contains("class2") ? false : true;
+}
+
 // ############################################################################################
 // POLYFILL IMPORTS
 // ############################################################################################
@@ -89,6 +96,27 @@ if (vcomet.needLocalStringPolyfill()) {
       return proxied.apply(this, arguments);
     };
   })(Date.prototype.toLocaleString);
+
+}
+//
+if (vcomet.needClassListAddPolyfill()) {
+  
+  (function (proxied) {
+
+    DOMTokenList.prototype.add = function () {
+      
+      if(arguments.length > 1) {
+        
+        for (var i = 0; i < arguments.length; i++) {
+          proxied.apply(this, [arguments[i]]);
+        }
+        
+      } else {
+        return proxied.apply(this, arguments);
+      }
+
+    };
+  })(DOMTokenList.prototype.add);
 
 }
 
