@@ -159,6 +159,13 @@ vcomet.needLocalStringPolyfill = function () {
   return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
 }
 
+vcomet.needClassListAddPolyfill = function () {
+  var div = document.createElement("div");
+  div.classList.add("class1", "class2");
+
+  return div.classList.contains("class2") ? false : true;
+}
+
 // ############################################################################################
 // POLYFILL IMPORTS
 // ############################################################################################
@@ -201,6 +208,27 @@ if (vcomet.needLocalStringPolyfill()) {
       return proxied.apply(this, arguments);
     };
   })(Date.prototype.toLocaleString);
+
+}
+//
+if (vcomet.needClassListAddPolyfill()) {
+  
+  (function (proxied) {
+
+    DOMTokenList.prototype.add = function () {
+      
+      if(arguments.length > 1) {
+        
+        for (var i = 0; i < arguments.length; i++) {
+          proxied.apply(this, [arguments[i]]);
+        }
+        
+      } else {
+        return proxied.apply(this, arguments);
+      }
+
+    };
+  })(DOMTokenList.prototype.add);
 
 }
 
@@ -3607,7 +3635,9 @@ vcomet.handleStyleAppend = function () {
 vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
     
     var elementNames = Object.keys(vcomet.imports.scripts);
-    var resume = Number.isInteger(elementIndex) && Number.isInteger(scriptIndex) ? true : false;
+    // var resume = elementIndex.constructor === Number && scriptIndex.constructor === Number ? true : false;
+     // var resume = (elementIndex == 0 || (elementIndex && elementIndex.constructor === Number)) && (scriptIndex == 0 || (scriptIndex &&scriptIndex.constructor === Number)) ? true : false;
+     var resume = !isNaN(elementIndex - 1) && !isNaN(scriptIndex - 1) ? true : false;
     var elementScriptsKeys, elementScripts;
 
     // If it has to resume a previous scripts append we start from that index
