@@ -168,21 +168,17 @@
           var clickable = document.createElement("div");
           var clickableZone = document.createElement("div");
           clickable.setAttribute("class", "vc-gutter-splitterClickable");
-          // TODO - style encapsulation
+          // Splitter collapsable style
           clickable.classList.add("vc-bg3","vc-fg5","vc-bg3-hoverable", "vc-fg3-hoverable");
           clickableZone.classList.add("vc-gutter-clickableZone");
           clickable.setAttribute("touch-action", "none");
-          // TODO - Mobile miss click > create transparent bigger child as clickable node
           // Create icon
           var icon = document.createElement("i");
           el._refs.collapseIcon = icon;
-          // TODO - style encapsulation
-          icon.setAttribute("class", "unselectable vc-gutter-splitterCollapseIcon");
+          icon.classList.add("vc-unselectable", "vc-gutter-splitterCollapseIcon");
           // ** Fix IE bad icon positioning on horizontal gutter
-          if(vcomet.util.getBrowser() === "IE" && el.type === "horizontal"){
-             icon.style.position = "relative";
-             icon.style.right = "4px";
-          }
+          el._splitterStyleIEFix(icon, clickableZone);
+
           el._rotateCollapseIcon();
           clickable.appendChild(icon);
           clickable.appendChild(clickableZone);
@@ -190,6 +186,24 @@
           // Collapsable click functionality
           el._clickCollapsable(clickable, icon);
         }
+      },
+      /*
+        @function (private) splitterStyleIESupport
+        @description 
+      */
+      splitterStyleIEFix: function(collapseIcon, clickableZone) {
+        var el = this;
+        // Check browser
+        if(vcomet.util.getBrowser() === "IE"){
+            if(el.type === "horizontal") {
+              collapseIcon.style.position = "relative";
+              collapseIcon.style.right = "3px";
+              clickableZone.style.top = "0";
+              clickableZone.style.right = "-3px";
+            } else {
+              collapseIcon.style.paddingTop = "3px";
+            }
+          }
       },
       /*
         @function (private) clickCollapsable
@@ -306,7 +320,6 @@
           // Draggable variables
           var mousedown = false;
           var moveValue = 0;
-          //TODO
           var pixels, propertyMoveValue;
           // Start slide on mouse down event
           el._refs.splitter.addEventListener("pointerdown", function(e){
@@ -324,7 +337,7 @@
             if(mousedown){
               // Get y/z translate pixels
               pixels = moveValue - e[el._misc.axisProp];
-              // TODO Set gutter no collapsed
+              // Set gutter no collapsed
               if(el._misc.collapsed && moveValue !== e[el._misc.axisProp]){
                 // Rotate arrow icon to its initial position
                 el._rotateCollapseIcon();
