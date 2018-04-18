@@ -1,4 +1,4 @@
-<p style="margin-top: 80px" align="center"><img width="450" src="https://vimlet.com/vimlet/VimletComet/master/logo.png"></img>
+<p style="margin-top: 80px" align="center"><img style="max-width: 600px; width: 80%" src="https://vimlet.com/vimlet/VimletComet/master/logo.png"></img>
 </p><p align="center"><strong>Fast, Light & Productive UX</strong></p>
 
 # Welcome
