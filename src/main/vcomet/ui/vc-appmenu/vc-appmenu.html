@@ -47,7 +47,7 @@
 
         privateProperties: {
             /*
-              @property (private) {Object} _appsBoxNode 
+              @property (private) {Object} _appsBox 
               @description Store appsBox node
             */
             appsBoxNode: {
@@ -103,7 +103,34 @@
             show: function () {
                 var el = this;
 
-                el._appsBoxNode.classList.add("vc-appmenu-visibleApps");
+                // el._appsBox.classList.add("vc-appmenu-visibleApps");
+
+                //TODO:
+
+                var top = el._appMenu.getBoundingClientRect().top;
+                var left = el._appMenu.getBoundingClientRect().left;
+
+                var appsBoxLeft;
+
+                el._appsBox.classList.add("vc-appmenu-visibleApps");
+                document.body.appendChild(el._appsBox);
+
+                el._appsBox.style.top = top + 25 + "px";
+                
+
+                if (el.location == "right") {
+
+                    appsBoxLeft = (left + el._appMenu.offsetWidth - el._appsBox.offsetWidth) + 13.5 - 3;
+
+                } else {
+
+                    el._appsBox.style.left = (left - el._appsBox.offsetWidth) + "px";
+
+                }
+
+                el._appsBox.style.left = appsBoxLeft + "px";
+
+
                 // Since the scroll was hidden, it could not calculate if it needs to create scrolls, so after we added the visibleApps class, 
                 // we manually call update to check whether it needs scrolling or not
                 el._appsWindowBox.vcometScroll.update();
@@ -116,7 +143,7 @@
             */
             hide: function () {
                 var el = this;
-                el._appsBoxNode.classList.remove("vc-appmenu-visibleApps");
+                el._appsBox.classList.remove("vc-appmenu-visibleApps");
                 vcomet.triggerCallback("onHide", this);
             },
         },
@@ -144,6 +171,8 @@
                         appmanuParent.style.justifyContent = "center";
                         break;
                 }
+
+                this._appsBox.dataset.location = newVal;
             },
 
             /*
@@ -281,7 +310,7 @@
             vcomet.createCallback("onHide", this);
 
             el._appMenu = el.template.querySelector(".vc-appmenu-appMenu");
-            el._appsBoxNode = el.template.querySelector(".vc-appmenu-appsBox");
+            el._appsBox = el.template.querySelector(".vc-appmenu-appsBox");
             el._appsWrapper = el.template.querySelector(".vc-appmenu-appsWrapper");
             el._appsWindowBox = el.template.querySelector(".vc-appmenu-windowBox");
             el._appsClose = el.template.querySelector(".vc-appmenu-close");
@@ -299,7 +328,7 @@
 
             // Open and close window apps event listener
             el._appMenu.addEventListener("click", function () {
-                (el._appsBoxNode.classList.contains("vc-appmenu-visibleApps")) ? el.hide() : el.show();
+                (el._appsBox.classList.contains("vc-appmenu-visibleApps")) ? el.hide() : el.show();
             }, false);
 
             // Closing the window apps when cliks outside
