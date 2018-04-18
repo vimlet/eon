@@ -99,7 +99,7 @@
             @property {string} maxlength
             @description Characters input limit
             */
-            maxlength: {
+            maxLength: {
                 value: "",
                 reflect: true
             },
@@ -112,22 +112,29 @@
                 reflect: true
             },
             /*
-            @property {string} status
-            @description Determines the status of the element (active, readonly, disabled)
-            */
-            status: {
-                value: "active",
-                reflect: true
-            },
-            /*
             @property {string} value
             @description Value of the element
             */
             value: {
                 value: "",
                 reflect: false
+            },
+            /*
+            @property {string} readonly
+            @description Toggles the readonly status of the element
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
+            @property {string} disabled
+            @description Toggles the disabled status of the element
+            */
+            disabled: {
+                value: false,
+                reflect: true
             }
-
         },
 
         privateFunctions: {
@@ -139,11 +146,21 @@
 
                 var el = this;
 
+                el._setupRefs();
                 el._setupCounter();
                 el._setupForType();
                 el._setupInitialText();
-                el._updateStatus();
                 el._updateLabel();
+                el._updateDisabled();
+                el._updateReadOnly();
+
+            },
+            setupRefs: function () {
+
+                var el = this;
+
+                el._refs.data = el.querySelector(".vc-text-data");
+                el._refs.main = el.querySelector(".vc-text-main");
 
             },
             /*
@@ -179,7 +196,6 @@
                 el._data.editable.verticalSize = 0;
                 el._data.editable.horizontalSize = 0;
 
-                el._refs = el._refs || {};
                 el._refs.editable = editable;
 
                 vcometScroll.setAttribute("thickness", "8");
@@ -247,7 +263,7 @@
                 });
 
                 editable.addEventListener("focus", function () {
-                    if (el.status == "active") {
+                    if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
                     }
                 });
@@ -300,7 +316,7 @@
                 });
 
                 input.addEventListener("focus", function (e) {
-                    if (el.status == "active") {
+                    if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
                     }
                 });
@@ -320,11 +336,11 @@
 
                 var el = this;
 
-                if (el.counter != "false" && el.maxlength != "") {
+                if (el.counter != "false" && el.maxLength != "") {
 
                     var counter = el.querySelector(".vc-text-counter");
 
-                    counter.innerHTML = el.maxlength;
+                    counter.innerHTML = el.maxLength;
 
                 }
 
@@ -339,8 +355,8 @@
 
                 if (el._initialText != "") {
 
-                    if (el._initialText.length > parseInt(el.maxlength)) {
-                        el._initialText = el._initialText.substring(0, el.maxlength);
+                    if (el._initialText.length > parseInt(el.maxLength)) {
+                        el._initialText = el._initialText.substring(0, el.maxLength);
                     }
 
                 }
@@ -361,7 +377,7 @@
             @description Returns a boolean whether the current value is already exceeding the maxlength or not
             */
             willExceedLength: function () {
-                return this.value.length >= parseInt(this.maxlength);
+                return this.value.length >= parseInt(this.maxLength);
             },
             isCharacterKeyPress: function (e) {
 
@@ -385,35 +401,8 @@
 
                 var el = this;
 
-                if (el.counter != "false" && el.maxlength != "") {
-                    el.querySelector(".vc-text-counter").innerHTML = parseInt(el.maxlength) - el.value.length;
-                }
-
-            },
-            /*
-            @function (private) _updateStatus
-            @description Removes previous status and sets the new one
-            @param {string} oldVal [Opcional, when passing a previous status we remove the class and attribute for to avoid multiple status at the same time]
-            */
-            updateStatus: function (oldVal) {
-
-                var el = this;
-
-                el.classList.remove(oldVal);
-
-                if (el.status != "active") {
-                    el.classList.add(el.status);
-                }
-
-                if (el.type == "area") {
-
-                    el._refs.editable.contentEditable = el.status != "active" ? false : true;
-
-                } else {
-
-                    el._refs.input.removeAttribute(oldVal);
-                    el._refs.input.setAttribute(el.status, "");
-
+                if (el.counter != "false" && el.maxLength != "") {
+                    el.querySelector(".vc-text-counter").innerHTML = parseInt(el.maxLength) - el.value.length;
                 }
 
             },
@@ -427,6 +416,61 @@
 
                 if (el.label != "") {
                     el.querySelector(".vc-text-label").innerHTML = el.label;
+                }
+
+            },
+            /*
+            @function (private) _updateDisabled
+            @description Updates disabled status
+            */
+            updateDisabled: function () {
+
+                var el = this;
+                var typingNode = el.type == "area" ? el._refs.editable : el._refs.input;
+
+                // Radio disabled
+                if (!vcomet.util.isTrue(el.disabled)) {
+
+                    typingNode.classList.add("vc-fg2");
+                    typingNode.classList.remove("vc-fg1-disabled");
+
+                    el._refs.data.classList.remove("vc-fg1-disabled");
+                    el._refs.main.classList.remove("vc-fg1-disabled");
+
+                } else {
+
+                    typingNode.classList.remove("vc-fg2");
+                    typingNode.classList.add("vc-fg1-disabled");
+
+                    el._refs.data.classList.add("vc-fg1-disabled");
+                    el._refs.main.classList.add("vc-fg1-disabled");
+
+                }
+            },
+            /*
+            @function (private) _updateReadOnly
+            @description Updates readonly status
+            */
+            updateReadOnly: function () {
+
+                var el = this;
+
+                if (vcomet.util.isTrue(el.readonly)) {
+
+                    if (el.type != "area") {
+                        el._refs.input.setAttribute("readonly", "true");
+                    } else {
+                        el._refs.editable.setAttribute("contenteditable", "false");
+                    }
+
+                } else {
+
+                    if (el.type != "area") {
+                        el._refs.input.removeAttribute("readonly");
+                    } else {
+                        el._refs.editable.setAttribute("contenteditable", "true");
+                    }
+
                 }
 
             },
@@ -718,31 +762,20 @@
 
         },
 
-        onInit: function () {
-            // console.log('onInit', this.nodeName);
-        },
-
-        onTransformed: function () {
-            // console.log('onTransformed', this.nodeName);
-        },
-
-        onRender: function () {
-            // console.log('onRender', this.nodeName);
-        },
-
         onBubbleRender: function () {
-            // console.log('onBubbleRender', this.nodeName);
             this._setup();
         },
 
         onPropertyChanged: function (key, oldVal, newVal) {
-            // console.log('onPropertyChanged');
             switch (key) {
-                case "status":
-                    this._updateStatus(oldVal);
-                    break;
                 case "label":
                     this._updateLabel();
+                    break;
+                case "disabled":
+                    this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadOnly();
                     break;
             }
 

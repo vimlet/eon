@@ -64,7 +64,7 @@
       */
       formelement: {
         value: "date"
-      },
+      }
     },
 
     properties: {
@@ -141,22 +141,6 @@
         reflect: true
       },
       /*
-      @property {string} pickerWidth
-      @description Indicates the width of the datepicker
-      */
-      pickerWidth: {
-        value: 500,
-        reflect: true
-      },
-      /*
-      @property {string} pickerHeight
-      @description Indicates the height of the datepicker
-      */
-      pickerHeight: {
-        value: 360,
-        reflect: true
-      },
-      /*
       @property {string} pickerFontSize
       @description Indicates the font size of the datepicker
       */
@@ -204,6 +188,22 @@
         value: "false",
         reflect: true
       },
+      /*
+      @property {string} readonly
+      @description Toggles the readonly status of the element
+      */
+      readonly: {
+        value: false,
+        reflect: true
+      },
+      /*
+      @property {string} disabled
+      @description Toggles the disabled status of the element
+      */
+      disabled: {
+        value: false,
+        reflect: true
+      }
     },
     privateFunctions: {
       /*
@@ -222,6 +222,8 @@
         el._setupMask();
         el._setupEvents();
         el._updateLabel();
+        el._updateDisabled();
+        el._updateReadOnly();
 
         if (el.min != "" && el.min != undefined) el._setupMinDate();
         if (el.max != "" && el.max != undefined) el._setupMaxDate();
@@ -258,8 +260,6 @@
         datePickerElement.setAttribute("closable", "true");
         datePickerElement.setAttribute("min", el.min);
         datePickerElement.setAttribute("max", el.max);
-        datePickerElement.setAttribute("width", el.pickerWidth);
-        datePickerElement.setAttribute("height", el.pickerHeight);
         datePickerElement.setAttribute("picker-font-size", el.pickerFontSize);
         datePickerElement.setAttribute("selectable", el.pickerSelectable);
 
@@ -299,7 +299,12 @@
         el._refs.subInputs.second = el.querySelector(".vc-datebox-subInputs .second input");
         el._refs.subInputs.third = el.querySelector(".vc-datebox-subInputs .third input");
 
-        el._refs.underline = el.querySelector(".vc-datebox-underline")
+        el._refs.underline = el.querySelector(".vc-datebox-underline");
+
+        el._refs.data = el.querySelector(".vc-datebox-data");
+        el._refs.main = el.querySelector(".vc-datebox-main");
+
+        el._refs.button = el.querySelector(".vc-datebox-button");
 
       },
       /*
@@ -814,6 +819,66 @@
 
       },
       /*
+      @function (private) _updateDisabled
+      @description Updates disabled status
+      */
+      updateDisabled: function () {
+
+        var el = this;
+
+        // Radio disabled
+        if (!vcomet.util.isTrue(el.disabled)) {
+
+          el.querySelector(".vc-datebox-subInputs").classList.add("vc-fg1-border");
+          el.querySelector(".vc-datebox-subInputs").classList.remove("vc-fg1-disabled");
+
+          el._refs.button.classList.add("vc-fg2");
+          el._refs.button.classList.remove("vc-fg1-disabled");
+
+          el._refs.data.classList.remove("vc-fg1-disabled");
+          el._refs.main.classList.remove("vc-fg1-disabled");
+
+        } else {
+
+          el.querySelector(".vc-datebox-subInputs").classList.remove("vc-fg1-border");
+          el.querySelector(".vc-datebox-subInputs").classList.add("vc-fg1-disabled");
+
+          el._refs.button.classList.remove("vc-fg2");
+          el._refs.button.classList.add("vc-fg1-disabled");
+
+          el._refs.data.classList.add("vc-fg1-disabled");
+          el._refs.main.classList.add("vc-fg1-disabled");
+
+        }
+      },
+      /*
+      @function (private) _updateReadOnly
+      @description Updates readonly status
+      */
+      updateReadOnly: function () {
+
+        var el = this;
+
+        if (vcomet.util.isTrue(el.readonly)) {
+
+          // if (el.type != "area") {
+          //   el._refs.input.setAttribute("readonly", "true");
+          // } else {
+          //   el._refs.editable.setAttribute("contenteditable", "false");
+          // }
+
+        } else {
+
+          // if (el.type != "area") {
+          //   el._refs.input.removeAttribute("readonly");
+          // } else {
+          //   el._refs.editable.setAttribute("contenteditable", "true");
+          // }
+
+        }
+
+      },
+      /*
       @function (private) {String} _getFormattedValue
       @description We replace the format with the given data, in case the field's length is lower than its format then we add 0 as needed
       @param {Object} obj
@@ -1188,6 +1253,9 @@
       switch (key) {
         case "label":
           this._updateLabel();
+          break;
+        case "disabled":
+          this._updateDisabled();
           break;
       }
     }
