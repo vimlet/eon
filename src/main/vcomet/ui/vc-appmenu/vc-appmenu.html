@@ -103,37 +103,10 @@
             show: function () {
                 var el = this;
 
-                // el._appsBox.classList.add("vc-appmenu-visibleApps");
-
-                //TODO:
-
-                var top = el._appMenu.getBoundingClientRect().top;
-                var left = el._appMenu.getBoundingClientRect().left;
-
-                var appsBoxLeft;
-
                 el._appsBox.classList.add("vc-appmenu-visibleApps");
                 document.body.appendChild(el._appsBox);
 
-                el._appsBox.style.top = top + 20 + "px";
-                
-
-                if (el.location == "right") {
-
-                    appsBoxLeft = (left + el._appsBox.offsetWidth) + 13.5 - 4;
-
-                } else if (el.location == "left") {
-                    
-                    appsBoxLeft = (left + el._appsBox.offsetWidth/2 ) + "px";
-
-                } else {
-
-                    appsBoxLeft = (left + el._appMenu.offsetWidth/2 ) + "px";
-
-                }
-
-                el._appsBox.style.left = appsBoxLeft + "px";
-
+                el._locateAppsBox();
 
                 // Since the scroll was hidden, it could not calculate if it needs to create scrolls, so after we added the visibleApps class, 
                 // we manually call update to check whether it needs scrolling or not
@@ -148,11 +121,41 @@
             hide: function () {
                 var el = this;
                 el._appsBox.classList.remove("vc-appmenu-visibleApps");
+                el.appendChild(el._appsBox);
                 vcomet.triggerCallback("onHide", this);
             },
         },
 
         privateFunctions: {
+            /*
+              @function (private) _locateAppsBox
+              @description Locates the appsBox container.
+            */
+            locateAppsBox: function () {
+                var el = this;
+
+                if (!el.classList.contains("vc-appmenu-responsive")) {
+                    var top = el._appMenu.getBoundingClientRect().top;
+                    var left = el._appMenu.getBoundingClientRect().left;
+                    var appsBoxLeft;
+
+                    el._appsBox.style.top = top + 20 + "px";
+
+                    if (el.location == "right") {
+                        appsBoxLeft = (left + el._appMenu.offsetWidth - el._appsBox.offsetWidth) + 13.5 - 4;
+                    } else if (el.location == "left") {
+                        appsBoxLeft = (left - 14.4) + 4;
+                    } else {
+                        appsBoxLeft = (left + el._appMenu.offsetWidth / 2) + "px";
+                    }
+
+                    el._appsBox.style.left = appsBoxLeft + "px";
+                    
+                } else {
+                    el._appsBox.style.top = 0;
+                    el._appsBox.style.left = 0;
+                }
+            },
 
             /*
               @function (private) _updateLocation
@@ -283,6 +286,7 @@
 
                 if (!el._appsClose.classList.contains("vc-appmenu-closeVisible")) {
                     el._appsClose.classList.add("vc-appmenu-closeVisible");
+                    el.classList.add("vc-appmenu-responsive");
 
                     el._appsCloseIcon.addEventListener("click", function () {
                         el.hide();
@@ -301,6 +305,7 @@
 
                 if (el._appsClose.classList.contains("vc-appmenu-closeVisible")) {
                     el._appsClose.classList.remove("vc-appmenu-closeVisible");
+                    el.classList.remove("vc-appmenu-responsive");
                 }
 
             }
@@ -357,6 +362,10 @@
 
         onWindowResize: function (event) {
             this._verifyScreenResolution();
+
+            if (this._appsBox.classList.contains("vc-appmenu-visibleApps")) {
+                this._locateAppsBox();
+            }
         }
 
     });
