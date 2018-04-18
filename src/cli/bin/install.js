@@ -127,16 +127,18 @@ function handleRemoteVersions(value, cb) {
 
             if (packageName == "vcomet") {
                 try {
-                    
+
                     if (valueArray.length == 2) {
                         checkPackageExists.sync(null, packageName, valueArray[1]);
                         packageVersion = valueArray[1];
+                        console.log('packageVersion', packageVersion);
                     } else {
                         packageVersion = getLatestVcometRelease.sync(null);
                     }
-                    
-                    vcometJsonObject[packageName] = packageVersion;
 
+                    vcometJsonObject[packageName] = packageVersion;
+                    fs.writeFileSync("vcomet.json", JSON.stringify(vcometJsonObject, null, 2));
+             
                 } catch (error) {
                     cb(error);
                 }
@@ -145,11 +147,11 @@ function handleRemoteVersions(value, cb) {
                 singlePackageMode = true;
                 singlePackageName = packageName;
                 packageVersion = valueArray.length == 2 ? valueArray[1] : getLatestDependencyRelease(packageName);
-                
+
                 if (!vcometJsonObject.dependencies) {
                     vcometJsonObject.dependencies = {};
                 }
-                
+
                 vcometJsonObject.dependencies[packageName] = packageVersion;
             }
         }
