@@ -142,6 +142,14 @@
       year: {
         value: "",
         reflect: true
+      },
+      /*
+      @property {string} disabled
+      @description Toggles the disabled status of the element
+      */
+      disabled: {
+        value: false,
+        reflect: true
       }
     },
 
@@ -278,6 +286,8 @@
           el.dataset.touch = "true";
         }
 
+        el._updateDisabled();
+
         vcomet.addResizeListener(el.querySelector(".vc-datepicker-calendar"), el.nodeName.toLowerCase(), function () {
           el._handleAutoHeight();
           el._handleFonts();
@@ -291,7 +301,7 @@
       setupMisc: function () {
 
         var el = this;
-        
+
         el._misc.focus = [];
         el._misc.current = {};
         el._misc.selected = {};
@@ -324,6 +334,13 @@
         el._refs.daysGrid = el.querySelector(".vc-datepicker-daysGrid");
         el._refs.monthsGrid = el.querySelector(".vc-datepicker-monthsGrid");
         el._refs.yearsGrid = el.querySelector(".vc-datepicker-yearsGrid");
+
+        el._refs.header = el.querySelector(".vc-datepicker-header");
+        el._refs.body = el.querySelector(".vc-datepicker-body");
+
+        el._refs.previous = el.querySelector(".vc-datepicker-previous");
+        el._refs.next = el.querySelector(".vc-datepicker-next");
+
       },
       /*
       @function (private) _handleInitialState
@@ -502,13 +519,13 @@
 
         var el = this;
 
-        el.querySelector(".vc-datepicker-previous").addEventListener(el._misc.downTrigger, function (e) {
+        el._refs.previous.addEventListener(el._misc.downTrigger, function (e) {
           e.stopPropagation();
           e.preventDefault();
           el._goToPrevious(this);
         });
 
-        el.querySelector(".vc-datepicker-next").addEventListener(el._misc.downTrigger, function (e) {
+        el._refs.next.addEventListener(el._misc.downTrigger, function (e) {
           e.stopPropagation();
           e.preventDefault();
           el._goToNext(this);
@@ -863,6 +880,7 @@
               disableDayAsMax = (isPreviousMonthMax || isMaxMonth && i > el._misc.max.day) ? true : false;
 
               day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin || disableDayAsMax)) ? "true" : "false";
+              day.classList[day.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
             }
 
           }
@@ -938,9 +956,10 @@
             months[i].dataset.disabled = ((disableMonthAsMin || disableMonthAsMax) || (disableMonthAsMin && disableMonthAsMax)) ? "true" : "false";
 
           } else {
-
             months[i].dataset.disabled = "false";
           }
+
+          months[i].classList[months[i].dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
         }
 
         el._misc.selected.month = (el._misc.selected.month == undefined) ? el._misc.current.month : el._misc.selected.month;
@@ -978,6 +997,7 @@
             disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
             disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
             row.children[j].dataset.disabled = ((disableYearAsMin || disableYearAsMax) || (disableYearAsMin && disableYearAsMax)) ? "true" : "false";
+            row.children[j].classList[row.children[j].dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
 
             year++;
           }
@@ -1270,7 +1290,7 @@
           previousCurrent.classList.remove("vc-datepicker-current", "vc-fg1-active");
         }
 
-        monthButton.classList.add("vc-datepicker-current","vc-fg1-active");
+        monthButton.classList.add("vc-datepicker-current", "vc-fg1-active");
       },
       /*
       @function (private) _highlightYear
@@ -1462,8 +1482,11 @@
 
           el.querySelector(".vc-datepicker-back").classList.add("hidden");
 
-          el.querySelector(".vc-datepicker-previous").dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
-          el.querySelector(".vc-datepicker-next").dataset.disabled = (el._isMaxMonth(year, month)) ? "true" : "false";
+          el._refs.previous.dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
+
+          el._refs.next.dataset.disabled = (el._isMaxMonth(year, month)) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
 
         } else if (headerType == "monthsGrid") {
 
@@ -1474,8 +1497,11 @@
           el._refs.yearSelector.innerHTML = year;
           el._refs.monthSelector.classList.add("hidden");
 
-          el.querySelector(".vc-datepicker-previous").dataset.disabled = (year <= el._misc.min.year) ? "true" : "false";
-          el.querySelector(".vc-datepicker-next").dataset.disabled = (year >= el._misc.max.year) ? "true" : "false";
+          el._refs.previous.dataset.disabled = (year <= el._misc.min.year) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
+
+          el._refs.next.dataset.disabled = (year >= el._misc.max.year) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
 
           if (el._refs.daysGrid) {
 
@@ -1496,8 +1522,11 @@
           el._refs.yearSelector.innerHTML = year;
           el._refs.monthSelector.classList.add("hidden");
 
-          el.querySelector(".vc-datepicker-previous").dataset.disabled = (el._misc.selector.range.start <= el._misc.min.year) ? "true" : "false";
-          el.querySelector(".vc-datepicker-next").dataset.disabled = (el._misc.selector.range.end >= el._misc.max.year) ? "true" : "false";
+          el._refs.previous.dataset.disabled = (el._misc.selector.range.start <= el._misc.min.year) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
+
+          el._refs.next.dataset.disabled = (el._misc.selector.range.end >= el._misc.max.year) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
 
           if (el._refs.daysGrid) {
 
@@ -1703,7 +1732,7 @@
         var daysFontSize, weekDaysFontSize, headerFontSize, navigation, otherGridsFontSize;
 
         weekDaysConstant = 1.0667;
-        
+
         if (parseInt(calendar.offsetWidth) >= 240) {
 
           baseFontSize = el.fontsize;
@@ -1782,8 +1811,12 @@
       @description Disables the month/year selectors
       */
       disableSelectors: function () {
+
         this.querySelector(".vc-datepicker-header .vc-datepicker-month").dataset.disabled = "true";
         this.querySelector(".vc-datepicker-header .vc-datepicker-year").dataset.disabled = "true";
+
+        this.querySelector(".vc-datepicker-leftNavigation").classList.add("vc-fg4");
+
       },
       /*
       @function (private) _disableNavigation
@@ -1795,6 +1828,38 @@
 
         this.querySelector(".vc-datepicker-leftNavigation .vc-datepicker-previous").dataset.hidden = "true";
         this.querySelector(".vc-datepicker-leftNavigation .vc-datepicker-next").dataset.hidden = "true";
+      },
+      /*
+      @function (private) _updateDisabled
+      @description Updates disabled status
+      */
+      updateDisabled: function () {
+
+        var el = this;
+        var selectedCell = el.querySelector(".vc-fg1-active");
+
+        if (vcomet.util.isTrue(el.disabled)) {
+
+          if (selectedCell) {
+            selectedCell.classList.remove("vc-fg1-active");
+            selectedCell.classList.add("vc-bg2-disabled");
+          }
+
+          el._refs.header.classList.add("vc-fg4");
+          el._refs.body.classList.add("vc-fg4");
+
+        } else {
+
+          if (selectedCell) {
+            selectedCell.classList.add("vc-fg1-active");
+            selectedCell.classList.remove("vc-bg2-disabled");
+          }
+
+          el._refs.header.classList.remove("vc-fg4");
+          el._refs.body.classList.remove("vc-fg4");
+
+        }
+
       }
     },
     functions: {
@@ -1900,7 +1965,14 @@
     onRender: function () {
       var el = this;
       el._setup();
-    }
+    },
+    onPropertyChanged: function (key, oldVal, newVal) {
+      switch (key) {
+        case "disabled":
+          this._updateDisabled();
+          break;
+      }
+    },
   });
 
 </script>
