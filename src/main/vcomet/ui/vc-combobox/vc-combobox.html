@@ -444,6 +444,22 @@
                     el.expand();
                 }
             },
+            /*
+            @function (private) _assignDropdownStyle
+            @description Assigns the datePicker's width and position relative to the datebox
+            */
+            assignDropdownStyle: function () {
+
+                var el = this;
+
+                var top = el.getBoundingClientRect().top;
+                var left = el.getBoundingClientRect().left;
+
+                el._refs.dropDown.style.top = top + el.offsetHeight + 1 + "px";
+                el._refs.dropDown.style.left = left + "px";
+                el._refs.dropDown.style.width = el.offsetWidth + "px";
+
+            },
 
         },
 
@@ -499,7 +515,7 @@
 
                 el.value = value;
                 el._refs.userInput.value = item.displayValue;
-                
+
                 vcomet.triggerCallback("onSelected", el, el, [item]);
 
                 el.shrink();
@@ -513,12 +529,7 @@
 
                 var el = this;
 
-                var top = el.getBoundingClientRect().top;
-                var left = el.getBoundingClientRect().left;
-
-                el._refs.dropDown.style.top = top + el.offsetHeight + 1 + "px";
-                el._refs.dropDown.style.left = left + "px";
-                el._refs.dropDown.style.width = el.offsetWidth + "px";
+                el._assignDropdownStyle();
 
                 document.body.appendChild(el._refs.dropDown);
 
@@ -542,7 +553,7 @@
 
                 el.appendChild(el._refs.dropDown);
 
-            }
+            },
 
         },
 
@@ -580,6 +591,15 @@
             el._setupAnimations()
 
             if (declarativePlaceholder) el._refs.userInput.placeholder = declarativePlaceholder;
+
+        },
+        onWindowResize: function () {
+
+            var el = this;
+
+            if (!el._refs.dropDown.classList.contains("hidden")) {
+                el._assignDropdownStyle();
+            }
 
         }
     });
