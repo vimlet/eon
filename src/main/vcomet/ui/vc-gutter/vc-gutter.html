@@ -165,47 +165,24 @@
         var el = this;
         if(vcomet.util.isTrue(el.collapsable)){
           // Create separator clickable div
-          var clickable = document.createElement("div");
-          var clickableZone = document.createElement("div");
-          clickable.setAttribute("class", "vc-gutter-splitterClickable");
+          el._refs.clickable = document.createElement("div");
+          el._refs.clickableZone = document.createElement("div");
+          el._refs.clickable.setAttribute("class", "vc-gutter-splitterClickable");
           // Splitter collapsable style
-          clickable.classList.add("vc-bg3","vc-fg5","vc-bg3-hoverable", "vc-fg3-hoverable");
-          clickableZone.classList.add("vc-gutter-clickableZone");
-          clickable.setAttribute("touch-action", "none");
+          el._refs.clickable.classList.add("vc-bg3","vc-fg5","vc-bg3-hoverable", "vc-fg3-hoverable");
+          el._refs.clickableZone.classList.add("vc-gutter-clickableZone");
+          el._refs.clickable.setAttribute("touch-action", "none");
           // Create icon
-          var icon = document.createElement("i");
-          el._refs.collapseIcon = icon;
-          icon.classList.add("vc-unselectable", "vc-gutter-splitterCollapseIcon");
-          // ** Fix IE and Safari bad icon positioning on horizontal gutter
-          el._splitterStyleIEFix(icon, clickableZone);
-
+          el._refs.collapseIcon = document.createElement("i");
+          el._refs.collapseIcon.classList.add("vc-unselectable", "vc-gutter-splitterCollapseIcon");
           el._rotateCollapseIcon();
-          clickable.appendChild(icon);
-          clickable.appendChild(clickableZone);
-          el._refs.splitter.appendChild(clickable);
+
+          el._refs.clickable.appendChild(el._refs.collapseIcon);
+          el._refs.clickable.appendChild(el._refs.clickableZone);
+          el._refs.splitter.appendChild(el._refs.clickable);
           // Collapsable click functionality
-          el._clickCollapsable(clickable, icon);
+          el._clickCollapsable(el._refs.clickable, el._refs.collapseIcon);
         }
-      },
-      /*
-        @function (private) splitterStyleIESupport
-        @description 
-      */
-      splitterStyleIEFix: function(collapseIcon, clickableZone) {
-        var el = this;
-        // Check browser
-        if(vcomet.util.getBrowser() === "IE"){
-            if(el.type === "horizontal") {
-              collapseIcon.style.position = "relative";
-              collapseIcon.style.right = "3px";
-              clickableZone.style.top = "0";
-              clickableZone.style.right = "-3px";
-            } else {
-              collapseIcon.style.paddingTop = "3px";
-            }
-          } else if(vcomet.util.getBrowser() === "Safari"){
-              clickableZone.style.right = "-3px";
-          }
       },
       /*
         @function (private) clickCollapsable
@@ -239,7 +216,6 @@
         });
         // Set on mouseup listener
         document.addEventListener("pointerup", function(){
-          
           // Check collapse constraints
           if(mousedown && (initValue === moveValue)){
             el._toggleCollapse();
@@ -426,11 +402,7 @@
       */
       responsiveListener: function() {
         var el = this;
-        el._misc.desktop = (window.innerWidth <= el.responsiveLimit) ? false : true;
-        // Set initial splitter size
-        if (!el._misc.desktop) {
-          el._changeSplitterSize(15);
-        }
+        el._misc.touch = vcomet.util.isTouchScreen() ? true : false;
         // Apply responsive
         el._applyResponsive();
         // Throttle event triggering for better performance
@@ -454,15 +426,57 @@
       */
       applyResponsive: function() {
         var el = this;
+        el._misc.desktop = window.innerWidth <= el.responsiveLimit ? false : true;
         // Increase splitter under desktop resolution
-        if(window.innerWidth <= el.responsiveLimit && el._misc.desktop){
-          el._misc.desktop = false;
-          el._changeSplitterSize(15);
+        if(!el._misc.desktop || el._misc.touch){
+          el._changeSplitterSize(15, true);
         }
         // Set splitter standard size on desktop resolution
-        if(window.innerWidth > el.responsiveLimit && !el._misc.desktop){
-          el._misc.desktop = true;
+        if(el._misc.desktop && !el._misc.touch){
           el._changeSplitterSize(6);
+        }
+        // ** Fix IE and Safari bad icon positioning on horizontal gutter
+        if(vcomet.util.isTrue(el.collapsable)) {
+          el._splitterStyleBrowserFix();
+        }
+      },
+       /*
+        @function (private) splitterStyleBrowserFix
+        @description 
+      */
+      splitterStyleBrowserFix: function() {
+        var el = this;
+        // Check browser
+        if(vcomet.util.getBrowser() === "IE"){
+            if(el.type === "horizontal") {
+              el._refs.collapseIcon.style.position = "relative";
+              el._refs.collapseIcon.style.right = "3px";
+              el._refs.clickableZone.style.top = "0";
+              el._refs.clickableZone.style.right = "-4px";
+              // Applied touchable screen device style
+              el._splitterStyleOnTouchScreen();
+            } else {
+              el._refs.collapseIcon.style.paddingTop = "3px";
+            }
+          } else if(vcomet.util.getBrowser() === "Safari"){
+            el._refs.clickableZone.style.right = "-3px";
+            // Applied touchable screen device style
+            el._splitterStyleOnTouchScreen();
+          }
+      },
+      /*
+        @function (private) splitterStyleTouchScreen
+        @description 
+      */
+      splitterStyleOnTouchScreen: function() {
+        var el = this;
+        // Check touchable device
+        if(el._misc.touch || !el._misc.desktop) {
+          // Check browser
+          if(vcomet.util.getBrowser() === "IE"){
+                el._refs.collapseIcon.style.right = 0;
+                el._refs.clickableZone.style.right = "-7px";
+            }
         }
       },
       /*
@@ -470,9 +484,20 @@
         @description Change splitter style size property
         @param {Number} value [New splitter size]
       */
-      changeSplitterSize: function(value) {
+      changeSplitterSize: function(value, increase) {
         var el = this;
-        el._refs.splitter.style[el._misc.sizeProp]= value + "px";
+        var oldValue = el._refs.splitter[el._misc.sizeOffProp];
+        // Change size if old and new value differ
+        if(oldValue !== value) {
+          el._refs.splitter.style[el._misc.sizeProp] = value + "px";
+          if(increase) {
+            // Adjust section size to splitter keep visual position
+            el._refs.section.style[el._misc.sizeProp] = (el._refs.section[el._misc.sizeOffProp] - (parseInt(value) / 3)) + "px";
+          } else {
+            // Adjust section size to keep splitter visual position
+            el._refs.section.style[el._misc.sizeProp] = (el._refs.section[el._misc.sizeOffProp] + (parseInt(oldValue) / 3)) + "px";
+          }
+        }
       }
     },
     onInit: function() {
