@@ -2,49 +2,40 @@
     vc-editor {
         height: 100%;
         width: 100%;
-        max-height: 450px;
-    }
-    vc-editor vc-scroll{
-        max-height: 450px !important;
     }
 
     #vc-editor-content {
         width: 100%;
         height: 100%;
-        min-height: 10px;
+        min-height: 80px;
+        max-height: 300px;
         box-sizing: border-box;
     }
-
-    vc-editor vc-loading {
+    vc-editor vc-loading{
         width: 100%;
         height: 100%;
         min-height: 300px;
         box-sizing: border-box;
     }
-
     #vc-editor-loading {
         width: 100%;
         height: 100%;
         min-height: 300px;
         box-sizing: border-box;
+        background-color:red;
     }
-
     .editor-container {
         height: calc(100% - 35px);
     }
 
-
-    vc-editor span {
+    
+    vc-tabs .tabContent span {
         font-family: Consolas, "Courier New", monospace !important;
         font-size: 14px !important;
     }
 
-    .vc-editor-until-render {
-        display: none;
-    }
-
-    .monaco-editor {
-        padding: 10px 0px;
+    .vc-editor-until-render{
+        display:none;
     }
 </style>
 
@@ -52,9 +43,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <vc-loading></vc-loading>
-    <vc-scroll>
-        <div id="vc-editor-content" class="vc-editor-until-render"></div>
-    </vc-scroll>
+    <div id="vc-editor-content" class="vc-editor-until-render"></div>
 </template>
 
 <script>
@@ -71,10 +60,6 @@
             },
             readonly: {
                 value: "readonly",
-                reflect: true
-            },
-            heightauto: {
-                value: "true",
                 reflect: true
             }
         },
@@ -101,7 +86,7 @@
             init: function (data, language) {
                 var el = this;
                 var readonly = false;
-                if (el.readonly === "readonly") {
+                if(el.readonly === "readonly"){
                     readonly = true;
                 }
                 if (el.language === "js") {
@@ -121,61 +106,31 @@
                             // Subtle shadows to the left & top. Defaults to true.
                             useShadows: false,
                             vertical: 'auto',
-                            horizontal: 'visible',
-                            handleMouseWheel:false
+                            horizontal: 'visible'
                         },
                         automaticLayout: true, // TODO "checks every 100ms if its container has changed its size" Optimizate via editor.layout({ width: ..., height: ... })
                         readOnly: readonly,
                         scrollBeyondLastLine: false, // Remove scrollbar when it is not needed
                         minimap: {
-                            enabled: false
-                        },
-                        mouseWheelScrollSensitivity: 0
+                            enabled:false
+                        }
                     });
-
+                    
                     // Ugly solution to know when monaco is ready because there is not an onReady function implemented yet
                     var didScrollChangeDisposable = el._refs.editor.onDidScrollChange(function (
                         event) {
-                        didScrollChangeDisposable.dispose();
-                        el._editorReady();
+                        didScrollChangeDisposable.dispose(); 
+                        el._show();                       
+                        vcomet.triggerCallback("oneditorready", el, el, [el]);
                     });
-
-                    el._refs.editor.model.onDidChangeContent((event) => {
-                        //         el._setHeight();
+                    
+                    el._refs.editor.model.onDidChangeContent((event) => {   
                         vcomet.triggerCallback("onchange", el, el, [el]);
                     });
                 });
             },
-            // @function editorReady (private) [Fires when monaco editor is loaded]
-            editorReady: function () {
-                var el = this;
-                el._show();
-                vcomet.triggerCallback("oneditorready", el, el, [el]);
-                el._setHeight(0, 450);
-            },
-            // @function setHeight (private) [Adjust editor height based on its content] @param min [Minimum height] @param max [Maximum height]
-            setHeight: function (min, max) {
-                var el = this;
-                // if (el.heightauto == "true") {
-                //     var contentHeight = el._refs.editor.getScrollHeight();
-                //     contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
-                //     el.querySelector("#vc-editor-content").setAttribute("style", "height:" + contentHeight +
-                //         "px");
-                // }
-                if (el.heightauto == "true") {
-                    var contentHeight = el._refs.editor.getScrollHeight() + 20;
-
-                    //     contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
-                    el.querySelector("#vc-editor-content").setAttribute("style", "height:" + contentHeight +
-                        "px");
-                }
-                    
-                    setTimeout(function() {                        
-                        el.querySelector("vc-scroll").update();
-                    }, 0);
-            },
             // @function show (private) [Hides loading mask and shows editor]
-            show: function () {
+            show: function(){
                 var el = this;
                 el.querySelector("#vc-editor-content").classList.remove("vc-editor-until-render");
                 el.querySelector("vc-loading").hide();

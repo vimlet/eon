@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The gutter element is a container with the ability of separate its content in two sections separated with a draggable splitter providing a flexible manipulation over the sections size and displaying. This kind of components are frequently used on code editor testers.
+The gutter element is a container with the ability to separate its content in two sections divided with a draggable splitter, providing a flexible manipulation over the sections size and displaying. This kind of components are frequently used on code editor programs.
 
 ## Declarative usage 
 
@@ -19,7 +19,7 @@ Gutter use vc-section elements to represent the content sections:
 
 Declare gutter the same way you declare any other HTML element:
 
-``` [html]
+``` [html] 
 <vc-gutter>
     <!-- Sections -->
     <vc-section> section </vc-section>
@@ -51,7 +51,8 @@ vcomet.ready(function () {
 ### Collapsable sections
 
 ``` [html]
-<vc-gutter collapsable="true">
+<!-- Horizontal gutter -->
+<vc-gutter collapsable="true" splitterSize="10">
     <vc-section>
         <div> content </div>
         <div> content </div>
@@ -62,6 +63,7 @@ vcomet.ready(function () {
     </vc-section>
 </vc-gutter>
 ```
+Gutter sections can be collapsable for a dynamic and flexible behaviour. On the contrary, the gutter provides other properties like `allowDrag` to build a static content layout. 
 
 ### Nested gutters
 
@@ -85,3 +87,5 @@ vcomet.ready(function () {
     </vc-section>
 </vc-gutter>
 ```
+
+Nothing prevents you from declaring nested vc-gutter elements without losing customization.
