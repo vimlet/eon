@@ -22,8 +22,18 @@
         height: 100%;
     }
 
+    #vc-doc-main-manuBack {
+        background-image: url(img/main/fullMenu.png);
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        z-index: 1;
+        height: 100px;
+        width: 100%;
+    }
+
     #vc-doc-api-tree-fakeMenuShadow {
-        top: 50px;
+        top: 50px !important;
     }
 
     #vc-doc-api-tree-toggleTree {
@@ -32,10 +42,12 @@
 
     #vc-doc-main-menu {
         height: 50px;
-        background-color: #2b2b2b;
-        background-image: url("img/main/main.png");
+        /* background-color: #2b2b2b;
+        background-image: url("img/main/main.png"); */
+        background-color: transparent;
         display: flex;
         align-items: center;
+        z-index: 1;
     }
 
     #vc-doc-main-content {
@@ -64,6 +76,8 @@
         flex-direction: column;
         cursor: pointer;
         flex: 1;
+        height: 400px;
+        align-self: center;
     }
 
     .vc-doc-main-itemIcon {
@@ -121,6 +135,10 @@
         color: #e6e6e6 !important;
     }
 
+    .vc-doc-main-menuItemText {
+        display: inline-block;
+    }
+
     .vc-doc-main-menuItem i {
         float: left;
         margin-right: 5px;
@@ -130,7 +148,7 @@
 
     #vc-doc-main-versionControl {
         margin-right: auto;
-        margin-left:20px;
+        margin-left: 20px;
     }
 
     #vc-doc-main-versionControlSelect {
@@ -139,6 +157,7 @@
         border: none;
         border-bottom: 1px solid;
         background-color: transparent;
+        font-size: 16px;
     }
 
     #vc-doc-main-versionControlSelect:focus {
@@ -150,11 +169,26 @@
         background-color: #333333;
     }
 
+    #vc-doc-main-colorBand {
+        position: absolute;
+        width: 100%;
+        height: 5px;
+        top: 100px;
+        left: 0px;
+        z-index: 10;
+    }
+
+    .vc-text-underline {
+        display: none !important;
+    }
+
+    .vc-text-main {
+        border-bottom: none !important;
+    }
+
     @media only screen and (max-width: 700px) {
         #vc-doc-main-menu {
             height: 50px;
-            background-color: #2b2b2b;
-            background-image: url("img/main/mainMobile.png");
             display: flex;
             align-items: center;
         }
@@ -177,6 +211,9 @@
         .vc-doc-main-itemTextBrief {
             font-size: 4vw;
         }
+        .vc-doc-main-viewContainer{
+            margin-top:100px;
+        }
     }
 
 
@@ -196,10 +233,15 @@
         .vc-doc-main-itemTextBrief {
             font-size: 7vw;
         }
+        .vc-doc-main-viewContainer{
+            margin-top:100px;
+        }
     }
 </style>
 
 <template>
+    <div id="vc-doc-main-manuBack"></div>
+    <div class="vc-doc-colorBand" id="vc-doc-main-colorBand"></div>
     <vc-layout type="column">
         <vc-layout id="vc-doc-main-menu">
             <div id="vc-doc-main-logo" onclick="document.querySelector('vc-doc-main').goToFirstView();">
@@ -335,6 +377,7 @@
                 view.innerHTML = "";
                 var docFragment = document.createDocumentFragment();
                 var viewScroll = document.createElement("vc-scroll");
+                viewScroll.thickness = 8;
                 var mainViewContainer = document.createElement("div");
                 mainViewContainer.classList.add("vc-doc-main-viewContainer");
                 var size = Object.keys(data).length;
@@ -354,7 +397,10 @@
                 for (var entriesKey in data.__config) {
                     var menuItem = document.createElement("div");
                     menuItem.classList.add("vc-doc-main-menuItem");
-                    menuItem.innerHTML = data.__config[entriesKey].title;
+                    var menuItemText = document.createElement("div");
+                    menuItemText.classList.add("vc-doc-main-menuItemText");
+                    menuItemText.innerHTML = data.__config[entriesKey].title;
+                    menuItem.appendChild(menuItemText);
                     var icon = document.createElement("i");
                     icon.classList.add("material-icons");
                     icon.innerHTML = data.__config[entriesKey].icon;
@@ -373,6 +419,7 @@
             setupVersionControl: function (data) {
                 if (!document.querySelector("#vc-doc-main-versionControlSelect")) { // Version control is just generated once. We can not change version paths because we never change index.html so references will to different versions will be always the same
                     var docFragment = document.createDocumentFragment();
+
                     var select = document.createElement("select");
                     select.id = "vc-doc-main-versionControlSelect";
                     select.setAttribute("onchange",
@@ -409,7 +456,7 @@
                 httpRequest.send();
             },
             // @function urlOnLoad (private) [Set up url when first load] @param data {object}
-            urlOnLoad: function (data) {                
+            urlOnLoad: function (data) {
                 var el = this;
                 if (window.location.href.indexOf("#") < 0) { // If we don't have version in the url go to standard load
                     el._setupData(data);
@@ -434,13 +481,14 @@
                 } else {
                     var currentFile = decodeURIComponent(window.location.href.split("file=")[1]).split(
                         "&")[0];
-                    var currentLink = "&link=" + decodeURIComponent(window.location.href.split("link=")[1]).split(
-                        "&")[0];
+                    var currentLink = "&link=" + decodeURIComponent(window.location.href.split("link=")[1])
+                        .split(
+                            "&")[0];
                     if (!currentFile || clean) {
                         window.location.href = window.location.href.split('&mode=')[0] + "&mode=" +
                             encodeURIComponent(path);
                     } else {
-                        if(!currentLink ||currentLink.indexOf("undefined") > -1){
+                        if (!currentLink || currentLink.indexOf("undefined") > -1) {
                             currentLink = "";
                         }
                         window.location.href = window.location.href.split('&mode=')[0] + "&mode=" +
