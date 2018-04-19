@@ -3431,7 +3431,7 @@ vcomet.createCallback("onScriptsReady", vcomet, "ready");
 
 // Imports the requested custom element file, admits arrays and strings
 vcomet.import = function (param) {
-    
+
     if (param.constructor === Array) {
 
         for (var i = 0; i < param.length; i++) {
@@ -3447,7 +3447,7 @@ vcomet.import = function (param) {
 };
 
 vcomet.insertImport = function (href) {
-    
+
     var elementName;
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
@@ -3553,13 +3553,14 @@ vcomet.insertImport = function (href) {
                         vcomet.handleScriptsAppend();
                         // When all the scripts are properly appended and ready then we import dependencies and see if we have finished all the imports
                         vcomet.onScriptsReady(function () {
-                            
+
                             // Handles the dependencies and returns a boolean for whether there are pendings imports or not
                             var hasPendingImports = vcomet.handleDependencies();
                             
                             // If there are no more dependencies to handle trigger onImportsReady
                             if (!hasPendingImports && !vcomet.imports.ready && vcomet.imports.count == vcomet.imports.total && vcomet.imports.total == Object.keys(vcomet.imports.config).length) {
                                 vcomet.imports.ready = true;
+
                                 vcomet.triggerCallback('onImportsReady', vcomet);
                             } else {
                                 vcomet.__onScriptsReady__triggered = false;
@@ -3633,12 +3634,10 @@ vcomet.handleStyleAppend = function () {
 };
 
 vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
-    
+
     var elementNames = Object.keys(vcomet.imports.scripts);
-    // var resume = elementIndex.constructor === Number && scriptIndex.constructor === Number ? true : false;
-     // var resume = (elementIndex == 0 || (elementIndex && elementIndex.constructor === Number)) && (scriptIndex == 0 || (scriptIndex &&scriptIndex.constructor === Number)) ? true : false;
-     var resume = !isNaN(elementIndex - 1) && !isNaN(scriptIndex - 1) ? true : false;
-    var elementScriptsKeys, elementScripts;
+    var resume = !isNaN(elementIndex - 1) && !isNaN(scriptIndex - 1) ? true : false;
+    var elementScriptsKeys, elementScripts, script;
 
     // If it has to resume a previous scripts append we start from that index
     for (var i = resume ? elementIndex : 0; i < elementNames.length; i++) {
@@ -3663,7 +3662,13 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
             } else {
 
-                // Here we take the current script text and add our code to remove the script once its finished
+                // iPad fix, if we tried to append the script saved in elementScripts directly the script was not executing
+                script = document.createElement("script");
+                script.innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML;
+                elementScripts[elementScriptsKeys[j]] = script;
+                
+                // // Here we take the current script text and add our code to remove the script once its finished
+                elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML;
                 elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML +
                     "var elementNames = Object.keys(vcomet.imports.scripts);" +
                     "var elementScripts = vcomet.imports.scripts[elementNames[" + i + "]];" +
@@ -3690,7 +3695,7 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
 };
 
-vcomet.removeScriptsReadyScripts = function () {  
+vcomet.removeScriptsReadyScripts = function () {
     var el = this;
     var scriptReadyScripts = document.head.querySelectorAll("script[scriptsready-script]");
 
@@ -4346,7 +4351,7 @@ vcomet.constructClass = function (baseElement) {
 };
 
 vcomet.element = function (name, stylePath, config) {
-
+    
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
 
