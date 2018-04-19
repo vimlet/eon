@@ -221,6 +221,7 @@
         el._setupRefs();
         el._setupMask();
         el._setupEvents();
+
         el._updateLabel();
         el._updateDisabled();
         el._updateReadOnly();
@@ -242,6 +243,8 @@
         vcomet.registerPathListener(el, "datebox");
 
         el.style.width = el.width + "px";
+
+        el._initValue();
 
       },
       /*
@@ -429,24 +432,30 @@
         el._labelNode = el.querySelector(".vc-datebox-label");
 
         el._refs.subInputs.first.addEventListener("focus", function (e) {
-          el._handleFocus(this);
-          el._refs.underline.classList.add("animate");
-          el.classList.add("focus");
-          el._labelNode.classList.add("vc-fg1");
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._handleFocus(this);
+            el._refs.underline.classList.add("animate");
+            el.classList.add("focus");
+            el._labelNode.classList.add("vc-fg1");
+          }
         }, true);
 
         el._refs.subInputs.second.addEventListener("focus", function (e) {
-          el._handleFocus(el._refs.subInputs.second);
-          el._refs.underline.classList.add("animate");
-          el.classList.add("focus");
-          el._labelNode.classList.add("vc-fg1");
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._handleFocus(el._refs.subInputs.second);
+            el._refs.underline.classList.add("animate");
+            el.classList.add("focus");
+            el._labelNode.classList.add("vc-fg1");
+          }
         }, true);
 
         el._refs.subInputs.third.addEventListener("focus", function (e) {
-          el._handleFocus(el._refs.subInputs.third);
-          el._refs.underline.classList.add("animate");
-          el.classList.add("focus");
-          el._labelNode.classList.add("vc-fg1");
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._handleFocus(el._refs.subInputs.third);
+            el._refs.underline.classList.add("animate");
+            el.classList.add("focus");
+            el._labelNode.classList.add("vc-fg1");
+          }
         }, true);
 
       },
@@ -569,7 +578,7 @@
 
         var el = this;
 
-        if (el.min.indexOf('/') > -1) {
+        if (el.min.indexOf("/") > -1) {
 
           var splittedMin = el.min.split("/");
 
@@ -679,9 +688,7 @@
 
         var el = this;
 
-        el._refs.datePicker.style.top = el.offsetTop + el.offsetHeight + 2 + "px";
-        el._refs.datePicker.style.left = el.offsetLeft + "px";
-        el._refs.datePicker.style.width = el.offsetWidth + "px";
+        el._assignDatePickerStyle();
 
         el._refs.datePicker._refresh();
 
@@ -690,6 +697,7 @@
         el._refs.datePicker.classList.remove("hidden");
 
         el._refs.datePicker._handleAutoHeight();
+        el._refs.datePicker._handleFonts();
 
       },
       /*
@@ -702,6 +710,42 @@
 
         el._refs.datePicker._hide();
         el.querySelector(".vc-datebox-main").appendChild(el._refs.datePicker);
+
+      },
+      /*
+      @function (private) _assignDatePickerStyle
+      @description Assigns the datePicker's width and position relative to the datebox
+      */
+      assignDatePickerStyle: function () {
+
+        var el = this;
+
+        if (window.innerWidth <= vcomet.tabletWidth) {
+
+          if (!el._refs.datePicker.classList.contains("device")) {
+
+            el._refs.datePicker.style.top = "0";
+            el._refs.datePicker.style.left = "0";
+            el._refs.datePicker.style.width = "100%";
+            el._refs.datePicker.style.height = "100%";
+            el._refs.datePicker.classList.add("device");
+            el._refs.datePicker.classList.add("vc-bg1-modal");
+
+          }
+
+        } else {
+
+          el._refs.datePicker.classList.remove("device");
+          el._refs.datePicker.classList.remove("vc-bg1-modal");
+
+          el._refs.datePicker.style.top = el.offsetTop + el.offsetHeight + 2 + "px";
+          el._refs.datePicker.style.left = el.offsetLeft + "px";
+          el._refs.datePicker.style.width = el.offsetWidth + "px";
+          el._refs.datePicker.style.height = "auto";
+
+        }
+
+
 
       },
       /*
@@ -806,6 +850,58 @@
 
       },
       /*
+      @function (private) {Object} _getObjectFromValue
+      @description Given a value with format this functions returns an object with day, month and year provided by the value
+      @param {String} value
+      */
+      getObjectFromValue: function (value) {
+
+        var el = this;
+
+        var splittedValue = value.split(el.separator);
+        var splittedFormat = el.valueFormat.split(el.separator);
+
+        var dayFormat = (el.valueFormat.match(/[d|D]{1,2}/)) ? el.valueFormat.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (el.valueFormat.match(/[M]{1,4}/)) ? el.valueFormat.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (el.valueFormat.match(/[y|Y]{2,4}/)) ? el.valueFormat.match(/[y|Y]{2,4}/)[0] : undefined;
+
+        var dayIndex = splittedFormat.indexOf(dayFormat);
+        var monthIndex = splittedFormat.indexOf(monthFormat);
+        var yearIndex = splittedFormat.indexOf(yearFormat);
+
+        return { day: splittedValue[dayIndex], month: splittedValue[monthIndex], year: splittedValue[yearIndex] };
+
+      },
+      /*
+      @function (private) _initValue
+      @description If a value has been provided by the user we set it for our element
+      */
+      initValue: function () {
+
+        var el = this;
+
+        if (el.value != "") {
+
+          var splittedMin = el.value.split("/");
+
+          var subInputs = el.querySelector(".vc-datebox-subInputs");
+          var dayInput = subInputs.querySelector('[data-field="day"] input');
+          var monthInput = subInputs.querySelector('[data-field="month"] input');
+          var yearInput = subInputs.querySelector('[data-field="year"] input');
+
+          var valueObj = el._getObjectFromValue(el.value);
+
+          dayInput.value = valueObj.day;
+          monthInput.value = valueObj.month;
+          yearInput.value = valueObj.year;
+
+          el._handleLimits(dayInput, monthInput, yearInput);
+          el._validateDate();
+
+        }
+
+      },
+      /*
       @function (private) _updateLabel
       @description Updates the label node with the new label
       */
@@ -861,19 +957,15 @@
 
         if (vcomet.util.isTrue(el.readonly)) {
 
-          // if (el.type != "area") {
-          //   el._refs.input.setAttribute("readonly", "true");
-          // } else {
-          //   el._refs.editable.setAttribute("contenteditable", "false");
-          // }
+          el._refs.subInputs.first.setAttribute("readonly", "true");
+          el._refs.subInputs.second.setAttribute("readonly", "true");
+          el._refs.subInputs.third.setAttribute("readonly", "true");
 
         } else {
 
-          // if (el.type != "area") {
-          //   el._refs.input.removeAttribute("readonly");
-          // } else {
-          //   el._refs.editable.setAttribute("contenteditable", "true");
-          // }
+          el._refs.subInputs.first.removeAttribute("readonly");
+          el._refs.subInputs.second.removeAttribute("readonly");
+          el._refs.subInputs.third.removeAttribute("readonly");
 
         }
 
@@ -1257,7 +1349,19 @@
         case "disabled":
           this._updateDisabled();
           break;
+        case "readonly":
+          this._updateReadOnly();
+          break;
       }
+    },
+    onWindowResize: function () {
+
+      var el = this;
+
+      if (el._refs.datePicker && !el._refs.datePicker.classList.contains("hidden")) {
+        el._assignDatePickerStyle();
+      }
+
     }
   });
 

@@ -4,11 +4,14 @@
         width: 100%;
         max-height: 450px;
     }
+    vc-editor vc-scroll{
+        max-height: 450px !important;
+    }
 
     #vc-editor-content {
         width: 100%;
         height: 100%;
-        min-height: 20px;
+        min-height: 10px;
         box-sizing: border-box;
     }
 
@@ -24,7 +27,6 @@
         height: 100%;
         min-height: 300px;
         box-sizing: border-box;
-        background-color: red;
     }
 
     .editor-container {
@@ -50,7 +52,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <vc-loading></vc-loading>
-    <div id="vc-editor-content" class="vc-editor-until-render"></div>
+    <vc-scroll>
+        <div id="vc-editor-content" class="vc-editor-until-render"></div>
+    </vc-scroll>
 </template>
 
 <script>
@@ -117,7 +121,8 @@
                             // Subtle shadows to the left & top. Defaults to true.
                             useShadows: false,
                             vertical: 'auto',
-                            horizontal: 'visible'
+                            horizontal: 'visible',
+                            handleMouseWheel:false
                         },
                         automaticLayout: true, // TODO "checks every 100ms if its container has changed its size" Optimizate via editor.layout({ width: ..., height: ... })
                         readOnly: readonly,
@@ -136,7 +141,7 @@
                     });
 
                     el._refs.editor.model.onDidChangeContent((event) => {
-                        el._setHeight();
+                        //         el._setHeight();
                         vcomet.triggerCallback("onchange", el, el, [el]);
                     });
                 });
@@ -151,12 +156,23 @@
             // @function setHeight (private) [Adjust editor height based on its content] @param min [Minimum height] @param max [Maximum height]
             setHeight: function (min, max) {
                 var el = this;
+                // if (el.heightauto == "true") {
+                //     var contentHeight = el._refs.editor.getScrollHeight();
+                //     contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
+                //     el.querySelector("#vc-editor-content").setAttribute("style", "height:" + contentHeight +
+                //         "px");
+                // }
                 if (el.heightauto == "true") {
-                    var contentHeight = el._refs.editor.getScrollHeight();
-                    contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
+                    var contentHeight = el._refs.editor.getScrollHeight() + 20;
+
+                    //     contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
                     el.querySelector("#vc-editor-content").setAttribute("style", "height:" + contentHeight +
                         "px");
                 }
+                    
+                    setTimeout(function() {                        
+                        el.querySelector("vc-scroll").update();
+                    }, 0);
             },
             // @function show (private) [Hides loading mask and shows editor]
             show: function () {

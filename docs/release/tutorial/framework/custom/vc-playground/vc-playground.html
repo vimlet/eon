@@ -39,13 +39,24 @@
         box-sizing: border-box;
     }
 
+    vc-playground vc-editor vc-scroll {
+        max-height: 100% !important;
+    }
+
+    .vc-playground-htmlTags {
+        position: absolute;
+        right: 20px;
+        z-index: 500;
+        top: 10px;
+        color: #ffffff42;
+    }
+
     .vc-playground-until-render {
         display: none;
     }
 
     .vc-playground-fullScreenBttn {
         cursor: pointer;
-        display:none;
     }
 
     .vc-playground-fullScreenBttn i {
@@ -121,7 +132,7 @@
             setResultTab: function () {
                 var el = this;
                 var resultTab = document.createElement("vc-tab");
-                resultTab.onReady(function(){
+                resultTab.onReady(function () {
                     resultTab._refs.scroll.type = "none";
                 });
                 resultTab.name = "result";
@@ -159,6 +170,10 @@
                 });
                 el._refs.html.head.value = el.head;
                 el._refs.html.head.language = "html";
+                var headTag = document.createElement("div");
+                headTag.classList.add("vc-playground-htmlTags");
+                headTag.innerHTML = "head";
+                headSection.appendChild(headTag);
                 el._refs.html.head.readonly = false;
                 el._refs.html.body = document.createElement("vc-editor");
                 el._refs.html.body.heightauto = "false";
@@ -167,6 +182,10 @@
                 });
                 el._refs.html.body.value = el.body;
                 el._refs.html.body.language = "html";
+                var bodyTag = document.createElement("div");
+                bodyTag.classList.add("vc-playground-htmlTags");
+                bodyTag.innerHTML = "body";
+                bodySection.appendChild(bodyTag);
                 el._refs.html.body.readonly = false;
                 headSection.appendChild(el._refs.html.head);
                 bodySection.appendChild(el._refs.html.body);
@@ -238,7 +257,8 @@
                 el._refs.fullScreenIcon.classList.add("material-icons");
                 el._refs.fullScreenIcon.innerHTML = "fullscreen";
                 fullScreenBtt.appendChild(el._refs.fullScreenIcon);
-                fullScreenBtt.setAttribute("onclick", "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
+                fullScreenBtt.setAttribute("onclick",
+                    "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
                 return fullScreenBtt;
             },
             // @function editorLoaded (private) [Each time that a component is loaded this function is called. When all components are loaded result is launched.]
@@ -311,21 +331,29 @@
             toggleFullScreen: function () {
                 var el = this;
                 el._misc.fullscreen = !el._misc.fullscreen;
-                if(el._misc.fullscreen){
+                if (el._misc.fullscreen) {
                     el._refs.fullScreenIcon.innerHTML = "fullscreen_exit";
                     el.style.height = "100%";
                     el.style.width = "100%";
                     el.style.position = "fixed";
                     el.style.top = "0px";
                     el.style.left = "0px";
-                    el.style.zIndex = "9999";                    
-                    el.parentNode.style.overflow ="hidden"; // TODO Needed a method to prevent vcomet scroll at parent. 
-                            // el._refs.htmlPanel.querySelector("vc-gutter").resize();  // TODO gutter get lost when fullscreen
-                }else{
+                    el.style.zIndex = "9999";
+                    el.parentNode.style.overflow = "hidden"; // TODO Needed a method to prevent vcomet scroll at parent. 
+                    // el._refs.htmlPanel.querySelector("vc-gutter").resize();  // TODO gutter get lost when fullscreen
+                    el._misc.parent = el.parentNode;
+                    el._misc.nextSibling = el.nextSibling;                    
+                    document.body.appendChild(el);
+                } else {
                     el._refs.fullScreenIcon.innerHTML = "fullscreen";
-                            // el._refs.htmlPanel.querySelector("vc-gutter").resize();
+                    // el._refs.htmlPanel.querySelector("vc-gutter").resize();
                     el.parentNode.style = ""; // TODO Needed a method to prevent vcomet scroll at parent.Note that via js this may result in the loss of parentNodeStyle
                     el.style = "";
+                    if(el._misc.nextSibling){
+                    el._misc.parent.insertBefore(el, el._misc.nextSibling);
+                    }else{
+                    el._misc.parent.appendChild(el);
+                    }
                 }
             }
         },

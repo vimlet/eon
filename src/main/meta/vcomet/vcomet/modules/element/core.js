@@ -1,6 +1,6 @@
 
 vcomet.element = function (name, stylePath, config) {
-
+    
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
 
