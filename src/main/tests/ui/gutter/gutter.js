@@ -33,7 +33,6 @@ function runTests() {
         result.classList.add("failed");
         result.innerHTML = "FAILED";
     }
-
     return result.innerHTML == "PASSED" ? true : false;
 
 }
@@ -42,7 +41,7 @@ function internTest(callback) {
     vcomet.onReady(function(){
         setTimeout(function(){
             // Run all component tests
-        callback(runTests());
+            callback(runTests());
         }, 1000);
     });
   }
