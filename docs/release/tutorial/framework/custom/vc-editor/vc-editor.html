@@ -4,7 +4,8 @@
         width: 100%;
         max-height: 450px;
     }
-    vc-editor vc-scroll{
+
+    vc-editor vc-scroll {
         max-height: 450px !important;
     }
 
@@ -13,6 +14,7 @@
         height: 100%;
         min-height: 10px;
         box-sizing: border-box;
+        min-width: 100%;
     }
 
     vc-editor vc-loading {
@@ -45,6 +47,8 @@
 
     .monaco-editor {
         padding: 10px 0px;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
     }
 </style>
 
@@ -74,6 +78,10 @@
                 reflect: true
             },
             heightauto: {
+                value: "true",
+                reflect: true
+            },
+            widthauto: {
                 value: "true",
                 reflect: true
             }
@@ -122,7 +130,7 @@
                             useShadows: false,
                             vertical: 'auto',
                             horizontal: 'visible',
-                            handleMouseWheel:false
+                            handleMouseWheel: false
                         },
                         automaticLayout: true, // TODO "checks every 100ms if its container has changed its size" Optimizate via editor.layout({ width: ..., height: ... })
                         readOnly: readonly,
@@ -151,28 +159,49 @@
                 var el = this;
                 el._show();
                 vcomet.triggerCallback("oneditorready", el, el, [el]);
-                el._setHeight(0, 450);
+                el._setHeight();
+                el._setWidth();
+                el._widthListener();
             },
             // @function setHeight (private) [Adjust editor height based on its content] @param min [Minimum height] @param max [Maximum height]
             setHeight: function (min, max) {
                 var el = this;
-                // if (el.heightauto == "true") {
-                //     var contentHeight = el._refs.editor.getScrollHeight();
-                //     contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
-                //     el.querySelector("#vc-editor-content").setAttribute("style", "height:" + contentHeight +
-                //         "px");
-                // }
-                if (el.heightauto == "true") {
+                if (el.heightauto == "true") {                    
                     var contentHeight = el._refs.editor.getScrollHeight() + 20;
-
                     //     contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
-                    el.querySelector("#vc-editor-content").setAttribute("style", "height:" + contentHeight +
-                        "px");
+                    el.querySelector("#vc-editor-content").style.height = contentHeight + "px";
+                    el.querySelector("vc-scroll").update();
                 }
-                    
-                    setTimeout(function() {                        
-                        el.querySelector("vc-scroll").update();
-                    }, 0);
+
+            },
+            // @function setWidth (private)
+            setWidth: function () {
+                var el = this;
+                if (el.widthauto) {
+                    var monacoLinesNumberWidth = el._refs.editor.domElement.querySelector(".margin").offsetWidth;
+                    el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
+                        ".view-lines");
+                    el._refs.monacoLinesWidth = el._refs.monacoLines.offsetWidth;
+                    //    var contentWidth = el._refs.editor.getScrollWidth();    // TODO not working
+
+                    var contentWidth = el._refs.monacoLinesWidth + monacoLinesNumberWidth;
+
+                    el.querySelector("#vc-editor-content").style.width = contentWidth + "px";
+                    el.querySelector("vc-scroll").update();
+                }
+            },
+            // @function widthListener (private) [Monaco editor getScrollWidth is not working, so this function keep listening if width change and if so, resize the element]
+            widthListener: function () {
+                var el = this;
+                if (el.widthauto) {
+                    el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
+                        ".view-lines");
+                    vcomet.addResizeListener(el._refs.monacoLines, "NAME", function () {
+                        if (el._refs.monacoLines.offsetWidth > el._refs.monacoLinesWidth) {
+                            el._setWidth();
+                        }
+                    });
+                }
             },
             // @function show (private) [Hides loading mask and shows editor]
             show: function () {
