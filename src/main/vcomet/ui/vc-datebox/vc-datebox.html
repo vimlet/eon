@@ -266,6 +266,14 @@
         datePickerElement.setAttribute("picker-font-size", el.pickerFontSize);
         datePickerElement.setAttribute("selectable", el.pickerSelectable);
 
+        datePickerElement.onShow(function () {
+          el._addFocusStyle();
+        });
+
+        datePickerElement.onHide(function () {
+          el._removeFocusStyle();
+        });
+
         vcomet.registerPathListener(datePickerElement, "datepicker");
 
         el.querySelector(".vc-datebox-main").appendChild(datePickerElement);
@@ -434,27 +442,21 @@
         el._refs.subInputs.first.addEventListener("focus", function (e) {
           if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
             el._handleFocus(this);
-            el._refs.underline.classList.add("animate");
-            el.classList.add("focus");
-            el._labelNode.classList.add("vc-fg1");
+            el._addFocusStyle();
           }
         }, true);
 
         el._refs.subInputs.second.addEventListener("focus", function (e) {
           if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
             el._handleFocus(el._refs.subInputs.second);
-            el._refs.underline.classList.add("animate");
-            el.classList.add("focus");
-            el._labelNode.classList.add("vc-fg1");
+            el._addFocusStyle();
           }
         }, true);
 
         el._refs.subInputs.third.addEventListener("focus", function (e) {
           if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
             el._handleFocus(el._refs.subInputs.third);
-            el._refs.underline.classList.add("animate");
-            el.classList.add("focus");
-            el._labelNode.classList.add("vc-fg1");
+            el._addFocusStyle();
           }
         }, true);
 
@@ -473,9 +475,7 @@
             el._refs.subInputs.first.textContent = "0" + el._refs.subInputs.first.textContent;
           }
 
-          el._refs.underline.classList.remove("animate");
-          el.classList.remove("focus");
-          el._labelNode.classList.remove("vc-fg1");
+          el._removeFocusStyle();
 
         }, true);
 
@@ -485,9 +485,7 @@
             el._refs.subInputs.second.textContent = "0" + el._refs.subInputs.second.textContent;
           }
 
-          el._refs.underline.classList.remove("animate");
-          el.classList.remove("focus");
-          el._labelNode.classList.remove("vc-fg1");
+          el._removeFocusStyle();
 
         }, true);
 
@@ -497,9 +495,7 @@
             el._refs.subInputs.third.textContent = "0" + el._refs.subInputs.third.textContent;
           }
 
-          el._refs.underline.classList.remove("animate");
-          el.classList.remove("focus");
-          el._labelNode.classList.remove("vc-fg1");
+          el._removeFocusStyle();
 
         }, true);
 
@@ -665,6 +661,24 @@
       setupToolbarMode: function () {
         this.querySelector(".vc-datebox-main").classList.add("toolbar");
       },
+      addFocusStyle: function () {
+
+        var el = this;
+
+        el._refs.underline.classList.add("animate");
+        el.classList.add("focus");
+        el._labelNode.classList.add("vc-fg1");
+
+      },
+      removeFocusStyle: function () {
+
+        var el = this;
+
+        el._refs.underline.classList.remove("animate");
+        el.classList.remove("focus");
+        el._labelNode.classList.remove("vc-fg1");
+
+      },
       /*
       @function (private) _toggleDatePicker
       @description Shows/Hides the picker depending on its state
@@ -694,10 +708,7 @@
 
         document.body.appendChild(el._refs.datePicker);
 
-        el._refs.underline.classList.add("animate");
-        el.classList.add("focus");
-
-        el._refs.datePicker.classList.remove("hidden");
+        el._refs.datePicker._show();
 
         el._refs.datePicker._handleAutoHeight();
         el._refs.datePicker._handleFonts();
@@ -757,8 +768,6 @@
       customBlur: function (e, el) {
         if (!el.isOnPath && !el._refs.datePicker.isOnPath) {
           el._hideDatePicker();
-          el._refs.underline.classList.remove("animate");
-          el.classList.remove("focus");
         }
       },
       /*
