@@ -540,7 +540,7 @@
         el.querySelector(".vc-datepicker-close").addEventListener(el._misc.downTrigger, function (e) {
           e.stopPropagation();
           e.preventDefault();
-          el._hide();
+          vcomet.triggerCallback("onClose", el, el, []);
         });
 
         el.querySelector(".vc-datepicker-header .vc-datepicker-month").addEventListener(el._misc.downTrigger, function (e) {
@@ -1800,11 +1800,26 @@
 
       },
       /*
+      @function (private) _show
+      @description Shows the calendar
+      */
+      show: function () {
+
+        var el = this;
+
+        el.classList.remove("hidden");
+        vcomet.triggerCallback("onShow", el, el, []);
+      },
+      /*
       @function (private) _hide
       @description Hides the calendar
       */
       hide: function () {
-        this.classList.add("hidden");
+
+        var el = this;
+
+        el.classList.add("hidden");
+        vcomet.triggerCallback("onHide", el, el, []);
       },
       /*
       @function (private) _disableSelectors
@@ -1961,6 +1976,9 @@
       var el = this;
       el._setupMisc();
       vcomet.createCallback("onSelected", el);
+      vcomet.createCallback("onClose", el);
+      vcomet.createCallback("onShow", el);
+      vcomet.createCallback("onHide", el);
     },
     onRender: function () {
       var el = this;

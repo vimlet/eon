@@ -1,13 +1,13 @@
 <template>
 
-    <div class="vc-spinner-group fg1-border unselectable">
+    <div class="vc-spinner-group vc-fg1-border vc-unselectable">
         <label class="vc-spinner-label"></label>
-        <div class="vc-spinner-spinner bg4">
-            <div class="vc-spinner-control fg1-hoverable vc-spinner-controlDown">
+        <div class="vc-spinner-spinner vc-bg4">
+            <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlDown">
                 <i class="material-icons">remove_circle_outline</i>
             </div>
-            <input class="vc-spinner-input fg1-border" type="number">
-            <div class="vc-spinner-control fg1-hoverable vc-spinner-controlUp">
+            <input class="vc-spinner-input vc-fg1-border" type="number">
+            <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlUp">
                 <i class="material-icons">add_circle_outline</i>
             </div>
         </div>
@@ -64,11 +64,11 @@
                 reflect: true
             },
             /*
-              @property {Boolean} disable 
+              @property {Boolean} disabled 
               @description Spinner desactivation
               Default: false
             */
-            disable: {
+            disabled: {
                 value: false,
                 reflect: true
             },
@@ -175,38 +175,40 @@
 
         privateFunctions: {
             /*
-              @function (private) _updateDisable
-              @description Update disable status and activates the focus listeners when it is not disabled
+              @function (private) _updateDisabled
+              @description Update disabled status and activates the focus listeners when it is not disabled
               @param {String} newVal [new value of disabled]
             */
-            updateDisable: function (newVal) {
+            updateDisabled: function (newVal) {
                 var spinnerGroup = this.querySelector(".vc-spinner-group");
                 var controlDown = this.querySelector(".vc-spinner-controlDown");
                 var controlUp = this.querySelector(".vc-spinner-controlUp");
 
                 if (!vcomet.util.isTrue(newVal)) {
                     this._spinnerInput.removeAttribute("disabled");
-                    spinnerGroup.classList.remove("vc-spinner-disable");
-                    spinnerGroup.classList.remove("bg1-disable");
-                    controlUp.classList.remove("bg1-disable");
-                    controlUp.classList.add("fg1-hoverable");
-                    controlDown.classList.remove("bg1-disable");
-                    controlDown.classList.add("fg1-hoverable");
-                    this._spinnerInput.classList.remove("bg1-disable");
-                    this._spinnerInput.classList.add("fg1-border");
+                    spinnerGroup.classList.remove("vc-spinner-disabled");
+                    spinnerGroup.classList.remove("vc-fg1-disabled");
+                    controlUp.classList.remove("vc-fg1-disabled");
+                    controlUp.classList.add("vc-fg1-hoverable");
+                    controlDown.classList.remove("vc-fg1-disabled");
+                    controlDown.classList.add("vc-fg1-hoverable");
+                    this._spinnerInput.classList.remove("vc-fg1-disabled");
+                    this._spinnerInput.classList.add("vc-fg1-border");
+                    this._labelNode.classList.remove("vc-fg1-disabled");
                     this._setFocusingListeners();
                     this._setUpdateListeners();
                     
                 } else {
                     this._spinnerInput.setAttribute("disabled", "true");
-                    spinnerGroup.classList.add("vc-spinner-disable");
-                    spinnerGroup.classList.add("bg1-disable");
-                    controlUp.classList.add("bg1-disable");
-                    controlUp.classList.remove("fg1-hoverable");
-                    controlDown.classList.add("bg1-disable");
-                    controlDown.classList.remove("fg1-hoverable");
-                    this._spinnerInput.classList.add("bg1-disable");
-                    this._spinnerInput.classList.remove("fg1-border");
+                    spinnerGroup.classList.add("vc-spinner-disabled");
+                    spinnerGroup.classList.add("vc-fg1-disabled");
+                    controlUp.classList.add("vc-fg1-disabled");
+                    controlUp.classList.remove("vc-fg1-hoverable");
+                    controlDown.classList.add("vc-fg1-disabled");
+                    controlDown.classList.remove("vc-fg1-hoverable");
+                    this._spinnerInput.classList.add("vc-fg1-disabled");
+                    this._spinnerInput.classList.remove("vc-fg1-border");
+                    this._labelNode.classList.add("vc-fg1-disabled");
                     this._removeUpdateListeners();
                     document.body.removeEventListener("click", this._focusEvent, false);
                 }
@@ -322,7 +324,7 @@
             inputFocus: function () {
                 var inputBar = this.querySelector(".vc-spinner-inputBar");
                 this._labelNode.classList.add("vc-spinner-focusLabel");
-                this._labelNode.classList.add("fg1");
+                this._labelNode.classList.add("vc-fg1");
                 inputBar.classList.add("vc-spinner-animate");
             },
 
@@ -335,7 +337,7 @@
 
                 this._updateSpinner(event);
                 this._labelNode.classList.remove("vc-spinner-focusLabel");
-                this._labelNode.classList.remove("fg1");
+                this._labelNode.classList.remove("vc-fg1");
                 // this.value = this._spinnerInput.value;
                 inputBar.classList.remove("vc-spinner-animate");
 
@@ -352,7 +354,7 @@
             */
             setAutofocus: function (newVal) {
 
-                if (vcomet.util.isTrue(newVal)) {
+                if (vcomet.util.isTrue(newVal) && this.disabled == false) {
                     this._spinnerInput.focus();
                     this._inputFocus();
                 }
@@ -406,7 +408,7 @@
 
             var value;
 
-            el._updateDisable(el.disable);
+            el._updateDisabled(el.disabled);
             el._setAutofocus(el.autofocus);
 
             // Sets the name of the input
@@ -436,9 +438,9 @@
 
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
-                case "disable":
+                case "disabled":
                     this.onRender(function () {
-                        this._updateDisable(newVal);
+                        this._updateDisabled(newVal);
                     });
                     break;
                 case "autofocus":
