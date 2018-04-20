@@ -1,6 +1,5 @@
 <script>
   vcomet.element("vc-drawer", "vc-drawer.css", {
-    
     properties: {
       /*
         @property {String} type
@@ -79,12 +78,12 @@
       }
     },
     privateProperties: {
-      /*
-        @property (private) {String} _sizeProperty
-        @description Store the drawer size unit distance depending on drawer slide direction
+       /*
+        @property (private) {Object} _misc
+        @description Quick access to the gutter structure nodes references
       */
-      sizeProperty: {
-        value: "offsetWidth", // offsetHeight
+      misc: {
+        value: {}
       },
       /*
         @property (private) {Boolean} _loaded
@@ -108,20 +107,6 @@
         value: false
       },
       /*
-        @property (private) {Boolean} _close
-        @description Whether or not drawer should close on mouse down and move out
-      */
-      close: {
-        value: true
-      },
-      /*
-        @property (private) {String} _blurCallback
-        @description Blur listener callback function
-      */
-      blurCallback: {
-        value: ""
-      },
-      /*
         @property (private) {Object} _dragCallbacks
         @description Drag listener callbacks
       */
@@ -136,16 +121,16 @@
       */
       initialDisplay: function () {
         var el = this;
-
-        // 
+        // TODO MOVE TO INIT MISC
+        // Get size property from drawer type
+        el._misc.sizeProperty = el.type == "left" || el.type == "right" ? "offsetWidth" : "offsetHeight";
+        // Static and no collapsable drawer
         if (vcomet.util.isTrue(el.static) && window.innerWidth > el.staticLimit) {
-       
           el.classList.add("vc-drawer-static");
           el.closable = false;
           el._translate(0);
         } else {
-         
-          // Check if must start hidden
+          // Drawer initial displaying
           if (!vcomet.util.isTrue(el.hide)) {
             el.style.opacity = 1;
             el._translate(0);
@@ -161,32 +146,40 @@
       */
       addBlurListener: function () {
         var el = this;
-        var dropdParentElement; 
+        var dropdParentElement, preventCloseElms, preventClose; 
 
-        function documenBlurDown(e) {
+        function documentBlurDown(e) {
           if (vcomet.util.isTrue(el.closable)) {
-            if (el._close) {
-              // TODO
+            // Prevent drawer from being closed during drag transition
+            if (el._misc.close) {
+              // Close if target is a drawer child only
               if (!el.isOnPath) {
-                var preventClose = false;
-                // Loop through nodes excluded from triggering drawer displaying
+                preventClose = false;
+                // Loop through nodes that should not trigger drawer displaying
                 for (var i = 0; i < el.preventCloseNodes.length; i++) {
-
                   // TODO -- For each querySelectorAll
-                  if (document.querySelector(el.preventCloseNodes[i]).isEqualNode(e.target)) {
-                    preventClose = true;
-                    break;
+                  preventCloseElms = document.querySelectorAll(el.preventCloseNodes[i]);
+
+                  if(preventCloseElms[1]) {
+                    // Multiple nodes
+                    for (var j = 0; j < preventCloseElms.length; j++) {
+                      if (preventCloseElms[j].isEqualNode(e.target)) {
+                        preventClose = true;
+                        break;
+                      }
+                    }
+                  } else {
+                    console.log('preventCloseElms[0].', preventCloseElms[0], e.target);
+                    console.log('preventCloseElms[0].',preventCloseElms[0].isEqualNode(e.target));
+                    // Multiple single node
+                    if (preventCloseElms[0].isEqualNode(e.target)) {
+                      preventClose = true;
+                      break;
+                    }
                   }
+                  
                 }
-
-                // -- // TODO Dropdowns absolute issue
-                dropdParentElement = e.target.parentNode.parentNode.parentNode
-                if (e.target.parentNode.classList.contains("vc-dropdown-result") || (dropdParentElement && dropdParentElement.classList &&
-                    dropdParentElement.classList.contains("vc-dropdown-dropdown"))) {
-                    preventClose = true;
-                }
-
-                // Whether or not de drawer must be closed
+                // Whether or not the drawer must be closed
                 if (!preventClose) {
                   el.close();
                 }
@@ -194,9 +187,9 @@
             }
           }
         }
-        el._blurCallback = "documenBlurDown";
+        el._misc.blurCallback = "documentBlurDown";
         // On document click, detect elements path
-        document.addEventListener("pointerdown", documenBlurDown);
+        document.addEventListener("pointerdown", documentBlurDown);
       },
       /*
         @function (private) _addBlurListener
@@ -290,7 +283,7 @@
                   // Get transform axis value
                   var position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
                   // Get middle drawer position
-                  var middlePosition = sign == -1 ? -Math.abs(el[el._sizeProperty] / 2) : el[el._sizeProperty] / 2;
+                  var middlePosition = sign == -1 ? -Math.abs(el[el._misc.sizeProperty] / 2) : el[el._misc.sizeProperty] / 2;
                   if ((sign == -1 && position > middlePosition) || (sign == 1 && position < middlePosition)) {
                     el.show();
                   } else {
@@ -298,7 +291,7 @@
                   }
                 }
                 // Prevent drawer from being closed on document click
-                el._close = moveValue != initialValue ? false : true;
+                el._misc.close = moveValue != initialValue ? false : true;
                 allowDrag = true;
                 slideCounter = 0;
               }
@@ -357,7 +350,7 @@
       */
       proccesPosition: function (position, pixels) {
         var el = this;
-        var limitValue = el[el._sizeProperty];
+        var limitValue = el[el._misc.sizeProperty];
         // Monitor node first position null value
         position = !position ? 0 : position;
         // Set translate x/y new value
@@ -379,19 +372,19 @@
         // Check drawer position
         switch (el.type) {
           case "left":
-            value = !value && value != 0 ? -el[el._sizeProperty] : -Math.abs(value);
+            value = !value && value != 0 ? -el[el._misc.sizeProperty] : -Math.abs(value);
             el.style.transform = "translate3d(" + value + "px,0px,0px)";
             break;
           case "right":
-            value = !value && value != 0 ? el[el._sizeProperty] : value;
+            value = !value && value != 0 ? el[el._misc.sizeProperty] : value;
             el.style.transform = "translate3d(" + value + "px,0px,0px)";
             break;
           case "top":
-            value = !value && value != 0 ? -el[el._sizeProperty] : -Math.abs(value);
+            value = !value && value != 0 ? -el[el._misc.sizeProperty] : -Math.abs(value);
             el.style.transform = "translate3d(0px, " + value + "px, 0px)";
             break;
           case "bottom":
-            value = !value && value != 0 ? el[el._sizeProperty] : value;
+            value = !value && value != 0 ? el[el._misc.sizeProperty] : value;
             el.style.transform = "translate3d(0px, " + value + "px, 0px)";
             break;
         }
@@ -451,7 +444,7 @@
       */
       formatArrayProperty: function (prop) {
         var el = this;
-        // Check preventclose property value
+        // Check preventClose property value
         if (typeof prop == "string") {
           // Convert value into an array
           prop = el._getValueAsArray(prop);
@@ -503,13 +496,13 @@
       close: function (cancelAnimation) {
         var el = this;
         if(el.closable) {
-
+          // Remove drawer transition effect
           if(cancelAnimation) {
             el.style.transition = "none";
           }
           el._translate();
           el._displayed = false;
-  
+          // Add transition effect again after closing the drawer
           if(cancelAnimation) {
             setTimeout(function () {
               el.style.transition = "transform .2s";
@@ -581,9 +574,8 @@
         }, delay);
       }, 0);
     },
-    onRender: function () {
+    onInit: function () {
       var el = this;
-
       // Initial element displaying configuration
       el._initialDisplay();
       // Events nodes path configuration
@@ -593,13 +585,10 @@
       // Format the excluded nodes array properties
       el.preventCloseNodes = el._formatArrayProperty(el.preventCloseNodes);
       el.preventDragNodes = el._formatArrayProperty(el.preventDragNodes);
-      // Get size property from drawer type
-      el._sizeProperty = el.type == "left" || el.type == "right" ? "offsetWidth" : "offsetHeight";
       // On drawer blur Listener
       el._addBlurListener();
       // On drag Listener
       el._addDragListener();
-
     }
   });
 </script>
