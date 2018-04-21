@@ -170,7 +170,7 @@ When declaring a new component through `vcomet.element` function you can pass a 
 
 ```[html]
 <script>
-  vcomet.element("my-element", {
+  vcomet.element("my-element", null, {
 
     properties: {
       customProperty: "I'm a custom property"
