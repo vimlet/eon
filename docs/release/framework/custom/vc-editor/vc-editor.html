@@ -15,6 +15,7 @@
         min-height: 10px;
         box-sizing: border-box;
         min-width: 100%;
+        /* pointer-events: none; */
     }
 
     vc-editor vc-loading {
@@ -50,12 +51,25 @@
         overflow: hidden !important;
         box-sizing: border-box !important;
     }
+
+    #vc-editor-mobile-scroll-trigger {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        width: 100%;
+        z-index: 10;
+        background-color: #ff020282;
+        /* pointer-events: none; */
+    }
 </style>
 
 <template>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <vc-loading></vc-loading>
+    <!-- <div id="vc-editor-mobile-scroll-trigger" onclick="this.parentNode.scrollTrigger();"></div> -->
+    <!-- <div id="vc-editor-mobile-scroll-trigger"></div> -->
     <vc-scroll>
         <div id="vc-editor-content" class="vc-editor-until-render"></div>
     </vc-scroll>
@@ -67,7 +81,7 @@
         properties: {
             value: {
                 value: "",
-                reflect: true
+                reflect: false
             },
             language: {
                 value: "html",
@@ -100,6 +114,19 @@
             // @function getValue (public) {string}
             getValue: function () {
                 return this._refs.editor.getValue();
+            },
+            scrollTrigger: function (e) {
+                var el = this;
+                console.log("scrolltrigger",e);
+                
+                var event = new CustomEvent("click");
+                event.clientX = e.clientX;
+                event.clientY = e.clientY;
+                
+                // el.parentNode._refs.editor.domElement.dispatchEvent(event);
+                el.parentNode.querySelector("#vc-editor-content").dispatchEvent(event);
+
+
             }
         },
 
@@ -229,6 +256,7 @@
             var el = this;
             el._init();
             el._misc.paddingOffset = 20;
+            // el.querySelector("#vc-editor-mobile-scroll-trigger").addEventListener("click", this.scrollTrigger, false);
         },
 
         onRender: function () {}
