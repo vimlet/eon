@@ -37,17 +37,13 @@
         margin-bottom: 0px !important;
         max-height: 100% !important;
         box-sizing: border-box;
+        background-color: #1e1e1e;
     }
 
-    vc-playground vc-editor #vc-editor-content{
-        height:564px;
-    }
-    vc-playground #htmlContent vc-editor #vc-editor-content{
-        height:282px;
-    }
 
     vc-playground vc-editor vc-scroll {
         max-height: 100% !important;
+        min-height: 100% !important;
     }
 
     .vc-playground-htmlTags {
@@ -126,7 +122,7 @@
                     switch (tab.name) {
                         case "result":
                             if (el._misc.editorsLoaded === 0) {
-                                // el._showResult();
+                                el._showResult();
                             }
                             break;
                         case "html":
@@ -151,10 +147,6 @@
                         el._editorsLoaded();
                     }
                 }
-                // el._refs.resultPanel = document.createElement("vc-panel");
-                // el._refs.resultPanel.setAttribute("allow-scroll", false);
-                // el._refs.resultPanel.appendChild(el._refs.result);
-                // resultTab.appendChild(el._refs.resultPanel);
                 resultTab.appendChild(el._refs.result);
                 return resultTab;
             },
@@ -171,8 +163,6 @@
                 var bodySection = document.createElement("vc-section");
                 el._refs.html = {};
                 el._refs.html.head = document.createElement("vc-editor");
-                el._refs.html.head.heightauto = "false";
-                el._refs.html.head.widthauto = "false";
                 el._refs.html.head.oneditorready(function (currentEditor) {
                     el._editorsLoaded()
                 });
@@ -184,8 +174,6 @@
                 headSection.appendChild(headTag);
                 el._refs.html.head.readonly = false;
                 el._refs.html.body = document.createElement("vc-editor");
-                el._refs.html.body.heightauto = "false";
-                el._refs.html.body.widthauto = "false";
                 el._refs.html.body.oneditorready(function () {
                     el._editorsLoaded();
                 });
@@ -213,8 +201,7 @@
                 jsTab.name = "js";
                 jsTab.title = "Js";
                 el._refs.js = document.createElement("vc-editor");
-                el._refs.js.heightauto = "false";
-                el._refs.js.widthauto = "false";
+                el._refs.js.minheight = 564;
                 el._refs.js.oneditorready(function () {
                     el._editorsLoaded();
                 });
@@ -231,8 +218,7 @@
                 cssTab.name = "css";
                 cssTab.title = "Css";
                 el._refs.css = document.createElement("vc-editor");
-                el._refs.css.heightauto = "false";
-                el._refs.css.widthauto = "false";
+                el._refs.css.minheight = 564;
                 el._refs.css.oneditorready(function () {
                     el._editorsLoaded();
                 });
@@ -350,22 +336,22 @@
                     el.style.top = "0px";
                     el.style.left = "0px";
                     el.style.zIndex = "9999";
-                    el.parentNode.style.overflow = "hidden"; // TODO Needed a method to prevent vcomet scroll at parent. 
-                    // el._refs.htmlPanel.querySelector("vc-gutter").resize();  // TODO gutter get lost when fullscreen
+                    // el.parentNode.style.overflow = "hidden"; // TODO Needed a method to prevent vcomet scroll at parent. 
                     el._misc.parent = el.parentNode;
-                    el._misc.nextSibling = el.nextSibling;                    
+                    el._misc.nextSibling = el.nextSibling;
                     document.body.appendChild(el);
                 } else {
                     el._refs.fullScreenIcon.innerHTML = "fullscreen";
-                    // el._refs.htmlPanel.querySelector("vc-gutter").resize();
-                    el.parentNode.style = ""; // TODO Needed a method to prevent vcomet scroll at parent.Note that via js this may result in the loss of parentNodeStyle
+                    // el.parentNode.style = ""; // TODO Needed a method to prevent vcomet scroll at parent.Note that via js this may result in the loss of parentNodeStyle
                     el.style = "";
-                    if(el._misc.nextSibling){
-                    el._misc.parent.insertBefore(el, el._misc.nextSibling);
-                    }else{
-                    el._misc.parent.appendChild(el);
+                    if (el._misc.nextSibling) {
+                        el._misc.parent.insertBefore(el, el._misc.nextSibling);
+                    } else {
+                        el._misc.parent.appendChild(el);
                     }
                 }
+                                el._showResult();
+                el._refs.htmlPanel.querySelector("vc-gutter").resize();
             }
         },
 

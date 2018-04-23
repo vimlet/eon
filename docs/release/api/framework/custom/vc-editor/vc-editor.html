@@ -77,18 +77,17 @@
                 value: "readonly",
                 reflect: true
             },
-            heightauto: {
-                value: "true",
-                reflect: true
-            },
-            widthauto: {
-                value: "true",
+            minheight: {
+                value: 0,
                 reflect: true
             }
         },
 
         privateProperties: {
             refs: {
+                value: {}
+            },
+            misc: {
                 value: {}
             }
         },
@@ -149,8 +148,11 @@
                     });
 
                     el._refs.editor.model.onDidChangeContent((event) => {
-                        //         el._setHeight();
-                        vcomet.triggerCallback("onchange", el, el, [el]);
+                        el._setHeight();
+                        el._setWidth();
+                        try {
+                            vcomet.triggerCallback("onchange", el, el, [el]);
+                        } catch (e) {}
                     });
                 });
             },
@@ -166,42 +168,48 @@
             // @function setHeight (private) [Adjust editor height based on its content] @param min [Minimum height] @param max [Maximum height]
             setHeight: function (min, max) {
                 var el = this;
-                if (el.heightauto == "true") {                    
-                    var contentHeight = el._refs.editor.getScrollHeight() + 20;
-                    //     contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
-                    el.querySelector("#vc-editor-content").style.height = contentHeight + "px";
-                    el.querySelector("vc-scroll").update();
+                min = min || el.minheight;
+                var contentHeight;
+                if (!el._misc.scrollHeight || el._misc.scrollHeight < el._refs.editor.getScrollHeight()) {
+                    el._misc.scrollHeight = el._refs.editor.getScrollHeight();
+                    contentHeight = el._misc.scrollHeight;
+                    if (el._refs.editor.getScrollHeight() >= min) {
+                        contentHeight = contentHeight + el._misc.paddingOffset;
+                    }
+                } else {
+                    contentHeight = el._misc.scrollHeight;
                 }
+                contentHeight = contentHeight <= min ? min : contentHeight;
+                // max = max || el.maxheight || 9999999;
+                // contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
 
+                el.querySelector("#vc-editor-content").style.height = contentHeight + "px";
+                el.querySelector("vc-scroll").update();
             },
             // @function setWidth (private)
             setWidth: function () {
                 var el = this;
-                if (el.widthauto) {
-                    var monacoLinesNumberWidth = el._refs.editor.domElement.querySelector(".margin").offsetWidth;
-                    el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
-                        ".view-lines");
-                    el._refs.monacoLinesWidth = el._refs.monacoLines.offsetWidth;
-                    //    var contentWidth = el._refs.editor.getScrollWidth();    // TODO not working
+                var monacoLinesNumberWidth = el._refs.editor.domElement.querySelector(".margin").offsetWidth;
+                el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
+                    ".view-lines");
+                el._refs.monacoLinesWidth = el._refs.monacoLines.offsetWidth;
+                //    var contentWidth = el._refs.editor.getScrollWidth();    // TODO not working
 
-                    var contentWidth = el._refs.monacoLinesWidth + monacoLinesNumberWidth;
+                var contentWidth = el._refs.monacoLinesWidth + monacoLinesNumberWidth;
 
-                    el.querySelector("#vc-editor-content").style.width = contentWidth + "px";
-                    el.querySelector("vc-scroll").update();
-                }
+                el.querySelector("#vc-editor-content").style.width = contentWidth + "px";
+                el.querySelector("vc-scroll").update();
             },
             // @function widthListener (private) [Monaco editor getScrollWidth is not working, so this function keep listening if width change and if so, resize the element]
             widthListener: function () {
                 var el = this;
-                if (el.widthauto) {
-                    el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
-                        ".view-lines");
-                    vcomet.addResizeListener(el._refs.monacoLines, "NAME", function () {
-                        if (el._refs.monacoLines.offsetWidth > el._refs.monacoLinesWidth) {
-                            el._setWidth();
-                        }
-                    });
-                }
+                el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
+                    ".view-lines");
+                vcomet.addResizeListener(el._refs.monacoLines, "NAME", function () {
+                    if (el._refs.monacoLines.offsetWidth > el._refs.monacoLinesWidth) {
+                        el._setWidth();
+                    }
+                });
             },
             // @function show (private) [Hides loading mask and shows editor]
             show: function () {
@@ -220,6 +228,7 @@
         onReady: function () {
             var el = this;
             el._init();
+            el._misc.paddingOffset = 20;
         },
 
         onRender: function () {}

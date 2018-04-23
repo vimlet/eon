@@ -170,7 +170,7 @@ When declaring a new component through `vcomet.element` function you can pass a 
 
 ```[html]
 <script>
-  vcomet.element("my-element", {
+  vcomet.element("my-element", null, {
 
     properties: {
       customProperty: "I'm a custom property"
@@ -276,7 +276,7 @@ would yield the following output instead:
 Hello Vimlet!
 ```
 
-# Understanding bind "@"
+## Understanding bind "@"
 
 You can see there's an `@` after the interpolation open tags, this is a shorthand for bind(data) function.
 the same code could be written like so without the shorthand:
@@ -289,7 +289,7 @@ the same code could be written like so without the shorthand:
 
 This is possible because vComet template engine treats interpolated code as plain javascript, but provides handy functions like bind(data) and echo(string) as well as its respective shorthands which speeds daily development.
 
-# Understanding echo "="
+## Understanding echo "="
 
 The function echo(string) outputs text to the template, and it can be used with `=` shorthand.
 
@@ -313,7 +313,7 @@ This would be viewed as
 Hello I'm a text!
 ```
 
-# Scripting
+## Scripting
 
 Since vComet template engine treats interpolated code as plain sanboxed javascript you can exploit it to your own advantage and create logic based content.
 
@@ -381,3 +381,5 @@ Now lets say we want to place it inside the div with the class vc-container-pare
 vComet takes care of the element placement so you can stay focus on other important aspects of your application.
 
 [Theming]<>
+
+Coming soon...
