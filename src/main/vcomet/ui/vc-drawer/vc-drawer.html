@@ -100,13 +100,6 @@
         value: ""
       },
       /*
-        @property (private) {Boolean} _displayed
-        @description Whether or not the drawer is displayed
-      */
-      displayed: {
-        value: false
-      },
-      /*
         @property (private) {Object} _dragCallbacks
         @description Drag listener callbacks
       */
@@ -136,7 +129,7 @@
             el._translate(0);
           } else {
             el._translate();
-            el._displayed = false;
+            el._misc.displayed = false;
           }
         }
       },
@@ -146,38 +139,26 @@
       */
       addBlurListener: function () {
         var el = this;
-        var dropdParentElement, preventCloseElms, preventClose; 
-
+        var dropdParentElement, preventCloseElms, preventClose;
         function documentBlurDown(e) {
           if (vcomet.util.isTrue(el.closable)) {
             // Prevent drawer from being closed during drag transition
-            if (el._misc.close) {
-              // Close if target is a drawer child only
-              if (!el.isOnPath) {
-                preventClose = false;
-                // Loop through nodes that should not trigger drawer displaying
-                for (var i = 0; i < el.preventCloseNodes.length; i++) {
-                  // TODO -- For each querySelectorAll
-                  preventCloseElms = document.querySelectorAll(el.preventCloseNodes[i]);
-
-                  if(preventCloseElms[1]) {
-                    // Multiple nodes
-                    for (var j = 0; j < preventCloseElms.length; j++) {
-                      if (preventCloseElms[j].isEqualNode(e.target)) {
-                        preventClose = true;
-                        break;
-                      }
-                    }
-                  } else {
-                    console.log('preventCloseElms[0].', preventCloseElms[0], e.target);
-                    console.log('preventCloseElms[0].',preventCloseElms[0].isEqualNode(e.target));
-                    // Multiple single node
-                    if (preventCloseElms[0].isEqualNode(e.target)) {
+            if (el._misc.close && !el.isOnPath) {
+              preventClose = false;
+              // Loop through nodes that should not trigger drawer displaying
+              for (var i = 0; i < el.preventCloseNodes.length; i++) {
+                preventCloseElms = document.querySelectorAll(el.preventCloseNodes[i]);
+                // Check query result amount
+                if(preventCloseElms[1]) {
+                  // Multiple nodes
+                  for (var j = 0; j < preventCloseElms.length; j++) {
+                    if (preventCloseElms[j].isEqualNode(e.target)) {
                       preventClose = true;
                       break;
                     }
                   }
-                  
+                } else if (preventCloseElms[0].isEqualNode(e.target)){
+                  preventClose = true;
                 }
                 // Whether or not the drawer must be closed
                 if (!preventClose) {
@@ -203,30 +184,26 @@
         var moveValue = 0;
         var throttled = false;
         var dragLimitExceeded = false;
-        // A minimum delay must be setted to make it works on Firefox but non on Edge or IE
+        // A minimum delay must be set to make it works on Firefox but non on Edge or IE
         var browser = vcomet.util.getBrowser();
         var delay = browser === "IE" || browser === "Edge" ? 0 : 60;
         var slideCounter = 0;
         var axis = el.type == "left" || el.type == "right" ? "clientX" : "clientY";
-        // May drawer be openned by dragging
-        if (el.drag && el.drag != "false") {
+        // May drawer be opened by dragging
+        if (vcomet.util.isTrue(el.drag) && vcomet.util.isTrue(el.closable)) {
           function documentDragDown(e) {
-            if (vcomet.util.isTrue(el.closable)) {
-              if (!el.isOnPath) { }
-              // Detect mouse down only outside drawer
-              if (!el.isOnPath) {
-                // Needed to make mouseup event work perfectly
-                mousedown = true;
-                dragLimitExceeded = false;
-                // Check prevent drag nodes array
-                allowDrag = el._isOnArray(e.target, el.preventDragNodes) ? false : true;
-                // Slide complete trigger interval
-                el._slideTimeInterval = setInterval(function () {
-                  slideCounter++;
-                }, 1);
-                // Get x/y value
-                initialValue = moveValue = e[axis];
-              }
+            // Detect mouse down only outside drawer
+            if (!el.isOnPath) {
+              mousedown = true;
+              dragLimitExceeded = false;
+              // Check prevent drag nodes array
+              allowDrag = el._isOnArray(e.target, el.preventDragNodes) ? false : true;
+              // Slide complete trigger interval
+              el._slideTimeInterval = setInterval(function () {
+                slideCounter++;
+              }, 1);
+              // Get x/y value
+              initialValue = moveValue = e[axis];
             }
           }
           el._dragCallbacks.pointerdown = "documentDragDown";
@@ -234,33 +211,31 @@
           document.body.addEventListener("pointerdown", documentDragDown);
 
           function documentDragMove(e) {
-            if (vcomet.util.isTrue(el.closable)) {
-              if (mousedown && allowDrag) {
-                // Check movement limits
-                dragLimitExceeded = el._isDragLimitExceeded(initialValue, moveValue);
-                if (!throttled) {
-                  // Set drawer loaded property to true
-                  el.style.opacity = 1;
-                  el._loaded = true;
-                  // Get transform axis value
-                  var position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
-                  // Calculate movement pixels from inital position
-                  var pixels = moveValue - e[axis];
-                  // Check limits
-                  position = el._proccesPosition(position, pixels);
-                  // Translate element
-                  if (dragLimitExceeded) {
-                    vcomet.translate(el, axis.substring(axis.length - 1), position);
-                  }
-                  // Update initial value
-                  moveValue = e[axis];
-                  // Throttle
-                  throttled = true;
-                  // Set a timeout to un-throttle
-                  setTimeout(function () {
-                    throttled = false;
-                  }, delay);
+            if (mousedown && allowDrag) {
+              // Check movement limits
+              dragLimitExceeded = el._isDragLimitExceeded(initialValue, moveValue);
+              if (!throttled) {
+                // Set drawer loaded property to true
+                el.style.opacity = 1;
+                // REMOVE? el._loaded = true;
+                // Get transform axis value
+                var position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
+                // Calculate movement pixels from initial position
+                var pixels = moveValue - e[axis];
+                // Check limits
+                position = el._processPosition(position, pixels);
+                // Translate element
+                if (dragLimitExceeded) {
+                  vcomet.translate(el, axis.substring(axis.length - 1), position);
                 }
+                // Update initial value
+                moveValue = e[axis];
+                // Throttle
+                throttled = true;
+                // Set a timeout to un-throttle
+                setTimeout(function () {
+                  throttled = false;
+                }, delay);
               }
             }
           }
@@ -269,32 +244,30 @@
           document.body.addEventListener("pointermove", documentDragMove);
 
           function documentDragUp(e) {
-            if (vcomet.util.isTrue(el.closable)) {
-              if (mousedown) {
-                mousedown = false;
-                // Check value sign (related to drawer side position)
-                var sign = el.type == "left" || el.type == "top" ? -1 : 1;
-                // Complete slide trigger functionality
-                clearInterval(el._slideTimeInterval);
-                if ((slideCounter < 100 && allowDrag) && dragLimitExceeded) {
-                  // Trigger complete slide only over move value limit
-                  el._triggerCompleteSlide(initialValue, moveValue, sign);
+            if (mousedown) {
+              mousedown = false;
+              // Check value sign (related to drawer side position)
+              var sign = el.type == "left" || el.type == "top" ? -1 : 1;
+              // Complete slide trigger functionality
+              clearInterval(el._slideTimeInterval);
+              if ((slideCounter < 100 && allowDrag) && dragLimitExceeded) {
+                // Trigger complete slide only over move value limit
+                el._triggerCompleteSlide(initialValue, moveValue, sign);
+              } else {
+                // Get transform axis value
+                var position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
+                // Get middle drawer position
+                var middlePosition = sign == -1 ? -Math.abs(el[el._misc.sizeProperty] / 2) : el[el._misc.sizeProperty] / 2;
+                if ((sign == -1 && position > middlePosition) || (sign == 1 && position < middlePosition)) {
+                  el.show();
                 } else {
-                  // Get transform axis value
-                  var position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
-                  // Get middle drawer position
-                  var middlePosition = sign == -1 ? -Math.abs(el[el._misc.sizeProperty] / 2) : el[el._misc.sizeProperty] / 2;
-                  if ((sign == -1 && position > middlePosition) || (sign == 1 && position < middlePosition)) {
-                    el.show();
-                  } else {
-                    el.close();
-                  }
+                  el.close();
                 }
-                // Prevent drawer from being closed on document click
-                el._misc.close = moveValue != initialValue ? false : true;
-                allowDrag = true;
-                slideCounter = 0;
               }
+              // Prevent drawer from being closed on document click
+              el._misc.close = moveValue != initialValue ? false : true;
+              allowDrag = true;
+              slideCounter = 0;
             }
           }
           el._dragCallbacks.pointerup = "documentDragUp";
@@ -342,13 +315,13 @@
         return exceeded;
       },
       /*
-        @function {Number} (private) _proccesPosition
-        @description Proccess a position value and add the new translation distance
+        @function {Number} (private) _processPosition
+        @description Process a position value and add the new translation distance
         @param {Number} position [Current drawer slide position]
         @param {Number} pixels [Mouse moved pixels]
         @return {Number} [New processed position value]
       */
-      proccesPosition: function (position, pixels) {
+      processPosition: function (position, pixels) {
         var el = this;
         var limitValue = el[el._misc.sizeProperty];
         // Monitor node first position null value
@@ -481,12 +454,12 @@
           el.style.opacity = 1;
           // Show drawer
           el._translate(0);
-          el._displayed = true;
+          el._misc.displayed = true;
           el._loaded = true;
         } else {
           // Show drawer
           el._translate(0);
-          el._displayed = true;
+          el._misc.displayed = true;
         }
       },
       /*
@@ -501,7 +474,7 @@
             el.style.transition = "none";
           }
           el._translate();
-          el._displayed = false;
+          el._misc.displayed = false;
           // Add transition effect again after closing the drawer
           if(cancelAnimation) {
             setTimeout(function () {
@@ -517,12 +490,12 @@
       toggle: function () {
         var el = this;
         // Show or close drawer
-        if (el._displayed) {
+        if (el._misc.displayed) {
           el._translate(0);
-          el._displayed = false;
+          el._misc.displayed = false;
         } else {
           el._translate()
-          el._displayed = true;
+          el._misc.displayed = true;
         }
       }
     },
@@ -530,10 +503,9 @@
       var el = this;
       var throttled = false;
       var delay = 10;
-
       // Prevent resize functionality from trigger before element css styling
       setTimeout(function () {
-        if (!el._displayed && vcomet.util.isTrue(el.closable)) {
+        if (!el._misc.displayed && vcomet.util.isTrue(el.closable)) {
           el._translate();
         }
         // Throttle
@@ -555,7 +527,7 @@
           el.classList.remove("vc-drawer-static");
         } else if(window.innerWidth > el.staticLimit && vcomet.util.isTrue(el.closable)){
           el.closable = false;
-          if(el._displayed == false){
+          if(el._misc.displayed == false){
             el.style.transition="none";
           }
           el.classList.add("vc-drawer-static");
