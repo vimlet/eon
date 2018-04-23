@@ -25,15 +25,17 @@
       /*
         @property {Boolean} allowDrag
         @description Whether or not splitter can be dragged
+        Values: false, true
+        Default: false
       */
       allowDrag: {
         value: true,
         reflect: true
       },
-       /*
+      /*
         @property {Boolean} collapsable
         @description Whether or not the gutter can be collapsed
-        Values: false, vertical
+        Values: false, true
         Default: false
       */
       collapsable: {
@@ -360,6 +362,7 @@
           // Update section size to change splitter position
           el._refs.section.style[el._misc.sizeProp] = value + "px";
           el._misc.gutterResizePercent = value * 100 / el._misc.size;
+          vcomet.triggerCallback("onDrag", el, el, [value]);
         }
       },
       /*
@@ -510,6 +513,10 @@
           }
         }
       }
+    },
+    onCreated: function() {
+      var el = this;
+      vcomet.createCallback("onDrag", el);
     },
     onInit: function() {
       var el = this;
