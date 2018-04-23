@@ -8,12 +8,14 @@
         Default: left
       */
       type: {
-        value: "left", // right, bottom, top
+        value: "left",
         reflect: true
       },
       /*
         @property {Boolean} static
         @description Drawer position type
+        Values: false, true
+        Default: false
       */
       static: {
         value: false,
@@ -21,7 +23,8 @@
       },
       /*
         @property {Number} staticLimit
-        @description
+        @description Turning point for static or absolute behaviour
+        Default: 1024
       */
       staticLimit: {
         value: 1024,
@@ -30,14 +33,17 @@
       /*
         @property {Boolean} drag
         @description Manage drawer drag in/out functionality
+        Values: false, true
+        Default: false
       */
       drag: {
-        value: true, // false
+        value: true,
         reflect: true
       },
       /*
         @property {Number} dragLimit
         @description Pixels the drawer have to exceed to trigger translation
+        Default: 10
       */
       dragLimit: {
         value: 10, //
@@ -46,18 +52,22 @@
       /*
         @property {Boolean} closable
         @description Make drawer closable
+        Values: false, true
+        Default: false
       */
       closable: {
-        value: true, // false
+        value: true,
         reflect: true,
         observed: true
       },
       /*
         @property {Boolean} hide
         @description Initial drawer displaying
+        Values: false, true
+        Default: false
       */
       hide: {
-        value: true, // false
+        value: true,
         reflect: true
       },
       /*
@@ -84,37 +94,23 @@
       */
       misc: {
         value: {}
-      },
-      /*
-        @property (private) {Boolean} _loaded
-        @description Whether or not the drawer has been first shown
-      */
-      loaded: {
-        value: false
-      },
-      /*
-        @property (private) {String} _slideTimeInterval
-        @description Interval function used for complete slide triggering functionality
-      */
-      slideTimeInterval: {
-        value: ""
-      },
-      /*
-        @property (private) {Object} _dragCallbacks
-        @description Drag listener callbacks
-      */
-      dragCallbacks: {
-        value: {}
       }
     },
     privateFunctions: {
+      /*
+        @function (private) __initMisc
+        @description Initialize miscellaneous private properties
+      */
+      initMisc: function () {
+        var el = this;
+        el._misc.dragCallbacks = {};
+      },
       /*
         @function (private) _initialDisplay
         @description Manage initial drawer display configuration
       */
       initialDisplay: function () {
         var el = this;
-        // TODO MOVE TO INIT MISC
         // Get size property from drawer type
         el._misc.sizeProperty = el.type == "left" || el.type == "right" ? "offsetWidth" : "offsetHeight";
         // Static and no collapsable drawer
@@ -199,14 +195,14 @@
               // Check prevent drag nodes array
               allowDrag = el._isOnArray(e.target, el.preventDragNodes) ? false : true;
               // Slide complete trigger interval
-              el._slideTimeInterval = setInterval(function () {
+              el._misc.slideTimeInterval = setInterval(function () {
                 slideCounter++;
               }, 1);
               // Get x/y value
               initialValue = moveValue = e[axis];
             }
           }
-          el._dragCallbacks.pointerdown = "documentDragDown";
+          el._misc.dragCallbacks.pointerdown = "documentDragDown";
           // On document mouse down, detect elements target and mouse information
           document.body.addEventListener("pointerdown", documentDragDown);
 
@@ -217,7 +213,6 @@
               if (!throttled) {
                 // Set drawer loaded property to true
                 el.style.opacity = 1;
-                // REMOVE? el._loaded = true;
                 // Get transform axis value
                 var position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
                 // Calculate movement pixels from initial position
@@ -239,7 +234,7 @@
               }
             }
           }
-          el._dragCallbacks.pointermove = "documentDragMove";
+          el._misc.dragCallbacks.pointermove = "documentDragMove";
           // On document mouse move, drag in/out drawer
           document.body.addEventListener("pointermove", documentDragMove);
 
@@ -249,7 +244,7 @@
               // Check value sign (related to drawer side position)
               var sign = el.type == "left" || el.type == "top" ? -1 : 1;
               // Complete slide trigger functionality
-              clearInterval(el._slideTimeInterval);
+              clearInterval(el._misc.slideTimeInterval);
               if ((slideCounter < 100 && allowDrag) && dragLimitExceeded) {
                 // Trigger complete slide only over move value limit
                 el._triggerCompleteSlide(initialValue, moveValue, sign);
@@ -270,7 +265,7 @@
               slideCounter = 0;
             }
           }
-          el._dragCallbacks.pointerup = "documentDragUp";
+          el._misc.dragCallbacks.pointerup = "documentDragUp";
           // On document mouse up, stop dragging
           document.body.addEventListener("pointerup", documentDragUp);
           // On document mouse leave, stop dragging
@@ -450,12 +445,12 @@
       show: function () {
         var el = this;
         // Force drawer to not be displayed before the first show call
-        if (!el._loaded) {
+        if (!el._misc.loaded) {
           el.style.opacity = 1;
           // Show drawer
           el._translate(0);
           el._misc.displayed = true;
-          el._loaded = true;
+          el._misc.loaded = true;
         } else {
           // Show drawer
           el._translate(0);
@@ -522,17 +517,20 @@
       var delay = 10;
 
       setTimeout(function () {
+        // Monitor drawer static behaviour on window resize
         if (window.innerWidth < el.staticLimit && !vcomet.util.isTrue(el.closable)) {
           el.closable = true;
           el.classList.remove("vc-drawer-static");
         } else if(window.innerWidth > el.staticLimit && vcomet.util.isTrue(el.closable)){
           el.closable = false;
+          // Avoid drawer from resize blinking 
           if(el._misc.displayed == false){
             el.style.transition="none";
           }
           el.classList.add("vc-drawer-static");
           el.show();
           if(el.style.transition == "none"){
+            // Reset transform animation
             setTimeout(function() {
               el.style.transition="transform .2s, width .2s";
             }, 200);
@@ -548,6 +546,8 @@
     },
     onInit: function () {
       var el = this;
+      // Initialize miscellaneous private properties
+      el._initMisc();
       // Initial element displaying configuration
       el._initialDisplay();
       // Events nodes path configuration
