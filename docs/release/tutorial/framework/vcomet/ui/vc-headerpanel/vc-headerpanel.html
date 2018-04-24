@@ -1,24 +1,34 @@
 <template>
-  <i class="vc-headerpanel-closeButton vc-fg1-hoverable material-icons">close</i>
-  <div class="vc-headerpanel-header vc-bg2 vc-fg2"></div>
-  <div class="vc-headerpanel-panel vc-bg3">
+  <i class="vc-headerpanel-closeButton fg1-hoverable material-icons">close</i>
+  <div class="vc-headerpanel-header"></div>
+  <div class="vc-headerpanel-panel">
     <div class="vc-headerpanel-content">
       <vc-scroll wheel-scroll-amount="30">
       </vc-scroll>
     </div>
-    <div class="vc-headerpanel-shadowDrop vc-bg4-boxshadow"></div>
-    <div class="vc-headerpanel-actionButton vc-fg1-active vc-bg5-boxshadow"></div>
+    <div class="vc-headerpanel-shadowDrop"></div>
+    <div class="vc-headerpanel-actionButton"></div>
   </div>
 </template>
 
 <script type="text/javascript">
   vcomet.element("vc-headerpanel", "vc-headerpanel.css", {
     dependencies: [
-      "../vc-scroll"
+      "../vc-scroll/vc-scroll"
     ],
 
     properties: {
       // ** MANUAL: Content top could be shadowed emulating header overlapping
+      /*
+        @property {String} type
+        @description Header panel type
+        Values: standard, shadowed
+        Default: standard
+      */
+      type: {
+        value: "standard", // standard, shadowed
+        reflect: true
+      },
       /*
         @property {String} Panel class
         @description Element standard CSS class name
@@ -156,7 +166,7 @@
       configurePanelButton: function (btnType) {
         var el = this;
         var btn = el.querySelector(".vc-headerpanel-" + btnType);
-        btn.classList.add("vc-unselectable");
+        btn.classList.add("unselectable");
         var btnFn = el[btnType];
         // Display button
         if (btnFn) {
@@ -201,7 +211,6 @@
           header.innerHTML = el.headerContent;
           // Set header dimensions
           el._setHeaderDimensions(el.headerHeight, el.headerTallHeight);
-          el.querySelector(".vc-headerpanel-shadowDrop").style.opacity = 1;
         }
       },
       /*
@@ -231,7 +240,7 @@
       setHeader: function () {
         var el = this;
         var header = el.querySelector(".vc-headerpanel-header");
-        header.classList.add("vc-unselectable");
+        header.classList.add("unselectable");
         // Check if css rules already exist
         if (el.headerClass) {
           header.classList.add(el.headerClass);
@@ -302,9 +311,6 @@
     },
     onBubbleRender: function () {
       var el = this;
-
-      el.classList.add("vc-bg3-boxshadow");
-
       // Display header if needed
       el._importContent();
       // Display header if needed
@@ -313,6 +319,11 @@
       el._displayHeader()
       // Header color
       el._setHeader();
+      // Apply header type
+      if (el.type == "shadowed") {
+        // Show drop shadow div
+        el.querySelector(".vc-headerpanel-shadowDrop").style.opacity = 1;
+      }
       // Growing header
       el._configureGrowingHeader();
       // Fixed and close buttons creation
