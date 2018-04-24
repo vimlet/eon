@@ -136,10 +136,11 @@
       addBlurListener: function () {
         var el = this;
         var dropdParentElement, preventCloseElms, preventClose;
+        el._misc.close = vcomet.util.isTrue(el.closable) ? true: false;
+
         function documentBlurDown(e) {
           if (vcomet.util.isTrue(el.closable)) {
             // Prevent drawer from being closed during drag transition
-            console.log('el._misc.close', el._misc.close, !el.isOnPath);
             if (el._misc.close && !el.isOnPath) {
               preventClose = false;
               // Loop through nodes that should not trigger drawer displaying
@@ -157,10 +158,10 @@
                 } else if (preventCloseElms[0].isEqualNode(e.target)){
                   preventClose = true;
                 }
-                // Whether or not the drawer must be closed
-                if (!preventClose) {
-                  el.close();
-                }
+              }
+              // Whether or not the drawer must be closed
+              if (!preventClose) {
+                el.close();
               }
             }
           }
@@ -175,17 +176,13 @@
       */
       addDragListener: function () {
         var el = this;
-        var mousedown = false;
+        var mousedown, dragLimitExceeded, throttled, position, pixels, middlePosition, sign;
         var allowDrag = true;
-        var initialValue = 0;
-        var moveValue = 0;
-        var throttled = false;
-        var dragLimitExceeded = false;
+        var initialValue = 0, moveValue = 0 , slideCounter = 0;
+        var axis = el.type == "left" || el.type == "right" ? "clientX" : "clientY";
         // A minimum delay must be set to make it works on Firefox but non on Edge or IE
         var browser = vcomet.util.getBrowser();
         var delay = browser === "IE" || browser === "Edge" ? 0 : 60;
-        var slideCounter = 0;
-        var axis = el.type == "left" || el.type == "right" ? "clientX" : "clientY";
         // May drawer be opened by dragging
         if (vcomet.util.isTrue(el.drag) && vcomet.util.isTrue(el.closable)) {
           function documentDragDown(e) {
@@ -215,9 +212,9 @@
                 // Set drawer loaded property to true
                 el.style.opacity = 1;
                 // Get transform axis value
-                var position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
+                position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
                 // Calculate movement pixels from initial position
-                var pixels = moveValue - e[axis];
+                pixels = moveValue - e[axis];
                 // Check limits
                 position = el._processPosition(position, pixels);
                 // Translate element
@@ -243,7 +240,7 @@
             if (mousedown) {
               mousedown = false;
               // Check value sign (related to drawer side position)
-              var sign = el.type == "left" || el.type == "top" ? -1 : 1;
+              sign = el.type == "left" || el.type == "top" ? -1 : 1;
               // Complete slide trigger functionality
               clearInterval(el._misc.slideTimeInterval);
               if ((slideCounter < 100 && allowDrag) && dragLimitExceeded) {
@@ -251,9 +248,9 @@
                 el._triggerCompleteSlide(initialValue, moveValue, sign);
               } else {
                 // Get transform axis value
-                var position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
+                position = vcomet.getTransformAxis(el, axis.substring(axis.length - 1));
                 // Get middle drawer position
-                var middlePosition = sign == -1 ? -Math.abs(el[el._misc.sizeProperty] / 2) : el[el._misc.sizeProperty] / 2;
+                middlePosition = sign == -1 ? -Math.abs(el[el._misc.sizeProperty] / 2) : el[el._misc.sizeProperty] / 2;
                 if ((sign == -1 && position > middlePosition) || (sign == 1 && position < middlePosition)) {
                   el.show();
                 } else {
@@ -349,12 +346,16 @@
             el.style.transform = "translate3d(" + value + "px,0px,0px)";
             break;
           case "top":
-            value = !value && value != 0 ? -el[el._misc.sizeProperty] : -Math.abs(value);
-            el.style.transform = "translate3d(0px, " + value + "px, 0px)";
+            setTimeout(function(){
+              value = !value && value != 0 ? -el[el._misc.sizeProperty] : -Math.abs(value);
+              el.style.transform = "translate3d(0px, " + value + "px, 0px)";
+            }, 0);
             break;
           case "bottom":
-            value = !value && value != 0 ? el[el._misc.sizeProperty] : value;
-            el.style.transform = "translate3d(0px, " + value + "px, 0px)";
+            setTimeout(function(){
+              value = !value && value != 0 ? el[el._misc.sizeProperty] : value;
+              el.style.transform = "translate3d(0px, " + value + "px, 0px)";
+            }, 0);
             break;
         }
       },
