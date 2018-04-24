@@ -19,7 +19,7 @@ Gutter use vc-section elements to represent the content sections:
 
 Declare gutter the same way you declare any other HTML element:
 
-``` [html] 
+``` [html]
 <vc-gutter>
     <!-- Sections -->
     <vc-section> section </vc-section>
