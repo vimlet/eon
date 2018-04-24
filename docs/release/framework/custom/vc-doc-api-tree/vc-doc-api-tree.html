@@ -17,11 +17,17 @@
     vc-tree {
         height: calc(100% - 55px) !important;
         box-sizing: border-box;
-        background-color: rgb(36, 36, 41);
+        background-color: #2d2d2d;
     }
-vc-tree .vc-tree-tree{
-    padding-left:10px !important;
-}
+
+    vc-tree .material-icons {
+        color:white;
+    }   
+
+    vc-tree .vc-tree-tree {
+        padding-left: 10px !important;
+    }
+
     vc-tree .vc-scroll-content {
         padding-top: 20px !important;
     }
@@ -68,7 +74,7 @@ vc-tree .vc-tree-tree{
     #vc-doc-api-tree-mobileFade {
         display: none;
         position: fixed;
-        top:0px;
+        top: 0px;
         height: 100%;
         width: 100%;
         z-index: 299;
@@ -94,7 +100,7 @@ vc-tree .vc-tree-tree{
     #vc-doc-api-tree-content {
         height: 100%;
         width: calc(100% - 300px);
-        min-width: 320px;
+        min-width: 300px;
     }
 
     #vc-doc-api-tree-fakeMenuShadow {
@@ -111,10 +117,11 @@ vc-tree .vc-tree-tree{
         box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.75);
     }
 
-    
-    vc-doc-api-tree vc-searchbar .vc-bg8, vc-doc-api-tree vc-searchbar .vc-bg7{        
+
+    vc-doc-api-tree vc-searchbar .vc-bg8,
+    vc-doc-api-tree vc-searchbar .vc-bg7 {
         background: transparent !important;
-        border:none !important;
+        border: none !important;
     }
 
     .vc-doc-api-tree-emptyMenu {
@@ -308,11 +315,11 @@ vc-tree .vc-tree-tree{
             },
             // @function loadDocument (public) [Load document from path and open in content window] @param path @param namePath [Name to show in the url] @param-optional link [Tree node maybe a link to a markdown document]
             loadDocument: function (path, namePath, link) {
-                var el = this;   
+                var el = this;
                 if (!el._misc.openedDocument || el._misc.openedDocument != namePath) {
                     el.setContent(el.src + decodeURIComponent(path));
                     el._urlOpenView(namePath, link);
-                } else if (link) {                  
+                } else if (link) {
                     el._urlNewLink(link);
                 }
                 el._misc.openedDocument = namePath;
@@ -339,7 +346,6 @@ vc-tree .vc-tree-tree{
                 var customCss = document.querySelector("#customCss");
                 customCss = customCss || document.createElement("style");
                 customCss.id = "customCss";
-
                 var fullcss = "";
                 var colorBandClass = " .vc-doc-colorBand{background-color:" + el._treeData.config.__band +
                     " !important;} ";
@@ -364,7 +370,6 @@ vc-tree .vc-tree-tree{
                     ._treeData.config.__band +
                     " !important;} ";
                 fullcss += apiMenuHover;
-
 
 
                 customCss.innerHTML = fullcss;
@@ -444,8 +449,8 @@ vc-tree .vc-tree-tree{
             // @function treeOnNodeSelected (private) [vc-tree onNodeSelected]
             treeOnNodeSelected: function () {
                 var el = this;
-                el._refs.tree.onNodeSelected(function () {                    
-                    if (el._refs.tree.selectedNode.type != "directory") {                        
+                el._refs.tree.onNodeSelected(function () {
+                    if (el._refs.tree.selectedNode.type != "directory") {
                         el.loadDocument(el._refs.tree.selectedNode.realPath, el._refs.tree.selectedNode
                             .namePath, el._refs.tree.selectedNode.link);
                     }
@@ -678,21 +683,21 @@ vc-tree .vc-tree-tree{
             urlOpenView: function (path, link) { // Add current opened file to url            
                 var res = "";
                 if (!document.querySelector("vc-doc-main")) { // Url depends on main mode vs solo api mode
-                    res = window.location.href.split('#')[0] + "#!file=" + path;
+                    res = window.location.href.split('#')[0] + "#!file=" + encodeURIComponent(path);
                 } else {
-                    res = window.location.href.split('&file=')[0] + "&file=" + path;
+                    res = window.location.href.split('&file=')[0] + "&file=" + encodeURIComponent(path);
                 }
                 if (link) {
                     res += "&link=" + encodeURIComponent(link);
-                }                
+                }
                 window.location.href = res;
             },
             // @function urlNewLink (private) [Modify url when surfing inside document] @param link
             urlNewLink: function (link) {
                 var res = window.location.href.split('&link=')[0];
                 res += "&link=" + encodeURIComponent(link);
-                window.location.href = res;     
-                document.querySelector("vc-doc-article").checkUrlLink();           
+                window.location.href = res;
+                document.querySelector("vc-doc-article").checkUrlLink();
             },
             // @function onHash (private) [Hash change listener. If selected document does not match hash, it means that user is goig backward or forward in the browser. Handle it]
             onHash: function () {
@@ -707,7 +712,7 @@ vc-tree .vc-tree-tree{
                                 break;
                             }
                         }
-                        if (selectedNode && selectedNode != el._refs.tree.selectedNode) {                            
+                        if (selectedNode && selectedNode != el._refs.tree.selectedNode) {
                             selectedNode.select();
                         }
                     }

@@ -1096,11 +1096,38 @@
             setLink: function (tag) {
                 var linkData = el._getParseLink(tag);
                 var link = document.createElement("a");
+                linkData[1] = el._sanitizeLink(linkData[1]);
                 link.setAttribute("href", linkData[1]);
                 if (linkData[2]) {
                     link.setAttribute("Title", linkData[2]);
                 }
                 link.innerHTML = linkData[0];
+                return link;
+            },
+            // @function sanitizeLink (private) [Relative links are supposed to have version and mode in it. If they don't, they are fulfilled with current version and mode] #param link
+            sanitizeLink: function (link) {
+                if (link && link.length > 0 && !link.includes("http")) {
+                    var version, mode, file;
+                    if (!link.includes("version")) {
+                        version = decodeURIComponent(window.location.href.split("#!version=")[1]).split("&")[
+                            0];
+                    } else {
+                        version = decodeURIComponent(link.split("version=")[1].split("&")[0]);
+                    }
+                    if (!link.includes("mode")) {
+                        mode = decodeURIComponent(window.location.href.split("mode=")[1]).split("&")[0];
+                    } else {
+                        mode = decodeURIComponent(link.split("mode=")[1].split("&")[0]);
+                    }
+                    if (link.includes("file")) {
+                        file = decodeURIComponent(link.split("file=")[1].split("&")[0]);
+                    } else if (!link.includes("version") && !link.includes("mode")) {
+                        file = link;
+                    } else {
+                        console.log("Warning, relative link without file");
+                    }
+                    link = "#!version=" + encodeURIComponent(version) + "&mode=" + encodeURIComponent(mode) + "&file=" + encodeURIComponent(file);
+                }                
                 return link;
             },
             // @function parseLinks (private) {string} @param str
