@@ -27,7 +27,7 @@
         Default: 1024
       */
       staticLimit: {
-        value: 1024,
+        value: 0,
         reflect: true
       },
       /*
@@ -46,7 +46,7 @@
         Default: 10
       */
       dragLimit: {
-        value: 10, //
+        value: 10,
         reflect: true
       },
       /*
@@ -114,7 +114,7 @@
         // Get size property from drawer type
         el._misc.sizeProperty = el.type == "left" || el.type == "right" ? "offsetWidth" : "offsetHeight";
         // Static and no collapsable drawer
-        if (vcomet.util.isTrue(el.static) && window.innerWidth > el.staticLimit) {
+        if (vcomet.util.isTrue(el.static) && (el.staticLimit > 0 && window.innerWidth > el.staticLimit)) {
           el.classList.add("vc-drawer-static");
           el.closable = false;
           el._translate(0);
@@ -520,30 +520,32 @@
 
       setTimeout(function () {
         // Monitor drawer static behaviour on window resize
-        if (window.innerWidth < el.staticLimit && !vcomet.util.isTrue(el.closable)) {
-          el.closable = true;
-          el.classList.remove("vc-drawer-static");
-        } else if(window.innerWidth > el.staticLimit && vcomet.util.isTrue(el.closable)){
-          el.closable = false;
-          // Avoid drawer from resize blinking 
-          if(el._misc.displayed == false){
-            el.style.transition="none";
+        if (el.staticLimit > 0) {
+          if (window.innerWidth < el.staticLimit && !vcomet.util.isTrue(el.closable)) {
+            el.closable = true;
+            el.classList.remove("vc-drawer-static");
+          } else if(window.innerWidth > el.staticLimit && vcomet.util.isTrue(el.closable)){
+            el.closable = false;
+            // Avoid drawer from resize blinking 
+            if(el._misc.displayed == false){
+              el.style.transition="none";
+            }
+            el.classList.add("vc-drawer-static");
+            el.show();
+            if(el.style.transition == "none"){
+              // Reset transform animation
+              setTimeout(function() {
+                el.style.transition="transform .2s, width .2s";
+              }, 200);
+            }
           }
-          el.classList.add("vc-drawer-static");
-          el.show();
-          if(el.style.transition == "none"){
-            // Reset transform animation
-            setTimeout(function() {
-              el.style.transition="transform .2s, width .2s";
-            }, 200);
-          }
+          // Throttle
+          throttled = true;
+          // Set a timeout to un-throttle
+          setTimeout(function () {
+            throttled = false;
+          }, delay);
         }
-        // Throttle
-        throttled = true;
-        // Set a timeout to un-throttle
-        setTimeout(function () {
-          throttled = false;
-        }, delay);
       }, 0);
     },
     onInit: function () {
