@@ -17,7 +17,7 @@
         margin: 0;
         padding: 0;
         font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-        background-color: #fff;
+        background-color: #fff !important;
         overflow: hidden;
         color: #6b6b6b !important;
     }
@@ -31,11 +31,13 @@
     }
 
     #vc-doc-api-apiMenu {
-        padding-left: 50px;
+        padding-left: 0px;
         height: 50px;
         min-height: 50px;
-        background-color: #2b2b2b;
-        background-image: url("img/menu/menu.png");
+        /* background-color: #2b2b2b;
+        background-image: url("img/menu/menu.png"); */
+        background-color: transparent;
+        z-index: 10;
     }
 
     .vc-doc-colorBand {
@@ -63,6 +65,12 @@
         color: #e6e6e6 !important;
     }
 
+    #menuFunctionsContainer,
+    #menuPropertiesContainer {
+        max-height: 300px;
+        display: flex;
+        flex-direction: column;
+    }
 
     vc-searchbar .main {
         border: none !important;
@@ -82,9 +90,22 @@
         padding: 0 10px;
     }
 
-    .vc-doc-api-menuDropdown .dropdown {
-        margin-top: 5px;
+    vc-doc-api .vc-bg4,
+    .vc-bg3 {
+        background: transparent !important;
+    }
+
+    vc-doc-api .vc-menu-dropdown {
+        background-color: #3a3a3a !important;
+    }
+
+    vc-doc-api .dropdownTrigger {
+        background-color: transparent !important;
+    }
+
+    .vc-doc-api-menuDropdown .vc-menu-dropdown {
         min-width: 200px;
+        z-index: 1000 !important;
     }
 
     .vc-doc-api-menuDropdown .dropdown vc-item {
@@ -96,14 +117,17 @@
         box-sizing: border-box;
         padding-right: 21px;
         padding-left: 25px;
-        padding-bottom: 50px;
+        margin-bottom: 300px;
         padding-top: 20px;
         height: calc(100% - 55px);
         min-width: 400px;
     }
 
     .vc-doc-api-t1 {
-        font-size: 2em;
+        font-size: 50px;
+        font-weight: bold;
+        margin-top: 65px !important;
+        margin-bottom: 35px !important;
     }
 
     .vc-doc-api-t2 {
@@ -178,7 +202,7 @@
         background-color: #333333;
         color: white;
         cursor: pointer;
-        padding: 15px;
+        padding: 10px;
         border-radius: 50%;
         -webkit-box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
         -moz-box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
@@ -186,9 +210,9 @@
     }
 
     .vc-doc-api-showGoToTop {
-        -webkit-animation: vc-doc-api-showGoToTopAnim 1.0s forwards;
+        -webkit-animation: vc-doc-api-showGoToTopAnim 0.7s forwards;
         /* for less modern browsers */
-        animation: vc-doc-api-showGoToTopAnim 1.0s forwards;
+        animation: vc-doc-api-showGoToTopAnim 0.7s forwards;
     }
 
     .vc-doc-api-hideGoToTop {
@@ -197,6 +221,16 @@
         animation: vc-doc-api-hideGoToTopAnim 0.5s forwards;
     }
 
+    vc-doc-api .vc-searchbar-searchButton {
+        margin-left: 0px !important;
+        padding: 0px !important;
+    }
+
+    vc-doc-api vc-searchbar .vc-bg2-boxshadow {
+        -webkit-box-shadow: 0 2px 8px -2px #000000;
+        -moz-box-shadow: 0 2px 8px -2px #000000;
+        box-shadow: 0 2px 8px -2px #000000;
+    }
 
     /* Safari 4.0 - 8.0 */
 
@@ -237,6 +271,13 @@
             bottom: -100px;
         }
     }
+
+
+    @media only screen and (max-width: 700px) {
+        #vc-doc-api-apiMenu {
+            padding-left: 50px;
+        }
+    }
 </style>
 
 <template>
@@ -244,16 +285,20 @@
         <vc-layout id="vc-doc-api-apiMenu">
 
             <vc-menu layout="horizontal" separators="false" background="true" direction="bottom-right">
-                <vc-item type="dropdown" name="Properties" class="vc-doc-api-menuDropdown">
+                <vc-item type="dropdown" name="Properties" class="vc-doc-api-menuDropdown" onclick="this.querySelector('vc-scroll').update()">
                     <vc-searchbar id="menuProperties" class="vc-doc-api-menuSearchBar">
-                        <input type="text" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));">
+                        <vc-text placeholder="Search" type="search" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));"></vc-text>
+                        <!-- <input type="text" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));"
+                            placeholder="Search"> -->
                     </vc-searchbar>
                     <div id="menuPropertiesContainer"></div>
                 </vc-item>
 
-                <vc-item type="dropdown" name="Functions" class="vc-doc-api-menuDropdown">
-                    <vc-searchbar id="menuFunctions" class="vc-doc-api-menuSearchBar">
-                        <input type="text" name="name" value="" onkeyup="document.querySelector('#menuFunctions').search(document.querySelector('#menuFunctions'));">
+                <vc-item type="dropdown" name="Functions" class="vc-doc-api-menuDropdown" onclick="this.querySelector('vc-scroll').update()">
+                    <vc-searchbar id="menuFunctions" class="vc-doc-api-menuSearchBar" thickness="8">
+                        <vc-text placeholder="Search" type="search" name="name" value="" onkeyup="document.querySelector('#menuFunctions').search(document.querySelector('#menuFunctions'));"></vc-text>
+                        <!-- <input type="text" name="name" value="" onkeyup="document.querySelector('#menuFunctions').search(document.querySelector('#menuFunctions'));"
+                            placeholder="Search"> -->
                     </vc-searchbar>
                     <div id="menuFunctionsContainer">
                     </div>
@@ -263,7 +308,7 @@
 
         </vc-layout>
         <div class="vc-doc-colorBand"></div>
-        <vc-scroll>
+        <vc-scroll thickness="8">
             <div id="vc-doc-api-content">
                 <div id="vc-doc-api-header">
                 </div>
@@ -368,17 +413,17 @@
 
                 this._misc.scroll.scrollTo(0);
                 this._misc.scroll.scrollTo(document.querySelector("#" + id).getBoundingClientRect()
-                    .top - 50);
+                    .top - 105, null, 0.2);
             },
             // @function goToFunction (public) [Scroll to id function position] @param id
             goToFunction(id) {
                 this._misc.scroll.scrollTo(0);
                 this._misc.scroll.scrollTo(document.querySelector("#" + id).getBoundingClientRect()
-                    .top - 105);
+                    .top - 105, null, 0.2);
             },
             // @function goToTop (public) [Scroll to top]
             goToTop() { // Scroll to top
-                this._misc.scroll.scrollTo(0);
+                this._misc.scroll.scrollTo(0, null, 0.05);
             }
         },
 
@@ -395,12 +440,13 @@
                 this._misc.goToTop = document.querySelector("#vc-doc-api-goToTop");
             },
             // @function hidePrivate (private) [Force to hide private data]
-            hidePrivate: function(){
+            hidePrivate: function () {
                 var privateElements = document.querySelectorAll(".private");
                 privateElements.forEach(function (privateElement) {
                     privateElement.classList.add("vc-doc-api-hidePrivate");
-                });                
-                document.querySelector("#vc-doc-api-togglePrivate").querySelector("i").textContent = "visibility";
+                });
+                document.querySelector("#vc-doc-api-togglePrivate").querySelector("i").textContent =
+                    "visibility";
             },
             // @function createDiv (private) {html object} @param options
             createDiv: function (options) {
@@ -438,6 +484,8 @@
             // @function cleanData (private) [Clean data before setting up]
             cleanData: function () {
                 var el = this;
+                document.querySelector("#publicFuncSummTable").classList.add("vc-doc-api-noExist");
+                document.querySelector("#privateFuncSummTable").classList.add("vc-doc-api-noExist");
                 document.querySelector("#publicFunctionDetails").innerHTML = "";
                 document.querySelector("#privateFunctionDetails").innerHTML = "";
                 document.querySelector("#vc-doc-api-header").innerHTML = "";
@@ -446,8 +494,9 @@
                 document.querySelector("#noPublicProp").classList.add("vc-doc-api-noExist");
                 document.querySelector("#noPrivateProp").classList.add("vc-doc-api-noExist");
                 document.querySelector("#publicPropTable").classList.add("vc-doc-api-noExist");
-                document.querySelector("#privatePropTable").classList.add("vc-doc-api-noExist");    
-                el._hidePrivate();            
+                document.querySelector("#privatePropTable").classList.add("vc-doc-api-noExist");
+                el._hidePrivate();
+                el._misc.scroll.scrollTo(0);
             },
             // @function setupData (private) [Set up document] @param data @param config
             setupData: function (data, config) {
@@ -455,6 +504,7 @@
 
                 el._cleanData();
 
+                el._misc.parsedCount = 3; // Counter to know when all api parts are appended
                 //// Internal functions
                 var PRIVATE = "private";
                 var __hasPublicProperties = null;
@@ -590,7 +640,7 @@
                                     value: method.name,
                                     onclick: "this.parentNode.parentNode.parentNode.parentcomponent.goToFunction('funcpub" +
                                         method.name + "');",
-                                    color: "blue"
+                                    color: "#5264c3"
                                 });
                                 if (method.return) {
                                     currentPublicFSummary.data.push({
@@ -658,7 +708,6 @@
                     if (hasPublicFunctions()) {
                         data.methods.forEach(function (method) {
                             if (!method.scope || method.scope != PRIVATE) {
-                                // publicFunctionsDiv.innerHTML += printFunction(method);
                                 publicFunctionsDiv.appendChild(printFunction(method));
                             }
                         });
@@ -671,7 +720,6 @@
                     if (hasPrivateFunctions()) {
                         data.methods.forEach(function (method) {
                             if (method.scope && method.scope === PRIVATE) {
-                                // privateFunctionsDiv.innerHTML += printFunction(method, true);
                                 privateFunctionsDiv.appendChild(printFunction(method, true));
                             }
                         });
@@ -700,24 +748,24 @@
                         id: methodId
                     });
                     var sName = document.createElement("span");
-                    sName.innerHTML = method.name + "(";
+                    sName.innerText = method.name + "(";
                     fName.appendChild(sName);
                     if (method.params.length > 0) {
                         for (var methodParamI = 0; methodParamI < method.params.length; methodParamI++) {
                             var currentParam = document.createElement("span");
                             currentParam.classList.add("vc-doc-api-textColorName");
-                            currentParam.innerHTML = method.params[methodParamI].name;
+                            currentParam.innerText = method.params[methodParamI].name;
                             if (method.params[methodParamI].optional) {
-                                currentParam.innerHTML += '*';
+                                currentParam.innerText += '*';
                             }
                             if (methodParamI < (method.params.length - 1)) {
-                                currentParam.innerHTML += ', ';
+                                currentParam.innerText += ', ';
                             }
                             fName.appendChild(currentParam);
                         }
                     }
                     var sClose = document.createElement("span");
-                    sClose.innerHTML = ")";
+                    sClose.innerText = ")";
                     fName.appendChild(sClose);
                     result.appendChild(fName);
                     if (method.description) {
@@ -735,7 +783,7 @@
                             var row = document.createElement("vc-row");
                             param.forEach(function (paramCell) {
                                 var cell = document.createElement("vc-cell");
-                                cell.innerHTML = paramCell;
+                                cell.innerText = paramCell;
                                 row.appendChild(cell);
                             });
                             table.appendChild(row);
@@ -743,28 +791,42 @@
                         result.appendChild(table);
                     }
                     if (method.return) {
+                        el._misc.parsedCount++; // TODO wait for each function return slows down api loading. It could be load after shown if boost needed
                         var table = document.createElement("vc-doc-table");
+                        table.ondrawn(function () {                            
+                            setTimeout(function () {
+                                if (document.querySelector('vc-doc-api')) {
+                                    document.querySelector('vc-doc-api')._onDrawn();
+                                }
+                            }, 0);
+                        });
                         table.columntitle = "Return, Description";
                         table.columnwidth = "200px ,calc(100% - 200px)";
                         var methodReturn = getReturn(method);
                         var row = document.createElement("vc-row");
                         methodReturn.forEach(function (paramReturn) {
                             var cell = document.createElement("vc-cell");
-                            cell.innerHTML = paramReturn;
+                            cell.innerText = paramReturn;
                             row.appendChild(cell);
                         });
                         table.appendChild(row);
                         result.appendChild(table);
                     } else {
                         if (config.__voidControl) {
+                            el._misc.parsedCount++;// TODO wait for each function return slows down api loading. It could be load after shown if boost needed
                             var table = document.createElement("vc-doc-table");
+                            table.ondrawn(function () {
+                                setTimeout(function () {
+                                    document.querySelector('vc-doc-api')._onDrawn();
+                                }, 0);
+                            });
                             table.columntitle = "Return, Description";
                             table.columnwidth = "200px ,calc(100% - 200px)";
                             var methodReturn = getReturn(method, true);
                             var row = document.createElement("vc-row");
                             methodReturn.forEach(function (paramReturn) {
                                 var cell = document.createElement("vc-cell");
-                                cell.innerHTML = paramReturn;
+                                cell.innerText = paramReturn;
                                 row.appendChild(cell);
                             });
                             table.appendChild(row);
@@ -772,7 +834,13 @@
                         }
                     }
                     if (method.exceptions.length > 0) {
+                        el._misc.parsedCount++;// TODO wait for each function exception slows down api loading. It could be load after shown if boost needed
                         var table = document.createElement("vc-doc-table");
+                        table.ondrawn(function () {
+                            setTimeout(function () {
+                                document.querySelector('vc-doc-api')._onDrawn();
+                            }, 0);
+                        });
                         table.columntitle = "Exception, Description";
                         table.columnwidth = "200px ,calc(100% - 200px)";
                         var excepts = getExceptions(method);
@@ -780,7 +848,7 @@
                             var row = document.createElement("vc-row");
                             except.forEach(function (exceptCell) {
                                 var cell = document.createElement("vc-cell");
-                                cell.innerHTML = exceptCell;
+                                cell.innerText = exceptCell;
                                 row.appendChild(cell);
                             });
                             table.appendChild(row);
@@ -863,20 +931,25 @@
                 var header = document.createDocumentFragment();
                 var fileName = document.createElement("div");
                 fileName.classList.add("vc-doc-api-t1");
-                fileName.innerHTML = this.data.fileName;
+                fileName.innerText = this.data.fileName;
                 header.appendChild(fileName);
                 var headerText = document.createElement("p");
                 this.data.header.forEach(function (cHeader) {
-                    headerText.innerHTML += cHeader + "<br>";
+                    headerText.innerText += cHeader + "<br>";
                 });
                 header.appendChild(headerText);
                 document.querySelector("#vc-doc-api-header").appendChild(header);
+
+                setTimeout(function () {
+                    document.querySelector('vc-doc-api')._onDrawn();
+                }, 0);
+
 
 
                 // Set public properties
                 if (hasPublicProperties()) {
                     var publicPropertyTable = document.querySelector("#publicPropTable");
-                    publicPropertyTable._cleanTable();
+                    publicPropertyTable.cleanTable();
                     publicPropertyTable.classList.remove("vc-doc-api-noExist");
                     var publicProperties = getPublicProperties();
                     publicProperties.forEach(function (pp) {
@@ -888,7 +961,7 @@
                 // Set private properties
                 if (hasPrivateProperties()) {
                     var privatePropertyTable = document.querySelector("#privatePropTable");
-                    privatePropertyTable._cleanTable();
+                    privatePropertyTable.cleanTable();
                     privatePropertyTable.classList.remove("vc-doc-api-noExist");
                     var privateProperties = getPrivateProperties();
                     privateProperties.forEach(function (pp) {
@@ -903,7 +976,7 @@
                 if (hasPublicFunctions()) {
                     var publicFunctionTable = document.querySelector("#publicFuncSummTable");
                     publicFunctionTable.parentcomponent = el;
-                    publicFunctionTable._cleanTable();
+                    publicFunctionTable.cleanTable();
                     publicFunctionTable.classList.remove("vc-doc-api-noExist");
                     var publicFunctions = getPublicFunctionsSummary();
                     publicFunctions.forEach(function (pp) {
@@ -917,7 +990,7 @@
                 if (hasPrivateFunctions()) {
                     var privateFunctionTable = document.querySelector("#privateFuncSummTable");
                     privateFunctionTable.parentcomponent = el;
-                    privateFunctionTable._cleanTable();
+                    privateFunctionTable.cleanTable();
                     privateFunctionTable.classList.remove("vc-doc-api-noExist");
                     var privateFunctions = getPrivateFunctionsSummary();
                     privateFunctions.forEach(function (pp) {
@@ -929,6 +1002,9 @@
 
                 // Set properties menu
                 var propertiesMenuContainer = document.querySelector("#menuPropertiesContainer");
+                var propertiesMenuScroll = document.createElement("vc-scroll");
+                propertiesMenuScroll.thickness = 8;
+                var hasMenuPublicProp = false;
                 data.properties.forEach(function (prop) {
                     var propItem = document.createElement("vc-item");
                     propItem.classList.add("vc-doc-api-menuSearchItem");
@@ -941,14 +1017,30 @@
                         propItem.setAttribute("onclick",
                             'document.querySelector("vc-doc-api").goTo(this, "proppub' + prop.name +
                             '");');
+                        hasMenuPublicProp = true;
                     }
                     propItem.setAttribute("name", prop.name);
                     propItem.setAttribute("value", prop.name);
-                    propItem.innerHTML = prop.name;
-                    propertiesMenuContainer.appendChild(propItem);
+                    propItem.innerText = prop.name;
+                    propertiesMenuScroll.appendChild(propItem);
                 });
+                if (!hasMenuPublicProp) {
+                    var propItem = document.createElement("vc-item");
+                    propItem.setAttribute("name", "None");
+                    propItem.setAttribute("value", "None");
+                    propItem.innerText = "None";
+                    propItem.classList.add("vc-doc-api-menuSearchItem");
+                    propertiesMenuScroll.appendChild(propItem);
+                }
+                propertiesMenuContainer.appendChild(propertiesMenuScroll);
+
+                setTimeout(function () {
+                    document.querySelector('vc-doc-api')._onDrawn();
+                }, 0);
                 // Set functions menu
                 var functionsMenuContainer = document.querySelector("#menuFunctionsContainer");
+                var functionsMenuScroll = document.createElement("vc-scroll");
+                functionsMenuScroll.thickness = 8;
                 data.methods.forEach(function (method) {
                     var funcItem = document.createElement("vc-item");
                     funcItem.classList.add("vc-doc-api-menuSearchItem");
@@ -966,21 +1058,39 @@
                     }
                     funcItem.setAttribute("name", method.name);
                     funcItem.setAttribute("value", method.name);
-                    funcItem.innerHTML = method.name;
-                    functionsMenuContainer.appendChild(funcItem);
+                    funcItem.innerText = method.name;
+                    functionsMenuScroll.appendChild(funcItem);
                 });
+                functionsMenuContainer.appendChild(functionsMenuScroll);
+                setTimeout(function () {
+                    document.querySelector('vc-doc-api')._onDrawn();
+                }, 0);
+
 
                 // Print function details
                 printPublicFuntions();
                 printPrivateFuntions();
 
+            },
+            // @function onDrawn (private) [Called when api is parsed and shown on screen]
+            onDrawn: function () {
+                var el = this;
+                el._misc.parsedCount--;
+                if (el._misc.parsedCount <= 0) {
+                    vcomet.triggerCallback("ondrawn", el, el, [el]);
+                    var scrolls = document.querySelector("vc-doc-api").querySelectorAll("vc-scroll");
+                    scrolls.forEach(function (scr) {
+                        scr.update();
+                    });
+                }
             }
         },
 
         onWindowResize: function (event) {},
 
-        onRender: function () {
 
+        onCreated: function () {
+            vcomet.createCallback("ondrawn", this);
         },
 
         onBubbleRender: function () {
@@ -990,26 +1100,31 @@
             // Initialize menu search bars
             document.querySelector("#menuProperties").onSearch(function (filters) {
                 var name = filters.name;
-                var toFilterChilds = document.querySelector("#menuPropertiesContainer").children;
+                var toFilterChilds = document.querySelector("#menuPropertiesContainer").querySelector(
+                    ".vc-scroll-content").children;
 
                 for (var i = 0; i < toFilterChilds.length; i++) {
-                    if (toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
+                    if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem") &&
+                        toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem") &&
+                        toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
                         -1) {
                         toFilterChilds[i].classList.remove("vc-doc-api-searchHide");
-                    } else {
+                    } else if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem")) {
                         toFilterChilds[i].classList.add("vc-doc-api-searchHide");
                     }
                 }
             });
             document.querySelector("#menuFunctions").onSearch(function (filters) {
                 var name = filters.name;
-                var toFilterChilds = document.querySelector("#menuFunctionsContainer").children;
+                var toFilterChilds = document.querySelector("#menuFunctionsContainer").querySelector(
+                    ".vc-scroll-content").children;
 
                 for (var i = 0; i < toFilterChilds.length; i++) {
-                    if (toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
+                    if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem") &&
+                        toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
                         -1) {
                         toFilterChilds[i].classList.remove("vc-doc-api-searchHide");
-                    } else {
+                    } else if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem")) {
                         toFilterChilds[i].classList.add("vc-doc-api-searchHide");
                     }
                 }

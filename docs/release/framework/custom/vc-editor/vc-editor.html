@@ -69,8 +69,8 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <vc-loading></vc-loading>
     <!-- <div id="vc-editor-mobile-scroll-trigger" onclick="this.parentNode.scrollTrigger();"></div> -->
-    <!-- <div id="vc-editor-mobile-scroll-trigger"></div> -->
     <vc-scroll>
+        <!-- <div id="vc-editor-mobile-scroll-trigger" style="height:900px;"></div> -->
         <div id="vc-editor-content" class="vc-editor-until-render"></div>
     </vc-scroll>
 </template>
@@ -117,12 +117,12 @@
             },
             scrollTrigger: function (e) {
                 var el = this;
-                console.log("scrolltrigger",e);
-                
+                console.log("scrolltrigger", e);
+
                 var event = new CustomEvent("click");
                 event.clientX = e.clientX;
                 event.clientY = e.clientY;
-                
+
                 // el.parentNode._refs.editor.domElement.dispatchEvent(event);
                 el.parentNode.querySelector("#vc-editor-content").dispatchEvent(event);
 
@@ -151,20 +151,12 @@
                         value: el.value,
                         language: el.language,
                         theme: 'vs-dark',
-                        scrollbar: {
-                            // Subtle shadows to the left & top. Defaults to true.
-                            useShadows: false,
-                            vertical: 'auto',
-                            horizontal: 'visible',
-                            handleMouseWheel: false
-                        },
                         automaticLayout: true, // TODO "checks every 100ms if its container has changed its size" Optimizate via editor.layout({ width: ..., height: ... })
                         readOnly: readonly,
                         scrollBeyondLastLine: false, // Remove scrollbar when it is not needed
                         minimap: {
                             enabled: false
-                        },
-                        mouseWheelScrollSensitivity: 0
+                        }
                     });
 
                     // Ugly solution to know when monaco is ready because there is not an onReady function implemented yet
@@ -190,10 +182,22 @@
                 vcomet.triggerCallback("oneditorready", el, el, [el]);
                 el._setHeight();
                 el._setWidth();
-                el._widthListener();
+                el._resizeListener();
             },
-            // @function setHeight (private) [Adjust editor height based on its content] @param min [Minimum height] @param max [Maximum height]
-            setHeight: function (min, max) {
+            //@function resize (private) [Set editor size]
+            resize: function () {
+                var el = this;
+                var contentHeight = el._getHeight();
+                var contentWidth = el._getWidth();
+                el._refs.editor.layout({
+                    width: contentWidth,
+                    height: contentHeight
+                });                
+                el.querySelector("#vc-editor-content").style.height = contentHeight + "px";
+                el.querySelector("#vc-editor-content").style.width = contentWidth + "px";
+            },
+            // @function getHeight (private) [Return editor height based on its content] @param min [Minimum height] @param max [Maximum height]
+            getHeight: function(min,max){
                 var el = this;
                 min = min || el.minheight;
                 var contentHeight;
@@ -207,14 +211,19 @@
                     contentHeight = el._misc.scrollHeight;
                 }
                 contentHeight = contentHeight <= min ? min : contentHeight;
-                // max = max || el.maxheight || 9999999;
-                // contentHeight = contentHeight <= min ? min : contentHeight >= max ? max : contentHeight;
+                return contentHeight;
+            },
+            // @function setHeight (private) [Adjust editor height based on its content] @param min [Minimum height] @param max [Maximum height]
+            setHeight: function (min, max) {
+                var el = this;                
+                var contentHeight = el._getHeight();
 
                 el.querySelector("#vc-editor-content").style.height = contentHeight + "px";
+                // el._refs.editor.layout({ width: 100, height: contentHeight });
                 el.querySelector("vc-scroll").update();
             },
-            // @function setWidth (private)
-            setWidth: function () {
+            //@function getWidth (private)
+            getWidth:function(){
                 var el = this;
                 var monacoLinesNumberWidth = el._refs.editor.domElement.querySelector(".margin").offsetWidth;
                 el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
@@ -223,18 +232,26 @@
                 //    var contentWidth = el._refs.editor.getScrollWidth();    // TODO not working
 
                 var contentWidth = el._refs.monacoLinesWidth + monacoLinesNumberWidth;
+                return contentWidth;
+            },
+            // @function setWidth (private)
+            setWidth: function () {
+                var el = this;
+                var contentWidth = el._getWidth();
 
                 el.querySelector("#vc-editor-content").style.width = contentWidth + "px";
                 el.querySelector("vc-scroll").update();
             },
-            // @function widthListener (private) [Monaco editor getScrollWidth is not working, so this function keep listening if width change and if so, resize the element]
-            widthListener: function () {
+            // @function resizeListener (private) [Monaco editor getScrollWidth is not working, so this function keep listening if width change and if so, resize the element]
+            resizeListener: function () {
                 var el = this;
+                
                 el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
                     ".view-lines");
-                vcomet.addResizeListener(el._refs.monacoLines, "NAME", function () {
+                vcomet.addResizeListener(el._refs.monacoLines, "NAME", function () {                    
                     if (el._refs.monacoLines.offsetWidth > el._refs.monacoLinesWidth) {
-                        el._setWidth();
+                        el._setWidth();                        
+                        // el._resize();
                     }
                 });
             },
