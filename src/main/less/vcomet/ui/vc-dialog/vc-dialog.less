@@ -1,71 +1,21 @@
 @element: vc-dialog;
 
-@{element}[theme="noire"].@{element}-hostMinim {
-  position: relative;
-  top: 0 !important;
-  left: 0 !important;
-}
-.@{element}-minBar {
-  position: fixed;
-  z-index: 3000;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  float: left;
-  flex-direction: row-reverse;
-
-  flex-wrap: wrap-reverse;
-}
-.@{element}-hideMinBar {
-  display: none;
-}
-
-.@{element}-minBar .@{element}-max {
-  display: none;
-}
-
-.@{element}-modal {
-  position: absolute;
-  z-index: 1000;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-
 @{element}[theme="noire"] {
-  & {
-    font-family: arial;
-    position: absolute;
-    display: flex !important;
-    outline: none;
-
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    transition: opacity .2s;
-  }
-
-  .@{element}-dialog > vc-scroll {
-    flex-grow: 1;
-  }
-
+}
   .@{element}-dialog {
     display: none;
     flex-direction: column;
-    pointer-events: all;
-  }
-  .@{element}-max {
-    position: fixed !important;
+    position: absolute;
     top: 0;
-    right: 0;
-    bottom: 0;
     left: 0;
-    max-width: 100% !important;
-    max-height: 100% !important;
+    z-index: 1;
   }
 
-  .@{element}-heading {
+  .@{element}-visible {
+    display: flex;
+  }
+
+  .@{element}-dialog .@{element}-heading {
     font-weight: bold;
     display: flex;
     padding: 5px 5px 5px 10px;
@@ -75,96 +25,65 @@
     flex: none;
     justify-content: space-between;
   }
-  .@{element}-title {
+  .@{element}-dialog .@{element}-title {
     flex-grow: 1;
     cursor: default;
   }
-  .@{element}-close {
+  .@{element}-dialog .@{element}-close,  
+  .@{element}-dialog .@{element}-minimize, 
+  .@{element}-dialog .@{element}-maximize{
     cursor: pointer;
     width: 24px;
     padding-left: 5px;
 
   }
-  .@{element}-fullscreen {
-    justify-content: flex-end;
+  .@{element}-dialog > vc-scroll {
+    flex-grow: 1;
   }
-  .@{element}-minim {
-    min-width: 250px;
-    min-height: auto !important;
-    margin-left: 5px;
-  }
-  .@{element}-minim .@{element}-heading {
-    padding-left: 5px;
-  }
-  .@{element}-minim .@{element}-content, .@{element}-minim .@{element}-footer {
-    display: none;
-  }
-  .@{element}-minim .@{element}-close, .@{element}-minim .@{element}-maximize, .@{element}-minim .@{element}-minimize {
-    padding-right: 0;
-  }
-  .@{element}-minim .@{element}-title {
-    padding-right: 5px;
-  }
-  .@{element}-maximize {
-    display: flex;
-    padding-left: 5px;
-    cursor: pointer;
-    width: 24px;
-  }
-  .@{element}-minimize {
-    display: flex;
-    padding-left: 5px;
-    cursor: pointer;
-    width: 24px;
-
-  }
-  
-  .@{element}-content {
-    display: flex;
-    overflow: auto;
-    flex-direction: column;
+  .@{element}-dialog .@{element}-content {
     box-sizing: border-box;
     padding: 20px 20px 20px 20px;
     word-wrap: break-all;
-    cursor: default;
-
-    flex-grow: 1;
-    justify-content: space-between;
   }
-  .@{element}-footer {
+
+  .@{element}-dialog .@{element}-footer {
     display: flex;
     min-height: 40px;
     padding: 5px 10px;
     flex-direction: row;
-    justify-content: center;
     align-items: center;
-    // min-height: 66px;
-    // flex-direction: column;
-    // justify-content: space-between;
-  }
-  .@{element}-buttonsFooter {
-    display: flex;
-    width: 100%;
-    justify-content: center;
   }
 
-  .@{element}-footer[location="right"] .@{element}-buttonsFooter {
+  .@{element}-dialog .@{element}-footer[location="right"] {
     justify-content: flex-end;
   }
 
-  .@{element}-footer[location="left"] .@{element}-buttonsFooter {
+  .@{element}-dialog .@{element}-footer[location="left"] {
     justify-content: flex-start;
   }
 
-  .@{element}-footer[location="separate"] .@{element}-buttonsFooter {
+  .@{element}-dialog .@{element}-footer[location="separate"] {
     justify-content: space-between;
   }
 
-  .@{element}-resizer .@{element}-resizerLine {
+  .@{element}-dialog .@{element}-footer[location="center"] {
+    justify-content: center;
+  }
+
+  .@{element}-overlay {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .@{element}-dialog .@{element}-sideResizer {
     position: absolute;
   }
 
-  .@{element}-resizer .@{element}-resizerTop {
+  .@{element}-dialog .@{element}-topResizer {
     top: 0;
     right: 0;
     left: 0;
@@ -172,7 +91,7 @@
     cursor: n-resize;
     border-top: 2px solid transparent;
   }
-  .@{element}-resizer .@{element}-resizerBottom {
+  .@{element}-dialog .@{element}-bottomResizer {
     right: 0;
     bottom: 0;
     left: 0;
@@ -180,7 +99,7 @@
     cursor: s-resize;
     border-bottom: 2px solid transparent;
   }
-  .@{element}-resizer .@{element}-resizerLeft {
+  .@{element}-dialog .@{element}-leftResizer {
     top: 0;
     bottom: 0;
     left: 0;
@@ -188,7 +107,7 @@
     cursor: w-resize;
     border-left: 2px solid transparent;
   }
-  .@{element}-resizer .@{element}-resizerRight {
+  .@{element}-dialog .@{element}-rightResizer {
     top: 0;
     right: 0;
     bottom: 0;
@@ -196,56 +115,56 @@
     cursor: e-resize;
     border-right: 2px solid transparent;
   }
-  .@{element}-resizer .@{element}-resizerCorner {
+  .@{element}-dialog .@{element}-cornerResizer {
     position: absolute;
     width: 6px;
     height: 6px;
     border: 2px solid transparent;
   }
-  .@{element}-resizer .@{element}-resizerTL {
+  .@{element}-dialog .@{element}-topLeftResizer {
     top: 0;
     left: 0;
     cursor: nw-resize;
   }
-  .@{element}-resizer .@{element}-resizerTR {
+  .@{element}-dialog .@{element}-topRightResizer {
     top: 0;
     right: 0;
     cursor: ne-resize;
   }
-  .@{element}-resizer .@{element}-resizerBL {
+  .@{element}-dialog .@{element}-bottomLeftResizer {
     bottom: 0;
     left: 0;
     cursor: sw-resize;
   }
-  .@{element}-resizer .@{element}-resizerBR {
+  .@{element}-dialog .@{element}-bottomRightResizer {
     right: 0;
     bottom: 0;
     cursor: se-resize;
+  }  
+
+  .@{element}-minBar {
+    position: fixed;
+    z-index: 1;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    float: left;
+    flex-direction: row-reverse;
+  
+    flex-wrap: wrap-reverse;
   }
 
-  @media (max-width: 800px) {
-    &[open="true"][responsive-ratio="false"] {
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100%;
-      height: 100%;
-    }
-
-    &[open="true"][responsive-ratio="false"] .@{element}-dialog {
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      width:  ~"calc(100% - 30px)" !important;
-      height:  ~"calc(100% - 30px)" !important;
-      max-width: inherit !important;
-      max-height: inherit !important;
-    }
-
-    &[open="true"][responsive-ratio="true"] .@{element}-dialog {
-      max-width: ~"calc(100% - 60px)" !important;
-    }
-
+  .@{element}-minimized {
+    position: relative;
+    margin-left: 5px; 
   }
-}
+
+  .@{element}-minimized .@{element}-content, .@{element}-minimized .@{element}-footer {
+    display: none;
+  }
+
+  .@{element}-dialog .@{element}-hidden {
+    display: none;
+  }
+
+

@@ -1,8 +1,7 @@
 <script type="text/javascript">
-  vcomet.element("vc-tree", null, {
-    themed: true,
+  vcomet.element("vc-tree", "vc-tree.css", {
     dependencies: [
-      "vc-treenode"
+      "../vc-treenode"
     ],
     properties: {
       /*
@@ -47,6 +46,14 @@
       selectedNode: {
         value: "",
         reflect: true
+      },
+      /*
+        @property {Object} drag
+        @description
+      */
+      drag: {
+        value: false,
+        reflect: true
       }
     },
     privateProperties: {
@@ -89,7 +96,7 @@
       reset: function () {
         var el = this;
         // Remove current tree nodes
-        el._clean();
+        el._clean(true);
         // Re build store
         el.buildStoreTree();
       },
@@ -100,41 +107,43 @@
       */
       refresh: function (filter) {
         var el = this;
-        var elm;
+        var parentNode;
+        var filterNodes = {};
         var fragment = document.createDocumentFragment();
 
         // Remove current tree nodes
         el._clean();
         if (el.store) {
+          // TODO - Store based refresh...
           el.buildStoreTree();
         } else {
 
-          // TODO improving refresh
-          // Loop through tree source elements paths 
-          el._misc.srcNodes.forEach(function (cNode) {
-            if (!filter || (filter.toLowerCase() && cNode.path.includes(filter))) {
-              fragment.appendChild(cNode);
+          // Append new refreshed tree nodes
+          el._misc.srcNodes.forEach(function (cNode) {      
+            parentNode = cNode._refs.parentNode;
+            if (filter && cNode.path.includes(filter)) {
+              // Append node to its tree node parent
+              if(!filterNodes[parentNode.path]) {
+                fragment.appendChild(cNode);
+              // Append node to the tree root
+              } else {
+                parentNode._refs.wrapper.appendChild(cNode);
+              }
+              filterNodes[cNode.path] = cNode;
+            } else if (!filter){
+              // Append node belonging to a tree node
+              if(parentNode.tagName.toLowerCase() == "vc-treenode") {
+                parentNode._refs.wrapper.appendChild(cNode);
+              // Append root node
+              } else{
+                fragment.appendChild(cNode);
+              }
             }
           });
-          el.appendChild(fragment);
+
+          el._refs.tree.appendChild(fragment);
+          el._sortNodes();
         }
-
-        //   // Loop through tree source elements paths
-        //   for (var key in el._misc.srcNodesPaths) {
-
-        //     //
-        //     if (!filter || (filter.toLowerCase() && key.toLowerCase().includes(filter))) {
-        //       // Create new tree nodes
-        //       elm = document.createElement("vc-treenode");
-        //       elm.path = key;
-        //       elm.type = el._misc.srcNodesPaths[key].type;
-        //       fragment.appendChild(elm);
-        //     }
-        //   }
-        //   el.appendChild(fragment);
-        // }
-
-
 
       },
       /*
@@ -347,16 +356,17 @@
         @function (private) _clean
         @description Remove tree nodes and their references
       */
-      clean: function () {
+      clean: function (cleanRefs) {
         var el = this;
-        var tree = el.querySelector(".vc-tree-tree");
-
+        var tree = el._refs.tree;
         // Remove current children
         while (tree.hasChildNodes()) {
           tree.removeChild(tree.lastChild);
         }
         // Reset tree nodes
-        el.nodes = {};
+        if(cleanRefs) {
+          el.nodes = {};
+        }
       },
       /*
         @function (private) _copyProperties
@@ -382,8 +392,7 @@
         var fragment = document.createDocumentFragment();
         var orderFragment = document.createDocumentFragment();
 
-        var sortArray = [],
-          elm;
+        var sortArray = [], elm;
 
         // Store object nodes into an array
         for (var i = 0; i < nodes.length; i++) {
@@ -427,12 +436,10 @@
       sortRecursively: function (node) {
 
         var el = this;
-
         var nodes = node._refs.wrapper.children;
         var alphaFragment = document.createDocumentFragment();
         var orderFragment = document.createDocumentFragment();
-        var sortArray = [],
-          elm, nodeRef;
+        var sortArray = [], elm, nodeRef;
 
         if (nodes[0]) {
 
@@ -538,7 +545,7 @@
       */
       moveLocal: function (dragNode, dropNode, callback, errCallback) {
         var el = this;
-
+       
         var parentNode = dragNode._refs.parentNode;
         // Check drop conditions
         if (dropNode.path.indexOf(dragNode.name + "/") == -1 &&
@@ -640,23 +647,6 @@
           }
         }
       },
-      //@function splitExtension (private) [When node is created from path, extension is removed from name and added to extension option] @param node @return {object}
-      splitExtension: function(node){
-        var extensionIndex = node.path.lastIndexOf(".");        
-        if(extensionIndex > 0){
-          var ext = node.path.substring(extensionIndex, node.path.length);
-          // TODO next situation is only contemplated for tree links where subfolders are appended after extension  
-          var extSub = ext.indexOf("/");
-          var subFolder = "";
-          if(extSub > 0){
-            subFolder = ext.substring(extSub, ext.length);
-            ext = ext.substring(0, extSub);
-          }
-          node.extension = ext;
-        //  node.name = node.path.substring(0, extensionIndex) + subFolder;   
-        }
-        return node;
-      }
     },
     onCreated: function () {
       var el = this;
@@ -688,9 +678,8 @@
       var srcNodes = el.getSourceElements();
       var scroll = document.createElement('vc-scroll');
 
-      // TODO improving refresh
+      // JESUS CHANGES improving refresh
       el._misc.srcNodes = [];
-
 
       el._misc.srcNodesPaths = {};
       el._refs.scroll = scroll;
@@ -700,18 +689,12 @@
         // Build nodes structure
         srcNode = srcNodes.shift();
         //
-        el._misc.srcNodesPaths[srcNode.getAttribute("path")] = {
-          type: srcNode.getAttribute("type")
-        };
+        el._misc.srcNodesPaths[srcNode.getAttribute("path")] = { type: srcNode.getAttribute("type") };
 
-        // TODO improving refresh
+        // JESUS CHANGES improving refresh
         el._misc.srcNodes.push(srcNode);
 
-
-
         if (srcNode.tagName.toLowerCase() !== "vc-scroll") {
-          // TODO improving extensions
-      //    srcNode = el._splitExtension(srcNode);
           tree.appendChild(srcNode)
         }
       }

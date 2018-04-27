@@ -2983,7 +2983,7 @@ vcomet.object.readFromPath = function(obj, path) {
 //  always: (default)     Call stored functions always when triggered.
 //  once:                Call stored functions once when triggered.
 //  ready:              Call stored functions when triggered and force future functions to run immediately.
-vcomet.createCallback = function(callback, obj, type) {
+vcomet.createCallback = function (callback, obj, type) {
   // Set callback type
   if (!obj["__" + callback + "__type"]) {
     // Set always as the default type when undefined
@@ -3003,7 +3003,8 @@ vcomet.createCallback = function(callback, obj, type) {
   // Add callback function to array
   if (!obj[callback]) {
     obj[callback] = function (fn, scope, args) {
-      // If ready and triggered immediately call the function else store it
+
+      // If ready and triggered inmediately call the function else store it
       if (
         obj["__" + callback + "__type"] === "ready" &&
         obj["__" + callback + "__triggered"] === true
@@ -3024,30 +3025,38 @@ vcomet.createCallback = function(callback, obj, type) {
   }
 };
 
-vcomet.triggerCallback = function(callback, obj, scope, args) {
-  
+vcomet.triggerCallback = function (callback, obj, scope, args) {
+
   // Check if callback exsists
   if (obj["__" + callback]) {
     // Check if callback functions need to be triggered
     if (obj["__" + callback + "__type"] === "always" || obj["__" + callback + "__triggered"] === false) {
-      
+
       obj["__" + callback + "__triggered"] = true;
-      
+
       var scopeUndefinedOrNull = typeof scope === "undefined" || scope == null;
       var argsUndefinedOrNull = typeof args === "undefined" || args == null;
-      
+      var callbackFunctions = obj["__" + callback];
+
+      // If the callback is of "ready" type we make a copy of the functions queue to trigger them and then clear the callback queue
+      if (obj["__" + callback + "__type"] == "ready") {
+        callbackFunctions = obj["__" + callback].slice(0);
+        obj["__" + callback] = [];
+      }
+
       // Trigger stored functions
-      var aux;
-      for (var i = 0; i < obj["__" + callback].length; i++) {
-        
+      for (var i = 0; i < callbackFunctions.length; i++) {
+
         if (scopeUndefinedOrNull) {
-          scope = obj["__" + callback][i].scope ? obj["__" + callback][i].scope : obj;
+          scope = callbackFunctions[i].scope ? callbackFunctions[i].scope : obj;
         }
-        
+
         if (argsUndefinedOrNull) {
-          args = obj["__" + callback][i].args ? obj["__" + callback][i].args : [];
+          args = callbackFunctions[i].args ? callbackFunctions[i].args : [];
         }
-        obj["__" + callback][i].fn.apply(scope, args);
+
+        callbackFunctions[i].fn.apply(scope, args);
+
       }
 
       // Store scope, args and tag as triggered
@@ -3058,7 +3067,7 @@ vcomet.triggerCallback = function(callback, obj, scope, args) {
   }
 };
 
-vcomet.removeCallback = function(callback, obj, fn) {
+vcomet.removeCallback = function (callback, obj, fn) {
   var callbacksArray = obj["__" + callback];
 
   for (var i = 0; i < callbacksArray.length; i++) {
@@ -3394,7 +3403,7 @@ vcomet.createCallback("onScriptsReady", vcomet, "ready");
 
 // Imports the requested custom element file, admits arrays and strings
 vcomet.import = function (param) {
-
+    
     if (param.constructor === Array) {
 
         for (var i = 0; i < param.length; i++) {
@@ -3410,9 +3419,9 @@ vcomet.import = function (param) {
 };
 
 vcomet.insertImport = function (href) {
-
-    var elementName;
     
+    var elementName;
+
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
 
@@ -3519,7 +3528,7 @@ vcomet.insertImport = function (href) {
                             
                             // Handles the dependencies and returns a boolean for whether there are pendings imports or not
                             var hasPendingImports = vcomet.handleDependencies();
-
+                            
                             // If there are no more dependencies to handle trigger onImportsReady
                             if (!hasPendingImports && !vcomet.imports.ready && vcomet.imports.count == vcomet.imports.total && vcomet.imports.total == Object.keys(vcomet.imports.config).length) {
                                 vcomet.imports.ready = true;
@@ -3579,41 +3588,57 @@ vcomet.handleTemplateInterpolation = function (name) {
 
 vcomet.handleStyleAppend = function () {
 
-    var combinedStyle = document.createElement("style");
-    combinedStyle.setAttribute("data-vcomet", "element-styles")
-    combinedStyle.innerHTML = vcomet.imports.style;
-    document.head.appendChild(combinedStyle);
+    if (vcomet.imports.style != "") {
+
+        var combinedStyle = document.createElement("style");
+
+        combinedStyle.setAttribute("data-vcomet", "element-styles")
+        combinedStyle.innerHTML = vcomet.imports.style;
+
+        // Resets style to avoid css rules style replication
+        vcomet.imports.style = "";
+
+        document.head.appendChild(combinedStyle);
+
+    }
 
 };
 
 vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
-
-    var elementNames = Object.keys(vcomet.imports.scripts);
-    var resume = elementIndex && scriptIndex ? true : false;
-    var elementScriptsKeys, elementScripts;
     
+    var elementNames = Object.keys(vcomet.imports.scripts);
+    var resume = Number.isInteger(elementIndex) && Number.isInteger(scriptIndex) ? true : false;
+    var elementScriptsKeys, elementScripts;
+
     // If it has to resume a previous scripts append we start from that index
     for (var i = resume ? elementIndex : 0; i < elementNames.length; i++) {
 
-        elementScriptsKeys = Object.keys(vcomet.imports.scripts[elementNames[i]]);
         elementScripts = vcomet.imports.scripts[elementNames[i]];
-        
+        elementScriptsKeys = Object.keys(elementScripts);
+
         // If it has to resume a previous scripts append we start from that index
         for (var j = (resume && i == elementIndex) ? scriptIndex : 0; j < elementScriptsKeys.length; j++) {
-            
+
             resume = false;
 
             if (elementScripts[elementScriptsKeys[j]].src) {
-                
+
                 // If the script has a src then we import it via require
                 vcomet.amd.require([elementScripts[elementScriptsKeys[j]].src], function () {
                     vcomet.handleScriptsAppend(i, j + 1);
                 });
-                
+
                 // Since we have to wait for the require to resumen our loops we break all the function execution
                 return;
 
             } else {
+
+                // Here we take the current script text and add our code to remove the script once its finished
+                elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML +
+                    "var elementNames = Object.keys(vcomet.imports.scripts);" +
+                    "var elementScripts = vcomet.imports.scripts[elementNames[" + i + "]];" +
+                    "var scriptKey = Object.keys(elementScripts)[" + j + "];" +
+                    "elementScripts[scriptKey].parentNode.removeChild(elementScripts[scriptKey]);";
 
                 document.head.appendChild(elementScripts[elementScriptsKeys[j]]);
 
@@ -3622,12 +3647,26 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
         }
 
     }
-    
+
+    // Since we are finished looping all the current element scripts we reset our scripts object to avoid looping through them again in case more elements are being imported after
+    vcomet.imports.scripts = {};
+
     var scriptsReadyScript = document.createElement("script");
-    
-    scriptsReadyScript.innerHTML = "vcomet.triggerCallback('onScriptsReady', vcomet);";
+
+    scriptsReadyScript.setAttribute("scriptsready-script", "");
+    scriptsReadyScript.innerHTML = "vcomet.triggerCallback('onScriptsReady', vcomet); vcomet.removeScriptsReadyScripts();";
+
     document.head.appendChild(scriptsReadyScript);
 
+};
+
+vcomet.removeScriptsReadyScripts = function () {  
+    var el = this;
+    var scriptReadyScripts = document.head.querySelectorAll("script[scriptsready-script]");
+
+    for (var i = 0; i < scriptReadyScripts.length; i++) {
+        scriptReadyScripts[i].parentNode.removeChild(scriptReadyScripts[i]);
+    }
 };
 
 vcomet.handleLinksAppend = function () {
@@ -3664,7 +3703,7 @@ vcomet.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = vcomet.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
-    
+
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
@@ -3672,7 +3711,8 @@ vcomet.handleConfigDependencies = function (name) {
             dependencyPath = elementConfig.dependencies[j];
             if (!(dependencyName in vcomet.imports.templates)) {
                 hasDependencies = true;
-                dependencyFile = vcomet.imports.paths[name] + dependencyPath + ".html";
+                dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
+                dependencyFile = vcomet.imports.paths[name] + dependencyPath;
                 vcomet.import(dependencyFile);
             }
         }
@@ -3805,7 +3845,7 @@ vcomet.registry.addToReadyQueue = function (el, fn) {
 vcomet.registry.triggerRenders = function () {
 
   if (Object.keys(vcomet.registry.elementStatus.attached).length == vcomet.registry.elementStatus.transformed.length) {
-
+    
     vcomet.registry.triggerRenderCallbacks();
     vcomet.registry.triggerBubbleRenderCallbacks();
     vcomet.registry.triggerReadyCallbacks();
@@ -3884,14 +3924,22 @@ vcomet.registry.updateElementStatus = function (el, status) {
     var uidFull = vcomet.registry.getUidFull(el);
 
     if (status == "attached") {
+
       vcomet.registry.elementStatus[status][uidFull] = el;
+
+      if (vcomet.registry.elementStatus.ready.length != Object.keys(vcomet.registry.elementStatus.attached).length) {
+        vcomet["__onReady__triggered"] = false;
+      }
+
     } else if (status != "detached") {
+
       vcomet.registry.elementStatus[status].push(el);
+      
     }
 
     if (status != "created" && status != "declared") {
       vcomet.registry.elementRegistry[uidFull][status] = true;
-    }  
+    }
 
   }
 
@@ -3941,11 +3989,11 @@ vcomet.registry.isReady = function (el) {
 
 // Trigger global onReady
 vcomet.onImportsReady(function () {
-  
+
   if (vcomet.registry.elementStatus.declared.length == 0) {
     vcomet.triggerCallback("onReady", vcomet);
   }
-  
+
 });
 
 vcomet.interpolation = vcomet.interpolation || {};
@@ -4268,28 +4316,31 @@ vcomet.constructClass = function (baseElement) {
 };
 
 vcomet.element = function (name, stylePath, config) {
-    
+
+    stylePath = stylePath ? stylePath : "";
+    config = config ? config : {};
+
     // If the user provided a style path then we create its link and append it
-    if (stylePath && stylePath != "") {
-        
+    if (stylePath != "") {
+
         var link = document.createElement("link");
-        
+
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", vcomet.imports.paths[name.toLowerCase()] + stylePath);
 
         document.head.appendChild(link);
 
     }
-    
-    if (config && config.constructor === Object) {
+
+    if (config.constructor === Object) {
 
         vcomet.imports.config[name.toLowerCase()] = config;
         vcomet.triggerCallback('onScriptsReady', vcomet);
 
     } else if (config) {
-        
+
         vcomet.amd.require([vcomet.imports.paths[name.toLowerCase()] + config], function (config) {
-            
+
             vcomet.imports.config[name.toLowerCase()] = config;
             vcomet.triggerCallback('onScriptsReady', vcomet);
 
@@ -4299,11 +4350,51 @@ vcomet.element = function (name, stylePath, config) {
 
 };
 
-vcomet.define = function (config) {    
+vcomet.define = function (config) {
     vcomet.amd.define(function () {
         return config;
     });
-}
+};
+
+vcomet.createElement = function (name, config) {
+
+    var el = document.createElement(name);
+
+    if (config) {
+
+        var callbacks = ["onCreated", "onInit", "onTransformed", "onRender", "onBubbleRender", "onReady"];
+
+        for (var i = 0; i < callbacks.length; i++) {
+            if (config[callbacks[i]]) {
+                el[callbacks[i]](config[callbacks[i]]);
+            }
+        }
+
+        if (config.functions) {
+
+            var functions = Object.keys(config.functions);
+
+            for (var j = 0; j < functions.length; j++) {
+                el[functions[j]] = config.functions[functions[j]];
+            }
+
+        }
+
+        if (config.properties) {
+
+            var properties = Object.keys(config.properties);
+
+            for (var k = 0; k < properties.length; k++) {
+                el[properties[k]] = config.properties[properties[k]];
+            }
+
+        }
+
+    }
+
+    return el;
+
+};
 
 vcomet.hideElement = function (el) {
     el.classList.add("vcomet-until-rendered");
@@ -4581,11 +4672,14 @@ vcomet.importPublic = function (el, config) {
 
     if (config.properties) {
         var keys = Object.keys(config.properties);
-
+        var attributeKey;
+        
         for (var i = 0; i < keys.length; i++) {
+            attributeKey = vcomet.util.camelToHyphenCase(keys[i]);
+            // If the element has one of the reflected attributes we send that value as the value of the property
             vcomet.handleProperty(el, config, el.__reflectProperties, el.__observeProperties, {
                 key: keys[i],
-                value: config.properties[keys[i]]
+                value: el.hasAttribute(attributeKey) ? el.getAttribute(attributeKey) : config.properties[keys[i]]
             });
         }
     }
@@ -4624,16 +4718,16 @@ vcomet.importPrivate = function (el, config) {
 };
 
 vcomet.importTemplateClasses = function (el) {
-    
+
     var template = vcomet.imports.templates[el.tagName.toLowerCase()];
-    
+
     if (template && template.classList.length != 0) {
 
         var elClassesArray = Array.prototype.slice.call(el.classList);
         var templateClassesArray = Array.prototype.slice.call(template.classList);
 
         elClassesArray = templateClassesArray.concat(elClassesArray);
-        
+
         el.setAttribute("class", elClassesArray.join(" "));
 
     }
@@ -5012,6 +5106,9 @@ vcomet.registerResizeListeners = function (el, config) {
     });
 
 };
+
+// Here we will register the main theme, the one declared by the user or our default one, its done here since this is the moment where this function exists
+vcomet.registerMainTheme(vcomet.theme);
 vcomet.declare = function (name, baseElement) {
 
     // Specifies HTML element interface
