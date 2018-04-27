@@ -2,8 +2,7 @@
 
 ## Introduction
 
-The drawer element is a container not meant to be visible the hole time, we could say that its content is intended to be complementary to the main one. It has multiple uses
-but the one that describes it better is as a expandable menu.
+The drawer element is a container not meant to be visible the whole time, we could say that its content is intended to be complementary to the main one. It has multiple uses but the one that describes it better is as an expandable menu.
 
 ## Declarative usage 
 
@@ -20,7 +19,7 @@ Declare drawer as any other HTML element:
 
 ``` [html]
 <vc-drawer>
-    <h1> My menu </h1>
+    <h1> My drawer </h1>
     <div> Item </div>
 </vc-drawer>
 ```
@@ -36,12 +35,12 @@ vcomet.ready(function () {
   // Create some content
   var title = document.createElement("h1");
   var item = document.createElement("div");
-  item.innerHTML = "Menu item 1";
+  item.innerHTML = "Drawer item 1";
   title.innerHTML = "My menu";
   myDrawer.appendChild(item);  
   myDrawer.appendChild(title);  
 
-  // Append wherever you need it
+  // Append it wherever you need it
   document.querySelector("body").appendChild(myDrawer);
 
 });
@@ -57,13 +56,6 @@ The displaying behaviour is completely customizable but the drawer has a smooth 
     <h1> My static menu </h1>
     <div> Item </div>
 </vc-drawer>
-```
-
-Result:
-
-``` [html]
-
-
 ```
 
 ### Multiple drawers
@@ -86,11 +78,4 @@ integrate only one drawer element at the same time if the situation requires it:
 </vc-drawer>
 ```
 
-Result:
-
-``` [html]
-
-
-```
-
-**Notice that right and bottom sides drawers, as a consequence of the HTML standard behaviour, force parent to scroll the content when they are hidden.**
+**Notice that right and bottom side drawers, as a consequence of the HTML standard behaviour, force parent to scroll the content when they are hidden.**

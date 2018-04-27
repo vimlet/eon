@@ -42,10 +42,6 @@
         element.__resizeTrigger = element;
         element.attachEvent("onresize", resizeListener);
       } else {
-        // Set relative position for resize trigger positioning
-        if (getComputedStyle(element).position == "static") {
-          element.style.position = "relative";
-        }
         // Create trigger object
         // ** Object tag also supports resize event and the remaining global events!
         var obj = (element.__resizeTrigger = document.createElement("object"));

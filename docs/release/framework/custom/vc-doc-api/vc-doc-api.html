@@ -226,6 +226,12 @@
         padding: 0px !important;
     }
 
+    vc-doc-api vc-searchbar .vc-bg2-boxshadow {
+        -webkit-box-shadow: 0 2px 8px -2px #000000;
+        -moz-box-shadow: 0 2px 8px -2px #000000;
+        box-shadow: 0 2px 8px -2px #000000;
+    }
+
     /* Safari 4.0 - 8.0 */
 
     @-webkit-keyframes vc-doc-api-showGoToTopAnim {
@@ -478,6 +484,8 @@
             // @function cleanData (private) [Clean data before setting up]
             cleanData: function () {
                 var el = this;
+                document.querySelector("#publicFuncSummTable").classList.add("vc-doc-api-noExist");
+                document.querySelector("#privateFuncSummTable").classList.add("vc-doc-api-noExist");
                 document.querySelector("#publicFunctionDetails").innerHTML = "";
                 document.querySelector("#privateFunctionDetails").innerHTML = "";
                 document.querySelector("#vc-doc-api-header").innerHTML = "";
@@ -740,24 +748,24 @@
                         id: methodId
                     });
                     var sName = document.createElement("span");
-                    sName.innerHTML = method.name + "(";
+                    sName.innerText = method.name + "(";
                     fName.appendChild(sName);
                     if (method.params.length > 0) {
                         for (var methodParamI = 0; methodParamI < method.params.length; methodParamI++) {
                             var currentParam = document.createElement("span");
                             currentParam.classList.add("vc-doc-api-textColorName");
-                            currentParam.innerHTML = method.params[methodParamI].name;
+                            currentParam.innerText = method.params[methodParamI].name;
                             if (method.params[methodParamI].optional) {
-                                currentParam.innerHTML += '*';
+                                currentParam.innerText += '*';
                             }
                             if (methodParamI < (method.params.length - 1)) {
-                                currentParam.innerHTML += ', ';
+                                currentParam.innerText += ', ';
                             }
                             fName.appendChild(currentParam);
                         }
                     }
                     var sClose = document.createElement("span");
-                    sClose.innerHTML = ")";
+                    sClose.innerText = ")";
                     fName.appendChild(sClose);
                     result.appendChild(fName);
                     if (method.description) {
@@ -775,7 +783,7 @@
                             var row = document.createElement("vc-row");
                             param.forEach(function (paramCell) {
                                 var cell = document.createElement("vc-cell");
-                                cell.innerHTML = paramCell;
+                                cell.innerText = paramCell;
                                 row.appendChild(cell);
                             });
                             table.appendChild(row);
@@ -783,9 +791,9 @@
                         result.appendChild(table);
                     }
                     if (method.return) {
-                        el._misc.parsedCount++;
+                        el._misc.parsedCount++; // TODO wait for each function return slows down api loading. It could be load after shown if boost needed
                         var table = document.createElement("vc-doc-table");
-                        table.ondrawn(function () {
+                        table.ondrawn(function () {                            
                             setTimeout(function () {
                                 if (document.querySelector('vc-doc-api')) {
                                     document.querySelector('vc-doc-api')._onDrawn();
@@ -798,14 +806,14 @@
                         var row = document.createElement("vc-row");
                         methodReturn.forEach(function (paramReturn) {
                             var cell = document.createElement("vc-cell");
-                            cell.innerHTML = paramReturn;
+                            cell.innerText = paramReturn;
                             row.appendChild(cell);
                         });
                         table.appendChild(row);
                         result.appendChild(table);
                     } else {
                         if (config.__voidControl) {
-                            el._misc.parsedCount++;
+                            el._misc.parsedCount++;// TODO wait for each function return slows down api loading. It could be load after shown if boost needed
                             var table = document.createElement("vc-doc-table");
                             table.ondrawn(function () {
                                 setTimeout(function () {
@@ -818,7 +826,7 @@
                             var row = document.createElement("vc-row");
                             methodReturn.forEach(function (paramReturn) {
                                 var cell = document.createElement("vc-cell");
-                                cell.innerHTML = paramReturn;
+                                cell.innerText = paramReturn;
                                 row.appendChild(cell);
                             });
                             table.appendChild(row);
@@ -826,7 +834,7 @@
                         }
                     }
                     if (method.exceptions.length > 0) {
-                        el._misc.parsedCount++;
+                        el._misc.parsedCount++;// TODO wait for each function exception slows down api loading. It could be load after shown if boost needed
                         var table = document.createElement("vc-doc-table");
                         table.ondrawn(function () {
                             setTimeout(function () {
@@ -840,7 +848,7 @@
                             var row = document.createElement("vc-row");
                             except.forEach(function (exceptCell) {
                                 var cell = document.createElement("vc-cell");
-                                cell.innerHTML = exceptCell;
+                                cell.innerText = exceptCell;
                                 row.appendChild(cell);
                             });
                             table.appendChild(row);
@@ -923,11 +931,11 @@
                 var header = document.createDocumentFragment();
                 var fileName = document.createElement("div");
                 fileName.classList.add("vc-doc-api-t1");
-                fileName.innerHTML = this.data.fileName;
+                fileName.innerText = this.data.fileName;
                 header.appendChild(fileName);
                 var headerText = document.createElement("p");
                 this.data.header.forEach(function (cHeader) {
-                    headerText.innerHTML += cHeader + "<br>";
+                    headerText.innerText += cHeader + "<br>";
                 });
                 header.appendChild(headerText);
                 document.querySelector("#vc-doc-api-header").appendChild(header);
@@ -941,7 +949,7 @@
                 // Set public properties
                 if (hasPublicProperties()) {
                     var publicPropertyTable = document.querySelector("#publicPropTable");
-                    publicPropertyTable._cleanTable();
+                    publicPropertyTable.cleanTable();
                     publicPropertyTable.classList.remove("vc-doc-api-noExist");
                     var publicProperties = getPublicProperties();
                     publicProperties.forEach(function (pp) {
@@ -953,7 +961,7 @@
                 // Set private properties
                 if (hasPrivateProperties()) {
                     var privatePropertyTable = document.querySelector("#privatePropTable");
-                    privatePropertyTable._cleanTable();
+                    privatePropertyTable.cleanTable();
                     privatePropertyTable.classList.remove("vc-doc-api-noExist");
                     var privateProperties = getPrivateProperties();
                     privateProperties.forEach(function (pp) {
@@ -968,7 +976,7 @@
                 if (hasPublicFunctions()) {
                     var publicFunctionTable = document.querySelector("#publicFuncSummTable");
                     publicFunctionTable.parentcomponent = el;
-                    publicFunctionTable._cleanTable();
+                    publicFunctionTable.cleanTable();
                     publicFunctionTable.classList.remove("vc-doc-api-noExist");
                     var publicFunctions = getPublicFunctionsSummary();
                     publicFunctions.forEach(function (pp) {
@@ -982,7 +990,7 @@
                 if (hasPrivateFunctions()) {
                     var privateFunctionTable = document.querySelector("#privateFuncSummTable");
                     privateFunctionTable.parentcomponent = el;
-                    privateFunctionTable._cleanTable();
+                    privateFunctionTable.cleanTable();
                     privateFunctionTable.classList.remove("vc-doc-api-noExist");
                     var privateFunctions = getPrivateFunctionsSummary();
                     privateFunctions.forEach(function (pp) {
@@ -1013,14 +1021,14 @@
                     }
                     propItem.setAttribute("name", prop.name);
                     propItem.setAttribute("value", prop.name);
-                    propItem.innerHTML = prop.name;
+                    propItem.innerText = prop.name;
                     propertiesMenuScroll.appendChild(propItem);
                 });
                 if (!hasMenuPublicProp) {
                     var propItem = document.createElement("vc-item");
                     propItem.setAttribute("name", "None");
                     propItem.setAttribute("value", "None");
-                    propItem.innerHTML = "None";
+                    propItem.innerText = "None";
                     propItem.classList.add("vc-doc-api-menuSearchItem");
                     propertiesMenuScroll.appendChild(propItem);
                 }
@@ -1050,7 +1058,7 @@
                     }
                     funcItem.setAttribute("name", method.name);
                     funcItem.setAttribute("value", method.name);
-                    funcItem.innerHTML = method.name;
+                    funcItem.innerText = method.name;
                     functionsMenuScroll.appendChild(funcItem);
                 });
                 functionsMenuContainer.appendChild(functionsMenuScroll);
