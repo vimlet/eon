@@ -1,5 +1,6 @@
 <script type="text/javascript">
-  vcomet.element("vc-gutter", "vc-gutter.css", {
+  vcomet.element("vc-gutter", "", {
+    themed: true,
     privateProperties:{
       /*
         @property {Number} (private) initOffset
@@ -148,26 +149,6 @@
         reflect: true
       }
     },
-    functions: {
-      /*  
-        @function (private) 
-        @description
-      */
-      resize: function() {
-        var el = this;
-        var oldGutterSize = parseFloat(el._gutterSize);
-        var newGutterSize = parseFloat(el[el._sizeProp]);
-        if(newGutterSize !== oldGutterSize){
-          // Store gutter new size
-          el._gutterSize = newGutterSize;
-          // Handle gutter resize collapsed and no collapsed behaviour
-          el._splitterResize(oldGutterSize, newGutterSize);
-          el._sectionResize(oldGutterSize, newGutterSize);
-          // Update splitter drag limits
-          el._updateDragLimits();
-        }
-      }
-    },
     privateFunctions: {
       /*
         @function (private) setUpGutter
@@ -181,7 +162,7 @@
           el._posProp = "top";
           el._sizeProp = "offsetHeight";
         }
-        // Check if it is a nested gutter
+        // Check if its a nested gutter
         // ** Solves Safari flex child fit parent bug
         if(el.parentNode.tagName == "VC-SECTION"){
           el.style.position = "absolute";
@@ -211,14 +192,12 @@
         var fragment = document.createDocumentFragment();
         var splitter = document.createElement("div");
         splitter.classList.add("vc-gutter-splitter");
-        splitter.classList.add("vc-bg8");
         fragment.appendChild(splitter);
         // Make second section the target of size changes
         var secSection = el.getSourceElements()[1];
         secSection.classList.add("vc-gutter-sectionSecond");
         // Position splitter centered
         el._splitterPosition = splitter.style[el._posProp] = (parseFloat(el._gutterSize / 2)) + "px";
-   
         // ** Set size as a style property for collapsable configuration purposes
         var prop = vcomet.util.firstToLowerCase(el._sizeProp.split("offset")[1]);
         el._resizeSectionSize = secSection.style[prop] = parseFloat(el._gutterSize / 2);
@@ -254,9 +233,19 @@
         // Throttle event triggering for better performance
         var throttled = false;
         var delay = 10;
-        vcomet.addResizeListener(el, "resize", function(){
+        vcomet.addResizeListener(el, "resize", function(element){
           if (!throttled) {
-            el.resize();
+            var oldGutterSize = parseFloat(el._gutterSize);
+            var newGutterSize = parseFloat(el[el._sizeProp]);
+            if(newGutterSize !== oldGutterSize){
+              // Store gutter new size
+              el._gutterSize = newGutterSize;
+              // Handle gutter resize collapsed and no collapsed behaviour
+              el._splitterResize(oldGutterSize, newGutterSize);
+              el._sectionResize(oldGutterSize, newGutterSize);
+              // Update splitter drag limits
+              el._updateDragLimits();
+            }
             // Throttle
             throttled = true;
             // Set a timeout to un-throttle
@@ -275,7 +264,6 @@
       splitterResize: function(oldGutterSize, newGutterSize) {
         var el = this;
         var splitter = el.splitter;
-        var newSplitterPosition;
         // Check whether or not the gutter is collapsed
         if(el._collapsed){
           el._moveSplitter(3);
@@ -285,12 +273,8 @@
         }else{
           // Get splitter percentage position value
           el._storeSplitterPercentage(el._splitterPosition, oldGutterSize);
-           // Get new splitter position value from percentage
-          if (!oldGutterSize) {
-            newSplitterPosition = el._splitterPosition = splitter.style[el._posProp] = (parseFloat(el._gutterSize / 2));
-          } else {
-            newSplitterPosition = (newGutterSize * parseInt(el._splitterPosition)) / 100;
-          }
+          // Get new splitter position value from percentage
+          var newSplitterPosition = (newGutterSize * el._splitterPosition) / 100;
           // Position splitter according to the new gutter size
           splitter.style[el._posProp] = newSplitterPosition + "px";
         }
@@ -309,14 +293,8 @@
           var newSectionValue = (newGutterSize * parseFloat(el._sectionBeforeCollapse)) / oldGutterSize;
           el._sectionBeforeCollapse = newSectionValue;
         }else{
-
           // Resize sections
-          if (!oldGutterSize) {
-            newSectionValue = el.section[el._sizeProp];
-          } else {
-            newSectionValue = (newGutterSize * parseFloat(el._resizeSectionSize)) / oldGutterSize;
-          }
-
+          var newSectionValue = (newGutterSize * parseFloat(el._resizeSectionSize)) / oldGutterSize;
           el._setSectionSize(newSectionValue);
         }
       },
@@ -326,7 +304,7 @@
       */
       drag: function() {
         var el = this;
-        if(vcomet.util.isTrue(el.allowDrag)){
+        if(el.allowDrag){
           // Get gutter elements
           var splitter = el.splitter;
           // Draggable variables
@@ -451,7 +429,6 @@
       moveSplitter: function(value){
         var el = this;
         el._splitterPosition = el.splitter.style[el._posProp] = value + "px";
-      
       },
       /*
         @function (private) setSectionSize
@@ -508,15 +485,11 @@
           // Create separator clickable div
           var clickable = document.createElement("div");
           clickable.setAttribute("class", "vc-gutter-splitterClickable");
-          clickable.classList.add("vc-bg3");
-          clickable.classList.add("vc-fg5");
-          clickable.classList.add("vc-bg3-hoverable");
-          clickable.classList.add("vc-fg3-hoverable");
           clickable.setAttribute("touch-action", "none");
           // TODO - Mobile miss click> create transaprent bigger child as clicable node
           // Create icon
           var icon = document.createElement("i");
-          icon.setAttribute("class", "vc-unselectable material-icons vc-gutter-splitterCollapseIcon");
+          icon.setAttribute("class", "unselectable material-icons vc-gutter-splitterCollapseIcon");
           // Fix IE bad icon positioning on horizontal gutter
           if(vcomet.util.getBrowser() === "IE" && el.type === "horizontal"){
              icon.style.position = "relative";
@@ -657,7 +630,6 @@
             el._splitterBeforeCollapse = (pos * 50) / midPos;
           }else{
             el._splitterPosition = (pos * 50) / midPos;
-            el._splitterPosition = !el._splitterPosition ? 0: el._splitterPosition;
           }
         }
       },

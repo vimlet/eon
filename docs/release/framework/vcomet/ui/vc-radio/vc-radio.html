@@ -1,6 +1,6 @@
 <template>
-  <input class="vc-radiogroup-radio vc-unselectable" type="radio">
-  <label class="vc-radiogroup-radioLabel vc-unselectable" onclick="">
+  <input class="vc-radiogroup-radio unselectable" type="radio">
+  <label class="vc-radiogroup-radioLabel unselectable" onclick="">
     <div class="vc-radiogroup-labelText"></div>
   </label>
 </template>
@@ -26,12 +26,12 @@
         reflect: true
       },
       /*
-        @property {Boolean} disabled 
+        @property {Boolean} disable 
         @description Radio desactivation
         Values can be: true or false
         Default: false
       */
-      disabled: {
+      disable: {
         value: false,
         reflect: true
       },
@@ -79,24 +79,24 @@
 
     privateFunctions: {
       /*
-        @function (private) _updateDisabled
-        @description Update disabled status
+        @function (private) _updateDisable
+        @description Update disable status
         @param {String} newVal [new value of disabled]
       */
-      updateDisabled: function (newVal) {
+      updateDisable: function (newVal) {
 
-        // Radio disabled
+        // Radio disable
         if (!vcomet.util.isTrue(newVal)) {
 
           this._radioNode.disabled = false;
-          this._radioNode.classList.remove("vc-radiogroup-disabledRadio");
-          this._radioNode.classList.remove("vc-radiogroup-checkedDisabledRadio");
+          this._radioNode.classList.remove("vc-radiogroup-disableRadio");
+          this._radioNode.classList.remove("vc-radiogroup-checkedDisableRadio");
 
-          // Radio NOT disabled
+          // Radio NOT disable
         } else {
 
           this._radioNode.disabled = true;
-          this._radioNode.classList.add("vc-radiogroup-disabledRadio");
+          this._radioNode.classList.add("vc-radiogroup-disableRadio");
 
         }
       },
@@ -169,7 +169,7 @@
       var inspan = document.createElement("span");
 
       span.classList.add("vc-radiogroup-outspan");
-      span.classList.add("vc-fg1-border");
+      span.classList.add("fg1-border");
       inspan.classList.add("vc-radiogroup-inspan");
       label.insertBefore(span, label.firstChild);
       span.appendChild(inspan);
@@ -177,24 +177,24 @@
       el._radioNode.setAttribute("value", el.value);
       el._radioNode.setAttribute("id", el.value);
       label.setAttribute("for", el.value);
-      el.classList.add("vc-unselectable");
+      el.classList.add("unselectable");
 
-      el._updateDisabled(el.disabled);
+      el._updateDisable(el.disable);
       el._setCheck(el.check);
       el.querySelector(".vc-radiogroup-labelText").innerHTML = el.label;
 
       // Checking a radio option
       el._radioNode.addEventListener("click", function (e) {
 
-        (!vcomet.util.isTrue(el.disabled) || el.disabled == null)? el._updateCheck() : null;
+        (!vcomet.util.isTrue(el.disable) || el.disable == null)? el._updateCheck() : null;
 
       }, false);
     },
 
     onPropertyChanged: function (attrName, oldVal, newVal) {
       switch (attrName) {
-        case ("disabled"):
-          this._updateDisabled(newVal);
+        case ("disable"):
+          this._updateDisable(newVal);
           break;
         case ("check"):
           this._setCheck(newVal);
