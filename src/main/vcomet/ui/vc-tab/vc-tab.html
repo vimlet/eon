@@ -1,6 +1,6 @@
 <template>
 
-  <div class="vc-tabs-closeButton">
+  <div class="vc-tabs-closeButton vc-tabs-hidden">
     <i class="iconsSize material-icons vc-fg5 vc-fg1-hoverable">close</i>
   </div>
   <span class="vc-tabs-title vc-fg5 vc-fg2-hoverable"></span>
@@ -114,11 +114,15 @@
           el._refs.host.select(el);
           el._refs.contentPanel.render();
         }, false);
-
-        // Creates the close button event
-        el.querySelector(".vc-tabs-closeButton").addEventListener('click', function (e) {
-          el._refs.host.closeTab(el, e)
-        }, false);
+        
+        if (vcomet.util.isTrue(el._refs.host.closable)) {
+          var closeButton = el.querySelector(".vc-tabs-closeButton");
+          closeButton.classList.remove("vc-tabs-hidden");
+          // Creates the close button event
+          closeButton.addEventListener('click', function (e) {
+            el._refs.host.closeTab(el, e)
+          }, false);
+        }
 
         // Check if we need to assign dragging related events
         if (vcomet.util.isTrue(el._refs.host.dragging)) {
@@ -160,7 +164,7 @@
 
         //Configuring content
         contentPanel.id = contentId;
-        contentPanel.classList.add("vc-tabs-content", "vc-fg3", "selectable", "hidden");
+        contentPanel.classList.add("vc-tabs-content", "vc-fg3", "selectable", "vc-tabs-hidden");
 
         // Appending source nodes to the content
         while (sourceNodes.length) {
