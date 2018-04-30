@@ -11,8 +11,8 @@ Swiper needs the collaboration of another vComet element to work correctly, the 
 ``` [html]
 <head>
   <script>
+    // Imports vc-swiper element and its dependencies (vc-slide)
     vComet.import("/vComet/ui/vc-swiper.html");
-    vComet.import("/vComet/ui/vc-slide.html");
   </script>
 <head>
 ```
@@ -68,7 +68,7 @@ vcomet.ready(function () {
 </vc-swiper>
 ```
 
-### Nested swiper elements
+### Nested swipers
 
 ``` [html]
 <vc-swiper external-slide="true">
