@@ -7,7 +7,7 @@
     privateProperties: {
       /*
         @property (private) {Object} _misc
-        @description Quick access to the swiper structure nodes references
+        @description Internal used data
       */
       misc: {
         value: {}
@@ -637,13 +637,16 @@
             thumbnail.style.touchAction = "none";
           }
         thumbnail.addEventListener("click", function(){
-          // Translate to slide position
-          if(el._misc.selectElement){
-            el.slideTo(slideIndex);
-          }else{
-            el._misc.selectElement = true;
-          }
-        });
+          // alert('thumb click');
+          // setTimeout(function() {
+            // Translate to slide position
+            if(el._misc.selectElement){
+              el.slideTo(slideIndex);
+            }else{
+              el._misc.selectElement = true;
+            }
+          // }, 500);
+        }, true);
       },
       /*
         @function (private) _setGalleryThumbnail
@@ -830,7 +833,9 @@
         var axis = el.direction == "horizontal" ? "clientX" : "clientY";
         if(!el.externalSlide || el.externalSlide === "false"){
           // Start slide on mouse down event
-          el.addEventListener("pointerdown", function(e){
+          el._refs.wrapper.addEventListener("pointerdown", function(e){
+            // Fix pointerup stacked bug
+            e.preventDefault();
             // Check slide policy
             mousedown = el._allowSlide(e.button, e.target);
             // Slide complete trigger interval
@@ -845,7 +850,7 @@
             }
           }, false);
           // Slide element on mouse move
-          el.addEventListener("pointermove", function(e){
+          el._refs.wrapper.addEventListener("pointermove", function(e){
             if(mousedown){
               if(slideCounter > 5) {
                 e.stopPropagation();

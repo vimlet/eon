@@ -6,13 +6,13 @@ The gutter element is a container with the ability to separate its content in tw
 
 ## Declarative usage 
 
-Gutter use vc-section elements to represent the content sections:
+Gutter use the vc-section element to represent its content sections:
 
 ``` [html]
 <head>
   <script>
+    // Imports vc-gutter element and its dependencies (vc-section)
     vComet.import("/vComet/ui/vc-gutter.html");
-    vComet.import("/vComet/ui/vc-section.html");
   </script>
 <head>
 ```
