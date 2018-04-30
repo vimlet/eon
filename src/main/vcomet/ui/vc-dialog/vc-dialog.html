@@ -186,7 +186,10 @@
         },
 
         privateFunctions: {
-
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
             createRefs: function () {
                 var el = this;
 
@@ -268,7 +271,7 @@
 
             /*
               @function (private) _addBlurEvent
-              @description 
+              @description Adds listener that give blur functionality to dialog
             */
             addBlurEvent: function () {
                 var el = this;
@@ -285,7 +288,7 @@
             },
             /*
             @function (private) _addDragListeners
-            @description Activate drag functionality
+            @description Adds drag listeners
             */
             addDragListeners: function () {
                 var el = this;
@@ -355,7 +358,7 @@
 
             /*
               @function (private) _addResizes
-              @description 
+              @description Adds resizes and their functionality.
             */
             addResizes: function () {
                 var el = this;
@@ -389,7 +392,9 @@
 
             /*
               @function (private) _addResizeListeners
-              @description 
+              @description Adds resize listeners
+              @param {String} type [Type of resizer, side or corner]
+              @param {String} resizerName 
             */
             addResizeListeners: function (type, resizerName) {
                 var el = this;
@@ -421,7 +426,9 @@
             },
             /*
               @function (private) _handleSideResize
-              @description 
+              @description Handle sides resize functionality
+              @param {String} resizerName [Resizer name]
+              @param {Object} e [Mouse event]
             */
             handleSideResize: function (resizerName, e) {
                 var el = this;
@@ -475,7 +482,9 @@
             },
             /*
               @function (private) _handleCornerResize
-              @description 
+              @description Handle corners resize functionality
+              @param {String} resizerName [Resizer name]
+              @param {Object} e [Mouse event]
             */
             handleCornerResize: function (resizerName, e) {
                 var el = this;
@@ -555,7 +564,8 @@
 
             /*
               @function (private) _getAdjustedWidth
-              @description 
+              @description Checks that the width of the dialog does not exceed its limit size.
+              @param {Number} width [Dialog width]
             */
             getAdjustedWidth: function (width) {
                 var el = this;
@@ -573,7 +583,8 @@
 
             /*
               @function (private) _getAdjustedHeight
-              @description 
+              @description Checks that the height of the dialog does not exceed its limit size.
+              @param {Number} height [Dialog height]
             */
             getAdjustedHeight: function (height) {
                 var el = this;
@@ -589,6 +600,10 @@
                 return height;
             },
 
+            /*
+              @function (private) _addMaximize
+              @description Adds maximize button and its functionality.
+            */
             addMaximize: function () {
                 var el = this;
 
@@ -606,6 +621,10 @@
 
             },
 
+            /*
+              @function (private) _addMinimize
+              @description Adds maximize button and its functionality.
+            */
             addMinimize: function () {
                 var el = this;
 
@@ -622,7 +641,10 @@
                 }
             },
 
-            // TODO:
+            /*
+              @function (private) _maximize
+              @description Maximize functionality
+            */
             maximize: function () {
                 var el = this;
 
@@ -650,6 +672,10 @@
                 document.body.appendChild(el._refs.dialog);
             },
 
+            /*
+              @function (private) _minimize
+              @description Maximize functionality
+            */
             minimize: function () {
                 var el = this;
                 var minimizedBar = document.querySelector(".vc-dialog-minBar");
@@ -686,6 +712,10 @@
 
             },
 
+            /*
+              @function (private) _restore
+              @description Returns a maximized or minimized dialog to its default position.
+            */
             restore: function () {
                 var el = this;
 
@@ -700,6 +730,10 @@
                 el._restorePreviousStatus();
             },
 
+            /*
+              @function (private) _savePreviousStatus
+              @description Saves the dialog size and position before maximize or minimize it.
+            */
             savePreviousStatus: function () {
                 var el = this;
 
@@ -710,6 +744,10 @@
 
             },
 
+            /*
+              @function (private) _restorePreviousStatus
+              @description Returns the dialog size and position after maximize or minimize it.
+            */
             restorePreviousStatus: function () {
                 var el = this;
 
@@ -729,7 +767,7 @@
 
             /*
               @function (private) _verifyScreenResolution
-              @description Control different versions of screens
+              @description Controls the different screens versions .
             */
             verifyScreenResolution: function () {
                 var el = this;
@@ -738,7 +776,7 @@
 
             /*
               @function (private) _assignSize
-              @description 
+              @description Establishes the maximum and minimum sizes of dialog.
             */
             assignSize: function () {
                 var el = this;
@@ -756,7 +794,7 @@
 
             /*
               @function (private) _addOverlay
-              @description 
+              @description Adds overlay if the dialog is modal type
             */
             addOverlay: function () {
                 var el = this;
@@ -774,7 +812,7 @@
 
             /*
               @function (private) _isFirstScaled
-              @description 
+              @description Returns true if it is the first scaled dialog opened
             */
             isFirstScaled: function () {
                 var openedScaledDialogs = document.querySelectorAll(".vc-dialog-scaled");
@@ -782,36 +820,22 @@
             },
 
             /*
-              @function (private) _center
-              @description 
+              @function (private) _setPosition
+              @description Sets the position of the dialogs depending on the value of multiposition properties.
             */
-            center: function () {
+            setPosition: function () {
                 var el = this;
-                el._refs.dialog.style.opacity = 0;
 
-                if (el.multiposition == "scaled") {
-                    el._refs.dialog.classList.add("vc-dialog-scaled");
+                if (!vcomet.util.isTrue(el.modal) && el.multiposition == "scaled" && el._refs.dialog.dataset.version == "desktop" && !el._isFirstScaled()) {
+                    el._scale();
+                } else {
+                    el._center();
                 }
-
-                setTimeout(function () {
-                    el._assignCenterPosition();
-                    el._refs.dialog.style.opacity = 1;
-                    el._misc.centered = true;
-                }, 0);
-            },
-
-            assignCenterPosition: function (params) {
-                var el = this;
-
-                var centerWidth = (window.innerWidth - el._refs.dialog.offsetWidth) / 2;
-                var centerHeight = (window.innerHeight - el._refs.dialog.offsetHeight) / 2;
-                el._refs.dialog.style.left = centerWidth + "px";
-                el._refs.dialog.style.top = centerHeight + "px";
             },
 
             /*
               @function (private) _scale
-              @description 
+              @description When there is more than one dialog open, position them scaled.
             */
             scale: function () {
                 var el = this;
@@ -835,12 +859,47 @@
             },
 
             /*
+              @function (private) _center
+              @description Position the dialog in the center of the window.
+            */
+            center: function () {
+                var el = this;
+                el._refs.dialog.style.opacity = 0;
+
+                if (el.multiposition == "scaled") {
+                    el._refs.dialog.classList.add("vc-dialog-scaled");
+                }
+
+                setTimeout(function () {
+                    el._assignCenterPosition();
+                    el._refs.dialog.style.opacity = 1;
+                    el._misc.centered = true;
+                }, 0);
+            },
+
+            /*
+              @function (private) _assignCenterPosition
+              @description Calculations needed to centered the dialog
+            */
+            assignCenterPosition: function () {
+                var el = this;
+
+                var centerWidth = (window.innerWidth - el._refs.dialog.offsetWidth) / 2;
+                var centerHeight = (window.innerHeight - el._refs.dialog.offsetHeight) / 2;
+                el._refs.dialog.style.left = centerWidth + "px";
+                el._refs.dialog.style.top = centerHeight + "px";
+            },
+
+
+            /*
               @function (private) _moveToFront
-              @description 
+              @description Puts the dialog in the foreground by clicking on it.
             */
             moveToFront: function () {
                 var el = this;
 
+                // If the dialog was prevoiusly minimized or maximized,
+                // when returnt to its default position, it will be placed in the foreground
                 if (el._refs.dialog.status == "minimized" && el._refs.dialog.status == "maximized") {
                     var openedDialogs = document.querySelectorAll(".vc-dialog-visible");
                     var minimizedBar = document.querySelector(".vc-dialog-minBar");
@@ -867,7 +926,7 @@
 
             /*
               @function (private) _registerInitialSize
-              @description 
+              @description Stores the initial size of the dialog.
             */
             registerInitialSize: function () {
                 var el = this;
@@ -879,36 +938,27 @@
             },
 
             /*
-              @function (private) _isInFront
-              @description 
-            */
-            isInFront: function () {
-                var el = this;
-                var openedDialogs = document.querySelectorAll(".vc-dialog-visible");
-
-                if (openedDialogs) {
-                    var openedDialogsArray = Array.prototype.slice.apply(openedDialogs);
-                    return openedDialogsArray.indexOf(el) == (openedDialogsArray.length - 1);
-                }
-
-                return false;
-            },
-            /*
               @function (private) _handleWindowResize
-              @description 
+              @description Handles different options of the dialog when doing the resizing of the window.
             */
             handleWindowResize: function () {
                 var el = this;
-                
+
+                // Only when the dialog is visible and is neither minimized nor maximized.
                 if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
 
+                    // When the dialog becomes visible sets its sizes
                     if (el._refs.dialog.style.width == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
                         el._refs.dialog.style.width = el._refs.dialog.offsetWidth + "px";
                         el._refs.dialog.style.height = el._refs.dialog.offsetHeight + "px";
                     }
 
+                    // If the dialog is centered, when resizing the window, it will remain centered.
                     if ((el.multiposition == "centered" && el._misc.centered)) {
                         el._assignCenterPosition();
+
+                    // If the dialog is scaled or has been moved, 
+                    // it will stay right where it is only if it is not pushed by the window edges
                     } else {
                         el._handleWindowEdges();
                     }
@@ -917,6 +967,10 @@
 
             },
 
+            /*
+              @function (private) _handleWindowEdges
+              @description Handles window edges so that the dialog does not exceed it.
+            */
             handleWindowEdges: function () {
                 var el = this;
 
@@ -932,11 +986,13 @@
                 if (isOnBottomEdge || exceedsTopEdge) {
                     el._refs.dialog.style.top = window.innerHeight - (el._refs.dialog.offsetHeight + el._misc.windowPadding) + "px";
                 }
-
-
             },
 
-            limitPosition: function (params) {
+            /*
+              @function (private) _limitPosition
+              @description Sets the limit of the window for cases in which, when opening several scaled dialogs, they do not exceed them
+            */
+            limitPosition: function () {
                 var el = this;
                 var exceedsWindowWidth = (parseInt(el._refs.dialog.style.left) + el._refs.dialog.offsetWidth) > (window.innerWidth - el._misc.windowPadding);
                 var exceedsWindowHeight = (parseInt(el._refs.dialog.style.top) + el._refs.dialog.offsetHeight) > (window.innerHeight - el._misc.windowPadding);
@@ -959,7 +1015,6 @@
                     }
 
                     setTimeout(function () {
-
                         width = el._refs.dialog.offsetWidth;
                         height = el._refs.dialog.offsetHeight;
 
@@ -973,10 +1028,7 @@
 
                         el._refs.dialog.style.opacity = 1;
                     }, 0);
-
                 }
-
-
             }
 
         },
@@ -994,12 +1046,7 @@
                     el._verifyScreenResolution();
                     el._assignSize();
                     el._addOverlay();
-
-                    if (!vcomet.util.isTrue(el.modal) && el.multiposition == "scaled" && el._refs.dialog.dataset.version == "desktop" && !el._isFirstScaled()) {
-                        el._scale();
-                    } else {
-                        el._center();
-                    }
+                    el._setPosition();
 
                     el._refs.dialog.addEventListener("mousedown", function (e) {
                         if (e.button == 0 && el._refs.close.isOnPath == false) {
@@ -1081,8 +1128,6 @@
             el._addResizes();
             el._addMaximize();
             el._addMinimize();
-
-
         },
 
         onWindowResize: function (e) {
