@@ -122,7 +122,6 @@
                 }
                 el._misc.rowCount++;
                 el._rows.push(cRow);
-                el.adjustRowHeight();
             },
             // @function cleanTable (public) [Remove all table cells but keep headers]
             cleanTable: function () { 
@@ -245,10 +244,9 @@
                 el._rowsData.forEach(function (row) {
                     el.addRow(row);
                 });
-                setTimeout(function () {
-                    el.adjustRowHeight();
+                setTimeout(() => {
+                    this.adjustRowHeight();
                 }, 0);
-
             },
             // @function resizeColumn (private) 
             resizeColumn: function () {
@@ -295,7 +293,6 @@
         onCreated: function () {
             var el = this;
             el._initMisc();
-            vcomet.createCallback("ondrawn", this);
         },
 
         onResize: function (event) {
@@ -308,7 +305,7 @@
             var el = this;
             var rows = this.querySelectorAll("vc-row");
 
-            el._rowsData = [];
+            el._rowsData = []; // TODO deberia venir inicializado porque es una propiedad privada, pero si borro esta linea no funciona
 
             rows.forEach(function (row) {
                 var columns = row.querySelectorAll("vc-cell");
@@ -330,16 +327,13 @@
             var table = document.createElement("div");
             table.id = "vc-doc-table-content";
             this.appendChild(table);
-                setTimeout(function () {
-                vcomet.triggerCallback("ondrawn", el, el, [el]);
-                el.adjustRowHeight();
-                                    }, 0); 
         },
 
         onBubbleRender: function () {
             this._init();
         },
 
+        onReady: function () {}
 
 
     });

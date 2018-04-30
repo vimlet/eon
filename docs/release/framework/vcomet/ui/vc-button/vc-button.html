@@ -2,7 +2,7 @@
 
 <template>
 
-  <div class="vc-button-button vc-bg1-border vc-bg1-hoverable vc-fg1-hoverable vc-unselectable"></div>
+  <div class="vc-button-button bg1-border bg1-hoverable fg1-hoverable unselectable"></div>
 
 </template>
 
@@ -20,12 +20,12 @@
         reflect: true
       },
       /*
-        @property {Boolean} disabled 
+        @property {Boolean} disable 
         @description Button desactivation
         Values can be: true o false
         Default: false
       */
-      disabled: {
+      disable: {
         value: false,
         reflect: true
       },
@@ -97,7 +97,7 @@
             buttonText.innerHTML = newVal;
             button.appendChild(buttonText);
             buttonText.classList.add("vc-button-buttonText");
-            // buttonText.classList.add("vc-fg1-hoverable");
+            // buttonText.classList.add("fg1-hoverable");
 
             // When the button text is dynamically changed
           } else {
@@ -106,7 +106,7 @@
             buttonText.innerHTML = newVal;
             var newText = buttonText;
             newText.classList.add("vc-button-buttonText");
-            // newText.classList.add("vc-fg1-hoverable");
+            // newText.classList.add("fg1-hoverable");
             button.replaceChild(newText, oldText);
           }
 
@@ -161,22 +161,22 @@
       },
 
       /*
-        @function (private) _updateDisabled
-        @description Update disabled status
+        @function (private) _updateDisable
+        @description Update disable status
         @param {String} newVal [New value of disabled]
       */
-      updateDisabled: function (newVal) {
+      updateDisable: function (newVal) {
         var button = this.querySelector(".vc-button-button");
 
         if (!vcomet.util.isTrue(newVal)) {
           button.removeAttribute("disabled");
-          button.classList.remove("vc-fg1-disabled");
+          button.classList.remove("bg1-disable");
           this.style.pointerEvents = "auto";
 
         } else {
 
           button.setAttribute("disabled", "true");
-          button.classList.add("vc-fg1-disabled");
+          button.classList.add("bg1-disable");
           this.style.pointerEvents = "none";
 
         }
@@ -188,7 +188,7 @@
       var button = el.querySelector(".vc-button-button");
 
       el.setValue(el.value);
-      el._updateDisabled(el.disabled);
+      el._updateDisable(el.disable);
       el._setupIcon(el.icon);
       // When the button is a type form submit
       (el.type) ? button.setAttribute("type", el.type) : null;
@@ -197,8 +197,8 @@
 
     onPropertyChanged: function (attrName, oldVal, newVal) {
       switch (attrName) {
-        case "disabled":
-          this._updateDisabled(newVal);
+        case "disable":
+          this._updateDisable(newVal);
           break;
         case "icon":
           (newVal !== "") ? this._setupIcon(newVal) : null;

@@ -10,7 +10,8 @@
 
 <script type="text/javascript">
   // Register custom element
-  vcomet.element("vc-treenode", "vc-treenode.css", {
+  vcomet.element("vc-treenode", null, {
+    themed: true,
     properties: {
       /*
         @property {String} name 
@@ -175,12 +176,6 @@
         if (el.type === "directory") {
           el.toggleExpand();
         }
-      },
-      // @function changeType (public) @param type
-      changeType: function (type) { // TODO        
-        var el = this;
-        el.type = type;        
-        el._refresh();
       }
     },
     privateFunctions: {
@@ -200,33 +195,26 @@
           el._refs.hostTreeWrapper.appendChild(el);
         }
       },
-      // @function refresh (private)
-      refresh: function(){ // TODO  Ensure that it is correct to remove name and extension and take it from node path
-        var el = this;
-        el.name = null;
-        el.extension = null;        
-        el._setNodeName();
-      },
-      //@function (private) setNodeName
-      setNodeName: function () { // TODO
-        var el = this;
-        // Set node name if not exits
-        el.name = !el.name ? el.path.split("/").pop() : el.name;
-
-        if (!el.extension) {
-          el = el._splitExtension(el); // TODO extension          
+      //@function splitExtension (private) [When node is created from path, extension is removed from name and added to extension option] @param node @return {object}
+      splitExtension: function (node) {
+        var extensionIndex = node.name.lastIndexOf(".");
+        if (extensionIndex > 0) {
+          var ext = node.name.substring(extensionIndex, node.path.length);
+          // TODO next situation is only contemplated for tree links where subfolders are appended after extension  
+          var extSub = ext.indexOf("/");
+          var subFolder = "";
+          if (extSub > 0) {
+            // subFolder = ext.substring(extSub, ext.length);
+            // ext = ext.substring(0, extSub);
+          } else {
+            node.extension = ext;
+            node.name = node.name.substring(0, extensionIndex) + subFolder;
+          }
+          // node.extension = ext;
+          // node.name = node.name.substring(0, extensionIndex) + subFolder;
         }
-
-        name = el.name;
-
-        // TODO extension
-        var showExt = (el._refs.hostTree.showExtension != "false");   
-        if (el.type != "directory" && showExt) {// TODO No sense to show extensions on directories 
-          name += el.extension;
-        }
-        el._refs.head.querySelector(".vc-treenode-name").innerHTML = name;
+        return node;
       },
-
       /*
         @function (private) _setUpNode
         @description Build tree node structure
@@ -242,10 +230,26 @@
         //     ext = (el.extension ? "." + el.extension : "");
         //   }
 
+        // The thing is that allow extensions can't be checked befor knowig if tree has name
+
+        // Set node name if not exits
+        el.name = !el.name ? el.path.split("/").pop() : el.name;
+
+        if (!el.extension) {
+          el = el._splitExtension(el); // TODO extension          
+        }
 
         el.order = !el.order ? "" : parseInt(el.order);
 
-        el._setNodeName();
+        name = el.name;
+
+
+        // TODO extension
+        var showExt = (el._refs.hostTree.showExtension != "false");
+        if (showExt) {
+          name += el.extension;
+        }
+        el._refs.head.querySelector(".vc-treenode-name").innerHTML += name;
 
         icon.style.display = ["all", "type"].indexOf(tree.icons) > -1 ? "inline-block" : "none";
 
@@ -274,23 +278,6 @@
         el._misc.dragging = {};
         el._misc.dragging.functions = {};
 
-      },
-      /*
-        @function (private) _splitExtension
-        @description
-      */
-      splitExtension: function (node) {
-          var extensionIndex = node.name.lastIndexOf(".");
-          if (extensionIndex > 0) {
-            var ext = node.name.substring(extensionIndex, node.path.length);
-            var extSub = ext.indexOf("/");
-            var subFolder = "";
-            if (extSub <= 0) {
-              node.extension = ext;
-              node.name = node.name.substring(0, extensionIndex) + subFolder;
-            }
-          }
-        return node;
       },
       /*
         @function (private) _makeParentExpandable
@@ -329,7 +316,6 @@
           "folder_open" : "folder";
 
         expandIcon.style.visibility = ["expand", "all"].indexOf(tree.icons) > -1 ? "visible" : "";
-
         el._refs.wrapper.style.display = "flex";
         // Check previous functionality
         if (!el._expandFunction) {
@@ -487,9 +473,7 @@
         // Select tree node functionality
         el._setNodeClickListener();
         // Adds the basic dragging events to the tree node
-        if (vcomet.util.isTrue(el._refs.hostTree.drag)) {
-          el._setupDraggingEvents();
-        }
+        el._setupDraggingEvents();
 
       } else {
         // Remove source node if already exists on tree element
