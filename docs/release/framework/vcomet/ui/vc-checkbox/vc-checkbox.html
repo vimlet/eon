@@ -1,6 +1,6 @@
 <template>
     <input class="vc-checkbox-checkbox" type="checkbox">
-    <label class="vc-checkbox-label  vc-unselectable">
+    <label class="vc-checkbox-label  unselectable">
         <div class="labelText"></div>
     </label>
 </template>
@@ -34,12 +34,12 @@
                 reflect: true
             },
             /*
-              @property {Boolean} disabled 
+              @property {Boolean} disable 
               @description Checkbox desactivation
               Values can be: true or false
               Default: false
             */
-            disabled: {
+            disable: {
                 value: false,
                 reflect: true
             },
@@ -111,11 +111,11 @@
 
         privateFunctions: {
             /*
-              @function (private) _updateDisabled
-              @description Update disabled status
+              @function (private) _updateDisable
+              @description Update disable status
               @param {String} newVal [New value of disabled]
             */
-            updateDisabled: function (newVal) {
+            updateDisable: function (newVal) {
                 var el = this;
 
                 if (!vcomet.util.isTrue(newVal)) {
@@ -188,7 +188,7 @@
             el._checkboxNode.setAttribute("id", el.value);
             el._labelNode.setAttribute("for", el.value);
             el._spanNode.classList.add("vc-checkbox-span");
-            el._spanNode.classList.add("vc-bg1-border");
+            el._spanNode.classList.add("bg1-border");
             el._currentvalue = el.value;
 
             el.querySelector(".labelText").innerHTML = el.label;
@@ -199,21 +199,21 @@
                 // The click event is triggered by two elements, the real input and the
                 // visual custom element. So it is necessary to control one of the two elements
                 // fot not activate the action twice.
-                if (!vcomet.util.isTrue(el.disabled) && e.target.type !== "checkbox") {
+                if (!vcomet.util.isTrue(el.disable) && e.target.type !== "checkbox") {
                     el.checked = vcomet.util.isTrue(el.checked) ? false : true;
                 }
 
             }, false);
 
-            el._updateDisabled(el.disabled);
+            el._updateDisable(el.disable);
             el._updateCheck(el.checked);
 
         },
 
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
-                case "disabled":
-                    this._updateDisabled(newVal);
+                case "disable":
+                    this._updateDisable(newVal);
                     break;
                 case "checked":
                     this._updateCheck(newVal);

@@ -1,17 +1,17 @@
 <template>
 
-  <div class="vc-menu-wrapper vc-bg4 vc-unselectable">
+  <div class="wrapper unselectable">
   </div>
 
 </template>
 
 <script>
-  vcomet.element("vc-menu", "vc-menu.css", {
-
+  vcomet.element("vc-menu", "", {
+    themed: true,
     dependencies: [
-      "../vc-item",
-      "../vc-combobox",
-      "../vc-scroll"
+      "../vc-item/vc-item",
+      "../vc-selector/vc-selector",
+      "../vc-scroll/vc-scroll"
     ],
     properties: {
       /*
@@ -70,7 +70,7 @@
           el._setupItem(menuItems[i]);
         }
 
-        el.querySelector(".vc-menu-wrapper").appendChild(fragment);
+        el.querySelector(".wrapper").appendChild(fragment);
 
       },
       setupItem: function (item) {
@@ -109,8 +109,7 @@
           item.appendChild(iconNode);
         }
 
-        item.classList.add("vc-menu-header");
-        item.classList.add("vc-bg4-hoverable");
+        item.classList.add("header");
 
       },
       /*
@@ -148,8 +147,7 @@
         el._setupVisuals(dropdownTrigger);
         el._setupItemEvents(item, dropdownTrigger, itemsDropdown);
 
-        itemsDropdown.classList.add("vc-menu-dropdown");
-        itemsDropdown.classList.add("vc-bg4");
+        itemsDropdown.classList.add("dropdown");
         itemsDropdown.appendChild(dropdownItemsFragment);
 
         item.appendChild(dropdownTrigger);
@@ -236,12 +234,10 @@
               el._toggleDropdown(item);
 
             } else if (!item.isOnPath) {
-              
+
               item.style.visibility = "hidden";
               item.dataset.visible = false;
               item.style.visibility = "visible";
-
-              item.classList.remove("vc-bg3");
 
             }
 
@@ -256,13 +252,10 @@
       */
       toggleDropdown: function (item, display) {
 
-        var classListFunction = item.dataset.visible == "true" || item.dataset.visible == true ? "remove" : "add";
         // Change dropdown displaying property
         item.style.visibility = "hidden";
         item.dataset.visible = item.dataset.visible == "true" || item.dataset.visible == true ? false : true;
         item.style.visibility = "visible";
-        
-        item.classList[classListFunction]("vc-bg3");
 
       },
       /*
@@ -270,17 +263,15 @@
       @description Hides the visible dropdowns of the menu
       */
       hideVisibleMenuItems: function () {
+
         var el = this;
         var visibleMenuItems = el.querySelectorAll('vc-item[data-visible="true"]');
-
-        console.log('hideVisibleMenuItems');
 
         for (var i = 0; i < visibleMenuItems.length; i++) {
           // This visibility style declarations is for internet explorer to properly refresh the visual changes
           visibleMenuItems[i].style.visibility = "hidden";
           visibleMenuItems[i].dataset.visible = false;
           visibleMenuItems[i].style.visibility = "visible";
-
         }
 
       },
@@ -334,7 +325,7 @@
       */
       relocateDropdownIfNeeded: function (item) {
 
-        var exceedsObject = this._exceedsWindow(item.querySelector(".vc-menu-dropdown"));
+        var exceedsObject = this._exceedsWindow(item.querySelector(".dropdown"));
 
         if (exceedsObject.exceeds == true) {
 
