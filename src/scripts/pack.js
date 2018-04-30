@@ -112,7 +112,7 @@ function releaseMin(cb) {
               var cssCleanOutput = new CleanCSS({}).minify(srcContent);
               var data = cssCleanOutput.styles;
 
-              if(cssCleanOutput.errors.length > 0) {
+              if(cssCleanOutput.errors && cssCleanOutput.errors.length > 0) {
                 throw cssCleanOutput.errors;
               }
 
