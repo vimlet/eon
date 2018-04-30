@@ -4078,7 +4078,7 @@ vcomet.interpolation.handleInterpolationVariables = function (el, config) {
     bindString = "data." + currentVariable.getAttribute("bind");
     bindValue = vcomet.object.readFromPath(el, bindString);
 
-    bindValue = bindValue != null && bindValue != undefined ? bindValue.toString() : "";
+    bindValue = typeof bindValue == "undefined" ? "" : bindValue.toString();
 
     vcomet.object.assignToPath(el, bindString, bindValue);
   }
