@@ -1,6 +1,9 @@
 <script>
   vcomet.element("vc-swiper", "vc-swiper.css", {
     themed: true,
+    dependencies: [
+      "../vc-slide"
+    ],
     privateProperties: {
       /*
         @property (private) {Object} _misc
@@ -180,8 +183,6 @@
         var wrapper = document.createElement("div");
         wrapper.classList.add("vc-swiper-wrapper");
         el._refs.wrapper = wrapper;
-        // Wrapper fragment the pages are going to be appended to
-        var children = el.getSourceElements();
         // Get axis
         if(el.direction == "horizontal"){
           el._misc.sizeProperty = "offsetWidth";
@@ -294,7 +295,6 @@
         var el = this;
         var paging = el.pagingNode;
         var pagingParent = paging.parentNode;
-        // TODO!!! same brwoser fix!!!
         // Functionality control
         var throttled, mousedown, thumbnailClicked, initialValue, moveValue, translatePixels, position;
         var delay = el._isTrickyBrowser() ? 10 : 60;
@@ -311,7 +311,7 @@
         pagingParent.addEventListener("pointerdown", function(e){
           // ** Fix bad rendering while sliding bug on tricky browsers
           paging.style.transition = el._isTrickyBrowser() ? "none" : "transform .2s";
-          // Prevent mouse down functionality on secondaary mouse button is clicked
+          // Prevent mouse down functionality on secondary mouse button is clicked
           if(e.button == 0){
             if(e.target.classList.contains("vc-swiper-thumbnail")){
               thumbnailClicked = e.target;
@@ -403,7 +403,7 @@
           leaveTimeout = setTimeout(function () {
             // Hide pagination translating its width distance
             node.style[prop] = -node[hideSizeProp] + "px";
-            // Disaplay pagination control div
+            // Display pagination control div
             control.style.display = "block";
               // Increase navigation buttons size
               el.nextBtn.node.style[el.direction == "horizontal" ? "height" : "width"] = "100%";
@@ -521,7 +521,7 @@
             // Set thumbnail translation range
             thumbnailStored = el._updateThumbnailRange(thumbnailObj, slideIndex, size);
           }
-          // Add thumbnail to swiper thumbails array
+          // Add thumbnail to swiper thumbnails array
           el.thumbnails.push(thumbnailStored);
           return thumbnail;
         }
@@ -529,11 +529,11 @@
       /*
         @function (private) _createThumbStyle
         @description Create the dynamic thumbnail size style rule
-        @param {Object} thumbnail [Thumnnail node]
+        @param {Object} thumbnail [Thumbnail node]
       */
       createThumbStyle: function(thumbnail){
         var el = this;
-        // Check style existance
+        // Check style existence
         if(!el._refs.styleSheet["thumbnail"]) {
           // Calculate 4:3 size ratio
           var invertSizeProp = el._misc.styleSizeProperty == "width" ? "height" : "width";
@@ -593,7 +593,7 @@
       */
       activateThumbnail: function(target){
         var el = this;
-        // Check thumbnail existance
+        // Check thumbnail existence
         if(target){
           try {
             // Active style
@@ -603,7 +603,7 @@
             target.el.classList.add("vc-swiper-thumbnailActive");
             // Get translate position
             var min = target.range[0];
-            // Translate paging wrapper to thumbail centered position
+            // Translate paging wrapper to thumbnail centered position
             if(el.direction == "horizontal"){
               el.pagingNode.style.transform = "translate3d(" + min + "px, 0px, 0px)";
             }else{
@@ -703,7 +703,7 @@
         var clickDelay, clickCounter, clickCounter, diff, initValue, moveValue;
         clickDelay = clickCounter = clickCounter = diff = initValue = moveValue = 0;
         var resetDbClick = function(){
-          // Reset double click paramaters
+          // Reset double click parameters
           clickCounter = 0;
           clickDelay = 0;
         };
@@ -715,7 +715,7 @@
             e.preventDefault();
             mousedown = true;
             initValue = moveValue = e[axis];
-            // Save current date in miliseconds
+            // Save current date in milliseconds
             if(clickCounter == 0){
               clickDelay = new Date().getTime();
             }
@@ -740,7 +740,7 @@
                 // Activate or deactivate full screen mode
                 el._toggleFullScreen();
               }
-              // Reset double click paramaters
+              // Reset double click parameters
               resetDbClick();
             } else {
               // Handle double click interruption
@@ -1146,7 +1146,7 @@
         @function (private) {Boolean} _isTrickyBrowser
         @description 
         @param {String} value [Array or String value to be processed]
-        @return {Boolean} [Whether or not the system is running on a non standard behaviour browser]
+        @return {Boolean} [Whether or not the system is running on a non standard behavior browser]
       */
       isTrickyBrowser: function() {
         var browser = vcomet.util.getBrowser();

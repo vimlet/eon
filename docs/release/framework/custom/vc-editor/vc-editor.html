@@ -43,7 +43,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <vc-loading></vc-loading>
+<<<<<<< HEAD
     <div id="vc-editor-content" class="vc-editor-until-render"></div>
+=======
+    <!-- <div id="vc-editor-mobile-scroll-trigger" onclick="this.parentNode.scrollTrigger();"></div> -->
+    <vc-scroll>
+        <!-- <div id="vc-editor-mobile-scroll-trigger" style="height:900px;"></div> -->
+        <div id="vc-editor-content" class="vc-editor-until-render"></div>
+    </vc-scroll>
+>>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
 </template>
 
 <script>
@@ -78,6 +86,22 @@
             // @function getValue (public) {string}
             getValue: function () {
                 return this._refs.editor.getValue();
+<<<<<<< HEAD
+=======
+            },
+            scrollTrigger: function (e) {
+                var el = this;
+                console.log("scrolltrigger", e);
+
+                var event = new CustomEvent("click");
+                event.clientX = e.clientX;
+                event.clientY = e.clientY;
+
+                // el.parentNode._refs.editor.domElement.dispatchEvent(event);
+                el.parentNode.querySelector("#vc-editor-content").dispatchEvent(event);
+
+
+>>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
             }
         },
 
@@ -102,17 +126,24 @@
                         value: el.value,
                         language: el.language,
                         theme: 'vs-dark',
+<<<<<<< HEAD
                         scrollbar: {
                             // Subtle shadows to the left & top. Defaults to true.
                             useShadows: false,
                             vertical: 'auto',
                             horizontal: 'visible'
                         },
+=======
+>>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
                         automaticLayout: true, // TODO "checks every 100ms if its container has changed its size" Optimizate via editor.layout({ width: ..., height: ... })
                         readOnly: readonly,
                         scrollBeyondLastLine: false, // Remove scrollbar when it is not needed
                         minimap: {
+<<<<<<< HEAD
                             enabled:false
+=======
+                            enabled: false
+>>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
                         }
                     });
                     
@@ -129,6 +160,89 @@
                     });
                 });
             },
+<<<<<<< HEAD
+=======
+            // @function editorReady (private) [Fires when monaco editor is loaded]
+            editorReady: function () {
+                var el = this;
+                el._show();
+                vcomet.triggerCallback("oneditorready", el, el, [el]);
+                el._setHeight();
+                el._setWidth();
+                el._resizeListener();
+            },
+            //@function resize (private) [Set editor size]
+            resize: function () {
+                var el = this;
+                var contentHeight = el._getHeight();
+                var contentWidth = el._getWidth();
+                el._refs.editor.layout({
+                    width: contentWidth,
+                    height: contentHeight
+                });                
+                el.querySelector("#vc-editor-content").style.height = contentHeight + "px";
+                el.querySelector("#vc-editor-content").style.width = contentWidth + "px";
+            },
+            // @function getHeight (private) [Return editor height based on its content] @param min [Minimum height] @param max [Maximum height]
+            getHeight: function(min,max){
+                var el = this;
+                min = min || el.minheight;
+                var contentHeight;
+                if (!el._misc.scrollHeight || el._misc.scrollHeight < el._refs.editor.getScrollHeight()) {
+                    el._misc.scrollHeight = el._refs.editor.getScrollHeight();
+                    contentHeight = el._misc.scrollHeight;
+                    if (el._refs.editor.getScrollHeight() >= min) {
+                        contentHeight = contentHeight + el._misc.paddingOffset;
+                    }
+                } else {
+                    contentHeight = el._misc.scrollHeight;
+                }
+                contentHeight = contentHeight <= min ? min : contentHeight;
+                return contentHeight;
+            },
+            // @function setHeight (private) [Adjust editor height based on its content] @param min [Minimum height] @param max [Maximum height]
+            setHeight: function (min, max) {
+                var el = this;                
+                var contentHeight = el._getHeight();
+
+                el.querySelector("#vc-editor-content").style.height = contentHeight + "px";
+                // el._refs.editor.layout({ width: 100, height: contentHeight });
+                el.querySelector("vc-scroll").update();
+            },
+            //@function getWidth (private)
+            getWidth:function(){
+                var el = this;
+                var monacoLinesNumberWidth = el._refs.editor.domElement.querySelector(".margin").offsetWidth;
+                el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
+                    ".view-lines");
+                el._refs.monacoLinesWidth = el._refs.monacoLines.offsetWidth;
+                //    var contentWidth = el._refs.editor.getScrollWidth();    // TODO not working
+
+                var contentWidth = el._refs.monacoLinesWidth + monacoLinesNumberWidth;
+                return contentWidth;
+            },
+            // @function setWidth (private)
+            setWidth: function () {
+                var el = this;
+                var contentWidth = el._getWidth();
+
+                el.querySelector("#vc-editor-content").style.width = contentWidth + "px";
+                el.querySelector("vc-scroll").update();
+            },
+            // @function resizeListener (private) [Monaco editor getScrollWidth is not working, so this function keep listening if width change and if so, resize the element]
+            resizeListener: function () {
+                var el = this;
+                
+                el._refs.monacoLines = el._refs.monacoLines || el._refs.editor.domElement.querySelector(
+                    ".view-lines");
+                vcomet.addResizeListener(el._refs.monacoLines, "NAME", function () {                    
+                    if (el._refs.monacoLines.offsetWidth > el._refs.monacoLinesWidth) {
+                        el._setWidth();                        
+                        // el._resize();
+                    }
+                });
+            },
+>>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
             // @function show (private) [Hides loading mask and shows editor]
             show: function(){
                 var el = this;
