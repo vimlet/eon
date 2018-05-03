@@ -156,16 +156,6 @@
             scaleBreak: {
                 value: "20",
                 reflect: true
-            },
-            /*
-              @property {Boolean} keepRatio 
-              @description Whether the user wants to keep the same ratio on small devices or not
-              Values can be: true or false
-              Default: false 
-            */
-            keepRatio: {
-                value: "false",
-                reflect: true
             }
         },
         privateProperties: {
@@ -293,7 +283,7 @@
             addDragListeners: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.drag)) {
+                if (vcomet.util.isTrue(el.drag) && el._refs.dialog.dataset.version == "desktop") {
                     var xPos = 0;
                     var yPos = 0; // Stores x & y coordinates of the mouse pointer
                     var xElem = 0;
@@ -363,7 +353,7 @@
             addResizes: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.resize)) {
+                if (vcomet.util.isTrue(el.resize) && el._refs.dialog.dataset.version == "desktop") {
                     var sideResizers = ["top", "right", "bottom", "left"];
                     var cornerResizers = ["topLeft", "topRight", "bottomLeft", "bottomRight"];
                     var sideResizersClasses = ["vc-dialog-topResizer", "vc-dialog-rightResizer", "vc-dialog-bottomResizer", "vc-dialog-leftResizer"];
@@ -607,7 +597,7 @@
             addMaximize: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.maximize)) {
+                if (vcomet.util.isTrue(el.maximize) && el._refs.dialog.dataset.version == "desktop") {
                     el._refs.maximizeButton.classList.remove("vc-dialog-hidden");
 
                     el._refs.maximizeButton.addEventListener("click", function () {
@@ -628,7 +618,7 @@
             addMinimize: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.minimize)) {
+                if (vcomet.util.isTrue(el.minimize) && el._refs.dialog.dataset.version == "desktop") {
                     el._refs.minimizeButton.classList.remove("vc-dialog-hidden");
 
                     el._refs.minimizeButton.addEventListener("click", function () {
@@ -766,12 +756,15 @@
             },
 
             /*
-              @function (private) _verifyScreenResolution
+              @function (private) _verifyDeviceVersion
               @description Controls the different screens versions .
             */
-            verifyScreenResolution: function () {
+            verifyDeviceVersion: function () {
                 var el = this;
-                el._refs.dialog.dataset.version = (window.innerWidth <= vcomet.tabletWidth) ? "device" : "desktop";
+                el._refs.dialog.dataset.version = (vcomet.util.isTouchScreen()) ? "device" : "desktop";
+
+                var mobileCondition = (window.innerWidth <= vcomet.mobileWidth || window.innerHeight <= vcomet.mobileWidth) && el._refs.dialog.dataset.version == "device";
+                el._refs.dialog.dataset.mobile = mobileCondition ? "true" : "false";
             },
 
             /*
@@ -781,15 +774,18 @@
             assignSize: function () {
                 var el = this;
 
-                el._refs.dialog.style.maxWidth = (el.maxWidth == "auto") ? el.maxWidth : el.maxWidth + "px";
-                el._refs.dialog.style.maxHeight = (el.maxHeight == "auto") ? el.maxHeight : el.maxHeight + "px";
-                el._refs.dialog.style.minWidth = el.minWidth + "px";
-                el._refs.dialog.style.minHeight = el.minHeight + "px";
+                if (el._refs.dialog.dataset.mobile == "false") {
+                    el._refs.dialog.style.maxWidth = (el.maxWidth == "auto") ? el.maxWidth : el.maxWidth + "px";
+                    el._refs.dialog.style.maxHeight = (el.maxHeight == "auto") ? el.maxHeight : el.maxHeight + "px";
+                    el._refs.dialog.style.minWidth = el.minWidth + "px";
+                    el._refs.dialog.style.minHeight = el.minHeight + "px";
 
-                if (el._misc.initialWidth && el._misc.initialHeight) {
-                    el._refs.dialog.style.width = el._misc.initialWidth + "px";
-                    el._refs.dialog.style.height = el._misc.initialHeight + "px";
-                }
+                    if (el._misc.initialWidth && el._misc.initialHeight) {
+                        el._refs.dialog.style.width = el._misc.initialWidth + "px";
+                        el._refs.dialog.style.height = el._misc.initialHeight + "px";
+                    }
+                } 
+
             },
 
             /*
@@ -945,7 +941,7 @@
                 var el = this;
 
                 // Only when the dialog is visible and is neither minimized nor maximized.
-                if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
+                if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.dataset.mobile == "false") {
 
                     // When the dialog becomes visible sets its sizes
                     if (el._refs.dialog.style.width == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
@@ -957,8 +953,8 @@
                     if ((el.multiposition == "centered" && el._misc.centered)) {
                         el._assignCenterPosition();
 
-                    // If the dialog is scaled or has been moved, 
-                    // it will stay right where it is only if it is not pushed by the window edges
+                        // If the dialog is scaled or has been moved, 
+                        // it will stay right where it is only if it is not pushed by the window edges
                     } else {
                         el._handleWindowEdges();
                     }
@@ -1043,7 +1039,6 @@
 
                 if (!el._refs.dialog.classList.contains("vc-dialog-visible")) {
 
-                    el._verifyScreenResolution();
                     el._assignSize();
                     el._addOverlay();
                     el._setPosition();
@@ -1120,6 +1115,7 @@
         onRender: function () {
             var el = this;
 
+            el._verifyDeviceVersion();
             el._addHeading();
             el._addContent();
             el._addFooter();
@@ -1131,6 +1127,7 @@
         },
 
         onWindowResize: function (e) {
+            this._verifyDeviceVersion();
             this._handleWindowResize(e);
         },
 
