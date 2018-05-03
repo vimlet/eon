@@ -762,6 +762,9 @@
             verifyDeviceVersion: function () {
                 var el = this;
                 el._refs.dialog.dataset.version = (vcomet.util.isTouchScreen()) ? "device" : "desktop";
+
+                var mobileCondition = (window.innerWidth <= vcomet.mobileWidth || window.innerHeight <= vcomet.mobileWidth) && el._refs.dialog.dataset.version == "device";
+                el._refs.dialog.dataset.mobile = mobileCondition ? "true" : "false";
             },
 
             /*
@@ -771,8 +774,7 @@
             assignSize: function () {
                 var el = this;
 
-                console.log('vcomet.mobileWidth', vcomet.mobileWidth);
-                if ( window.innerWidth > vcomet.mobileWidth) {
+                if (el._refs.dialog.dataset.mobile == "false") {
                     el._refs.dialog.style.maxWidth = (el.maxWidth == "auto") ? el.maxWidth : el.maxWidth + "px";
                     el._refs.dialog.style.maxHeight = (el.maxHeight == "auto") ? el.maxHeight : el.maxHeight + "px";
                     el._refs.dialog.style.minWidth = el.minWidth + "px";
@@ -939,7 +941,7 @@
                 var el = this;
 
                 // Only when the dialog is visible and is neither minimized nor maximized.
-                if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
+                if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.dataset.mobile == "false") {
 
                     // When the dialog becomes visible sets its sizes
                     if (el._refs.dialog.style.width == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
@@ -1125,7 +1127,7 @@
         },
 
         onWindowResize: function (e) {
-            // this._verifyDeviceVersion();
+            this._verifyDeviceVersion();
             this._handleWindowResize(e);
         },
 
