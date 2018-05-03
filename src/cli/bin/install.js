@@ -131,14 +131,13 @@ function handleRemoteVersions(value, cb) {
                     if (valueArray.length == 2) {
                         checkPackageExists.sync(null, packageName, valueArray[1]);
                         packageVersion = valueArray[1];
-                        console.log('packageVersion', packageVersion);
                     } else {
                         packageVersion = getLatestVcometRelease.sync(null);
                     }
 
                     vcometJsonObject[packageName] = packageVersion;
                     fs.writeFileSync("vcomet.json", JSON.stringify(vcometJsonObject, null, 2));
-             
+
                 } catch (error) {
                     cb(error);
                 }
@@ -159,6 +158,11 @@ function handleRemoteVersions(value, cb) {
         // Generate vcomet.json if it does not exist.
         if (newVcometJson && packageVersion) {
             var newVcometJsonPath = path.join(".", "vcomet.json");
+            var ignoreArray = ["custom"];
+
+            // Adds ignore file to the vcomet.json
+            vcometJsonObject.ignore = ignoreArray;
+
             fs.createFileSync(newVcometJsonPath);
             fs.writeFileSync(newVcometJsonPath, JSON.stringify(vcometJsonObject, null, 2));
         }
@@ -388,15 +392,20 @@ function cleanLocal(name) {
         var filePath;
 
         if (name == "vcomet") {
+            var ignoreArray = vcometJsonObject.ignore;
             fs.readdirSync(localPath).forEach(function (file) {
-                if (file != "custom" && file != "version.json") {
+
+                // Files that are specified in the ignore file of the vcomet.json will not be deleted
+                if (ignoreArray.indexOf(file) == -1 && file != "version.json") {
                     filePath = path.join(localPath, file);
                     console.log("Removing: " + filePath);
                     // Using rimraf to avoid fs-extra not-empty errors
                     rimraf.sync(filePath);
                     // fs.removeSync(filePath);   
                 }
+
             });
+
         } else {
             // Dependency
             filePath = path.join(localCustomPath, name);
