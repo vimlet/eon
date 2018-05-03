@@ -2,16 +2,16 @@
 </template>
 
 <script>
-  vcomet.element("vc-stackcontainer", "vc-stackcontainer.css", {
+  vcomet.element("vc-stack", "vc-stack.css", {
     dependencies: [
-      "../vc-container"
+      "../vc-panel"
     ],
     privateProperties: {
       /*
-      @property {object} data
+      @property {object} _misc
       @description Object with usefull information
       */
-      data: {
+      misc: {
         value: {},
         reflect: false
       }
@@ -25,20 +25,31 @@
       setup: function () {
 
         var el = this;
-        var containers = el.querySelectorAll('vc-container[target="stackcontainer"]');
+        var children = el.children;
 
-        el._data.containers = {};
-        el._data.indexedContainers = [];
+        el._misc.panels = {};
+        el._misc.indexedPanels = [];
 
-        for (var i = 0; i < containers.length; i++) {
-          containers[i].classList.remove("visible");
-          el._data.indexedContainers.push(containers[i]);
-          el._data.containers[containers[i].id] = containers[i];
+        for (var i = 0; i < children.length; i++) {
+
+          // Only vc-panel will be taken into account
+          if (children[i].nodeName.toLowerCase() == "vc-panel") {
+            el._misc.indexedPanels.push(children[i]);
+            el._misc.panels[children[i].id] = children[i];
+          }
+
         }
 
-        if (el._data.indexedContainers.length > 0) {
-          el._data.indexedContainers[0].classList.add("visible");
+        // If there are panels, then we show/render the first one
+        if (el._misc.indexedPanels.length > 0) {
+
+          el._misc.indexedPanels[0].onReady(function () {
+            el._misc.indexedPanels[0].classList.add("visible");
+            el._misc.indexedPanels[0].render();
+          })
+
         }
+
       },
       /*
       @function swaptToContainer
@@ -62,7 +73,7 @@
       @param {string} id
       */
       swapToContainerById: function (id) {
-        this._swapToContainer(this._data.containers[id]);
+        this._swapToContainer(this._misc.panels[id]);
       },
       /*
       @function swapToContainerByIndex
@@ -70,7 +81,7 @@
       @param {string} index
       */
       swapToContainerByIndex: function (index) {
-        this._swapToContainer(this._data.indexedContainers[index]);
+        this._swapToContainer(this._misc.indexedPanels[index]);
       },
       /*
       @function {object} getCurrentContainer
