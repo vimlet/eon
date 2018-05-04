@@ -36,8 +36,8 @@ vcomet.ready(function () {
   // Create some nodes
   var treenode = document.createElement("vc-treenode");
   var treenode2 = document.createElement("vc-treenode");
-  tree.appendChild(treenode);  
-  tree.appendChild(treenode2);  
+  tree.appendChild(treenode);
+  tree.appendChild(treenode2);
 
   // Append wherever you need it
   document.querySelector("body").appendChild(tree);
