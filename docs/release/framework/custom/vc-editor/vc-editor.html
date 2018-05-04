@@ -2,40 +2,65 @@
     vc-editor {
         height: 100%;
         width: 100%;
+        max-height: 450px;
+    }
+
+    vc-editor vc-scroll {
+        max-height: 450px !important;
     }
 
     #vc-editor-content {
         width: 100%;
         height: 100%;
-        min-height: 80px;
-        max-height: 300px;
+        min-height: 10px;
         box-sizing: border-box;
+        min-width: 100%;
+        /* pointer-events: none; */
     }
-    vc-editor vc-loading{
+
+    vc-editor vc-loading {
         width: 100%;
         height: 100%;
         min-height: 300px;
         box-sizing: border-box;
     }
+
     #vc-editor-loading {
         width: 100%;
         height: 100%;
         min-height: 300px;
         box-sizing: border-box;
-        background-color:red;
     }
+
     .editor-container {
         height: calc(100% - 35px);
     }
 
-    
-    vc-tabs .tabContent span {
+
+    vc-editor span {
         font-family: Consolas, "Courier New", monospace !important;
         font-size: 14px !important;
     }
 
-    .vc-editor-until-render{
-        display:none;
+    .vc-editor-until-render {
+        display: none;
+    }
+
+    .monaco-editor {
+        padding: 10px 0px;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    #vc-editor-mobile-scroll-trigger {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        width: 100%;
+        z-index: 10;
+        background-color: #ff020282;
+        /* pointer-events: none; */
     }
 </style>
 
@@ -43,15 +68,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <vc-loading></vc-loading>
-<<<<<<< HEAD
-    <div id="vc-editor-content" class="vc-editor-until-render"></div>
-=======
     <!-- <div id="vc-editor-mobile-scroll-trigger" onclick="this.parentNode.scrollTrigger();"></div> -->
     <vc-scroll>
         <!-- <div id="vc-editor-mobile-scroll-trigger" style="height:900px;"></div> -->
         <div id="vc-editor-content" class="vc-editor-until-render"></div>
     </vc-scroll>
->>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
 </template>
 
 <script>
@@ -60,7 +81,7 @@
         properties: {
             value: {
                 value: "",
-                reflect: true
+                reflect: false
             },
             language: {
                 value: "html",
@@ -69,11 +90,18 @@
             readonly: {
                 value: "readonly",
                 reflect: true
+            },
+            minheight: {
+                value: 0,
+                reflect: true
             }
         },
 
         privateProperties: {
             refs: {
+                value: {}
+            },
+            misc: {
                 value: {}
             }
         },
@@ -86,8 +114,6 @@
             // @function getValue (public) {string}
             getValue: function () {
                 return this._refs.editor.getValue();
-<<<<<<< HEAD
-=======
             },
             scrollTrigger: function (e) {
                 var el = this;
@@ -101,7 +127,6 @@
                 el.parentNode.querySelector("#vc-editor-content").dispatchEvent(event);
 
 
->>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
             }
         },
 
@@ -110,7 +135,7 @@
             init: function (data, language) {
                 var el = this;
                 var readonly = false;
-                if(el.readonly === "readonly"){
+                if (el.readonly === "readonly") {
                     readonly = true;
                 }
                 if (el.language === "js") {
@@ -126,42 +151,30 @@
                         value: el.value,
                         language: el.language,
                         theme: 'vs-dark',
-<<<<<<< HEAD
-                        scrollbar: {
-                            // Subtle shadows to the left & top. Defaults to true.
-                            useShadows: false,
-                            vertical: 'auto',
-                            horizontal: 'visible'
-                        },
-=======
->>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
                         automaticLayout: true, // TODO "checks every 100ms if its container has changed its size" Optimizate via editor.layout({ width: ..., height: ... })
                         readOnly: readonly,
                         scrollBeyondLastLine: false, // Remove scrollbar when it is not needed
                         minimap: {
-<<<<<<< HEAD
-                            enabled:false
-=======
                             enabled: false
->>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
                         }
                     });
-                    
+
                     // Ugly solution to know when monaco is ready because there is not an onReady function implemented yet
                     var didScrollChangeDisposable = el._refs.editor.onDidScrollChange(function (
                         event) {
-                        didScrollChangeDisposable.dispose(); 
-                        el._show();                       
-                        vcomet.triggerCallback("oneditorready", el, el, [el]);
+                        didScrollChangeDisposable.dispose();
+                        el._editorReady();
                     });
-                    
-                    el._refs.editor.model.onDidChangeContent((event) => {   
-                        vcomet.triggerCallback("onchange", el, el, [el]);
+
+                    el._refs.editor.model.onDidChangeContent((event) => {
+                        el._setHeight();
+                        el._setWidth();
+                        try {
+                            vcomet.triggerCallback("onchange", el, el, [el]);
+                        } catch (e) {}
                     });
                 });
             },
-<<<<<<< HEAD
-=======
             // @function editorReady (private) [Fires when monaco editor is loaded]
             editorReady: function () {
                 var el = this;
@@ -242,9 +255,8 @@
                     }
                 });
             },
->>>>>>> 571bdc569cdbdfda0a82863597b5c6ed8295382f
             // @function show (private) [Hides loading mask and shows editor]
-            show: function(){
+            show: function () {
                 var el = this;
                 el.querySelector("#vc-editor-content").classList.remove("vc-editor-until-render");
                 el.querySelector("vc-loading").hide();
@@ -260,6 +272,8 @@
         onReady: function () {
             var el = this;
             el._init();
+            el._misc.paddingOffset = 20;
+            // el.querySelector("#vc-editor-mobile-scroll-trigger").addEventListener("click", this.scrollTrigger, false);
         },
 
         onRender: function () {}

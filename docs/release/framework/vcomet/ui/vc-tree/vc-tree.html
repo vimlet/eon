@@ -1,7 +1,7 @@
 <script type="text/javascript">
   vcomet.element("vc-tree", "vc-tree.css", {
     dependencies: [
-      "../vc-treenode/vc-treenode"
+      "../vc-treenode"
     ],
     properties: {
       /*
@@ -46,6 +46,22 @@
       selectedNode: {
         value: "",
         reflect: true
+      },
+      /*
+        @property {Object} markedNode
+        @description Marked tree node reference
+      */
+      markedNode: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Object} drag
+        @description
+      */
+      drag: {
+        value: false,
+        reflect: true
       }
     },
     privateProperties: {
@@ -88,7 +104,7 @@
       reset: function () {
         var el = this;
         // Remove current tree nodes
-        el._clean();
+        el._clean(true);
         // Re build store
         el.buildStoreTree();
       },
@@ -99,27 +115,42 @@
       */
       refresh: function (filter) {
         var el = this;
-        var elm;
+        var parentNode;
+        var filterNodes = {};
         var fragment = document.createDocumentFragment();
 
         // Remove current tree nodes
         el._clean();
         if (el.store) {
+          // TODO - Store based refresh...
           el.buildStoreTree();
         } else {
-          // Loop through tree source elements paths
-          for (var key in el._misc.srcNodesPaths) {
 
-            //
-            if (!filter || (filter.toLowerCase() && key.toLowerCase().includes(filter))) {
-              // Create new tree nodes
-              elm = document.createElement("vc-treenode");
-              elm.path = key;
-              elm.type = el._misc.srcNodesPaths[key].type;
-              fragment.appendChild(elm);
+          // Append new refreshed tree nodes
+          el._misc.srcNodes.forEach(function (cNode) {      
+            parentNode = cNode._refs.parentNode;
+            if (filter && cNode.path.toLowerCase().includes(filter.toLowerCase())) {
+              // Append node to its tree node parent
+              if(!filterNodes[parentNode.path]) {
+                fragment.appendChild(cNode);
+              // Append node to the tree root
+              } else {
+                parentNode._refs.wrapper.appendChild(cNode);
+              }
+              filterNodes[cNode.path] = cNode;
+            } else if (!filter){
+              // Append node belonging to a tree node
+              if(parentNode.tagName.toLowerCase() == "vc-treenode") {
+                parentNode._refs.wrapper.appendChild(cNode);
+              // Append root node
+              } else{
+                fragment.appendChild(cNode);
+              }
             }
-          }
-          el.appendChild(fragment);
+          });
+
+          el._refs.tree.appendChild(fragment);
+          el._sortNodes();
         }
 
       },
@@ -156,7 +187,6 @@
         @param {object} node [Tree node]
       */
       selectNode: function (node) {
-
         var el = this;
 
         // Deselect previous selected node
@@ -164,10 +194,33 @@
           el.selectedNode.selected = false;
           vcomet.triggerCallback("onNodeUnselected", el, el.selectedNode);
         }
+        if(el.markedNode){
+          el.markedNode.marked = false;
+        }
         // Select node
         el.selectedNode = node;
         node.selected = true;
         vcomet.triggerCallback("onNodeSelected", el, node);
+      },
+      /*
+        @function markNode
+        @description Mark given node at tree
+        @param {object} node [Tree node]
+      */
+      markNode: function (node) {
+        var el = this;
+        // Deselect previous selected node
+        if (el.markedNode) {
+          el.markedNode.marked = false;
+          vcomet.triggerCallback("onNodeUnmarked", el, el.markedNode);
+        }
+        if(el.selectedNode) {
+          el.selectedNode.selected = false;
+        }
+        // Select node
+        el.markedNode = node;
+        node.marked = true;
+        vcomet.triggerCallback("onNodeMarked", el, node);
       },
       /*
         @function create
@@ -333,16 +386,17 @@
         @function (private) _clean
         @description Remove tree nodes and their references
       */
-      clean: function () {
+      clean: function (cleanRefs) {
         var el = this;
-        var tree = el.querySelector(".vc-tree-tree");
-
+        var tree = el._refs.tree;
         // Remove current children
         while (tree.hasChildNodes()) {
           tree.removeChild(tree.lastChild);
         }
         // Reset tree nodes
-        el.nodes = {};
+        if(cleanRefs) {
+          el.nodes = {};
+        }
       },
       /*
         @function (private) _copyProperties
@@ -412,7 +466,6 @@
       sortRecursively: function (node) {
 
         var el = this;
-
         var nodes = node._refs.wrapper.children;
         var alphaFragment = document.createDocumentFragment();
         var orderFragment = document.createDocumentFragment();
@@ -623,7 +676,7 @@
             }
           }
         }
-      }
+      },
     },
     onCreated: function () {
       var el = this;
@@ -631,6 +684,8 @@
       vcomet.createCallback("onDataReady", el);
       vcomet.createCallback("onNodeSelected", el);
       vcomet.createCallback("onNodeUnselected", el);
+      vcomet.createCallback("onNodeMarked", el);
+      vcomet.createCallback("onNodeUnmarked", el);
       vcomet.createCallback("onNodeRightClicked", el);
       vcomet.createCallback("onNodeCreate", el);
       vcomet.createCallback("onNodeCreated", el);
@@ -655,6 +710,9 @@
       var srcNodes = el.getSourceElements();
       var scroll = document.createElement('vc-scroll');
 
+      
+      el._misc.srcNodes = [];
+
       el._misc.srcNodesPaths = {};
       el._refs.scroll = scroll;
 
@@ -664,6 +722,9 @@
         srcNode = srcNodes.shift();
         //
         el._misc.srcNodesPaths[srcNode.getAttribute("path")] = { type: srcNode.getAttribute("type") };
+
+        
+        el._misc.srcNodes.push(srcNode);
 
         if (srcNode.tagName.toLowerCase() !== "vc-scroll") {
           tree.appendChild(srcNode)
