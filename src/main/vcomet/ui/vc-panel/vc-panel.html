@@ -35,7 +35,27 @@
       */
       content: {
         value: {}
-      }
+      },
+      /*
+        @property {Object} fit
+        @description Indicates whether the vc-scroll will autofill its container or grow according to its content until it fills its container
+        Values true, false
+        Default: false
+      */
+      fit: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} arrowScrolls
+        @description Indicates the vc-scroll whether it needs arrow scrolls or not
+        Values true, false
+        Default: false
+      */
+      arrowScrolls: {
+        value: false,
+        reflect: true
+      },
     },
     privateFunctions: {
       /*
@@ -125,8 +145,17 @@
 
         // Remove empty template
         el.content.removeChild(tmp);
+      },
+      /*
+        @function (private) setUpScroll
+        @description 
+      */
+      setUpScroll: function () {
+        var el = this;
+        // Set passed scroll parameters
+        el._refs.wrapper.fit = el.fit;
+        el._refs.wrapper.arrowScrolls = el.arrowScrolls;
       }
-
     },
     functions: {
       /*
@@ -175,9 +204,14 @@
       vcomet.createCallback("onLoad", this);
       vcomet.createCallback("onContent", this);
       el._refs.templates = {};
-
       // Get body container
-      el._refs.wrapper = vcomet.util.isTrue(el.allowScroll) ? document.createElement("vc-scroll") : el;
+      if(vcomet.util.isTrue(el.allowScroll)) {
+        el._refs.wrapper = document.createElement("vc-scroll");
+        // Configure scroll
+        el._setUpScroll();
+      } else {
+        el._refs.wrapper = el;
+      }
       // Get body container
       el.content = vcomet.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
     },
