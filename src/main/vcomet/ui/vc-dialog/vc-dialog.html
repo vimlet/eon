@@ -784,7 +784,7 @@
                         el._refs.dialog.style.width = el._misc.initialWidth + "px";
                         el._refs.dialog.style.height = el._misc.initialHeight + "px";
                     }
-                } 
+                }
 
             },
 
@@ -943,11 +943,14 @@
                 // Only when the dialog is visible and is neither minimized nor maximized.
                 if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.dataset.mobile == "false") {
 
+                    
                     // When the dialog becomes visible sets its sizes
                     if (el._refs.dialog.style.width == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
                         el._refs.dialog.style.width = el._refs.dialog.offsetWidth + "px";
                         el._refs.dialog.style.height = el._refs.dialog.offsetHeight + "px";
                     }
+                    
+                    el._handleDialogSize();
 
                     // If the dialog is centered, when resizing the window, it will remain centered.
                     if ((el.multiposition == "centered" && el._misc.centered)) {
@@ -964,12 +967,36 @@
             },
 
             /*
+              @function (private) _handleDialogSize
+              @description Set dialog width when do the window resize
+            */
+            handleDialogSize: function () {
+                var el = this;
+
+                // When the dialog width is bigger than window set it a percentaqge width
+                if (el._refs.dialog.offsetWidth >= window.innerWidth && !el._misc.sizeControl) {
+                    el._refs.dialog.style.width = "calc(100% - 20px)";
+                    el._misc.sizeControl = true;
+                } 
+                
+                if ( el.maxWidth != "auto") {
+                    if (el._refs.dialog.offsetWidth < window.innerWidth && el._misc.sizeControl) {
+                    el._refs.dialog.style.width = "";
+                    el._misc.sizeControl = false;
+                    } 
+                } else if (el._refs.dialog.offsetWidth <= window.innerWidth && el._misc.sizeControl) {
+                    el._refs.dialog.style.width = "";
+                    el._misc.sizeControl = false;
+                }
+            },
+
+            /*
               @function (private) _handleWindowEdges
               @description Handles window edges so that the dialog does not exceed it.
             */
             handleWindowEdges: function () {
                 var el = this;
-
+                
                 var isOnRightEdge = (el._refs.dialog.offsetLeft + el._refs.dialog.offsetWidth) >= (window.innerWidth - el._misc.windowPadding);
                 var isOnBottomEdge = (el._refs.dialog.offsetTop + el._refs.dialog.offsetHeight) >= (window.innerHeight - el._misc.windowPadding);
                 var exceedsTopEdge = el._refs.dialog.offsetTop < el._misc.windowPadding;
@@ -1099,6 +1126,7 @@
             el._misc.resize = {};
             el._misc.scaled = {};
             el._misc.windowPadding = 5;
+            el._misc.sizeControl = false;
 
             el.dataset.status = "";
 
