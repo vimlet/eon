@@ -2,7 +2,7 @@
     vc-code {
         position: relative;
         max-height: 450px;
-        background: #2d2d2d;
+        background: #1E1E1E;
         margin: 20px 0px;
         border-radius: 3px;
     }
@@ -29,8 +29,8 @@
 
 <script>
     /*
-            @header Highlighter for html <code>. Wraps a string within <pre><code></code></pre> and higlight it.
-            */
+                    @header Highlighter for html <code>. Wraps a string within <pre><code></code></pre> and higlight it.
+                    */
     vcomet.element("vc-code", null, {
 
         properties: {
@@ -40,6 +40,10 @@
             },
             language: {
                 value: null,
+                reflect: true
+            },
+            lineNumbers: {
+                value: true,
                 reflect: true
             }
         },
@@ -86,20 +90,28 @@
                 } else {
                     el._refs.code.classList.add("language-none");
                 }
+            },
+            //@function setLineNumbers (private)
+            setLineNumbers: function () {
+                var el = this;
+                if (el.lineNumbers) {
+                    el._refs.pre.classList.add("line-numbers");
+                }
             }
         },
 
         onCreated: function () {
-            vcomet.createCallback("oncodeready", this);                   
+            vcomet.createCallback("oncodeready", this);
         },
 
-        onReady: function () {            
+        onReady: function () {
             var el = this;
             el._setRefs();
 
             el._refs.scroll.thickness = 8;
 
             el._setLanguage();
+            el._setLineNumbers();
 
             el._refs.code.innerText = el.value;
 

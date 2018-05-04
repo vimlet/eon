@@ -1,5 +1,8 @@
 <script>
   vcomet.element("vc-panel", "", {
+    dependencies: [
+      "../vc-scroll"
+    ],
     privateProperties: {
       /*
         @property (private) {Object} _refs 
@@ -32,7 +35,27 @@
       */
       content: {
         value: {}
-      }
+      },
+      /*
+        @property {Object} fit
+        @description Indicates whether the vc-scroll will autofill its container or grow according to its content until it fills its container
+        Values true, false
+        Default: false
+      */
+      fit: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} arrowScrolls
+        @description Indicates the vc-scroll whether it needs arrow scrolls or not
+        Values true, false
+        Default: false
+      */
+      arrowScrolls: {
+        value: false,
+        reflect: true
+      },
     },
     privateFunctions: {
       /*
@@ -76,10 +99,14 @@
         var fragment = document.createDocumentFragment();
         var i, t;
         var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
+        var childrenArray;
 
+        // Avoid empty element template on programmatic cases
+        childrenArray = !dataNode.childNodes[0] ? dataNode.template.children : dataNode.childNodes;
+       
         // Get first generation template children
-        for (i = 0, t = 0; i < dataNode.children.length; i++) {
-          child = dataNode.children[i];
+        for (i = 0, t = 0; i < childrenArray.length; i++) {
+          child = childrenArray[i];
           
           if (reAppend) {
             fragment.appendChild(child);
@@ -118,8 +145,17 @@
 
         // Remove empty template
         el.content.removeChild(tmp);
+      },
+      /*
+        @function (private) setUpScroll
+        @description 
+      */
+      setUpScroll: function () {
+        var el = this;
+        // Set passed scroll parameters
+        el._refs.wrapper.fit = el.fit;
+        el._refs.wrapper.arrowScrolls = el.arrowScrolls;
       }
-
     },
     functions: {
       /*
@@ -168,11 +204,16 @@
       vcomet.createCallback("onLoad", this);
       vcomet.createCallback("onContent", this);
       el._refs.templates = {};
-
       // Get body container
-      el._refs.wrapper = vcomet.util.isTrue(el.allowScroll) ? document.createElement("vc-scroll") : el;
+      if(vcomet.util.isTrue(el.allowScroll)) {
+        el._refs.wrapper = document.createElement("vc-scroll");
+        // Configure scroll
+        el._setUpScroll();
+      } else {
+        el._refs.wrapper = el;
+      }
       // Get body container
-      el.content = vcomet.util.isTrue(el.allowScroll)  ? el._refs.wrapper.content : el;
+      el.content = vcomet.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
     },
     onInit: function () {
       var el = this;

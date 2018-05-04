@@ -8,7 +8,7 @@
     ],
     privateProperties: {
       /*
-      @property {object} _misc
+      @property (private) {Object} _misc
       @description Object with usefull information
       */
       misc: {
@@ -19,7 +19,7 @@
 
     privateFunctions: {
       /*
-      @function setup
+      @function (private) _setup
       @description Here we setup everything we need for the element
       */
       setup: function () {
@@ -43,58 +43,65 @@
         // If there are panels, then we show/render the first one
         if (el._misc.indexedPanels.length > 0) {
 
-          el._misc.indexedPanels[0].onReady(function () {
-            el._misc.indexedPanels[0].classList.add("visible");
-            el._misc.indexedPanels[0].render();
+          el._misc.activePanel = el._misc.indexedPanels[0];
+
+          el._misc.activePanel.onReady(function () {
+            el._misc.activePanel.classList.add("vc-stack-visible");
+            el._misc.activePanel.render();
           })
 
         }
 
       },
       /*
-      @function swaptToContainer
+      @function (private) _swapToPanel
       @description Hides the current container and shows the requested one
-      @param {object} targetContainer
+      @param {Object} targetContainer
       */
-      swapToContainer: function (targetContainer) {
-        var previousContainer = this.getCurrentContainer();
+      swapToPanel: function (targetContainer) {
+        var el = this;
+        var previousContainer = this.getActivePanel();
+
+        previousContainer.classList.remove("vc-stack-visible");
+
         if (targetContainer) {
-          previousContainer.classList.remove("visible");
-          targetContainer.classList.add("visible");
+          el._misc.activePanel = targetContainer;
+          el._misc.activePanel.classList.add("vc-stack-visible");
         }
-        vcomet.triggerCallback("onSwapped", this, this, [previousContainer, targetContainer]);
+
+        vcomet.triggerCallback("onSwapped", this, this, [previousContainer, el._misc.activePanel]);
       },
     },
 
     functions: {
       /*
-      @function swapToContainerById
+      @function swapToPanelById
       @description Swaps to a container with the requested id
-      @param {string} id
+      @param {String} id
       */
-      swapToContainerById: function (id) {
-        this._swapToContainer(this._misc.panels[id]);
+      swapToPanelById: function (id) {
+        this._swapToPanel(this._misc.panels[id]);
       },
       /*
-      @function swapToContainerByIndex
+      @function swapToPanelByIndex
       @description Swaps to a container with the requested index
-      @param {string} index
+      @param {String} index
       */
-      swapToContainerByIndex: function (index) {
-        this._swapToContainer(this._misc.indexedPanels[index]);
+      swapToPanelByIndex: function (index) {
+        this._swapToPanel(this._misc.indexedPanels[index]);
       },
       /*
-      @function {object} getCurrentContainer
+      @function {Object} getActivePanel
       @description Returns the current selected container
       */
-      getCurrentContainer: function () {
-        return this.querySelector('vc-container[target="stackcontainer"].visible');
+      getActivePanel: function () {
+        return this._misc.activePanel;
       }
     },
     onCreated: function () {
       vcomet.createCallback("onSwapped", this);
     },
-    onRender: function () {
+    onTransformed: function () {
       this._setup();
     }
   });
