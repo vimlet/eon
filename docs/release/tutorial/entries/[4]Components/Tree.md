@@ -2,15 +2,16 @@
 
 ## Introduction
 
-This element is the best ally to represent hierarchical data. The vComet tree element is based on the same tree structure idea as many other frameworks that covers this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
+The vComet tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that covers this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
 
 ## Declarative usage 
 
-The tree element functionality depends on the vc-treenode element as structural element, so it is imported while vc-tree does.
+The tree element functionality depends on the [vc-treenode](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FTreenode.md) element as structural element, so it is imported while vc-tree does.
 
 ``` [html]
 <head>
   <script>
+    // Imports vc-swiper element and its dependencies (vc-treenode)
     vcomet.import("/vcomet/ui/vc-tree.html");
   </script>
 <head>
@@ -49,7 +50,7 @@ vcomet.ready(function () {
 
 ### Store based tree
 
-The tree element can be connected to a vc-store to be built with remote data:
+The tree element can be connected to a [vc-store](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FStore.md) to be built with remote data:
 
 ``` [html]
 <vc-tree>
@@ -57,4 +58,4 @@ The tree element can be connected to a vc-store to be built with remote data:
 </vc-tree>
 ```
 
-It does not need any other configuration to work and whenever a change is made on the tree is reflected on store data on a invisible way for the user.
+It does not need any other configuration to work and whenever a change is made on the tree it is reflected on the store data in a invisible way for the user.
