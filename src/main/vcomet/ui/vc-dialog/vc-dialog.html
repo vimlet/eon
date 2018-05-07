@@ -274,7 +274,6 @@
                             yElem = yPos - el._refs.dialog.offsetTop;
                         }
 
-                        // el._moveToFront();
                     });
 
                     window.addEventListener("mousemove", function (e) {
@@ -573,6 +572,7 @@
 
                 if (vcomet.util.isTrue(el.maximize) && el._refs.dialog.dataset.version == "desktop") {
                     el._refs.maximizeButton.classList.remove("vc-dialog-hidden");
+                    vcomet.registerPathListener(el._refs.maximizeButton);
 
                     el._refs.maximizeButton.addEventListener("click", function () {
                         if (el.dataset.status != "maximized") {
@@ -594,6 +594,7 @@
 
                 if (vcomet.util.isTrue(el.minimize) && el._refs.dialog.dataset.version == "desktop") {
                     el._refs.minimizeButton.classList.remove("vc-dialog-hidden");
+                    vcomet.registerPathListener(el._refs.minimizeButton);
 
                     el._refs.minimizeButton.addEventListener("click", function () {
                         if (el.dataset.status != "minimized") {
@@ -645,6 +646,7 @@
                 var minimizedBar = document.querySelector(".vc-dialog-minBar");
 
                 if (!minimizedBar) {
+
                     minimizedBar = document.createElement("div");
                     minimizedBar.classList.add("vc-dialog-minBar");
                     document.body.appendChild(minimizedBar);
@@ -869,8 +871,8 @@
                 var el = this;
 
                 // If the dialog was prevoiusly minimized or maximized,
-                // when returnt to its default position, it will be placed in the foreground
-                if (el._refs.dialog.status == "minimized" && el._refs.dialog.status == "maximized") {
+                // when return to its default position, it will be placed in the foreground
+                if (el.dataset.status != "minimized" && el.dataset.status != "maximized") {
                     var openedDialogs = document.querySelectorAll(".vc-dialog-visible");
                     var minimizedBar = document.querySelector(".vc-dialog-minBar");
                     var fragment = document.createDocumentFragment();
@@ -1047,7 +1049,7 @@
                     el._setPosition();
 
                     el._refs.dialog.addEventListener("mousedown", function (e) {
-                        if (e.button == 0 && el._refs.close.isOnPath == false) {
+                        if (e.button == 0 && el._refs.close.isOnPath == false && el._refs.minimizeButton.isOnPath == false && el._refs.maximizeButton.isOnPath == false) {
                             el._moveToFront();
                         }
                     });
@@ -1245,16 +1247,6 @@
         onWindowResize: function (e) {
             this._verifyDeviceVersion();
             this._handleWindowResize(e);
-        },
-
-        onPropertyChanged: function (attrName, oldVal, newVal) {
-            switch (attrName) {
-                case "drag":
-                    break;
-
-                case "modal":
-                    break;
-            }
         }
     });
 
