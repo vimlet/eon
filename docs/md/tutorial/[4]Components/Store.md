@@ -2,14 +2,14 @@
 
 ## Introduction
 
-The store is a non visual element created to provide and manipulate data from a local or remote source. Includes a stable interface for interacting with data through some communication protocols like REST and WebSocket.
+The store is a non visual element created to provide and manipulate data from a local or a remote source. Includes a stable interface for interacting with data through communication protocols like REST and WebSocket.
 
 ## Declarative usage 
 
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-store.html");
+    vcomet.import("/vcomet/data/store/vc-store.html");
   </script>
 <head>
 ```
@@ -94,7 +94,7 @@ The previous example requires the store to be managed in a programmatic way, but
 
 ### vComet grid with store integration 
 
-Here is the code needed to implement a grid element working with remote data retrieved by a rest store:
+Here is the code needed to implement a **vc-grid** element working with remote data retrieved by a rest store:
 
 ``` [html]
 <vc-grid rows-per-page="auto" columns="name, lastname" headers="Name, Last name">
@@ -102,4 +102,4 @@ Here is the code needed to implement a grid element working with remote data ret
 </vc-grid>
 ```
 
-This example proves that is a better option to take advantage of the vComet elements composition to make your application development easier. 
+This example proves that is a good option to take advantage of the vComet elements composition to make your application development easier. 

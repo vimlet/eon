@@ -11,11 +11,11 @@ By default the drawer is designed to be relative to the HTML body element, and p
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-drawer.html");
+    vcomet.import("/vcomet/ui/vc-drawer.html");
   </script>
 <head>
 ```
-Declare drawer as any other HTML element:
+Declare the vc-drawer as any other HTML element:
 
 ``` [html]
 <vc-drawer>

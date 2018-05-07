@@ -6,13 +6,13 @@ This element is a combination of the well known slider and image gallery compone
 
 ## Declarative usage
 
-Swiper needs the collaboration of another vComet element to work correctly, the slide element:
+Swiper needs the collaboration of another vComet element to work correctly, the [vc-slide](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSlide.md) element:
 
 ``` [html]
 <head>
   <script>
     // Imports vc-swiper element and its dependencies (vc-slide)
-    vComet.import("/vComet/ui/vc-swiper.html");
+    vcomet.import("/vcomet/ui/vc-swiper.html");
   </script>
 <head>
 ```

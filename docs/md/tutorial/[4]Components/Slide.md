@@ -1,20 +1,12 @@
-# Layout
+# Slide
 
 ## Introduction
 
-The slide element is designed to work inside a swiper as the main structure item, so appended on any other element will do nothing different from a standard HTML element. 
+The slide element is designed to work inside a [vc-swiper](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSwiper.md) as the main structure item, so appended on any other element will do nothing different from a standard HTML element. 
 
 ## Declarative usage
 
-``` [html]
-<head>
-  <script>
-    vComet.import("/vComet/ui/vc-swiper.html");
-    vComet.import("/vComet/ui/vc-slide.html");
-  </script>
-<head>
-```
-Declare slide as any other HTML element:
+Declare the vc-slide as any other HTML element:
 
 ``` [html]
 <vc-swiper>
