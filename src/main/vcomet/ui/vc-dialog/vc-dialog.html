@@ -5,8 +5,7 @@
             <i class="vc-dialog-maximize vc-fg1-hoverable vc-dialog-hidden vicon vicon-maximize"></i>
             <i class="vc-dialog-close vc-fg1-hoverable vicon vicon-close"></i>
         </div>
-        <vc-scroll arrowScrolls="true" thickness="10">
-            <!-- <div class="vc-dialog-content vc-unselectable"></div> -->
+        <vc-scroll arrowScrolls="true" thickness="10" fill-container="false">
         </vc-scroll>
     </div>
 </template>
@@ -756,6 +755,7 @@
                     el._refs.dialog.style.minWidth = el.minWidth + "px";
                     el._refs.dialog.style.minHeight = el.minHeight + "px";
 
+
                     if (el._misc.initialWidth && el._misc.initialHeight) {
                         el._refs.dialog.style.width = el._misc.initialWidth + "px";
                         el._refs.dialog.style.height = el._misc.initialHeight + "px";
@@ -906,6 +906,13 @@
                 if (!el._misc.initialWidth && !el._misc.initialHeight) {
                     el._misc.initialWidth = el._refs.dialog.offsetWidth;
                     el._misc.initialHeight = el._refs.dialog.offsetHeight;
+                }
+
+                // Prevents the scroll from exceeding the dialog since 
+                // the dialog has no default size to limit the scroll on IE 
+                if (vcomet.util.getBrowser() == "IE") {
+                    el._refs.dialog.style.width = el._refs.dialog.offsetWidth + "px";
+                    el._refs.dialog.style.height = el._refs.dialog.offsetHeight + "px";
                 }
             },
 
@@ -1059,7 +1066,8 @@
                     document.body.appendChild(el._refs.dialog);
                     el._registerInitialSize();
                     el._limitPosition();
-                    el._refs.dialog.vcometScroll.update();
+
+                    el._refs.scroll.update();
 
                     vcomet.triggerCallback("onOpened", el);
                 }
@@ -1113,7 +1121,6 @@
                 if (el._refs.userContent) {
                     el._refs.userContent.classList.add("vc-dialog-content");
                     el._refs.scroll.content.appendChild(el._refs.userContent);
-
                 }
             },
 
@@ -1233,6 +1240,7 @@
 
         onRender: function () {
             var el = this;
+
 
             el._addHeading();
             el.addContent();
