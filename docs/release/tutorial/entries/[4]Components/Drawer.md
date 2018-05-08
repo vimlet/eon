@@ -78,4 +78,4 @@ integrate only one drawer element at the same time if the situation requires it:
 </vc-drawer>
 ```
 
-**Notice that right and bottom side drawers, as a consequence of the HTML standard behaviour, force parent to scroll the content when they are hidden.**
+**Notice that right and bottom side drawers, as a consequence of the HTML standard behavior, force parent to scroll the content when they are hidden.**
