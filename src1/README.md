@@ -1,13 +1,24 @@
+<p align="center">
+<a href="https://vimlet.com/vcomet">
+<img width="450" src="logo.png"></img>
+</a>
+</p>
+
+
+<p align="center">
+
 [//]: # (badges)
 
-[![license](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525800148996/license.svg?raw=true "License")](https://github.com/vimlet/VimletComet/blob/master/LICENSE)
-[![build](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525800148996/build.svg?raw=true "Build")](https://vimlet.com/downloads)
-[![version](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525800148996/version.svg?raw=true "Version")](https://vimlet.com/downloads)
-[![docs](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525800148996/docs.svg?raw=true "Docs")](https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html)
+[![license](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525800630059/license.svg?raw=true "License")](https://github.com/vimlet/VimletComet/blob/master/LICENSE)
+[![build](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525800630059/build.svg?raw=true "Build")](https://vimlet.com/downloads)
+[![version](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525800630059/version.svg?raw=true "Version")](https://vimlet.com/downloads)
+[![docs](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525800630059/docs.svg?raw=true "Docs")](https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html)
 
 [//]: # (badges)
 
-[![https://vimlet.com/vcomet](logo.png)](https://vimlet.com/vcomet)
+
+</p>
+
 <p align="center">
 <strong>Fast, Light & Productive UX</strong>
 </p>
@@ -72,15 +83,15 @@ Now it can be use anywhere in the body as any other html element.
 
 ```html
 <body>
-    <vc-button value="Click Me!"><vc-button>
+    <vc-button label="Click Me!"><vc-button>
 </body>
 ```
 
-You can use them programmatically too but you need to wait for vcomet.onReady due to its asynchronous nature.
+To use it programmatically due to its asynchronous nature you need to wait for vcomet.onReady
+
 ```javascript
 vcomet.onReady(function () {
-    var el = document.querySelector("vc-button");
-    el.value = "Hello World";
+    document.querySelector("vc-button").label = "Hello World";
 });
 ```
 
