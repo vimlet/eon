@@ -909,8 +909,8 @@
                 var el = this;
 
                 if (!el._misc.initialWidth && !el._misc.initialHeight) {
-                    el._misc.initialWidth = el._refs.dialog.offsetWidth;
-                    el._misc.initialHeight = el._refs.dialog.offsetHeight;
+                    el._misc.initialWidth = el._refs.dialog.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetWidth;
+                    el._misc.initialHeight = el._refs.dialog.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetHeight;
                 }
 
                 // Prevents the scroll from exceeding the dialog since 
@@ -959,8 +959,6 @@
             */
             handleDialogSize: function () {
                 var el = this;
-                // TODO: Handle window size after blur close
-                // console.log('handleDialogSizes', el._misc.initialWidth);
 
                 // When the dialog width is bigger than window set it a percentaqge width
                 if (el._refs.dialog.offsetWidth >= (window.innerWidth - 20) && !el._misc.sizeControl) {
@@ -1072,7 +1070,6 @@
 
                     document.body.appendChild(el._refs.dialog);
                     el._registerInitialSize();
-                    el._handleDialogSize();
                     el._limitPosition();
 
                     el._refs.scroll.update();
