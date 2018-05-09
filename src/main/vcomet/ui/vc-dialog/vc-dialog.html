@@ -20,7 +20,6 @@
             /*
               @property {String} heading 
               @description Dialog title
-              Default: undefined
             */
             heading: {
                 value: "",
@@ -242,7 +241,13 @@
                 if (vcomet.util.isTrue(el.blur)) {
                     vcomet.registerPathListener(el._refs.dialog);
 
-                    document.body.addEventListener("mousedown", function (e) {
+                    // This fixes click not being triggered on body on iPad
+                    if (/iPad|iPhone/.test(navigator.platform)) {
+                        document.body.style.cursor = "pointer";
+                    }
+
+                    document.body.addEventListener("pointerdown", function (e) {
+
                         if (el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.isOnPath == false) {
                             el.close();
                         }
@@ -904,8 +909,8 @@
                 var el = this;
 
                 if (!el._misc.initialWidth && !el._misc.initialHeight) {
-                    el._misc.initialWidth = el._refs.dialog.offsetWidth;
-                    el._misc.initialHeight = el._refs.dialog.offsetHeight;
+                    el._misc.initialWidth = el._refs.dialog.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetWidth;
+                    el._misc.initialHeight = el._refs.dialog.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetHeight;
                 }
 
                 // Prevents the scroll from exceeding the dialog since 
@@ -925,7 +930,6 @@
 
                 // Only when the dialog is visible and is neither minimized nor maximized.
                 if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.dataset.mobile == "false") {
-
 
                     // When the dialog becomes visible sets its sizes
                     if (el._refs.dialog.style.width == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
@@ -964,11 +968,12 @@
 
                 // When the window grows back, the width of the dialog is restored
                 if (el.maxWidth != "auto") {
-                    if (el._refs.dialog.offsetWidth < (window.innerWidth - 20) && el._misc.sizeControl) {
+                    if (el._refs.dialog.offsetWidth < (window.innerWidth - 20) && el._refs.dialog.offsetWidth == el._misc.initialWidth && el._misc.sizeControl) {
                         el._refs.dialog.style.width = "";
                         el._misc.sizeControl = false;
                     }
-                } else if (el._refs.dialog.offsetWidth <= (window.innerWidth - 20) && el._misc.sizeControl) {
+
+                } else if (el._refs.dialog.offsetWidth <= (window.innerWidth - 20) && el._refs.dialog.offsetWidth >= el._misc.initialWidth && el._misc.sizeControl) {
                     el._refs.dialog.style.width = "";
                     el._misc.sizeControl = false;
                 }
@@ -1047,7 +1052,7 @@
             */
             open: function () {
                 var el = this;
-
+                
                 if (!el._refs.dialog.classList.contains("vc-dialog-visible")) {
                     vcomet.triggerCallback("onOpen", el);
 
@@ -1082,6 +1087,8 @@
                 var el = this;
 
                 vcomet.triggerCallback("onClose", el);
+                // document.body.style.overflow = "auto";
+
                 el.appendChild(el._refs.dialog);
                 el._refs.dialog.classList.remove("vc-dialog-visible");
                 el._refs.dialog.classList.remove("vc-dialog-scaled");
@@ -1240,7 +1247,6 @@
 
         onRender: function () {
             var el = this;
-
 
             el._addHeading();
             el.addContent();
