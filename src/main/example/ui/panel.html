@@ -1,48 +1,51 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta charset="utf-8">
+        <title>VC-PANEL</title>
 
-<head>
-    <meta charset="utf-8">
-    <title>VC-PANEL</title>
+        <!-- Import vcomet js  -->
+        <script src="/vcomet/vcomet.js"></script>
 
-    <!-- Import vcomet js  -->
-    <script src="/vcomet/vcomet.js"></script>
+        <!-- Example style -->
+        <link rel="stylesheet" href="/example/ui/css/style.css">
+        <link rel="stylesheet" href="/example/ui/css/panel.css">
 
-    <!-- Example style -->
-    <link rel="stylesheet" href="/example/ui/css/style.css">
-    <link rel="stylesheet" href="/example/ui/css/panel.css">
+        <script>
+            vcomet.import("/vcomet/ui/vc-panel");
+            vcomet.import("/vcomet/ui/vc-button");
+        </script>
 
-    <script>
-        vcomet.import("/vcomet/ui/vc-panel");
-        vcomet.import("/vcomet/ui/vc-scroll");
-    </script>
+    </head>
+    <body>
+        <div class="container main">
+            <div class="card">
+                <h1>PANEL</h1>
 
-</head>
+                <vc-panel allow-scroll="false" class="panel">
 
-<body>
-    <div class="container main">
-        <div class="card">
-            <h1>PANEL</h1>
-
-            <vc-panel allow-scroll="false" class="panel">
-
-                <div id="content11" class="content">
-                    I'm a div!
-                </div>
-
-                <template>
-
-                    <div id="content21" class="content">
-                        I'm a lazy div!
+                    <div id="content11" class="content">
+                        I'm a div!
                     </div>
 
-                </template>
+                </vc-panel>
 
-            </vc-panel>
+                <vc-panel allow-scroll="false" href="util/panel/panelHrefTest.html" class="panel">
+                </vc-panel>
+            </div>
+            <div class="card">
+                <h1>LAZY CONTENT</h1>
 
-            <vc-panel allow-scroll="false" href="util/panel/panelHrefTest.html" class="panel">
-            </vc-panel>
+                <vc-button value="Render lazy" onclick="renderLazy()"></vc-button>
 
+                <vc-panel id="lazyContentPanel" allow-scroll="false" class="panel">
+                    <template>
+                        <div class="content" style="background-color: #3b78b7;">
+                            I'm a lazy div!
+                        </div>
+                    </template>
+                </vc-panel>
+            </div>
             <script>
                 var panel = document.querySelector("vc-panel");
                 var panelAjax = document.querySelectorAll("vc-panel")[1];
@@ -52,31 +55,32 @@
                     panel.render();
                 });
 
-                setTimeout(function() {
+                setTimeout(function () {
                     // Load lazy content
                     panelAjax.onReady(function () {
                         panelAjax.render();
                     });
                 }, 1000);
 
-                setTimeout(function() {
+                setTimeout(function () {
 
                     panelAjax.onReady(function () {
                         // Refresh with another source content
                         panelAjax.href = "util/panel/panelHrefTest1.html";
                         panelAjax.refresh();
                         // Load lazy content
-                        panelAjax.onLoad(function(){
-                            setTimeout(function() {
+                        panelAjax.onLoad(function () {
+                            setTimeout(function () {
                                 // panelAjax.render();
                             }, 500);
                         });
                     });
                 }, 2500);
 
+                function renderLazy() {
+                    document.querySelector("#lazyContentPanel").render();
+                }
             </script>
         </div>
-    </div>
-</body>
-
+    </body>
 </html>
