@@ -35,7 +35,8 @@
           // Only vc-panel will be taken into account
           if (children[i].nodeName.toLowerCase() == "vc-panel") {
             el._misc.indexedPanels.push(children[i]);
-            el._misc.panels[children[i].id] = children[i];
+            children[i].name = el._generateName(children[i].name);
+            el._misc.panels[children[i].name] = children[i];
           }
 
         }
@@ -52,6 +53,32 @@
 
         }
 
+      },
+      /*
+      @function (private) _generateName
+      @description Generates an unique id for the tab based on the name
+      */
+      generateName: function (name) {
+
+        var el = this;
+
+        name = name == "" ? "Untitled" : name;
+        
+        var tempId = name;
+        var definitiveName = name;
+        var differentiatorNumber = 2;
+
+        if (tempId in el._misc.panels) {
+
+          while (tempId in el._misc.panels) {
+
+            tempId = name + "_" + differentiatorNumber;
+            definitiveName = name + "_" + differentiatorNumber;
+            differentiatorNumber++;
+          }
+        }
+
+        return definitiveName;
       },
       /*
       @function (private) _swapToPanel
@@ -79,8 +106,8 @@
       @description Swaps to a container with the requested id
       @param {String} id
       */
-      swapToPanelById: function (id) {
-        this._swapToPanel(this._misc.panels[id]);
+      swapToPanel: function (name) {
+        this._swapToPanel(this._misc.panels[name]);
       },
       /*
       @function swapToPanelByIndex
