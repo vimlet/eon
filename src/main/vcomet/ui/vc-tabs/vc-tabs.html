@@ -23,9 +23,10 @@
 
   </div>
   <!-- Begin contentsSection Section -->
-  <div class="vc-tabs-contentsSection vc-bg6">
+  <!-- <div class="vc-tabs-contentsSection vc-bg6">
     <div class="vc-tabs-contentsWrapper"></div>
-  </div>
+  </div> -->
+  <!-- <vc-stack></vc-stack> -->
 
 </template>
 
@@ -35,7 +36,8 @@
     dependencies: [
       "../vc-scroll",
       "../vc-tab",
-      "../vc-panel"
+      "../vc-panel",
+      "../vc-stack"
     ],
     privateProperties: {
       /*
@@ -98,7 +100,9 @@
         el._refs.tabsScrolls = el.template.querySelector(".vc-tabs-scrolls");
 
         el._refs.contentsSection = el.template.querySelector(".vc-tabs-contentsSection");
-        el._refs.contentsWrapper = el.template.querySelector(".vc-tabs-contentsWrapper");
+        // el._refs.contentsWrapper = el.template.querySelector(".vc-tabs-contentsWrapper");
+
+        el._refs.stack = document.createElement("vc-stack");
 
       },
       /*
@@ -210,10 +214,10 @@
       @param {object} tab
       */
       selectTab: function (tab) {
-
+        
         var el = this;
-        var contentPanel = el._misc.contents[tab.id];
-
+        var contentPanel = el._misc.contentPanels[tab.dataset.id];
+        
         //Add selected Tab class to the clicked Tab
         tab.classList.add("vc-tabs-selected", "vc-bg6");
         tab.dataset.selected = true;
@@ -407,7 +411,87 @@
         tab.parentNode.removeChild(tab);
         tabContent.parentNode.removeChild(tabContent);
 
-      }
+      },
+      /*
+      @function (private) _createPanelTab
+      @description Creates a tab for the provided panel
+      @param {Object} panel
+      */
+      createPanelTab: function (panel) {
+
+        var el = this;
+
+        var tab = document.createElement("div");
+
+        var titleSpan = document.createElement("span");
+        var closeButton = document.createElement("div");
+        var closeIcon = document.createElement("i");
+        var name = panel.getAttribute("name");
+        var title = panel.getAttribute("tab-title");
+
+        title = title ? title : name;
+
+        tab.classList.add("vc-tabs-tab", "vc-bg4-border");
+        titleSpan.classList.add("vc-tabs-title", "vc-fg5", "vc-fg2-hoverable");
+        closeButton.classList.add("vc-tabs-closeButton", "vc-tabs-hidden");
+        closeIcon.classList.add("iconsSize", "material-icons", "vc-fg5", "vc-fg1-hoverable");
+
+        closeIcon.innerHTML = "close";
+        titleSpan.innerHTML = title ? title : "";
+
+        closeButton.appendChild(closeIcon);
+
+        tab.dataset.selected = false;
+
+        tab.appendChild(closeButton);
+        tab.appendChild(titleSpan);
+
+        tab.dataset.id = el._generateTabId(name);
+
+        el._createTabEvents(tab);
+
+        return tab;
+
+      },
+      /*
+      @function (private) _setupEvents
+      @description Creates all the events for the tab (click, close, drag...)
+      */
+      createTabEvents: function (tab) {
+
+        var el = this;
+
+        // Assigns an event for the tab when clicked
+        tab.addEventListener('click', function (e) {
+          el.select(tab);
+          el._misc.contentPanels[tab.dataset.id].render();
+        }, false);
+
+        if (vcomet.util.isTrue(el.closable)) {
+          var closeButton = tab.querySelector(".vc-tabs-closeButton");
+          closeButton.classList.remove("vc-tabs-hidden");
+          // Creates the close button event
+          closeButton.addEventListener('click', function (e) {
+            el.closeTab(el, e);
+          }, false);
+        }
+
+        // Check if we need to assign dragging related events
+        if (vcomet.util.isTrue(el.dragging)) {
+
+          tab.setAttribute("draggable", "true");
+
+          //Adding the draggable functionality, there are more available functions, but these are the ones we need
+          tab.addEventListener('dragstart', function (e) {
+            el._handleDragStart(e, tab);
+          });
+
+          tab.addEventListener("dragend", function (e) {
+            el._handleDragEnd(e, tab);
+          });
+        }
+
+      },
     },
     functions: {
       /*
@@ -480,7 +564,7 @@
           var siblingTab = this._getSiblingTab(tab);
 
           el._wipeout(tab);
-          
+
           // If there are still tabs in the tabsContainer then select it
           if (siblingTab) {
             el._selectTab(siblingTab);
@@ -504,7 +588,7 @@
         var el = this;
 
         var previousSelectedTab = this.querySelector('.vc-tabs-selected');
-        var previosSelectedContent = el._misc.contents[previousSelectedTab.id];
+        var previosSelectedContent = el._misc.contentPanels[previousSelectedTab.dataset.id];
 
         //Remove selected Tab class from the previous tab
         previousSelectedTab.classList.remove("vc-bg6", "vc-tabs-selected");
@@ -576,17 +660,56 @@
 
       var el = this;
 
-      el._misc.contents = {};
+      el._misc.contentPanels = {};
 
       el._setupRefs();
+
+      el._refs.stack.appendChild(el.source);
 
       vcomet.createCallback("onTabSelected", el);
 
     },
-    onRender: function () {
+    onInit: function () {
+
+      // var el = this;
+      // var panels = Array.prototype.slice.apply(el.template.querySelectorAll("vc-panel"));
+      // var panelsFragment = document.createDocumentFragment();
+      // var tabsFragment = document.createDocumentFragment();
+      // var panel, tab;
+
+      // while (panels.length) {
+      //   // From last to first
+      //   panel = panels.pop();
+      //   tab = el._createPanelTab(panel);
+
+      //   panel.classList.add("vc-tabs-panel", "vc-fg3", "selectable", "vc-tabs-hidden");
+
+      //   tabsFragment.insertBefore(tab, tabsFragment.childNodes[0]);
+      //   panelsFragment.insertBefore(panel, panelsFragment.childNodes[0]);
+
+      //   tab.dataset.tabOrder = panels.length;
+
+      //   el._misc.contentPanels[tab.dataset.id] = panel;
+
+      //   if (tab.dataset.tabOrder == 0) {
+      //     el.onReady(function () {
+      //       el._selectTab(tab);
+      //     });
+      //   }
+
+      // }
+
+      // el._refs.tabsWrapper.appendChild(tabsFragment);
+      // // el._refs.contentsWrapper.appendChild(panelsFragment);
+      // el._refs.stack.appendChild(panelsFragment);
+
+    },
+    onTransformed: function () {
 
       var el = this;
       var elementTabs = el.querySelectorAll("vc-tab");
+
+      el.appendChild(el._refs.stack);
 
       el._setupScrolls();
       el._setupDragging();
