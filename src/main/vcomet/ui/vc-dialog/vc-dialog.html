@@ -241,7 +241,13 @@
                 if (vcomet.util.isTrue(el.blur)) {
                     vcomet.registerPathListener(el._refs.dialog);
 
-                    document.body.addEventListener("mousedown", function (e) {
+                    // This fixes click not being triggered on body on iPad
+                    if (/iPad|iPhone/.test(navigator.platform)) {
+                        document.body.style.cursor = "pointer";
+                    }
+
+                    document.body.addEventListener("pointerdown", function (e) {
+
                         if (el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.isOnPath == false) {
                             el.close();
                         }
@@ -953,6 +959,8 @@
             */
             handleDialogSize: function () {
                 var el = this;
+                // TODO: Handle window size after blur close
+                // console.log('handleDialogSizes', el._misc.initialWidth);
 
                 // When the dialog width is bigger than window set it a percentaqge width
                 if (el._refs.dialog.offsetWidth >= (window.innerWidth - 20) && !el._misc.sizeControl) {
@@ -1242,7 +1250,6 @@
 
         onRender: function () {
             var el = this;
-
 
             el._addHeading();
             el.addContent();
