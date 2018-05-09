@@ -44,7 +44,7 @@ At is heart vComet takes care of the hassels of user interface creation, effecti
 
 * You can download the latest version [here](https://vimlet.com/downloads) and add it to your project.
 
-* Via NPM:
+* NPM client:
 ```npm install @vimlet/vcomet-cli -g```
 
     Once it is installed
