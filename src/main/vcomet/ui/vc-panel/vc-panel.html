@@ -92,7 +92,7 @@
           xhr.onload = function (e) {
             // If operation has been completed - ready state 4
             if (this.readyState !== 4) { return };
-            // Response status succesfully completed - status 200
+            // Response status successfully completed - status 200
             if (this.status !== 200) { return };
             // Allow execute imported html scripts
             documentFragment = vcomet.fragmentFromString(xhr.responseText);
@@ -116,25 +116,33 @@
         var i, t;
         var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
         var childrenArray;
-
-        // Avoid empty element template on programmatic cases
-        childrenArray = !dataNode.children[0] ? dataNode.template.children : dataNode.children;
-    
-        // Get first generation template children
-        for (i = 0, t = 0; i < childrenArray.length; i++) {
-          child = childrenArray[i];
-          
-          if (reAppend) {
-            fragment.appendChild(child);
-          }
-
-          if (child.tagName.toLowerCase() === "template") {
-            // Store templates references
-            el._refs.templates[t] = child;
-            t++
-          }
+        // ** IE do not support 'children' property
+        if(vcomet.util.getBrowser() === "IE"){
+          // Avoid empty element template on programmatic cases
+          childrenArray = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
+          // From node list to js array
+        } else {
+          // Avoid empty element template on programmatic cases
+          childrenArray = !dataNode.children[0] ? dataNode.template.children : dataNode.children;
         }
 
+        childrenArray = [].slice.call(childrenArray);
+        // Get first generation template children
+        while (childrenArray.length) {
+          // Build nodes structure
+          child = childrenArray.shift();
+          if(child.nodeType == 1) {
+            // Append remote source child
+            if (reAppend) {
+              fragment.appendChild(child);
+            }
+            if (child.tagName.toLowerCase() === "template") {
+              // Store templates references
+              el._refs.templates[t] = child;
+              t++
+            }
+          }
+        }
         // Move templates to the assigned body container 
         if (reAppend) {
            el.content.appendChild(fragment);
@@ -233,7 +241,7 @@
       // Get body container
       el.content = vcomet.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
     },
-    onInit: function () {
+    onTransformed: function () {
       var el = this;
       // Import panel content from specific source
       el._importContent();
