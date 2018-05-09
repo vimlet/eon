@@ -22,15 +22,13 @@
             <div class="card">
                 <h1>PANEL</h1>
 
-                <vc-panel allow-scroll="false" class="panel">
-
+                <!-- <vc-panel allow-scroll="false" class="panel">
                     <div id="content11" class="content">
                         I'm a div!
                     </div>
+                </vc-panel> -->
 
-                </vc-panel>
-
-                <vc-panel allow-scroll="false" href="util/panel/panelHrefTest.html" class="panel">
+                <vc-panel id="panelAjax" allow-scroll="false" href="util/panel/panelHrefTest.html" class="panel">
                 </vc-panel>
             </div>
             <div class="card">
@@ -43,37 +41,28 @@
                         <div class="content" style="background-color: #3b78b7;">
                             I'm a lazy div!
                         </div>
+                        <script>
+                            console.log("Example log - Blue panel content rendered on demand")
+                        </script>
                     </template>
                 </vc-panel>
             </div>
             <script>
                 var panel = document.querySelector("vc-panel");
-                var panelAjax = document.querySelectorAll("vc-panel")[1];
+                var panelAjax = document.querySelector("#panelAjax");
 
                 // Load lazy content
-                panel.onReady(function () {
-                    panel.render();
+                panelAjax.onReady(function () {
+                    panelAjax.onLoad(function () {
+                        panelAjax.render();
+                    });
                 });
 
                 setTimeout(function () {
-                    // Load lazy content
-                    panelAjax.onReady(function () {
-                        panelAjax.render();
-                    });
-                }, 1000);
-
-                setTimeout(function () {
-
                     panelAjax.onReady(function () {
                         // Refresh with another source content
                         panelAjax.href = "util/panel/panelHrefTest1.html";
                         panelAjax.refresh();
-                        // Load lazy content
-                        panelAjax.onLoad(function () {
-                            setTimeout(function () {
-                                // panelAjax.render();
-                            }, 500);
-                        });
                     });
                 }, 2500);
 
