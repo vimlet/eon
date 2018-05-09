@@ -20,7 +20,6 @@
             /*
               @property {String} heading 
               @description Dialog title
-              Default: undefined
             */
             heading: {
                 value: "",
@@ -926,7 +925,6 @@
                 // Only when the dialog is visible and is neither minimized nor maximized.
                 if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.dataset.mobile == "false") {
 
-
                     // When the dialog becomes visible sets its sizes
                     if (el._refs.dialog.style.width == "" && el._refs.dialog.classList.contains("vc-dialog-visible")) {
                         el._refs.dialog.style.width = el._refs.dialog.offsetWidth + "px";
@@ -964,11 +962,12 @@
 
                 // When the window grows back, the width of the dialog is restored
                 if (el.maxWidth != "auto") {
-                    if (el._refs.dialog.offsetWidth < (window.innerWidth - 20) && el._misc.sizeControl) {
+                    if (el._refs.dialog.offsetWidth < (window.innerWidth - 20) && el._refs.dialog.offsetWidth == el._misc.initialWidth && el._misc.sizeControl) {
                         el._refs.dialog.style.width = "";
                         el._misc.sizeControl = false;
                     }
-                } else if (el._refs.dialog.offsetWidth <= (window.innerWidth - 20) && el._misc.sizeControl) {
+
+                } else if (el._refs.dialog.offsetWidth <= (window.innerWidth - 20) && el._refs.dialog.offsetWidth >= el._misc.initialWidth && el._misc.sizeControl) {
                     el._refs.dialog.style.width = "";
                     el._misc.sizeControl = false;
                 }
@@ -1047,7 +1046,7 @@
             */
             open: function () {
                 var el = this;
-
+                
                 if (!el._refs.dialog.classList.contains("vc-dialog-visible")) {
                     vcomet.triggerCallback("onOpen", el);
 
@@ -1065,6 +1064,7 @@
 
                     document.body.appendChild(el._refs.dialog);
                     el._registerInitialSize();
+                    el._handleDialogSize();
                     el._limitPosition();
 
                     el._refs.scroll.update();
@@ -1082,6 +1082,8 @@
                 var el = this;
 
                 vcomet.triggerCallback("onClose", el);
+                // document.body.style.overflow = "auto";
+
                 el.appendChild(el._refs.dialog);
                 el._refs.dialog.classList.remove("vc-dialog-visible");
                 el._refs.dialog.classList.remove("vc-dialog-scaled");
