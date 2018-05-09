@@ -47,7 +47,7 @@ At is heart vComet takes care of the hassels of user interface creation, effecti
 * NPM client:
 ```npm install @vimlet/vcomet-cli -g```
 
-    Once it is installed
+    Once installed
 
     ```vcomet-cli install```
 
