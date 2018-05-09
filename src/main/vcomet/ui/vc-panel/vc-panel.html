@@ -56,6 +56,22 @@
         value: false,
         reflect: true
       },
+      /*
+      @property {String} name
+      @description In case of being used in vc-tabs it will be used internally to link a tab to its panel
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} tabTitle
+      @description In case of being used in vc-tabs , it will be used as a visual text for the tab
+      */
+      tabTitle: {
+        value: "",
+        reflect: true
+      }
     },
     privateFunctions: {
       /*
@@ -102,8 +118,8 @@
         var childrenArray;
 
         // Avoid empty element template on programmatic cases
-        childrenArray = !dataNode.childNodes[0] ? dataNode.template.children : dataNode.childNodes;
-       
+        childrenArray = !dataNode.children[0] ? dataNode.template.children : dataNode.children;
+    
         // Get first generation template children
         for (i = 0, t = 0; i < childrenArray.length; i++) {
           child = childrenArray[i];
@@ -133,16 +149,18 @@
       */
       removeTemplate: function (tmp) {
         var el = this;
-        var children = tmp.children;
         var fragment = document.createDocumentFragment();
-
-        for (var i = 0; i < children.length; i++) {
-          fragment.appendChild(children[i]);
+        var child;
+        var children = !tmp.children[0] ? tmp.content.children: tmp.children;
+        children = [].slice.call(children);
+        // Move nodes to the tree container safely
+        while (children.length) {
+          // Build nodes structure
+          child = children.shift();
+          fragment.appendChild(child);
         }
-
         // Insert template content just before the template node
         el.content.insertBefore(fragment, tmp);
-
         // Remove empty template
         el.content.removeChild(tmp);
       },
@@ -167,6 +185,7 @@
         var el = this;
         var tmp, i;
         var tmps = el._refs.templates;
+        
         // Partial render
         if (index === 0 || index) {
           tmp = tmps[index];
@@ -175,7 +194,7 @@
           delete tmps[index];
         } else {
           var keys = Object.keys(tmps);
-         
+          
           for (i = 0; i < keys.length; i++) {
             tmp = tmps[keys[i]];
             // Remove template
@@ -195,7 +214,6 @@
 
         // Import panel content from specific source
         el._importContent();
-        
       }
     },
     onCreated: function () {
