@@ -139,6 +139,14 @@
         animation: vc-md-viewer-hideGoToTopAnim 0.5s forwards;
     }
 
+.tip {
+    background-color: rgb(36, 36, 41);
+    border-radius: 2px;
+    padding: 2px 4px;
+    color: white;
+    display: inline-block;
+}
+
 
     /* Safari 4.0 - 8.0 */
 
@@ -284,6 +292,14 @@
                         "^.*\\s*$",
                         "gm"
                     ),
+                    tip: new RegExp(
+                        "@`(?:(?!`)[\\s\\S])*`",
+                        "g"
+                    ),
+                    tipIcon: new RegExp(
+                        "^\\((?:(?!\\()[\\s\\S])*\\)",
+                        "g"
+                    ),
                     codeBlock: new RegExp(
                         "```(?:(?!```)[\\s\\S])*```",
                         "g"
@@ -329,7 +345,7 @@
                         "g"
                     ),
                     br: new RegExp(
-                        "^(\\r\\n|\\r|\\n)$",
+                        "(\\r\\n|\\r|\\n)$",
                         "gm"
                     ),
                     table: new RegExp(
@@ -520,8 +536,8 @@
                     .replace(/\u00a0/g, ' ')
                     .replace(/\u2424/g, '\n');
                 // Replace especial escaped characters
-                data = el._preparse(data);
                 data = el._replaceEscaped(data);
+                data = el._preparse(data);
                 return data;
             },
             // @function parseHr (private) {string} [Parse horizontal rules] @param data {string}
@@ -807,6 +823,7 @@
                 data = el._parseTreeLink(data);
                 data = el._parsePlayground(data);
                 data = el._parseCodeBlock(data);
+                data = el._parseTip(data);
                 data = el._parseCode(data); // Order mathers, code must be parsed first because its content must not be parsed    
                 data = el._parseBr(data);
                 data = el._parseVideo(data);
@@ -946,7 +963,7 @@
                                 el._ondrawnCb();
                             });
 
-                            el._parseData.table.setAttribute("cTitle", header);
+                            el._parseData.table.setAttribute("columntitle", header);
                             exist = false;
                         }
                     } else if (el._parseData.table) { // If this table line belong to an existing table and its not header |---|
@@ -979,15 +996,19 @@
                 return docFragment;
             },
             // @function appendIndented (private) [Append indented paragraph]
-            appendIndented: function (content) {
+            appendIndented: function (content) {   
                 var appended = false;
                 if (el._parseData.ul) {
                     appended = true;
-                    el._parseData.ul.childNodes[el._parseData.ul.childNodes.length - 1].appendChild(content);
+                    var p = document.createElement("p");
+                    p.appendChild(content);
+                    el._parseData.ul.childNodes[el._parseData.ul.childNodes.length - 1].appendChild(p);
                 }
                 if (el._parseData.ol) {
                     appended = true;
-                    el._parseData.ol.childNodes[el._parseData.ol.childNodes.length - 1].appendChild(content);
+                    var p = document.createElement("p");
+                    p.appendChild(content);
+                    el._parseData.ol.childNodes[el._parseData.ol.childNodes.length - 1].appendChild(p);
                 }
                 return appended;
             },
@@ -1213,6 +1234,51 @@
                 });
                 return result;
             },
+            // @function parseTip (private) {string} @param data {string}
+            parseTip: function (data) {
+                var el = this;
+                var result = "";
+                var matches = data.match(el._regex.tip);
+                var codeResults = [];
+
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var cleanMatch = el._cleanMatch(matches[i], "@`", "`");
+                        var splitted = el._splitIcon(cleanMatch);
+                        var tipFragment = document.createDocumentFragment();
+                        var tipContent = document.createElement("span");
+                        tipContent.innerHTML = splitted[1];
+                        var icon = document.createElement("i");
+                        icon.classList.add("material-icons");
+                        icon.innerHTML = splitted[0] || "lightbulb_outline";
+                        tipFragment.appendChild(icon);
+                        tipFragment.appendChild(tipContent);
+                        var tip = el._createDiv(tipFragment, "tip");
+                        codeResults.push(tip);
+                    }
+                }
+                var j = 0;
+
+                result = data.replace(el._regex.tip, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = codeResults[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function splitIcon (private) {string} [Extract language from codeblock] @param data {string}
+            splitIcon: function (tag) {
+                var el = this;
+                var result = "";
+                var matches = tag.match(el._regex.tipIcon);
+
+                if (matches) {
+                    var icon = el._cleanMatch(matches[0], "(", ")");
+                    var cleanData = tag.replace(matches[0], "");
+                    return [icon, cleanData];
+                }
+                return [null, tag];
+            },
             // @function parseSingleEmphasis (private) {string} [Parse given emphasis tag] @param str {string} @param tag {string} @param regex {string} @param element {string} [Html element to create]
             parseSingleEmphasis: function (str, tag, regex, element) {
                 var result = "";
@@ -1243,7 +1309,7 @@
             },
 
             //@function cleanMultiParagraph (private) [At the begining of each line, check if we are inside of a multiline paragraph like lists]
-            cleanMultiParagraph: function (docFragment, currentMatch, isIndented) {
+            cleanMultiParagraph: function (docFragment, currentMatch) {
                 el = this;
                 if (currentMatch != "unorderedList" || !currentMatch) {
                     if (el._parseData.ul) {
