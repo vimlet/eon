@@ -49,35 +49,11 @@
         reflect: true
       },
       /*
-      @property {String} scrollsLength
-      @description Handles the length of the scroll rails
-      */
-      scrollsLength: {
-        value: "auto",
-        reflect: true
-      },
-      /*
       @property {Number} thickness
       @description Indicates the thickness for the scroll rails
       */
       thickness: {
         value: 15,
-        reflect: true
-      },
-      /*
-      @property {Number} growthConstant
-      @description Indicates the proportion of the scroll bars growth
-      */
-      growthConstant: {
-        value: 1,
-        reflect: true
-      },
-      /*
-      @property {Number} wheelScrollAmount
-      @description Indicates the amount of scroll when scrolling with the wheel
-      */
-      wheelScrollAmount: {
-        value: 120,
         reflect: true
       },
       /*
@@ -94,14 +70,6 @@
       */
       arrowScrolls: {
         value: false,
-        reflect: true
-      },
-      /*
-      @property {Number} arrowScrollAmount
-      @description Indicates the amount of scroll when scrolling with the arrows
-      */
-      arrowScrollAmount: {
-        value: 6,
         reflect: true
       },
       /*
@@ -192,6 +160,9 @@
         el._misc.moveThreshold = {};
         el._misc.moveThreshold.start = 0;
         el._misc.moveThreshold.time = 500;
+        
+        // Determines the amount of the arrow scroll
+        el._misc.arrowScrollAmount = 12;
 
         // This helps our pointerEnter to be triggered only once
         el._misc.pointerLeft = true;
@@ -207,9 +178,6 @@
 
         var el = this;
 
-        el.growthConstant = parseFloat(el.growthConstant);
-        el.wheelScrollAmount = parseInt(el.wheelScrollAmount);
-        el.arrowScrollAmount = parseInt(el.arrowScrollAmount);
         el.arrowScrolls = (el.arrowScrolls == "true");
 
         el._misc.horizontal.static = el.static == "both" || el.static == "horizontal" ? true : false;
@@ -904,8 +872,8 @@
 
           //Here we use the computed style of the rail to get a more exact value of its height, we were using
           //offsetHeight before but it was returning a rounded integer, that caused missmatches when creating the bar height
-          el._refs.verticalBar.style.top = 0 + "px";
-          el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight)) * el.growthConstant) + "px";
+          el._refs.verticalBar.style.transform = "translate3d(0, 0, 0)";
+          el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight))) + "px";
 
           //When left clicking on the scrollBar we will start the dragging event
           el._refs.verticalBar.addEventListener("pointerdown", function (e) {
@@ -993,7 +961,7 @@
                 var currentVerticalPosition = el._misc.vertical.position;
                 var limit = el.offsetHeight - el.content.scrollHeight;
 
-                var shouldStop = parseFloat(el._refs.verticalBar.style.top) + barHeight > e.clientY && e.clientY > parseFloat(el._refs.verticalBar.style.top);
+                var shouldStop = parseFloat(barTop) + barHeight > e.clientY && e.clientY > parseFloat(barTop);
 
                 if (shouldStop) {
 
@@ -1012,8 +980,6 @@
 
                   //If the scroll has changed we trigger the callback
                   if (currentVerticalPosition != el._misc.vertical.position) {
-                    // var eventObject = el._createScrollEventObject("rail", "vertical");
-                    // vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
                     el._railScrollAnimation("vertical", el._misc.vertical.position);
                   }
 
@@ -1054,8 +1020,8 @@
 
           //Here we use the computed style of the rail to get a more exact value of its width, we were using
           //offsetWidth before but it was returning a rounded integer, that caused missmatches when creating the bar width
-          el._refs.horizontalBar.style.left = 0 + "px";
-          el._refs.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
+          el._refs.horizontalBar.style.transform = "translate3d(0, 0, 0)";
+          el._refs.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth))) + "px";
 
           //When left clicking on the scrollBar we will start the dragging event
           el._refs.horizontalBar.addEventListener("pointerdown", function (e) {
@@ -1107,7 +1073,7 @@
                 var currentHorizontalPosition = el._misc.horizontal.position;
                 var limit = el.offsetWidth - el.content.scrollWidth;
 
-                var shouldStop = parseFloat(el._refs.horizontalBar.style.left) + barWidth > e.clientX && e.clientX > parseFloat(el._refs.horizontalBar.style.left);
+                var shouldStop = parseFloat(barLeft) + barWidth > e.clientX && e.clientX > parseFloat(barLeft);
 
                 if (shouldStop) {
 
@@ -1141,7 +1107,6 @@
           el._misc.horizontal.created = true;
 
           vcomet.triggerCallback("onHorizontalScrollCreated", el, el, [el._refs.horizontalScroll]);
-          // console.log("created horizontal scroll");
         }
 
       },
@@ -1265,7 +1230,7 @@
 
               var currentVerticalPosition = el._misc.vertical.position;
 
-              el._misc.vertical.position = currentVerticalPosition + el.arrowScrollAmount < 0 ? currentVerticalPosition + el.arrowScrollAmount : 0;
+              el._misc.vertical.position = currentVerticalPosition + el._misc.arrowScrollAmount < 0 ? currentVerticalPosition + el._misc.arrowScrollAmount : 0;
 
               el._updateVerticalPosition(el._misc.vertical.position);
 
@@ -1287,7 +1252,7 @@
               var currentVerticalPosition = el._misc.vertical.position;
               var limit = el.offsetHeight - el.content.scrollHeight;
 
-              el._misc.vertical.position = currentVerticalPosition - el.arrowScrollAmount > limit ? currentVerticalPosition - el.arrowScrollAmount : limit;
+              el._misc.vertical.position = currentVerticalPosition - el._misc.arrowScrollAmount > limit ? currentVerticalPosition - el._misc.arrowScrollAmount : limit;
 
               el._updateVerticalPosition(el._misc.vertical.position);
 
@@ -1308,7 +1273,7 @@
 
               var currentHorizontalPosition = el._misc.horizontal.position;
 
-              el._updateHorizontalPosition(currentHorizontalPosition + el.arrowScrollAmount < 0 ? currentHorizontalPosition + el.arrowScrollAmount : 0);
+              el._updateHorizontalPosition(currentHorizontalPosition + el._misc.arrowScrollAmount < 0 ? currentHorizontalPosition + el._misc.arrowScrollAmount : 0);
 
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
 
@@ -1328,7 +1293,7 @@
               var currentHorizontalPosition = el._misc.horizontal.position;
               var limit = el.offsetWidth - el.content.scrollWidth;
 
-              el._updateHorizontalPosition(currentHorizontalPosition - el.arrowScrollAmount > limit ? currentHorizontalPosition - el.arrowScrollAmount : limit);
+              el._updateHorizontalPosition(currentHorizontalPosition - el._misc.arrowScrollAmount > limit ? currentHorizontalPosition - el._misc.arrowScrollAmount : limit);
 
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
 
@@ -1576,7 +1541,7 @@
                 }
 
                 //Changes the vertical bar size depending on the new vertical scroll height
-                el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight)) * el.growthConstant) + "px";
+                el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight))) + "px";
 
                 vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("resize", "vertical")]);
 
@@ -1630,7 +1595,7 @@
                 //We calculate the new bars width depending on the rail
                 el._handleHorizontalScrollLength();
                 el._refs.horizontalScroll.classList.add("vc-scroll-active");
-                el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
+                el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth))) + "px";
 
                 el._updateHorizontalPosition(-proportionalTranslatePosition);
                 el._updateHorizontalBarPosition(el._misc.horizontal.position);
@@ -1640,7 +1605,7 @@
                 }
 
                 //Changes the vertical bar size depending on the new vertical scroll height
-                el._refs.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
+                el._refs.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth))) + "px";
 
                 vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("resize", "horizontal")]);
 
@@ -1698,7 +1663,7 @@
 
         previousPosition = el._misc.vertical.position;
 
-        scrollPosition = (e.deltaY < 0) ? parseInt(el._misc.vertical.position) + parseInt(el.wheelScrollAmount) : parseInt(el._misc.vertical.position) - parseInt(el.wheelScrollAmount);
+        scrollPosition = (e.deltaY < 0) ? parseInt(el._misc.vertical.position) + parseInt(Math.abs(e.deltaY)) : parseInt(el._misc.vertical.position) - parseInt(Math.abs(e.deltaY));
         scrollPosition = scrollPosition > 0 ? 0 : scrollPosition;
         scrollPosition = scrollPosition + el.content.scrollHeight < el.offsetHeight ? el.offsetHeight - el.content.scrollHeight : scrollPosition;
 
@@ -1720,6 +1685,8 @@
         var currentVerticalPosition = el._misc.vertical.position;
 
         var verticalRailRect = el._refs.verticalRail.getBoundingClientRect();
+        var verticalBarRect = el._refs.verticalBar.getBoundingClientRect();
+        var verticalBarTop = verticalBarRect.top - verticalRailRect.top;
         var barTopProportion;
         var proportionalScrollTop;
 
@@ -1747,14 +1714,14 @@
             finalBarTopPosition = parseFloat(window.getComputedStyle(el._refs.verticalRail, null).getPropertyValue("height").split("px")[0] - el._refs.verticalBar.offsetHeight);
           }
 
-          el._refs.verticalBar.style.top = finalBarTopPosition + "px";
+          el._refs.verticalBar.style.transform = "translate3d(0, " + finalBarTopPosition + "px, 0)";
 
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
-          barTopProportion = (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight) / parseFloat(el._refs.verticalBar.style.top.split("px")[0]);
+          barTopProportion = (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight) / parseFloat(verticalBarTop);
           proportionalScrollTop = parseFloat(el.content.scrollHeight - el.offsetHeight) / barTopProportion;
 
           el._misc.vertical.position = -proportionalScrollTop;
-
+          
           el._updateVerticalPosition(el._misc.vertical.position);
 
           el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
@@ -1838,6 +1805,8 @@
         var currentHorizontalPosition = el._misc.horizontal.position;
 
         var horizontalRailRect = el._refs.horizontalRail.getBoundingClientRect();
+        var horizontalBarRect = el._refs.horizontalBar.getBoundingClientRect();
+        var horizontalBarLeft = horizontalBarRect.left - horizontalRailRect.left;
         var barLeftProportion;
         var proportionalScrollLeft;
 
@@ -1865,10 +1834,10 @@
             finalBarLeftPosition = parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] - el._refs.horizontalBar.offsetWidth)
           }
 
-          el._refs.horizontalBar.style.left = finalBarLeftPosition + "px";
+          el._refs.horizontalBar.style.transform = "translate3d(" + finalBarLeftPosition + "px, 0, 0)";
 
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
-          barLeftProportion = parseFloat(el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / (parseFloat(el._refs.horizontalBar.style.left.split("px")[0]))
+          barLeftProportion = parseFloat(el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / (parseFloat(horizontalBarLeft))
           proportionalScrollLeft = (parseFloat(el.content.scrollWidth - el.offsetWidth) / barLeftProportion);
 
           el._updateHorizontalPosition(-proportionalScrollLeft);
@@ -1903,23 +1872,15 @@
       */
       handleVerticalScrollLength: function () {
         var el = this;
-
-        if (el.scrollsLength != "fixed") {
-          el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
-        }
+        el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
       },
       /*
       @function (private) _handleHorizontalScrollLength
       @description Handles the length of the vertical scroll
       */
       handleHorizontalScrollLength: function () {
-
         var el = this;
-
-        if (el.scrollsLength != "fixed") {
-          el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
-        }
-
+        el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
       },
       /*
       @function (private) _createVerticalScroll
@@ -2151,7 +2112,7 @@
         proportionalBarTop = ((el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight) / scrollTopProportion);
         proportionalBarTop = Math.floor(proportionalBarTop) == 0 ? Math.floor(proportionalBarTop) : proportionalBarTop;
 
-        el._refs.verticalBar.style.top = proportionalBarTop + "px";
+        el._refs.verticalBar.style.transform = "translate3d( 0, " + proportionalBarTop + "px, 0)";
       },
       /*
       @function (private) {Number} _getCurrentVertical
@@ -2198,7 +2159,7 @@
 
         proportionalBarLeft = ((el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / scrollLeftProportion);
 
-        el._refs.horizontalBar.style.left = proportionalBarLeft + "px";
+        el._refs.horizontalBar.style.transform = "translate3d(" + proportionalBarLeft + "px , 0, 0)";
       },
       /*
       @function updateHorizontalPosition
@@ -2353,18 +2314,14 @@
 
         if (el._refs.verticalScroll) {
           el._refs.verticalScroll.style.width = el.thickness + "px";
-          if (el.scrollsLength != "fixed") {
-            el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
-          }
-          el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight)) * el.growthConstant) + "px";
+          el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+          el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight))) + "px";
         }
 
         if (el._refs.horizontalScroll) {
           el._refs.horizontalScroll.style.height = el.thickness + "px";
-          if (el.scrollsLength != "fixed") {
-            el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
-          }
-          el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth)) * el.growthConstant) + "px";
+          el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+          el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth))) + "px";
         }
 
 
@@ -2520,13 +2477,13 @@
 
       el._initMisc();
       el._setupContent();
-      
+
 
     },
     onInit: function () {
 
       var el = this;
-      
+
       el._setupFitSizes();
       el._setupMisc();
       el._setupContainer();
@@ -2550,7 +2507,10 @@
       var el = this;
 
       el._setupContainerPosition();
-      el._setupScrollBars();
+
+      vcomet.onReady(function () {
+        el._setupScrollBars();
+      });
 
     },
     onPropertyChanged: function (key, oldVal, newVal) {
