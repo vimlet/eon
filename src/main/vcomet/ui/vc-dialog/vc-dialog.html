@@ -1,9 +1,11 @@
 <template>
     <div class="vc-dialog-dialog vc-bg2 vc-bg2-boxshadow">
         <div class="vc-dialog-heading vc-bg8 vc-unselectable">
-            <i class="vc-dialog-minimize vc-fg1-hoverable vc-dialog-hidden vicon vicon-minimize"></i>
-            <i class="vc-dialog-maximize vc-fg1-hoverable vc-dialog-hidden vicon vicon-maximize"></i>
-            <i class="vc-dialog-close vc-fg1-hoverable vicon vicon-close"></i>
+            <div class="vc-dialog-headingButtons">
+                <i class="vc-dialog-minimize vc-fg1-hoverable vc-dialog-hidden vicon vicon-minimize"></i>
+                <i class="vc-dialog-maximize vc-fg1-hoverable vc-dialog-hidden vicon vicon-maximize"></i>
+                <i class="vc-dialog-close vc-fg1-hoverable vicon vicon-close"></i>
+            </div>
         </div>
         <vc-scroll arrowScrolls="true" thickness="10" fill-container="false">
         </vc-scroll>
@@ -214,10 +216,10 @@
                 // we want to enable the header with the closable button
                 if (el.heading != "" || el.heading == "" && vcomet.util.isTrue(el.closable)) {
                     el._refs.heading.classList.remove("vc-dialog-hidden");
-                    
+
                     if (el._refs.dialog.querySelector(".vc-dialog-title")) {
                         el._refs.dialog.querySelector(".vc-dialog-title").innerHTML = el.heading;
-                        
+
                     } else {
                         var title = document.createElement("span");
                         title.classList.add("vc-dialog-title");
@@ -228,7 +230,6 @@
 
                     // If closable is enabled then we add its event listener to close the dialog
                     if (vcomet.util.isTrue(el.closable)) {
-                        
                         el._refs.close.addEventListener("click", function () {
                             el.close();
                         });
@@ -236,9 +237,10 @@
                     } else {
                         el._refs.close.classList.add("vc-dialog-hidden");
                     }
-                    
+
 
                 } else {
+                    el._refs.close.classList.add("vc-dialog-hidden");
                     el._refs.heading.classList.add("vc-dialog-hidden");
                 }
 
@@ -247,6 +249,21 @@
 
             },
 
+            /*
+              @function (private) _addContent
+              @description Adds listener that give blur functionality to dialog
+            */
+            addContent: function () {
+                var el = this;
+
+                el._refs.userContent = el._refs.userContent ? el._refs.userContent : document.createElement("vc-section");
+
+                el._refs.userContent.type = "content";
+                el._refs.userContent.classList.add("vc-dialog-content");
+                el._refs.scroll.appendChild(el._refs.userContent);
+
+                el.content = el._refs.userContent;
+            },
             /*
               @function (private) _addBlurEvent
               @description Adds listener that give blur functionality to dialog
@@ -592,6 +609,7 @@
 
                 if (vcomet.util.isTrue(el.maximize) && el._refs.dialog.dataset.version == "desktop") {
                     el._refs.maximizeButton.classList.remove("vc-dialog-hidden");
+                    el._refs.heading.classList.remove("vc-dialog-hidden");
 
                     el._refs.maximizeButton.addEventListener("click", function () {
                         if (el.dataset.status != "maximized") {
@@ -613,6 +631,7 @@
 
                 if (vcomet.util.isTrue(el.minimize) && el._refs.dialog.dataset.version == "desktop") {
                     el._refs.minimizeButton.classList.remove("vc-dialog-hidden");
+                    el._refs.heading.classList.remove("vc-dialog-hidden");
 
                     el._refs.minimizeButton.addEventListener("click", function () {
                         if (el.dataset.status != "minimized") {
@@ -774,7 +793,6 @@
                     el._refs.dialog.style.minWidth = el.minWidth + "px";
                     el._refs.dialog.style.minHeight = el.minHeight + "px";
 
-
                     if (el._misc.initialWidth && el._misc.initialHeight) {
                         el._refs.dialog.style.width = el._misc.initialWidth + "px";
                         el._refs.dialog.style.height = el._misc.initialHeight + "px";
@@ -929,8 +947,8 @@
                 // Prevents the scroll from exceeding the dialog since 
                 // the dialog has no default size to limit the scroll on IE 
                 if (vcomet.util.getBrowser() == "IE") {
-                    el._refs.dialog.style.width = el._refs.dialog.offsetWidth + "px";
-                    el._refs.dialog.style.height = el._refs.dialog.offsetHeight + "px";
+                    el._refs.dialog.style.width = el._refs.dialog.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetWidth + "px";
+                    el._refs.dialog.style.height = el._refs.dialog.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetHeight + "px";
                 }
             },
 
@@ -1068,7 +1086,6 @@
 
                 if (!el._refs.dialog.classList.contains("vc-dialog-visible")) {
                     vcomet.triggerCallback("onOpen", el);
-
                     el._assignSize();
                     el._addOverlay();
                     el._setPosition();
@@ -1082,6 +1099,7 @@
                     el._refs.dialog.classList.add("vc-dialog-visible");
 
                     document.body.appendChild(el._refs.dialog);
+                    el._handleDialogSize();
                     el._registerInitialSize();
                     el._limitPosition();
 
@@ -1104,7 +1122,7 @@
                 el.appendChild(el._refs.dialog);
                 el._refs.dialog.classList.remove("vc-dialog-visible");
                 el._refs.dialog.classList.remove("vc-dialog-scaled");
-                
+
                 if (el._refs.overlay) {
                     el._refs.overlay.parentNode.removeChild(el._refs.overlay);
                 }
@@ -1121,27 +1139,7 @@
                 el.dataset.status = "";
                 vcomet.triggerCallback("onClosed", el);
             },
-            /*
-              @function addContent
-              @description Add new content to dialog
-              @param {Object} content [Content node]
-            */
-            addContent: function (content) {
-                var el = this;
 
-                if (content) {
-                    var section = document.createElement("vc-section");
-
-                    section.type = "content";
-                    section.appendChild(content);
-                    this._refs.userContent = section;
-                }
-
-                if (el._refs.userContent) {
-                    el._refs.userContent.classList.add("vc-dialog-content");
-                    el._refs.scroll.content.appendChild(el._refs.userContent);
-                }
-            },
 
             /*
               @function addFooter
@@ -1169,18 +1167,6 @@
                     el._refs.userFooter.classList.add("vc-dialog-footer", "vc-bg8", "vc-unselectable");
                     el._refs.dialog.appendChild(el._refs.userFooter);
                 }
-            },
-
-            /*
-              @function setContent
-              @description Replaces old dialog content with the new value
-              @param {Object} newContent [New content node]
-            */
-            setContent: function (newContent) {
-                var el = this;
-                var oldContent = this._refs.userContent.querySelector("span");
-
-                this._refs.userContent.replaceChild(newContent, oldContent);
             },
 
             /*
@@ -1216,6 +1202,12 @@
         onCreated: function () {
             var el = this;
 
+            // Create callbacks
+            vcomet.createCallback("onOpen", el);
+            vcomet.createCallback("onOpened", el);
+            vcomet.createCallback("onClose", el);
+            vcomet.createCallback("onClosed", el);
+
             el._createRefs();
             el._misc.drag = {};
             el._misc.resize = {};
@@ -1223,24 +1215,9 @@
             el._misc.windowPadding = 5;
             el._misc.sizeControl = false;
 
+            el._addContent();
+
             el._refs.dialog.rootNode = el;
-
-            // if (el.template.querySelector("vc-section[type='content']")) {
-            //     el.content = el.template.querySelector("vc-section[type='content']");
-            // } else {
-            //     el.content = document.createElement("vc-section");
-            //     el.content.type = "content";
-            //     el._refs.scroll.appendChild(content);
-            // }
-
-            // el.content.classList.add("vc-dialog-content");
-
-            // Create callbacks
-            vcomet.createCallback("onOpen", el);
-            vcomet.createCallback("onOpened", el);
-            vcomet.createCallback("onClose", el);
-            vcomet.createCallback("onClosed", el);
-
         },
 
         onInit: function () {
@@ -1255,7 +1232,7 @@
             var el = this;
 
             el._addHeading();
-            el.addContent();
+            // el.addContent();
             el.addFooter();
             el._addBlurEvent();
             el._addDragListeners();
