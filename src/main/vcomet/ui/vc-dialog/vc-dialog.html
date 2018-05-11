@@ -410,6 +410,14 @@
             addResizes: function () {
                 var el = this;
 
+                // When the dialog changes its size dynamically it will center
+                vcomet.addResizeListener(el._refs.dialog, "dialog", function () {
+                    if (el._refs.dialog.classList.contains("vc-dialog-visible") && el.multiposition == "centered" && !el._misc.resize.active) {
+                        el._center();
+                    }
+
+                });
+
                 if (vcomet.util.isTrue(el.resize) && el._refs.dialog.dataset.version == "desktop") {
                     var sideResizers = ["top", "right", "bottom", "left"];
                     var cornerResizers = ["topLeft", "topRight", "bottomLeft", "bottomRight"];
@@ -456,6 +464,7 @@
                 };
 
                 el._refs.resizers[type][resizerName].addEventListener("mousedown", function (e) {
+                    el._misc.resize.active = true;
                     el._misc.resize.startX = e.clientX;
                     el._misc.resize.startY = e.clientY;
                     el._misc.resize.startWidth = parseInt(document.defaultView.getComputedStyle(el._refs.dialog).width, 10);
@@ -466,6 +475,7 @@
                 });
 
                 document.addEventListener("mouseup", function (e) {
+                    el._misc.resize.active = false;
                     el._refs.dialog.classList.remove("vc-unselectable");
                     document.body.removeEventListener("mousemove", moveFunction);
                 });
@@ -1219,6 +1229,8 @@
             el.hasFooter = el._refs.userFooter ? true : el.hasFooter;
 
             el._verifyDeviceVersion();
+
+            console.log('el.multiposition', el.multiposition);
         },
 
         onRender: function () {
