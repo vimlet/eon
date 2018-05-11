@@ -412,10 +412,9 @@
 
                 // When the dialog changes its size dynamically it will center
                 vcomet.addResizeListener(el._refs.dialog, "dialog", function () {
-                    if (el._refs.dialog.classList.contains("vc-dialog-visible") && el.multiposition == "centered" && !el._misc.resize.active) {
+                    if (el._refs.dialog.classList.contains("vc-dialog-visible") && el.multiposition == "centered" && !el._misc.resize.active && el._misc.previousWindowWidth == el._misc.newWindowWidth) {
                         el._center();
                     }
-
                 });
 
                 if (vcomet.util.isTrue(el.resize) && el._refs.dialog.dataset.version == "desktop") {
@@ -949,7 +948,6 @@
             */
             assignCenterPosition: function () {
                 var el = this;
-
                 var centerWidth = (window.innerWidth - el._refs.dialog.offsetWidth) / 2;
                 var centerHeight = (window.innerHeight - el._refs.dialog.offsetHeight) / 2;
                 el._refs.dialog.style.left = centerWidth + "px";
@@ -1015,6 +1013,9 @@
             */
             handleWindowResize: function () {
                 var el = this;
+
+                el._misc.previousWindowWidth = el._misc.newWindowWidth;
+                el._misc.newWindowWidth = window.innerWidth;
 
                 // Only when the dialog is visible and is neither minimized nor maximized.
                 if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.dataset.mobile == "false") {
@@ -1214,6 +1215,8 @@
             el._misc.scaled = {};
             el._misc.windowPadding = 5;
             el._misc.sizeControl = false;
+            el._misc.previousWindowWidth = window.innerWidth;
+            el._misc.newWindowWidth = window.innerWidth;
 
             el._addContent();
             el._addFooter();
@@ -1229,8 +1232,6 @@
             el.hasFooter = el._refs.userFooter ? true : el.hasFooter;
 
             el._verifyDeviceVersion();
-
-            console.log('el.multiposition', el.multiposition);
         },
 
         onRender: function () {
@@ -1245,6 +1246,7 @@
         },
 
         onWindowResize: function (e) {
+            
             this._verifyDeviceVersion();
             this._handleWindowResize(e);
         },
