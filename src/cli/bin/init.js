@@ -24,7 +24,7 @@ module.exports = function (result) {
 
             // Call to install vcomet
             install.sync(null, { install: true });
-            console.log('\x1b[96m', '\nTo start the server, type "npm start"\n');
+            console.log('\x1b[96m', '\nTo start the server, type "npm start"');
             console.log("\x1b[0m"); // Reset color + newLine
 
         } catch (error) {
