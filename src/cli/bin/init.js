@@ -23,7 +23,9 @@ module.exports = function (result) {
             downloadAndExtractTemplate.sync(null, templateURL, projectPath);
 
             // Call to install vcomet
-            install({install: true});
+            install.sync(null, { install: true });
+            console.log('\x1b[96m', '\nTo start the server, type "npm start"');
+            console.log("\x1b[0m"); // Reset color + newLine
 
         } catch (error) {
             console.error("\x1b[91m", "\nError: " + error);
