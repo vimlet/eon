@@ -24,7 +24,7 @@ var localVersionPath;
 var localCustomPath;
 var versionJsonObject = {};
 
-module.exports = function (result) {
+module.exports = function (result, cb) {
 
     vcometJsonObject = {};
     actualPackages = {};
@@ -43,12 +43,15 @@ module.exports = function (result) {
             // Install or update wanted packages        
             installPackages.sync(null);
 
+            cb(null, true);
         } catch (error) {
             console.error("\x1b[91m", "\nError: " + error);
             console.error("\x1b[0m"); // Reset color + newLine
+
+            cb(error);
         }
     });
-
+    
 };
 
 function supportGitCredentials() {
@@ -336,6 +339,7 @@ function installPackages(cb) {
                 }
             });
         }
+
         // Call calback
         cb();
     });
