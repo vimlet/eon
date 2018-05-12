@@ -45,9 +45,11 @@ vcomet.$1 = function (query) {
   return document.querySelector(query);
 };
 
-// window definitions will use any other framework $ and $1 if found
+// window & document definitions will use any other framework $ and $1 if found
 window.$ = window.$ || vcomet.$;
 window.$1 = window.$1 || vcomet.$1;
+document.$ = document.$ || vcomet.$;
+document.$1 = document.$1 || vcomet.$1;
 
 // TODO: MOVE THIS EXCEPT DOMREADY TO VCOMET.DOM
 (function () {
