@@ -42,16 +42,18 @@ module.exports = function (result, cb) {
             handleLocalVersions.sync(null);
             // Install or update wanted packages        
             installPackages.sync(null);
-
-            cb(null, true);
+            if (cb) {
+                cb(null, true);
+            }
         } catch (error) {
             console.error("\x1b[91m", "\nError: " + error);
             console.error("\x1b[0m"); // Reset color + newLine
-
-            cb(error);
+            if (cb) {
+                cb(error);
+            }
         }
     });
-    
+
 };
 
 function supportGitCredentials() {
