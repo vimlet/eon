@@ -16,8 +16,7 @@ It creates a file called `vcomet.json` with configuration data such as:
 * Dependencies to download third partners vComet components.
 
 ## Installation
-* Via NPM: npm install@vimlet/vcomet-cli -g
-It **has to** be installed globally.
+* NPM: npm install@vimlet/vcomet-cli -g
 
 ## How to use
 After installation just run `vcomet-cli install` in your project folder.
