@@ -30,7 +30,7 @@ At is heart vComet takes care of the hassles of user interface creation, effecti
 ## Features
 
 * **Light:** Core of less than 16kb (minified and gzipped).
-* **Fast:** It's asynchronous patterns and natively supported specs.
+* **Fast:** With its asynchronous patterns and natively supported specs.
 * **Intuitive:** The DOM is your API; HTML and JavaScript are enough to work with vComet.
 * **Semantic:** Non-verbose declarative and programmatic API.
 * **Templating:** Data binding capabilities.

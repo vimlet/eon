@@ -158,10 +158,26 @@
                 reflect: true
             },
             /*
+              @property {Boolean} hasFooter 
+              @description Makes the dialog footer visible or not
+              Default: false
+            */
+            hasFooter: {
+                value: "false",
+                reflect: true
+            },
+            /*
              @property {Object} content 
              @description Reference to the content element
            */
             content: {
+                value: {}
+            },
+            /*
+             @property {Object} footer 
+             @description Reference to the footer element
+           */
+            footer: {
                 value: {}
             }
         },
@@ -244,9 +260,6 @@
                     el._refs.heading.classList.add("vc-dialog-hidden");
                 }
 
-
-
-
             },
 
             /*
@@ -263,6 +276,39 @@
                 el._refs.scroll.appendChild(el._refs.userContent);
 
                 el.content = el._refs.userContent;
+            },
+
+            /* 
+              @function (private) _addFooter
+              @description Adds dialog footer
+            */
+            addFooter: function () {
+                var el = this;
+
+                el.footer = el._refs.userFooter ? el._refs.userFooter : document.createElement("vc-section");
+                el.footer.type = "footer";
+                el.footer.classList.add("vc-dialog-footer", "vc-bg8", "vc-unselectable");
+
+                el._handleFooterAppend();
+            },
+
+            /* 
+              @function (private) _handleFooterAppend
+              @description Depending on the hasFooter property it will append/remove the footer from the dialog
+            */
+            handleFooterAppend: function () {
+                var el = this;
+
+                el.onInit(function () {
+                    if (vcomet.util.isTrue(el.hasFooter)) {
+                        el._refs.dialog.appendChild(el.footer);
+                    } else {
+                        if (el.footer.parentNode && el.footer.parentNode.isEqualNode(el._refs.dialog)) {
+                            el._refs.dialog.removeChild(el.footer);
+                        }
+                    }
+                });
+
             },
 
             /*
@@ -364,6 +410,13 @@
             addResizes: function () {
                 var el = this;
 
+                // When the dialog changes its size dynamically it will center
+                vcomet.addResizeListener(el._refs.dialog, "dialog", function () {
+                    if (el._refs.dialog.classList.contains("vc-dialog-visible") && el.multiposition == "centered" && !el._misc.resize.active && el._misc.previousWindowWidth == el._misc.newWindowWidth) {
+                        el._center();
+                    }
+                });
+
                 if (vcomet.util.isTrue(el.resize) && el._refs.dialog.dataset.version == "desktop") {
                     var sideResizers = ["top", "right", "bottom", "left"];
                     var cornerResizers = ["topLeft", "topRight", "bottomLeft", "bottomRight"];
@@ -410,6 +463,7 @@
                 };
 
                 el._refs.resizers[type][resizerName].addEventListener("mousedown", function (e) {
+                    el._misc.resize.active = true;
                     el._misc.resize.startX = e.clientX;
                     el._misc.resize.startY = e.clientY;
                     el._misc.resize.startWidth = parseInt(document.defaultView.getComputedStyle(el._refs.dialog).width, 10);
@@ -420,6 +474,7 @@
                 });
 
                 document.addEventListener("mouseup", function (e) {
+                    el._misc.resize.active = false;
                     el._refs.dialog.classList.remove("vc-unselectable");
                     document.body.removeEventListener("mousemove", moveFunction);
                 });
@@ -893,7 +948,6 @@
             */
             assignCenterPosition: function () {
                 var el = this;
-
                 var centerWidth = (window.innerWidth - el._refs.dialog.offsetWidth) / 2;
                 var centerHeight = (window.innerHeight - el._refs.dialog.offsetHeight) / 2;
                 el._refs.dialog.style.left = centerWidth + "px";
@@ -959,6 +1013,10 @@
             */
             handleWindowResize: function () {
                 var el = this;
+
+                // Stores the windows previous window resize size and the resize after do window resize
+                el._misc.previousWindowWidth = el._misc.newWindowWidth;
+                el._misc.newWindowWidth = window.innerWidth;
 
                 // Only when the dialog is visible and is neither minimized nor maximized.
                 if (el.dataset.status == "" && el._refs.dialog.classList.contains("vc-dialog-visible") && el._refs.dialog.dataset.mobile == "false") {
@@ -1141,63 +1199,6 @@
                 vcomet.triggerCallback("onClosed", el);
             },
 
-
-            /*
-              @function addFooter
-              @description Add new footer to dialog
-              @param {Object} footer [Footer node]
-              @param {String} location [Button footer location]
-            */
-            addFooter: function (footer, location) {
-                var el = this;
-
-                if (footer && !el._refs.userFooter) {
-                    var section = document.createElement("vc-section");
-
-                    section.type = "footer";
-                    location ? section.location = location : section.location;
-                    section.appendChild(footer);
-                    el._refs.userFooter = section;
-                }
-
-                if (el._refs.userFooter) {
-                    if (footer) {
-                        location ? el._refs.userFooter.location = location : el._refs.userFooter.location;
-                        el._refs.userFooter.appendChild(footer);
-                    }
-                    el._refs.userFooter.classList.add("vc-dialog-footer", "vc-bg8", "vc-unselectable");
-                    el._refs.dialog.appendChild(el._refs.userFooter);
-                }
-            },
-
-            /*
-              @function setFooter
-              @description Replaces old buttons of the footer with the new value
-              @param {Object} newFooter [New footer node]
-              @param {String} newLocation [New footer location]
-            */
-            setFooter: function (newFooter, newLocation) {
-                var el = this;
-                var oldFooter = this._refs.userFooter.childNodes;
-
-                while (this._refs.userFooter.firstChild) {
-                    this._refs.userFooter.removeChild(this._refs.userFooter.firstChild);
-                }
-
-                newLocation ? this._refs.userFooter.location = newLocation : this._refs.userFooter.location;
-                this._refs.userFooter.appendChild(newFooter);
-            },
-
-
-            /*
-              @function removeFooterButton
-              @description Removes a button from footer
-              @param {Object} button [button to remove]
-            */
-            removeFooterButton: function (button) {
-                this._refs.userFooter.removeChild(button);
-            }
-
         },
 
         onCreated: function () {
@@ -1215,16 +1216,21 @@
             el._misc.scaled = {};
             el._misc.windowPadding = 5;
             el._misc.sizeControl = false;
+            el._misc.previousWindowWidth = window.innerWidth;
+            el._misc.newWindowWidth = window.innerWidth;
 
             el._addContent();
+            el._addFooter();
 
             el._refs.dialog.rootNode = el;
         },
 
         onInit: function () {
             var el = this;
+
             el.dataset.status = "";
             el.multiposition = el.multiposition == "scaled" && vcomet.util.isTrue(el.modal) ? "centered" : el.multiposition;
+            el.hasFooter = el._refs.userFooter ? true : el.hasFooter;
 
             el._verifyDeviceVersion();
         },
@@ -1233,8 +1239,6 @@
             var el = this;
 
             el._addHeading();
-            // el.addContent();
-            el.addFooter();
             el._addBlurEvent();
             el._addDragListeners();
             el._addResizes();
@@ -1243,14 +1247,19 @@
         },
 
         onWindowResize: function (e) {
+            
             this._verifyDeviceVersion();
             this._handleWindowResize(e);
         },
 
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
-                case ("heading"):
+                case "heading":
                     this._addHeading(newVal);
+                    break;
+
+                case "hasFooter":
+                    this._handleFooterAppend();
                     break;
             }
         },

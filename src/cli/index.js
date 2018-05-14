@@ -58,7 +58,7 @@ cli
 .flag("h", "help", "Shows help")
 .parse(process.argv);
 
-if (cli.result.help) {
+if (Object.keys(cli.result).length == 0 || cli.result.help) {
     cli.printHelp();
 } else if(cli.result.init) {
     init(cli.result);

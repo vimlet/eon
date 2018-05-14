@@ -25,39 +25,40 @@ To indicate that the vc-section will contain the content of the dialog it is nec
   <vc-section type="content">
     <span>My dialog content</span>
   </vc-section>
-  <vc-section type="footer" location="right">
+  <vc-section type="footer">
     <vc-button value="OK" onclick="alert('¡Hey!');"></vc-button>
   </vc-section>
 </vc-dialog>
 
 <!-- Trigger button-->
-<vc-button value="SHOW" onclick="document.querySelector('#myDialog').open()"></vc-button>
+<vc-button label="SHOW" onclick="document.querySelector('#myDialog').open()"></vc-button>
 ```
 
 ## Programmatic usage
 
-Unlike vc-dialog created declaratively, programmatic vc-dialog does not need vc-section. To add content vc-dialog have `addContent` method, and to add footer use `addFooter`.
+Unlike vc-dialog created declaratively, programmatic vc-dialog does not need vc-section. To interact with the content and the footer only need to use the object `content` and `footer`.
 
 ``` [javascript]
 vcomet.onReady(function () {
   // Create vc-dialog
   var myDialog = document.createElement("vc-dialog");
-  // Create content elements
   var myContent = document.createElement("span");
   var myButton = document.createElement("vc-button");
 
   // Set properties
   myDialog.heading = "Dialog Test";
-  myDialog.setAttribute("id", "myDialog");
+  // To make the footer visible programmatically this property with `true` value is necessary
+  myDialog.hasFooter = "true";
   myContent.innerHTML = "Programmatic dialog content";
-  myButton.value = "OK";
+  myButton.label = "OK";
+
+  // Add the content and the footer to the vc-dialog
+  myDialog.content.appendChild(myContent);
+  myDialog.footer.appendChild(myButton);
 
   // Append vc-dialog
   document.querySelector("body").appendChild(myDialog);
 
-  // Add the content and the footer to the vc-dialog
-  myDialog.addContent(myContent);
-  myDialog.addFooter(myButton);
 });
 ```
 
@@ -69,7 +70,7 @@ vcomet.onReady(function () {
 ## Examples
 
 ### Interactive dialog
-Using different vc-dialog properties it can be draggable, resizeable, maximizable, minimizable and it can be closed if it loses focus.
+Using different vc-dialog properties it can be draggable, resizable, maximizable, minimizable and it can be closed if it loses focus.
 It also possible to establish maximum or minimum height and width using vc-dialog properties.
 
 ``` [html]
@@ -106,9 +107,9 @@ This example shows a vc-dialog containing vc-form components.
 
 
 ### Dynamically content dialog
-Dynamically and using the vc-dialog methods it is possible modify the content, footer or properties. Also there are different callbacks that can be very useful. 
+Dynamically it is possible to modify the content and footer with its objects. Also, there are different callbacks that can be very useful. 
 
-In this example first creates the dialog declaratively and then programmatically changes the content.
+In this example first creates the dialog declaratively and then programmatically changes the content and adds the footer.
 ``` [html]
 <vc-dialog id="myDialog" max-width="250" min-height="100">
   <vc-section type="content">
@@ -124,12 +125,16 @@ In this example first creates the dialog declaratively and then programmatically
 vcomet.onReady(function () {
   var myDialog = document.querySelector("#myDialog");
   var newContent = document.createElement("span");
+  var newButton = document.createElement("vc-button");
 
   newContent.innerHTML = "This is the new dynamically dialog content";
+  newButton.label = "New button";
 
   // When the dialog is opened the functionality will be executed
   myDialog.onOpen(function () {
-    myDialog.setContent(newContent);
+    myDialog.hasFooter = "true";
+    myDialog.content.appendChild(newContent);
+    myDialog.footer.appendChild(newButton);
   });
 
 });

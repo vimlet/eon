@@ -3,7 +3,7 @@
 ## Introduction
 It is a specific menu composed of apps. The button of the vc-appmenu that displays the container with the apps can be placed to the left, to the right or in the center with respect to the element that contains it.
 
-To use it, is necessary to import vc-appmenu in the head of the HTML document:
+To use it is necessary to import vc-appmenu in the head of the HTML document:
 ``` [html]
 <head>
   <script>
