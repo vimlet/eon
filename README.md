@@ -1,6 +1,15 @@
 
 
+
 <p align="center">
+<a href="https://vimlet.com/vcomet">
+<img width="450" src="logo.png"></img>
+</a>
+</p>
+
+
+<p align="center">
+
 [//]: # (badges)
 
 <a href='https://github.com/vimlet/VimletComet/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526309522167license.svg?raw=true' title='License' alt='license'></a>
@@ -8,13 +17,6 @@
 <a href='https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526309522167docs.svg?raw=true' title='Docs' alt='docs'></a>
 
 [//]: # (badges)
-</p>
-
-
-<p align="center">
-<a href="https://vimlet.com/vcomet">
-<img width="450" src="logo.png"></img>
-</a>
 </p>
 
 
