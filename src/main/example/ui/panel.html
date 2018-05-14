@@ -22,12 +22,6 @@
             <div class="card">
                 <h1>PANEL</h1>
 
-                <!-- <vc-panel allow-scroll="false" class="panel">
-                    <div id="content11" class="content">
-                        I'm a div!
-                    </div>
-                </vc-panel> -->
-
                 <vc-panel id="panelAjax" allow-scroll="false" href="util/panel/panelHrefTest.html" class="panel">
                 </vc-panel>
             </div>
@@ -39,9 +33,12 @@
                 <vc-panel id="lazyContentPanel" allow-scroll="false" class="panel">
                     <template>
                         <div class="content" style="background-color: #3b78b7;">
-                            I'm a lazy div!
+                            I'm an on demand rendered div!
                         </div>
-                        <script>
+                        <script defer>
+                            if(vcomet.util.getBrowser() === "IE") {
+                                console.log("Example log - * IE executes scripts inside templates too");
+                            }
                             console.log("Example log - Blue panel content rendered on demand")
                         </script>
                     </template>
@@ -52,8 +49,10 @@
                 var panelAjax = document.querySelector("#panelAjax");
 
                 // Load lazy content
-                panelAjax.onLoad(function () {
-                    panelAjax.render();
+                panelAjax.onCreated(function () {
+                    panelAjax.onLoad(function () {
+                        panelAjax.render();
+                    });
                 });
 
                 setTimeout(function () {
@@ -62,7 +61,11 @@
                         panelAjax.href = "util/panel/panelHrefTest1.html";
                         panelAjax.refresh();
                         panelAjax.onLoad(function () {
-                            panelAjax.render();
+                            panelAjax.render(0);
+                            document.querySelector("#red").style.width = "100%";
+                            setTimeout(function () {
+                                document.querySelector(".square").style.width = "50%";
+                            }, 500);
                         });
                     });
                 }, 2500);

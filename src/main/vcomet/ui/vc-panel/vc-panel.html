@@ -97,33 +97,44 @@
             // Allow execute imported html scripts
             documentFragment = vcomet.fragmentFromString(xhr.responseText);
             // Extract script nodes that belong to template elements for deferring their execution
-            el._getTemplateScripts(documentFragment.children);
+            var nodes = el._deferScripts(documentFragment);
   
-            el._appendContent(documentFragment);
+            el._appendContent(nodes);
           };
           // Execute request
           xhr.send();
         } else {
-          // Store templates references
-          el._appendContent(el);
+          // Extract script nodes that belong to template elements for deferring their execution
+          var nodes = el._deferScripts(el);
+          el._appendContent(nodes);
         }
       },
       /*
-        @function (private) getTemplateScripts
+        @function (private) _deferScripts
         @description  
         @param {Array} nodes []
       */
-      getTemplateScripts: function (nodes) {
+      deferScripts: function (dataNode) {
         var el = this;
-        var scripts, script, scriptKey;
+        var nodes, scripts, script, scriptKey;
+        // ** IE do not support 'children' property
+        if(vcomet.util.getBrowser() === "IE"){
+          // Avoid empty element template on programmatic cases
+          nodes = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
+          // From node list to js array
+        } else {
+          // Avoid empty element template on programmatic cases
+          nodes = !dataNode.children[0] ? dataNode.template.children : dataNode.children;
+        }
         // Cast to js array 
         nodes = [].slice.call(nodes);
+
         for (var i = 0; i < nodes.length; i++) {
           var node = nodes[i];
           // Check template node
           if (node.tagName === "TEMPLATE") {
            // Get template script nodes
-           scripts = node.content.querySelectorAll("script");
+           scripts = node.content ? node.content.querySelectorAll("script") : node.querySelectorAll("script");
             for (var j = 0; j < scripts.length; j++) {
               script = scripts[j];
               scriptKey = Object.keys(el._refs.scripts).length;
@@ -136,35 +147,23 @@
             }
           }
         }
-        
-        
+        return nodes;
       },
       /*
         @function (private) appendContent
         @description Append content to the panel or the scroll container if exists 
         @param {Object} dataNode [Node element containing the panel content]
       */
-      appendContent: function (dataNode) {
+      appendContent: function (nodes) {
         var el = this;
         var fragment = document.createDocumentFragment();
-        var i, t;
+        var i;
+        var t = 0;
         var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
-        var childrenArray;
-        // ** IE do not support 'children' property
-        if(vcomet.util.getBrowser() === "IE"){
-          // Avoid empty element template on programmatic cases
-          childrenArray = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
-          // From node list to js array
-        } else {
-          // Avoid empty element template on programmatic cases
-          childrenArray = !dataNode.children[0] ? dataNode.template.children : dataNode.children;
-        }
-
-        childrenArray = [].slice.call(childrenArray);
         // Get first generation template children
-        while (childrenArray.length) {
+        while (nodes.length) {
           // Build nodes structure
-          child = childrenArray.shift();
+          child = nodes.shift();
           if(child.nodeType == 1) {
             // Append remote source child
             if (reAppend) {
@@ -231,7 +230,6 @@
       */
       resetLoadCallback: function () {
         var el = this;
-        
         // Reset onLoad callback values
         el.__onLoad.__triggered = false
         el.__onLoad = [];
@@ -256,7 +254,6 @@
           delete tmps[index];
         } else {
           var keys = Object.keys(tmps);
-          
           for (i = 0; i < keys.length; i++) {
             tmp = tmps[keys[i]];
             // Remove template
