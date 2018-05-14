@@ -85,7 +85,7 @@ function handleRemoteVersions(value, cb) {
                 cb("Unexpected syntax while reading vcomet.json\n\n" + error);
             }
 
-            // If the project does not have vcomoet.json
+            // If the project does not have vcomet.json
             // looks for a field "vcomet" in the package.json
         } else if (fs.existsSync("package.json")) {
             try {
@@ -323,10 +323,10 @@ function installPackages(cb) {
         }
 
         if (isSinglePackageDependency) {
-            // Clean old if exsit and install
+            // Clean old if exist and install
             cleanLocal(singlePackageName);
             //TODO: coming soon
-            console.log("comming soon!");
+            console.log("coming soon!");
             // downloadAndExtract(packageUrl, path.join(localCustomPath, singlePackageName), vcometJsonObject.dependencies[singlePackageName]);
         }
 
@@ -334,15 +334,15 @@ function installPackages(cb) {
             var dependenciesKeys = Object.keys(vcometJsonObject.dependencies);
             dependenciesKeys.forEach(function (dependencyKey) {
                 if (!(dependencyKey in actualPackages.dependencies) || actualPackages.dependencies[dependencyKey] != vcometJsonObject.dependencies[dependencyKey]) {
-                    // Clean old if exsit and install
+                    // Clean old if exist and install
                     cleanLocal(dependencyKey);
-                    console.log("comming soon!");
+                    console.log("coming soon!");
                     // downloadAndExtract(packageUrl, path.join(localCustomPath, dependencyKey), vcometJsonObject.dependencies[dependencyKey]);
                 }
             });
         }
 
-        // Call calback
+        // Call callback
         cb();
     });
 
