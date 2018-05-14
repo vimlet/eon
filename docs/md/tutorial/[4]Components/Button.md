@@ -13,21 +13,20 @@ To use it import vc-button in the head of the HTML document:
 ```
 
 ## Declarative usage
-Create a vc-button as any other HTML element. The attribute `value` is equivalent to the text of the button. 
+Create a vc-button as any other HTML element. The attribute `label` is equivalent to the text of the button. 
 
 ``` [html]
-<vc-button value="CLICK" onclick="alert('Hello!');"></vc-button>
+<vc-button label="CLICK" onclick="alert('Hello!');"></vc-button>
 ```
 
 ## Programmatic usage
-To send the functionality of the `onclick` in the programmatic usage must be used the `setOnClick()` method.
 
 ``` [javascript]
 vcomet.onReady(function () {
   // Create vc-button
   var myButton = document.createElement("vc-button");
 
-  myButton.value = "CLICK";
+  myButton.label = "CLICK";
   // Set button onclick functionality
   myButton.setOnClick("alert('Hello!');");
 
@@ -39,14 +38,14 @@ vcomet.onReady(function () {
 ## Examples
 
 ### Button with icon
-This component can hace icons, whitch by default is located to the left of the vc-button text, but it can be modified with the `icon-position` attribute declaratively and with the `iconPosition` property programmatically.
+This component can have icons, which by default is located to the left of the vc-button text, but it can be modified with the `icon-position` attribute declaratively and with the `iconPosition` property programmatically.
 
 ``` [html]
-<vc-button value="CLICK" icon='<i class="material-icons">star</i>' onclick="alert('Hello!');" icon-position="right"></vc-button>
+<vc-button label="CLICK" icon='<i class="material-icons">star</i>' onclick="alert('Hello!');" icon-position="right"></vc-button>
 ```
 
-### Change icon dinamycally
-In this example the vc-button has no text, only an icon and when the vc-button is clicked the icon changes dynamically.
+### Change icon dynamically
+In this example, the vc-button has no text, only an icon and when the vc-button is clicked the icon changes dynamically.
 
 ``` [html]
 <vc-button icon='<i class="material-icons">content_cut</i>' onclick="changeIcon(this);"></vc-button>
@@ -63,8 +62,8 @@ A vc-button can be disabled and enabled before a specified event.
 
 ``` [html]
 <!-- Click to enable the disabled button -->
-<vc-button value="Click me!"  onclick="enableButton();"></vc-button>
-<vc-button id="disabled" value="Disabled" disabled="true"></vc-button>
+<vc-button label="Click me!"  onclick="enableButton();"></vc-button>
+<vc-button id="disabled" label="Disabled" disabled="true"></vc-button>
 ```
 ``` [javascript]
 function enableButton() {

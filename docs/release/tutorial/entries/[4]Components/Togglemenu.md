@@ -13,7 +13,7 @@ To use it import vc-togglemenu in the head of the HTML document:
 ```
 
 ## Declarative usage
-By default vc-togglemenu is displayed downwards occupying the remaining space of the container, and if it has an element below it, it will push it downwards.
+By default, vc-togglemenu is displayed downwards occupying the remaining space of the container, and if it has an element below it, it will push it downwards.
 ``` [html]
 <vc-togglemenu heading="Togglemenu"></vc-togglemenu>
 ```
@@ -45,7 +45,7 @@ vcomet.onReady(function () {
 ## Examples
 
 ### Fit to the content
-The height of vc-togglemenu can be adjusted to its content setting the atttribute `ocuppy="fit"`. Another option of this component is when it is deployed does it overlapping the elements that it has below setting the attribute `deploy="overlap"`.
+The height of vc-togglemenu can be adjusted to its content setting the attribute `ocuppy="fit"`. Another option of this component is when it is deployed does it overlapping the elements that it has below setting the attribute `deploy="overlap"`.
 
 ``` [html]
 <vc-togglemenu heading="Togglemenu" ocuppy="fit" deploy="overlap"></vc-togglemenu>
