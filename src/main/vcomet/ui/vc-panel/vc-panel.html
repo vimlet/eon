@@ -96,6 +96,9 @@
             if (this.status !== 200) { return };
             // Allow execute imported html scripts
             documentFragment = vcomet.fragmentFromString(xhr.responseText);
+            // Extract script nodes that belong to template elements for deferring their execution
+            el._getTemplateScripts(documentFragment.children);
+  
             el._appendContent(documentFragment);
           };
           // Execute request
@@ -104,6 +107,37 @@
           // Store templates references
           el._appendContent(el);
         }
+      },
+      /*
+        @function (private) getTemplateScripts
+        @description  
+        @param {Array} nodes []
+      */
+      getTemplateScripts: function (nodes) {
+        var el = this;
+        var scripts, script, scriptKey;
+        // Cast to js array 
+        nodes = [].slice.call(nodes);
+        for (var i = 0; i < nodes.length; i++) {
+          var node = nodes[i];
+          // Check template node
+          if (node.tagName === "TEMPLATE") {
+           // Get template script nodes
+           scripts = node.content.querySelectorAll("script");
+            for (var j = 0; j < scripts.length; j++) {
+              script = scripts[j];
+              scriptKey = Object.keys(el._refs.scripts).length;
+              // Label script node
+              script.setAttribute("_positionId", scriptKey);
+              // Extract script content and store it
+              el._refs.scripts[scriptKey] = script.text;
+              // Empty script
+              script.text = "";
+            }
+          }
+        }
+        
+        
       },
       /*
         @function (private) appendContent
@@ -147,8 +181,11 @@
         if (reAppend) {
            el.content.appendChild(fragment);
         }
-
-        vcomet.triggerCallback("onLoad", el, el, []);
+        // Wait until the element is ready
+        el.onReady(function(){
+          vcomet.triggerCallback("onLoad", el, el, []);
+        });
+        
       },
       /*
         @function (private) removeTemplate
@@ -158,13 +195,19 @@
       removeTemplate: function (tmp) {
         var el = this;
         var fragment = document.createDocumentFragment();
-        var child;
+        var child, positionId;
         var children = !tmp.children[0] ? tmp.content.children: tmp.children;
         children = [].slice.call(children);
         // Move nodes to the tree container safely
         while (children.length) {
           // Build nodes structure
           child = children.shift();
+          // Check scripts
+          if(child.tagName == "SCRIPT") {
+            // Inject deferred script text from stored ones
+            positionId = child.getAttribute("_positionId");
+            child.text = positionId ? el._refs.scripts[positionId] : child.text;
+          }
           fragment.appendChild(child);
         }
         // Insert template content just before the template node
@@ -181,6 +224,17 @@
         // Set passed scroll parameters
         el._refs.wrapper.fit = el.fit;
         el._refs.wrapper.arrowScrolls = el.arrowScrolls;
+      },
+      /*
+        @function (private) resetLoadCallback
+        @description 
+      */
+      resetLoadCallback: function () {
+        var el = this;
+        
+        // Reset onLoad callback values
+        el.__onLoad.__triggered = false
+        el.__onLoad = [];
       }
     },
     functions: {
@@ -230,6 +284,7 @@
       vcomet.createCallback("onLoad", this);
       vcomet.createCallback("onContent", this);
       el._refs.templates = {};
+      el._refs.scripts = {};
       // Get body container
       if(vcomet.util.isTrue(el.allowScroll)) {
         el._refs.wrapper = document.createElement("vc-scroll");
@@ -247,6 +302,13 @@
       el._importContent();
 
       if (!el._refs.wrapper.isEqualNode(el)) { el.appendChild(el._refs.wrapper) }
+    },
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case ("href"):
+          this._resetLoadCallback();
+          break;
+      }
     }
   });
 </script>
