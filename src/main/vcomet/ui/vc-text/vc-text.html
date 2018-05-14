@@ -182,56 +182,45 @@
 
                 var el = this;
 
-                var main = el.querySelector(".vc-text-main");
-                var vcometScroll = document.createElement("vc-scroll");
-                var editableContainer = document.createElement("div");
-                var editable = document.createElement("div");
+                el._misc.isNativeArea = vcomet.util.isTouchScreen();
 
-                el._misc.editable = {};
-                el._misc.editable.inputEventTriggered = false;
-                el._misc.editable.verticalSize = 0;
-                el._misc.editable.horizontalSize = 0;
+                if (!el._misc.isNativeArea) {
 
-                el._refs.editable = editable;
+                    el._setupAsCustomArea();
 
-                vcometScroll.setAttribute("thickness", "8");
+                    var onInputChange = function () {
 
-                editable.classList.add("vc-text-editable");
-                editable.setAttribute("contenteditable", "true");
-                editable.setAttribute("placeholder", el.placeholder);
-
-                // If the user has specified a height for the textarea we set up some style and listeners for its functionality
-                if (el.areaHeight != "") {
-
-                    main.style.height = el.areaHeight + "px";
-                    main.style.cursor = "text";
-
-                    vcomet.registerPathListener(editable);
-
-                    main.addEventListener("click", function () {
-
-                        // If the users clicks on the main node that is not covered by the editable
-                        if (!editable.isOnPath) {
-                            el._placeCaretAtEnd(editable);
-                        }
-
-                    });
-
-                }
-
-                // If the user is exceeding the max length we will prevent everything
-                editable.addEventListener("keypress", function (e) {
-                    console.log(editable.innerText.length, el.maxLength);
-                    if ((el._isCharacterKeyPress(e) && el._willExceedLength()) || (el.maxLength != "" && editable.innerText.length >= el.maxLength)) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    } else {
-
-                        el.__value = editable.innerText;
-                        editable.title = editable.innerText;
+                        el.__value = el._refs.editable.innerText;
+                        el._refs.editable.title = el._refs.editable.innerText;
                         el._updateCounter();
                         el._refresh();
                         el._handleAutoScroll();
+
+                    };
+
+                } else {
+
+                    el._setupAsNativeArea();
+                    
+                    var onInputChange = function () {
+
+                        el.__value = el._refs.editable.value;
+                        el._refs.editable.title = el._refs.editable.value;
+                        el._updateCounter();
+
+                    };
+
+                }
+
+
+                // If the user is exceeding the max length we will prevent everything
+                el._refs.editable.addEventListener("keypress", function (e) {
+
+                    if ((el._isCharacterKeyPress(e) && el._willExceedLength()) || (el.maxLength != "" && el._refs.editable.innerText.length >= el.maxLength)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    } else {
+                        onInputChange();
                     }
 
                     // Checks if the key press corresponds to ENTER
@@ -242,38 +231,86 @@
                 });
 
                 // Updates everything needed for new inputs and prevents keyup from triggering
-                editable.addEventListener("input", function (e) {
-                    console.log('input');
-                    el.__value = editable.innerText;
-                    editable.title = editable.innerText;
-                    el._updateCounter();
-                    el._refresh();
-                    el._handleAutoScroll();
+                el._refs.editable.addEventListener("input", function (e) {
+                    onInputChange();
                     el._misc.editable.inputEventTriggered = true;
                 });
 
                 // As some browsers doesnt handle spaces and different keys with the input event we also created the keyup event, 
                 // which will only do stuff if the input event was not triggered
-                editable.addEventListener("keyup", function (e) {
+                el._refs.editable.addEventListener("keyup", function (e) {
                     if (el._misc.editable.inputEventTriggered == false) {
-                        el.__value = editable.innerText;
-                        editable.title = editable.innerText;
-                        el._updateCounter();
-                        el._refresh();
-                        el._handleAutoScroll();
+                        onInputChange();
                     }
                     el._misc.editable.inputEventTriggered = false;
                 });
 
-                editable.addEventListener("focus", function () {
-                    console.log('focus');
+                el._refs.editable.addEventListener("focus", function () {
                     if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
                     }
                 });
 
-                editable.addEventListener("blur", function () {
+                el._refs.editable.addEventListener("blur", function () {
                     el.classList.remove("focus");
+                });
+
+            },
+            setupAsNativeArea: function () {
+
+                var el = this;
+
+                var main = el.querySelector(".vc-text-main");
+                var editable = document.createElement("div");
+
+                // If the user has specified a height for the textarea we set up some style and listeners for its functionality
+                if (el.areaHeight != "") {
+                    main.style.height = el.areaHeight + "px";
+                    main.style.cursor = "text";
+                }
+
+                editable = document.createElement("textarea");
+                editable.classList.add("vc-text-editable", "vc-fg2");
+                editable.setAttribute("placeholder", el.placeholder);
+                editable.setAttribute("resize", false);
+
+                el._refs.editable = editable;
+
+                main.appendChild(editable);
+
+            },
+            setupAsCustomArea: function () {
+
+                var el = this;
+
+                var main = el.querySelector(".vc-text-main");
+                var vcometScroll = document.createElement("vc-scroll");
+                var editableContainer = document.createElement("div");
+                var editable = document.createElement("div");
+
+                // If the user has specified a height for the textarea we set up some style and listeners for its functionality
+                if (el.areaHeight != "") {
+                    main.style.height = el.areaHeight + "px";
+                    main.style.cursor = "text";
+                }
+
+                el._refs.editable = editable;
+
+                vcometScroll.setAttribute("thickness", "8");
+
+                editable.classList.add("vc-text-editable");
+                editable.setAttribute("contenteditable", "true");
+                editable.setAttribute("placeholder", el.placeholder);
+
+                vcomet.registerPathListener(editable);
+
+                main.addEventListener("click", function () {
+
+                    // If the users clicks on the main node that is not covered by the editable
+                    if (!editable.isOnPath) {
+                        el._placeCaretAtEnd(editable);
+                    }
+
                 });
 
                 // Appends the new nodes
@@ -522,6 +559,9 @@
 
                                 vcometScroll.removeChild(vcometScrollbar);
                                 vcometScroll._setupVerticalScroll();
+
+                            } else if (hasDifferentVerticalSize) {
+                                vcometScroll._setupVerticalScroll();
                             }
 
                             editable.focus();
@@ -765,8 +805,15 @@
 
         onCreated: function () {
 
-            this._misc.initialText = this.source.textContent;
-            this.source.textContent = "";
+            var el = this;
+
+            el._misc.initialText = this.source.textContent;
+            el._misc.editable = {};
+            el._misc.editable.inputEventTriggered = false;
+            el._misc.editable.verticalSize = 0;
+            el._misc.editable.horizontalSize = 0;
+
+            el.source.textContent = "";
 
             vcomet.createCallback("onEnter", this);
 
