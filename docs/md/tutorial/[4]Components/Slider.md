@@ -1,7 +1,7 @@
 # Slider
 
 ## Introduction
-Form component that allows to select a value from a range of values by moving the slider thumb of the vc-slider. This can be horizontal or vertical and the value can be visible or not.
+Form component that allows selecting a value from a range of values by moving the slider thumb of the vc-slider. This can be horizontal or vertical and the value can be visible or not.
 
 To use it import vc-slider in the head of the HTML document:
 ``` [html]
@@ -13,7 +13,7 @@ To use it import vc-slider in the head of the HTML document:
 ```
 
 ## Declarative usage
-To declace a basic vc-slider it is only necessaty to indicate the `name`, because by default the minumum value is 0 and the maximum value is 100. The value in whitch it is located by default is 50.
+To declare a basic vc-slider it is only necessary to indicate the `name` because by default the minimum value is 0 and the maximum value is 100. The value in which it is located by default is 50.
 ``` [html]
 <vc-slider name="mySlider"></vc-slider>
 ```
@@ -40,7 +40,7 @@ By default in a vc-slider that has the visible value, it will be placed under th
 ```
 
 ### Enable dynamically
-In this example the vc-slider is contained within a vc-form, and is disabled, and after a second it will be enabled.
+In this example, the vc-slider is contained within a vc-form, and is disabled, and after a second it will be enabled.
 ``` [html]
 <!-- Initially disabled slider -->
 <vc-slider id="mySlider" name="mySlider" disabled="true"></vc-slider>

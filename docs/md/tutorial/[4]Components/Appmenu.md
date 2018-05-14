@@ -13,7 +13,7 @@ To use it is necessary to import vc-appmenu in the head of the HTML document:
 ```
 
 ## Declarative usage
-The vc-appmenu created declaratively is composed by vc-item to add the differents apps. The attribute `value` of vc-item is equivalent to the name of the app.
+The vc-appmenu created declaratively is composed by vc-item to add the different apps. The attribute `value` of vc-item is equivalent to the name of the app.
 
 ``` [html]
 <vc-appmenu >
