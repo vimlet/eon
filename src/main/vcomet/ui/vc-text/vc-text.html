@@ -181,26 +181,37 @@
             setupAsTextarea: function () {
 
                 var el = this;
-                var setupFunction, onChangeFunction;
 
                 el._misc.isNativeArea = vcomet.util.isTouchScreen();
-                
-                // Establishes which area setup function should be called
-                setupFunction = !el._misc.isNativeArea ? el._setupAsCustomArea : el._setupAsNativeArea;
-                setupFunction();
 
-                onInputChange = function () {
+                if (!el._misc.isNativeArea) {
 
-                    el.__value = el._refs.editable.value;
-                    el._refs.editable.title = el._refs.editable.value;
-                    el._updateCounter();
+                    el._setupAsCustomArea();
 
-                    if (!el._misc.isNativeArea) {
+                    var onInputChange = function () {
+
+                        el.__value = el._refs.editable.innerText;
+                        el._refs.editable.title = el._refs.editable.innerText;
+                        el._updateCounter();
                         el._refresh();
                         el._handleAutoScroll();
-                    }
 
-                };
+                    };
+
+                } else {
+
+                    el._setupAsNativeArea();
+                    
+                    var onInputChange = function () {
+
+                        el.__value = el._refs.editable.value;
+                        el._refs.editable.title = el._refs.editable.value;
+                        el._updateCounter();
+
+                    };
+
+                }
+
 
                 // If the user is exceeding the max length we will prevent everything
                 el._refs.editable.addEventListener("keypress", function (e) {
