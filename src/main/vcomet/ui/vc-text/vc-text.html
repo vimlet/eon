@@ -21,30 +21,22 @@
 
         privateProperties: {
             /*
-            @property (private) {string} _formelement 
+            @property (private) {String} _formelement 
             @description Necessary property for a form
             */
             formelement: {
                 value: "textbox"
             },
             /*
-            @property (private) {string} _initialText
-            @description Text provided by the user inside the element
-            */
-            initialText: {
-                value: "",
-                reflect: false
-            },
-            /*
-            @property (private) {object} _data
+            @property (private) {Object} _misc
             @description Object with usefull information
             */
-            data: {
+            misc: {
                 value: {},
                 reflect: false
             },
             /*
-            @property (private) {object} _refs
+            @property (private) {Object} _refs
             @description Object with references to frecuently queryied nodes
             */
             refs: {
@@ -56,7 +48,7 @@
 
         properties: {
             /*
-            @property {string} name
+            @property {String} name
             @description Name to identify the element in a form
             */
             name: {
@@ -64,7 +56,7 @@
                 reflect: true
             },
             /*
-            @property {string} placeholder
+            @property {String} placeholder
             @description Placeholder for the user typing area
             */
             placeholder: {
@@ -72,7 +64,7 @@
                 reflect: true
             },
             /*
-            @property {string} label
+            @property {String} label
             @description Label for the element
             */
             label: {
@@ -80,7 +72,7 @@
                 reflect: true
             },
             /*
-            @property {string} type
+            @property {String} type
             @description Determines the type of the element (area, text, password)
             */
             type: {
@@ -96,7 +88,7 @@
                 reflect: true
             },
             /*
-            @property {string} maxlength
+            @property {String} maxlength
             @description Characters input limit
             */
             maxLength: {
@@ -104,7 +96,7 @@
                 reflect: true
             },
             /*
-            @property {string} counter
+            @property {String} counter
             @description Whether the user wants a counter or not
             */
             counter: {
@@ -112,12 +104,12 @@
                 reflect: true
             },
             /*
-            @property {string} value
+            @property {String} value
             @description Value of the element
             */
             value: {
                 value: "",
-                reflect: false
+                reflect: true
             },
             /*
             @property {string} readonly
@@ -128,7 +120,7 @@
                 reflect: true
             },
             /*
-            @property {string} disabled
+            @property {String} disabled
             @description Toggles the disabled status of the element
             */
             disabled: {
@@ -155,6 +147,10 @@
                 el._updateReadOnly();
 
             },
+            /*
+            @function (private) _setupRefs
+            @description Creates references for relevant nodes
+            */
             setupRefs: function () {
 
                 var el = this;
@@ -191,10 +187,10 @@
                 var editableContainer = document.createElement("div");
                 var editable = document.createElement("div");
 
-                el._data.editable = {};
-                el._data.editable.inputEventTriggered = false;
-                el._data.editable.verticalSize = 0;
-                el._data.editable.horizontalSize = 0;
+                el._misc.editable = {};
+                el._misc.editable.inputEventTriggered = false;
+                el._misc.editable.verticalSize = 0;
+                el._misc.editable.horizontalSize = 0;
 
                 el._refs.editable = editable;
 
@@ -225,11 +221,15 @@
 
                 // If the user is exceeding the max length we will prevent everything
                 editable.addEventListener("keypress", function (e) {
-
-                    if (el._isCharacterKeyPress(e) && el._willExceedLength()) {
+                    console.log(editable.innerText.length, el.maxLength);
+                    if ((el._isCharacterKeyPress(e) && el._willExceedLength()) || (el.maxLength != "" && editable.innerText.length >= el.maxLength)) {
                         e.preventDefault();
                         e.stopPropagation();
                     } else {
+
+                        el.__value = editable.innerText;
+                        editable.title = editable.innerText;
+                        el._updateCounter();
                         el._refresh();
                         el._handleAutoScroll();
                     }
@@ -243,26 +243,30 @@
 
                 // Updates everything needed for new inputs and prevents keyup from triggering
                 editable.addEventListener("input", function (e) {
-                    el.value = editable.innerText;
+                    console.log('input');
+                    el.__value = editable.innerText;
+                    editable.title = editable.innerText;
                     el._updateCounter();
                     el._refresh();
                     el._handleAutoScroll();
-                    el._data.editable.inputEventTriggered = true;
+                    el._misc.editable.inputEventTriggered = true;
                 });
 
                 // As some browsers doesnt handle spaces and different keys with the input event we also created the keyup event, 
                 // which will only do stuff if the input event was not triggered
                 editable.addEventListener("keyup", function (e) {
-                    if (el._data.editable.inputEventTriggered == false) {
-                        el.value = editable.innerText;
+                    if (el._misc.editable.inputEventTriggered == false) {
+                        el.__value = editable.innerText;
+                        editable.title = editable.innerText;
                         el._updateCounter();
                         el._refresh();
                         el._handleAutoScroll();
                     }
-                    el._data.editable.inputEventTriggered = false;
+                    el._misc.editable.inputEventTriggered = false;
                 });
 
                 editable.addEventListener("focus", function () {
+                    console.log('focus');
                     if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
                     }
@@ -311,7 +315,8 @@
                 });
 
                 input.addEventListener("input", function (e) {
-                    el.value = input.value;
+                    el.__value = input.value;
+                    input.title = el.type.toLowerCase() != "password" ? input.value : el._refs.input.title;
                     el._updateCounter();
                 });
 
@@ -353,27 +358,29 @@
 
                 var el = this;
 
-                if (el._initialText != "") {
+                if (el._misc.initialText != "") {
 
-                    if (el._initialText.length > parseInt(el.maxLength)) {
-                        el._initialText = el._initialText.substring(0, el.maxLength);
+                    if (el._misc.initialText.length > parseInt(el.maxLength)) {
+                        el._misc.initialText = el._misc.initialText.substring(0, el.maxLength);
                     }
 
                 }
 
                 if (el.type != "area") {
-                    el._refs.input.value = el._initialText;
+                    el._refs.input.value = el._misc.initialText;
+                    el._refs.input.title = el._refs.input.title = el.type.toLowerCase() != "password" ? el._misc.initialText : el._refs.input.title;
                 } else {
-                    el._refs.editable.innerText = el._initialText;
+                    el._refs.editable.innerText = el._misc.initialText;
+                    el._refs.editable.title = el._misc.initialText;
                 }
 
-                el.value = el._initialText;
+                el.__value = el._misc.initialText;
 
                 el._updateCounter();
 
             },
             /*
-            @function (private) {boolean} _willExceedLength
+            @function (private) {Boolean} _willExceedLength
             @description Returns a boolean whether the current value is already exceeding the maxlength or not
             */
             willExceedLength: function () {
@@ -437,7 +444,11 @@
                     el._refs.data.classList.remove("vc-fg1-disabled");
                     el._refs.main.classList.remove("vc-fg1-disabled");
 
+                    el.removeAttribute("disabled");
+
                 } else {
+
+                    el._refs.input.setAttribute("disabled", "true");
 
                     typingNode.classList.remove("vc-fg2");
                     typingNode.classList.add("vc-fg1-disabled");
@@ -553,7 +564,7 @@
             /*
             @function (private) _handleAutoScroll
             @description Called when typing, when the size has changed it manages the autoscrolling to keep the cursor visible
-            @param {object} e [event]
+            @param {Object} e [event]
             */
             handleAutoScroll: function (e) {
 
@@ -574,14 +585,14 @@
 
                     vcometScroll._handleScrollResize();
 
-                    el._data.editable.verticalSize = vcometScroll._getVerticalScrollLimit();
-                    el._data.editable.horizontalSize = vcometScroll._getHorizontalScrollLimit();
+                    el._misc.editable.verticalSize = vcometScroll._getVerticalScrollLimit();
+                    el._misc.editable.horizontalSize = vcometScroll._getHorizontalScrollLimit();
 
                     // Vertical check
                     if (hasDifferentVerticalSize) {
 
                         onVerticalLimit = (selectionRect.bottom <= editableRect.bottom && selectionRect.bottom >= (editableRect.bottom - errorRange));
-                        verticalPosition = onVerticalLimit ? el._data.editable.verticalSize : (selectionRect.top - editableRect.top);
+                        verticalPosition = onVerticalLimit ? el._misc.editable.verticalSize : (selectionRect.top - editableRect.top);
 
                     }
 
@@ -589,7 +600,7 @@
                     if (hasDifferentHorizontalSize) {
 
                         onHorizontalLimit = (selectionRect.left <= editableRect.right && selectionRect.right >= (editableRect.right - errorRange));
-                        horizontalPosition = onHorizontalLimit ? el._data.editable.horizontalSize : (selectionRect.left - editableRect.left);
+                        horizontalPosition = onHorizontalLimit ? el._misc.editable.horizontalSize : (selectionRect.left - editableRect.left);
 
                     }
 
@@ -599,7 +610,7 @@
 
             },
             /*
-            @function (private) {object} _getSelectionCoords
+            @function (private) {Object} _getSelectionCoords
             @description Returns an object with the absolute position of the cursor
             */
             getSelectionCoords: function () {
@@ -674,7 +685,7 @@
                 return { left: left, top: top, right: right, bottom: bottom };
             },
             /*
-            @function (private) {object} _getSelectionRange
+            @function (private) {Object} _getSelectionRange
             @description Returns the actual range of the selection
             */
             getSelectionRange: function () {
@@ -709,53 +720,52 @@
                 }
             },
             /*
-            @function (private) {boolean} _hasDifferentVerticalSize
+            @function (private) {Boolean} _hasDifferentVerticalSize
             @description Checks if the size is different from the vertical scroll limit
             */
             hasDifferentVerticalSize: function () {
-                return this._data.editable.verticalSize != this.querySelector("vc-scroll")._getVerticalScrollLimit();
+                return this._misc.editable.verticalSize != this.querySelector("vc-scroll")._getVerticalScrollLimit();
             },
             /*
-           @function (private) {boolean} _hasDifferentHorizontalSize
+           @function (private) {Boolean} _hasDifferentHorizontalSize
            @description Checks if the size is different from the horizontal scroll limit
            */
             hasDifferentHorizontalSize: function () {
-                return this._data.editable.horizontalSize != this.querySelector("vc-scroll")._getHorizontalScrollLimit();
+                return this._misc.editable.horizontalSize != this.querySelector("vc-scroll")._getHorizontalScrollLimit();
             },
 
-        },
-
-        functions: {
             /*
-            @function (private) setValue
+            @function (private) _updateValue
             @description Updates the value
             @param {String} value 
             */
-            setValue: function (value) {
+            updateValue: function () {
 
                 var el = this;
 
                 if (el.type == "area") {
 
-                    el.value = value;
-                    el._refs.editable.innerText = value;
+                    el._refs.editable.innerText = el.value;
+                    el._refs.editable.title = el.value;
+
                     el._updateCounter();
                     el._refresh();
                     el._handleAutoScroll();
 
                 } else {
 
-                    el._refs.input.value = value;
-                    el.value = value;
+                    el._refs.input.value = el.value;
+                    el._refs.input.title = el.type.toLowerCase() != "password" ? el.value : el._refs.input.title;
 
                 }
 
             }
+
         },
 
         onCreated: function () {
 
-            this._initialText = this.source.textContent;
+            this._misc.initialText = this.source.textContent;
             this.source.textContent = "";
 
             vcomet.createCallback("onEnter", this);
@@ -776,6 +786,9 @@
                     break;
                 case "readonly":
                     this._updateReadOnly();
+                    break;
+                case "value":
+                    this._updateValue();
                     break;
             }
 
