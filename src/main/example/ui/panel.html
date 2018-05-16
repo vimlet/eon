@@ -36,7 +36,7 @@
 
                 <vc-button value="Render lazy" onclick="renderLazy()"></vc-button>
 
-                <!-- <vc-panel id="lazyContentPanel" allow-scroll="false" class="panel">
+                <vc-panel id="lazyContentPanel" allow-scroll="false" class="panel">
                     <template>
                         <div class="content" style="background-color: #3b78b7;">
                             I'm a lazy div!
@@ -45,28 +45,31 @@
                             console.log("Example log - Blue panel content rendered on demand")
                         </script>
                     </template>
-                </vc-panel> -->
+                </vc-panel>
             </div>
             <script>
                 var panel = document.querySelector("vc-panel");
                 var panelAjax = document.querySelector("#panelAjax");
 
-                // Load lazy content
-                panelAjax.onReady(function () {
+                // Make sure panel has its event callbacks initialized
+                panelAjax.onCreated(function () {
                     panelAjax.onLoad(function () {
-                        panelAjax.render();
+                        console.log('FIRST LOADED');
+                        // panelAjax.render();
                     });
+
                 });
 
                 setTimeout(function () {
                     panelAjax.onReady(function () {
                         // Refresh with another source content
                         panelAjax.href = "util/panel/panelHrefTest1.html";
-                        panelAjax.refresh();
+                        //
                         panelAjax.onLoad(function(){
                             console.log('LOADED');
                             // panelAjax.render();
                         });
+                        panelAjax.refresh();
                     });
                 }, 2500);
 

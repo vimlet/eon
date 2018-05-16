@@ -33,7 +33,7 @@
      */
   vcomet.addResizeListener = function(element, key, fn) {
     //
-    var isIE = navigator.userAgent.match(/Trident/);
+    var isIE = navigator.userAgent.match(/Trident/) && document.documentMode;
     //
     if (!element.__resizeListeners) {
       element.__resizeListeners = {};
@@ -87,8 +87,8 @@
     }
   };
 
-   // Resize triggering!
-   function resizeListener(e) {
+  // Resize triggering!
+  function resizeListener(e) {
     var win = e.target || e.srcElement;
     // Get resize funciton to be triggered and suscribe itto cancel function
     if (win.__resizeRAF) cancelFrame(win.__resizeRAF);
