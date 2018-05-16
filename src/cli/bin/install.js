@@ -91,8 +91,11 @@ function handleRemoteVersions(value, cb) {
             try {
                 var packageJsonObject = JSON.parse(fs.readFileSync("package.json").toString());
 
+                // When existing package.json but not exists vcomet field will create the vcomet.json
                 if (packageJsonObject.vcomet) {
                     vcometJsonObject = packageJsonObject.vcomet;
+                } else {
+                    var newVcometJson = true;
                 }
 
             } catch (error) {
@@ -240,8 +243,6 @@ function handleLocalVersions(cb) {
         try {
             versionJsonObject = JSON.parse(fs.readFileSync(localVersionPath).toString());
             foundPackages.vcomet = versionJsonObject.vcomet;
-            // foundPackages.core = versionJsonObject.core;
-            // foundPackages.ui = versionJsonObject.ui;
         } catch (error) {
             cb("Unexpected syntax while reading version.json\n\n" + error);
         }
