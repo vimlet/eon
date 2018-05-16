@@ -48,13 +48,13 @@ var install = require("./bin/install");
 var prune = require("./bin/prune");
 var publish = require("./bin/publish");
 
-
 cli
 .value("i", "install", "Install dependency")
 .value("p", "path", "Specify path to download dependencies")
 .value("u", "publish", "Publish components to vcomet hub")
 .flag("s", "init", "Initialize a vComet project")
 .flag("d", "prune", "Remove unused packages")
+.flag("n", "--no-save", "Do not generate vcomet.json")
 .flag("h", "help", "Shows help")
 .parse(process.argv);
 

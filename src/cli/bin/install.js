@@ -34,6 +34,11 @@ module.exports = function (result, cb) {
         localPath = result.path;
     }
 
+    // TODO:
+    // if (result["--no-save"]) {
+    //    console.log('yey'); 
+    // }
+
     Sync(function () {
         try {
             // supportGitCredentials();
@@ -433,6 +438,7 @@ function downloadAndExtract(file_url, extractPath, version, cb) {
     // Create local vcomet storage path
     var downloadPath = path.join(os.homedir(), ".vcomet", "vcomet-" + version);
     var fileName = path.basename(url.parse(file_url).pathname);
+    
     fs.mkdirsSync(downloadPath);
     var dest = path.join(downloadPath, fileName);
     // Check if already in local storage, if so extract only
