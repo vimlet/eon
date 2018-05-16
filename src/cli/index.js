@@ -50,7 +50,7 @@ var publish = require("./bin/publish");
 
 cli
 .value("i", "install", "Install dependency")
-.value("p", "path", "Specify path to download dependencies")
+.value("p", "path", "Specify the path to download dependencies")
 .value("u", "publish", "Publish components to vcomet hub")
 .flag("s", "init", "Initialize a vComet project")
 .flag("d", "prune", "Remove unused packages")
