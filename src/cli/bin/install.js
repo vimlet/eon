@@ -30,19 +30,19 @@ module.exports = function (result, cb) {
     actualPackages = {};
     singlePackageMode = false;
 
+    
     if (result.path) {
         localPath = result.path;
     }
-
-    // TODO:
-    // if (result["--no-save"]) {
-    //    console.log('yey'); 
-    // }
+    
+    if (result["no-save"]) {
+        var noSave = true;
+    }
 
     Sync(function () {
         try {
             // supportGitCredentials();
-            handleRemoteVersions.sync(null, result.install);
+            handleRemoteVersions.sync(null, result.install, noSave);
             // Find installed packages
             handleLocalVersions.sync(null);
             // Install or update wanted packages        
@@ -78,8 +78,7 @@ function supportGitCredentials() {
 }
 
 // Finds the required version of the packages
-function handleRemoteVersions(value, cb) {
-
+function handleRemoteVersions(value, noSave, cb) {
     Sync(function () {
 
         // Reads the vcomet.json to search the required versions
@@ -106,6 +105,7 @@ function handleRemoteVersions(value, cb) {
             } catch (error) {
                 cb("Unexpected syntax while reading package.json\n\n" + error);
             }
+
         } else {
             var newVcometJson = true;
         }
@@ -149,7 +149,9 @@ function handleRemoteVersions(value, cb) {
                     }
 
                     vcometJsonObject[packageName] = packageVersion;
-                    fs.writeFileSync("vcomet.json", JSON.stringify(vcometJsonObject, null, 2));
+                    if (!noSave) {
+                        fs.writeFileSync("vcomet.json", JSON.stringify(vcometJsonObject, null, 2));
+                    }
 
                 } catch (error) {
                     cb(error);
@@ -167,14 +169,14 @@ function handleRemoteVersions(value, cb) {
                 vcometJsonObject.dependencies[packageName] = packageVersion;
             }
         }
+        
+        // Adds ignore file to the vcomet.json
+        var ignoreArray = ["custom"];
+        vcometJsonObject.ignore = ignoreArray;
 
         // Generate vcomet.json if it does not exist.
-        if (newVcometJson && packageVersion) {
+        if (newVcometJson && packageVersion && !noSave) {
             var newVcometJsonPath = path.join(".", "vcomet.json");
-            var ignoreArray = ["custom"];
-
-            // Adds ignore file to the vcomet.json
-            vcometJsonObject.ignore = ignoreArray;
 
             fs.createFileSync(newVcometJsonPath);
             fs.writeFileSync(newVcometJsonPath, JSON.stringify(vcometJsonObject, null, 2));

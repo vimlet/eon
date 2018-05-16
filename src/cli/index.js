@@ -54,7 +54,7 @@ cli
 .value("u", "publish", "Publish components to vcomet hub")
 .flag("s", "init", "Initialize a vComet project")
 .flag("d", "prune", "Remove unused packages")
-.flag("n", "--no-save", "Do not generate vcomet.json")
+.flag("", "--no-save", "Do not generate vcomet.json")
 .flag("h", "help", "Shows help")
 .parse(process.argv);
 
