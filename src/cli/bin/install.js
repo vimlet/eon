@@ -29,15 +29,8 @@ module.exports = function (result, cb) {
     vcometJsonObject = {};
     actualPackages = {};
     singlePackageMode = false;
-
-    
-    if (result.path) {
-        localPath = result.path;
-    }
-    
-    if (result["no-save"]) {
-        var noSave = true;
-    }
+    var noSave = result["no-save"];
+    localPath = result.path;
 
     Sync(function () {
         try {
@@ -169,7 +162,7 @@ function handleRemoteVersions(value, noSave, cb) {
                 vcometJsonObject.dependencies[packageName] = packageVersion;
             }
         }
-        
+
         // Adds ignore file to the vcomet.json
         var ignoreArray = ["custom"];
         vcometJsonObject.ignore = ignoreArray;
@@ -440,7 +433,7 @@ function downloadAndExtract(file_url, extractPath, version, cb) {
     // Create local vcomet storage path
     var downloadPath = path.join(os.homedir(), ".vcomet", "vcomet-" + version);
     var fileName = path.basename(url.parse(file_url).pathname);
-    
+
     fs.mkdirsSync(downloadPath);
     var dest = path.join(downloadPath, fileName);
     // Check if already in local storage, if so extract only
