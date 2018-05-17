@@ -7,9 +7,9 @@
 
 [//]: # (badges)
 
-[![license](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565585887/license.svg?raw=true "License")](https://github.com/vimlet/VimletComet/blob/master/LICENSE)
-[![build](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565585887/build.svg?raw=true "Build")](https://vimlet.com/downloads)
-[![docs](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565585887/docs.svg?raw=true "Docs")](https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html)
+<a href='https://github.com/vimlet/VimletComet/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565675373license.svg?raw=true' title='License' alt='license'></a>
+<a href='https://vimlet.com/downloads'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565675373build.svg?raw=true' title='Build' alt='build'></a>
+<a href='https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565675373docs.svg?raw=true' title='Docs' alt='docs'></a>
 
 [//]: # (badges)
 
