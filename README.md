@@ -1,20 +1,19 @@
 
-
-[//]: # (badges)
-
-[![license](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525801096800/license.svg?raw=true "License")](https://github.com/vimlet/VimletComet/blob/master/LICENSE)
-[![build](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525801096800/build.svg?raw=true "Build")](https://vimlet.com/downloads)
-[![docs](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1525801096800/docs.svg?raw=true "Docs")](https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html)
-
-[//]: # (badges)
-
-
 <p align="center">
 <a href="https://vimlet.com/vcomet">
 <img width="450" src="logo.png"></img>
 </a>
 </p>
 
+[//]: # (badges)
+
+<p align='center'>
+<a href='https://github.com/vimlet/VimletComet/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526498029861license.svg?raw=true' title='License' alt='license'></a>
+<a href='https://vimlet.com/downloads'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526498029861build.svg?raw=true' title='Build' alt='build'></a>
+<a href='https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526498029861docs.svg?raw=true' title='Docs' alt='docs'></a>
+</p>
+
+[//]: # (badges)
 
 
 <p align="center">
@@ -30,7 +29,7 @@ At is heart vComet takes care of the hassles of user interface creation, effecti
 ## Features
 
 * **Light:** Core of less than 16kb (minified and gzipped).
-* **Fast:** It's asynchronous patterns and natively supported specs.
+* **Fast:** With its asynchronous patterns and natively supported specs.
 * **Intuitive:** The DOM is your API; HTML and JavaScript are enough to work with vComet.
 * **Semantic:** Non-verbose declarative and programmatic API.
 * **Templating:** Data binding capabilities.

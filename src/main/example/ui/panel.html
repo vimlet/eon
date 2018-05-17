@@ -22,12 +22,6 @@
             <div class="card">
                 <h1>PANEL</h1>
 
-                <!-- <vc-panel allow-scroll="false" class="panel">
-                    <div id="content11" class="content">
-                        I'm a div!
-                    </div>
-                </vc-panel> -->
-
                 <vc-panel id="panelAjax" allow-scroll="false" href="util/panel/panelHrefTest.html" class="panel">
                 </vc-panel>
             </div>
@@ -39,9 +33,12 @@
                 <vc-panel id="lazyContentPanel" allow-scroll="false" class="panel">
                     <template>
                         <div class="content" style="background-color: #3b78b7;">
-                            I'm a lazy div!
+                            I'm an on demand rendered div!
                         </div>
-                        <script>
+                        <script defer>
+                            if(vcomet.util.getBrowser() === "IE") {
+                                console.log("Example log - * IE executes scripts inside templates too");
+                            }
                             console.log("Example log - Blue panel content rendered on demand")
                         </script>
                     </template>
@@ -51,18 +48,36 @@
                 var panel = document.querySelector("vc-panel");
                 var panelAjax = document.querySelector("#panelAjax");
 
+<<<<<<< HEAD
+                // Make sure panel has its event callbacks initialized
+=======
                 // Load lazy content
-                panelAjax.onReady(function () {
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
+                panelAjax.onCreated(function () {
                     panelAjax.onLoad(function () {
-                        panelAjax.render();
+                        console.log('FIRST LOADED');
+                        // panelAjax.render();
                     });
+
                 });
 
                 setTimeout(function () {
                     panelAjax.onReady(function () {
                         // Refresh with another source content
                         panelAjax.href = "util/panel/panelHrefTest1.html";
+                        //
+                        panelAjax.onLoad(function(){
+                            console.log('LOADED');
+                            // panelAjax.render();
+                        });
                         panelAjax.refresh();
+                        panelAjax.onLoad(function () {
+                            panelAjax.render(0);
+                            document.querySelector("#red").style.width = "100%";
+                            setTimeout(function () {
+                                document.querySelector(".square").style.width = "50%";
+                            }, 500);
+                        });
                     });
                 }, 2500);
 

@@ -27,7 +27,7 @@
       },
       /*
         @property {Boolean} disabled 
-        @description Button desactivation
+        @description Button deactivation
         Values can be: true o false
         Default: false
       */
@@ -46,13 +46,13 @@
         reflect: true
       },
       /*
-       @property {String} expand 
-       @description Space that occupy inside parent container
-       Values can be: full or inline
-       Default: inline
+       @property {String} fillWidth 
+       @description Space that occupy the button inside parent container
+       Values can be: true or false
+       Default: false
      */
-      expand: {
-        value: "inline",
+      fillWidth: {
+        value: "false",
         reflect: true
       },
       /*
@@ -86,21 +86,26 @@
         this.setAttribute("onclick", functionality);
       },
 
+    },
+
+    privateFunctions: {
       /*
-        @function setLabel
+        @function (private) _setLabel
         @description Set new button text
         @param {String} newVal [New button text]
       */
-      setLabel: function (newVal) {
+      setLabel: function () {
         var el = this;
         var button = el.querySelector(".vc-button-button");
         var buttonText = document.createElement("div");
 
-        if (newVal) {
+        var label = el.label || (el.label && el.value) ? el.label : el.value;
+
+        if (label) {
           // First time the button text is added
           if (!el.hasAttribute("text")) {
 
-            buttonText.innerHTML = newVal;
+            buttonText.innerHTML = label;
             button.appendChild(buttonText);
             buttonText.classList.add("vc-button-buttonText");
 
@@ -108,7 +113,7 @@
           } else {
 
             var oldText = button.querySelector(".vc-button-buttonText");
-            buttonText.innerHTML = newVal;
+            buttonText.innerHTML = label;
             var newText = buttonText;
             newText.classList.add("vc-button-buttonText");
             button.replaceChild(newText, oldText);
@@ -118,32 +123,20 @@
 
         // When the button has no text is added an attribute
         // so if the button has icon it will be placed centered
-        (!newVal) ? el.setAttribute("text", "false") : el.setAttribute("text", "true");
+        (!label) ? el.setAttribute("text", "false") : el.setAttribute("text", "true");
 
       },
-
-      /*
-        @function setValue
-        @description Set new button text
-        @param {String} newVal [New button text]
-      */
-      setValue: function (newVal) {
-        this.setLabel(newVal);
-      }
-    },
-
-    privateFunctions: {
       /*
         @function (private) _setupIcon
         @description Set new button icon
         @param {String} newVal [New button icon]
       */
-      setupIcon: function (newVal) {
-
-        if (newVal) {
-          var el = this;
+      setupIcon: function () {
+        var el = this;
+        
+        if (el.icon) {
           var button = el.querySelector(".vc-button-button");
-          var iconAttribute = newVal;
+          var iconAttribute = el.icon;
           var icon;
 
           // When change the icon dynamically is necessary delete old icon
@@ -161,11 +154,9 @@
             icon.classList.add("vc-button-buttonIcon");
 
           } else {
-
             icon = document.createElement("div");
             icon.style.backgroundImage = "url('" + iconAttribute + "')";
             icon.classList.add("vc-button-buttonIcon");
-
           }
 
           button.appendChild(icon);
@@ -178,10 +169,10 @@
         @description Update disabled status
         @param {String} newVal [New value of disabled]
       */
-      updateDisabled: function (newVal) {
+      updateDisabled: function () {
         var button = this.querySelector(".vc-button-button");
 
-        if (!vcomet.util.isTrue(newVal)) {
+        if (!vcomet.util.isTrue(this.disabled)) {
           button.removeAttribute("disabled");
           button.classList.remove("vc-fg1-disabled");
           this.style.pointerEvents = "auto";
@@ -200,15 +191,8 @@
       var el = this;
       var button = el.querySelector(".vc-button-button");
 
-      if (el.label || (el.label && el.value) ) {
-        el.setValue(el.label);
-
-      } else {
-        el.setValue(el.value);
-        
-      }
-
-      el._updateDisabled(el.disabled);
+      el._setLabel();
+      el._updateDisabled();
       el._setupIcon(el.icon);
       // When the button is a type form submit
       (el.type) ? button.setAttribute("type", el.type) : null;
@@ -218,10 +202,16 @@
     onPropertyChanged: function (attrName, oldVal, newVal) {
       switch (attrName) {
         case "disabled":
-          this._updateDisabled(newVal);
+          this._updateDisabled();
           break;
         case "icon":
-          (newVal !== "") ? this._setupIcon(newVal) : null;
+          this._setupIcon();
+          break;
+        case "label":
+          this._setLabel();
+          break;
+        case "value":
+          this._setLabel();
           break;
       }
     }

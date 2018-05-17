@@ -29,29 +29,29 @@ module.exports = function (result, cb) {
     vcometJsonObject = {};
     actualPackages = {};
     singlePackageMode = false;
-
-    if (result.path) {
-        localPath = result.path;
-    }
+    var noSave = result["no-save"];
+    localPath = result.path;
 
     Sync(function () {
         try {
             // supportGitCredentials();
-            handleRemoteVersions.sync(null, result.install);
+            handleRemoteVersions.sync(null, result.install, noSave);
             // Find installed packages
             handleLocalVersions.sync(null);
             // Install or update wanted packages        
             installPackages.sync(null);
-
-            cb(null, true);
+            if (cb) {
+                cb(null, true);
+            }
         } catch (error) {
             console.error("\x1b[91m", "\nError: " + error);
             console.error("\x1b[0m"); // Reset color + newLine
-
-            cb(error);
+            if (cb) {
+                cb(error);
+            }
         }
     });
-    
+
 };
 
 function supportGitCredentials() {
@@ -71,8 +71,7 @@ function supportGitCredentials() {
 }
 
 // Finds the required version of the packages
-function handleRemoteVersions(value, cb) {
-
+function handleRemoteVersions(value, noSave, cb) {
     Sync(function () {
 
         // Reads the vcomet.json to search the required versions
@@ -83,19 +82,23 @@ function handleRemoteVersions(value, cb) {
                 cb("Unexpected syntax while reading vcomet.json\n\n" + error);
             }
 
-            // If the project does not have vcomoet.json
+            // If the project does not have vcomet.json
             // looks for a field "vcomet" in the package.json
         } else if (fs.existsSync("package.json")) {
             try {
                 var packageJsonObject = JSON.parse(fs.readFileSync("package.json").toString());
 
+                // When existing package.json but not exists vcomet field will create the vcomet.json
                 if (packageJsonObject.vcomet) {
                     vcometJsonObject = packageJsonObject.vcomet;
+                } else {
+                    var newVcometJson = true;
                 }
 
             } catch (error) {
                 cb("Unexpected syntax while reading package.json\n\n" + error);
             }
+
         } else {
             var newVcometJson = true;
         }
@@ -139,7 +142,9 @@ function handleRemoteVersions(value, cb) {
                     }
 
                     vcometJsonObject[packageName] = packageVersion;
-                    fs.writeFileSync("vcomet.json", JSON.stringify(vcometJsonObject, null, 2));
+                    if (!noSave) {
+                        fs.writeFileSync("vcomet.json", JSON.stringify(vcometJsonObject, null, 2));
+                    }
 
                 } catch (error) {
                     cb(error);
@@ -158,13 +163,13 @@ function handleRemoteVersions(value, cb) {
             }
         }
 
-        // Generate vcomet.json if it does not exist.
-        if (newVcometJson && packageVersion) {
-            var newVcometJsonPath = path.join(".", "vcomet.json");
-            var ignoreArray = ["custom"];
+        // Adds ignore file to the vcomet.json
+        var ignoreArray = ["custom"];
+        vcometJsonObject.ignore = ignoreArray;
 
-            // Adds ignore file to the vcomet.json
-            vcometJsonObject.ignore = ignoreArray;
+        // Generate vcomet.json if it does not exist.
+        if (newVcometJson && packageVersion && !noSave) {
+            var newVcometJsonPath = path.join(".", "vcomet.json");
 
             fs.createFileSync(newVcometJsonPath);
             fs.writeFileSync(newVcometJsonPath, JSON.stringify(vcometJsonObject, null, 2));
@@ -238,8 +243,6 @@ function handleLocalVersions(cb) {
         try {
             versionJsonObject = JSON.parse(fs.readFileSync(localVersionPath).toString());
             foundPackages.vcomet = versionJsonObject.vcomet;
-            // foundPackages.core = versionJsonObject.core;
-            // foundPackages.ui = versionJsonObject.ui;
         } catch (error) {
             cb("Unexpected syntax while reading version.json\n\n" + error);
         }
@@ -321,10 +324,10 @@ function installPackages(cb) {
         }
 
         if (isSinglePackageDependency) {
-            // Clean old if exsit and install
+            // Clean old if exist and install
             cleanLocal(singlePackageName);
             //TODO: coming soon
-            console.log("comming soon!");
+            console.log("coming soon!");
             // downloadAndExtract(packageUrl, path.join(localCustomPath, singlePackageName), vcometJsonObject.dependencies[singlePackageName]);
         }
 
@@ -332,15 +335,15 @@ function installPackages(cb) {
             var dependenciesKeys = Object.keys(vcometJsonObject.dependencies);
             dependenciesKeys.forEach(function (dependencyKey) {
                 if (!(dependencyKey in actualPackages.dependencies) || actualPackages.dependencies[dependencyKey] != vcometJsonObject.dependencies[dependencyKey]) {
-                    // Clean old if exsit and install
+                    // Clean old if exist and install
                     cleanLocal(dependencyKey);
-                    console.log("comming soon!");
+                    console.log("coming soon!");
                     // downloadAndExtract(packageUrl, path.join(localCustomPath, dependencyKey), vcometJsonObject.dependencies[dependencyKey]);
                 }
             });
         }
 
-        // Call calback
+        // Call callback
         cb();
     });
 
@@ -430,6 +433,7 @@ function downloadAndExtract(file_url, extractPath, version, cb) {
     // Create local vcomet storage path
     var downloadPath = path.join(os.homedir(), ".vcomet", "vcomet-" + version);
     var fileName = path.basename(url.parse(file_url).pathname);
+
     fs.mkdirsSync(downloadPath);
     var dest = path.join(downloadPath, fileName);
     // Check if already in local storage, if so extract only

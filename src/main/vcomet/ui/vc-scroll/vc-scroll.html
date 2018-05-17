@@ -7,14 +7,6 @@
 
     privateProperties: {
       /*
-      @property (private) {Object} _container
-      @description Reference to the container node
-      */
-      container: {
-        value: {},
-        reflect: false
-      },
-      /*
       @property (private) {Array} _preventDragNodes
       @description Array containing nodes that prevent the scroll from happening
       */
@@ -254,13 +246,13 @@
           el.style.height = "100%";
           el.style.width = "100%";
 
-          el._container = el.parentNode;
+          el._refs.container = el.parentNode;
 
-          el._container.vcometScroll = el;
-          el._container.vcometScroll.content = el.content;
+          el._refs.container.vcometScroll = el;
+          el._refs.container.vcometScroll.content = el.content;
 
-          if (!el._container.classList.contains("vc-scroll-content")) {
-            el._container.classList.add("vc-scroll-container");
+          if (!el._refs.container.classList.contains("vc-scroll-content")) {
+            el._refs.container.classList.add("vc-scroll-container");
           }
 
         }
@@ -1551,7 +1543,7 @@
               if (!hasVerticalScroll) {
 
                 el._refs.verticalBar.style.height = "100%";
-                el._refs.verticalBar.style.top = "0px";
+                el._refs.verticalBar.style.transform = "translate3d(0, 0, 0)";
 
                 //If the scroll is not static then we remove the active class to hide it
                 if (el._misc.vertical.static == false) {
@@ -1615,7 +1607,7 @@
               if (!hasHorizontalScroll) {
 
                 el._refs.horizontalBar.style.width = "100%";
-                el._refs.horizontalBar.style.left = "0px";
+                el._refs.horizontalBar.style.transform = "translate3d(0, 0, 0)";
 
                 //If the scroll is not static then we remove the active class to hide it
                 if (el._misc.horizontal.static == false) {
@@ -2262,8 +2254,8 @@
         var el = this;
 
         if (vcomet.util.isTrue(el.fillContainer)) {
-          if (window.getComputedStyle(el._container, false).position == "static") {
-            el._container.style.position = "relative";
+          if (window.getComputedStyle(el._refs.container, false).position == "static") {
+            el._refs.container.style.position = "relative";
           }
         }
 

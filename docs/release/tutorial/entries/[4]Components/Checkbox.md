@@ -58,7 +58,7 @@ vcomet.onReady(function () {
 ## Examples
 
 ### Enable and check dynamically
-In this example one of the vc-checkbox is disabled and other is checked, but after a second the disabled and unchecked checkbox will be enable and checked.
+In this example one of the vc-checkbox is disabled and other is checked, but after a second the disabled and unchecked checkbox will be enabled and checked.
 ``` [html]
 <!-- Initially checkbox checked -->
 <vc-checkbox label="Checkbox 1" name="options" value="myCheckbox1" checked="true"></vc-checkbox>

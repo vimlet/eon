@@ -1,7 +1,7 @@
 # Spinner
 
 ## Introduction
-This form component consists of an entry field for numerical values with `up` and `down` buttons. It is possible set a minimum value and a maximum value using the properties of vc-spinner `min` and `max`. 
+This form component consists of an entry field for numerical values with `up` and `down` buttons. It is possible to set a minimum value and a maximum value using the properties of vc-spinner `min` and `max`. 
 
 To use it import vc-spinner in the head of the HTML document:
 ``` [html]
@@ -36,7 +36,7 @@ vcomet.onReady(function () {
 ## Examples
 
 ### Enable dynamically
-In this example the vc-spinner is contained within a vc-form, and is disabled, and after a second it will be enabled.
+In this example, the vc-spinner is contained within a vc-form, and is disabled, and after a second it will be enabled.
 ``` [html]
 <!-- Initially disabled spinner -->
 <vc-spinner label="Spinner number" name="mySpinner" disabled="true"></vc-spinner>

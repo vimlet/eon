@@ -3154,9 +3154,11 @@ vcomet.$1 = function (query) {
   return document.querySelector(query);
 };
 
-// window definitions will use any other framework $ and $1 if found
+// window & document definitions will use any other framework $ and $1 if found
 window.$ = window.$ || vcomet.$;
 window.$1 = window.$1 || vcomet.$1;
+document.$ = document.$ || vcomet.$;
+document.$1 = document.$1 || vcomet.$1;
 
 // TODO: MOVE THIS EXCEPT DOMREADY TO VCOMET.DOM
 (function () {
@@ -4078,7 +4080,7 @@ vcomet.interpolation.handleInterpolationVariables = function (el, config) {
     bindString = "data." + currentVariable.getAttribute("bind");
     bindValue = vcomet.object.readFromPath(el, bindString);
 
-    bindValue = typeof bindValue == "undefined" ? "" : bindValue.toString();
+    bindValue = typeof bindValue == "undefined" ? "" : bindValue;
 
     vcomet.object.assignToPath(el, bindString, bindValue);
   }
@@ -5154,7 +5156,7 @@ vcomet.declare = function (name, baseElement) {
     // Constructs the element class
     var elementClass = vcomet.constructClass(baseElement);
 
-    // Element constructor: Important! never modify element attributes or childs here
+    // Element constructor: Important! never modify element attributes or children here
     elementClass.onCreated(function () {
 
         var el = this;
@@ -5468,7 +5470,7 @@ vcomet.time.defaultLocale = {
      */
   vcomet.addResizeListener = function(element, key, fn) {
     //
-    var isIE = navigator.userAgent.match(/Trident/);
+    var isIE = navigator.userAgent.match(/Trident/) && document.documentMode;
     //
     if (!element.__resizeListeners) {
       element.__resizeListeners = {};
@@ -5522,8 +5524,8 @@ vcomet.time.defaultLocale = {
     }
   };
 
-   // Resize triggering!
-   function resizeListener(e) {
+  // Resize triggering!
+  function resizeListener(e) {
     var win = e.target || e.srcElement;
     // Get resize funciton to be triggered and suscribe itto cancel function
     if (win.__resizeRAF) cancelFrame(win.__resizeRAF);
