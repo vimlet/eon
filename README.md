@@ -1,18 +1,20 @@
-[//]: # (badges)
-
-[![license](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526309799306/license.svg?raw=true "License")](https://github.com/vimlet/VimletComet/blob/master/LICENSE)
-[![build](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526309799306/build.svg?raw=true "Build")](https://vimlet.com/downloads)
-[![docs](https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526309799306/docs.svg?raw=true "Docs")](https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html)
-
-[//]: # (badges)
-
-
 
 <p align="center">
 <a href="https://vimlet.com/vcomet">
 <img width="450" src="logo.png"></img>
 </a>
 </p>
+
+[//]: # (badges)
+
+<p align='center'>
+<a href='https://github.com/vimlet/VimletComet/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526498029861license.svg?raw=true' title='License' alt='license'></a>
+<a href='https://vimlet.com/downloads'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526498029861build.svg?raw=true' title='Build' alt='build'></a>
+<a href='https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526498029861docs.svg?raw=true' title='Docs' alt='docs'></a>
+</p>
+
+[//]: # (badges)
+
 
 <p align="center">
 <strong>Fast, Light & Productive UX</strong>
