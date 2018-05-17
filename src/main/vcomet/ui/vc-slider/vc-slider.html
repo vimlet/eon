@@ -128,42 +128,42 @@
                 value: "slider"
             },
             /*
-              @property (private) {Object} _sliderNode 
+              @property (private) {Object} _refs.slider 
               @description Store slider input node
             */
             sliderNode: {
                 value: {}
             },
             /*
-              @property (private) {Object} _thumbNode 
+              @property (private) {Object} _refs.thumb 
               @description Store slider thumb node
             */
             thumbNode: {
                 value: {}
             },
             /*
-              @property (private) {Object} _shellNode 
+              @property (private) {Object} _refs.shell 
               @description Store slider shell node
             */
             shellNode: {
                 value: {}
             },
             /*
-              @property (private) {Object} _trackNode 
+              @property (private) {Object} _refs.track 
               @description Store slider track node
             */
             trackNode: {
                 value: {}
             },
             /*
-              @property (private) {Object} _fillNode
+              @property (private) {Object} _refs.fill
               @description Store slider fill node
             */
             fillNode: {
                 value: {}
             },
             /*
-              @property (private) {Object} _rangeValue
+              @property (private) {Object} _refs.range
               @description Store slider range node
             */
             rangeValue: {
@@ -182,27 +182,43 @@
             */
             thumbEvent: {
                 value: {}
-            }
-        },
-
-        functions: {
+            },
             /*
-              @function setValue
-              @param {String} newVal [new slider value]
-              @description Set new slider value
+              @property (private) {Object} _refs 
+              @description Object with  references
             */
-            setValue: function (newVal) {
-
-                this._sliderNode.value = newVal;
-                this._currentvalue = newVal;
-                this._updateSlider();
-                vcomet.triggerCallback("onChange", this);
-
-            }
-
+            refs: {
+                value: {}
+            },
         },
-
         privateFunctions: {
+            /*
+              @function (private) _setValue
+              @param {String} newVal [new slider value]
+            */
+            setValue: function () {
+                var el = this;
+                
+                el._refs.slider.value = el.value;
+                el._currentvalue = el.value;
+                el._updateSlider();
+                vcomet.triggerCallback("onChange", el);
+    
+            },
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.shell = el.template.querySelector(".vc-slider-shell");
+                el._refs.track = el.template.querySelector(".vc-slider-track");
+                el._refs.slider = el.template.querySelector(".vc-slider-slider");
+                el._refs.fill = el.template.querySelector(".vc-slider-fill");
+                el._refs.thumb = el.template.querySelector(".vc-slider-thumb");
+                el._refs.range = el.template.querySelector(".vc-slider-display");
+            },
             /*
               @function (private) _updateSlider
               @description Update slider view
@@ -210,14 +226,14 @@
             */
             updateSlider: function (arg) {
                 var el = this;
-                var sliderVal = el._sliderNode.value;
-                var percentValue = (sliderVal - el._sliderNode.min) / (el._sliderNode.max - el._sliderNode.min); /* percentage slider value */
+                var sliderVal = el._refs.slider.value;
+                var percentValue = (sliderVal - el._refs.slider.min) / (el._refs.slider.max - el._refs.slider.min); /* percentage slider value */
                 var thumbPosition = -5.7;
                 var fillSize = percentValue * 100;
-                el._rangeValue.innerHTML = sliderVal;
+                el._refs.range.innerHTML = sliderVal;
                 (el.orientation == "horizontal") ? el._horizontalSlider(percentValue) : el._verticalSlider(percentValue, fillSize, arg);
 
-                el.value = el._sliderNode.value;
+                el.value = el._refs.slider.value;
             },
 
 
@@ -229,8 +245,8 @@
             horizontalSlider: function (percentValue) {
                 var trackSize = 100;
 
-                this._fillNode.style.width = (percentValue * trackSize) + "%";
-                this._trackNode.style.width = trackSize + "%"; /* adjust for border */
+                this._refs.fill.style.width = (percentValue * trackSize) + "%";
+                this._refs.track.style.width = trackSize + "%"; /* adjust for border */
             },
 
             /*
@@ -254,12 +270,12 @@
                     this.style.width = "auto";
                     this.style.height = actualNodeWidth + "px";
 
-                    (navigator.userAgent.indexOf("Firefox") != -1 || navigator.userAgent.indexOf("Trident") != -1) ? this._sliderNode.setAttribute("orient", "vertical") : null;
+                    (navigator.userAgent.indexOf("Firefox") != -1 || navigator.userAgent.indexOf("Trident") != -1) ? this._refs.slider.setAttribute("orient", "vertical") : null;
 
                 }
 
                 this.style.display = "inline-block";
-                this._fillNode.style.height = (percentValue * 100) + "%";
+                this._refs.fill.style.height = (percentValue * 100) + "%";
 
             },
 
@@ -270,7 +286,7 @@
             thumbMotion: function () {
                 var el = this;
 
-                el._thumbNode.addEventListener("pointerdown", startThumb, false);
+                el._refs.thumb.addEventListener("pointerdown", startThumb, false);
                 el._thumbEvent = startThumb;
 
                 function startThumb(e) {
@@ -304,20 +320,20 @@
                 var min = parseInt(el.min);
 
                 if (el.orientation == "horizontal") {
-                    trackSize = el._sliderNode.offsetWidth;
-                    var shellLeft = el._shellNode.getBoundingClientRect().left;
+                    trackSize = el._refs.slider.offsetWidth;
+                    var shellLeft = el._refs.shell.getBoundingClientRect().left;
                     var trackRight = shellLeft + trackSize;
 
                     if (e.clientX <= trackRight && e.clientX >= shellLeft) {
-                        el._sliderNode.value = (((e.clientX - shellLeft) / trackSize) * (max - min)) + min;
+                        el._refs.slider.value = (((e.clientX - shellLeft) / trackSize) * (max - min)) + min;
                         el._updateSlider();
                     }
 
                 } else {
-                    trackSize = el._sliderNode.offsetHeight;
-                    var shellTop = el._shellNode.getBoundingClientRect().top;
+                    trackSize = el._refs.slider.offsetHeight;
+                    var shellTop = el._refs.shell.getBoundingClientRect().top;
                     var trackBottom = shellTop + trackSize;
-                    var sliderNode = parseInt(el._sliderNode.value);
+                    var sliderNode = parseInt(el._refs.slider.value);
                     var positionDiff;
 
                     if (e.clientY <= trackBottom && e.clientY >= shellTop) {
@@ -329,13 +345,13 @@
 
                             // Vertical click slider on iOS
                         } else {
-                            positionDiff = el._fillNode.getBoundingClientRect().top - e.clientY;
+                            positionDiff = el._refs.fill.getBoundingClientRect().top - e.clientY;
                         }
 
-                        el._fillNode.style.height = (el._fillNode.offsetHeight + positionDiff) + "px";
-                        el._sliderNode.value = ((el._fillNode.offsetHeight / trackSize) * (max - min)) + min;
-                        el._rangeValue.innerHTML = el._sliderNode.value;
-                        el.value = el._sliderNode.value;
+                        el._refs.fill.style.height = (el._refs.fill.offsetHeight + positionDiff) + "px";
+                        el._refs.slider.value = ((el._refs.fill.offsetHeight / trackSize) * (max - min)) + min;
+                        el._refs.range.innerHTML = el._refs.slider.value;
+                        el.value = el._refs.slider.value;
                     }
                 }
             },
@@ -345,30 +361,31 @@
               @description Updates disabled status and activates the thumb motion when it is not disabled
               @param {String} newVal [new value of disabled]
             */
-            updateDisabled: function (newVal) {
-                var shell = this.querySelector(".vc-slider-shell");
+            updateDisabled: function () {
+                // var shell = this.querySelector(".vc-slider-shell");
+                var el = this;
 
-                if (!vcomet.util.isTrue(newVal)) {
-                    this._sliderNode.removeAttribute("disabled");
-                    shell.classList.remove("vc-slider-disabled");
-                    this._rangeValue.classList.remove("vc-fg1-disabled");
-                    this._fillNode.classList.remove("vc-bg1-disabled");
-                    this._thumbNode.classList.remove("vc-bg1-disabled");
-                    this._fillNode.classList.add("vc-fg1-active");
-                    this._thumbNode.classList.add("vc-fg1-active");
-                    this._trackNode.classList.remove("vc-bg1-disabled");
-                    this._thumbMotion();
+                if (!vcomet.util.isTrue(el.disabled)) {
+                    el._refs.slider.removeAttribute("disabled");
+                    el._refs.shell.classList.remove("vc-slider-disabled");
+                    el._refs.range.classList.remove("vc-fg1-disabled");
+                    el._refs.fill.classList.remove("vc-bg1-disabled");
+                    el._refs.fill.classList.add("vc-fg1-active");
+                    el._refs.thumb.classList.remove("vc-bg1-disabled");
+                    el._refs.thumb.classList.add("vc-fg1-active");
+                    el._refs.track.classList.remove("vc-bg1-disabled");
+                    el._thumbMotion();
 
                 } else {
-                    this._sliderNode.setAttribute("disabled", "true");
-                    shell.classList.add("vc-slider-disabled");
-                    this._rangeValue.classList.add("vc-fg1-disabled");
-                    this._fillNode.classList.add("vc-bg1-disabled");
-                    this._thumbNode.classList.add("vc-bg1-disabled");
-                    this._fillNode.classList.remove("vc-fg1-active");
-                    this._thumbNode.classList.remove("vc-fg1-active");
-                    this._trackNode.classList.add("vc-bg1-disabled");
-                    this._thumbNode.removeEventListener("pointerdown", this._thumbEvent, false);
+                    el._refs.slider.setAttribute("disabled", "true");
+                    el._refs.shell.classList.add("vc-slider-disabled");
+                    el._refs.range.classList.add("vc-fg1-disabled");
+                    el._refs.fill.classList.add("vc-bg1-disabled");
+                    el._refs.thumb.classList.add("vc-bg1-disabled");
+                    el._refs.fill.classList.remove("vc-fg1-active");
+                    el._refs.thumb.classList.remove("vc-fg1-active");
+                    el._refs.track.classList.add("vc-bg1-disabled");
+                    el._refs.thumb.removeEventListener("pointerdown", el._thumbEvent, false);
                 }
 
             },
@@ -409,22 +426,16 @@
 
         onCreated: function () {
             vcomet.createCallback("onChange", this);
+            this._createRefs();
         },
 
         onRender: function () {
             var el = this;
 
-            el._shellNode = el.querySelector(".vc-slider-shell");
-            el._trackNode = el.querySelector(".vc-slider-track");
-            el._sliderNode = el.querySelector(".vc-slider-slider");
-            el._fillNode = el.querySelector(".vc-slider-fill");
-            el._thumbNode = el.querySelector(".vc-slider-thumb");
-            el._rangeValue = el.querySelector(".vc-slider-display");
-
-            el._sliderNode.setAttribute("name", el.name);
-            el._sliderNode.setAttribute("value", el.value);
-            el._sliderNode.setAttribute("min", el.min);
-            el._sliderNode.setAttribute("max", el.max);
+            el._refs.slider.setAttribute("name", el.name);
+            el._refs.slider.setAttribute("value", el.value);
+            el._refs.slider.setAttribute("min", el.min);
+            el._refs.slider.setAttribute("max", el.max);
             el.setAttribute("touch-action", "none");
             el._verifyScreenResolution();
 
@@ -434,7 +445,7 @@
             // So is necessary a click event
             if (vcomet.util.getBrowser() == "IE" || /iPad|iPhone|iPod/.test(navigator.platform)) {
 
-                el._sliderNode.addEventListener("click", function (event) {
+                el._refs.slider.addEventListener("click", function (event) {
                     // On iOS devices clicking on the input does not update its status
                     // Is is necessary  to do it programmatically
                     /iPad|iPhone|iPod/.test(navigator.platform) ? el._interactionSlider(event) : el._updateSlider();
@@ -442,7 +453,7 @@
                 }, false);
 
             } else {
-                el._sliderNode.addEventListener("input", function (e) {
+                el._refs.slider.addEventListener("input", function (e) {
                     el._updateSlider();
                     el._updateCurrentValue();
                 }, false);
@@ -452,7 +463,7 @@
                 el.displayPosition = "";
             }
 
-            el._updateDisabled(el.disabled);
+            el._updateDisabled();
 
         },
 
@@ -463,7 +474,10 @@
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
                 case "disabled":
-                    this._updateDisabled(newVal);
+                    this._updateDisabled();
+                    break;
+                case "value":
+                    this._setValue();
                     break;
             }
         }
