@@ -116,9 +116,16 @@
       */
       deferScripts: function (dataNode) {
         var el = this;
+<<<<<<< HEAD
+        var fragment = document.createDocumentFragment();
+        var t = 0;
+        var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
+        var childrenArray;
+=======
         var nodes, scripts, script, scriptKey;
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
         // ** IE do not support 'children' property
-        if(vcomet.util.getBrowser() === "IE"){
+        if (vcomet.util.getBrowser() === "IE") {
           // Avoid empty element template on programmatic cases
           nodes = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
           // From node list to js array
@@ -163,8 +170,13 @@
         // Get first generation template children
         while (nodes.length) {
           // Build nodes structure
+<<<<<<< HEAD
+          child = childrenArray.shift();
+          if (child.nodeType == 1) {
+=======
           child = nodes.shift();
           if(child.nodeType == 1) {
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
             // Append remote source child
             if (reAppend) {
               fragment.appendChild(child);
@@ -178,24 +190,33 @@
         }
         // Move templates to the assigned body container 
         if (reAppend) {
-           el.content.appendChild(fragment);
+          el.content.appendChild(fragment);
         }
+<<<<<<< HEAD
+        vcomet.triggerCallback("onLoad", el, el, []);
+=======
         // Wait until the element is ready
         el.onReady(function(){
           vcomet.triggerCallback("onLoad", el, el, []);
         });
         
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
       },
       /*
-        @function (private) removeTemplate
+        @function (private) _removeTemplate
         @description Extract content and remove the template node
         @param {Object} tmp [Node element containing the panel content]
       */
       removeTemplate: function (tmp) {
         var el = this;
         var fragment = document.createDocumentFragment();
+<<<<<<< HEAD
+        var child;
+        var children = !tmp.children[0] ? tmp.content.children : tmp.children;
+=======
         var child, positionId;
         var children = !tmp.children[0] ? tmp.content.children: tmp.children;
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
         children = [].slice.call(children);
         // Move nodes to the tree container safely
         while (children.length) {
@@ -215,7 +236,7 @@
         el.content.removeChild(tmp);
       },
       /*
-        @function (private) setUpScroll
+        @function (private) _setUpScroll
         @description 
       */
       setUpScroll: function () {
@@ -225,6 +246,16 @@
         el._refs.wrapper.arrowScrolls = el.arrowScrolls;
       },
       /*
+<<<<<<< HEAD
+        @function (private) _resetCallback
+        @description 
+      */
+      resetCallback: function (eventName) {
+        var el = this;
+        // 
+        el["__" + eventName] = [];
+        el["__" + eventName + "__triggered"] = false;
+=======
         @function (private) resetLoadCallback
         @description 
       */
@@ -233,6 +264,7 @@
         // Reset onLoad callback values
         el.__onLoad.__triggered = false
         el.__onLoad = [];
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
       }
     },
     functions: {
@@ -245,7 +277,6 @@
         var el = this;
         var tmp, i;
         var tmps = el._refs.templates;
-        
         // Partial render
         if (index === 0 || index) {
           tmp = tmps[index];
@@ -254,6 +285,10 @@
           delete tmps[index];
         } else {
           var keys = Object.keys(tmps);
+<<<<<<< HEAD
+
+=======
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
           for (i = 0; i < keys.length; i++) {
             tmp = tmps[keys[i]];
             // Remove template
@@ -270,7 +305,6 @@
         var el = this;
         // Remove previous content 
         el._refs.wrapper.content.innerHTML = "";
-
         // Import panel content from specific source
         el._importContent();
       }
@@ -283,7 +317,7 @@
       el._refs.templates = {};
       el._refs.scripts = {};
       // Get body container
-      if(vcomet.util.isTrue(el.allowScroll)) {
+      if (vcomet.util.isTrue(el.allowScroll)) {
         el._refs.wrapper = document.createElement("vc-scroll");
         // Configure scroll
         el._setUpScroll();
@@ -301,9 +335,16 @@
       if (!el._refs.wrapper.isEqualNode(el)) { el.appendChild(el._refs.wrapper) }
     },
     onPropertyChanged: function (attrName, oldVal, newVal) {
+<<<<<<< HEAD
+      var el = this;
+      switch (attrName) {
+        case "href":
+          el._resetCallback("onLoad");
+=======
       switch (attrName) {
         case ("href"):
           this._resetLoadCallback();
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
           break;
       }
     }

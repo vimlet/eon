@@ -6,7 +6,7 @@ vcomet.declare = function (name, baseElement) {
     // Constructs the element class
     var elementClass = vcomet.constructClass(baseElement);
 
-    // Element constructor: Important! never modify element attributes or childs here
+    // Element constructor: Important! never modify element attributes or children here
     elementClass.onCreated(function () {
 
         var el = this;
