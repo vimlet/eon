@@ -7,9 +7,11 @@
 
 [//]: # (badges)
 
-<a href='https://github.com/vimlet/VimletComet/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565951630license.svg?raw=true' title='License' alt='license'></a>
-<a href='https://vimlet.com/downloads'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565951630build.svg?raw=true' title='Build' alt='build'></a>
-<a href='https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526565951630docs.svg?raw=true' title='Docs' alt='docs'></a>
+<p align='center'>
+<a href='https://github.com/vimlet/VimletComet/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526566230987/license.svg?raw=true' title='License' alt='license'></a>
+<a href='https://vimlet.com/downloads'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526566230987/build.svg?raw=true' title='Build' alt='build'></a>
+<a href='https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526566230987/docs.svg?raw=true' title='Docs' alt='docs'></a>
+</p>
 
 [//]: # (badges)
 
