@@ -94,34 +94,27 @@
             }
         },
 
-        functions: {
+        privateFunctions: {
             /*
-              @function setValue
+              @function _setValue
               @description Set new checkbox value
               @param {String} newVal [New checkbox value]
             */
-            setValue: function (newVal) {
-
-                this.value = newVal;
-                this._currentvalue = newVal;
+            setValue: function () {
+                this._currentvalue = this.value;
                 vcomet.triggerCallback("onChange", this);
 
-            }
-        },
-
-        privateFunctions: {
+            },
             /*
               @function (private) _updateDisabled
               @description Update disabled status
-              @param {String} newVal [New value of disabled]
             */
-            updateDisabled: function (newVal) {
+            updateDisabled: function () {
                 var el = this;
 
-                if (!vcomet.util.isTrue(newVal)) {
+                if (!vcomet.util.isTrue(el.disabled)) {
                     el._checkboxNode.removeAttribute("disabled");
-
-                    // For Edge bug (not solved yet) that when enable o diable an input dynamically,
+                    // For Edge bug (not solved yet): when enable o disable an input dynamically,
                     // it is not automatically associated with the corresponding css,
                     // so is necessary to add a css property to activate the process
                     el._labelNode.style.visibility = (navigator.userAgent.indexOf("Edge") != -1) ? "inherit" : el._labelNode.style.visibility;
@@ -141,10 +134,10 @@
               @description Update checked status
               @param {String} newVal [New value of checked]
             */
-            updateCheck: function (newVal) {
+            updateCheck: function () {
                 var el = this;
 
-                if (!vcomet.util.isTrue(newVal)) {
+                if (!vcomet.util.isTrue(el.checked)) {
                     el._checkboxNode.checked = false;
                     el._checkboxNode.removeAttribute("checked");
                     el._checkboxNode.classList.remove("vc-checkbox-checked");
@@ -181,7 +174,7 @@
             if (!el.name) {
                 el.name = "";
             }
-
+            
             el._labelNode.insertBefore(el._spanNode, el._labelNode.firstChild);
             el._checkboxNode.setAttribute("name", el.name);
             el._checkboxNode.setAttribute("value", el.value);
@@ -204,21 +197,24 @@
 
             }, false);
 
-            el._updateDisabled(el.disabled);
-            el._updateCheck(el.checked);
+            el._updateDisabled();
+            el._updateCheck();
 
         },
 
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
                 case "disabled":
-                    this._updateDisabled(newVal);
+                    this._updateDisabled();
                     break;
                 case "checked":
-                    this._updateCheck(newVal);
+                    this._updateCheck();
                     break;
                 case "label":
                     this.querySelector(".labelText").innerHTML = newVal;
+                    break;
+                case "value":
+                    this._setValue();
                     break;
             }
         }

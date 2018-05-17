@@ -1,7 +1,7 @@
 # Loadingmask
 
 ## Introduction
-This component is an overlay with a load circle that appears immediately after opening the page to hide its content until it has been fully loaded.
+This component is an overlay with a loading circle that appears immediately after opening the page to hide its content until it has been fully loaded.
 
 To use it import vc-loadingmask in the head of the HTML document:
 ``` [html]
@@ -13,7 +13,7 @@ To use it import vc-loadingmask in the head of the HTML document:
 ```
 
 ## Declarative usage
-Create a vc-loadingmask declaratively is really simple. By default the time it takes vc-loadingmask to hide is 2 seconds, but it can be changed with the attribute `duration`
+Create a vc-loadingmask declaratively is really simple. By default, the time it takes vc-loadingmask to hide is 2 seconds, but it can be changed with the attribute `duration`.
 ``` [html]
 <vc-loadingmask duration="3000"></vc-loadingmask>
 ```
@@ -21,7 +21,7 @@ Create a vc-loadingmask declaratively is really simple. By default the time it t
 ## Programmatic usage
 It is also very simple to create a vc-loadingmask programmatically. 
 
-It can be indicated that the vc-loadingmask is not shown when it is created and displayed when necessary using the method `show`
+It can be indicated that the vc-loadingmask is not shown when it is created and displayed when necessary using the method `show`.
 ``` [javascript]
 vcomet.onReady(function () {
   // Create vc-loadingmask

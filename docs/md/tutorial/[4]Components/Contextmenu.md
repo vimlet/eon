@@ -15,7 +15,7 @@ To use it import vc-contextmenu in the head of the HTML document:
 ## Declarative usage
 The vc-contextmenu created declaratively is composed by vc-item to add the different options. The attribute `value` of vc-item is equivalent to the name of the option.
 
-To indicate that an element will have a vc-contextmenu associated with it, the attribute `vc-contextmenu` must be added with the name of vc-contextmenu
+To indicate that an element will have a vc-contextmenu associated with it, the attribute `vc-contextmenu` must be added with the name of vc-contextmenu.
 
 ``` [html]
 <vc-contextmenu name="myContextmenu">
@@ -28,7 +28,7 @@ To indicate that an element will have a vc-contextmenu associated with it, the a
 ```
 
 ## Programmatic usage
-To create vc-contextmenu programmatically also uses vc-item to add the options, and it will be added to the vc-contextmenu using 
+To create vc-contextmenu programmatically also uses vc-item to add the options, and it will be added to the vc-contextmenu using.
 
 ``` [javascript]
 vcomet.onReady(function () {
@@ -63,7 +63,6 @@ The trigger element:
 ## Examples
 
 ### Changes dynamically 
-
 Declare the initial vc-contextmenu:
 ``` [html]
 <vc-contextmenu id="myContextmenu" name="myContextmenu">

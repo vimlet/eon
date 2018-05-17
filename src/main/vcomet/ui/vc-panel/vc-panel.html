@@ -96,42 +96,87 @@
             if (this.status !== 200) { return };
             // Allow execute imported html scripts
             documentFragment = vcomet.fragmentFromString(xhr.responseText);
-            el._appendContent(documentFragment);
+            // Extract script nodes that belong to template elements for deferring their execution
+            var nodes = el._deferScripts(documentFragment);
+  
+            el._appendContent(nodes);
           };
           // Execute request
           xhr.send();
         } else {
-          // Store templates references
-          el._appendContent(el);
+          // Extract script nodes that belong to template elements for deferring their execution
+          var nodes = el._deferScripts(el);
+          el._appendContent(nodes);
         }
+      },
+      /*
+        @function (private) _deferScripts
+        @description  
+        @param {Array} nodes []
+      */
+      deferScripts: function (dataNode) {
+        var el = this;
+<<<<<<< HEAD
+        var fragment = document.createDocumentFragment();
+        var t = 0;
+        var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
+        var childrenArray;
+=======
+        var nodes, scripts, script, scriptKey;
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
+        // ** IE do not support 'children' property
+        if (vcomet.util.getBrowser() === "IE") {
+          // Avoid empty element template on programmatic cases
+          nodes = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
+          // From node list to js array
+        } else {
+          // Avoid empty element template on programmatic cases
+          nodes = !dataNode.children[0] ? dataNode.template.children : dataNode.children;
+        }
+        // Cast to js array 
+        nodes = [].slice.call(nodes);
+
+        for (var i = 0; i < nodes.length; i++) {
+          var node = nodes[i];
+          // Check template node
+          if (node.tagName === "TEMPLATE") {
+           // Get template script nodes
+           scripts = node.content ? node.content.querySelectorAll("script") : node.querySelectorAll("script");
+            for (var j = 0; j < scripts.length; j++) {
+              script = scripts[j];
+              scriptKey = Object.keys(el._refs.scripts).length;
+              // Label script node
+              script.setAttribute("_positionId", scriptKey);
+              // Extract script content and store it
+              el._refs.scripts[scriptKey] = script.text;
+              // Empty script
+              script.text = "";
+            }
+          }
+        }
+        return nodes;
       },
       /*
         @function (private) appendContent
         @description Append content to the panel or the scroll container if exists 
         @param {Object} dataNode [Node element containing the panel content]
       */
-      appendContent: function (dataNode) {
+      appendContent: function (nodes) {
         var el = this;
         var fragment = document.createDocumentFragment();
+        var i;
         var t = 0;
         var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
-        var childrenArray;
-        // ** IE do not support 'children' property
-        if (vcomet.util.getBrowser() === "IE") {
-          // Avoid empty element template on programmatic cases
-          childrenArray = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
-          // From node list to js array
-        } else {
-          // Avoid empty element template on programmatic cases
-          childrenArray = !dataNode.children[0] ? dataNode.template.children : dataNode.children;
-        }
-
-        childrenArray = [].slice.call(childrenArray);
         // Get first generation template children
-        while (childrenArray.length) {
+        while (nodes.length) {
           // Build nodes structure
+<<<<<<< HEAD
           child = childrenArray.shift();
           if (child.nodeType == 1) {
+=======
+          child = nodes.shift();
+          if(child.nodeType == 1) {
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
             // Append remote source child
             if (reAppend) {
               fragment.appendChild(child);
@@ -147,7 +192,15 @@
         if (reAppend) {
           el.content.appendChild(fragment);
         }
+<<<<<<< HEAD
         vcomet.triggerCallback("onLoad", el, el, []);
+=======
+        // Wait until the element is ready
+        el.onReady(function(){
+          vcomet.triggerCallback("onLoad", el, el, []);
+        });
+        
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
       },
       /*
         @function (private) _removeTemplate
@@ -157,13 +210,24 @@
       removeTemplate: function (tmp) {
         var el = this;
         var fragment = document.createDocumentFragment();
+<<<<<<< HEAD
         var child;
         var children = !tmp.children[0] ? tmp.content.children : tmp.children;
+=======
+        var child, positionId;
+        var children = !tmp.children[0] ? tmp.content.children: tmp.children;
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
         children = [].slice.call(children);
         // Move nodes to the tree container safely
         while (children.length) {
           // Build nodes structure
           child = children.shift();
+          // Check scripts
+          if(child.tagName == "SCRIPT") {
+            // Inject deferred script text from stored ones
+            positionId = child.getAttribute("_positionId");
+            child.text = positionId ? el._refs.scripts[positionId] : child.text;
+          }
           fragment.appendChild(child);
         }
         // Insert template content just before the template node
@@ -182,6 +246,7 @@
         el._refs.wrapper.arrowScrolls = el.arrowScrolls;
       },
       /*
+<<<<<<< HEAD
         @function (private) _resetCallback
         @description 
       */
@@ -190,6 +255,16 @@
         // 
         el["__" + eventName] = [];
         el["__" + eventName + "__triggered"] = false;
+=======
+        @function (private) resetLoadCallback
+        @description 
+      */
+      resetLoadCallback: function () {
+        var el = this;
+        // Reset onLoad callback values
+        el.__onLoad.__triggered = false
+        el.__onLoad = [];
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
       }
     },
     functions: {
@@ -210,7 +285,10 @@
           delete tmps[index];
         } else {
           var keys = Object.keys(tmps);
+<<<<<<< HEAD
 
+=======
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
           for (i = 0; i < keys.length; i++) {
             tmp = tmps[keys[i]];
             // Remove template
@@ -237,6 +315,7 @@
       vcomet.createCallback("onLoad", this);
       vcomet.createCallback("onContent", this);
       el._refs.templates = {};
+      el._refs.scripts = {};
       // Get body container
       if (vcomet.util.isTrue(el.allowScroll)) {
         el._refs.wrapper = document.createElement("vc-scroll");
@@ -256,10 +335,16 @@
       if (!el._refs.wrapper.isEqualNode(el)) { el.appendChild(el._refs.wrapper) }
     },
     onPropertyChanged: function (attrName, oldVal, newVal) {
+<<<<<<< HEAD
       var el = this;
       switch (attrName) {
         case "href":
           el._resetCallback("onLoad");
+=======
+      switch (attrName) {
+        case ("href"):
+          this._resetLoadCallback();
+>>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
           break;
       }
     }
