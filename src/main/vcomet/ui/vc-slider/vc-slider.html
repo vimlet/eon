@@ -128,48 +128,6 @@
                 value: "slider"
             },
             /*
-              @property (private) {Object} _refs.slider 
-              @description Store slider input node
-            */
-            sliderNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _refs.thumb 
-              @description Store slider thumb node
-            */
-            thumbNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _refs.shell 
-              @description Store slider shell node
-            */
-            shellNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _refs.track 
-              @description Store slider track node
-            */
-            trackNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _refs.fill
-              @description Store slider fill node
-            */
-            fillNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _refs.range
-              @description Store slider range node
-            */
-            rangeValue: {
-                value: {}
-            },
-            /*
               @property (private) {String} _currentvalue
               @description Current slider value
            */
@@ -232,8 +190,9 @@
                 var fillSize = percentValue * 100;
                 el._refs.range.innerHTML = sliderVal;
                 (el.orientation == "horizontal") ? el._horizontalSlider(percentValue) : el._verticalSlider(percentValue, fillSize, arg);
-
-                el.value = el._refs.slider.value;
+                el.__value = el._refs.slider.value;
+                console.log('el.__value', el.__value);
+                console.log('el.value', el.value);
             },
 
 
@@ -338,7 +297,7 @@
 
                     if (e.clientY <= trackBottom && e.clientY >= shellTop) {
 
-                        // When interacion is moving the thumb
+                        // When interaction is moving the thumb
                         if (el._startY) {
                             positionDiff = el._startY - e.clientY;
                             el._startY = e.clientY;
@@ -351,7 +310,7 @@
                         el._refs.fill.style.height = (el._refs.fill.offsetHeight + positionDiff) + "px";
                         el._refs.slider.value = ((el._refs.fill.offsetHeight / trackSize) * (max - min)) + min;
                         el._refs.range.innerHTML = el._refs.slider.value;
-                        el.value = el._refs.slider.value;
+                        el.__value = el._refs.slider.value;
                     }
                 }
             },
@@ -392,7 +351,7 @@
 
             /*
               @function (private) _updateCurrentValue
-              @description Updates slider current vlaue and trigger onCHange callback
+              @description Updates slider current value and trigger onChange callback
             */
             updateCurrentValue: function () {
                 var el = this;
@@ -444,11 +403,12 @@
             // On IE and IOS devices not work event "input"
             // So is necessary a click event
             if (vcomet.util.getBrowser() == "IE" || /iPad|iPhone|iPod/.test(navigator.platform)) {
-
-                el._refs.slider.addEventListener("click", function (event) {
+                // el._refs.slider.addEventListener("click", function (event) {
+                    el.addEventListener("click", function (event) {
                     // On iOS devices clicking on the input does not update its status
                     // Is is necessary  to do it programmatically
-                    /iPad|iPhone|iPod/.test(navigator.platform) ? el._interactionSlider(event) : el._updateSlider();
+                    // /iPad|iPhone|iPod/.test(navigator.platform) ? el._interactionSlider(event) : el._updateSlider();
+                    el._interactionSlider(event);
                     el._updateCurrentValue();
                 }, false);
 
