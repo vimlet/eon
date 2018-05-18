@@ -31,9 +31,6 @@
 </template>
 <script>
     vcomet.element("vc-video", "vc-video.css", {
-        dependencies: [
-            "../vc-slider"
-        ],
         properties: {
             /*
                 @property {String}
@@ -211,129 +208,157 @@
             }
         },
         functions: {
+            //
+            play: function () {
+                var el = this;
 
+                el._togglePlayIcon("paused");
+                el._refs.video.play();
+
+                // Hide poster
+                el._refs.poster.style.display = "none";
+                el._posterHidden = true;
+
+            },
+            //
+            pause: function () {
+                var el = this;
+
+                el._togglePlayIcon("play");
+                el._refs.video.pause();
+
+            },
+            // TODO
+            mute: function () {
+                var el = this;
+            }
         },
         privateFunctions: {
-
-            //
+            /*
+                @function (private) _setUpHTMLVideo
+                @description Set up HTML video configuration
+            */
             setUpHTMLVideo: function () {
-
                 var el = this;
-                var source;
-                var src, i;
+                var source, src, i;
 
+                // Get HTML video reference
                 el._refs.video = el.querySelector("video");
+                
+                // Set up video configuration
                 el._refs.video.poster = el.poster;
-
+                el._refs.video.autoplay = el.autoPlay;
+                el._refs.video.loop = el.loop;
+                
                 // Allow multiple sources
                 el.src = el.src.replace(/\s/g, '').split(",");
                 el.type = el.type.replace(/\s/g, '').split(",");
-
                 // Append sources
                 for (i = 0; i < el.src.length; i++) {
-
                     // Append correct source
                     if (el.type[i]) {
-
                         // Create source element
                         source = document.createElement("source");
                         source.src = el.src[i];
                         source.type = el.type[i];
 
                         el._refs.video.appendChild(source);
-
                     }
                 }
-
-                //
-                el._refs.video.autoplay = el.autoPlay;
+                // Auto play video configuration
                 if (el.autoPlay) {
-                    
-                    vcomet.triggerCallback("onInit", el, el);
+                    // iOS devices autoplay configuration needed
                     el._refs.video.muted = true;
                     el._refs.video.playsinline = true;
                     el._refs.video.setAttribute("playsinline", "");
+                    // Start video
                     el._refs.video.play();
-
                 }
-
-                el._refs.video.loop = el.loop;
-
             },
-
-            //
+            /*
+                @function (private) _setUp
+                @description 
+            */
             setUp: function () {
-
                 var el = this;
 
-                // 
+                // Accessibility
                 el.setAttribute("tabindex", 0);
-                el._refs.parent = el.parentNode;
-
-                //
+                // Video custom style
                 el.style.backgroundColor = el.background;
-
-                // Event path monitor 
+                // Controls event path monitor 
                 vcomet.registerPathListener(el._refs.controls);
-
-                //
+                // Auto play configuration
                 el._autoPlaySetUp();
-
-                // Toggle play on click listener
-                el._refs.wrapper.addEventListener("pointerdown", function (e) {
-
-                    if (!el._refs.controls.isOnPath && e.button == 0 && el._posterHidden == true
-                        && el._controlsHided == false && vcomet.util.isTrue(el.touchPlaying)) {
-                        el._togglePlay();
-                    }
-
-                });
-
-                el.addEventListener("keydown", function (e) {
-
-                    if (e.keyCode == 32 && vcomet.util.isTrue(el.touchPlaying)) {
-                        el._togglePlay();
-                    }
-
-                });
-
+                // Poster configuration
+                el._posterSetUp();
+                // Controls configuration
+                el._controlsSetUp();
+                // Wrapper configuration
+                el._wrapperSetUp();
+                // Keyboard controls
+                el._keyboardControl();
+                //
                 el._fullscreenChangeListener();
 
                 // Controls bar displaying monitor
                 el._controlsDisplayListener();
-
             },
             //
             autoPlaySetUp: function () {
-
                 var el = this;
-
                 // Hide poster
                 if (vcomet.util.isTrue(el.autoPlay)) {
                     el._refs.poster.style.display = "none";
                     el._posterHidden = true;
                 }
-
+            },
+            //
+            controlsSetUp: function () {
+                var el = this;
+                // Show video controls displaying
+                if (vcomet.util.isTrue(el.controls)) {
+                    el._refs.controls.style.display = "flex";
+                }
+            },
+            //
+            posterSetUp: function () {
+                var el = this;
                 // Place holder click functionality
                 el._refs.poster.addEventListener("click", function (e) {
-
-                    // Show video controls displaying
-                    if (vcomet.util.isTrue(el.controls)) {
-                        el._refs.controls.style.display = "flex";
-                    }
                     // Hide poster
                     el._refs.poster.style.display = "none";
                     el._posterHidden = true;
-
                     // Toggle play video
+                    console.log('POSTER PLAY');
                     el._togglePlay();
-
                 });
             },
-
+            //
+            wrapperSetUp: function () {
+                var el = this;
+                // Toggle play on video wrapper click
+                el._refs.wrapper.addEventListener("pointerdown", function (e) {
+                    if (!el._refs.controls.isOnPath && e.button == 0 && el._posterHidden == true
+                        && el._controlsHided == false && vcomet.util.isTrue(el.touchPlaying)) {
+                        el._togglePlay();
+                    }
+                });
+            },
+            //
+            keyboardControl: function () {
+                var el = this;
+                // Toggle video playing using keyboards
+                if(vcomet.util.isTrue(el.touchPlaying)) {
+                    el.addEventListener("keydown", function (e) {
+                        if (e.keyCode == 32 && vcomet.util.isTrue(el.touchPlaying)) {
+                            el._togglePlay();
+                        }
+                    });
+                }
+            },
             //
             fullscreenChangeListener: function () {
-
                 var el = this;
                 var fullscreenFn = function (vendorFullscreen) {
                     el._isFullscreen = document[vendorFullscreen];
@@ -925,46 +950,13 @@
             }
 
         },
-        functions: {
-
-            //
-            play: function () {
-                var el = this;
-
-                el._togglePlayIcon("paused");
-                el._refs.video.play();
-
-                // Hide poster
-                el._refs.poster.style.display = "none";
-                el._posterHidden = true;
-
-            },
-            //
-            pause: function () {
-                var el = this;
-
-                el._togglePlayIcon("play");
-                el._refs.video.pause();
-
-
-            },
-            // TODO
-            mute: function () {
-                var el = this;
-            }
-        },
         onCreated: function () {
             var el = this;
-
-            vcomet.createCallback("onInit", el);
-
-
         },
         onInit: function () {
             var el = this;
 
             el.setAttribute("touch-action", "none");
-
             // Quick access
             el._refs.wrapper = el.template.querySelector(".vc-video-wrapper");
             el._refs.poster = el.template.querySelector(".vc-video-poster");
@@ -979,17 +971,12 @@
             el._refs.timerail.back = el.template.querySelector(".vc-video-timerail-back");
             el._refs.timeline = el.template.querySelector(".vc-video-timeline");
             el._refs.fullscreen = el.template.querySelector(".vc-video-fullscreen");
-
-
-
         },
         onTransformed: function () {
-
             var el = this;
-            //
+            // Initialize HTML video
             el._setUpHTMLVideo();
-
-            //
+            // Initialize vc-video inner configuration
             el._setUp();
 
             //
@@ -1012,23 +999,15 @@
 
                 // 
                 el._fullScreenListener();
-
-                el._refs.video.oncanPlay = function () {
-                    vcomet.triggerCallback("onInit", el, el);
-                }
             });
-
         },
-
         onRender: function () {
-
             var el = this;
             //
             el._refs.video.addEventListener("loadeddata", function () {
                 // 
                 el._timeLineListener();
             });
-
         }
     });
 </script>
