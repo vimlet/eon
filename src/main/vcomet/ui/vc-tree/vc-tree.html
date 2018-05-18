@@ -412,56 +412,66 @@ vcomet.element("vc-tree", "vc-tree.css", {
       */
       sortNodes: function () {
         var el = this;
-        var tree = el._refs.tree;
-        var nodes = tree.children;
-        var fragment = document.createDocumentFragment();
-        var orderFragment = document.createDocumentFragment();
-        var x, y;
-        var sortArray = [], elm;
-        // Store object nodes into an array
-        for (var i = 0; i < nodes.length; i++) {
-          var node = nodes[i];
-          sortArray.push([node.name, node.order, node.type, node.path]);
-        }
-        // Sort alphabetically
-        sortArray.sort(function (a, b) {
-          x = a[0].toLowerCase();
-          y = b[0].toLowerCase();
-          if (x < y) {return -1;}
-          if (x > y) {return 1;}
-          return 0;
-        });
-        // Sort by type (Inverted alphabetic)
-        sortArray.sort(function (a, b) {
-          x = a[2].toLowerCase();
-          y = b[2].toLowerCase();
-          // Directories before files
-          if (x < y) {return -1;}
-          if (x > y) {return 1;}
-          return 0;
-        });
-        // Sort by order
-        sortArray.sort(function (a, b) {
-          var x = a[0].toLowerCase();
-          var y = b[0].toLowerCase();
-          if (x < y) { return -1; }
-          if (x > y) { return 1; }
-          return 0;
-        });
-        // Append sorted nodes
-        for (var i = 0; i < sortArray.length; i++) {
-          elm = sortArray[i];
-          if (elm[1]) {
-            orderFragment.appendChild(el._sortRecursively(el.nodes[elm[3]]));
-          } else {
-            fragment.appendChild(el._sortRecursively(el.nodes[elm[3]]));
-          }
-        }
-        // Append ordered tree nodes fragments
-        tree.innerHTML = "";
-        tree.appendChild(orderFragment);
-        tree.appendChild(fragment);
 
+        // Check if other nodes are pending to be appended
+        // This means that only the first node in this cycle will create the new onReady callback
+        if (!el._misc.pendingNodes) {
+          vcomet.onReady(function(){
+            var tree = el._refs.tree;
+            var nodes = tree.children;
+            var fragment = document.createDocumentFragment();
+            var orderFragment = document.createDocumentFragment();
+            var x, y;
+            var sortArray = [], elm;
+            // Store object nodes into an array
+            for (var i = 0; i < nodes.length; i++) {
+              var node = nodes[i];
+              sortArray.push([node.name, node.order, node.type, node.path]);
+            }
+            // Sort alphabetically
+            sortArray.sort(function (a, b) {
+              x = a[0].toLowerCase();
+              y = b[0].toLowerCase();
+              if (x < y) {return -1;}
+              if (x > y) {return 1;}
+              return 0;
+            });
+            // Sort by type (Inverted alphabetic)
+            sortArray.sort(function (a, b) {
+              x = a[2].toLowerCase();
+              y = b[2].toLowerCase();
+              // Directories before files
+              if (x < y) {return -1;}
+              if (x > y) {return 1;}
+              return 0;
+            });
+            // Sort by order
+            sortArray.sort(function (a, b) {
+              var x = a[0].toLowerCase();
+              var y = b[0].toLowerCase();
+              if (x < y) { return -1; }
+              if (x > y) { return 1; }
+              return 0;
+            });
+            // Append sorted nodes
+            for (var i = 0; i < sortArray.length; i++) {
+              elm = sortArray[i];
+              if (elm[1]) {
+                orderFragment.appendChild(el._sortRecursively(el.nodes[elm[3]]));
+              } else {
+                fragment.appendChild(el._sortRecursively(el.nodes[elm[3]]));
+              }
+            }
+            // Append ordered tree nodes fragments
+            tree.innerHTML = "";
+            tree.appendChild(orderFragment);
+            tree.appendChild(fragment);
+
+            el._misc.pendingNodes = false;
+          });
+          // Tag tree as pending tree nodes append
+          el._misc.pendingNodes = true;
+        }
       },
       /*
         @function (private) _sortRecursively
