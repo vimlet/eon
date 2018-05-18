@@ -22,6 +22,16 @@
         reflect: true
       },
       /*
+        @property {String} lazyLoad
+        @description Import href content on demand
+        Values true, false
+        Default: false
+      */
+      lazyLoad: {
+        value: false,
+        reflect: true
+      },
+      /*
         @property {Boolean} allowScroll
         @description Allow or denied scroll
       */
@@ -83,26 +93,10 @@
         // Get panel elements
         var documentFragment = document.createDocumentFragment();
         // Check href property
-        if (el.href) {
+        if (el.href && !vcomet.util.isTrue(el.lazyLoad)) {
           // Request content file
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", el.href, true);
-          xhr.setRequestHeader("Content-Type", "application/json");
-          // Callback
-          xhr.onload = function (e) {
-            // If operation has been completed - ready state 4
-            if (this.readyState !== 4) { return };
-            // Response status successfully completed - status 200
-            if (this.status !== 200) { return };
-            // Allow execute imported html scripts
-            documentFragment = vcomet.fragmentFromString(xhr.responseText);
-            // Extract script nodes that belong to template elements for deferring their execution
-            var nodes = el._deferScripts(documentFragment);
-            el._appendContent(nodes);
-          };
-          // Execute request
-          xhr.send();
-        } else {
+          el.importContent(documentFragment);
+        } else if (!vcomet.util.isTrue(el.lazyLoad)){
           // Extract script nodes that belong to template elements for deferring their execution
           var nodes = el._deferScripts(el);
           el._appendContent(nodes);
@@ -168,7 +162,7 @@
             if (reAppend) {
               fragment.appendChild(child);
             }
-            if (child.tagName.toLowerCase() === "template") {
+            if (child.tagName.toLowerCase() === "template" && !child.hasAttribute("hidden")) {
               // Store templates references
               el._refs.templates[t] = child;
               t++
@@ -261,6 +255,33 @@
         }
       },
       /*
+        @function (private) ajaxContentRequest
+        @description 
+      */
+      importContent: function (fragment) {
+        var el = this;
+
+        fragment = !fragment ? document.createDocumentFragment() : fragment;
+        // Request content file
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", el.href, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        // Callback
+        xhr.onload = function (e) {
+          // If operation has been completed - ready state 4
+          if (this.readyState !== 4) { return };
+          // Response status successfully completed - status 200
+          if (this.status !== 200) { return };
+          // Allow execute imported html scripts
+          fragment = vcomet.fragmentFromString(xhr.responseText);
+          // Extract script nodes that belong to template elements for deferring their execution
+          var nodes = el._deferScripts(fragment);
+          el._appendContent(nodes);
+        };
+        // Execute request
+        xhr.send();
+      },
+      /*
         @function refresh
         @description Remove current content and re-import content
       */
@@ -277,6 +298,7 @@
       // Create content related callbacks
       vcomet.createCallback("onLoad", this);
       vcomet.createCallback("onContent", this);
+
       el._refs.templates = {};
       el._refs.scripts = {};
       // Get body container
