@@ -55,7 +55,7 @@
             },
             /*
               @property {Boolean} disabled 
-              @description Slider desactivation
+              @description Slider deactivation
               Default: false
             */
             disabled: {
@@ -128,10 +128,10 @@
                 value: "slider"
             },
             /*
-              @property (private) {String} _currentvalue
+              @property (private) {String} _currentValue
               @description Current slider value
            */
-            currentvalue: {
+            currentValue: {
                 value: ""
             },
             /*
@@ -158,7 +158,7 @@
                 var el = this;
                 
                 el._refs.slider.value = el.value;
-                el._currentvalue = el.value;
+                el._currentValue = el.value;
                 el._updateSlider();
                 vcomet.triggerCallback("onChange", el);
     
@@ -184,15 +184,16 @@
             */
             updateSlider: function (arg) {
                 var el = this;
+                
                 var sliderVal = el._refs.slider.value;
                 var percentValue = (sliderVal - el._refs.slider.min) / (el._refs.slider.max - el._refs.slider.min); /* percentage slider value */
                 var thumbPosition = -5.7;
                 var fillSize = percentValue * 100;
+
                 el._refs.range.innerHTML = sliderVal;
                 (el.orientation == "horizontal") ? el._horizontalSlider(percentValue) : el._verticalSlider(percentValue, fillSize, arg);
                 el.__value = el._refs.slider.value;
-                console.log('el.__value', el.__value);
-                console.log('el.value', el.value);
+                el._refs.slider.setAttribute("value", el._refs.slider.value);
             },
 
 
@@ -268,7 +269,7 @@
 
             /*
               @function (private) _interactionSlider
-              @description Funtionality when interacting with the slider
+              @description Functionality when interacting with the slider
               Only for thumb interaction and click interaction on iOS devices
               @param {Object} e [Event]
             */
@@ -355,8 +356,8 @@
             */
             updateCurrentValue: function () {
                 var el = this;
-                (el.value !== el._currentvalue) ? vcomet.triggerCallback("onChange", el) : null;
-                el._currentvalue = (el.value !== el._currentvalue) ? el.value : el._currentvalue;
+                (el.value !== el._currentValue) ? vcomet.triggerCallback("onChange", el) : null;
+                el._currentValue = (el.value !== el._currentValue) ? el.value : el._currentValue;
             },
 
             /*
@@ -398,17 +399,16 @@
             el.setAttribute("touch-action", "none");
             el._verifyScreenResolution();
 
-            el._currentvalue = el.value;
+            el._currentValue = el.value;
 
             // On IE and IOS devices not work event "input"
             // So is necessary a click event
             if (vcomet.util.getBrowser() == "IE" || /iPad|iPhone|iPod/.test(navigator.platform)) {
                 // el._refs.slider.addEventListener("click", function (event) {
-                    el.addEventListener("click", function (event) {
-                    // On iOS devices clicking on the input does not update its status
+                    el._refs.slider.addEventListener("click", function (e) {
+                    // On iOS devices and IE clicking on the input does not update its status
                     // Is is necessary  to do it programmatically
-                    // /iPad|iPhone|iPod/.test(navigator.platform) ? el._interactionSlider(event) : el._updateSlider();
-                    el._interactionSlider(event);
+                    el._interactionSlider(e);
                     el._updateCurrentValue();
                 }, false);
 
