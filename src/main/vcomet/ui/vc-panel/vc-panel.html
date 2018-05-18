@@ -22,6 +22,16 @@
         reflect: true
       },
       /*
+        @property {String} lazyLoad
+        @description Import href content on demand
+        Values true, false
+        Default: false
+      */
+      lazyLoad: {
+        value: false,
+        reflect: true
+      },
+      /*
         @property {Boolean} allowScroll
         @description Allow or denied scroll
       */
@@ -83,27 +93,10 @@
         // Get panel elements
         var documentFragment = document.createDocumentFragment();
         // Check href property
-        if (el.href) {
+        if (el.href && !vcomet.util.isTrue(el.lazyLoad)) {
           // Request content file
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", el.href, true);
-          xhr.setRequestHeader("Content-Type", "application/json");
-          // Callback
-          xhr.onload = function (e) {
-            // If operation has been completed - ready state 4
-            if (this.readyState !== 4) { return };
-            // Response status successfully completed - status 200
-            if (this.status !== 200) { return };
-            // Allow execute imported html scripts
-            documentFragment = vcomet.fragmentFromString(xhr.responseText);
-            // Extract script nodes that belong to template elements for deferring their execution
-            var nodes = el._deferScripts(documentFragment);
-  
-            el._appendContent(nodes);
-          };
-          // Execute request
-          xhr.send();
-        } else {
+          el.importContent(documentFragment);
+        } else if (!vcomet.util.isTrue(el.lazyLoad)){
           // Extract script nodes that belong to template elements for deferring their execution
           var nodes = el._deferScripts(el);
           el._appendContent(nodes);
@@ -116,14 +109,7 @@
       */
       deferScripts: function (dataNode) {
         var el = this;
-<<<<<<< HEAD
-        var fragment = document.createDocumentFragment();
-        var t = 0;
-        var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
-        var childrenArray;
-=======
         var nodes, scripts, script, scriptKey;
->>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
         // ** IE do not support 'children' property
         if (vcomet.util.getBrowser() === "IE") {
           // Avoid empty element template on programmatic cases
@@ -170,18 +156,13 @@
         // Get first generation template children
         while (nodes.length) {
           // Build nodes structure
-<<<<<<< HEAD
-          child = childrenArray.shift();
-          if (child.nodeType == 1) {
-=======
           child = nodes.shift();
           if(child.nodeType == 1) {
->>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
             // Append remote source child
             if (reAppend) {
               fragment.appendChild(child);
             }
-            if (child.tagName.toLowerCase() === "template") {
+            if (child.tagName.toLowerCase() === "template" && !child.hasAttribute("hidden")) {
               // Store templates references
               el._refs.templates[t] = child;
               t++
@@ -192,15 +173,11 @@
         if (reAppend) {
           el.content.appendChild(fragment);
         }
-<<<<<<< HEAD
-        vcomet.triggerCallback("onLoad", el, el, []);
-=======
         // Wait until the element is ready
         el.onReady(function(){
           vcomet.triggerCallback("onLoad", el, el, []);
         });
         
->>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
       },
       /*
         @function (private) _removeTemplate
@@ -210,13 +187,8 @@
       removeTemplate: function (tmp) {
         var el = this;
         var fragment = document.createDocumentFragment();
-<<<<<<< HEAD
         var child;
         var children = !tmp.children[0] ? tmp.content.children : tmp.children;
-=======
-        var child, positionId;
-        var children = !tmp.children[0] ? tmp.content.children: tmp.children;
->>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
         children = [].slice.call(children);
         // Move nodes to the tree container safely
         while (children.length) {
@@ -246,7 +218,6 @@
         el._refs.wrapper.arrowScrolls = el.arrowScrolls;
       },
       /*
-<<<<<<< HEAD
         @function (private) _resetCallback
         @description 
       */
@@ -255,16 +226,6 @@
         // 
         el["__" + eventName] = [];
         el["__" + eventName + "__triggered"] = false;
-=======
-        @function (private) resetLoadCallback
-        @description 
-      */
-      resetLoadCallback: function () {
-        var el = this;
-        // Reset onLoad callback values
-        el.__onLoad.__triggered = false
-        el.__onLoad = [];
->>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
       }
     },
     functions: {
@@ -285,10 +246,6 @@
           delete tmps[index];
         } else {
           var keys = Object.keys(tmps);
-<<<<<<< HEAD
-
-=======
->>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
           for (i = 0; i < keys.length; i++) {
             tmp = tmps[keys[i]];
             // Remove template
@@ -296,6 +253,33 @@
             delete tmps[keys[i]];
           }
         }
+      },
+      /*
+        @function (private) ajaxContentRequest
+        @description 
+      */
+      importContent: function (fragment) {
+        var el = this;
+
+        fragment = !fragment ? document.createDocumentFragment() : fragment;
+        // Request content file
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", el.href, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        // Callback
+        xhr.onload = function (e) {
+          // If operation has been completed - ready state 4
+          if (this.readyState !== 4) { return };
+          // Response status successfully completed - status 200
+          if (this.status !== 200) { return };
+          // Allow execute imported html scripts
+          fragment = vcomet.fragmentFromString(xhr.responseText);
+          // Extract script nodes that belong to template elements for deferring their execution
+          var nodes = el._deferScripts(fragment);
+          el._appendContent(nodes);
+        };
+        // Execute request
+        xhr.send();
       },
       /*
         @function refresh
@@ -314,6 +298,7 @@
       // Create content related callbacks
       vcomet.createCallback("onLoad", this);
       vcomet.createCallback("onContent", this);
+
       el._refs.templates = {};
       el._refs.scripts = {};
       // Get body container
@@ -335,16 +320,10 @@
       if (!el._refs.wrapper.isEqualNode(el)) { el.appendChild(el._refs.wrapper) }
     },
     onPropertyChanged: function (attrName, oldVal, newVal) {
-<<<<<<< HEAD
       var el = this;
       switch (attrName) {
         case "href":
           el._resetCallback("onLoad");
-=======
-      switch (attrName) {
-        case ("href"):
-          this._resetLoadCallback();
->>>>>>> e58c802d8b14d0b7881dc8f758fd5fe984167150
           break;
       }
     }
