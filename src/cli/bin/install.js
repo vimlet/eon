@@ -25,7 +25,7 @@ var localCustomPath;
 var versionJsonObject = {};
 
 module.exports = function (result, cb) {
-    // PATCH: This timeouts fixes vcomet.json read error after template download and extract
+    // PATCH: This timeout fixes vcomet.json read error after template download and extract
     setTimeout(function() {
         vcometJsonObject = {};
         actualPackages = {};
