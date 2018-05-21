@@ -10,11 +10,11 @@ var clear = require("./bin/clear");
 cli
 .value("i", "install", "Installs vcomet or dependency")
 .value("p", "path", "Specifies dependency path")
-.value("", "clear", "Removes various elements")
-.flag("", "init", "Initialize a vComet project")
-.flag("", "prune", "Removes unused dependencies")
-.flag("", "--no-save", "Prevents vcomet.json generation")
-.flag("h", "help", "Display this help")
+.value(null, "clear", "Removes various elements")
+.flag(null, "init", "Initialize a vComet project")
+.flag(null, "prune", "Removes unused dependencies")
+.flag(null, "--no-save", "Prevents vcomet.json generation")
+.flag(null, "help", "Display this help")
 .parse(process.argv);
 // .value("u", "publish", "Publish components to vcomet hub")
 
