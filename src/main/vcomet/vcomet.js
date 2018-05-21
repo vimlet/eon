@@ -5156,7 +5156,7 @@ vcomet.declare = function (name, baseElement) {
     // Constructs the element class
     var elementClass = vcomet.constructClass(baseElement);
 
-    // Element constructor: Important! never modify element attributes or childs here
+    // Element constructor: Important! never modify element attributes or children here
     elementClass.onCreated(function () {
 
         var el = this;
@@ -5470,7 +5470,7 @@ vcomet.time.defaultLocale = {
      */
   vcomet.addResizeListener = function(element, key, fn) {
     //
-    var isIE = navigator.userAgent.match(/Trident/);
+    var isIE = navigator.userAgent.match(/Trident/) && document.documentMode;
     //
     if (!element.__resizeListeners) {
       element.__resizeListeners = {};
@@ -5524,8 +5524,8 @@ vcomet.time.defaultLocale = {
     }
   };
 
-   // Resize triggering!
-   function resizeListener(e) {
+  // Resize triggering!
+  function resizeListener(e) {
     var win = e.target || e.srcElement;
     // Get resize funciton to be triggered and suscribe itto cancel function
     if (win.__resizeRAF) cancelFrame(win.__resizeRAF);

@@ -8,8 +8,12 @@ var rimraf = require("rimraf");
 var Sync = require("sync");
 
 module.exports = function (result) {
-    
-    if (Object.keys(result).length > 1) {
+
+    var clearArguments = {
+        cache: true
+    };
+
+    if (clearArguments[result.clear]) {
         // Remove .vcomet 
         if (result.clear.toLowerCase() == "cache") {
             var deletePath = path.join(os.homedir(), ".vcomet");
@@ -17,7 +21,7 @@ module.exports = function (result) {
             rimraf.sync(deletePath);
         }
     } else {
-        console.log('\nMissing "clear" argument [cache]\n');
+        console.log('\nInvalid "clear" argument [' + Object.keys(clearArguments).toString() + ']\n');
     }
 
 };

@@ -28,7 +28,7 @@ vcomet.onReady(function () {
   mySpinner.name = "mySpinner";
   mySpinner.label = "Spinner number";
 
-  // Append vc-spiner where necessary
+  // Append vc-spinner where necessary
   document.querySelector("body").appendChild(mySpinner);
 });
 ```
@@ -36,7 +36,7 @@ vcomet.onReady(function () {
 ## Examples
 
 ### Enable dynamically
-In this example, the vc-spinner is contained within a vc-form, and is disabled, and after a second it will be enabled.
+In this example, the vc-spinner is contained within a vc-form and is disabled, and after a second it will be enabled.
 ``` [html]
 <!-- Initially disabled spinner -->
 <vc-spinner label="Spinner number" name="mySpinner" disabled="true"></vc-spinner>
