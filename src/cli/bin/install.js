@@ -25,33 +25,34 @@ var localCustomPath;
 var versionJsonObject = {};
 
 module.exports = function (result, cb) {
+    // PATCH: This timeout fixes vcomet.json read error after template download and extract
+    setTimeout(function() {
+        vcometJsonObject = {};
+        actualPackages = {};
+        singlePackageMode = false;
+        var noSave = result["no-save"];
+        localPath = result.path;
 
-    vcometJsonObject = {};
-    actualPackages = {};
-    singlePackageMode = false;
-    var noSave = result["no-save"];
-    localPath = result.path;
-
-    Sync(function () {
-        try {
-            // supportGitCredentials();
-            handleRemoteVersions.sync(null, result.install, noSave);
-            // Find installed packages
-            handleLocalVersions.sync(null);
-            // Install or update wanted packages        
-            installPackages.sync(null);
-            if (cb) {
-                cb(null, true);
+        Sync(function () {
+            try {
+                // supportGitCredentials();
+                handleRemoteVersions.sync(null, result.install, noSave);
+                // Find installed packages
+                handleLocalVersions.sync(null);
+                // Install or update wanted packages        
+                installPackages.sync(null);
+                if (cb) {
+                    cb(null, true);
+                }
+            } catch (error) {
+                console.error("\x1b[91m", "\nError: " + error);
+                console.error("\x1b[0m"); // Reset color + newLine
+                if (cb) {
+                    cb(error);
+                }
             }
-        } catch (error) {
-            console.error("\x1b[91m", "\nError: " + error);
-            console.error("\x1b[0m"); // Reset color + newLine
-            if (cb) {
-                cb(error);
-            }
-        }
-    });
-
+        });
+    }, 0);
 };
 
 function supportGitCredentials() {
