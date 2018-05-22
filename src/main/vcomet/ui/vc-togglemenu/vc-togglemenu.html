@@ -82,7 +82,7 @@
             },
             /*
               @function addItem
-              @description Add new togglemenu node item programmaticaly
+              @description Add new togglemenu node item programmatically
               @param {Object} item [Node to add to togglemenu]
             */
             addItem: function (item) {
@@ -127,16 +127,15 @@
                 var item;
 
                 while (sourceNodes.length) {
-
                     item = sourceNodes.shift();
                     item.classList.add("vc-togglemenu-item");
                     (item.value) ? this._setupSpan(item) : null;
                     itemsDocFragment.appendChild(item);
-
                 }
 
                 // Move documentFragment to shadowRoot
                 el._content.vcometScroll.content.appendChild(itemsDocFragment);
+                el._content.vcometScroll.update();
 
             },
             /*
@@ -211,12 +210,11 @@
             /*
               @function (private) _updateDisplay
               @description Update displayed status
-              @param {String} newVal [new value of displayed]
             */
-            updateDisplay: function (newVal) {
+            updateDisplay: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(newVal)) {
+                if (vcomet.util.isTrue(el.displayed)) {
                     this._displayTogglemenu();
                     el.autoAdjustHeight = true;
 
@@ -250,7 +248,6 @@
                     el._content.style.height = 0;
 
                 } else {
-
                     el._content.classList.add("vc-togglemenu-display");
                     el._button.classList.add("vc-togglemenu-buttonActive");
                     vcomet.triggerCallback("onDisplay", this);
@@ -282,7 +279,7 @@
             el._title.innerHTML = el.heading;
             el._setupItems(sourceNodes);
             el._setMeasurements();
-            el._updateDisplay(el.displayed);
+            el._updateDisplay();
 
             // Sets buttons listener for display the togglemenu
             el._button.addEventListener("click", function () {
@@ -290,6 +287,8 @@
             }, false);
 
             // Resizes toggle content when adds or deletes elements
+            // vcomet.addResizeListener(el._content, el.tagName + el.uid, function () {
+            //     var differentHeight = (parseInt(el._content.style.height) != el._content);
             vcomet.addResizeListener(el._content.vcometScroll.content, el.tagName + el.uid, function () {
                 var differentHeight = (parseInt(el._content.style.height) != el._content.vcometScroll.content.scrollHeight);
 
@@ -310,7 +309,7 @@
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
                 case "displayed":
-                    this._updateDisplay(newVal);
+                    this._updateDisplay();
                     break;
             }
 
