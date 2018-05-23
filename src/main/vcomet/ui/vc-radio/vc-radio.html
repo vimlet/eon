@@ -1,15 +1,15 @@
 <template class="vc-unselectable">
-  <div class="vc-radiogroup-radio">
-    <input class="vc-radiogroup-input vc-unselectable" type="radio">
-    <label class="vc-radiogroup-label vc-unselectable" onclick="">
-      <div class="vc-radiogroup-labelText"></div>
+  <div class="vc-radio-radio">
+    <input class="vc-radio-input vc-unselectable" type="radio">
+    <label class="vc-radio-label vc-unselectable" onclick="">
+      <div class="vc-radio-labelText"></div>
     </label>
   </div>
 </template>
 
 <script>
-  vcomet.element("vc-radio", "", {
-
+  vcomet.element("vc-radio", "vc-radio.css", {
+    themed: true,
     properties: {
       /*
         @property {String} value 
@@ -55,7 +55,7 @@
        Default: true
      */
       inline: {
-        value: "true",
+        value: true,
         reflect: true
       },
     },
@@ -95,13 +95,13 @@
         if (!vcomet.util.isTrue(this.disabled)) {
 
           this._refs.input.disabled = false;
-          this._refs.input.classList.remove("vc-radiogroup-disabledRadio", "vc-radiogroup-checkedDisabledRadio");
+          this._refs.input.classList.remove("vc-radio-disabledRadio", "vc-radio-checkedDisabledRadio");
 
           // Radio NOT disabled
         } else {
 
           this._refs.input.disabled = true;
-          this._refs.input.classList.add("vc-radiogroup-disabledRadio");
+          this._refs.input.classList.add("vc-radio-disabledRadio");
 
         }
       },
@@ -111,7 +111,7 @@
         @description Update check status
       */
       updateCheck: function () {
-        // var span = this.querySelector(".vc-radiogroup-outspan");
+        // var span = this.querySelector(".vc-radio-outspan");
         var radioGroupHost = this.parentNode;
         var previousChecked = vcomet.Radio.checkedRadios[radioGroupHost.name];
         var previousSpan;
@@ -119,18 +119,18 @@
         // Uncheck previousRadio
         if (previousChecked) {
 
-          previousSpan = previousChecked.querySelector(".vc-radiogroup-outspan");
+          previousSpan = previousChecked.querySelector(".vc-radio-outspan");
           previousChecked._refs.input.checked = false;
-          previousChecked._refs.input.classList.remove("vc-radiogroup-checkRadio");
-          previousSpan.classList.remove("vc-radiogroup-checked");
+          previousChecked._refs.input.classList.remove("vc-radio-checkRadio");
+          previousSpan.classList.remove("vc-radio-checked");
           vcomet.createCallback("onUncheck", this);
 
         }
 
         // Check new Radio
         this._refs.input.checked = true;
-        this._refs.input.classList.add("vc-radiogroup-checkRadio");
-        this._refs.span.classList.add("vc-radiogroup-checked");
+        this._refs.input.classList.add("vc-radio-checkRadio");
+        this._refs.span.classList.add("vc-radio-checked");
         radioGroupHost.value = this.value;
 
         vcomet.Radio.checkedRadios[radioGroupHost.name] = this;
@@ -158,8 +158,8 @@
       createRefs: function () {
         var el = this;
 
-        el._refs.input = el.template.querySelector(".vc-radiogroup-input");
-        el._refs.label = el.template.querySelector(".vc-radiogroup-label");
+        el._refs.input = el.template.querySelector(".vc-radio-input");
+        el._refs.label = el.template.querySelector(".vc-radio-label");
         el._refs.span = document.createElement("span");
         el._refs.inspan = document.createElement("span");
       }
@@ -182,8 +182,8 @@
       var el = this;
       var radioGroupHost = el.parentNode;
 
-      el._refs.span.classList.add("vc-radiogroup-outspan", "vc-fg1-border");
-      el._refs.inspan.classList.add("vc-radiogroup-inspan");
+      el._refs.span.classList.add("vc-radio-outspan", "vc-fg1-border");
+      el._refs.inspan.classList.add("vc-radio-inspan");
       el._refs.label.insertBefore(el._refs.span, el._refs.label.firstChild);
       el._refs.span.appendChild(el._refs.inspan);
       el._refs.input.setAttribute("name", radioGroupHost.name);
@@ -191,7 +191,7 @@
       el._setValue();
       el._updateDisabled();
       el._setCheck();
-      el.querySelector(".vc-radiogroup-labelText").innerHTML = el.label;
+      el.querySelector(".vc-radio-labelText").innerHTML = el.label;
 
       // Checking a radio option
       el._refs.label.addEventListener("click", function (e) {
@@ -209,7 +209,7 @@
           this._setCheck();
           break;
         case "label":
-          this.querySelector(".vc-radiogroup-labelText").innerHTML = newVal;
+          this.querySelector(".vc-radio-labelText").innerHTML = newVal;
           break;
         case "value":
           this._setValue();
