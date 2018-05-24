@@ -26,7 +26,7 @@ var versionJsonObject = {};
 
 module.exports = function (result, cb) {
     // PATCH: This timeout fixes vcomet.json read error after template download and extract
-    setTimeout(function() {
+    setTimeout(function () {
         vcometJsonObject = {};
         actualPackages = {};
         singlePackageMode = false;
@@ -277,6 +277,15 @@ function handleLocalVersions(cb) {
 function installPackages(cb) {
 
     Sync(function () {
+
+        // Update current vcomet.json 
+        // TODO: Update dependencies too
+        if (fs.existsSync("vcomet.json")) {
+            var vcometJsonFileObject = JSON.parse(fs.readFileSync("vcomet.json").toString());
+            vcometJsonFileObject.vcomet = vcometJsonObject.vcomet;
+            fs.writeFileSync("vcomet.json", JSON.stringify(vcometJsonFileObject, null, 2));
+        }
+
         var summaryMessage = "";
 
         // Avoid checking things twice by using flags
