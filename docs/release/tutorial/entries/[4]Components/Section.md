@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The section element is designed to work inside a [vc-gutter](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FGutter.md). 
+The section element is designed to work inside a [vc-dialog](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FDialog.md) and [vc-gutter](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FGutter.md). 
 
 ## Declarative usage
 

@@ -1,36 +1,36 @@
-# Radiogroup
+# Group
 
 ## Introduction
 This form component is meant to contain different vc-radio components. Only one of them will be selectable.
 
-To use it import vc-radiogroup in the head of the HTML document:
+To use it import vc-group in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-radiogroup.html");
+    vComet.import("/vComet/ui/vc-group.html");
   </script>
 <head>
 ```
 
 ## Declarative usage
 ``` [html]
-<vc-radiogroup name="myRadiogroup">
+<vc-group name="myGroup">
   <vc-radio label="Radio 1" value="myRadio1"></vc-radio>
   <vc-radio label="Radio 2" value="myRadio2"></vc-radio>
-</vc-radiogroup>
+</vc-group>
 ```
 
 ## Programmatic usage
 ``` [javascript]
 vcomet.onReady(function () {
-  // Create vc-radiogroup and vc-radio 
-  var myRadiogroup = document.createElement("vc-radiogroup");
+  // Create vc-group and vc-radio 
+  var myGroup = document.createElement("vc-group");
   var myRadio1 = document.createElement("vc-radio");
   var myRadio2 = document.createElement("vc-radio");
 
-  // Set property and append vc-radiogroup
-  myRadiogroup.name = "myRadiogroup";
-  document.querySelector(".example").appendChild(myRadiogroup);
+  // Set property and append vc-group
+  myGroup.name = "myGroup";
+  document.querySelector(".example").appendChild(myGroup);
 
   // Set properties of myRadio1
   myRadio1.label = "Radio 1";
@@ -41,7 +41,7 @@ vcomet.onReady(function () {
   myRadio2.value = "myRadio2";
 
   // Append all vc-checkbox
-  myRadiogroup.appendChild(myRadio1);
-  myRadiogroup.appendChild(myRadio2);
+  myGroup.appendChild(myRadio1);
+  myGroup.appendChild(myRadio2);
 });
 ```
