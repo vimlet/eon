@@ -79,7 +79,7 @@
               Default: 50%
             */
             size: {
-                value: "50%",
+                value: "",
                 reflect: true
             },
             /*
@@ -109,13 +109,23 @@
               Different depending the orientation of the slider
               Vertical slider: top, bottom, left or right
               Horizontal slider: top & bottom
-              Default: valueless
+              Default: bottom
             */
             displayPosition: {
                 value: "bottom",
                 reflect: true
             },
-
+            /*
+             @property {Boolean} inline 
+             @description Space that occupy the slider inside parent container.
+             By default, its size adapts to its content
+             Values can be: true or false
+             Default: true
+           */
+            inline: {
+                value: false,
+                reflect: true
+            }
         },
 
         privateProperties: {
@@ -156,12 +166,12 @@
             */
             setValue: function () {
                 var el = this;
-                
+
                 el._refs.slider.value = el.value;
                 el._currentValue = el.value;
                 el._updateSlider();
                 vcomet.triggerCallback("onChange", el);
-    
+
             },
             /*
               @function (private) _createRefs
@@ -184,7 +194,7 @@
             */
             updateSlider: function (arg) {
                 var el = this;
-                
+
                 var sliderVal = el._refs.slider.value;
                 var percentValue = (sliderVal - el._refs.slider.min) / (el._refs.slider.max - el._refs.slider.min); /* percentage slider value */
                 var thumbPosition = -5.7;
@@ -228,7 +238,7 @@
                     // Sets an automatic width for the vertical slider, because the value of the height when
                     // it was horizontal may not be a correct measurement
                     this.style.width = "auto";
-                    this.style.height = actualNodeWidth + "px";
+                    this.style.height = this.inline ? "auto" : actualNodeWidth + "px";
 
                     (navigator.userAgent.indexOf("Firefox") != -1 || navigator.userAgent.indexOf("Trident") != -1) ? this._refs.slider.setAttribute("orient", "vertical") : null;
 
@@ -370,7 +380,7 @@
                 // Small devices view
                 if (window.innerWidth <= vcomet.tabletWidth) {
                     el.setAttribute("version", "tablet");
-                    el.style.width = "100%";
+                    // el.style.width = "100%";
 
                     // Desktop view
                 } else {
@@ -405,7 +415,7 @@
             // So is necessary a click event
             if (vcomet.util.getBrowser() == "IE" || /iPad|iPhone|iPod/.test(navigator.platform)) {
                 // el._refs.slider.addEventListener("click", function (event) {
-                    el._refs.slider.addEventListener("click", function (e) {
+                el._refs.slider.addEventListener("click", function (e) {
                     // On iOS devices and IE clicking on the input does not update its status
                     // Is is necessary  to do it programmatically
                     el._interactionSlider(e);
