@@ -3307,7 +3307,7 @@ document.$1 = document.$1 || vcomet.$1;
    * @param {[type]} el     [description]
    * @param {[type]} parent [description]
    */
-  self.offsetRight = function (el, parent) {
+  vcomet.dom.offsetRight = function (el, parent) {
     // Get parent the element is relative to
     parent = !parent ? document.documentElement || document.body : parent;
     var docWidth = parent.offsetWidth;
@@ -3319,12 +3319,12 @@ document.$1 = document.$1 || vcomet.$1;
     return offsetRight;
   };
   /**
-     * The bottom position (in pixels) relative to the bottom side of the specified parent
-     * * If no parent is specified, document body is de default one
-     * @param {[type]} el     [description]
-     * @param {[type]} parent [description]
-     */
-  self.offsetBottom = function (el, parent) {
+   * The bottom position (in pixels) relative to the bottom side of the specified parent
+   * * If no parent is specified, document body is de default one
+   * @param {[type]} el     [description]
+   * @param {[type]} parent [description]
+   */
+  vcomet.dom.offsetBottom = function (el, parent) {
     // Get parent the element is relative to
     parent = !parent ? document.documentElement || document.body : parent;
     var docHeight = parent.offsetHeight;
@@ -3336,12 +3336,12 @@ document.$1 = document.$1 || vcomet.$1;
     return offsetBottom;
   };
   /**
-     * Get element transform axis value
-     * @param  {[type]}  el   [description]
-     * @param  {[type]}  axis [description]
-     * @return {Boolean}      [description]
-     */
-  self.getTransformAxis = function (el, axis) {
+   * Get element transform axis value
+   * @param  {[type]}  el   [description]
+   * @param  {[type]}  axis [description]
+   * @return {Boolean}      [description]
+   */
+  vcomet.dom.getTransformAxis = function (el, axis) {
     var value;
     // Get element transform property
     var transform = el.style.transform;
@@ -3362,12 +3362,12 @@ document.$1 = document.$1 || vcomet.$1;
     return value;
   };
   /**
-     * Move a node the specified pixels distance
-     * @param  {[type]} node     [description]
-     * @param  {[type]} distance [description]
-     * @return {[type]}          [description]
-     */
-  self.translate = function (el, axis, value) {
+   * Move a node the specified pixels distance
+   * @param  {[type]} node     [description]
+   * @param  {[type]} distance [description]
+   * @return {[type]}          [description]
+   */
+  vcomet.dom.translate = function (el, axis, value) {
     // Set the new node translate position
     switch (axis.toLowerCase()) {
       case "x":

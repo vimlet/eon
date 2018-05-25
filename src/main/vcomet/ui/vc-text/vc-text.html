@@ -439,8 +439,12 @@
                 if (vcomet.util.getBrowser() == "IE" && this.type == "area") {
 
                     // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
-                    value = this._refs.editableArea.innerHTML.replace(/<\/p><p>/g, "\r\n").replace(/<br><\/p><p>/g, "\r\n")
-                        .replace(/<p>/g, "").replace(/<\/p>/g, "").replace(/<br>/g, "");
+                    value = this._refs.editableArea.innerHTML
+                        .replace(new RegExp("</p><p>", "g"), "\r\n")
+                        .replace(new RegExp("<br></p><p>", "g"), "\r\n")
+                        .replace(new RegExp("<p>", "g"), "")
+                        .replace(new RegExp("</p>", "g"), "")
+                        .replace(new RegExp("<br>", "g"), "");
 
                 } else {
 
@@ -461,8 +465,12 @@
                 if (vcomet.util.getBrowser() == "IE" && this.type == "area") {
 
                     // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
-                    valueLength = this._refs.editableArea.innerHTML.replace(/<\/p><p>/g, "~").replace(/<br><\/p><p>/g, "~")
-                        .replace(/<p>/g, "").replace(/<\/p>/g, "").replace(/<br>/g, "").length;
+                    valueLength = this._refs.editableArea.innerHTML
+                        .replace(new RegExp("</p><p>", "g"), "~")
+                        .replace(new RegExp("<br></p><p>", "g"), "~")
+                        .replace(new RegExp("<p>", "g"), "")
+                        .replace(new RegExp("</p>", "g"), "")
+                        .replace(new RegExp("<br>", "g"), "").length;
 
                 } else {
 
@@ -501,8 +509,8 @@
 
                 var el = this;
 
-                if (el.counter != "false" && el.maxLength != "") {
-                    el.querySelector(".vc-text-counter").innerHTML = parseInt(el.maxLength) - el._getValueLength();
+                if (el.counter != "false") {
+                    el.querySelector(".vc-text-counter").innerHTML = el.maxLength != "" ? (parseInt(el.maxLength) - el._getValueLength()) : el._getValueLength();
                 }
 
             },

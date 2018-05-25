@@ -23,15 +23,6 @@
     },
     properties: {
       /*
-        @property {String} type
-        @description Sticky type
-        Values: fixed, absolute
-        Default: fixed
-      */
-      type: {
-        value: "fixed"
-      },
-      /*
         @property {String} side
         @description Sticky position type
         Values: top, bottom, right, left
@@ -125,13 +116,11 @@
       */
       fixedMonitor: function () {
         var el = this;
-        if (el.type == "fixed") {
-          // Apply fixed behavior for each scroll side position
-          if (el.side == "top" || el.side == "left") {
-            el._topLeftFixing();
-          } else {
-            el._bottomRightFixing();
-          }
+        // Apply fixed behavior for each scroll side position
+        if (el.side == "top" || el.side == "left") {
+          el._topLeftFixing();
+        } else {
+          el._bottomRightFixing();
         }
       },
       /*
@@ -166,38 +155,33 @@
         @function (private) _bottomRightFixing
         @description Set fixed behavior for bottom and right sticky
       */
-      // bottomRightFixing: function () {
-      //   var el = this;
-      //   var body = document.documentElement || document.body;
-      //   var position = window.getComputedStyle(el.wrapper).position;
-      //   var limitValue = el.side == "right" ? body.offsetWidth : body.offsetHeight;
-      //   // **Right value is not an exact number on IE
-      //   el._misc.viewPosition = vcomet.util.getBrowser() === "IE" ? parseInt(Math.floor(el.wrapper.getBoundingClientRect()[el.side])) : el._misc.viewPosition;
-      //   el._misc.viewPosition += parseInt(el.spacing);
-
-      //   // Monitor fixed element behavior
-      //   if (el.offsetParent && el._misc.viewPosition > limitValue && ["fixed", "absolute"].indexOf(position) < 0) {
-
-      //     // Check scroll parent container
-      //     if (el.vcScroll) {
-      //       // Custom fixed positioning
-      //       el._vcScrollCompatible("fixed");
-      //     } else {
-      //       el._nativeCompatible("fixed");
-      //     }
-
-      //   } else if (el.offsetParent && el._misc.viewPosition <= limitValue && ["fixed", "absolute"].indexOf(position) > -1) {
-
-      //     // Check scroll parent container
-      //     if (el.vcScroll) {
-      //       // Custom fixed positioning
-      //       el._vcScrollCompatible("relative");
-      //     } else {
-      //       el._nativeCompatible("relative");
-      //     }
-
-      //   }
-      // },
+      bottomRightFixing: function () {
+        var el = this;
+        var body = document.documentElement || document.body;
+        var position = window.getComputedStyle(el.wrapper).position;
+        var limitValue = el.side == "right" ? body.offsetWidth : body.offsetHeight;
+        // **Right value is not an exact number on IE
+        el._misc.viewPosition = vcomet.util.getBrowser() === "IE" ? parseInt(Math.floor(el.wrapper.getBoundingClientRect()[el.side])) : el._misc.viewPosition;
+        el._misc.viewPosition += parseInt(el.spacing);
+        // Monitor fixed element behavior
+        if (el.offsetParent && el._misc.viewPosition > limitValue && ~["static", "relative"].indexOf(position)) {
+          // Check scroll parent container
+          if (el.vcScroll) {
+            // Custom fixed positioning
+            el._vcScrollCompatible("fixed");
+          } else {
+            el._nativeCompatible("fixed");
+          }
+        } else if (el.offsetParent && el._misc.viewPosition <= limitValue && ~["fixed", "absolute"].indexOf(position)) {
+          // Check scroll parent container
+          if (el.vcScroll) {
+            // Custom fixed positioning
+            el._vcScrollCompatible("relative");
+          } else {
+            el._nativeCompatible("relative");
+          }
+        }
+      },
       /*
         @function (private) _vcScrollCompatible
         @description Set fixed behavior inside vc-scroll container
@@ -215,6 +199,7 @@
           // Set element position "fixed"
           el.wrapper.style.position = "absolute";
           el.wrapper.style[el.side] = el.spacing + "px";
+          // Left and right sticky fix
           if (fitSide) { el.wrapper.style[fitSide] = 0; }
         } else {
           // Append sticky wrapper back to the element
@@ -285,14 +270,12 @@
         var prop = el.offsetTop;
         switch (el.side) {
           case "right":
-            //TODO vcomet.dom.offsetRight(el);
             prop = vcomet.dom.offsetRight(el);
             break;
           case "left":
             prop = el.offsetLeft;
             break;
           case "bottom":
-            //TODO vcomet.dom.offsetBottom(el);
             prop = vcomet.dom.offsetBottom(el);
             break;
         }
