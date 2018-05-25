@@ -1,7 +1,9 @@
 <template>
-    <input class="vc-toggle-toggle" type="checkbox">
-    <label class="vc-toggle-label vc-bg5 vc-bg1-boxshadow"></label>
-    <label class="vc-toggle-nameLabel vc-unselectable"></label>
+    <div class="vc-toggle-toggle">
+        <input class="vc-toggle-input" type="checkbox">
+        <label class="vc-toggle-label vc-bg5 vc-bg1-boxshadow"></label>
+        <label class="vc-toggle-nameLabel vc-unselectable"></label>
+    </div>
 </template>
 
 <script>
@@ -41,6 +43,17 @@
             check: {
                 value: false,
                 reflect: true
+            },
+            /*
+             @property {Boolean} inline 
+             @description Space that occupy the toggle inside parent container.
+             By default, its size adapts to its content
+             Values can be: true or false
+             Default: true
+           */
+           inline: {
+                value: "true",
+                reflect: true
             }
         },
 
@@ -62,7 +75,7 @@
             createRefs: function () {
                 var el = this;
 
-                el._refs.toggle = el.template.querySelector(".vc-toggle-toggle");
+                el._refs.input = el.template.querySelector(".vc-toggle-input");
                 el._refs.label = el.template.querySelector(".vc-toggle-label");
                 el._refs.nameLabel = el.template.querySelector(".vc-toggle-nameLabel");
             },
@@ -71,7 +84,7 @@
               @description Update disabled status
             */
             updateDisabled: function () {
-                !vcomet.util.isTrue(this.disabled) ? this._refs.toggle.removeAttribute("disabled") : this._refs.toggle.setAttribute("disabled", "true");
+                !vcomet.util.isTrue(this.disabled) ? this._refs.input.removeAttribute("disabled") : this._refs.input.setAttribute("disabled", "true");
             },
 
             /*
@@ -81,12 +94,12 @@
             updateCheck: function () {
 
                 if (!vcomet.util.isTrue(this.check)) {
-                    this._refs.toggle.removeAttribute("checked");
+                    this._refs.input.removeAttribute("checked");
                     this._refs.label.classList.remove("checked");
                     vcomet.triggerCallback("onUncheck", this);
 
                 } else {
-                    this._refs.toggle.setAttribute("checked", "true");
+                    this._refs.input.setAttribute("checked", "true");
                     this._refs.label.classList.add("checked");
                     vcomet.triggerCallback("onCheck", this);
 
@@ -104,7 +117,7 @@
         onRender: function () {
             var el = this;
 
-            el._refs.toggle.setAttribute("name", el.name);
+            el._refs.input.setAttribute("name", el.name);
 
             // Checking or unchecking the checkbox
             el.addEventListener("click", function (e) {
