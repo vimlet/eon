@@ -180,76 +180,7 @@
         el._misc.vertical.position = 0;
         el._misc.horizontal.position = 0;
 
-        // el._setupPublicScrollProperties();
-
-      },
-      /*
-      @function (private) _setupMisc
-      @description Sets up basic properties for the misc object
-      */
-      setupPublicScrollProperties: function () {
-
-        var el = this;
-        var scrollTopPropDescriptor = {};
-        var scrollLeftPropDescriptor = {};
-
-        scrollTopPropDescriptor.get = function () {
-          return Math.abs(el._misc.vertical.position);
-        };
-
-        scrollLeftPropDescriptor.get = function () {
-          return Math.abs(el._misc.horizontal.position);
-        };
-
-        scrollTopPropDescriptor.set = function (value) {
-
-          var transition = false;
-          var verticalPosition;
-
-          if (value.constructor === Array) {
-            verticalPosition = value[0];
-            transition = value[1];
-          } else {
-            verticalPosition = value;
-          }
-
-          el.scrollTo(verticalPosition, Math.abs(el._misc.horizontal.position), transition);
-
-        };
-
-        scrollLeftPropDescriptor.set = function (value) {
-
-          var transition = false;
-          var horizontalPosition;
-
-          if (value.constructor === Array) {
-            horizontalPosition = value[0];
-            transition = value[1];
-          } else {
-            horizontalPosition = value;
-          }
-
-          el.scrollTo(Math.abs(el._misc.vertical.position), horizontalPosition, transition);
-
-        };
-
-        // Defines its own descriptor, in case the whole "data" object changes
-        Object.defineProperty(el, "scrollTop", scrollTopPropDescriptor);
-        Object.defineProperty(el, "scrollLeft", scrollLeftPropDescriptor);
-
-      },
-      /*
-      @function (private) _setupFragmentForSourceNodes
-      @description Reads all the source nodes and appends them to a fragment
-      */
-      moveSourceToContent: function () {
-
-        var sourceNodes = this.getSourceElements();
-        var content = this.template.querySelector(".vc-scroll-content");
-
-        for (var i = 0; i < sourceNodes.length; i++) {
-          content.appendChild(sourceNodes[i]);
-        }
+        el._definePublicScrollProperties();
 
       },
       /*
@@ -569,6 +500,77 @@
 
       },
       /*
+      @function (private) _definePublicScrollProperties
+      @description Creates definitions for scrollTop/scrollLeft properties
+      */
+      definePublicScrollProperties: function () {
+
+        var el = this;
+        var scrollTopDescriptor = {};
+        var scrollLeftDescriptor = {};
+
+        // ScrollTop property descriptor
+        scrollTopDescriptor.get = function () {
+          return Math.abs(el._misc.vertical.position);
+        };
+
+        scrollTopDescriptor.set = function (value) {
+
+          var transition = false;
+          var verticalPosition;
+
+          if (value.constructor === Array) {
+            verticalPosition = value[0];
+            transition = value[1];
+          } else {
+            verticalPosition = value;
+          }
+
+          el.scrollTo(verticalPosition, Math.abs(el._misc.horizontal.position), transition);
+
+        };
+
+        // ScrollLeft property descriptor
+        scrollLeftDescriptor.get = function () {
+          return Math.abs(el._misc.horizontal.position);
+        };
+
+        scrollLeftDescriptor.set = function (value) {
+
+          var transition = false;
+          var horizontalPosition;
+
+          if (value.constructor === Array) {
+            horizontalPosition = value[0];
+            transition = value[1];
+          } else {
+            horizontalPosition = value;
+          }
+
+          el.scrollTo(Math.abs(el._misc.vertical.position), horizontalPosition, transition);
+
+        };
+
+        // Defines scrollTop, scrollLeft properties to trigger our functions
+        Object.defineProperty(el, "scrollTop", scrollTopDescriptor);
+        Object.defineProperty(el, "scrollLeft", scrollLeftDescriptor);
+
+      },
+      /*
+      @function (private) _setupFragmentForSourceNodes
+      @description Reads all the source nodes and appends them to a fragment
+      */
+      moveSourceToContent: function () {
+
+        var sourceNodes = this.getSourceElements();
+        var content = this.template.querySelector(".vc-scroll-content");
+
+        for (var i = 0; i < sourceNodes.length; i++) {
+          content.appendChild(sourceNodes[i]);
+        }
+
+      },
+      /*
       @function (private) _restartOrigin
       @description Restarts the origin point from which we will base our drag up calculations
       @param {Object} e [Event]
@@ -706,6 +708,9 @@
           el.content.scrollTop = verticalPosition;
           el.content.scrollLeft = horizontalPosition;
 
+          el._updateVerticalPosition(-el.content.scrollTop);
+          el._updateHorizontalPosition(-el.content.scrollLeft);
+
         } else {
 
           var keepGoing = false;
@@ -717,6 +722,9 @@
 
           var vAmount = verticalPosition - el.content.scrollTop;
           var hAmount = horizontalPosition - el.content.scrollLeft;
+
+          el._updateVerticalPosition(-vEnd);
+          el._updateHorizontalPosition(-hEnd);
 
           el._misc.native.initialY = el.content.scrollTop;
           el._misc.native.initialX = el.content.scrollLeft;
@@ -1316,10 +1324,10 @@
               el._misc.vertical.position = currentVerticalPosition + el._misc.arrowScrollAmount < 0 ? currentVerticalPosition + el._misc.arrowScrollAmount : 0;
 
               el._updateVerticalPosition(el._misc.vertical.position);
-
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-
               el._updateVerticalBarPosition(el._misc.vertical.position);
+
+              el.showScrollbars(el._misc.hideScrollbarsMs);
 
               //If the scroll has changed we trigger the callback
               if (currentVerticalPosition != el._misc.vertical.position) {
@@ -1338,10 +1346,10 @@
               el._misc.vertical.position = currentVerticalPosition - el._misc.arrowScrollAmount > limit ? currentVerticalPosition - el._misc.arrowScrollAmount : limit;
 
               el._updateVerticalPosition(el._misc.vertical.position);
-
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-
               el._updateVerticalBarPosition(el._misc.vertical.position);
+
+              el.showScrollbars(el._misc.hideScrollbarsMs);
 
               ///If the scroll has changed we trigger the callback
               if (currentVerticalPosition != el._misc.vertical.position) {
@@ -1357,10 +1365,10 @@
               var currentHorizontalPosition = el._misc.horizontal.position;
 
               el._updateHorizontalPosition(currentHorizontalPosition + el._misc.arrowScrollAmount < 0 ? currentHorizontalPosition + el._misc.arrowScrollAmount : 0);
-
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-
               el._updateHorizontalBarPosition(el._misc.horizontal.position);
+
+              el.showScrollbars(el._misc.hideScrollbarsMs);
 
               //If the scroll has changed we trigger the callback
               if (currentHorizontalPosition != el._misc.horizontal.position) {
@@ -1377,10 +1385,10 @@
               var limit = el.offsetWidth - el.content.scrollWidth;
 
               el._updateHorizontalPosition(currentHorizontalPosition - el._misc.arrowScrollAmount > limit ? currentHorizontalPosition - el._misc.arrowScrollAmount : limit);
-
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-
               el._updateHorizontalBarPosition(el._misc.horizontal.position);
+
+              el.showScrollbars(el._misc.hideScrollbarsMs);
 
               //If the scroll has changed we trigger the callback
               if (currentHorizontalPosition != el._misc.horizontal.position) {
@@ -2574,13 +2582,13 @@
           var hasStyleDisplay = (el.style.display);
           var displays = ["block", "flex"];
           var previousDisplay, newDisplay;
-  
+
           previousDisplay = hasStyleDisplay ? el.style.display : window.getComputedStyle(el).display;
-  
+
           displays.splice(displays.indexOf(previousDisplay), 1);
           newDisplay = displays[0];
           el.style.display = newDisplay;
-  
+
           setTimeout(function () {
             el.style.display = previousDisplay;
           }, 0);
