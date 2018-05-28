@@ -202,7 +202,7 @@
         };
 
         scrollTopPropDescriptor.set = function (value) {
-          
+
           var transition = false;
           var verticalPosition;
 
@@ -218,7 +218,7 @@
         };
 
         scrollLeftPropDescriptor.set = function (value) {
-          
+
           var transition = false;
           var horizontalPosition;
 
@@ -610,7 +610,7 @@
       handleScrollToRequest: function (verticalPosition, horizontalPosition, transition) {
 
         var el = this;
-        
+
         var verticalLimit = el._getVerticalScrollLimit();
         var horizontalLimit = el._getHorizontalScrollLimit();
         var verticalMovement = el._misc.vertical.position > verticalPosition ? "forward" : "backward";
@@ -1894,7 +1894,7 @@
         var horizontalMovement = el._misc.horizontal.position > info.horizontal ? "forward" : "backward";
         var verticalPosition = info.hasOwnProperty("vertical") ? info.vertical : el._misc.vertical.position;
         var horizontalPosition = info.hasOwnProperty("horizontal") ? info.horizontal : el._misc.horizontal.position;
-        
+
         var transitionEndFunction, eventObject, watcher;
 
         el._misc.transition.ended = false;
@@ -1907,11 +1907,11 @@
 
           setTimeout(function () {
 
-            var triggerOnScrolled  = el._misc.transition.lastVerticalPosition != Math.abs(el._misc.vertical.position) || el._misc.transition.lastHorizontalPosition != Math.abs(el._misc.horizontal.position);
+            var triggerOnScrolled = el._misc.transition.lastVerticalPosition != Math.abs(el._misc.vertical.position) || el._misc.transition.lastHorizontalPosition != Math.abs(el._misc.horizontal.position);
 
             el._misc.transition.lastVerticalPosition = Math.abs(el._misc.vertical.position);
             el._misc.transition.lastHorizontalPosition = Math.abs(el._misc.horizontal.position);
-            
+
             if (triggerOnScrolled) {
               vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject(info.trigger)]);
             }
@@ -1924,7 +1924,7 @@
           el.content.addEventListener("transitionend", transitionEndFunction);
           el._misc.transition.hasListener = true;
         }
-        
+
         el._updateVerticalPosition(verticalPosition);
         el._updateHorizontalPosition(horizontalPosition);
 
@@ -1937,7 +1937,7 @@
 
           var currentVertical = el._getCurrentVertical(verticalMovement);
           var currentHorizontal = el._getCurrentHorizontal(horizontalMovement);
-          
+
           var validVerticalForward = (verticalMovement == "forward" && currentVertical <= Math.abs(el._misc.vertical.position));
           var validVerticalBackward = (verticalMovement == "backward" && currentVertical >= Math.abs(el._misc.vertical.position));
           var validVertical = validVerticalForward || validVerticalBackward;
@@ -1948,7 +1948,7 @@
 
           var differentVertical = (typeof el._misc.transition.lastVerticalPosition != "undefined") && (el._misc.transition.lastVerticalPosition !== currentVertical);
           var differentHorizontal = (typeof el._misc.transition.lastHorizontalPosition != "undefined") && (el._misc.transition.lastHorizontalPosition !== currentHorizontal);
-          
+
           if (!el._misc.transition.ended && validVertical && validHorizontal) {
 
             var needsForwardAvoiding = currentVertical <= el._misc.transition.lastPosition;
@@ -2347,7 +2347,7 @@
       @param {Number} translatePosition
       */
       updateHorizontalBarPosition: function (translatePosition) {
-        
+
         var el = this;
         var scrollLeftProportion, proportionalBarLeft;
 
@@ -2562,6 +2562,29 @@
           el._updateHorizontalBarPosition(el._misc.horizontal.position);
         }
 
+      },
+      /*
+      @function (private) _forceRepaint
+      @description Reassigns a display to the element as it was causing trouble on iOS not showing its content properly
+      */
+      forceRepaint: function () {
+        var el = this;
+
+        if (vcomet.util.getBrowser() == "Safari" && /iPad|iPhone|iPod/.test(navigator.platform)) {
+          var hasStyleDisplay = (el.style.display);
+          var displays = ["block", "flex"];
+          var previousDisplay, newDisplay;
+  
+          previousDisplay = hasStyleDisplay ? el.style.display : window.getComputedStyle(el).display;
+  
+          displays.splice(displays.indexOf(previousDisplay), 1);
+          newDisplay = displays[0];
+          el.style.display = newDisplay;
+  
+          setTimeout(function () {
+            el.style.display = previousDisplay;
+          }, 0);
+        }
       }
     },
     functions: {
@@ -2715,6 +2738,7 @@
       var el = this;
 
       el._setupContainerPosition();
+      el._forceRepaint();
 
       vcomet.onReady(function () {
         el._setupScrollBars();
