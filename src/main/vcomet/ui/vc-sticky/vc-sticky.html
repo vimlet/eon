@@ -141,23 +141,9 @@
         el._misc.viewPosition -= parseInt(el.spacing);
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition < 0 && ~["static", "relative"].indexOf(position)) {
-          console.log('TO FIXED');
-          // Check scroll parent container
-          // if (el.vcScroll) {
-          //   // Custom fixed positioning
-          //   el._vcScrollCompatible("fixed");
-          // } else {
             el._nativeCompatible("fixed");
-          // }
         } else if (el.offsetParent && el._misc.viewPosition >= 0 && ~["fixed", "absolute"].indexOf(position)) {
-          console.log('TO RELATIVE');
-          // Check scroll parent container
-          // if (el.vcScroll) {
-          //   // Custom fixed positioning
-          //   el._vcScrollCompatible("relative");
-          // } else {
             el._nativeCompatible("relative");
-          // }
         }
       },
       /*
@@ -171,59 +157,14 @@
         var position = window.getComputedStyle(el.wrapper).position;
         var limitValue = el.side == "right" ? body.offsetWidth : body.offsetHeight;
         // **Right value is not an exact number on IE
-        el._misc.viewPosition = vcomet.util.getBrowser() === "IE" ? parseInt(Math.floor(el.wrapper.getBoundingClientRect()[el.side])) : el._misc.viewPosition;
+        // el._misc.viewPosition = vcomet.util.getBrowser() === "IE" ? parseInt(Math.floor(el.wrapper.getBoundingClientRect()[el.side])) : el._misc.viewPosition;
         el._misc.viewPosition += parseInt(el.spacing);
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition > limitValue && ~["static", "relative"].indexOf(position)) {
-          // Check scroll parent container
-          if (el.vcScroll) {
-            // Custom fixed positioning
-            el._vcScrollCompatible("fixed");
-          } else {
-            el._nativeCompatible("fixed");
-          }
+          el._nativeCompatible("fixed");
         } else if (el.offsetParent && el._misc.viewPosition <= limitValue && ~["fixed", "absolute"].indexOf(position)) {
-          // Check scroll parent container
-          if (el.vcScroll) {
-            // Custom fixed positioning
-            el._vcScrollCompatible("relative");
-          } else {
-            el._nativeCompatible("relative");
-          }
+          el._nativeCompatible("relative");
         }
-      },
-      /*
-        @function (private) _vcScrollCompatible
-        @description Set fixed behavior inside vc-scroll container
-        @param {String} position [Sticky new position value]
-      */
-      vcScrollCompatible: function (position) {
-        var el = this;
-        // Parent scroll position
-        var fitSide = el.side == "top" || el.side == "bottom" ? "left" : "top";
-        // TODO! - scrollTop support for this
-        var parentScroll = document.documentElement[el._misc.scrollProp] || document.body[el._misc.scrollProp];
-        // Make sticky fixed (*Sticky wrapper always turns to position absolute since it's appended on top of the DOM)
-        if (position == "fixed") {
-          // Append sticky wrapper to the body
-          document.body.appendChild(el.wrapper);
-          // Set element position "fixed"
-          el.wrapper.style.position = "absolute";
-          el.wrapper.style[el.side] = el.spacing + "px";
-          // Left and right sticky fix
-          el.wrapper.style[fitSide] = 0;
-        } else {
-          // Append sticky wrapper back to the element
-          el.appendChild(el.wrapper);
-          // Move sticky element back to its initial position
-          // TODO! - scrollTop support for this
-          //if (parentScroll < (el._misc.initOffsetPos - parseInt(el.spacing))) {
-          // if (parentScroll < (el._misc.initOffsetPos - parseInt(el.spacing))) {
-            el.wrapper.style.position = "relative";
-            el.wrapper.style[el.side] = "0";
-          // }
-        }
-        vcomet.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
       },
       /*
         @function (private) _nativeCompatible
@@ -232,6 +173,7 @@
       */
       nativeCompatible: function (position) {
         var el = this;
+        var fitSide = el.side == "top" || el.side == "bottom" ? "left" : "top";
         // Parent scroll position
         if (position == "fixed") {
           // Append sticky wrapper to the body
@@ -239,6 +181,7 @@
           // Set element position fixed
           el.wrapper.style.position = el.fixContainer.tagName.toLowerCase() == "body" ? "fixed" : "absolute";
           el.wrapper.style[el.side] = el.spacing + "px";
+          el.wrapper.style[fitSide] = 0;
         } else {
           // Append sticky wrapper back to the element
           el.appendChild(el.wrapper);
@@ -314,10 +257,11 @@
         var el = this;
         // Trigger sticky event only if it is needed
         var throttled = false;
-        var delay = 15;
+        var delay = 20;
         // Check sticky position
         el._refs.setPositionFn = function (arg) {
-          if (!throttled) {
+          // Only apply throttled on desktop devices (Higher scroll call number)
+          if (!throttled || vcomet.util.isTouchScreen()) {
             // Get element top offset value and style top value
             el._misc.viewPosition = el.getBoundingClientRect()[el.side];
             value = Math.abs(el._getOffsetProp());
