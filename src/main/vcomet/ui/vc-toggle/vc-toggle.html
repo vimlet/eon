@@ -1,8 +1,11 @@
 <template>
     <div class="vc-toggle-toggle">
         <input class="vc-toggle-input" type="checkbox">
-        <label class="vc-toggle-label vc-bg5 vc-bg1-boxshadow"></label>
-        <label class="vc-toggle-nameLabel vc-unselectable"></label>
+        <label class="vc-toggle-label">
+            <span class="vc-toggle-span vc-bg5 vc-bg1-boxshadow"></span>
+            <div class="vc-toggle-nameLabel vc-unselectable"></div>
+        </label>
+
     </div>
 </template>
 
@@ -11,10 +14,18 @@
         themed: true,
         properties: {
             /*
-              @property {String} name 
-              @description Toggle name
+              @property {String} name labelWrapper
+              @description Toggle name for the form functionality
             */
             name: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {String} value 
+              @description Toggle value for the form functionality
+            */
+            value: {
                 value: "",
                 reflect: true
             },
@@ -36,11 +47,11 @@
                 reflect: true
             },
             /*
-              @property {Boolean} check 
+              @property {Boolean} checked 
               @description Checkbox checked status
               Default: false
             */
-            check: {
+            checked: {
                 value: false,
                 reflect: true
             },
@@ -51,13 +62,21 @@
              Values can be: true or false
              Default: true
            */
-           inline: {
-                value: "true",
+            inline: {
+                value: true,
                 reflect: true
             }
         },
 
         privateProperties: {
+            /*
+              @property (private) {String} _formelement 
+              @description Set that toggle is a form element
+              Value: checkbox
+            */
+            formelement: {
+                value: "checkbox"
+            },
             /*
               @property (private) {Object} _refs 
               @description Object with  references
@@ -69,6 +88,16 @@
 
         privateFunctions: {
             /*
+              @function (private) _setValue
+              @description Set new checkbox value
+              @param {String} newVal [New checkbox value]
+            */
+            setValue: function () {
+                this._currentValue = this.value;
+                vcomet.triggerCallback("onChange", this);
+
+            },
+            /*
               @function (private) _createRefs
               @description Creates fast access to elements
             */
@@ -77,6 +106,7 @@
 
                 el._refs.input = el.template.querySelector(".vc-toggle-input");
                 el._refs.label = el.template.querySelector(".vc-toggle-label");
+                el._refs.span = el.template.querySelector(".vc-toggle-span");
                 el._refs.nameLabel = el.template.querySelector(".vc-toggle-nameLabel");
             },
             /*
@@ -93,7 +123,7 @@
             */
             updateCheck: function () {
 
-                if (!vcomet.util.isTrue(this.check)) {
+                if (!vcomet.util.isTrue(this.checked)) {
                     this._refs.input.removeAttribute("checked");
                     this._refs.label.classList.remove("checked");
                     vcomet.triggerCallback("onUncheck", this);
@@ -120,19 +150,19 @@
             el._refs.input.setAttribute("name", el.name);
 
             // Checking or unchecking the checkbox
-            el.addEventListener("click", function (e) {
+            el._refs.label.addEventListener("click", function (e) {
                 // The click event is triggered by two elements, the real input and the
                 // visual custom element. So it is necessary to control one of the two elements
                 // fot not activate the action twice.
                 if (!vcomet.util.isTrue(el.disabled) && e.target.type !== "checkbox") {
-                    el.check = (vcomet.util.isTrue(el.check)) ? false : true;
+                    el.checked = (vcomet.util.isTrue(el.checked)) ? false : true;
                 }
 
             }, false);
 
             el._updateDisabled();
             el._updateCheck();
-            el.querySelector(".vc-toggle-nameLabel").innerHTML = el.label;
+            this._refs.nameLabel.innerHTML = el.label;
 
         },
 
@@ -142,11 +172,14 @@
                 case "disabled":
                     this._updateDisabled();
                     break;
-                case "check":
+                case "checked":
                     this._updateCheck();
                     break;
                 case "label":
                     this._refs.nameLabel = newVal;
+                    break;
+                case "value":
+                    this._setValue();
                     break;
             }
         }
