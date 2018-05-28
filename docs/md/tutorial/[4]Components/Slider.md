@@ -40,7 +40,7 @@ By default in a vc-slider that has the visible value, it will be placed under th
 ```
 
 ### Enable dynamically
-In this example, the vc-slider is contained within a vc-form, and is disabled, and after a second it will be enabled.
+In this example, the vc-slider is contained within a vc-form and is disabled, and after a second it will be enabled.
 ``` [html]
 <!-- Initially disabled slider -->
 <vc-slider id="mySlider" name="mySlider" disabled="true"></vc-slider>

@@ -4601,8 +4601,8 @@ vcomet.createAttributesObserver = function (el, config) {
 
                 // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
-
-                value = el[propertyName] ? el[propertyName] : "";
+                
+                value = el.hasOwnProperty(propertyName) ? el[propertyName] : "";
                 el.setAttribute(observeAttributesKeys[i], value);
 
             }

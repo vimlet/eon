@@ -59,7 +59,7 @@
               Default: false
             */
             disabled: {
-                value: false,
+                value: "false",
                 reflect: true
             },
             /*
@@ -88,7 +88,7 @@
               Default: false
             */
             displayVisibility: {
-                value: false,
+                value: "false",
                 reflect: true
             },
             /*
@@ -123,7 +123,7 @@
              Default: true
            */
             inline: {
-                value: false,
+                value: "true",
                 reflect: true
             }
         },
@@ -213,10 +213,12 @@
             @param {Number} percentValue [percentage slider value]
             */
             horizontalSlider: function (percentValue) {
+                var el = this;
                 var trackSize = 100;
 
-                this._refs.fill.style.width = (percentValue * trackSize) + "%";
-                this._refs.track.style.width = trackSize + "%"; /* adjust for border */
+                el.style.width = (el.size) ? el.size : el.offsetWidth;
+                el._refs.fill.style.width = (percentValue * trackSize) + "%";
+                el._refs.track.style.width = trackSize + "%"; /* adjust for border */
             },
 
             /*
@@ -238,13 +240,18 @@
                     // Sets an automatic width for the vertical slider, because the value of the height when
                     // it was horizontal may not be a correct measurement
                     this.style.width = "auto";
-                    this.style.height = this.inline ? "auto" : actualNodeWidth + "px";
 
-                    (navigator.userAgent.indexOf("Firefox") != -1 || navigator.userAgent.indexOf("Trident") != -1) ? this._refs.slider.setAttribute("orient", "vertical") : null;
+                    // Sets height of slider depending on the properties inline and size 
+                    if (vcomet.util.isTrue(this.inline)) {
+                        this.style.height = this.size == "" ? "auto" : this.size;
+                    } else {
+                        this.style.height = this.size;
+                    }
 
+                    // Sets the property to place the slider in vertical for IE and Firefox browsers
+                    (vcomet.util.getBrowser() == "Firefox" || vcomet.util.getBrowser() == "IE") ? this._refs.slider.setAttribute("orient", "vertical") : null;
                 }
 
-                this.style.display = "inline-block";
                 this._refs.fill.style.height = (percentValue * 100) + "%";
 
             },
@@ -380,12 +387,10 @@
                 // Small devices view
                 if (window.innerWidth <= vcomet.tabletWidth) {
                     el.setAttribute("version", "tablet");
-                    // el.style.width = "100%";
 
                     // Desktop view
                 } else {
                     el.setAttribute("version", "desktop");
-                    el.style.width = (el.size) ? el.size : el.offsetWidth;
                 }
 
                 el._updateSlider("first");
