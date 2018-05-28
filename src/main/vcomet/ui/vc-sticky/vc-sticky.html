@@ -78,6 +78,14 @@
       vcScroll: {
         value: "",
         reflect: true
+      },
+      /*
+        @property {String} fixContainer
+        @description Sticky scroll parent container
+      */
+      fixContainer: {
+        value: "",
+        reflect: true
       }
     },
     privateFunctions: {
@@ -133,21 +141,23 @@
         el._misc.viewPosition -= parseInt(el.spacing);
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition < 0 && ~["static", "relative"].indexOf(position)) {
+          console.log('TO FIXED');
           // Check scroll parent container
-          if (el.vcScroll) {
-            // Custom fixed positioning
-            el._vcScrollCompatible("fixed");
-          } else {
+          // if (el.vcScroll) {
+          //   // Custom fixed positioning
+          //   el._vcScrollCompatible("fixed");
+          // } else {
             el._nativeCompatible("fixed");
-          }
+          // }
         } else if (el.offsetParent && el._misc.viewPosition >= 0 && ~["fixed", "absolute"].indexOf(position)) {
+          console.log('TO RELATIVE');
           // Check scroll parent container
-          if (el.vcScroll) {
-            // Custom fixed positioning
-            el._vcScrollCompatible("relative");
-          } else {
+          // if (el.vcScroll) {
+          //   // Custom fixed positioning
+          //   el._vcScrollCompatible("relative");
+          // } else {
             el._nativeCompatible("relative");
-          }
+          // }
         }
       },
       /*
@@ -190,7 +200,8 @@
       vcScrollCompatible: function (position) {
         var el = this;
         // Parent scroll position
-        var fitSide = el.side == "top" || el.side == "bottom" ? null : "top";
+        var fitSide = el.side == "top" || el.side == "bottom" ? "left" : "top";
+        // TODO! - scrollTop support for this
         var parentScroll = document.documentElement[el._misc.scrollProp] || document.body[el._misc.scrollProp];
         // Make sticky fixed (*Sticky wrapper always turns to position absolute since it's appended on top of the DOM)
         if (position == "fixed") {
@@ -200,15 +211,17 @@
           el.wrapper.style.position = "absolute";
           el.wrapper.style[el.side] = el.spacing + "px";
           // Left and right sticky fix
-          if (fitSide) { el.wrapper.style[fitSide] = 0; }
+          el.wrapper.style[fitSide] = 0;
         } else {
           // Append sticky wrapper back to the element
           el.appendChild(el.wrapper);
           // Move sticky element back to its initial position
-          if (parentScroll < (el._misc.initOffsetPos - parseInt(el.spacing))) {
+          // TODO! - scrollTop support for this
+          //if (parentScroll < (el._misc.initOffsetPos - parseInt(el.spacing))) {
+          // if (parentScroll < (el._misc.initOffsetPos - parseInt(el.spacing))) {
             el.wrapper.style.position = "relative";
             el.wrapper.style[el.side] = "0";
-          }
+          // }
         }
         vcomet.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
       },
@@ -217,44 +230,43 @@
         @description Set fixed behavior inside native scroll container
         @param {String} position [Sticky new position value]
       */
-      // nativeCompatible: function (position) {
-      //   var el = this;
-      //   var sticky = el.wrapper;
-      //   // Parent scroll position
-      //   var parentScroll = document.documentElement[el._misc.scrollProp] || document.body[el._misc.scrollProp];
-
-      //   if (position == "fixed") {
-      //     // Set element position fixed
-      //     sticky.style.position = "fixed";
-      //     sticky.style[el.side] = el.spacing + "px";
-      //     vcomet.triggerCallback("onPositionChanged", el, el, ["fixed"]);
-      //   } else {
-      //     // Move back sticky element to its initial position
-      //     if (parentScroll < (el._misc.initOffsetPos - parseInt(el.spacing))) {
-      //       sticky.style.position = "relative";
-      //       sticky.style[el.side] = "auto";
-      //     }
-      //     vcomet.triggerCallback("onPositionChanged", el, el, ["relative"]);
-      //   }
-      // },
+      nativeCompatible: function (position) {
+        var el = this;
+        // Parent scroll position
+        if (position == "fixed") {
+          // Append sticky wrapper to the body
+          el.fixContainer.appendChild(el.wrapper);
+          // Set element position fixed
+          el.wrapper.style.position = el.fixContainer.tagName.toLowerCase() == "body" ? "fixed" : "absolute";
+          el.wrapper.style[el.side] = el.spacing + "px";
+        } else {
+          // Append sticky wrapper back to the element
+          el.appendChild(el.wrapper);
+          // Move back sticky element to its initial position
+          // TODO! - scrollTop support for this
+          //if (parentScroll < (el._misc.initOffsetPos - parseInt(el.spacing))) {
+            el.wrapper.style.position = "relative";
+            el.wrapper.style[el.side] = "auto";
+          // }
+        }
+        vcomet.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
+      },
       /*
         @function (private) _animationMonitor
         @description Check the animation start position and handle it
       */
-      animationMonitor: function () {
+      animationMonitor: function (scrollMisc) {
         var el = this;
         if (el.animPosition) {
-          el.wrapper.style.transition = "all .2s";
-          // Parent scroll position
-          // *Parent is the document body element or vc-scroll if sticky is currently relative positioned
-          // TODO - vc-scroll.scrollTop
+          // Parent is the document body element or vc-scroll if sticky is currently relative positioned
           var parent = el.vcScroll && ~["static", "relative"].indexOf(window.getComputedStyle(el.wrapper).position) ? el.vcScroll : document.documentElement;
-          var parentScroll = !parent.scrollTop ? 0 : parent.scrollTop;
+          var scrollValue = scrollMisc && scrollMisc[el._misc.scrollProp] ? scrollMisc[el._misc.scrollProp] : parent[el._misc.scrollProp];
+          el.wrapper.style.transition = "all .2s";
           // Check animation scroll position
-          if (!el.wrapper.classList.contains(el.animationClass) && parentScroll >= el.animPosition) {
+          if (!el.wrapper.classList.contains(el.animationClass) && scrollValue >= el.animPosition) {
             // Add animation class
             el.wrapper.classList.add(el.animationClass);
-          } else if (el.wrapper.classList.contains(el.animationClass) && parentScroll < el.animPosition) {
+          } else if (el.wrapper.classList.contains(el.animationClass) && scrollValue < el.animPosition) {
             // Remove animation
             el.wrapper.classList.remove(el.animationClass);
           }
@@ -282,29 +294,17 @@
         return prop;
       },
       /*
-        @function (private) _resizeStickyUpdate
-        @description Sticky resize listener functionality
+        @function (private) _getFixContainer
+        @description 
       */
-      resizeStickyUpdate: function () {
+      getFixContainer: function () {
         var el = this;
-        // Trigger sticky event only if it is needed
-        var throttled = false;
-        var delay = 15;
-        // Recalculate sticky initial offset position on window resize
-        window.addEventListener("resize", function () {
-          var position = window.getComputedStyle(el.wrapper).position;
-          // Update offset value when resized on relative position
-          if (el.offsetParent && position == "relative") {
-            el._misc.initOffsetPos = Math.abs(el._getOffsetProp());
-          }
-          el.refresh();
-          // Throttle
-          throttled = true;
-          // Set a timeout to un-throttle
-          setTimeout(function () {
-            throttled = false;
-          }, delay);
-        });
+        // Sticky inside vc-scroll container
+        el.vcScroll = el.vcScroll ? document.querySelector(el.vcScroll) : false;
+        // Sticky 
+        el.fixContainer = !el.fixContainer ? document.body : document.querySelector(el.fixContainer);
+        el.fixContainer = !el.fixContainer ? document.body : el.fixContainer;
+        el.vcScroll = el.fixContainer.tagName.toLowerCase() == "vc-scroll" ? el.fixContainer : el.vcScroll;
       },
       /*
         @function (private) _scrollSticky
@@ -323,7 +323,7 @@
             value = Math.abs(el._getOffsetProp());
             // Fixed behavior
             el._fixedMonitor(el._misc.viewPosition, el._misc.offsetPos, el._misc.initOffsetPos, el.wrapper.style.position);
-            el._animationMonitor(el._misc.viewPosition, el._misc.offsetPos, el._misc.initOffsetPos, el.wrapper.style.position);
+            el._animationMonitor(arg);
             // Throttle
             throttled = true;
             // Set a timeout to un-throttle
@@ -337,8 +337,12 @@
           el.vcScroll.onCreated(function(){
             el.vcScroll.onScrolled(el._refs.setPositionFn);
           });
-        } else {
+        } else if (el.fixContainer.tagName.toLowerCase() == "body") {
+          console.log('NATIVE BODY SCROLL');
           document.addEventListener("scroll", el._refs.setPositionFn);
+        } else {
+          console.log('NATIVE SCROLL');
+          el.fixContainer.addEventListener("scroll", el._refs.setPositionFn);
         }
       }
     },
@@ -370,25 +374,34 @@
       el._misc.initOffsetPos = el._misc.offsetPos = Math.abs(el._getOffsetProp());
       // Get element distance from viewport
       el._misc.viewPosition = sticky.getBoundingClientRect()[el.side];
+      // Check scroll container
+      el._getFixContainer();
       // Fixed behavior
-      el.vcScroll = document.querySelector(el.vcScroll);
-      if (el.vcScroll) {
-        el._fixedMonitor();
-      }
+      el._fixedMonitor();
       // Animation monitoring
       el._animationMonitor();
-      // Recalculate sticky initial offset position on window resize
-      el._resizeStickyUpdate();
       // Sticky fixed functionality
       el._scrollSticky();
     },
+    onResize: function(){
+      var el = this;
+      // Copy size property from parent
+      el.wrapper.style.width = el.side == "top" || el.side == "bottom" ? "100%" : el.offsetWidth + "px";
+      el.wrapper.style.height = el.side == "top" || el.side == "bottom" ? el.offsetHeight + "px" : "100%";
+      //
+      var position = window.getComputedStyle(el.wrapper).position;
+      // Update offset value when resized on relative position
+      if (el.offsetParent && position == "relative") {
+        el._misc.initOffsetPos = Math.abs(el._getOffsetProp());
+      }
+      el.refresh();
+    },
     onPropertyChanged: function (attrName, oldVal, newVal) {
       var el = this;
-      // TODO - REMOVEs
       // Monitor wrapper fixed displaying with vc-scroll integration
-      // if (attrName == "_viewPosition" && el.vcScroll) {
-      //   el.wrapper.style.display = newVal == -el.spacing ? "none" : "flex";
-      // }
+      if (attrName == "_viewPosition" && el.vcScroll) {
+        el.wrapper.style.display = newVal == -el.spacing ? "none" : "flex";
+      }
     }
   });
 </script>
