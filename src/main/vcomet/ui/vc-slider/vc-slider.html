@@ -59,7 +59,7 @@
               Default: false
             */
             disabled: {
-                value: "false",
+                value: false,
                 reflect: true
             },
             /*
@@ -88,7 +88,7 @@
               Default: false
             */
             displayVisibility: {
-                value: "false",
+                value: false,
                 reflect: true
             },
             /*
@@ -123,7 +123,7 @@
              Default: true
            */
             inline: {
-                value: "true",
+                value: true,
                 reflect: true
             }
         },
@@ -157,7 +157,14 @@
             */
             refs: {
                 value: {}
-            }
+            },
+            /*
+              @property (private) {Object} _misc 
+              @description Stores slider useful data.
+            */
+            misc: {
+                value: {}
+            },
         },
         privateFunctions: {
             /*
@@ -169,7 +176,7 @@
 
                 el._refs.slider.value = el.value;
                 el._currentValue = el.value;
-                el._updateSlider();
+                el._updateSlider(true);
                 vcomet.triggerCallback("onChange", el);
 
             },
@@ -190,19 +197,19 @@
             /*
               @function (private) _updateSlider
               @description Update slider view
-              @param {String} arg [control variable for vertical slider]
+              @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
             */
-            updateSlider: function (arg) {
+            updateSlider: function (privateValueKey) {
                 var el = this;
 
                 var sliderVal = el._refs.slider.value;
-                var percentValue = (sliderVal - el._refs.slider.min) / (el._refs.slider.max - el._refs.slider.min); /* percentage slider value */
                 var thumbPosition = -5.7;
-                var fillSize = percentValue * 100;
+                el._misc.percentValue = (sliderVal - el._refs.slider.min) / (el._refs.slider.max - el._refs.slider.min); /* percentage slider value */
+                var valueKey = privateValueKey ? "__value" : "value";
 
                 el._refs.range.innerHTML = sliderVal;
-                (el.orientation == "horizontal") ? el._horizontalSlider(percentValue) : el._verticalSlider(percentValue, fillSize, arg);
-                el.__value = el._refs.slider.value;
+                (el.orientation == "horizontal") ? el._horizontalSlider() : el._verticalSlider();
+                el[valueKey] = el._refs.slider.value;
                 el._refs.slider.setAttribute("value", el._refs.slider.value);
             },
 
@@ -212,12 +219,12 @@
             @description Specify horizontal slider view style
             @param {Number} percentValue [percentage slider value]
             */
-            horizontalSlider: function (percentValue) {
+            horizontalSlider: function () {
                 var el = this;
                 var trackSize = 100;
 
                 el.style.width = (el.size) ? el.size : el.offsetWidth;
-                el._refs.fill.style.width = (percentValue * trackSize) + "%";
+                el._refs.fill.style.width = (el._misc.percentValue * trackSize) + "%";
                 el._refs.track.style.width = trackSize + "%"; /* adjust for border */
             },
 
@@ -225,35 +232,32 @@
               @function (private) _verticalSlider
               @description Specify vertical slider view style
               @param {Number} percentValue [percentage slider value]
-              @param {Number} fillSize [Correspond to value of slider]
-              @param {String} arg [control variable to check first time update slider]
             */
-            verticalSlider: function (percentValue, fillSize, arg) {
+            verticalSlider: function () {
+                var el = this;
 
                 // If its the first the verticalSlider is called then we have
                 // to invert the width and height
-                if (arg && arg == "first") {
+                if (el._misc.first) {
                     // Stores the width of the input when it is horizontal,
                     // then use it as height when it is vertical
-                    var actualNodeWidth = this.offsetWidth;
+                    var actualNodeWidth = el.offsetWidth;
+                    el._misc.first = false;
 
                     // Sets an automatic width for the vertical slider, because the value of the height when
                     // it was horizontal may not be a correct measurement
-                    this.style.width = "auto";
+                    el.style.width = "auto";
 
                     // Sets height of slider depending on the properties inline and size 
-                    if (vcomet.util.isTrue(this.inline)) {
-                        this.style.height = this.size == "" ? "auto" : this.size;
+                    if (vcomet.util.isTrue(el.inline)) {
+                        el.style.height = el.size == "" ? "auto" : el.size;
                     } else {
-                        this.style.height = this.size;
+                        el.style.height = el.size;
                     }
 
                     // Sets the property to place the slider in vertical for IE and Firefox browsers
-                    (vcomet.util.getBrowser() == "Firefox" || vcomet.util.getBrowser() == "IE") ? this._refs.slider.setAttribute("orient", "vertical") : null;
+                    (vcomet.util.getBrowser() == "Firefox" || vcomet.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
                 }
-
-                this._refs.fill.style.height = (percentValue * 100) + "%";
-
             },
 
             /*
@@ -328,7 +332,7 @@
                         el._refs.fill.style.height = (el._refs.fill.offsetHeight + positionDiff) + "px";
                         el._refs.slider.value = ((el._refs.fill.offsetHeight / trackSize) * (max - min)) + min;
                         el._refs.range.innerHTML = el._refs.slider.value;
-                        el.__value = el._refs.slider.value;
+                        el.value = el._refs.slider.value;
                     }
                 }
             },
@@ -393,15 +397,29 @@
                     el.setAttribute("version", "desktop");
                 }
 
-                el._updateSlider("first");
+                el._updateSlider();
 
             },
+
+            /*
+             @function (private) _updateVerticalHeight
+             @description Updates fill's height on vertical sliders
+           */
+            updateVerticalHeight: function () {
+                var el = this;
+
+                if (el.orientation == "vertical") {
+                    el._refs.fill.style.height = (el._misc.percentValue * 100) + "%";
+                }
+            }
 
         },
 
         onCreated: function () {
             vcomet.createCallback("onChange", this);
             this._createRefs();
+
+            this._misc.first = true;
         },
 
         onRender: function () {
@@ -418,27 +436,29 @@
 
             // On IE and IOS devices not work event "input"
             // So is necessary a click event
-            if (vcomet.util.getBrowser() == "IE" || /iPad|iPhone|iPod/.test(navigator.platform)) {
-                // el._refs.slider.addEventListener("click", function (event) {
-                el._refs.slider.addEventListener("click", function (e) {
+            el._refs.slider.addEventListener("click", function (e) {
+                if (vcomet.util.getBrowser() == "IE" || vcomet.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
                     // On iOS devices and IE clicking on the input does not update its status
                     // Is is necessary  to do it programmatically
                     el._interactionSlider(e);
                     el._updateCurrentValue();
-                }, false);
+                }
 
-            } else {
-                el._refs.slider.addEventListener("input", function (e) {
-                    el._updateSlider();
-                    el._updateCurrentValue();
-                }, false);
-            }
+                el._updateVerticalHeight();
+
+            }, false);
+
+            el._refs.slider.addEventListener("input", function (e) {
+                el._updateSlider();
+                el._updateCurrentValue();
+            }, false);
 
             if (el.orientation == "horizontal" && el.displayAlign != "center") {
                 el.displayPosition = "";
             }
 
             el._updateDisabled();
+            el._updateVerticalHeight();
 
         },
 
@@ -455,7 +475,8 @@
                     this._setValue();
                     break;
             }
-        }
+        },
+
     });
 
 </script>

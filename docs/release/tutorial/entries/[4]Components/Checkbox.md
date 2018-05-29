@@ -15,11 +15,11 @@ To use it import vc-check in the head of the HTML document:
 
 ## Declarative usage
 ``` [html]
-<vc-checkbox label="Checkbox 1"  name="options" value="myCheckbox1"></vc-checkbox>
+<vc-checkbox label="Checkbox 1" name="options" value="myCheckbox1"></vc-checkbox>
 <!-- Initially checkbox checked -->
-<vc-checkbox label="Checkbox 2"  name="options" value="myCheckbox2" checked="true"></vc-checkbox>
+<vc-checkbox label="Checkbox 2" name="options" value="myCheckbox2" checked="true"></vc-checkbox>
 <!-- Checkbox disabled -->
-<vc-checkbox label="Checkbox 3"  name="options" value="myCheckbox3" disabled="true"></vc-checkbox>
+<vc-checkbox label="Checkbox 3" name="options" value="myCheckbox3" disabled="true"></vc-checkbox>
 ```
 
 

@@ -22,10 +22,11 @@
   <body>
     <div class="container main">
       <vc-scroll id="scrollParent">
+
         <div style="margin-top: 50px; background-color: #154e15; height: 200px; width: 100%;"></div>
 
         <!-- TOP STICKY -->
-        <vc-sticky class="stickyElement topSticky" wrapper-class="wrapperStyle" scroll-container="#scrollParent">
+        <vc-sticky class="stickyElement topSticky" wrapper-class="wrapperStyle" vc-scroll="vc-scroll">
           <div class="card">
             <h1>TOP STICKY</h1>
             <div class="innerCard"></div>
@@ -36,12 +37,12 @@
         <div style="margin-top: 50px; background-color: #4b5b84; height: 200px; width: 100%;"></div>
 
         <!-- TOP STICKY ANIMATED-->
-        <!-- <vc-sticky class="stickyElement topSticky" spacing="150" anim-position="500" animation-class="animation" wrapper-class="wrapperStyle" vc-scroll="vc-scroll">
+        <vc-sticky id="spaced" class="stickyElement topSticky" spacing="150" anim-position="500" animation-class="animation" wrapper-class="wrapperStyle" vc-scroll="vc-scroll">
           <div class="card">
             <h1>TOP STICKY ANIMATED</h1>
             <div class="innerCard"></div>
           </div>
-        </vc-sticky> -->
+        </vc-sticky>
 
         <div style="margin-top: 50px; background-color: #695736; height: 200px; width: 100%;"></div>
         <div style="margin-top: 50px; background-color: #154e15; height: 200px; width: 100%;"></div>
@@ -51,12 +52,12 @@
         <div style="margin-top: 50px; background-color: #4b5b84; height: 200px; width: 100%;"></div>
 
         <!--BOTTOM STICKY -->
-        <!-- <vc-sticky side="bottom" class="stickyElement" wrapper-class="wrapperStyle" vc-scroll="vc-scroll">
+        <vc-sticky side="bottom" class="stickyElement" wrapper-class="wrapperStyle" vc-scroll="vc-scroll">
           <div class="card">
             <h1>BOTTOM STICKY</h1>
             <div class="innerCard"></div>
           </div>
-        </vc-sticky> -->
+        </vc-sticky>
 
         <div style="margin-top: 50px; background-color: #695736; height: 200px; width: 100%;"></div>
         <div style="margin-top: 50px; background-color: #154e15; height: 200px; width: 100%;"></div>
@@ -69,5 +70,32 @@
       </vc-scroll>
 
     </div>
+    <script>
+      var spaced = document.querySelector("#spaced");
+
+      if(vcomet.util.isTouchScreen()) {
+        spaced.setAttribute("spacing", 80);
+      }
+
+      // Reduce resize event calls
+      var throttled = false;
+      var delay = 20;
+      window.addEventListener('resize', function(e) {
+        if (!throttled) {
+          // Monitor sticky with spacing to improve cross-device visibility
+          if(window.innerWidth <= 650) {
+            spaced.setAttribute("spacing", 80);
+          } else {
+            spaced.setAttribute("spacing", 150);
+          }
+          // Throttle
+          throttled = true;
+            // Set a timeout to un-throttle
+            setTimeout(function () {
+              throttled = false;
+            }, delay);
+        }
+      }, false);
+    </script>
   </body>
 </html>

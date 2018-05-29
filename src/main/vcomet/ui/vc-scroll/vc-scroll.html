@@ -324,13 +324,13 @@
 
           el._setupDeviceTouchAction();
 
-          el.onscroll = function (e) {
+          el.content.onscroll = function (e) {
 
             var eventObject = {};
 
             eventObject.trigger = "native";
-            eventObject.scrollTop = el.scrollTop;
-            eventObject.scrollLeft = el.scrollLeft;
+            eventObject.scrollTop = el.content.scrollTop;
+            eventObject.scrollLeft = el.content.scrollLeft;
 
             vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
 
@@ -1048,7 +1048,6 @@
 
           //When the drag event is active and we start moving the mouse we will scroll the content and the bar
           document.addEventListener("pointermove", function (e) {
-
             el._misc.mouse.clientX = e.clientX;
 
             if (el._misc.horizontal.drag.active == "true" || el._misc.horizontal.drag.active == true) {
@@ -1799,7 +1798,7 @@
       @param {Object} e [Event]
       */
       handleHorizontalDrag: function (e) {
-
+      
         var el = this;
         var currentHorizontalPosition = el._misc.horizontal.position;
 
@@ -1832,7 +1831,7 @@
 
             finalBarLeftPosition = parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] - el._refs.horizontalBar.offsetWidth)
           }
-
+         
           el._refs.horizontalBar.style.transform = "translate3d(" + finalBarLeftPosition + "px, 0, 0)";
 
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
@@ -1840,7 +1839,6 @@
           proportionalScrollLeft = (parseFloat(el.content.scrollWidth - el.offsetWidth) / barLeftProportion);
 
           el._updateHorizontalPosition(-proportionalScrollLeft);
-
           el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
 
           //If the scroll has changed we trigger the callback
@@ -2183,7 +2181,7 @@
         var el = this;
         var scrollLimit, currentScroll, translatePercentage;
 
-        if (el._misc.vertical.created) {
+        if (el._misc.horizontal.created) {
 
           scrollLimit = el.content.scrollWidth - el.content.offsetWidth
           currentScroll = translatePosition < 0 ? translatePosition * -1 : translatePosition;

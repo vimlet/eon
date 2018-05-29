@@ -1,7 +1,7 @@
 # Toggle
 
 ## Introduction
-This component is a simple on/off switch.
+This component is a simple on/off switch. It is also possible to use it as a form component.
 
 To use it import vc-toggle in the head of the HTML document:
 ``` [html]
@@ -14,7 +14,7 @@ To use it import vc-toggle in the head of the HTML document:
 
 ## Declarative usage
 ``` [html]
-<vc-toggle label="Toggle"></vc-toggle>
+<vc-toggle label="Toggle" name"toggleOption" value="myToggle"></vc-toggle>
 ```
 
 ## Programmatic usage
@@ -26,7 +26,9 @@ vcomet.onReady(function () {
 
     // Set properties and append vc-toggle
     myToggle.label = "Toggle";
-    myToggle.check = true;
+    myToggle.name = "toggleOption";
+    myToggle.value = "myToggle";
+    myToggle.checked = true;
     document.querySelector("body").appendChild(myToggle);
 });
 ```
