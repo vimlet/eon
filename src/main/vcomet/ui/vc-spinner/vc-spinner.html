@@ -169,12 +169,13 @@
             setValue: function () {
                 var el = this;
 
+                //TODO:
                 if (el.value) {
                     el.__value = this._checkMin(el.value);
                     el.__value = this._checkMax(el.value);
+                    el._refs.input.value = el.__value;
+                    el._currentValue = el.__value;
 
-                    el._refs.input.value = el.value;
-                    el._currentValue = el.value;
                     vcomet.triggerCallback("onChange", el);
                 }
             },
@@ -366,12 +367,9 @@
             */
             checkMin: function (value) {
                 var el = this;
-                var returnValue;
-
-                returnValue = (this.min && parseInt(value) < parseInt(this.min)) ? parseInt(this.min) : value;
+                var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : value;
 
                 return returnValue;
-
             },
 
             /*
@@ -381,12 +379,9 @@
             */
             checkMax: function (value) {
                 var el = this;
-                var returnValue;
-
-                returnValue = (this.max && value > this.max) ? parseInt(this.max) : value;
+                var returnValue = (el.max && value > el.max) ? parseInt(el.max) : value;
 
                 return returnValue;
-
             }
         },
 
@@ -435,7 +430,17 @@
                     this._setValue();
                     break;
             }
+        },
+        // TODO:
+        onAttributeChanged: function (attrName, oldVal, newVal) {
+            switch (attrName) {
+                case "value":
+                    // console.log('attribute');
+                    // this._setValue();
+                    break;
+            }
         }
+
 
     });
 
