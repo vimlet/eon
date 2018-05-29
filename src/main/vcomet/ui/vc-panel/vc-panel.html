@@ -88,6 +88,14 @@
       tabTitle: {
         value: "",
         reflect: true
+      },
+      /*
+      @property {String} scrollType
+      @description Sets the type of the scroll
+      */
+      scrollType: {
+        value: "auto",
+        reflect: true
       }
     },
     privateFunctions: {
@@ -166,7 +174,7 @@
         while (nodes.length) {
           // Build nodes structure
           child = nodes.shift();
-          if(child.nodeType == 1) {
+          if (child.nodeType == 1) {
             // Append remote source child
             if (reAppend) {
               fragment.appendChild(child);
@@ -183,10 +191,10 @@
           el.content.appendChild(fragment);
         }
         // Wait until the element is ready
-        el.onReady(function(){
+        el.onReady(function () {
           vcomet.triggerCallback("onLoad", el, el, []);
         });
-        
+
       },
       /*
         @function (private) _removeTemplate
@@ -204,7 +212,7 @@
           // Build nodes structure
           child = children.shift();
           // Check scripts
-          if(child.tagName == "SCRIPT") {
+          if (child.tagName == "SCRIPT") {
             // Inject deferred script text from stored ones
             positionId = child.getAttribute("_positionId");
             child.text = positionId ? el._refs.scripts[positionId] : child.text;
@@ -225,6 +233,7 @@
         // Set passed scroll parameters
         el._refs.wrapper.fit = el.fit;
         el._refs.wrapper.arrowScrolls = el.arrowScrolls;
+        el._refs.wrapper.type = el.scrollType;
       },
       /*
         @function (private) _resetCallback
@@ -293,7 +302,7 @@
           // Execute request
           xhr.send();
         }
-        
+
       },
       /*
         @function refresh
