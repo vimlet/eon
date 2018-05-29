@@ -9,16 +9,14 @@
         @description Stores useful data information
       */
       misc: {
-        value: {},
-        reflect: false
+        value: {}
       },
       /*
         @property (private) {Object} _refs
         @description Stores involved elements references
       */
       refs: {
-        value: {},
-        reflect: false
+        value: {}
       }
     },
     properties: {
@@ -34,7 +32,7 @@
       },
       /*
         @property {Number} spacing
-        @description Margin between the sticky and the document limit
+        @description Margin between the sticky and the container boundary
       */
       spacing: {
         value: 0,
@@ -65,7 +63,7 @@
       },
       /*
         @property {Number} animPosition
-        @description Scrolling breakpoint where the animation is triggered from
+        @description Scrolling breakpoint the animation is triggered from
       */
       animPosition: {
         value: "",
@@ -81,7 +79,7 @@
       },
       /*
         @property {String} fixContainer
-        @description Sticky scroll parent container
+        @description Sticky fixed parent container
       */
       fixContainer: {
         value: "",
@@ -141,15 +139,14 @@
         el._misc.viewPosition -= parseInt(el.spacing);
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition < 0 && ~["static", "relative"].indexOf(position)) {
-            el._nativeCompatible("fixed");
+            el._fix("fixed");
         } else if (el.offsetParent && el._misc.viewPosition >= 0 && ~["fixed", "absolute"].indexOf(position)) {
-            el._nativeCompatible("relative");
+            el._fix("relative");
         }
       },
       /*
-      TODO--
         @function (private) _bottomRightFixing
-        @description Set fixed behavior for bottom and right sticky
+        @description Set fixed behavior for the bottom and right sticky
       */
       bottomRightFixing: function () {
         var el = this;
@@ -161,17 +158,17 @@
         el._misc.viewPosition += parseInt(el.spacing);
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition > limitValue && ~["static", "relative"].indexOf(position)) {
-          el._nativeCompatible("fixed");
+          el._fix("fixed");
         } else if (el.offsetParent && el._misc.viewPosition <= limitValue && ~["fixed", "absolute"].indexOf(position)) {
-          el._nativeCompatible("relative");
+          el._fix("relative");
         }
       },
       /*
-        @function (private) _nativeCompatible
+        @function (private) _fix
         @description Set fixed behavior inside native scroll container
         @param {String} position [Sticky new position value]
       */
-      nativeCompatible: function (position) {
+      fix: function (position) {
         var el = this;
         var fitSide = el.side == "top" || el.side == "bottom" ? "left" : "top";
         // Parent scroll position
@@ -186,17 +183,15 @@
           // Append sticky wrapper back to the element
           el.appendChild(el.wrapper);
           // Move back sticky element to its initial position
-          // TODO! - scrollTop support for this
-          //if (parentScroll < (el._misc.initOffsetPos - parseInt(el.spacing))) {
-            el.wrapper.style.position = "relative";
-            el.wrapper.style[el.side] = "auto";
-          // }
+          el.wrapper.style.position = "relative";
+          el.wrapper.style[el.side] = "auto";
         }
         vcomet.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
       },
       /*
         @function (private) _animationMonitor
         @description Check the animation start position and handle it
+        @param {String} scrollMisc [Object containing the scroll information]
       */
       animationMonitor: function (scrollMisc) {
         var el = this;
@@ -237,14 +232,14 @@
         return prop;
       },
       /*
-        @function (private) _getFixContainer
-        @description 
+        @function (private) _setFixContainer
+        @description Set upt fix container configuration
       */
-      getFixContainer: function () {
+      setFixContainer: function () {
         var el = this;
         // Sticky inside vc-scroll container
         el.vcScroll = el.vcScroll ? document.querySelector(el.vcScroll) : false;
-        // Sticky 
+        // Sticky fix container
         el.fixContainer = !el.fixContainer ? document.body : document.querySelector(el.fixContainer);
         el.fixContainer = !el.fixContainer ? document.body : el.fixContainer;
         el.vcScroll = el.fixContainer.tagName.toLowerCase() == "vc-scroll" ? el.fixContainer : el.vcScroll;
@@ -262,7 +257,7 @@
         el._refs.setPositionFn = function (arg) {
           // Only apply throttled on desktop devices (Higher scroll call number)
           if (!throttled || vcomet.util.isTouchScreen()) {
-            // Get element top offset value and style top value
+            // Get the element top offset value and style top value
             el._misc.viewPosition = el.getBoundingClientRect()[el.side];
             value = Math.abs(el._getOffsetProp());
             // Fixed behavior
@@ -282,10 +277,8 @@
             el.vcScroll.onScrolled(el._refs.setPositionFn);
           });
         } else if (el.fixContainer.tagName.toLowerCase() == "body") {
-          console.log('NATIVE BODY SCROLL');
           document.addEventListener("scroll", el._refs.setPositionFn);
         } else {
-          console.log('NATIVE SCROLL');
           el.fixContainer.addEventListener("scroll", el._refs.setPositionFn);
         }
       }
@@ -319,7 +312,7 @@
       // Get element distance from viewport
       el._misc.viewPosition = sticky.getBoundingClientRect()[el.side];
       // Check scroll container
-      el._getFixContainer();
+      el._setFixContainer();
       // Fixed behavior
       el._fixedMonitor();
       // Animation monitoring
@@ -332,7 +325,7 @@
       // Copy size property from parent
       el.wrapper.style.width = el.side == "top" || el.side == "bottom" ? "100%" : el.offsetWidth + "px";
       el.wrapper.style.height = el.side == "top" || el.side == "bottom" ? el.offsetHeight + "px" : "100%";
-      //
+      
       var position = window.getComputedStyle(el.wrapper).position;
       // Update offset value when resized on relative position
       if (el.offsetParent && position == "relative") {
