@@ -47,7 +47,7 @@
             },
             /*
               @property (private) {Object} _clickContextmenuEvent
-              @description Store contextmenu samll devices event
+              @description Store contextmenu small devices event
             */
             clickContextmenuEvent: {
                 value: {}
@@ -59,9 +59,30 @@
             lastDevice: {
                 value: ""
             },
+            /*
+              @property (private) {Object} _refs 
+              @description Object with  references
+            */
+            refs: {
+                value: {}
+            }
         },
 
         privateFunctions: {
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.contextmenu = el.template.querySelector(".vc-contextmenu-contextmenu");
+                el._refs.wrapper = el.template.querySelector(".vc-contextmenu-wrapper");
+                el._refs.container = el.template.querySelector(".vc-contextmenu-container");
+                el._refs.close = el.template.querySelector(".vc-contextmenu-close");
+                el._refs.closeIcon = el.template.querySelector(".vc-contextmenu-closeIcon");
+                el._refs.scroll = el.template.querySelector("vc-scroll");
+            },
             /*
               @function (private) _setContextmenuEvent
               @description Set event to open contextmenu
@@ -71,7 +92,7 @@
                 var posX;
                 var posY;
 
-                if (el.getAttribute("data-version") == "desktop") {
+                if (el._refs.wrapper.dataset.version == "desktop") {
 
                     triggerElement.addEventListener("contextmenu", contextmenuEvent);
 
@@ -90,7 +111,8 @@
                 }
 
                 // Long touch event functionality
-                if (el.getAttribute("data-version") == "smalldevice") {
+                // if (el.getAttribute("data-version") == "smalldevice") {
+                if (el._refs.wrapper.dataset.version == "device") {
                     var onLongTouch;
                     var timer, lockerTimer;
                     var touchDuration = 800;
@@ -132,7 +154,7 @@
             */
             exceedsWindow: function () {
                 var el = this;
-                var elementRect = el._wrapperNode.getBoundingClientRect();
+                var elementRect = el._refs.wrapper.getBoundingClientRect();
                 var returnObject = {};
 
                 returnObject.exceeds = false;
@@ -195,7 +217,7 @@
                 }
 
                 // Move documentFragment to shadowRoot
-                el._contextmenuNode.appendChild(itemsDocFragment);
+                el._refs.contextmenu.appendChild(itemsDocFragment);
 
             },
 
@@ -252,9 +274,9 @@
                 var el = this;
 
                 if (!el.classList.contains("vc-contextmenu-responsive")) {
-                    el._closeNode.classList.add("vc-contextmenu-closeVisible");
+                    el._refs.close.classList.add("vc-contextmenu-closeVisible");
 
-                    el._closeIconNode.addEventListener("click", function () {
+                    el._refs.closeIcon.addEventListener("click", function () {
                         el.hide();
                     });
                 }
@@ -268,19 +290,24 @@
             verifyScreenResolution: function () {
                 var el = this;
 
+                // TODO:
                 // Small devices view
-                if (window.innerWidth <= vcomet.tabletWidth || navigator.userAgent.match(/Tablet|iPad|iPod/i)) {
-                    el.dataset.version = "smalldevice";
+                // if (window.innerWidth <= vcomet.tabletWidth || navigator.userAgent.match(/Tablet|iPad|iPod/i)) {
+                el._refs.wrapper.dataset.version = (vcomet.util.isTouchScreen()) ? "device" : "desktop";
+                console.log(el._refs.wrapper.dataset.version);
+                // if (vcomet.util.isTouchScreen()) {
+                //     console.log('Small');
+                //     el._refs.wrapper.dataset.version = "smalldevice";
 
-                    // Desktop view
-                } else {
-                    el.dataset.version = "desktop";
-                }
+                //     // Desktop view
+                // } else {
+                //     el.dataset.version = "desktop";
+                // }
 
-                if (el.getAttribute("data-version") != el._lastDevice) {
-                    el._lastDevice = el.getAttribute("data-version");
-                    el._updateDeviceOptions();
-                }
+                // if (el.getAttribute("data-version") != el._lastDevice) {
+                //     el._lastDevice = el.getAttribute("data-version");
+                //     el._updateDeviceOptions();
+                // }
 
             },
 
@@ -295,13 +322,13 @@
 
                 for (var i = 0; i < triggerLength; i++) {
 
-                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el.getAttribute("data-version") == "desktop") {
+                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el._refs.wrapper.dataset.version == "desktop") {
                         el._triggerNode[i].setAttribute("oncontextmenu", "return false");
                         el._triggerNode[i].removeEventListener("click", el._clickContextmenuEvent);
                         el._setContextmenuEvent(el._triggerNode[i]);
                     }
 
-                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el.getAttribute("data-version") != "desktop") {
+                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el._refs.wrapper.dataset.version !== "desktop") {
                         el._triggerNode[i].removeAttribute("oncontextmenu");
                         el._triggerNode[i].removeEventListener("contextmenu", el._contextmenuEvent);
                         el._setContextmenuEvent(el._triggerNode[i]);
@@ -339,8 +366,8 @@
 
                 // Contextmenu opened by a click event for the responsive functionality
                 if (typeof posX == "undefined" && typeof posY == "undefined") {
-                    el._wrapperNode.classList.add("vc-contextmenu-wrapper-visible", "vc-bg1-modal");
-                    document.body.appendChild(el._wrapperNode);
+                    el._refs.wrapper.classList.add("vc-contextmenu-wrapper-visible", "vc-bg1-modal");
+                    document.body.appendChild(el._refs.wrapper);
                     el._setResponsiveClose();
 
                 } else {
@@ -348,17 +375,17 @@
                     var openContextmenuObject = {};
 
                     el._verifyOpenContextmenu(openContextmenu);
-                    openContextmenuObject.element = el._wrapperNode;
+                    openContextmenuObject.element = el._refs.wrapper;
                     vcomet.contextmenu.openContextmenu.push(openContextmenuObject);
-                    el._wrapperNode.style.top = posY + "px";
-                    el._wrapperNode.style.left = posX + "px";
+                    el._refs.wrapper.style.top = posY + "px";
+                    el._refs.wrapper.style.left = posX + "px";
                     // Appends the wrapper node to the body to control when it is in an absolute container
-                    document.body.appendChild(el._wrapperNode);
-                    el._wrapperNode.classList.add("vc-contextmenu-wrapper-visible");
+                    document.body.appendChild(el._refs.wrapper);
+                    el._refs.wrapper.classList.add("vc-contextmenu-wrapper-visible");
                 }
 
                 vcomet.triggerCallback("onShow", this);
-                el._scroll.update();
+                el._refs.scroll.update();
 
             },
 
@@ -370,12 +397,12 @@
                 var el = this;
                 var verticalScroll = el.querySelector(".vc-contextmenu-wrapper .vc-scroll-verticalScroll");
 
-                if ((!verticalScroll && el._wrapperNode.classList.contains("vc-contextmenu-wrapper-visible")) || (el._wrapperNode.classList.contains("vc-contextmenu-wrapper-visible") && (verticalScroll.isOnPath == false))) {
-                    el._wrapperNode.classList.remove("vc-contextmenu-wrapper-visible", "vc-bg1-modal");
-                    el._closeNode.classList.remove("vc-contextmenu-closeVisible");
-                    el._wrapperNode.style.top = "0";
-                    el._wrapperNode.style.left = "0";
-                    el.appendChild(el._wrapperNode);
+                if ((!verticalScroll && el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) || (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible") && (verticalScroll.isOnPath == false))) {
+                    el._refs.wrapper.classList.remove("vc-contextmenu-wrapper-visible", "vc-bg1-modal");
+                    el._refs.close.classList.remove("vc-contextmenu-closeVisible");
+                    el._refs.wrapper.style.top = "0";
+                    el._refs.wrapper.style.left = "0";
+                    el.appendChild(el._refs.wrapper);
                     document.body.removeEventListener("click", el._hideEvent);
                 }
 
@@ -384,7 +411,7 @@
 
             /*
               @function addItem
-              @description Add new contextmenu node item programmaticaly
+              @description Add new contextmenu node item programmatically
               @param {Object} item [Node to add to contextmenu]
             */
             addItem: function (item) {
@@ -394,7 +421,7 @@
                 (item.value) ? this._setupSpan(item) : null;
                 item.classList.add("vc-bg2-hoverable");
 
-                this._contextmenuNode.appendChild(item);
+                this._refs.contextmenu.appendChild(item);
             },
 
             /*
@@ -403,7 +430,7 @@
               @param {Object} item [Node to removes from contextmenu] 
              */
             removeItem: function (item) {
-                this._contextmenuNode.removeChild(item);
+                this._refs.contextmenu.removeChild(item);
             },
 
             /*
@@ -419,7 +446,7 @@
                 (newItem.icon) ? this._setupIcon(newItem) : null;
                 newItem.classList.add("vc-bg2-hoverable");
 
-                this._contextmenuNode.replaceChild(newItem, oldItem);
+                this._refs.contextmenu.replaceChild(newItem, oldItem);
 
             }
 
@@ -432,17 +459,12 @@
             vcomet.createCallback("onShow", this);
             vcomet.createCallback("onHide", this);
 
-            // Global contextemenu variables
+            // Global contextmenu variables
             vcomet.contextmenu = vcomet.contextmenu || {
                 openContextmenu: []
             };
 
-            el._contextmenuNode = el.template.querySelector(".vc-contextmenu-contextmenu");
-            el._wrapperNode = el.template.querySelector(".vc-contextmenu-wrapper");
-            el._containerNode = el.template.querySelector(".vc-contextmenu-container");
-            el._closeNode = el.template.querySelector(".vc-contextmenu-close");
-            el._closeIconNode = el.template.querySelector(".vc-contextmenu-closeIcon");
-            el._scroll = el.template.querySelector("vc-scroll");
+            el._createRefs();
         },
 
         onBubbleRender: function () {
@@ -453,28 +475,30 @@
             triggerLength = el._triggerNode.length;
 
             el._verifyScreenResolution();
+            el._updateDeviceOptions();
             el._setupItems(sourceNodes);
 
-            el._scroll.onVerticalScrollCreated(function (verticalScroll) {
+            el._refs.scroll.onVerticalScrollCreated(function (verticalScroll) {
                 vcomet.registerPathListener(verticalScroll);
             });
 
             window.addEventListener("blur", function () {
-                if (el._wrapperNode.classList.contains("vc-contextmenu-wrapper-visible")) {
-                    el.hide();
-                }
+                //TODO: restore
+                // if (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) {
+                //     el.hide();
+                // }
             });
 
             document.body.addEventListener("click", function () {
-                if (el._wrapperNode.classList.contains("vc-contextmenu-wrapper-visible") && el.getAttribute("data-version") == "desktop") {
+                if (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible") && el._refs.wrapper.dataset.version == "desktop") {
                     el.hide();
                 }
             });
         },
 
         onWindowResize: function (event) {
-            this._verifyScreenResolution();
-            if (this._wrapperNode.classList.contains("vc-contextmenu-wrapper-visible")) {
+            // this._verifyScreenResolution();
+            if (this._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) {
                 this.hide();
             }
         }

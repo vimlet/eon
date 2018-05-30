@@ -217,6 +217,24 @@
 
       },
       /*
+      @function (private) _importPanels
+      @description Searches the panels and appends them in the stack
+      */
+      importPanels: function () {
+        
+        var el = this;
+        var children = Array.prototype.slice.apply(el.children);
+        
+        for (var i = 0; i < children.length; i++) {
+
+          if (children[i].nodeName.toLowerCase() == "vc-panel") {
+            el._refs.stack.appendChild(children[i]);
+          }
+
+        }
+
+      },
+      /*
       @function (private) _handleTabsScrollsStatus
       @description Enables/disabled the tabs scroll
       */
@@ -631,11 +649,9 @@
       var el = this;
 
       el._misc.tabs = {};
+      el._misc.dragging = {};
 
       el._setupRefs();
-
-      el._refs.stack.appendChild(el.source);
-      el._refs.stack.classList.add("vc-bg6");
 
       vcomet.createCallback("onTabSelected", el);
 
@@ -643,12 +659,15 @@
     onTransformed: function () {
 
       var el = this;
+      
+      el._importPanels();
 
       el._setupTabs();
       el._setupScrolls();
       el._setupDragging();
 
       el.classList.add("vc-bg3");
+      el._refs.stack.classList.add("vc-bg6");
 
     }
   });

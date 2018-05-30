@@ -139,6 +139,14 @@
         animation: vc-md-viewer-hideGoToTopAnim 0.5s forwards;
     }
 
+.tip {
+    background-color: rgb(36, 36, 41);
+    border-radius: 2px;
+    padding: 2px 4px;
+    color: white;
+    display: inline-block;
+}
+
 
     /* Safari 4.0 - 8.0 */
 
@@ -228,6 +236,14 @@
                         "!\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])*\\)",
                         "gm"
                     ),
+                    imageLink: new RegExp(
+                        "\\[!\\[(?:(?!\\[|\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])*\\)\\]\\((?:(?!\\()[\\s\\S])*\\)",
+                        "gm"
+                    ),
+                    imageLinkImg: new RegExp(
+                        "\\[!\\[(?:(?!\\[|\\[)[\\s\\S])*\\]",
+                        "gm"
+                    ),
                     inner: new RegExp(
                         "\\[.*\\]",
                         "gm"
@@ -276,6 +292,14 @@
                         "^.*\\s*$",
                         "gm"
                     ),
+                    tip: new RegExp(
+                        "^@`(?:(?!`)[\\s\\S])*`",
+                        "g"
+                    ),
+                    tipIcon: new RegExp(
+                        "^\\((?:(?!\\()[\\s\\S])*\\)",
+                        "g"
+                    ),
                     codeBlock: new RegExp(
                         "```(?:(?!```)[\\s\\S])*```",
                         "g"
@@ -321,8 +345,7 @@
                         "g"
                     ),
                     br: new RegExp(
-                        // "^\\s*(\\r\\n|\\r|\\n){1,}",
-                        "^(\\r\\n|\\r|\\n)$",
+                        "(\\r\\n|\\r|\\n)$",
                         "gm"
                     ),
                     table: new RegExp(
@@ -425,20 +448,8 @@
                                 if (tLink.link && currentLink && tLink.link ===
                                     currentLink.id) {
                                     el._misc.tree.markNode(tLink);
-                                    // clearInterval(el._misc.interval);
-                                    // document.querySelector("vc-doc-article")._misc.isOnHashEnabled =
-                                    // false;
                                     window.location.href = window.location.href.split(
                                         '&link=')[0] + '&link=' + currentLink.id;
-                                    // el._misc.interval = setInterval(function () {
-                                    //     if (document.querySelector(
-                                    //             "vc-doc-article")) {
-                                    //         document.querySelector(
-                                    //                 "vc-doc-article")
-                                    //             ._misc
-                                    //             .isOnHashEnabled = true;
-                                    //     }
-                                    // }, 300);
                                 }
                             });
                         }
@@ -525,8 +536,8 @@
                     .replace(/\u00a0/g, ' ')
                     .replace(/\u2424/g, '\n');
                 // Replace especial escaped characters
-                data = el._preparse(data);
                 data = el._replaceEscaped(data);
+                data = el._preparse(data);
                 return data;
             },
             // @function parseHr (private) {string} [Parse horizontal rules] @param data {string}
@@ -812,9 +823,11 @@
                 data = el._parseTreeLink(data);
                 data = el._parsePlayground(data);
                 data = el._parseCodeBlock(data);
+                data = el._parseTip(data);
                 data = el._parseCode(data); // Order mathers, code must be parsed first because its content must not be parsed    
                 data = el._parseBr(data);
                 data = el._parseVideo(data);
+                data = el._parseImageLink(data); // Images with link must be parsed before images and before links
                 data = el._parseImages(data); // Images must be parsed before links, structure is the same                
                 data = el._parseLinks(data);
                 data = el._parseHr(data);
@@ -950,7 +963,7 @@
                                 el._ondrawnCb();
                             });
 
-                            el._parseData.table.setAttribute("cTitle", header);
+                            el._parseData.table.setAttribute("columntitle", header);
                             exist = false;
                         }
                     } else if (el._parseData.table) { // If this table line belong to an existing table and its not header |---|
@@ -983,15 +996,19 @@
                 return docFragment;
             },
             // @function appendIndented (private) [Append indented paragraph]
-            appendIndented: function (content) {
+            appendIndented: function (content) {   
                 var appended = false;
                 if (el._parseData.ul) {
                     appended = true;
-                    el._parseData.ul.childNodes[el._parseData.ul.childNodes.length - 1].appendChild(content);
+                    var p = document.createElement("p");
+                    p.appendChild(content);
+                    el._parseData.ul.childNodes[el._parseData.ul.childNodes.length - 1].appendChild(p);
                 }
                 if (el._parseData.ol) {
                     appended = true;
-                    el._parseData.ol.childNodes[el._parseData.ol.childNodes.length - 1].appendChild(content);
+                    var p = document.createElement("p");
+                    p.appendChild(content);
+                    el._parseData.ol.childNodes[el._parseData.ol.childNodes.length - 1].appendChild(p);
                 }
                 return appended;
             },
@@ -1088,7 +1105,7 @@
                 return [inner, fullUrl[0], fullUrl[1]];
             },
             // @function setLink (private) {html object} [Generate href element] @param tag
-            setLink: function (tag) {
+            setLink: function (tag) {                
                 var linkData = el._getParseLink(tag);
                 var link = document.createElement("a");
                 linkData[1] = el._sanitizeLink(linkData[1]);
@@ -1126,9 +1143,8 @@
                 return link;
             },
             // @function parseLinks (private) {string} @param str
-            parseLinks: function (str) {
+            parseLinks: function (str) {           
                 el = this;
-
                 var result = "";
                 var matches = str.match(el._regex.link);
                 var parsedResult = [];
@@ -1147,7 +1163,7 @@
             },
             // @function setImage (private) {html object} [Generate img element] @param tag
             setImage: function (tag) {
-                el = this;
+                el = this;                
                 var linkData = el._getParseLink(tag);
                 var link = document.createElement("img");
                 link.setAttribute("src", el._linkResolve(linkData[1]));
@@ -1164,14 +1180,47 @@
                 }
                 return path;
             },
-            // @function parseImages (private) {string} @param str
-            parseImages: function (str) {
+            // @function splitImgLink (private) {string} @param str
+            splitImgLink : function(tag){
+                var el = this;
+                var result = "";
+                var matches = tag.match(el._regex.imageLinkImg);
+                var parsedResult = [];
+                var img = el._cleanMatch(matches[0], "[", "]");
+                var imgEl = el._setImage(img);
+                var link = el._cleanMatch(tag.replace(el._regex.imageLinkImg, ""), "(", ")",);
+                var imgLink = document.createElement("a");
+                imgLink.setAttribute("href", el._sanitizeLink(link));
+                imgLink.appendChild(imgEl);
+                return imgLink;
+            },
+            // @function parseImageLink (private) {string} @param str
+            parseImageLink: function (str) {             
                 el = this;
+                var result = "";
+                var matches = str.match(el._regex.imageLink);
+                var parsedResult = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        parsedResult.push(el._splitImgLink(matches[i]));
+                    }
+                }
+                var j = 0;
 
+                result = str.replace(el._regex.imageLink, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = parsedResult[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function parseImages (private) {string} @param str
+            parseImages: function (str) {             
+                el = this;
                 var result = "";
                 var matches = str.match(el._regex.image);
                 var parsedResult = [];
-                if (matches) {
+                if (matches) { 
                     for (var i = 0; i < matches.length; i++) {
                         parsedResult.push(el._setImage(matches[i]));
                     }
@@ -1184,6 +1233,51 @@
                     return "@@[" + count + "]@@";
                 });
                 return result;
+            },
+            // @function parseTip (private) {string} @param data {string}
+            parseTip: function (data) {
+                var el = this;
+                var result = "";
+                var matches = data.match(el._regex.tip);
+                var codeResults = [];
+
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var cleanMatch = el._cleanMatch(matches[i], "@`", "`");
+                        var splitted = el._splitIcon(cleanMatch);
+                        var tipFragment = document.createDocumentFragment();
+                        var tipContent = document.createElement("span");
+                        tipContent.innerHTML = splitted[1];
+                        var icon = document.createElement("i");
+                        icon.classList.add("material-icons");
+                        icon.innerHTML = splitted[0] || "lightbulb_outline";
+                        tipFragment.appendChild(icon);
+                        tipFragment.appendChild(tipContent);
+                        var tip = el._createDiv(tipFragment, "tip");
+                        codeResults.push(tip);
+                    }
+                }
+                var j = 0;
+
+                result = data.replace(el._regex.tip, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = codeResults[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function splitIcon (private) {string} [Extract language from codeblock] @param data {string}
+            splitIcon: function (tag) {
+                var el = this;
+                var result = "";
+                var matches = tag.match(el._regex.tipIcon);
+
+                if (matches) {
+                    var icon = el._cleanMatch(matches[0], "(", ")");
+                    var cleanData = tag.replace(matches[0], "");
+                    return [icon, cleanData];
+                }
+                return [null, tag];
             },
             // @function parseSingleEmphasis (private) {string} [Parse given emphasis tag] @param str {string} @param tag {string} @param regex {string} @param element {string} [Html element to create]
             parseSingleEmphasis: function (str, tag, regex, element) {
@@ -1215,7 +1309,7 @@
             },
 
             //@function cleanMultiParagraph (private) [At the begining of each line, check if we are inside of a multiline paragraph like lists]
-            cleanMultiParagraph: function (docFragment, currentMatch, isIndented) {
+            cleanMultiParagraph: function (docFragment, currentMatch) {
                 el = this;
                 if (currentMatch != "unorderedList" || !currentMatch) {
                     if (el._parseData.ul) {
