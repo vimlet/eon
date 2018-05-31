@@ -56,15 +56,6 @@
                 reflect: true
             },
             /*
-              @property {String} width 
-              @description spinner size respect to container
-              Value must be number with px or percentage
-            */
-            width: {
-                value: "",
-                reflect: true
-            },
-            /*
               @property {Boolean} disabled 
               @description Spinner deactivation
               Default: false
@@ -261,20 +252,20 @@
             */
             setFocusingListeners: function () {
                 var el = this;
+                var eventType = /iPad|iPhone/.test(navigator.platform) ? "touchstart" : "click";
                 vcomet.registerPathListener(el._refs.spinner);
 
-                document.body.addEventListener("click", function (e) {
 
+                document.addEventListener(eventType, function (e) {
                     if (el._refs.spinner.isOnPath && !el._refs.label.classList.contains("vc-spinner-focusLabel")) {
                         el._inputFocus()
                     } else if (!el._refs.spinner.isOnPath && el._refs.label.classList.contains("vc-spinner-focusLabel")) {
                         el._inputBlur(e);
                     }
-                    
+
                 });
 
                 el._refs.input.addEventListener("blur", function (e) {
-                    console.log('input blur');
                     if (!el._refs.spinner.isOnPath) {
                         el._inputBlur(e);
                     }
@@ -327,10 +318,11 @@
             */
             inputFocus: function () {
                 var inputBar = this.querySelector(".vc-spinner-inputBar");
-                console.log('focus');
 
                 this._refs.label.classList.add("vc-spinner-focusLabel", "vc-fg1");
                 inputBar.classList.add("vc-spinner-animate");
+
+           
             },
 
             /*
@@ -345,7 +337,6 @@
                 }
 
                 this._refs.label.classList.remove("vc-spinner-focusLabel", "vc-fg1");
-                // this.value = this._refs.input.value;
                 inputBar.classList.remove("vc-spinner-animate");
 
                 // Trigger onChange callback
@@ -374,9 +365,8 @@
             @param {Number} value [spinner value]
             */
             checkMin: function (value) {
-
                 var el = this;
-                var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : value;
+                var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : parseInt(value);
 
                 return returnValue;
             },
@@ -388,7 +378,7 @@
             */
             checkMax: function (value) {
                 var el = this;
-                var returnValue = (el.max && value > el.max) ? parseInt(el.max) : value;
+                var returnValue = (el.max && parseInt(value) > parseInt(el.max)) ? parseInt(el.max) : parseInt(value);
 
                 return returnValue;
             }
@@ -421,9 +411,6 @@
                 el._refs.label.innerHTML = el.label ? el.label : el._refs.label.innerHTML;
                 el._refs.label.classList.add("vc-spinner-labelDisplay");
             }
-
-            // Sets the width of the spinner
-            el.style.width = el.width;
         },
 
         onPropertyChanged: function (attrName, oldVal, newVal) {
@@ -442,16 +429,6 @@
                     break;
             }
         },
-        // TODO:
-        onAttributeChanged: function (attrName, oldVal, newVal) {
-            switch (attrName) {
-                case "value":
-                    // this._setValue();
-                    break;
-            }
-        }
-
-
     });
 
 </script>
