@@ -5,7 +5,11 @@
             <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlDown">
                 <i class="vicon vicon-remove-circle-o"></i>
             </div>
-            <input class="vc-spinner-input vc-fg1-border" type="number">
+
+            <div class="vc-spinner-inputBox">
+                <input class="vc-spinner-input vc-fg1-border" type="number">
+            </div>
+
             <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlUp">
                 <i class="vicon vicon-add-circle-o"></i>
             </div>
@@ -135,13 +139,6 @@
                 value: {}
             },
             /*
-              @property (private) {Object} _focusEvent
-              @description Store spinner focus spinner event
-            */
-            focusEvent: {
-                value: {}
-            },
-            /*
               @property (private) {Object} _refs 
               @description Object with  references
             */
@@ -158,25 +155,43 @@
                 var el = this;
 
                 el._refs.spinner = el.template.querySelector(".vc-spinner-spinner");
+                el._refs.group = el.template.querySelector(".vc-spinner-group");
                 el._refs.input = el.template.querySelector(".vc-spinner-input");
                 el._refs.label = el.template.querySelector(".vc-spinner-label");
             },
             /*
               @function (private) _setValue
               @description Set new spinner value
-              @param {String} newVal [new spinner value]
+              @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
             */
-            setValue: function () {
+            setValue: function (privateValueKey) {
                 var el = this;
+                var value = el.value;
+                var valueKey = privateValueKey ? "__value" : "value";
+                var newValue;
 
-                //TODO:
                 if (el.value) {
-                    el.__value = this._checkMin(el.value);
-                    el.__value = this._checkMax(el.value);
-                    el._refs.input.value = el.__value;
-                    el._currentValue = el.__value;
+                    newValue = this._checkMin(value);
+                    newValue = this._checkMax(value);
+
+                    // If we have to fix the value because it exceeds any of the limits we update the elements value
+                    if (parseInt(newValue) != parseInt(value)) {
+                        setTimeout(function () {
+                            el.value = newValue;
+                        }, 0);
+
+                    } else {
+                        el[valueKey] = newValue;
+                    }
+
+                    el._refs.input.value = newValue;
+                    el._currentValue = newValue;
+
+                    el._refs.input.setAttribute("value", newValue);
 
                     vcomet.triggerCallback("onChange", el);
+
+
                 }
             },
             /*
@@ -184,35 +199,33 @@
               @description Update disabled status and activates the focus listeners when it is not disabled
             */
             updateDisabled: function () {
-                var spinnerGroup = this.querySelector(".vc-spinner-group");
-                var controlDown = this.querySelector(".vc-spinner-controlDown");
-                var controlUp = this.querySelector(".vc-spinner-controlUp");
+                var el = this;
+                var spinnerGroup = el.querySelector(".vc-spinner-group");
+                var controlDown = el.querySelector(".vc-spinner-controlDown");
+                var controlUp = el.querySelector(".vc-spinner-controlUp");
 
-                if (!vcomet.util.isTrue(this.disabled)) {
-                    this._refs.input.removeAttribute("disabled");
+                if (!vcomet.util.isTrue(el.disabled)) {
+                    el._refs.input.removeAttribute("disabled");
+                    el.removeAttribute("disabled");
                     spinnerGroup.classList.remove("vc-spinner-disabled", "vc-fg1-disabled");
                     controlUp.classList.remove("vc-fg1-disabled");
                     controlUp.classList.add("vc-fg1-hoverable");
                     controlDown.classList.remove("vc-fg1-disabled");
                     controlDown.classList.add("vc-fg1-hoverable");
-                    this._refs.input.classList.remove("vc-fg1-disabled");
-                    this._refs.input.classList.add("vc-fg1-border");
-                    this._refs.label.classList.remove("vc-fg1-disabled");
-                    this._setFocusingListeners();
-                    this._setUpdateListeners();
+                    el._refs.input.classList.remove("vc-fg1-disabled");
+                    el._refs.input.classList.add("vc-fg1-border");
+                    el._refs.label.classList.remove("vc-fg1-disabled");
 
                 } else {
-                    this._refs.input.setAttribute("disabled", "true");
+                    el._refs.input.setAttribute("disabled", "true");
                     spinnerGroup.classList.add("vc-spinner-disabled", "vc-fg1-disabled");
                     controlUp.classList.add("vc-fg1-disabled");
                     controlUp.classList.remove("vc-fg1-hoverable");
                     controlDown.classList.add("vc-fg1-disabled");
                     controlDown.classList.remove("vc-fg1-hoverable");
-                    this._refs.input.classList.add("vc-fg1-disabled");
-                    this._refs.input.classList.remove("vc-fg1-border");
-                    this._refs.label.classList.add("vc-fg1-disabled");
-                    this._removeUpdateListeners();
-                    document.body.removeEventListener("click", this._focusEvent, false);
+                    el._refs.input.classList.add("vc-fg1-disabled");
+                    el._refs.input.classList.remove("vc-fg1-border");
+                    el._refs.label.classList.add("vc-fg1-disabled");
                 }
 
             },
@@ -222,20 +235,20 @@
               @description Update spinner value
               @param {Object} event [mouse event]
             */
-            updateSpinner: function (event) {
+            updateSpinner: function (e) {
                 var el = this;
-                var value = parseInt(el._refs.input.value);
-                var control = event.target.parentNode;
+                var value = isNaN(parseInt(el._refs.input.value)) ? "" : parseInt(el._refs.input.value);
+                var control = e.target.parentNode;
 
-                if (event.type == "click") {
 
+                if (e.type == "click") {
                     (control.classList.contains("vc-spinner-controlDown")) ? value-- : null;
                     (control.classList.contains("vc-spinner-controlUp")) ? value++ : null;
 
+                    value = el._checkMin(value);
+                    value = el._checkMax(value);
                 }
 
-                value = el._checkMin(value);
-                value = el._checkMax(value);
                 el.value = value;
                 el._refs.input.value = value;
                 el._refs.input.setAttribute("value", value);
@@ -250,12 +263,23 @@
                 var el = this;
                 vcomet.registerPathListener(el._refs.spinner);
 
-                document.body.addEventListener("click", focusEvent, false);
-                el._focusEvent = focusEvent;
+                document.body.addEventListener("click", function (e) {
 
-                function focusEvent() {
-                    (el._refs.spinner.isOnPath == true) ? el._inputFocus() : el._inputBlur(event);
-                }
+                    if (el._refs.spinner.isOnPath && !el._refs.label.classList.contains("vc-spinner-focusLabel")) {
+                        el._inputFocus()
+                    } else if (!el._refs.spinner.isOnPath && el._refs.label.classList.contains("vc-spinner-focusLabel")) {
+                        el._inputBlur(e);
+                    }
+                    
+                });
+
+                el._refs.input.addEventListener("blur", function (e) {
+                    console.log('input blur');
+                    if (!el._refs.spinner.isOnPath) {
+                        el._inputBlur(e);
+                    }
+                });
+
             },
 
             /*
@@ -273,20 +297,19 @@
                 // Click listener to control increment spinner value
                 controlUp.addEventListener("click", callUpdateEvent, false);
 
-                // Change listener to control spinner value change from the input
-                el._refs.input.addEventListener("change", callUpdateEvent, false);
-
                 // Handle the invalids keys in the input
-                el._refs.input.addEventListener("keydown", function (event) {
-                    var keysComprobation = (event.keyCode != "9" && event.keyCode != "46" && event.keyCode != "8" && event.keyCode != "38" && event.keyCode != "40" && isNaN(parseInt(event.key)));
+                el._refs.input.addEventListener("keyup", function (e) {
+                    var keysComprobation = (e.keyCode != "9" && e.keyCode != "46" && e.keyCode != "8" && e.keyCode != "38" && e.keyCode != "40" && isNaN(parseInt(e.key)));
 
-                    keysComprobation ? event.preventDefault() : null;
-                    keysComprobation ? event.stopPropagation() : null;
+                    keysComprobation ? e.preventDefault() : null;
+                    keysComprobation ? e.stopPropagation() : null;
 
                     // Checks if the key press corresponds to ENTER
-                    if (event.keyCode == 13) {
+                    if (e.keyCode == 13) {
                         vcomet.triggerCallback("onEnter", el)
                     }
+
+                    el._updateSpinner(e);
 
                 });
 
@@ -299,32 +322,13 @@
             },
 
             /*
-            @function (private) _removeUpdateListeners
-            @description Remove listener for update the spinner value
-            */
-            removeUpdateListeners: function () {
-
-                var el = this;
-                var controlDown = el.querySelector(".vc-spinner-controlDown");
-                var controlUp = el.querySelector(".vc-spinner-controlUp");
-
-                // Click listener to control decrement spinner value
-                controlDown.removeEventListener("click", el._callUpdateEvent, false);
-
-                // Click listener to control increment spinner value
-                controlUp.removeEventListener("click", el._callUpdateEvent, false);
-
-                // Change listener to control spinner value change from the input
-                el._refs.input.removeEventListener("change", el._callUpdateEvent, false);
-
-            },
-
-            /*
             @function (private) _inputFocus
             @description Set focus functionality to spinner element and to spinner input
             */
             inputFocus: function () {
                 var inputBar = this.querySelector(".vc-spinner-inputBar");
+                console.log('focus');
+
                 this._refs.label.classList.add("vc-spinner-focusLabel", "vc-fg1");
                 inputBar.classList.add("vc-spinner-animate");
             },
@@ -333,10 +337,13 @@
             @function (private) _inputBlur
             @description Set blur functionality to spinner element and to spinner input
             */
-            inputBlur: function (event) {
+            inputBlur: function (e) {
                 var inputBar = this.querySelector(".vc-spinner-inputBar");
 
-                this._updateSpinner(event);
+                if (this._refs.label.classList.contains("vc-spinner-focusLabel")) {
+                    this._updateSpinner(e);
+                }
+
                 this._refs.label.classList.remove("vc-spinner-focusLabel", "vc-fg1");
                 // this.value = this._refs.input.value;
                 inputBar.classList.remove("vc-spinner-animate");
@@ -354,6 +361,7 @@
             setAutofocus: function () {
 
                 if (vcomet.util.isTrue(this.autofocus) && this.disabled == false) {
+                    // document.activeElement.blur();
                     this._refs.input.focus();
                     this._inputFocus();
                 }
@@ -366,6 +374,7 @@
             @param {Number} value [spinner value]
             */
             checkMin: function (value) {
+
                 var el = this;
                 var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : value;
 
@@ -400,6 +409,8 @@
             el._setValue();
 
             el._updateDisabled();
+            el._setFocusingListeners();
+            el._setUpdateListeners();
             el._setAutofocus();
 
             // Sets the name of the input
@@ -427,7 +438,7 @@
                     this._refs.label.innerHTML = newVal;
                     break;
                 case "value":
-                    this._setValue();
+                    this._setValue(true);
                     break;
             }
         },
@@ -435,7 +446,6 @@
         onAttributeChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
                 case "value":
-                    // console.log('attribute');
                     // this._setValue();
                     break;
             }
