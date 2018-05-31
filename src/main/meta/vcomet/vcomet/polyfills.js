@@ -117,7 +117,3 @@ if (vcomet.needClassListAddPolyfill()) {
 
     };
   })(DOMTokenList.prototype.add);
-
-}
-
-

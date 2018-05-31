@@ -5,7 +5,11 @@
             <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlDown">
                 <i class="vicon vicon-remove-circle-o"></i>
             </div>
-            <input class="vc-spinner-input vc-fg1-border" type="number">
+
+            <div class="vc-spinner-inputBox">
+                <input class="vc-spinner-input vc-fg1-border" type="number">
+            </div>
+
             <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlUp">
                 <i class="vicon vicon-add-circle-o"></i>
             </div>
@@ -259,13 +263,23 @@
                 var el = this;
                 vcomet.registerPathListener(el._refs.spinner);
 
+                document.body.addEventListener("click", function (e) {
+
+                    if (el._refs.spinner.isOnPath && !el._refs.label.classList.contains("vc-spinner-focusLabel")) {
+                        el._inputFocus()
+                    } else if (!el._refs.spinner.isOnPath && el._refs.label.classList.contains("vc-spinner-focusLabel")) {
+                        el._inputBlur(e);
+                    }
+                    
+                });
+
                 el._refs.input.addEventListener("blur", function (e) {
-                    // TODO:
-                    // console.log('blur');
-                    if (!vcomet.util.isTrue(el.disabled)) {
-                        (el._refs.spinner.isOnPath == true) ? el._inputFocus() : el._inputBlur(e);
+                    console.log('input blur');
+                    if (!el._refs.spinner.isOnPath) {
+                        el._inputBlur(e);
                     }
                 });
+
             },
 
             /*
@@ -313,6 +327,7 @@
             */
             inputFocus: function () {
                 var inputBar = this.querySelector(".vc-spinner-inputBar");
+                console.log('focus');
 
                 this._refs.label.classList.add("vc-spinner-focusLabel", "vc-fg1");
                 inputBar.classList.add("vc-spinner-animate");
@@ -346,6 +361,7 @@
             setAutofocus: function () {
 
                 if (vcomet.util.isTrue(this.autofocus) && this.disabled == false) {
+                    // document.activeElement.blur();
                     this._refs.input.focus();
                     this._inputFocus();
                 }
