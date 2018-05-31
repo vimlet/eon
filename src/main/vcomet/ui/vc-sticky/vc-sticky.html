@@ -138,10 +138,10 @@
         var position = window.getComputedStyle(el.wrapper).position;
         el._misc.viewPosition -= parseInt(el.spacing);
         // Monitor fixed element behavior
-        if (el.offsetParent && el._misc.viewPosition < 0 && ~["static", "relative"].indexOf(position)) {
-            el._fix("fixed");
-        } else if (el.offsetParent && el._misc.viewPosition >= 0 && ~["fixed", "absolute"].indexOf(position)) {
-            el._fix("relative");
+        if ((el.offsetParent && el._misc.viewPosition <= 0 && ~["static", "relative"].indexOf(position)) || !el._misc.initOffsetPos) {
+          el._fix("fixed");
+        } else if (el.offsetParent && el._misc.viewPosition > 0 && ~["fixed", "absolute"].indexOf(position)) {
+          el._fix("relative");
         }
       },
       /*
@@ -239,6 +239,8 @@
         var el = this;
         // Sticky inside vc-scroll container
         el.vcScroll = el.vcScroll ? document.querySelector(el.vcScroll) : false;
+        el.vcScroll = !el.vcScroll && el.parentNode.classList.contains("vc-scroll-content") ? el.parentNode.parentNode : el.vcScroll;
+      
         // Sticky fix container
         el.fixContainer = !el.fixContainer ? document.body : document.querySelector(el.fixContainer);
         el.fixContainer = !el.fixContainer ? document.body : el.fixContainer;
@@ -259,6 +261,7 @@
           if (!throttled || vcomet.util.isTouchScreen()) {
             // Get the element top offset value and style top value
             el._misc.viewPosition = el.getBoundingClientRect()[el.side];
+            el._misc.viewPosition = el._misc.viewPosition < 0 ? 0 : el._misc.viewPosition; 
             value = Math.abs(el._getOffsetProp());
             // Fixed behavior
             el._fixedMonitor(el._misc.viewPosition, el._misc.offsetPos, el._misc.initOffsetPos, el.wrapper.style.position);
