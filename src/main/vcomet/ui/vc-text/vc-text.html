@@ -13,7 +13,6 @@
 
 <script>
     vcomet.element("vc-text", "vc-text.css", {
-        display: "inline",
         themed: true,
         dependencies: [
             "../vc-scroll"
@@ -80,6 +79,14 @@
                 reflect: true
             },
             /*
+            @property {Boolean} inline 
+            @description Space that occupies the button inside its parent container.
+            */
+            inline: {
+                value: false,
+                reflect: true
+            },
+            /*
             @property {Number} areaHeight
             @description Determines the height of the typeable area
             */
@@ -142,6 +149,7 @@
                 el._setupCounter();
                 el._setupForType();
                 el._setupInitialText();
+                el._setupTouchBlur();
                 el._updateLabel();
                 el._updateDisabled();
                 el._updateReadOnly();
@@ -217,7 +225,8 @@
                 editable.setAttribute("maxlength", el.maxLength);
 
                 el._misc.area.update = function () {
-                    el.__value = el._refs.editableArea.value;
+                    el._misc.area.preventUpdate = true;
+                    el.value = el._refs.editableArea.value;
                     el._refs.editableArea.title = el._refs.editableArea.value;
                     el._updateCounter();
                 };
@@ -248,11 +257,10 @@
 
                 el._misc.area.update = function () {
                     var value = el._getValue();
-                    el.__value = value;
+                    el._misc.area.preventUpdate = true;
+                    el.value = value;
                     el._refs.editableArea.title = value;
                     el._updateCounter();
-                    el._refresh();
-                    el._handleAutoScroll();
                 };
 
                 el._refs.editableArea = editable;
@@ -294,7 +302,16 @@
                         e.preventDefault();
                         e.stopPropagation();
                     } else {
-                        el._misc.area.update();
+
+                        if (!el._misc.area.isNative) {
+                            el._refresh();
+                            el._handleAutoScroll();
+                        }
+
+                        setTimeout(function () {
+                            el._misc.area.update();
+                        }, 0);
+
                     }
 
                     // Checks if the key press corresponds to ENTER
@@ -306,15 +323,19 @@
 
                 // Updates everything needed for new inputs and prevents keyup from triggering
                 el._refs.editableArea.addEventListener("input", function (e) {
-                    el._misc.area.update();
+                    if (!el._misc.area.isNative) {
+                        el._refresh();
+                        el._handleAutoScroll();
+                    }
                     el._misc.area.inputEventTriggered = true;
                 });
 
                 // As some browsers doesnt handle spaces and different keys with the input event we also created the keyup event, 
                 // which will only do stuff if the input event was not triggered
                 el._refs.editableArea.addEventListener("keyup", function (e) {
-                    if (el._misc.area.inputEventTriggered == false) {
-                        el._misc.area.update();
+                    if (el._misc.area.inputEventTriggered == false && !el._misc.area.isNative) {
+                        el._refresh();
+                        el._handleAutoScroll();
                     }
                     el._misc.area.inputEventTriggered = false;
                 });
@@ -350,7 +371,7 @@
                 input.classList.add("vc-fg2");
 
                 input.addEventListener("keypress", function (e) {
-                    console.log('input key press');
+
                     if (el._isCharacterKeyPress(e) && el._valueExceedsLength()) {
                         e.preventDefault();
                         e.stopPropagation();
@@ -364,7 +385,7 @@
                 });
 
                 input.addEventListener("input", function (e) {
-                    el.__value = input.value;
+                    el.value = input.value;
                     input.title = el.type.toLowerCase() != "password" ? input.value : el._refs.input.title;
                     el._updateCounter();
                 });
@@ -432,6 +453,25 @@
             @function (private) {String} _getValue
             @description Returns the proper value for the element
             */
+            setupTouchBlur: function () {
+
+                var el = this;
+
+                vcomet.registerPathListener(el);
+
+                document.addEventListener("touchstart", function () {
+                    if (!el.isOnPath) {
+                        var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+                        el.classList.remove("focus");
+                        typingNode.blur();
+                    }
+                });
+
+            },
+            /*
+            @function (private) {String} _getValue
+            @description Returns the proper value for the element
+            */
             getValue: function () {
 
                 var value;
@@ -460,12 +500,13 @@
             */
             getValueLength: function () {
 
-                var valueLength;
+                var el = this;
+                var value, valueLength;
 
                 if (vcomet.util.getBrowser() == "IE" && this.type == "area") {
 
                     // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
-                    valueLength = this._refs.editableArea.innerHTML
+                    valueLength = el._refs.editableArea.innerHTML
                         .replace(new RegExp("</p><p>", "g"), "~")
                         .replace(new RegExp("<br></p><p>", "g"), "~")
                         .replace(new RegExp("<p>", "g"), "")
@@ -474,7 +515,8 @@
 
                 } else {
 
-                    valueLength = Array.prototype.slice.apply(this.value.match(/\n/g) || []).length > 1 ? this.value.length - 1 : this.value.length;
+                    value = el.value.toString();
+                    valueLength = Array.prototype.slice.apply(value.match(/\n/g) || []).length > 1 ? value.length - 1 : value.length;
 
                 }
 
@@ -697,7 +739,7 @@
 
                         onVerticalLimit = (selectionRect.bottom <= editableRect.bottom && selectionRect.bottom >= (editableRect.bottom - errorRange));
                         verticalPosition = onVerticalLimit ? el._misc.area.verticalSize : (selectionRect.top - editableRect.top);
-
+                        console.log('onVerticalLimit', onVerticalLimit, verticalPosition);
                     }
 
                     // Horizontal check
@@ -849,12 +891,19 @@
 
                 if (el.type == "area") {
 
-                    el._refs.editableArea.innerText = el.value;
-                    el._refs.editableArea.title = el.value;
+                    // This is set to true when the value propertyChanged is triggered from the textarea change, 
+                    // in those scenarios we dont want to update the area again
+                    if (!el._misc.area.preventUpdate) {
 
-                    el._updateCounter();
-                    el._refresh();
-                    el._handleAutoScroll();
+                        el._refs.editableArea.innerText = el.value;
+                        el._refs.editableArea.title = el.value;
+
+                        el._updateCounter();
+                        el._refresh();
+                        el._handleAutoScroll();
+                    }
+
+                    el._misc.area.preventUpdate = false;
 
                 } else {
 
