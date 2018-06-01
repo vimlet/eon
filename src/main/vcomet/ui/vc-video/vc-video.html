@@ -1,5 +1,4 @@
 <template>
-    <video class="vc-video-video"></video>
     <div class="vc-video-wrapper">
         <div class="vc-video-controls">
             <div class="vc-video-timerail vc-bg6-boxshadow">
@@ -31,6 +30,9 @@
 </template>
 <script>
     vcomet.element("vc-video", "vc-video.css", {
+        dependencies: [
+            "vc-slider"
+        ],
         properties: {
             /*
                 @property {String}
@@ -69,6 +71,14 @@
                 @description
             */
             poster: {
+                value: "",
+                reflect: true
+            },
+            /*
+                @property {String}
+                @description
+            */
+            fallbackGif: {
                 value: "",
                 reflect: true
             },
@@ -116,6 +126,13 @@
                 @property {Boolean}
                 @description
             */
+            autoPlayAllowed: {
+                value: true
+            },
+            /*
+                @property {Boolean}
+                @description
+            */
             loop: {
                 value: false,
                 reflect: true
@@ -135,103 +152,10 @@
             */
             misc: {
                 value: {}
-            },
-            /*
-                @property {Boolean} isFullscreen
-                @description
-            */
-            isFullscreen: {
-                value: false
-            },
-            /*
-                @property {Number} duration
-                @description
-            */
-            duration: {
-                value: 0
-            },
-            /*
-                @property {Boolean} controlsHided
-                @description
-            */
-            controlsHided: {
-                value: false
-            },
-            /*
-                @property {Boolean} posterHidden 
-                @description
-            */
-            posterHidden: {
-                value: false
-            },
-            /*
-                @property {Number} lastVolume
-                @description
-            */
-            lastVolume: {
-                value: 0
-            },
-            /*
-                @property {Number} onChangeMuted
-                @description
-            */
-            onChangeMuted: {
-                value: 0
-            },
-            /*
-                @property {Boolean} touch
-                @description
-            */
-            touch: {
-                value: false
-            },
-            /*
-                @property (private) {Object} slideTimeInterval
-                @description 
-            */
-            slideTimeInterval: {
-                value: {}
-            },
-            /*
-                @property (private) {Number} actionCounter
-                @description 
-            */
-            actionCounter: {
-                value: 0
-            },
-            /*
-                @property (private) {Boolean} stopPropagation
-                @description 
-            */
-            stopPropagation: {
-                value: false
             }
         },
         functions: {
-            //
-            play: function () {
-                var el = this;
 
-                el._togglePlayIcon("paused");
-                el._refs.video.play();
-
-                // Hide poster
-                el._refs.poster.style.display = "none";
-                el._posterHidden = true;
-
-            },
-            //
-            pause: function () {
-                var el = this;
-
-                el._togglePlayIcon("play");
-                el._refs.video.pause();
-
-            },
-            // TODO
-            mute: function () {
-                var el = this;
-            }
         },
         privateFunctions: {
             /*
@@ -241,15 +165,12 @@
             setUpHTMLVideo: function () {
                 var el = this;
                 var source, src, i;
-
                 // Get HTML video reference
                 el._refs.video = el.querySelector("video");
-                
                 // Set up video configuration
                 el._refs.video.poster = el.poster;
                 el._refs.video.autoplay = el.autoPlay;
                 el._refs.video.loop = el.loop;
-                
                 // Allow multiple sources
                 el.src = el.src.replace(/\s/g, '').split(",");
                 el.type = el.type.replace(/\s/g, '').split(",");
@@ -261,7 +182,6 @@
                         source = document.createElement("source");
                         source.src = el.src[i];
                         source.type = el.type[i];
-
                         el._refs.video.appendChild(source);
                     }
                 }
@@ -270,9 +190,8 @@
                     // iOS devices autoplay configuration needed
                     el._refs.video.muted = true;
                     el._refs.video.playsinline = true;
+                    el._refs.video.setAttribute("muted", "");
                     el._refs.video.setAttribute("playsinline", "");
-                    // Start video
-                    el._refs.video.play();
                 }
             },
             /*
@@ -281,7 +200,6 @@
             */
             setUp: function () {
                 var el = this;
-
                 // Accessibility
                 el.setAttribute("tabindex", 0);
                 // Video custom style
@@ -300,17 +218,26 @@
                 el._keyboardControl();
                 //
                 el._fullscreenChangeListener();
-
                 // Controls bar displaying monitor
                 el._controlsDisplayListener();
             },
             //
             autoPlaySetUp: function () {
                 var el = this;
+                // 
+                var agent = window.navigator.userAgent;
+                var start = agent.indexOf("OS");
+                var iOSVersion = false;
+               
+                if((agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1) && start > -1){
+                    iOSVersion = window.Number(agent.substr(start + 3, 3).replace("_", "."));
+                }
                 // Hide poster
-                if (vcomet.util.isTrue(el.autoPlay)) {
+                if (vcomet.util.isTrue(el.autoPlay) && (!iOSVersion || (iOSVersion >= 10))) {
                     el._refs.poster.style.display = "none";
-                    el._posterHidden = true;
+                    el._misc.posterHidden = true;
+                    // Toggle video play icon
+                    el._togglePlayIcon();
                 }
             },
             //
@@ -328,9 +255,8 @@
                 el._refs.poster.addEventListener("click", function (e) {
                     // Hide poster
                     el._refs.poster.style.display = "none";
-                    el._posterHidden = true;
+                    el._misc.posterHidden = true;
                     // Toggle play video
-                    console.log('POSTER PLAY');
                     el._togglePlay();
                 });
             },
@@ -339,8 +265,8 @@
                 var el = this;
                 // Toggle play on video wrapper click
                 el._refs.wrapper.addEventListener("pointerdown", function (e) {
-                    if (!el._refs.controls.isOnPath && e.button == 0 && el._posterHidden == true
-                        && el._controlsHided == false && vcomet.util.isTrue(el.touchPlaying)) {
+                    if (!el._refs.controls.isOnPath && e.button == 0 && el._misc.posterHidden == true
+                        && el._misc.controlsHided == false && vcomet.util.isTrue(el.touchPlaying)) {
                         el._togglePlay();
                     }
                 });
@@ -349,7 +275,7 @@
             keyboardControl: function () {
                 var el = this;
                 // Toggle video playing using keyboards
-                if(vcomet.util.isTrue(el.touchPlaying)) {
+                if (vcomet.util.isTrue(el.touchPlaying)) {
                     el.addEventListener("keydown", function (e) {
                         if (e.keyCode == 32 && vcomet.util.isTrue(el.touchPlaying)) {
                             el._togglePlay();
@@ -361,25 +287,21 @@
             fullscreenChangeListener: function () {
                 var el = this;
                 var fullscreenFn = function (vendorFullscreen) {
-                    el._isFullscreen = document[vendorFullscreen];
+                    el._misc.isFullscreen = document[vendorFullscreen];
                     el._toggleFullscreen(el);
                 }
                 document.addEventListener("fullscreenchange", function () {
                     fullscreenFn("fullscreen");
                 }, false);
-
                 document.addEventListener("mozfullscreenchange", function () {
                     fullscreenFn("mozFullScreen");
                 }, false);
-
                 document.addEventListener("webkitfullscreenchange", function () {
                     fullscreenFn("webkitIsFullScreen");
                 }, false);
-
                 document.addEventListener("msfullscreenchange", function () {
                     fullscreenFn("msFullscreenElement");
                 }, false);
-
                 // IE 11 fix
                 if ('onmsfullscreenchange' in document) {
                     document.onmsfullscreenchange = function () {
@@ -387,406 +309,278 @@
                     };
                 };
             },
-
             //
             controlsDisplayListener: function () {
-
                 var el = this;
                 var controlsOver = false;
-
                 //
                 function toggleControls(hide) {
-
                     el._refs.controls.style.opacity = hide ? 0 : 1;
                     el.classList[hide ? "add" : "remove"]("vc-video-hideCursor");
-                    el._controlsHided = hide;
-
+                    el._misc.controlsHided = hide;
                 }
-
-                // 
-                el._refs.wrapper.addEventListener("pointerdown", function (e) {
-                    el._touch = e.pointerType && e.pointerType == "touch" ? true : false;
-                });
-
                 // 
                 el._refs.wrapper.addEventListener("pointerleave", function (e) {
-
-                    if (!el._touch) {
+                    if (!el._misc.touch) {
                         el._misc.leaveTimeout = setTimeout(function () {
                             toggleControls(true);
                         }, 200);
-
                     }
-
                 });
-
                 // 
                 el._refs.wrapper.addEventListener("pointermove", function (e) {
-
                     clearTimeout(el._misc.hideTimeout);
                     clearTimeout(el._misc.leaveTimeout);
-
                     setTimeout(function () {
-                        if (el._posterHidden) {
+                        if (el._misc.posterHidden) {
                             toggleControls(false);
                         }
                     }, 0);
-
-                    if (!controlsOver || el._touch) {
-
+                    if (!controlsOver || el._misc.touch) {
                         el._misc.hideTimeout = setTimeout(function () {
                             toggleControls(true);
                         }, 2000);
-
                     }
-
                 }, true);
-
                 // 
                 el._refs.controls.addEventListener("pointerover", function (e) {
                     controlsOver = true;
-                    if (!el._touch) {
+                    if (!el._misc.touch) {
                         clearTimeout(el._misc.hideTimeout);
                         clearTimeout(el._misc.leaveTimeout);
                     }
-
                 });
-
                 // 
                 el._refs.controls.addEventListener("pointerleave", function (e) {
                     controlsOver = false;
-                    if (!el._touch) {
+                    if (!el._misc.touch) {
                         clearTimeout(el._misc.hideTimeout);
                     }
-
                 });
-
                 el.addEventListener("click", function (e) {
-
                     setTimeout(function () {
                         toggleControls(false);
                     }, 0);
-
                     clearTimeout(el._misc.hideTimeout);
-
-                    if (!el._touch) {
+                    if (!el._misc.touch) {
                         setTimeout(function () {
                             clearTimeout(el._misc.leaveTimeout);
                         }, 200);
                     }
-
                     if (!controlsOver) {
-
                         el._misc.hideTimeout = setTimeout(function () {
                             toggleControls(true);
                         }, 2000);
-
                     }
-
                 }, true);
-
             },
-
             //
             volumeListener: function () {
-
                 var el = this;
                 var initValue, thresholdValue;
-
                 // Set slider color
                 el._refs.volume._refs.slider.style.backgroundColor = el.sliderColor;
                 el._refs.volume._refs.thumb.style.backgroundColor = el.sliderColor;
                 el._refs.volume._refs.thumb.parentNode.style.backgroundColor = el.sliderColor;
-
                 // Set initial volume
-                el._refs.video.volume = el._lastVolume = el.volume;
-
+                el._refs.video.volume = el._misc.lastVolume = el.volume;
                 // Set slider position
                 el._refs.volume.value = el.volume * 100;
-
                 // Bind slider and volume values
                 el._refs.volume.onChange(function (arg) {
-
                     // Unmute if volume is muted
                     el._refs.video.volume = this.value / 100;
-
-                    el._lastVolume = parseFloat(el.volume);
+                    el._misc.lastVolume = parseFloat(el.volume);
                     //
                     el.volume = el._refs.video.volume;
-
                     //
                     el._onChangedMuting();
-
                 });
-
                 // Bind slider and volume values
                 el._refs.volume.addEventListener("pointerdown", function (e) {
-
-                    if (e.button == 0 && el._controlsHided == false) {
+                    if (e.button == 0 && el._misc.controlsHided == false) {
                         initValue = e.clientY;
-
                         // Slide complete trigger interval
-                        el._slideTimeInterval = setInterval(function () {
-                            el._actionCounter = !el._actionCounter ? 1 : el._actionCounter + 1;
+                        el._misc.slideTimeInterval = setInterval(function () {
+                            el._misc.actionCounter = !el._misc.actionCounter ? 1 : el._misc.actionCounter + 1;
                         }, 1);
                     }
-
                 });
                 // Bind slider and volume values
                 el._refs.volume.addEventListener("pointermove", function (e) {
-
-                    if (el._controlsHided == false) {
-
+                    if (el._misc.controlsHided == false) {
                         thresholdValue = Math.abs(initValue - e.clientY);
-
                         //
-                        if (thresholdValue < 20 || el._actionCounter > 10) {
-                            el._stopPropagation = true
+                        if (thresholdValue < 20 || el._misc.actionCounter > 10) {
+                            el._misc.stopPropagation = true
                         } else {
-                            el._stopPropagation = false;
+                            el._misc.stopPropagation = false;
                         }
-
                     }
-
                 });
-
                 el._refs.volumeIcon.addEventListener("pointerdown", function (e) {
-                    if (e.button == 0 && el._controlsHided == false) {
+                    if (e.button == 0 && el._misc.controlsHided == false) {
                         el._toggleSound();
                     }
-
                 });
-
                 //
                 el._refs.volume.addEventListener("input", function (e) {
-
-                    if (el._controlsHided) {
+                    if (el._misc.controlsHided) {
                         e.preventDefault();
                         e.stopPropagation();
                     }
-
                 }, true);
-
             },
-
             //
             onChangedMuting: function () {
                 var el = this;
-
                 // Unmute
-                if (el._lastVolume < 0.1 && el._refs.video.volume > 0.1 && !el._onDownMuted
+                if (el._misc.lastVolume < 0.1 && el._refs.video.volume > 0.1 && !el._onDownMuted
                     || el._refs.video.volume > 0.1 && !el._onDownMuted) {
                     el._toggleSoundIcon("forceUnMute");
                     el._refs.video.muted = false;
                 }
                 // Mute
-                else if (el._lastVolume >= 0.1 && el._refs.video.volume <= 0.1 && !el._onDownMuted) {
+                else if (el._misc.lastVolume >= 0.1 && el._refs.video.volume <= 0.1 && !el._onDownMuted) {
                     el._toggleSoundIcon("forceMute");
                     el._refs.video.muted = true;
                 }
-
                 el._onDownMuted = false;
             },
-
             //
             playBtnListener: function () {
                 var el = this;
-
                 el._refs.play.addEventListener('click', function (e) {
-
-                    if (e.button == 0 && el._controlsHided == false) {
+                    if (e.button == 0 && el._misc.controlsHided == false) {
                         el._togglePlay();
                     }
-
                 }, false);
-
             },
-
             //
             durationListener: function () {
-
                 var el = this;
-
-                el._duration = el._refs.video.duration;
-
+                el._misc.duration = el._refs.video.duration;
                 el._refs.video.addEventListener("durationchange", function () {
-
-                    el._duration = el._refs.video.duration;
-
+                    el._misc.duration = el._refs.video.duration;
                 });
-
             },
-
             //
             timeListener: function () {
-
                 var el = this;
                 var currentTime = el.querySelector(".vc-video-currentTime");
                 var totalTime = el.querySelector(".vc-video-totalTime");
                 var secs, mins, time;
-
                 // Update current time
-                totalTime.innerHTML = "/ " + el._getMinutes(el._duration) + ":" + el._getSeconds(el._duration);
+                totalTime.innerHTML = "/ " + el._getMinutes(el._misc.duration) + ":" + el._getSeconds(el._misc.duration);
                 currentTime.innerHTML = "00:00";
-
                 el._refs.video.addEventListener("timeupdate", function () {
-
                     time = el._refs.video.currentTime;
                     mins = el._getMinutes(time);
                     secs = el._getSeconds(time);
-
                     // Update current time
                     currentTime.innerHTML = mins + ":" + secs;
-
                 });
-
             },
-
             //
             timeLineListener: function (time) {
-
                 var el = this;
                 var railWidth, lineWidth, duration, currentTime, endTime, remaining, rate, initValue, thresholdValue;
                 var poster = el.querySelector(".vc-video-poster");
                 var railPressed = false;
-
                 // Set time line color
                 el._refs.timeline.style.backgroundColor = el.timeLineColor;
-
                 // Increase proportionally the duration on partial animations
                 el._refs.video.addEventListener("timeupdate", function () {
                     railWidth = el._refs.timerail.offsetWidth;
-
                     time = el._refs.video.currentTime;
                     // Update time line
-                    el._refs.timeline.style.width = ((time * railWidth) / el._duration) + "px";
-
+                    el._refs.timeline.style.width = ((time * railWidth) / el._misc.duration) + "px";
                 });
-
                 //
                 el._refs.timerail.addEventListener("pointerdown", function (e) {
-
-                    if (e.button == 0 && el._controlsHided == false) {
-
+                    if (e.button == 0 && el._misc.controlsHided == false) {
                         initValue = e.clientY;
-
                         // Slide complete trigger interval
-                        el._slideTimeInterval = setInterval(function () {
-                            el._actionCounter = !el._actionCounter || el._actionCounter == 0 ? 1 : (el._actionCounter + 1);
+                        el._misc.slideTimeInterval = setInterval(function () {
+                            el._misc.actionCounter = !el._misc.actionCounter || el._misc.actionCounter == 0 ? 1 : (el._misc.actionCounter + 1);
                         }, 1);
-
                         // Decrease timeline size on touchable devices
-                        if (el._touch) {
+                        if (el._misc.touch) {
                             el._refs.timerail.back.style.transform = "scaleY(1.4)";
                         }
-
                         railPressed = true;
-                        lineWidth = el._isFullscreen ? e.clientX : (e.clientX - el.getBoundingClientRect().left);
-
+                        lineWidth = el._misc.isFullscreen ? e.clientX : (e.clientX - el.getBoundingClientRect().left);
                         // Update time line
                         el._refs.timeline.style.width = lineWidth + "px";
-
                         // Update video time
-                        el._refs.video.currentTime = (lineWidth * el._duration) / railWidth;
+                        el._refs.video.currentTime = (lineWidth * el._misc.duration) / railWidth;
                     }
-
                 });
-
                 //
                 el._refs.timerail.addEventListener("pointermove", function (e) {
-
-                    if (el._controlsHided == false) {
-
+                    if (el._misc.controlsHided == false) {
                         thresholdValue = Math.abs(initValue - e.clientY);
-
                         // TODO - STOP PROPAGATION UNDER TRESHOLD
-                        if (thresholdValue < 20 || el._actionCounter > 10) {
-                            el._stopPropagation = true
+                        if (thresholdValue < 20 || el._misc.actionCounter > 10) {
+                            el._misc.stopPropagation = true
                         } else {
-                            el._stopPropagation = false;
+                            el._misc.stopPropagation = false;
                         }
-
                     }
-
                 });
-
                 //
                 el.addEventListener("pointermove", function (e) {
-
-                    // if (el._stopPropagation) {
-                        // e.stopPropagation();
+                    // if (el._misc.stopPropagation) {
+                    // e.stopPropagation();
                     // }
-
                     if (railPressed) {
-
-
-                        lineWidth = el._isFullscreen ? e.clientX : (e.clientX - el.getBoundingClientRect().left);
-
+                        lineWidth = el._misc.isFullscreen ? e.clientX : (e.clientX - el.getBoundingClientRect().left);
                         // Update time line
                         el._refs.timeline.style.width = lineWidth + "px";
-
                         // Update video time
-                        el._refs.video.currentTime = (lineWidth * el._duration) / railWidth;
-
+                        el._refs.video.currentTime = (lineWidth * el._misc.duration) / railWidth;
                     }
-
                 });
-
                 //
                 document.addEventListener("pointerup", function (e) {
                     // 
-                    clearInterval(el._slideTimeInterval);
-                    el._stopPropagation = false;
-                    el._actionCounter = 0;
-
+                    clearInterval(el._misc.slideTimeInterval);
+                    el._misc.stopPropagation = false;
+                    el._misc.actionCounter = 0;
                     if (railPressed) {
                         railPressed = false;
                     }
-
                     // Decrease timline size on touchable devices
-                    if (el._touch) {
+                    if (el._misc.touch) {
                         el._refs.timerail.back.style.transform = "scaleY(1)";
                     }
-
                 });
-
                 //
                 el._refs.video.addEventListener("ended", function (e) {
-
                     // Reset timeline and video
                     el._refs.timeline.style.width = 0;
                     el._refs.video.currentTime = 0;
-
                     // Reset play button icon
                     el._refs.playIcon.classList.add("vicon-play");
                     el._refs.playIcon.classList.remove("vicon-pause");
-
                     // Check loop functionality
                     if (!vcomet.util.isTrue(el.loop)) {
-
                         // Show poster
                         poster.style.display = "flex";
                         poster.style.backgroundImage = "url(" + el.poster + ")";
                         poster.style.backgroundSize = "cover";
-                        el._posterHidden = false;
-
+                        el._misc.posterHidden = false;
                     }
-
-
                 });
-
             },
-
             //
             fullScreenListener: function () {
                 var el = this;
                 var video = el._refs.video;
-
                 el._refs.fullscreen.addEventListener("click", function (e) {
-                    if (e.button == 0 && el._controlsHided == false) {
-                        if (el._isFullscreen) {
-                            el._isFullscreen = false;
-
+                    if (e.button == 0 && el._misc.controlsHided == false) {
+                        if (el._misc.isFullscreen) {
+                            el._misc.isFullscreen = false;
                             if (document.exitFullscreen) {
                                 document.exitFullscreen();
                             } else if (document.mozCancelFullScreen) {
@@ -796,14 +590,11 @@
                             } else if (document.msExitFullscreen) {
                                 document.msExitFullscreen();
                             }
-
                         } else {
-                            el._isFullscreen = true;
-
+                            el._misc.isFullscreen = true;
                             if (/iPad|iPhone|iPod|Mac/.test(navigator.platform)) {
                                 video.webkitEnterFullscreen();
                             } else {
-
                                 if (el.requestFullscreen) {
                                     el.requestFullscreen();
                                 } else if (el.mozRequestFullScreen) {
@@ -814,114 +605,85 @@
                                     el.msRequestFullscreen();
                                 }
                             }
-
-
                             video.removeAttribute("controls");
                         }
-
                     }
-
                 });
-
             },
-
             //
             toggleFullscreen: function (el) {
-
                 // Toggle full screen
-                if (!el._isFullscreen) {
+                if (!el._misc.isFullscreen) {
                     el.classList.remove("vc-video-fullscreenActive", "vc-bg2");
                     el._refs.wrapper.classList.remove("vc-video-wrapperFullscreen");
                     clearTimeout(el._misc.hideTimeout);
-
                 } else {
                     // Append video wrapper to the body
                     el.classList.add("vc-video-fullscreenActive", "vc-bg2");
                     el._refs.wrapper.classList.add("vc-video-wrapperFullscreen");
                 }
-
             },
-
             //
             getMinutes: function (secondsValue) {
-
                 var el = this;
                 var min = secondsValue / 60;
                 var result;
-
                 if (min < 1) {
                     result = "00";
                 } else {
                     result = min < 10 ? ("0" + Math.floor(min)) : Math.floor(min);
                 }
-
                 return result;
             },
-
             //
             getSeconds: function (secondsValue) {
-
                 var el = this;
                 var min = secondsValue / 60;
                 var result;
-
                 if (min > 1) {
                     var minRound = Math.abs(Math.floor(-min));
                     var secs = (minRound - min) * 60;
                     secs = Math.floor(secs);
                 }
-
                 result = secondsValue < 10 ? ("0" + Math.floor(secondsValue)) : Math.floor(secondsValue);
-
                 return min <= 1 ? result : 60 - result;
-
             },
-
             //
             togglePlay: function () {
-
                 var el = this;
-
                 // Check video status
                 if (el._refs.video.paused) {
                     // Play video
                     el._togglePlayIcon();
                     el._refs.video.play();
-
                 } else {
                     // Pause video
                     el._togglePlayIcon();
                     el._refs.video.pause();
                 }
-
             },
             //
             togglePlayIcon: function (state) {
                 var el = this;
-
                 // Check video status
                 if ((el._refs.video.paused && !state) || state == "paused") {
                     // Play video
                     el._refs.playIcon.classList.add("vicon-pause");
                     el._refs.playIcon.classList.remove("vicon-play");
-
                 } else if ((!el._refs.video.paused && !state) || state == "play") {
-
                     // Pause video
                     el._refs.playIcon.classList.add("vicon-play");
                     el._refs.playIcon.classList.remove("vicon-pause");
                 }
-
             },
             // 
             toggleSound: function () {
                 var el = this;
                 el._onDownMuted = true;
-
                 // Check video status
                 if (el._refs.video.muted) {
                     // Set last volume value
-                    el._refs.volume.value = el._lastVolume * 100;
+                    el._refs.volume.value = el._misc.lastVolume * 100;
                     // Unmute video
                     el._toggleSoundIcon();
                     el._refs.video.muted = false;
@@ -931,7 +693,6 @@
                     el._toggleSoundIcon();
                     el._refs.video.muted = true;
                 }
-
             },
             //
             toggleSoundIcon: function (constraint) {
@@ -946,19 +707,20 @@
                     el._refs.volumeIcon.classList.add("vicon-volume-off");
                     el._refs.volumeIcon.classList.remove("vicon-volume-on");
                 }
-
             }
-
         },
         onCreated: function () {
             var el = this;
-        },
-        onInit: function () {
-            var el = this;
-
-            el.setAttribute("touch-action", "none");
-            // Quick access
+            // Create video element (** MacOS bug declaring on element template)
+            var vid = document.createElement("video");
+            vid.classList.add("vc-video-video");
             el._refs.wrapper = el.template.querySelector(".vc-video-wrapper");
+            el.template.insertBefore(vid,  el._refs.wrapper);
+            // PEP support
+            el.setAttribute("touch-action", "none");
+            //
+            el._misc.touch = vcomet.util.isTouchScreen();
+            // Quick access
             el._refs.poster = el.template.querySelector(".vc-video-poster");
             el._refs.controls = el.template.querySelector(".vc-video-controls");
             el._refs.play = el.template.querySelector(".vc-video-play");
@@ -978,25 +740,19 @@
             el._setUpHTMLVideo();
             // Initialize vc-video inner configuration
             el._setUp();
-
             //
             el._refs.video.addEventListener("loadeddata", function () {
-
                 //
                 el._durationListener();
-
                 // 
                 el._playBtnListener();
-
                 // 
                 if (!/iPad|iPhone|iPod/.test(navigator.platform)) {
                     el._refs.videoContainer.classList.add("vc-video-volume-container-display");
                     el._volumeListener();
                 }
-
                 // 
                 el._timeListener();
-
                 // 
                 el._fullScreenListener();
             });
@@ -1008,6 +764,32 @@
                 // 
                 el._timeLineListener();
             });
+        },
+        onBubbleRender: function () {
+
+            var el = this;
+            var promise;
+            if (vcomet.util.isTrue(el.autoPlay)) {
+                if (/iPad|iPhone/.test(navigator.platform)) {
+                    // Automatic playback failed, Fallback! set gif to imitate video
+                    el.autoPlayAllowed = false;
+                    vcomet.triggerCallback("onPlayTested", el, el);
+                } else {
+                    promise = el._refs.video.play();
+                    // ** IE play function does not retrieve a promise
+                    if (promise) {
+                        promise.then(function () {
+                            // Automatic playback started!
+                            vcomet.triggerCallback("onPlayTested", el, el);
+                        }).catch(function (error) {
+                            // Automatic playback failed, Fallback! set gif to imitate video
+                            el._refs.video.poster = el.fallbackGif ? el.fallbackGif : el._refs.video.poster;
+                            el.autoPlayAllowed = false;
+                            vcomet.triggerCallback("onPlayTested", el, el);
+                        });
+                    }
+                }
+            }
         }
     });
 </script>
