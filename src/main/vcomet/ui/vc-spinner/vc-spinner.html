@@ -5,7 +5,11 @@
             <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlDown">
                 <i class="vicon vicon-remove-circle-o"></i>
             </div>
-            <input class="vc-spinner-input vc-fg1-border" type="number">
+
+            <div class="vc-spinner-inputBox">
+                <input class="vc-spinner-input vc-fg1-border" type="number" pattern="[0-9]*">
+            </div>
+
             <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlUp">
                 <i class="vicon vicon-add-circle-o"></i>
             </div>
@@ -52,20 +56,20 @@
                 reflect: true
             },
             /*
-              @property {String} width 
-              @description spinner size respect to container
-              Value must be number with px or percentage
-            */
-            width: {
-                value: "",
-                reflect: true
-            },
-            /*
               @property {Boolean} disabled 
               @description Spinner deactivation
               Default: false
             */
             disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the spinner
+              Default: false
+            */
+            readonly: {
                 value: false,
                 reflect: true
             },
@@ -152,8 +156,11 @@
 
                 el._refs.spinner = el.template.querySelector(".vc-spinner-spinner");
                 el._refs.group = el.template.querySelector(".vc-spinner-group");
+                el._refs.inputBox = el.template.querySelector(".vc-spinner-inputBox");
                 el._refs.input = el.template.querySelector(".vc-spinner-input");
                 el._refs.label = el.template.querySelector(".vc-spinner-label");
+                el._refs.inputBar = el.template.querySelector(".vc-spinner-inputBar");
+
             },
             /*
               @function (private) _setValue
@@ -192,7 +199,7 @@
             },
             /*
               @function (private) _updateDisabled
-              @description Update disabled status and activates the focus listeners when it is not disabled
+              @description Update disabled status
             */
             updateDisabled: function () {
                 var el = this;
@@ -225,11 +232,24 @@
                 }
 
             },
+            /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
 
+                if (vcomet.util.isTrue(el.readonly)) {
+                    el._refs.input.setAttribute("readonly", "true");
+                } else {
+                    el._refs.input.removeAttribute("readonly");
+                }
+
+            },
             /*
               @function (private) _updateSpinner
               @description Update spinner value
-              @param {Object} event [mouse event]
+              @param {Object} e [Event object]
             */
             updateSpinner: function (e) {
                 var el = this;
@@ -237,7 +257,7 @@
                 var control = e.target.parentNode;
 
 
-                if (e.type == "click") {
+                if (e.type == "click" && !vcomet.util.isTrue(el.readonly)) {
                     (control.classList.contains("vc-spinner-controlDown")) ? value-- : null;
                     (control.classList.contains("vc-spinner-controlUp")) ? value++ : null;
 
@@ -257,15 +277,25 @@
             */
             setFocusingListeners: function () {
                 var el = this;
+                var eventType = /iPad|iPhone/.test(navigator.platform) ? "touchstart" : "click";
                 vcomet.registerPathListener(el._refs.spinner);
 
+
+                document.addEventListener(eventType, function (e) {
+                    if (el._refs.spinner.isOnPath && !el._refs.label.classList.contains("vc-spinner-focusLabel")) {
+                        el._inputFocus()
+                    } else if (!el._refs.spinner.isOnPath && el._refs.label.classList.contains("vc-spinner-focusLabel")) {
+                        el._inputBlur(e);
+                    }
+
+                });
+
                 el._refs.input.addEventListener("blur", function (e) {
-                    // TODO:
-                    // console.log('blur');
-                    if (!vcomet.util.isTrue(el.disabled)) {
-                        (el._refs.spinner.isOnPath == true) ? el._inputFocus() : el._inputBlur(e);
+                    if (!el._refs.spinner.isOnPath) {
+                        el._inputBlur(e);
                     }
                 });
+
             },
 
             /*
@@ -312,26 +342,25 @@
             @description Set focus functionality to spinner element and to spinner input
             */
             inputFocus: function () {
-                var inputBar = this.querySelector(".vc-spinner-inputBar");
-
-                this._refs.label.classList.add("vc-spinner-focusLabel", "vc-fg1");
-                inputBar.classList.add("vc-spinner-animate");
+                if (!vcomet.util.isTrue(this.readonly)) {
+                    this._refs.label.classList.add("vc-spinner-focusLabel", "vc-fg1");
+                    this._refs.inputBar.classList.add("vc-spinner-animate");
+                }
             },
 
             /*
             @function (private) _inputBlur
             @description Set blur functionality to spinner element and to spinner input
+            @param {Object} e [Event object]
             */
             inputBlur: function (e) {
-                var inputBar = this.querySelector(".vc-spinner-inputBar");
 
                 if (this._refs.label.classList.contains("vc-spinner-focusLabel")) {
                     this._updateSpinner(e);
                 }
 
                 this._refs.label.classList.remove("vc-spinner-focusLabel", "vc-fg1");
-                // this.value = this._refs.input.value;
-                inputBar.classList.remove("vc-spinner-animate");
+                this._refs.inputBar.classList.remove("vc-spinner-animate");
 
                 // Trigger onChange callback
                 this._currentValue = (this.value !== this._currentValue) ? this.value : this._currentValue;
@@ -344,12 +373,14 @@
             @description Gives autofocus to the spinner
             */
             setAutofocus: function () {
+                var el = this;
 
-                if (vcomet.util.isTrue(this.autofocus) && this.disabled == false) {
-                    this._refs.input.focus();
-                    this._inputFocus();
-                }
-
+                setTimeout(function () {
+                    if (vcomet.util.isTrue(el.autofocus) && el.disabled == false) {
+                        el._refs.input.focus();
+                        el._inputFocus();
+                    }
+                }, 100);
             },
 
             /*
@@ -358,9 +389,8 @@
             @param {Number} value [spinner value]
             */
             checkMin: function (value) {
-
                 var el = this;
-                var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : value;
+                var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : parseInt(value);
 
                 return returnValue;
             },
@@ -372,7 +402,7 @@
             */
             checkMax: function (value) {
                 var el = this;
-                var returnValue = (el.max && value > el.max) ? parseInt(el.max) : value;
+                var returnValue = (el.max && parseInt(value) > parseInt(el.max)) ? parseInt(el.max) : parseInt(value);
 
                 return returnValue;
             }
@@ -393,9 +423,9 @@
             el._setValue();
 
             el._updateDisabled();
+            el._updateReadonly();
             el._setFocusingListeners();
             el._setUpdateListeners();
-            el._setAutofocus();
 
             // Sets the name of the input
             el._refs.input.setAttribute("name", el.name);
@@ -405,9 +435,11 @@
                 el._refs.label.innerHTML = el.label ? el.label : el._refs.label.innerHTML;
                 el._refs.label.classList.add("vc-spinner-labelDisplay");
             }
+        },
 
-            // Sets the width of the spinner
-            el.style.width = el.width;
+        onReady: function () {
+            var el = this;
+            el._setAutofocus();
         },
 
         onPropertyChanged: function (attrName, oldVal, newVal) {
@@ -415,8 +447,8 @@
                 case "disabled":
                     this._updateDisabled();
                     break;
-                case "autofocus":
-                    this._setAutofocus();
+                case "readonly":
+                    this._updateReadonly();
                     break;
                 case "label":
                     this._refs.label.innerHTML = newVal;
@@ -425,17 +457,7 @@
                     this._setValue(true);
                     break;
             }
-        },
-        // TODO:
-        onAttributeChanged: function (attrName, oldVal, newVal) {
-            switch (attrName) {
-                case "value":
-                    // this._setValue();
-                    break;
-            }
         }
-
-
     });
 
 </script>
