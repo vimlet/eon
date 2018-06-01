@@ -63,6 +63,15 @@
                 reflect: true
             },
             /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the spinner
+              Default: false
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
               @property {String} orientation 
               @description Slider orientation
               Values can be: horizontal or vertical
@@ -217,7 +226,6 @@
             /*
             @function (private) _horizontalSlider
             @description Specify horizontal slider view style
-            @param {Number} percentValue [percentage slider value]
             */
             horizontalSlider: function () {
                 var el = this;
@@ -231,7 +239,6 @@
             /*
               @function (private) _verticalSlider
               @description Specify vertical slider view style
-              @param {Number} percentValue [percentage slider value]
             */
             verticalSlider: function () {
                 var el = this;
@@ -271,14 +278,15 @@
                 el._thumbEvent = startThumb;
 
                 function startThumb(e) {
-                    el._startY = e.clientY;
-                    document.addEventListener("pointermove", moveThumb, false);
-                    document.addEventListener("pointerup", function stopThumb(e) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
+                        el._startY = e.clientY;
+                        document.addEventListener("pointermove", moveThumb, false);
+                        document.addEventListener("pointerup", function stopThumb(e) {
 
-                        document.removeEventListener("pointermove", moveThumb, false);
-                        document.removeEventListener("pointerup", stopThumb, false);
-                    }, false);
-
+                            document.removeEventListener("pointermove", moveThumb, false);
+                            document.removeEventListener("pointerup", stopThumb, false);
+                        }, false);
+                    }
                 }
 
                 function moveThumb(e) {
@@ -338,12 +346,41 @@
             },
 
             /*
+              @function (private) _setSliderListeners
+              @description Sets slider listeners
+            */
+            setSliderListeners: function () {
+                var el = this;
+
+                // On IE, Safari and IOS devices not work event "input"
+                // So is necessary a click event
+                el._refs.slider.addEventListener("click", function (e) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
+                        if (vcomet.util.getBrowser() == "IE" || vcomet.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
+                            // On iOS devices and IE clicking on the input does not update its status
+                            // Is is necessary  to do it programmatically
+                            el._interactionSlider(e);
+                            el._updateCurrentValue();
+                        }
+                        // For the vertical slider it is necessary to update its height when clicking
+                        el._updateVerticalHeight();
+
+                    }
+                }, false);
+
+                el._refs.slider.addEventListener("input", function (e) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
+                        el._updateSlider();
+                        el._updateCurrentValue();
+                    }
+                }, false);
+            },
+
+            /*
               @function (private) _updateDisabled
               @description Updates disabled status and activates the thumb motion when it is not disabled
-              @param {String} newVal [new value of disabled]
             */
             updateDisabled: function () {
-                // var shell = this.querySelector(".vc-slider-shell");
                 var el = this;
 
                 if (!vcomet.util.isTrue(el.disabled)) {
@@ -355,6 +392,7 @@
                     el._refs.thumb.classList.remove("vc-bg1-disabled");
                     el._refs.thumb.classList.add("vc-fg1-active");
                     el._refs.track.classList.remove("vc-bg1-disabled");
+
                     el._thumbMotion();
 
                 } else {
@@ -367,6 +405,21 @@
                     el._refs.thumb.classList.remove("vc-fg1-active");
                     el._refs.track.classList.add("vc-bg1-disabled");
                     el._refs.thumb.removeEventListener("pointerdown", el._thumbEvent, false);
+                }
+
+            },
+
+            /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
+
+                if (vcomet.util.isTrue(el.readonly)) {
+                    el._refs.slider.setAttribute("readonly", "true");
+                } else {
+                    el._refs.slider.removeAttribute("readonly");
                 }
 
             },
@@ -434,30 +487,14 @@
 
             el._currentValue = el.value;
 
-            // On IE, Safari and IOS devices not work event "input"
-            // So is necessary a click event
-            el._refs.slider.addEventListener("click", function (e) {
-                if (vcomet.util.getBrowser() == "IE" || vcomet.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
-                    // On iOS devices and IE clicking on the input does not update its status
-                    // Is is necessary  to do it programmatically
-                    el._interactionSlider(e);
-                    el._updateCurrentValue();
-                }
-                // For the vertical slider it is necessary to update its height when clicking
-                el._updateVerticalHeight();
-
-            }, false);
-
-            el._refs.slider.addEventListener("input", function (e) {
-                el._updateSlider();
-                el._updateCurrentValue();
-            }, false);
+            el._setSliderListeners();
 
             if (el.orientation == "horizontal" && el.displayAlign != "center") {
                 el.displayPosition = "";
             }
 
             el._updateDisabled();
+            el._updateReadonly();
             el._updateVerticalHeight();
 
         },
@@ -470,6 +507,9 @@
             switch (attrName) {
                 case "disabled":
                     this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadonly();
                     break;
                 case "value":
                     this._setValue();
