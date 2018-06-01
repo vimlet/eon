@@ -7,7 +7,7 @@
             </div>
 
             <div class="vc-spinner-inputBox">
-                <input class="vc-spinner-input vc-fg1-border" type="number">
+                <input class="vc-spinner-input vc-fg1-border" type="number" pattern="[0-9]*" >
             </div>
 
             <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlUp">
@@ -147,8 +147,11 @@
 
                 el._refs.spinner = el.template.querySelector(".vc-spinner-spinner");
                 el._refs.group = el.template.querySelector(".vc-spinner-group");
+                el._refs.inputBox = el.template.querySelector(".vc-spinner-inputBox");
                 el._refs.input = el.template.querySelector(".vc-spinner-input");
                 el._refs.label = el.template.querySelector(".vc-spinner-label");
+                el._refs.inputBar = el.template.querySelector(".vc-spinner-inputBar");
+
             },
             /*
               @function (private) _setValue
@@ -224,7 +227,7 @@
             /*
               @function (private) _updateSpinner
               @description Update spinner value
-              @param {Object} event [mouse event]
+              @param {Object} e [Event object]
             */
             updateSpinner: function (e) {
                 var el = this;
@@ -317,27 +320,23 @@
             @description Set focus functionality to spinner element and to spinner input
             */
             inputFocus: function () {
-                var inputBar = this.querySelector(".vc-spinner-inputBar");
-
                 this._refs.label.classList.add("vc-spinner-focusLabel", "vc-fg1");
-                inputBar.classList.add("vc-spinner-animate");
-
-           
+                this._refs.inputBar.classList.add("vc-spinner-animate");
             },
 
             /*
             @function (private) _inputBlur
             @description Set blur functionality to spinner element and to spinner input
+            @param {Object} e [Event object]
             */
             inputBlur: function (e) {
-                var inputBar = this.querySelector(".vc-spinner-inputBar");
 
                 if (this._refs.label.classList.contains("vc-spinner-focusLabel")) {
                     this._updateSpinner(e);
                 }
 
                 this._refs.label.classList.remove("vc-spinner-focusLabel", "vc-fg1");
-                inputBar.classList.remove("vc-spinner-animate");
+                this._refs.inputBar.classList.remove("vc-spinner-animate");
 
                 // Trigger onChange callback
                 this._currentValue = (this.value !== this._currentValue) ? this.value : this._currentValue;
@@ -350,13 +349,14 @@
             @description Gives autofocus to the spinner
             */
             setAutofocus: function () {
+                var el = this;
 
-                if (vcomet.util.isTrue(this.autofocus) && this.disabled == false) {
-                    // document.activeElement.blur();
-                    this._refs.input.focus();
-                    this._inputFocus();
-                }
-
+                setTimeout(function () {
+                    if (vcomet.util.isTrue(el.autofocus) && el.disabled == false) {
+                        el._refs.input.focus();
+                        el._inputFocus();
+                    }
+                }, 100);
             },
 
             /*
@@ -401,7 +401,6 @@
             el._updateDisabled();
             el._setFocusingListeners();
             el._setUpdateListeners();
-            el._setAutofocus();
 
             // Sets the name of the input
             el._refs.input.setAttribute("name", el.name);
@@ -413,13 +412,15 @@
             }
         },
 
+        onReady: function () {
+            var el = this;
+            el._setAutofocus();
+        },
+
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
                 case "disabled":
                     this._updateDisabled();
-                    break;
-                case "autofocus":
-                    this._setAutofocus();
                     break;
                 case "label":
                     this._refs.label.innerHTML = newVal;
@@ -428,7 +429,7 @@
                     this._setValue(true);
                     break;
             }
-        },
+        }
     });
 
 </script>
