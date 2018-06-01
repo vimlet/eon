@@ -7,7 +7,7 @@
             </div>
 
             <div class="vc-spinner-inputBox">
-                <input class="vc-spinner-input vc-fg1-border" type="number" pattern="[0-9]*" >
+                <input class="vc-spinner-input vc-fg1-border" type="number" pattern="[0-9]*">
             </div>
 
             <div class="vc-spinner-control vc-fg1-hoverable vc-spinner-controlUp">
@@ -61,6 +61,15 @@
               Default: false
             */
             disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the spinner
+              Default: false
+            */
+            readonly: {
                 value: false,
                 reflect: true
             },
@@ -190,7 +199,7 @@
             },
             /*
               @function (private) _updateDisabled
-              @description Update disabled status and activates the focus listeners when it is not disabled
+              @description Update disabled status
             */
             updateDisabled: function () {
                 var el = this;
@@ -223,7 +232,20 @@
                 }
 
             },
+            /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
 
+                if (vcomet.util.isTrue(el.readonly)) {
+                    el._refs.input.setAttribute("readonly", "true");
+                } else {
+                    el._refs.input.removeAttribute("readonly");
+                }
+
+            },
             /*
               @function (private) _updateSpinner
               @description Update spinner value
@@ -235,7 +257,7 @@
                 var control = e.target.parentNode;
 
 
-                if (e.type == "click") {
+                if (e.type == "click" && !vcomet.util.isTrue(el.readonly)) {
                     (control.classList.contains("vc-spinner-controlDown")) ? value-- : null;
                     (control.classList.contains("vc-spinner-controlUp")) ? value++ : null;
 
@@ -320,8 +342,10 @@
             @description Set focus functionality to spinner element and to spinner input
             */
             inputFocus: function () {
-                this._refs.label.classList.add("vc-spinner-focusLabel", "vc-fg1");
-                this._refs.inputBar.classList.add("vc-spinner-animate");
+                if (!vcomet.util.isTrue(this.readonly)) {
+                    this._refs.label.classList.add("vc-spinner-focusLabel", "vc-fg1");
+                    this._refs.inputBar.classList.add("vc-spinner-animate");
+                }
             },
 
             /*
@@ -399,6 +423,7 @@
             el._setValue();
 
             el._updateDisabled();
+            el._updateReadonly();
             el._setFocusingListeners();
             el._setUpdateListeners();
 
@@ -421,6 +446,9 @@
             switch (attrName) {
                 case "disabled":
                     this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadonly();
                     break;
                 case "label":
                     this._refs.label.innerHTML = newVal;

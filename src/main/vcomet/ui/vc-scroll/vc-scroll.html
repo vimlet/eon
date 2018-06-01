@@ -180,8 +180,6 @@
         el._misc.vertical.position = 0;
         el._misc.horizontal.position = 0;
 
-        el._definePublicScrollProperties();
-
       },
       /*
       @function (private) _setupContent
@@ -251,6 +249,10 @@
         }
 
       },
+      /*
+      @function (private) _setupContentPush
+      @description Sets up some paddings to simulate the push that native scrolls do
+      */
       setupContentPush: function () {
 
         var el = this;
@@ -309,6 +311,22 @@
 
         // Creates the device events
         el._setupDeviceEvents();
+
+      },
+      /*
+      @function (private) _setupContainerPosition
+      @description Since we need our container to have a position different from static to work,
+       we set relative if no position was provided to the container or its static
+      */
+      setupContainerPosition: function () {
+
+        var el = this;
+
+        if (vcomet.util.isTrue(el.fillContainer)) {
+          if (window.getComputedStyle(el._refs.container, false).position == "static") {
+            el._refs.container.style.position = "relative";
+          }
+        }
 
       },
       /*
@@ -500,344 +518,6 @@
 
       },
       /*
-      @function (private) _definePublicScrollProperties
-      @description Creates definitions for scrollTop/scrollLeft properties
-      */
-      definePublicScrollProperties: function () {
-
-        var el = this;
-        var scrollTopDescriptor = {};
-        var scrollLeftDescriptor = {};
-
-        // ScrollTop property descriptor
-        scrollTopDescriptor.get = function () {
-          return Math.abs(el._misc.vertical.position);
-        };
-
-        scrollTopDescriptor.set = function (value) {
-
-          var transition = false;
-          var verticalPosition;
-
-          if (value.constructor === Array) {
-            verticalPosition = value[0];
-            transition = value[1];
-          } else {
-            verticalPosition = value;
-          }
-
-          el.scrollTo(verticalPosition, Math.abs(el._misc.horizontal.position), transition);
-
-        };
-
-        // ScrollLeft property descriptor
-        scrollLeftDescriptor.get = function () {
-          return Math.abs(el._misc.horizontal.position);
-        };
-
-        scrollLeftDescriptor.set = function (value) {
-
-          var transition = false;
-          var horizontalPosition;
-
-          if (value.constructor === Array) {
-            horizontalPosition = value[0];
-            transition = value[1];
-          } else {
-            horizontalPosition = value;
-          }
-
-          el.scrollTo(Math.abs(el._misc.vertical.position), horizontalPosition, transition);
-
-        };
-
-        // Defines scrollTop, scrollLeft properties to trigger our functions
-        Object.defineProperty(el, "scrollTop", scrollTopDescriptor);
-        Object.defineProperty(el, "scrollLeft", scrollLeftDescriptor);
-
-      },
-      /*
-      @function (private) _setupFragmentForSourceNodes
-      @description Reads all the source nodes and appends them to a fragment
-      */
-      moveSourceToContent: function () {
-
-        var sourceNodes = this.getSourceElements();
-        var content = this.template.querySelector(".vc-scroll-content");
-
-        for (var i = 0; i < sourceNodes.length; i++) {
-          content.appendChild(sourceNodes[i]);
-        }
-
-      },
-      /*
-      @function (private) _restartOrigin
-      @description Restarts the origin point from which we will base our drag up calculations
-      @param {Object} e [Event]
-      */
-      restartOrigin: function (e) {
-
-        var el = this;
-        var currentTimestamp = +new Date();
-
-        // If when moved the user has exceeded the established amount of time for him to release we refresh all the values as if starting again the scroll
-        if ((currentTimestamp - el._misc.dragScroll.timeStamp) > el._misc.dragScroll.downRefreshRate) {
-
-          // Sets the initial pointer values
-          el._misc.dragScroll.initialX = e.clientX;
-          el._misc.dragScroll.initialY = e.clientY;
-
-          // Sets the current pointer values, these ones will be updated on each pointer move
-          el._misc.dragScroll.currentX = e.clientX;
-          el._misc.dragScroll.currentY = e.clientY;
-
-          // DragThreshold variables declaration
-          el._misc.dragScroll.dragThresholdX = e.clientX;
-          el._misc.dragScroll.dragThresholdY = e.clientY;
-          el._misc.dragScroll.isOnDragThreshold = true;
-
-          // Timestamp of the moment the user started the scroll
-          el._misc.dragScroll.timeStamp = currentTimestamp;
-
-        }
-
-      },
-      /*
-      @function (private) _handleScrollToRequest
-      @description Handles the scroll to request
-      @param {Number} verticalPosition
-      @param {Number} horizontalPosition
-      @param {Boolean} transition [Whether the user wants a transition while scrolling to the request position]
-      */
-      handleScrollToRequest: function (verticalPosition, horizontalPosition, transition) {
-
-        var el = this;
-
-        // It adds it back if the user requested so and prepares what we need to call the "onScrolled" callback for every animationFrame
-        if (transition) {
-
-          el._animateScroll({ vertical: -verticalPosition, horizontal: -horizontalPosition, trigger: "requested" });
-
-        } else {
-
-          el.classList.remove("active-transitions");
-          el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-          vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("requested")]);
-
-        }
-
-      },
-      /*
-      @function (private) _handleNativeScrollToRequest
-      @description Handles the scroll to request for the native situation
-      @param {Number} verticalPosition
-      @param {Number} horizontalPosition
-      @param {Boolean} transition [Whether the user wants a transition while scrolling to the request position]
-      */
-      handleNativeScrollToRequest: function (verticalPosition, horizontalPosition, transition) {
-
-        var el = this;
-
-        if (!transition) {
-
-          el.content.scrollTop = verticalPosition;
-          el.content.scrollLeft = horizontalPosition;
-
-          el._updateVerticalPosition(-el.content.scrollTop);
-          el._updateHorizontalPosition(-el.content.scrollLeft);
-
-        } else {
-
-          var keepGoing = false;
-          var duration = 400;
-          var endTime = +new Date() + duration;
-
-          var vEnd = verticalPosition > el.content.scrollHeight ? el.content.scrollHeight : verticalPosition;
-          var hEnd = verticalPosition > el.content.scrollWidth ? el.content.scrollWidth : horizontalPosition;
-
-          var vAmount = verticalPosition - el.content.scrollTop;
-          var hAmount = horizontalPosition - el.content.scrollLeft;
-
-          el._updateVerticalPosition(-vEnd);
-          el._updateHorizontalPosition(-hEnd);
-
-          el._misc.native.initialY = el.content.scrollTop;
-          el._misc.native.initialX = el.content.scrollLeft;
-
-          var easeScrollAnimation = function () {
-
-            // Get animation progress
-            var currentTime = +new Date();
-            var remaining = (endTime - currentTime);
-            var rate = remaining / duration;
-
-            // This makes the reate to change in an EASE way
-            rate = 1 - Math.pow(rate, 3);
-
-            // Do some animation
-            keepGoing = el._handleNativeEaseAnimation(rate, vAmount, hAmount);
-
-            if (keepGoing) {
-              el._misc.native.easeAnimationFrame = window.requestAnimationFrame(easeScrollAnimation);
-            }
-
-          };
-
-          easeScrollAnimation();
-
-        }
-
-      },
-      /*
-      @function (private) _handleInertThreshold
-      @description Handles whether the user has left the inert threshold
-      @param {Object} e [Event]
-      */
-      handleInertThreshold: function (e) {
-
-        var el = this;
-
-        var pointToinertThresholdY = el._misc.dragScroll.inertThresholdY > e.clientY ? el._misc.dragScroll.inertThresholdY - e.clientY : e.clientY - el._misc.dragScroll.inertThresholdY;
-        var pointToinertThresholdX = el._misc.dragScroll.inertThresholdX > e.clientX ? el._misc.dragScroll.inertThresholdX - e.clientX : e.clientX - el._misc.dragScroll.inertThresholdX;
-
-        if ((pointToinertThresholdY > el._misc.dragScroll.inertThresholdRadius || pointToinertThresholdX > el._misc.dragScroll.inertThresholdRadius) && el._misc.dragScroll.isOnInertThreshold == true) {
-
-          pointToinertThresholdY = el._misc.dragScroll.verticalDirection == "up" ? pointToinertThresholdY : pointToinertThresholdY * -1;
-          pointToinertThresholdX = el._misc.dragScroll.horizontalDirection == "left" ? pointToinertThresholdX : pointToinertThresholdX * -1;
-
-          el._misc.dragScroll.currentY = el._misc.dragScroll.currentY + pointToinertThresholdY;
-          el._misc.dragScroll.currentX = el._misc.dragScroll.currentX + pointToinertThresholdX;
-
-          el._misc.dragScroll.isOnInertThreshold = false;
-
-        }
-
-      },
-      /*
-      @function (private) _handleDragThreshold
-      @description Handles whether the user has left the drag threshold
-      @param {Object} e [Event]
-      */
-      handleDragThreshold: function (e) {
-
-        var el = this;
-
-        var pointToDragThresholdY = el._misc.dragScroll.dragThresholdY > e.clientY ? el._misc.dragScroll.dragThresholdY - e.clientY : e.clientY - el._misc.dragScroll.dragThresholdY;
-        var pointToDragThresholdX = el._misc.dragScroll.dragThresholdX > e.clientX ? el._misc.dragScroll.dragThresholdX - e.clientX : e.clientX - el._misc.dragScroll.dragThresholdX;
-
-        if ((pointToDragThresholdY > el._misc.dragScroll.dragThresholdRadius || pointToDragThresholdX > el._misc.dragScroll.dragThresholdRadius) && el._misc.dragScroll.isOnDragThreshold == true) {
-
-          pointToDragThresholdY = el._misc.dragScroll.verticalDirection == "up" ? pointToDragThresholdY : pointToDragThresholdY * -1;
-          pointToDragThresholdX = el._misc.dragScroll.horizontalDirection == "left" ? pointToDragThresholdX : pointToDragThresholdX * -1;
-
-          el._misc.dragScroll.currentY = e.clientY;
-          el._misc.dragScroll.currentX = e.clientX;
-
-          el._misc.dragScroll.isOnDragThreshold = false;
-
-        }
-
-      },
-      /*
-      @function (private) _handleDrag
-      @description Handles the scrolling when dragging
-      @param {Object} e [Event]
-      */
-      handleDrag: function (e) {
-
-        var el = this;
-
-        el._misc.direction = undefined;
-
-        var verticalScrollPosition, horizontalScrollPosition;
-
-        if (e.clientY != el._misc.dragScroll.currentY && el._misc.vertical.created) {
-
-          verticalScrollPosition = el._getVerticalScrollPosition(e);
-
-          el._updateVerticalPosition(verticalScrollPosition);
-          el._updateVerticalBarPosition(el._misc.vertical.position);
-
-          el._misc.direction = "vertical";
-
-        }
-
-        if (e.clientX != el._misc.dragScroll.currentX && el._misc.horizontal.created) {
-
-          horizontalScrollPosition = el._getHorizontalScrollPosition(e);
-
-          el._updateHorizontalPosition(horizontalScrollPosition);
-          el._updateHorizontalBarPosition(el._misc.horizontal.position);
-
-        }
-
-        el.showScrollbars();
-
-        el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-
-        el._misc.dragScroll.currentX = e.clientX;
-        el._misc.dragScroll.currentY = e.clientY;
-
-        //Trigger the scroll event
-        if (el._misc.direction) {
-          var eventObject = el._createScrollEventObject("drag");
-          vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
-        }
-
-      },
-      /*
-      @function (private) _handleDirection
-      @description Handles and updates the current direction of the scroll
-      @param {Object} e [Event]
-      */
-      handleDirection: function (e) {
-
-        var el = this;
-
-        var newVerticalDirection = e.clientY > el._misc.dragScroll.currentY ? "up" : "down";
-        var newHorizontalDirection = e.clientX > el._misc.dragScroll.currentX ? "left" : "right";
-
-        el._misc.dragScroll.verticalDirection = e.clientY > el._misc.dragScroll.initialY ? "up" : "down";
-        el._misc.dragScroll.horizontalDirection = e.clientX > el._misc.dragScroll.initialX ? "left" : "right";
-
-      },
-      /*
-      @function (private) {Number} _getHorizontalScrollPosition
-      @description Returns the horizontal scroll position
-      @param {Object} e [Event]
-      */
-      getHorizontalScrollPosition: function (e) {
-
-        var el = this;
-
-        var horizontalScrollAmount = e.clientX - el._misc.dragScroll.currentX;
-        var horizontalScrollPosition = el._misc.horizontal.position + horizontalScrollAmount;
-
-        horizontalScrollPosition = horizontalScrollPosition > 0 ? 0 : horizontalScrollPosition;
-        horizontalScrollPosition = horizontalScrollPosition + el.content.scrollWidth < el.offsetWidth ? el.offsetWidth - el.content.scrollWidth : horizontalScrollPosition;
-
-        return horizontalScrollPosition;
-
-      },
-      /*
-      @function (private) {Number} _getVerticalScrollPosition
-      @description Returns the vertical scroll position
-      @param {Object} e [Event]
-      */
-      getVerticalScrollPosition: function (e) {
-
-        var el = this;
-
-        var verticalScrollAmount = el._misc.dragScroll.currentY - e.clientY;
-        var verticalScrollPosition = el._misc.vertical.position - verticalScrollAmount;
-
-        verticalScrollPosition = verticalScrollPosition > 0 ? 0 : verticalScrollPosition;
-        verticalScrollPosition = verticalScrollPosition + el.content.scrollHeight < el.offsetHeight ? el.offsetHeight - el.content.scrollHeight : verticalScrollPosition;
-
-        return verticalScrollPosition;
-
-      },
-      /*
       @function (private) _setupScrollbars
       @description Manages the first call to the scrollbar setups
       */
@@ -978,7 +658,7 @@
 
                 var scrollAmount = el.content.scrollHeight * (barHeight / railHeight);
                 var currentVerticalPosition = el._misc.vertical.position;
-                var limit = el.offsetHeight - el.content.scrollHeight;
+                var limit = el._getVerticalScrollLimit();
 
                 var shouldStop = parseFloat(barTop) + barHeight > e.clientY && e.clientY > parseFloat(barTop);
 
@@ -994,7 +674,7 @@
 
                   //If the scroll has changed we trigger the callback
                   if (currentVerticalPosition != verticalPosition) {
-                    el._railScrollAnimation(el._misc.horizontal.position, verticalPosition);
+                    el._animateScroll({ horizontal: el._misc.horizontal.position, vertical: verticalPosition, trigger: "rail" });
                   }
 
                 }
@@ -1083,7 +763,7 @@
 
                 var scrollAmount = el.content.scrollWidth * (barWidth / railWidth);
                 var currentHorizontalPosition = el._misc.horizontal.position;
-                var limit = el.offsetWidth - el.content.scrollWidth;
+                var limit = el._getHorizontalScrollLimit();
 
                 var shouldStop = parseFloat(barLeft) + barWidth > e.clientX && e.clientX > parseFloat(barLeft);
 
@@ -1097,7 +777,7 @@
 
                   //If the scroll has changed we trigger the callback
                   if (currentHorizontalPosition != horizontalPosition) {
-                    el._railScrollAnimation(horizontalPosition, el._misc.vertical.position);
+                    el._animateScroll({ horizontal: horizontalPosition, vertical: el._misc.vertical.position, trigger: "rail" });
                   };
 
                 }
@@ -1121,13 +801,6 @@
           vcomet.triggerCallback("onHorizontalScrollCreated", el, el, [el._refs.horizontalScroll]);
         }
 
-      },
-      /*
-      @function (private) _railScrollAnimation
-      @description Handles the onScrolled called for each animation frame
-      */
-      railScrollAnimation: function (horizontal, vertical) {
-        this._animateScroll({ horizontal: horizontal, vertical: vertical, trigger: "rail" });
       },
       /*
       @function (private) _setupSquare
@@ -1158,6 +831,386 @@
         el._misc.square.created = true;
       },
       /*
+      @function (private) _setupDeviceTouchAction
+      @description function_description
+      @param {param_type} param_name [param_description]
+      */
+      setupDeviceTouchAction: function () {
+
+        var el = this;
+
+        if (vcomet.util.isTrue(el.nativeOnDevice)) {
+
+          if (vcomet.util.isTouchScreen()) {
+
+            el._performScroll(0, 0);
+
+            el.removeAttribute("touch-action");
+            el.setAttribute("native", "true");
+
+            el.content.scrollTop = Math.abs(el._misc.vertical.position);
+            el.content.scrollLeft = Math.abs(el._misc.horizontal.position);
+
+          } else {
+
+            el.setAttribute("touch-action", "none");
+            el.removeAttribute("native");
+
+            if (el._misc.vertical.created == true) {
+              el._verticalUpdate(-el.content.scrollTop);
+            }
+
+            if (el._misc.horizontal.created == true) {
+              el._horizontalUpdate(-el.content.scrollLeft);
+            }
+
+          }
+
+
+        }
+
+      },
+      /*
+      @function (private) _definePublicScrollProperties
+      @description Creates definitions for scrollTop/scrollLeft properties
+      */
+      definePublicScrollProperties: function () {
+
+        var el = this;
+        var scrollTopDescriptor = {};
+        var scrollLeftDescriptor = {};
+
+        // ScrollTop property descriptor
+        scrollTopDescriptor.get = function () {
+          return Math.abs(el._misc.vertical.position);
+        };
+
+        scrollTopDescriptor.set = function (value) {
+
+          var transition = false;
+          var verticalPosition;
+
+          if (value.constructor === Array) {
+            verticalPosition = value[0];
+            transition = value[1];
+          } else {
+            verticalPosition = value;
+          }
+
+          el.scrollTo(verticalPosition, Math.abs(el._misc.horizontal.position), transition);
+
+        };
+
+        // ScrollLeft property descriptor
+        scrollLeftDescriptor.get = function () {
+          return Math.abs(el._misc.horizontal.position);
+        };
+
+        scrollLeftDescriptor.set = function (value) {
+
+          var transition = false;
+          var horizontalPosition;
+
+          if (value.constructor === Array) {
+            horizontalPosition = value[0];
+            transition = value[1];
+          } else {
+            horizontalPosition = value;
+          }
+
+          el.scrollTo(Math.abs(el._misc.vertical.position), horizontalPosition, transition);
+
+        };
+
+        // Defines scrollTop, scrollLeft properties to trigger our functions
+        Object.defineProperty(el, "scrollTop", scrollTopDescriptor);
+        Object.defineProperty(el, "scrollLeft", scrollLeftDescriptor);
+
+      },
+      /*
+      @function (private) _setupFragmentForSourceNodes
+      @description Reads all the source nodes and appends them to a fragment
+      */
+      moveSourceToContent: function () {
+
+        var sourceNodes = this.getSourceElements();
+        var content = this.template.querySelector(".vc-scroll-content");
+
+        for (var i = 0; i < sourceNodes.length; i++) {
+          content.appendChild(sourceNodes[i]);
+        }
+
+      },
+      /*
+      @function (private) _restartOrigin
+      @description Restarts the origin point from which we will base our drag up calculations
+      @param {Object} e [Event]
+      */
+      restartOrigin: function (e) {
+
+        var el = this;
+        var currentTimestamp = +new Date();
+
+        // If when moved the user has exceeded the established amount of time for him to release we refresh all the values as if starting again the scroll
+        if ((currentTimestamp - el._misc.dragScroll.timeStamp) > el._misc.dragScroll.downRefreshRate) {
+
+          // Sets the initial pointer values
+          el._misc.dragScroll.initialX = e.clientX;
+          el._misc.dragScroll.initialY = e.clientY;
+
+          // Sets the current pointer values, these ones will be updated on each pointer move
+          el._misc.dragScroll.currentX = e.clientX;
+          el._misc.dragScroll.currentY = e.clientY;
+
+          // DragThreshold variables declaration
+          el._misc.dragScroll.dragThresholdX = e.clientX;
+          el._misc.dragScroll.dragThresholdY = e.clientY;
+          el._misc.dragScroll.isOnDragThreshold = true;
+
+          // Timestamp of the moment the user started the scroll
+          el._misc.dragScroll.timeStamp = currentTimestamp;
+
+        }
+
+      },
+      /*
+      @function (private) _handleScrollToRequest
+      @description Handles the scroll to request
+      @param {Number} verticalPosition
+      @param {Number} horizontalPosition
+      @param {Boolean} transition [Whether the user wants a transition while scrolling to the request position]
+      */
+      handleScrollToRequest: function (verticalPosition, horizontalPosition, transition) {
+        
+        var el = this;
+
+        verticalPosition = verticalPosition ? verticalPosition : el._misc.vertical.position;
+        horizontalPosition = horizontalPosition ? horizontalPosition : el._misc.horizontal.position;
+
+        el._verticalUpdate(-Math.abs(verticalPosition));
+        el._horizontalUpdate(-Math.abs(horizontalPosition));
+
+        // It adds it back if the user requested so and prepares what we need to call the "onScrolled" callback for every animationFrame
+        if (transition) {
+
+          el._animateScroll({ vertical: el._misc.vertical.position, horizontal:  el._misc.horizontal.position, trigger: "requested" });
+
+        } else {
+
+          el.classList.remove("active-transitions");
+          el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
+          vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("requested")]);
+
+        }
+
+      },
+      /*
+      @function (private) _handleNativeScrollToRequest
+      @description Handles the scroll to request for the native situation
+      @param {Number} verticalPosition
+      @param {Number} horizontalPosition
+      @param {Boolean} transition [Whether the user wants a transition while scrolling to the request position]
+      */
+      handleNativeScrollToRequest: function (verticalPosition, horizontalPosition, transition) {
+
+        var el = this;
+
+        if (!transition) {
+
+          el.content.scrollTop = verticalPosition;
+          el.content.scrollLeft = horizontalPosition;
+
+          el._verticalUpdate(-el.content.scrollTop);
+          el._horizontalUpdate(-el.content.scrollLeft);
+
+        } else {
+
+          var keepGoing = false;
+          var duration = 400;
+          var endTime = +new Date() + duration;
+
+          var vEnd = verticalPosition > el.content.scrollHeight ? el.content.scrollHeight : verticalPosition;
+          var hEnd = verticalPosition > el.content.scrollWidth ? el.content.scrollWidth : horizontalPosition;
+
+          var vAmount = verticalPosition - el.content.scrollTop;
+          var hAmount = horizontalPosition - el.content.scrollLeft;
+
+          el._verticalUpdate(-vEnd);
+          el._horizontalUpdate(-hEnd);
+
+          el._misc.native.initialY = el.content.scrollTop;
+          el._misc.native.initialX = el.content.scrollLeft;
+
+          var easeScrollAnimation = function () {
+
+            // Get animation progress
+            var currentTime = +new Date();
+            var remaining = (endTime - currentTime);
+            var rate = remaining / duration;
+
+            // This makes the reate to change in an EASE way
+            rate = 1 - Math.pow(rate, 3);
+
+            // Do some animation
+            keepGoing = el._handleNativeEaseAnimation(rate, vAmount, hAmount);
+
+            if (keepGoing) {
+              el._misc.native.easeAnimationFrame = window.requestAnimationFrame(easeScrollAnimation);
+            }
+
+          };
+
+          easeScrollAnimation();
+
+        }
+
+      },
+      /*
+      @function (private) _handleInertThreshold
+      @description Handles whether the user has left the inert threshold
+      @param {Object} e [Event]
+      */
+      handleInertThreshold: function (e) {
+
+        var el = this;
+
+        var pointToinertThresholdY = el._misc.dragScroll.inertThresholdY > e.clientY ? el._misc.dragScroll.inertThresholdY - e.clientY : e.clientY - el._misc.dragScroll.inertThresholdY;
+        var pointToinertThresholdX = el._misc.dragScroll.inertThresholdX > e.clientX ? el._misc.dragScroll.inertThresholdX - e.clientX : e.clientX - el._misc.dragScroll.inertThresholdX;
+
+        if ((pointToinertThresholdY > el._misc.dragScroll.inertThresholdRadius || pointToinertThresholdX > el._misc.dragScroll.inertThresholdRadius) && el._misc.dragScroll.isOnInertThreshold == true) {
+
+          pointToinertThresholdY = el._misc.dragScroll.verticalDirection == "up" ? pointToinertThresholdY : pointToinertThresholdY * -1;
+          pointToinertThresholdX = el._misc.dragScroll.horizontalDirection == "left" ? pointToinertThresholdX : pointToinertThresholdX * -1;
+
+          el._misc.dragScroll.currentY = el._misc.dragScroll.currentY + pointToinertThresholdY;
+          el._misc.dragScroll.currentX = el._misc.dragScroll.currentX + pointToinertThresholdX;
+
+          el._misc.dragScroll.isOnInertThreshold = false;
+
+        }
+
+      },
+      /*
+      @function (private) _handleDragThreshold
+      @description Handles whether the user has left the drag threshold
+      @param {Object} e [Event]
+      */
+      handleDragThreshold: function (e) {
+
+        var el = this;
+
+        var pointToDragThresholdY = el._misc.dragScroll.dragThresholdY > e.clientY ? el._misc.dragScroll.dragThresholdY - e.clientY : e.clientY - el._misc.dragScroll.dragThresholdY;
+        var pointToDragThresholdX = el._misc.dragScroll.dragThresholdX > e.clientX ? el._misc.dragScroll.dragThresholdX - e.clientX : e.clientX - el._misc.dragScroll.dragThresholdX;
+
+        if ((pointToDragThresholdY > el._misc.dragScroll.dragThresholdRadius || pointToDragThresholdX > el._misc.dragScroll.dragThresholdRadius) && el._misc.dragScroll.isOnDragThreshold == true) {
+
+          pointToDragThresholdY = el._misc.dragScroll.verticalDirection == "up" ? pointToDragThresholdY : pointToDragThresholdY * -1;
+          pointToDragThresholdX = el._misc.dragScroll.horizontalDirection == "left" ? pointToDragThresholdX : pointToDragThresholdX * -1;
+
+          el._misc.dragScroll.currentY = e.clientY;
+          el._misc.dragScroll.currentX = e.clientX;
+
+          el._misc.dragScroll.isOnDragThreshold = false;
+
+        }
+
+      },
+      /*
+      @function (private) _handleDrag
+      @description Handles the scrolling when dragging
+      @param {Object} e [Event]
+      */
+      handleDrag: function (e) {
+
+        var el = this;
+
+        el._misc.direction = undefined;
+
+        var verticalScrollPosition, horizontalScrollPosition;
+
+        if (e.clientY != el._misc.dragScroll.currentY && el._misc.vertical.created) {
+
+          verticalScrollPosition = el._getVerticalScrollPosition(e);
+          el._verticalUpdate(verticalScrollPosition);
+
+          el._misc.direction = "vertical";
+
+        }
+
+        if (e.clientX != el._misc.dragScroll.currentX && el._misc.horizontal.created) {
+
+          horizontalScrollPosition = el._getHorizontalScrollPosition(e);
+          el._horizontalUpdate(horizontalScrollPosition);
+
+        }
+
+        el.showScrollbars();
+
+        el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
+
+        el._misc.dragScroll.currentX = e.clientX;
+        el._misc.dragScroll.currentY = e.clientY;
+
+        //Trigger the scroll event
+        if (el._misc.direction) {
+          var eventObject = el._createScrollEventObject("drag");
+          vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
+        }
+
+      },
+      /*
+      @function (private) _handleDirection
+      @description Handles and updates the current direction of the scroll
+      @param {Object} e [Event]
+      */
+      handleDirection: function (e) {
+
+        var el = this;
+
+        var newVerticalDirection = e.clientY > el._misc.dragScroll.currentY ? "up" : "down";
+        var newHorizontalDirection = e.clientX > el._misc.dragScroll.currentX ? "left" : "right";
+
+        el._misc.dragScroll.verticalDirection = e.clientY > el._misc.dragScroll.initialY ? "up" : "down";
+        el._misc.dragScroll.horizontalDirection = e.clientX > el._misc.dragScroll.initialX ? "left" : "right";
+
+      },
+      /*
+      @function (private) {Number} _getHorizontalScrollPosition
+      @description Returns the horizontal scroll position
+      @param {Object} e [Event]
+      */
+      getHorizontalScrollPosition: function (e) {
+
+        var el = this;
+
+        var horizontalScrollAmount = e.clientX - el._misc.dragScroll.currentX;
+        var horizontalScrollPosition = el._misc.horizontal.position + horizontalScrollAmount;
+
+        horizontalScrollPosition = horizontalScrollPosition > 0 ? 0 : horizontalScrollPosition;
+        horizontalScrollPosition = horizontalScrollPosition + el.content.scrollWidth < el.offsetWidth ? el.offsetWidth - el.content.scrollWidth : horizontalScrollPosition;
+
+        return horizontalScrollPosition;
+
+      },
+      /*
+      @function (private) {Number} _getVerticalScrollPosition
+      @description Returns the vertical scroll position
+      @param {Object} e [Event]
+      */
+      getVerticalScrollPosition: function (e) {
+
+        var el = this;
+
+        var verticalScrollAmount = el._misc.dragScroll.currentY - e.clientY;
+        var verticalScrollPosition = el._misc.vertical.position - verticalScrollAmount;
+
+        verticalScrollPosition = verticalScrollPosition > 0 ? 0 : verticalScrollPosition;
+        verticalScrollPosition = verticalScrollPosition + el.content.scrollHeight < el.offsetHeight ? el.offsetHeight - el.content.scrollHeight : verticalScrollPosition;
+
+        return verticalScrollPosition;
+
+      },
+      /*
       @function (private) _handleArrowScroll
       @description Handles the scrolling of the arrow
       @param {Object} e [Event]
@@ -1181,10 +1234,8 @@
 
               el._misc.vertical.position = currentVerticalPosition + el._misc.arrowScrollAmount < 0 ? currentVerticalPosition + el._misc.arrowScrollAmount : 0;
 
-              el._updateVerticalPosition(el._misc.vertical.position);
+              el._verticalUpdate(el._misc.vertical.position);
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-              el._updateVerticalBarPosition(el._misc.vertical.position);
-
               el.showScrollbars(el._misc.hideScrollbarsMs);
 
               //If the scroll has changed we trigger the callback
@@ -1199,14 +1250,12 @@
             scrollFunction = function () {
 
               var currentVerticalPosition = el._misc.vertical.position;
-              var limit = el.offsetHeight - el.content.scrollHeight;
+              var limit = el._getVerticalScrollLimit();
 
               el._misc.vertical.position = currentVerticalPosition - el._misc.arrowScrollAmount > limit ? currentVerticalPosition - el._misc.arrowScrollAmount : limit;
 
-              el._updateVerticalPosition(el._misc.vertical.position);
+              el._verticalUpdate(el._misc.vertical.position);
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-              el._updateVerticalBarPosition(el._misc.vertical.position);
-
               el.showScrollbars(el._misc.hideScrollbarsMs);
 
               ///If the scroll has changed we trigger the callback
@@ -1222,10 +1271,8 @@
 
               var currentHorizontalPosition = el._misc.horizontal.position;
 
-              el._updateHorizontalPosition(currentHorizontalPosition + el._misc.arrowScrollAmount < 0 ? currentHorizontalPosition + el._misc.arrowScrollAmount : 0);
+              el._horizontalUpdate(currentHorizontalPosition + el._misc.arrowScrollAmount < 0 ? currentHorizontalPosition + el._misc.arrowScrollAmount : 0);
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-              el._updateHorizontalBarPosition(el._misc.horizontal.position);
-
               el.showScrollbars(el._misc.hideScrollbarsMs);
 
               //If the scroll has changed we trigger the callback
@@ -1240,12 +1287,10 @@
             scrollFunction = function () {
 
               var currentHorizontalPosition = el._misc.horizontal.position;
-              var limit = el.offsetWidth - el.content.scrollWidth;
+              var limit = el._getHorizontalScrollLimit();
 
-              el._updateHorizontalPosition(currentHorizontalPosition - el._misc.arrowScrollAmount > limit ? currentHorizontalPosition - el._misc.arrowScrollAmount : limit);
+              el._horizontalUpdate(currentHorizontalPosition - el._misc.arrowScrollAmount > limit ? currentHorizontalPosition - el._misc.arrowScrollAmount : limit);
               el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-              el._updateHorizontalBarPosition(el._misc.horizontal.position);
-
               el.showScrollbars(el._misc.hideScrollbarsMs);
 
               //If the scroll has changed we trigger the callback
@@ -1313,16 +1358,8 @@
           }
 
           // Update the transform values
-          el._updateVerticalPosition(verticalScrollPosition);
-          el._updateHorizontalPosition(horizontalScrollPosition);
-
-          if (el._misc.vertical.created) {
-            el._updateVerticalBarPosition(el._misc.vertical.position);
-          }
-
-          if (el._misc.horizontal.created) {
-            el._updateHorizontalBarPosition(el._misc.horizontal.position);
-          }
+          el._verticalUpdate(verticalScrollPosition);
+          el._horizontalUpdate(horizontalScrollPosition);
 
           el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
 
@@ -1392,52 +1429,6 @@
         }
       },
       /*
-      @function (private) setupDeviceTouchAction
-      @description function_description
-      @param {param_type} param_name [param_description]
-      */
-      setupDeviceTouchAction: function () {
-
-        var el = this;
-
-        if (vcomet.util.isTrue(el.nativeOnDevice)) {
-
-          if (vcomet.util.isTouchScreen()) {
-
-            el._performScroll(0, 0);
-
-            el.removeAttribute("touch-action");
-            el.setAttribute("native", "true");
-
-            el.content.scrollTop = Math.abs(el._misc.vertical.position);
-            el.content.scrollLeft = Math.abs(el._misc.horizontal.position);
-
-          } else {
-
-            el.setAttribute("touch-action", "none");
-            el.removeAttribute("native");
-
-            if (el._misc.vertical.created == true) {
-
-              el._updateVerticalPosition(-el.content.scrollTop);
-              el._updateVerticalBarPosition(el.content.scrollTop);
-
-            }
-
-            if (el._misc.horizontal.created == true) {
-
-              el._updateHorizontalPosition(-el.content.scrollLeft);
-              el._updateHorizontalBarPosition(el.content.scrollLeft);
-
-            }
-
-          }
-
-
-        }
-
-      },
-      /*
       @function (private) _handleScrollResize
       @description Handles the scroll resizes when the contents size has changed
       */
@@ -1471,8 +1462,8 @@
 
               //If we have verticalScroll
               if (hasVerticalScroll || (!hasVerticalScroll && el._misc.vertical.translatePercentage != 0)) {
-
-                var scrollLimit = el.content.scrollHeight - el.content.offsetHeight;
+                
+                var scrollLimit = el._getVerticalScrollLimit();
                 var proportionalTranslatePosition = (scrollLimit * el._misc.vertical.translatePercentage) / 100;
 
                 proportionalTranslatePosition = proportionalTranslatePosition > scrollLimit ? scrollLimit : proportionalTranslatePosition;
@@ -1482,8 +1473,7 @@
                 el._handleVerticalScrollLength();
                 el._refs.verticalScroll.classList.add("vc-scroll-active");
 
-                el._updateVerticalPosition(-proportionalTranslatePosition);
-                el._updateVerticalBarPosition(el._misc.vertical.position);
+                el._verticalUpdate(-proportionalTranslatePosition);
 
                 if (el._misc.vertical.drag.active == true || el._misc.vertical.drag.active == "true") {
                   el._handleVerticalDrag(el._misc.mouse.clientY);
@@ -1535,7 +1525,7 @@
 
               if (hasHorizontalScroll || (!hasHorizontalScroll && el._misc.horizontal.translatePercentage != 0)) {
 
-                var scrollLimit = el.content.scrollWidth - el.content.offsetWidth;
+                var scrollLimit = el._getHorizontalScrollLimit();
                 var proportionalTranslatePosition = (scrollLimit * el._misc.horizontal.translatePercentage) / 100;
 
                 proportionalTranslatePosition = proportionalTranslatePosition > scrollLimit ? scrollLimit : proportionalTranslatePosition;
@@ -1546,8 +1536,7 @@
                 el._refs.horizontalScroll.classList.add("vc-scroll-active");
                 el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth))) + "px";
 
-                el._updateHorizontalPosition(-proportionalTranslatePosition);
-                el._updateHorizontalBarPosition(el._misc.horizontal.position);
+                el._horizontalUpdate(-proportionalTranslatePosition);
 
                 if (el._misc.horizontal.drag.active == true || el._misc.horizontal.drag.active == "true") {
                   el._handleHorizontalDrag(el._misc.mouse.clientX);
@@ -1625,7 +1614,7 @@
         // Only do something if we are actually being scrolled
         if (scrollPosition != previousPosition) {
           e.stopPropagation();
-          el._wheelScrollAnimation(scrollPosition);
+          el._animateScroll({ vertical: scrollPosition, trigger: "wheel" });
         }
 
       },
@@ -1677,8 +1666,7 @@
 
           el._misc.vertical.position = -proportionalScrollTop;
 
-          el._updateVerticalPosition(el._misc.vertical.position);
-
+          el._verticalUpdate(el._misc.vertical.position);
           el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
 
           //If the scroll has changed we trigger the callback
@@ -1690,18 +1678,20 @@
         }
 
       },
-      wheelScrollAnimation: function (position) {
-        this._animateScroll({ vertical: position, trigger: "wheel" });
-      },
-      animateScroll: function (info) {
+      /*
+      @function (private) _animateScroll
+      @description Animates a scroll request and triggers onScrolled event for each animationFrame
+      @param {Object} scrollObj
+      */
+      animateScroll: function (scrollObj) {
 
         var el = this;
 
-        var verticalMovement = el._misc.vertical.position > info.vertical ? "forward" : "backward";
-        var horizontalMovement = el._misc.horizontal.position > info.horizontal ? "forward" : "backward";
-        var verticalPosition = info.hasOwnProperty("vertical") ? info.vertical : el._misc.vertical.position;
-        var horizontalPosition = info.hasOwnProperty("horizontal") ? info.horizontal : el._misc.horizontal.position;
-        
+        var verticalMovement = el._misc.vertical.position > scrollObj.vertical ? "forward" : "backward";
+        var horizontalMovement = el._misc.horizontal.position > scrollObj.horizontal ? "forward" : "backward";
+        var verticalPosition = scrollObj.hasOwnProperty("vertical") ? scrollObj.vertical : el._misc.vertical.position;
+        var horizontalPosition = scrollObj.hasOwnProperty("horizontal") ? scrollObj.horizontal : el._misc.horizontal.position;
+
         var transitionEndFunction, eventObject, watcher;
 
         window.cancelAnimationFrame(el._misc.transition.animationFrame);
@@ -1722,7 +1712,7 @@
             el._misc.transition.lastHorizontalPosition = Math.abs(el._misc.horizontal.position);
 
             if (triggerOnScrolled) {
-              vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject(info.trigger)]);
+              vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject(scrollObj.trigger)]);
             }
 
             el.content.removeEventListener("transitionend", el._misc.transition.transitionEndFunction);
@@ -1733,19 +1723,16 @@
 
         el.content.addEventListener("transitionend", el._misc.transition.transitionEndFunction);
 
-        el._updateVerticalPosition(verticalPosition);
-        el._updateHorizontalPosition(horizontalPosition);
+        el._verticalUpdate(verticalPosition);
+        el._horizontalUpdate(horizontalPosition);
 
         el._performScroll(horizontalPosition, verticalPosition);
-
-        el._updateVerticalBarPosition(verticalPosition);
-        el._updateHorizontalBarPosition(horizontalPosition);
 
         watcher = function () {
 
           var currentVertical = el._getCurrentVertical(verticalMovement);
           var currentHorizontal = el._getCurrentHorizontal(horizontalMovement);
-          
+
           var validVerticalForward = (verticalMovement == "forward" && currentVertical <= Math.abs(el._misc.vertical.position));
           var validVerticalBackward = (verticalMovement == "backward" && currentVertical >= Math.abs(el._misc.vertical.position));
           var validVertical = validVerticalForward || validVerticalBackward;
@@ -1763,7 +1750,7 @@
             var needsBackwardAvoiding = currentVertical >= el._misc.transition.lastPosition;
 
             eventObject = {};
-            eventObject.trigger = info.trigger;
+            eventObject.trigger = scrollObj.trigger;
             eventObject.scrollTop = currentVertical;
             eventObject.scrollLeft = currentHorizontal;
 
@@ -1798,7 +1785,7 @@
       @param {Object} e [Event]
       */
       handleHorizontalDrag: function (e) {
-      
+
         var el = this;
         var currentHorizontalPosition = el._misc.horizontal.position;
 
@@ -1831,14 +1818,14 @@
 
             finalBarLeftPosition = parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] - el._refs.horizontalBar.offsetWidth)
           }
-         
+
           el._refs.horizontalBar.style.transform = "translate3d(" + finalBarLeftPosition + "px, 0, 0)";
 
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
           barLeftProportion = parseFloat(el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / (parseFloat(horizontalBarLeft))
           proportionalScrollLeft = (parseFloat(el.content.scrollWidth - el.offsetWidth) / barLeftProportion);
 
-          el._updateHorizontalPosition(-proportionalScrollLeft);
+          el._horizontalUpdate(-proportionalScrollLeft);
           el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
 
           //If the scroll has changed we trigger the callback
@@ -2172,43 +2159,51 @@
 
       },
       /*
-      @function updateHorizontalPosition
+      @function (private) _horizontalUpdate
       @description Updates the horizontal scroll to the given position
       @param {Number} translatePosition
       */
-      updateHorizontalPosition: function (translatePosition) {
+      horizontalUpdate: function (translatePosition) {
 
         var el = this;
         var scrollLimit, currentScroll, translatePercentage;
 
         if (el._misc.horizontal.created) {
 
-          scrollLimit = el.content.scrollWidth - el.content.offsetWidth
+          scrollLimit = el._getHorizontalScrollLimit();
           currentScroll = translatePosition < 0 ? translatePosition * -1 : translatePosition;
           translatePercentage = (currentScroll / scrollLimit) * 100;
 
           el._misc.horizontal.position = isNaN(translatePosition) ? 0 : translatePosition;
           el._misc.horizontal.translatePercentage = isNaN(translatePercentage) ? 0 : translatePercentage;
 
+          el._updateHorizontalBarPosition(el._misc.horizontal.position);
+
         }
 
       },
       /*
-      @function updateVerticalPosition
+      @function (private) _verticalUpdate
       @description Updates the vertical scroll to the given position
       @param {Number} translatePosition
       */
-      updateVerticalPosition: function (translatePosition) {
+      verticalUpdate: function (translatePosition) {
 
         var el = this;
         var scrollLimit, currentScroll, translatePercentage;
 
-        scrollLimit = el.content.scrollHeight - el.content.offsetHeight
-        currentScroll = translatePosition < 0 ? translatePosition * -1 : translatePosition;
-        translatePercentage = (currentScroll / scrollLimit) * 100;
+        if (el._misc.vertical.created) {
 
-        el._misc.vertical.position = isNaN(translatePosition) ? 0 : translatePosition;
-        el._misc.vertical.translatePercentage = isNaN(translatePercentage) ? 0 : translatePercentage;
+          scrollLimit = el._getVerticalScrollLimit();
+          currentScroll = translatePosition < 0 ? translatePosition * -1 : translatePosition;
+          translatePercentage = (currentScroll / scrollLimit) * 100;
+          
+          el._misc.vertical.position = isNaN(translatePosition) ? 0 : translatePosition;
+          el._misc.vertical.translatePercentage = isNaN(translatePercentage) ? 0 : translatePercentage;
+          
+          el._updateVerticalBarPosition(el._misc.vertical.position);
+
+        }
 
       },
       /*
@@ -2225,7 +2220,7 @@
         } else {
           limit = el.scrollHeight - el.offsetHeight;
         }
-
+        
         return limit;
       },
       /*
@@ -2265,22 +2260,6 @@
         }
 
         return returnBoolean;
-      },
-      /*
-      @function (private) _setupContainerPosition
-      @description Since we need our container to have a position different from static to work,
-       we set relative if no position was provided to the container or its static
-      */
-      setupContainerPosition: function () {
-
-        var el = this;
-
-        if (vcomet.util.isTrue(el.fillContainer)) {
-          if (window.getComputedStyle(el._refs.container, false).position == "static") {
-            el._refs.container.style.position = "relative";
-          }
-        }
-
       },
       /*
       @function (private) _updateThickness
@@ -2417,9 +2396,9 @@
 
       },
       /*
-    @function addNodeToPreventDragScroll
-    @description Request from the user to add a node to the array
-    @param {Object} node
+      @function addNodeToPreventDragScroll
+      @description Request from the user to add a node to the array
+      @param {Object} node
      */
       addNodeToPreventDragScroll: function (node) {
 
@@ -2494,13 +2473,6 @@
 
         }, miliseconds);
 
-      },
-      /*
-      @function stop
-      @description Cancel drag-release scrolling
-      */
-      stop: function () {
-        window.cancelAnimationFrame(this._misc.dragScroll.easeAnimationFrame);
       }
     },
     onCreated: function () {
@@ -2514,7 +2486,7 @@
 
       el._initMisc();
       el._setupContent();
-
+      el._definePublicScrollProperties();
 
     },
     onInit: function () {
