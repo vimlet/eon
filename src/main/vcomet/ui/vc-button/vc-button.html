@@ -110,12 +110,20 @@
 
             // When the button text is dynamically changed
           } else {
-
             var oldText = button.querySelector(".vc-button-buttonText");
-            buttonText.innerHTML = label;
-            var newText = buttonText;
-            newText.classList.add("vc-button-buttonText");
-            button.replaceChild(newText, oldText);
+
+            if (!oldText) {
+              buttonText.innerHTML = label;
+              button.appendChild(buttonText);
+              buttonText.classList.add("vc-button-buttonText");
+
+            } else {
+              buttonText.innerHTML = label;
+              var newText = buttonText;
+              newText.classList.add("vc-button-buttonText");
+              button.replaceChild(newText, oldText);
+            }
+
           }
 
         }
@@ -123,7 +131,6 @@
         // When the button has no text is added an attribute
         // so if the button has icon it will be placed centered
         (!label) ? el.setAttribute("text", "false") : el.setAttribute("text", "true");
-
       },
       /*
         @function (private) _setupIcon
@@ -132,7 +139,7 @@
       */
       setupIcon: function () {
         var el = this;
-        
+
         if (el.icon) {
           var button = el.querySelector(".vc-button-button");
           var iconAttribute = el.icon;
