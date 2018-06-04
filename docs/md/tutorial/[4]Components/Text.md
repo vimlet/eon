@@ -48,18 +48,18 @@ If the type is not specified to the element, it will proceed as a "text" type, w
     <vc-text name="myText">Enabled</vc-text>
 ```
 
-### Password type text with counter
+### Area type text with counter
 
-The password text is pretty similar to the text type but it shows asterisks instead of the written text, for this example the counter was also enabled as it may be convenient to know how long the typed password is, we also specified a placeholder.
-
-``` [html]
-    <vc-text name="myPassword" placeholder="Write your password here" type="password" counter="true"></vc-text>
-```
-
-### Area type text with counter and length limit
-
-The area text enables the user to write large amount of characters in multiple lines, for this example the counter was also enabled as well as a max-length and area-height were specified.
+The area type text enables the user to write large amount of characters in multiple lines, for this example the counter was also enabled as well as an area-height were specified.
 
 ``` [html]
     <vc-text name="myArea" type="area" counter="true" max-length="300" area-height="150"></vc-text>
+```
+
+### Password type text with counter and length limit
+
+The password text is pretty similar to the text type but it shows asterisks instead of the written text, for this example the counter was also enabled as it may be convenient to know how long the typed password is ass well as max-length for the user , we also specified a placeholder.
+
+``` [html]
+    <vc-text name="myPassword" placeholder="Write your password here" type="password" counter="true"></vc-text>
 ```
