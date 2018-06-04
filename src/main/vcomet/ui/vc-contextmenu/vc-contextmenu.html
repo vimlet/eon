@@ -1,6 +1,6 @@
 <template>
     <div class="vc-contextmenu-wrapper">
-        <div class="vc-contextmenu-container vc-bg2-boxshadow">
+        <div class="vc-contextmenu-container vc-bg2 vc-bg2-boxshadow">
             <!-- Only small devices -->
             <div class="vc-contextmenu-close vc-bg2">
                 <i class="vc-contextmenu-closeIcon vicon vicon-close"></i>
@@ -111,7 +111,6 @@
                 }
 
                 // Long touch event functionality
-                // if (el.getAttribute("data-version") == "smalldevice") {
                 if (el._refs.wrapper.dataset.version == "device") {
                     var onLongTouch;
                     var timer, lockerTimer;
@@ -290,25 +289,7 @@
             verifyScreenResolution: function () {
                 var el = this;
 
-                // TODO:
-                // Small devices view
-                // if (window.innerWidth <= vcomet.tabletWidth || navigator.userAgent.match(/Tablet|iPad|iPod/i)) {
                 el._refs.wrapper.dataset.version = (vcomet.util.isTouchScreen()) ? "device" : "desktop";
-                console.log(el._refs.wrapper.dataset.version);
-                // if (vcomet.util.isTouchScreen()) {
-                //     console.log('Small');
-                //     el._refs.wrapper.dataset.version = "smalldevice";
-
-                //     // Desktop view
-                // } else {
-                //     el.dataset.version = "desktop";
-                // }
-
-                // if (el.getAttribute("data-version") != el._lastDevice) {
-                //     el._lastDevice = el.getAttribute("data-version");
-                //     el._updateDeviceOptions();
-                // }
-
             },
 
 
@@ -367,6 +348,7 @@
                 // Contextmenu opened by a click event for the responsive functionality
                 if (typeof posX == "undefined" && typeof posY == "undefined") {
                     el._refs.wrapper.classList.add("vc-contextmenu-wrapper-visible", "vc-bg1-modal");
+                    
                     document.body.appendChild(el._refs.wrapper);
                     el._setResponsiveClose();
 
@@ -483,22 +465,20 @@
             });
 
             window.addEventListener("blur", function () {
-                //TODO: restore
-                // if (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) {
-                //     el.hide();
-                // }
+                if (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) {
+                    el.hide();
+                }
             });
 
             document.body.addEventListener("click", function () {
-                if (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible") && el._refs.wrapper.dataset.version == "desktop") {
+                if (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) {
                     el.hide();
                 }
             });
         },
 
         onWindowResize: function (event) {
-            // this._verifyScreenResolution();
-            if (this._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) {
+            if (this._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible") && this._refs.wrapper.dataset.version == "desktop") {
                 this.hide();
             }
         }
