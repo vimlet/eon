@@ -416,6 +416,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Check if other nodes are pending to be appended
         // This means that only the first node in this cycle will create the new onReady callback
         if (!el._misc.pendingNodes) {
+          
           vcomet.onReady(function(){
             var tree = el._refs.tree;
             var nodes = tree.children;
@@ -423,6 +424,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
             var orderFragment = document.createDocumentFragment();
             var x, y;
             var sortArray = [], elm;
+
             // Store object nodes into an array
             for (var i = 0; i < nodes.length; i++) {
               var node = nodes[i];
@@ -430,27 +432,23 @@ vcomet.element("vc-tree", "vc-tree.css", {
             }
             // Sort alphabetically
             sortArray.sort(function (a, b) {
-              x = a[0].toLowerCase();
-              y = b[0].toLowerCase();
-              if (x < y) {return -1;}
-              if (x > y) {return 1;}
-              return 0;
-            });
-            // Sort by type (Inverted alphabetic)
-            sortArray.sort(function (a, b) {
-              x = a[2].toLowerCase();
-              y = b[2].toLowerCase();
-              // Directories before files
-              if (x < y) {return -1;}
-              if (x > y) {return 1;}
-              return 0;
-            });
-            // Sort by order
-            sortArray.sort(function (a, b) {
-              var x = a[1];
-              var y = b[1];
-              if (x < y) { return -1; }
-              if (x > y) { return 1; }
+              // Order values
+              o1 = a[1];
+              o2 = b[1];
+              // Type values
+              t1 = a[2].toLowerCase();
+              t2 = b[2].toLowerCase();
+              // Name values
+              n1 = a[0].toLowerCase();
+              n2 = b[0].toLowerCase();
+              // Compare order
+              if (o1 > o2) {return -1;}
+              if (o1 < o2) {return 1;}
+              // Compare type 
+              if (t1 < t2) {return -1;}
+              if (t1 > t2) {return 1;}
+              // Ensure multiple languages accents correct sorting
+              return n1.localeCompare(n2);
               return 0;
             });
             // Append sorted nodes
