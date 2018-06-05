@@ -38,6 +38,15 @@
         reflect: true
       },
       /*
+        @property {Boolean} readonly 
+        @description Toggles the readonly status of the radio element
+        Default: false
+      */
+      readonly: {
+        value: false,
+        reflect: true
+      },
+      /*
         @property {Boolean} check
         @description Radio checked status
         Values can be: true or false
@@ -104,6 +113,21 @@
           this._refs.input.classList.add("vc-radio-disabledRadio");
 
         }
+      },
+
+      /*
+      @function (private) _updateReadonly
+      @description Updates readonly status
+      */
+      updateReadonly: function () {
+        var el = this;
+
+        if (vcomet.util.isTrue(el.readonly)) {
+          el._refs.input.setAttribute("readonly", "true");
+        } else {
+          el._refs.input.removeAttribute("readonly");
+        }
+
       },
 
       /*
@@ -190,12 +214,13 @@
 
       el._setValue();
       el._updateDisabled();
+      el._updateReadonly();
       el._setCheck();
       el.querySelector(".vc-radio-labelText").innerHTML = el.label;
 
       // Checking a radio option
       el._refs.label.addEventListener("click", function (e) {
-        (!vcomet.util.isTrue(el.disabled) || el.disabled == null) ? el._updateCheck() : null;
+        ((!vcomet.util.isTrue(el.disabled) && !vcomet.util.isTrue(el.readonly)) || el.disabled == null) ? el._updateCheck() : null;
 
       }, false);
     },
@@ -204,6 +229,9 @@
       switch (attrName) {
         case "disabled":
           this._updateDisabled();
+          break;
+        case "readonly":
+          this._updateReadonly();
           break;
         case "check":
           this._setCheck();
