@@ -46,6 +46,15 @@
                 reflect: true
             },
             /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the checkbox
+              Default: false
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
               @property {Boolean} checked 
               @description Checkbox checked status
               Values can be: true or false
@@ -128,6 +137,21 @@
                 }
             },
 
+            /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
+
+                if (vcomet.util.isTrue(el.readonly)) {
+                    el._refs.input.setAttribute("readonly", "true");
+                } else {
+                    el._refs.input.removeAttribute("readonly");
+                }
+
+            },
+
             /* 
               @function (private) _updateCheck
               @description Update checked status
@@ -189,13 +213,14 @@
                 // The click event is triggered by two elements, the real input and the
                 // visual custom element. So it is necessary to control one of the two elements
                 // fot not activate the action twice.
-                if (!vcomet.util.isTrue(el.disabled) && e.target.type !== "checkbox") {
+                if (!vcomet.util.isTrue(el.disabled) && !vcomet.util.isTrue(el.readonly) && e.target.type !== "checkbox") {
                     el.checked = vcomet.util.isTrue(el.checked) ? false : true;
                 }
 
             }, false);
 
             el._updateDisabled();
+            el._updateReadonly();
             el._updateCheck();
 
         },
@@ -204,6 +229,9 @@
             switch (attrName) {
                 case "disabled":
                     this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadonly();
                     break;
                 case "checked":
                     this._updateCheck();

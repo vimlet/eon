@@ -163,6 +163,8 @@
 
         el._misc.transition = {};
 
+        el._misc.vertical.translatePercentage = 0;
+        el._misc.horizontal.translatePercentage = 0;
       },
       /*
       @function (private) _setupMisc
@@ -2171,10 +2173,10 @@
         if (el._misc.horizontal.created) {
 
           scrollLimit = el._getHorizontalScrollLimit();
-          currentScroll = translatePosition < 0 ? translatePosition * -1 : translatePosition;
+          currentScroll = Math.abs(translatePosition) > scrollLimit ? scrollLimit : Math.abs(translatePosition);
           translatePercentage = (currentScroll / scrollLimit) * 100;
 
-          el._misc.horizontal.position = isNaN(translatePosition) ? 0 : translatePosition;
+          el._misc.horizontal.position = isNaN(currentScroll) ? 0 : -Math.abs(currentScroll);
           el._misc.horizontal.translatePercentage = isNaN(translatePercentage) ? 0 : translatePercentage;
 
           el._updateHorizontalBarPosition(el._misc.horizontal.position);
@@ -2195,10 +2197,10 @@
         if (el._misc.vertical.created) {
 
           scrollLimit = el._getVerticalScrollLimit();
-          currentScroll = translatePosition < 0 ? translatePosition * -1 : translatePosition;
+          currentScroll = Math.abs(translatePosition) > scrollLimit ? scrollLimit : Math.abs(translatePosition);
           translatePercentage = (currentScroll / scrollLimit) * 100;
           
-          el._misc.vertical.position = isNaN(translatePosition) ? 0 : translatePosition;
+          el._misc.vertical.position = isNaN(currentScroll) ? 0 : -Math.abs(currentScroll);
           el._misc.vertical.translatePercentage = isNaN(translatePercentage) ? 0 : translatePercentage;
           
           el._updateVerticalBarPosition(el._misc.vertical.position);
