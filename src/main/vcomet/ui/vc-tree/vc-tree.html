@@ -188,7 +188,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Deselect previous selected node
         if (el.selectedNode) {
           el.selectedNode.selected = false;
-          vcomet.triggerCallback("onNodeUnselected", el, el.selectedNode);
+          vcomet.triggerCallback("onNodeUnselected", el, el, [el.selectedNode]);
         }
         if (el.markedNode) {
           el.markedNode.marked = false;
@@ -196,7 +196,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Select node
         el.selectedNode = node;
         node.selected = true;
-        vcomet.triggerCallback("onNodeSelected", el, node);
+        vcomet.triggerCallback("onNodeSelected", el, el, [node]);
       },
       /*
         @function markNode
@@ -208,7 +208,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Deselect previous selected node
         if (el.markedNode) {
           el.markedNode.marked = false;
-          vcomet.triggerCallback("onNodeUnmarked", el, el.markedNode);
+          vcomet.triggerCallback("onNodeUnmarked", el, el, [el.markedNode]);
         }
         if (el.selectedNode) {
           el.selectedNode.selected = false;
@@ -216,7 +216,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Select node
         el.markedNode = node;
         node.marked = true;
-        vcomet.triggerCallback("onNodeMarked", el, node);
+        vcomet.triggerCallback("onNodeMarked", el, el, [node]);
       },
       /*
         @function create
@@ -442,8 +442,8 @@ vcomet.element("vc-tree", "vc-tree.css", {
               n1 = a[0].toLowerCase();
               n2 = b[0].toLowerCase();
               // Compare order
-              if (o1 > o2) {return -1;}
-              if (o1 < o2) {return 1;}
+              if (o1 > o2) {return 1;}
+              if (o1 < o2) {return -1;}
               // Compare type 
               if (t1 < t2) {return -1;}
               if (t1 > t2) {return 1;}
@@ -542,7 +542,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
 
           setTimeout(function () {
             el._sortNodes();
-            vcomet.triggerCallback("onNodeCreated", el, el, nodeEl);
+            vcomet.triggerCallback("onNodeCreated", el, el, [nodeEl]);
           }, 100);
         }
       },
@@ -569,7 +569,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
           delete el._misc.srcNodesPaths[node.path];
           delete el.nodes[node.path];
 
-          vcomet.triggerCallback("onNodeRemoved", el, el, node);
+          vcomet.triggerCallback("onNodeRemoved", el, el, [node]);
         }
       },
       /*
