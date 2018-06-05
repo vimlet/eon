@@ -133,9 +133,6 @@
                 // we manually call update to check whether it needs scrolling or not
                 el._refs.scroll.update();
 
-                // Since the scroll was hidden, it could not calculate if it needs to create scrolls, so after we added the visibleApps class, 
-                // we manually call update to check whether it needs scrolling or not
-                el._refs.scroll.update();
                 vcomet.triggerCallback("onShow", this);
             },
 
@@ -364,13 +361,20 @@
         },
 
         onInit: function () {
-            this._verifyScreenResolution();
+            var el = this;
+
+            el._verifyScreenResolution();
+
+            if (!vcomet.util.isTrue(el._refs.box.dataset.mobile) && el._refs.box.dataset.version == "device") {
+                el._refs.scroll.nativeOnDevice = "false";
+            }
         },
 
         onBubbleRender: function () {
             var el = this;
             var sourceNodes = el.getSourceElements();
 
+            el._refs.scroll.style.display = "flex";
             el._setupItems(sourceNodes);
             el._updateLocation();
 
