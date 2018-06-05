@@ -147,8 +147,9 @@ vcomet.element("vc-tree", "vc-tree.css", {
               }
             }
           });
-
           el._refs.tree.appendChild(fragment);
+          // Force sorting
+          el._misc.pendingNodes = false;
           el._sortNodes();
         }
 
@@ -412,11 +413,9 @@ vcomet.element("vc-tree", "vc-tree.css", {
       */
       sortNodes: function () {
         var el = this;
-
         // Check if other nodes are pending to be appended
         // This means that only the first node in this cycle will create the new onReady callback
         if (!el._misc.pendingNodes) {
-          
           vcomet.onReady(function(){
             var tree = el._refs.tree;
             var nodes = tree.children;
@@ -442,14 +441,13 @@ vcomet.element("vc-tree", "vc-tree.css", {
               n1 = a[0].toLowerCase();
               n2 = b[0].toLowerCase();
               // Compare order
-              if (o1 > o2) {return -1;}
-              if (o1 < o2) {return 1;}
+              if (o1 > o2) {return 1;}
+              if (o1 < o2) {return -1;}
               // Compare type 
               if (t1 < t2) {return -1;}
               if (t1 > t2) {return 1;}
               // Ensure multiple languages accents correct sorting
               return n1.localeCompare(n2);
-              return 0;
             });
             // Append sorted nodes
             for (var i = 0; i < sortArray.length; i++) {
