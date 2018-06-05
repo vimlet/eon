@@ -7,12 +7,21 @@ function setUpSearch (selector) {
 }
 
 function loadVCometExamples () {
+    var anchor, activePanel;
     // Configure tree
     refs.tree.vcometScroll.thickness = "10";
     // Load vComet element example
     refs.tree.onNodeSelected(function(node) {
-        refs.view.swapToPanel(node.id);
-        // Update scroll
-        refs.view.getActivePanel().vcometScroll.update();
+        activePanel = refs.view.getActivePanel();
+        anchor = activePanel.querySelector("[state=" + node.id + "]")
+        //
+        if (anchor) {
+            // Scroll to
+            activePanel.vcometScroll.scrollTop = [anchor.getOffsetPosition(), true];
+        } else {
+            refs.view.swapToPanel(node.id);
+            // Update scroll
+            activePanel.vcometScroll.update();
+        }
     })
 }
