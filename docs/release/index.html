@@ -1,173 +1,55 @@
+<!DOCTYPE html>
+<html>
 
-    <!DOCTYPE html>
-    <html>
+<head>
+  <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="framework/materialIcons/material-icons.css">
+  <script src="framework/vcomet/vcomet.js"></script>
+  <script src="framework/custom/vc-editor/vs/loader.js"></script>
+  <link href="framework/custom/vc-code/prism/prism.css" rel="stylesheet" />
+  <link href="framework/custom/vc-code/vs-dark.css" rel="stylesheet" />
+  <script src="framework/custom/vc-code/prism/prism.js"></script>
+  <script>
+    vcomet.import([
+      "framework/custom/vc-playground",
+      "framework/vcomet/ui/vc-layout",
+      "framework/custom/vc-doc-table",
+      "framework/custom/vc-doc-api",
+      "framework/custom/vc-doc-api-tree",
+      "framework/custom/vc-doc-article",
+      "framework/custom/vc-md-viewer",
+      "framework/custom/vc-editor",
+      "framework/custom/vc-code",
+      "framework/custom/vc-loading",
+       "framework/vcomet/ui/vc-searchbar",
+      "framework/custom/vc-doc-main",
+      "framework/vcomet/ui/vc-item",
+      "framework/vcomet/ui/vc-menu",
+      "framework/vcomet/ui/vc-scroll",
+      "framework/vcomet/data/store/vc-store.html",
+     "framework/vcomet/ui/vc-tree",
+     "framework/vcomet/ui/vc-treenode",
+      "framework/vcomet/ui/vc-combobox",
+      "framework/vcomet/ui/vc-tabs",
+      "framework/vcomet/ui/vc-tab",
+      "framework/vcomet/ui/vc-button",
+      "framework/vcomet/ui/vc-panel",
+      "framework/vcomet/ui/vc-gutter",
+      "framework/vcomet/ui/vc-video",
+      "framework/vcomet/ui/vc-text",
+      "framework/vcomet/ui/vc-anchor"
+    ]);
+  </script>
 
-    <head>
-      <meta charset="utf-8"
-           name="viewport"
-           content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet"
-           href="main.css">
-  <link rel="stylesheet" href="framework\fontAwesome\css\font-awesome.min.css">
+  <style>
+  </style>
 
-<script src="framework\perfectScrollbar\perfect-scrollbar.js"></script>
-<link rel="stylesheet" href="framework\perfectScrollbar\perfect-scrollbar.css">
-    </head>
+</head>
 
-    <body>
+<body>
+  <vc-doc-main></vc-doc-main>
+  <script type="text/javascript">
+  </script>
+</body>
 
-      <div id="menu">
-        <div id="logo"
-             onclick="goToFirstView();"><img src="vimlet.png"
-               alt="vimlet">
-        </div>
-
-        <div id="menuItems">
-          <div class="menuButton" id="menuTutorialLink" onclick="firstViewBttnClick(&quot;tutorial/index.html&quot;, true);">Tutorial<i class="fa description"></i> </div><div class="menuButton" id="menuAPILink" onclick="firstViewBttnClick(&quot;api/index.html&quot;, true);">API<i class="fa code"></i> </div>
-
-        </div>
-        <select  disabled class='selectDisabled'  id="versionControl"
-             onchange="changeVersion()">
-             <option value=1.0.0 selected='selected'  link=D:\Projects\VimletComet\docs\release>1.0.0</option>
-           </select>
-      </div>
-      <div id="explorer">
-        <iframe id="explorerIframe"></iframe>
-      </div>
-      <div id="firstView"
-           class="visibleFlex">
-
-        <div class="firstViewRow"><div class="firstViewBttn" id="mainTutorialLink" onclick="firstViewBttnClick(&quot;tutorial/index.html&quot;);"><div class="firstViewBttnIcon"><div class="firstViewBttnImg fa description"></div></div><div class="firstViewBttnText"><div class="firstViewBttnTitle">Tutorial</div><div class="firstViewBttnText">Get Started</div></div></div><div class="firstViewBttn" id="mainAPILink" onclick="firstViewBttnClick(&quot;api/index.html&quot;);"><div class="firstViewBttnIcon"><div class="firstViewBttnImg fa code"></div></div><div class="firstViewBttnText"><div class="firstViewBttnTitle">API</div><div class="firstViewBttnText">API Documentation</div></div></div></div>
-      </div>
-
-    <script>
-  var __onlyDefault = false;
-  var __version = {"1.0.0":"D:\\Projects\\VimletComet\\docs\\release"};
-  var __mainIconsPerRow = 3;
-
-  // @property hashListener [Enable/disable onHashChange when needed]
-  var hashListener = true;
-
-  function init() {
-    var location = window.location.href;
-    var fileParam = new URL(location).searchParams.get("file");
-    if (location.indexOf("#") >= 0) {
-      handleHashChange();
-    } else {
-      window.location.href = window.location.href + "#!version=" + encodeURIComponent(document.querySelector("#versionControl").value);
-    }
-  }
-
-  init();
-
-  function handleHashChange() {
-    var currentVersion;
-    if (window.location.href.split('#!')[1].indexOf('&mode=') >= 0) {        
-      firstViewBttnClick(decodeURIComponent(window.location.href.split('#!')[1].split('&mode=')[1].split('&file')[0] + "/index.html"),
-        true, decodeURIComponent(window.location.href.split('&file=')[1]), true);
-      currentVersion = decodeURIComponent(window.location.href.split('version=')[1].split('&')[0]);
-    } else {          
-      currentVersion = decodeURIComponent(window.location.href.split('version=')[1]);
-      goToFirstView(true);
-    }
-    document.querySelector("#versionControl").value = currentVersion;
-  }
-
-  // Listen to message from child window
-  var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
-  var eventer = window[eventMethod];
-  var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
-  eventer(messageEvent, function (e) {
-    var currentData = e.data;
-    
-    if (currentData[0] === "!") {
-      currentData = currentData.substring(1, currentData.length);
-    }
-      hashListener = false; // Turn of hash location when iframe child change it
-      window.location.replace(window.location.href.split('&file=')[0] + "&file=" + encodeURIComponent(currentData));
-      setTimeout(function () {
-        hashListener = true;
-      }, 0);
-  }, false);
-
-
-  window.onhashchange = function () {
-    if (hashListener) {
-      handleHashChange();
-    }
-  };
-
-
-  function goToFirstView(hasAlreadyChanged) {
-    if(!hasAlreadyChanged){ // When we came from handleHashChange we can not override hash again
-      window.location.href = window.location.href.split('#!')[0];
-    }
-    var explorer = document.querySelector("#explorer");
-    if (explorer.classList.contains("visibleFlex")) {
-      toggleFirstView(false);
-    }
-  }
-
-  function firstViewBttnClick(url, forceOpen, file, hasAlreadyChanged) {    
-    var iframeShortCut = url.replace("/index.html", "");
-    hashListener = false;
-    if (!hasAlreadyChanged) {
-      window.location.href = window.location.href.split('#!')[0] + "#!version=" + encodeURIComponent(document.querySelector(
-        "#versionControl").value) + "&mode=" + encodeURIComponent(iframeShortCut);
-    } else { // When we came from handleHashChange we can not override hash again
-      window.location.replace(window.location.href.split('#!')[0] + "#!version=" + encodeURIComponent(document.querySelector(
-        "#versionControl").value) + "&mode=" + encodeURIComponent(iframeShortCut));
-    }
-    setTimeout(function () {
-      hashListener = true;
-    }, 0);
-    if (file) {
-      url += "#" + file;
-    }
-    // document.querySelector("#explorerIframe").setAttribute("src", url);
-    document.querySelector("#explorerIframe").contentWindow.location.replace(url);
-    toggleFirstView(forceOpen);
-  }
-
-  function toggleFirstView(forceOpen) {
-    var explorer = document.querySelector("#explorer");
-    var firstView = document.querySelector("#firstView");
-    if (forceOpen) {
-      if (!explorer.classList.contains("visibleFlex")) {
-        toggleFirstView(false);
-      }
-    } else {
-      explorer.classList.toggle("visibleFlex");
-      firstView.classList.toggle("visibleFlex");
-    }
-  }
-
-  function changeVersion() {
-    var selectVersion = document.querySelector("#versionControl");
-    var goTo = resolvePath(selectVersion.options[selectVersion.selectedIndex].getAttribute("link"));
-    window.location.href = goTo + "#!version=" + encodeURIComponent(selectVersion.value);
-  }
-
-  function hideVersion() {
-    if (__onlyDefault) {
-      document.querySelector("#versionControl").style = "display:none;";
-    }
-  }
-  hideVersion();
-
-  var psMain = new PerfectScrollbar('#firstView');
-
-
-  function urlConvert(url) {
-    return (url.replace(/[/\\*]/g, "/"));
-  }
-
-  function resolvePath(url) {
-    url += "/index.html";
-    return urlConvert(url);
-  }
-</script>
-
-    </body>
-
-    </html>
+</html>

@@ -46,25 +46,25 @@
 
         privateProperties: {
             /*
-              @property (private) {Object} _refs.box 
-              @description Store appsBox node
-            */
-            appsBoxNode: {
-                value: {}
-            },
-            /*
               @property (private) {Object} _refs 
               @description Object with  references
             */
             refs: {
                 value: {}
-            }
+            },
+            /*
+              @property (private) {Object} _misc 
+              @description Stores dialog useful data.
+            */
+            misc: {
+                value: {}
+            },
         },
 
         functions: {
             /*
               @function addItem
-              @description Add new app node item programmaticaly
+              @description Add new app node item programmatically
               @param {Object} item [Node to add to appmenu]
             */
             addItem: function (item) {
@@ -76,13 +76,12 @@
                 // If does not exit mobileContainer
                 this._refs.wrapper.appendChild(item);
 
-                this._refs.box.style.height = "auto";
-                this._refs.box.style.height = this._refs.box.offsetHeight + "px";
+                this._setDesktopHeight();
+                this._locateAppsBox();
 
                 // Since the scroll was hidden, it could not calculate if it needs to create scrolls, so after we added the visibleApps class, 
                 // we manually call update to check whether it needs scrolling or not
                 this._refs.scroll.update();
-                this._locateAppsBox();
             },
 
             /*
@@ -93,13 +92,12 @@
             removeItem: function (item) {
                 this._refs.wrapper.removeChild(item);
 
-                this._refs.box.style.height = "auto";
-                this._refs.box.style.height = this._refs.box.offsetHeight + "px";
+                this._setDesktopHeight();
+                this._locateAppsBox();
 
                 // Since the scroll was hidden, it could not calculate if it needs to create scrolls, so after we added the visibleApps class, 
                 // we manually call update to check whether it needs scrolling or not
                 this._refs.scroll.update();
-                this._locateAppsBox();
             },
 
             /*
@@ -127,15 +125,9 @@
                 el._refs.box.classList.add("vc-appmenu-visibleApps");
                 document.body.appendChild(el._refs.box);
 
-                // if (el._refs.box.dataset.version == "device") {
-                if (vcomet.util.isTrue(el._refs.box.dataset.mobile)) {
-                    el._setResponsiveClose();
-                }
-
+                el._setResponsiveClose();
+                el._setDesktopHeight();
                 el._locateAppsBox();
-
-                el._refs.box.style.height = "auto";
-                el._refs.box.style.height = this._refs.box.offsetHeight + "px";
 
                 // Since the scroll was hidden, it could not calculate if it needs to create scrolls, so after we added the visibleApps class, 
                 // we manually call update to check whether it needs scrolling or not
@@ -182,53 +174,68 @@
             locateAppsBox: function () {
                 var el = this;
 
-                if (!vcomet.util.isTrue(el._refs.box.dataset.mobile)) {
-                    var top = el._refs.appMenu.getBoundingClientRect().top;
-                    var left = el._refs.appMenu.getBoundingClientRect().left;
-                    var appsBoxLeft;
+                if (el._refs.box.classList.contains("vc-appmenu-visibleApps")) {
+                    if (!vcomet.util.isTrue(el._refs.box.dataset.mobile)) {
+                        var top = el._refs.appMenu.getBoundingClientRect().top;
+                        var left = el._refs.appMenu.getBoundingClientRect().left;
+                        var boxWidth = el._misc.boxWidth ? el._misc.boxWidth : el._refs.box.offsetWidth;
+                        var appsBoxLeft;
 
-                    el._refs.box.style.top = top + 20 + "px";
+                        el._refs.box.style.top = top + 20 + "px";
 
-                    if (el.location == "right") {
-                        appsBoxLeft = (left + el._refs.appMenu.offsetWidth - el._refs.box.offsetWidth) + 13.5 - 4;
-                    } else if (el.location == "left") {
-                        appsBoxLeft = (left - 14.4) + 4;
+                        if (el.location == "right") {
+                            appsBoxLeft = (left + el._refs.appMenu.offsetWidth - boxWidth) + 13.5 - 4;
+                        } else if (el.location == "left") {
+                            appsBoxLeft = (left - 14.4) + 4;
+                        } else {
+                            // Subtract half of the appsBox width to the center position of the appmenu button
+                            appsBoxLeft = (left + el._refs.appMenu.offsetWidth / 2) - (el._refs.box.offsetWidth / 2);
+                        }
+
+                        el._refs.box.style.left = appsBoxLeft + "px";
+
+                        el._misc.boxWidth = el._refs.box.offsetWidth;
+
                     } else {
-                        // Substracts half of the appsBox width to the center position of the appmenu button
-                        appsBoxLeft = (left + el._refs.appMenu.offsetWidth / 2) - (el._refs.box.offsetWidth / 2);
+                        el._refs.box.style.top = 0;
+                        el._refs.box.style.left = 0;
                     }
 
-                    el._refs.box.style.left = appsBoxLeft + "px";
-
-                } else {
-                    el._refs.box.style.top = 0;
-                    el._refs.box.style.left = 0;
                 }
             },
 
             /*
+              @function (private) _setDesktopHeight
+              @description Sets the height of appBox on desktop
+            */
+            setDesktopHeight: function () {
+                if (!vcomet.util.isTrue(this._refs.box.dataset.mobile)) {
+                    this._refs.box.style.height = "auto";
+                    this._refs.box.style.height = this._refs.box.offsetHeight + "px";
+                }
+            },
+            /*
               @function (private) _updateLocation
               @description Position appmenu. *Parent container must have display: flex
-              @param {String} newVal [Site of the container where the appmenu icon will be placed]
             */
-            updateLocation: function (newVal) {
-                var appmanuParent = this.parentNode;
+            updateLocation: function () {
+                var appmenuParent = this.parentNode;
 
-                switch (newVal) {
+                switch (this.location) {
                     case ("right"):
-                        appmanuParent.style.justifyContent = "flex-end";
+                        appmenuParent.style.justifyContent = "flex-end";
                         break;
 
                     case ("left"):
-                        appmanuParent.style.justifyContent = "flex-start";
+                        appmenuParent.style.justifyContent = "flex-start";
                         break;
 
                     case ("center"):
-                        appmanuParent.style.justifyContent = "center";
+                        appmenuParent.style.justifyContent = "center";
                         break;
                 }
 
-                this._refs.box.dataset.location = newVal;
+                this._refs.box.dataset.location = this.location;
             },
 
             /*
@@ -279,14 +286,8 @@
                 var iconAttribute;
                 var iconPosition;
 
-                // Programmaticaly item property
-                // Declarative item attribute
                 iconAttribute = (item.icon) ? item.icon : item.getAttribute("icon");
-
-                // Programmaticaly item property
-                // Declarative item attribute
                 iconPosition = (item.iconPosition) ? item.iconPosition : item.getAttribute("icon-position");
-
 
                 if (iconAttribute.indexOf("</i>") !== -1) {
                     var tempDiv = document.createElement("div");
@@ -320,18 +321,6 @@
                 el._refs.box.dataset.mobile = mobileCondition ? "true" : "false";
                 el.dataset.mobile = mobileCondition ? "true" : "false";
 
-
-                // // Tablet view
-                // if (window.innerWidth <= vcomet.tabletWidth && window.innerWidth > vcomet.mobileWidth) {
-                //     el._setResponsiveClose();
-                //     // Mobile view
-                // } else if (window.innerWidth <= vcomet.mobileWidth) {
-                //     el._setResponsiveClose();
-                //     // Desktop view
-                // } else {
-                //     el._removeResponsiveFunctionality();
-                // }
-
             },
 
             /*
@@ -341,7 +330,7 @@
             setResponsiveClose: function () {
                 var el = this;
 
-                if (!el._refs.close.classList.contains("vc-appmenu-closeVisible")) {
+                if (!el._refs.close.classList.contains("vc-appmenu-closeVisible") && vcomet.util.isTrue(el._refs.box.dataset.mobile)) {
                     el._refs.close.classList.add("vc-appmenu-closeVisible");
                     el.classList.add("vc-appmenu-responsive");
 
@@ -352,20 +341,6 @@
                 }
 
             },
-
-            /*
-              @function (private) _removeResponsiveFunctionality
-              @description Remove small devices functionality on desktop view
-            */
-            // removeResponsiveFunctionality: function () {
-            //     var el = this;
-
-            //     if (el._refs.close.classList.contains("vc-appmenu-closeVisible")) {
-            //         el._refs.close.classList.remove("vc-appmenu-closeVisible");
-            //         el.classList.remove("vc-appmenu-responsive");
-            //     }
-
-            // }
 
         },
 
@@ -388,22 +363,25 @@
 
         },
 
+        onInit: function () {
+            this._verifyScreenResolution();
+        },
+
         onBubbleRender: function () {
             var el = this;
             var sourceNodes = el.getSourceElements();
 
-            el._verifyScreenResolution();
             el._setupItems(sourceNodes);
-            el._updateLocation(el.location);
+            el._updateLocation();
 
             // Open and close window apps event listener
             el._refs.appMenu.addEventListener("click", function () {
                 (el._refs.box.classList.contains("vc-appmenu-visibleApps")) ? el.hide() : el.show();
             }, false);
 
-            // Closing the window apps when cliks outside
+            // Closing the window apps when do click outside
             document.body.addEventListener("pointerdown", function (event) {
-                var clickElement = el.contains(event.target);
+                var clickElement = el._refs.box.contains(event.target);
 
                 if (!clickElement) {
                     el.hide();
@@ -416,17 +394,13 @@
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
                 case ("location"):
-                    this._updateLocation(newVal);
+                    this._updateLocation();
                     break;
             }
         },
 
-        onWindowResize: function (event) {
-            this._verifyScreenResolution();
-
-            if (this._refs.box.classList.contains("vc-appmenu-visibleApps")) {
-                this._locateAppsBox();
-            }
+        onWindowResize: function () {
+            this._locateAppsBox();
         }
 
     });
