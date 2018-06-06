@@ -210,7 +210,7 @@
           // Radio button elements
         } else if (inputType == "radio" || formChildNode._formelement == "radio") {
 
-          if (vcomet.util.isTrue(formChildNode._checked)) {
+          if (vcomet.util.isTrue(formChildNode._checked) && !vcomet.util.isTrue(formChildNode._disabled)) {
 
             elementValue = formChildNode.value;
             // Adding name and value of element at the submit object
@@ -220,22 +220,26 @@
 
           // Slider elements
         } else if (inputType == "range" || formChildNode._formelement == "slider") {
-          elementName = formChildNode.name;
-          elementValue = formChildNode.value;
-          // Adding name and value of element at the submit object
-          submitElements[elementName] = elementValue;
+
+          if (!vcomet.util.isTrue(formChildNode.disabled)) {
+            elementName = formChildNode.name;
+            elementValue = formChildNode.value;
+            // Adding name and value of element at the submit object
+            submitElements[elementName] = elementValue;
+          }
 
           // Vimlet textbox, textarea and others html elements
         } else {
           elementValue = formChildNode.value;
-
-          // Control if the input has no value
-          if (elementValue !== "" && typeof elementValue != "undefined") {
-            // Adding name and value of element at the submit object
-
-            submitElements[elementName] = elementValue;
+          if (!vcomet.util.isTrue(formChildNode.disabled)) {
+            // Control if the input has no value
+            if (elementValue !== "" && typeof elementValue != "undefined") {
+              // Adding name and value of element at the submit object
+              submitElements[elementName] = elementValue;
+            }
 
           }
+
 
         }
       },
