@@ -6,10 +6,10 @@
       <div class="vc-datepicker-header vc-bg1 vc-fg2">
         <div class="vc-datepicker-leftNavigation">
           <div class="vc-datepicker-previous vc-unselectable">
-            <i class="material-icons">chevron_left</i>
+            <i class="vicon vicon-chevron-left"></i>
           </div>
           <div class="vc-datepicker-next vc-unselectable">
-            <i class="material-icons">chevron_right</i>
+            <i class="vicon vicon-chevron-right"></i>
           </div>
         </div>
 
@@ -20,10 +20,10 @@
 
         <div class="vc-datepicker-rightNavigation">
           <div class="vc-datepicker-back vc-unselectable hidden">
-            <i class="material-icons">keyboard_return</i>
+            <i class="vicon vicon-arrow-back"></i>
           </div>
           <div class="vc-datepicker-close vc-unselectable">
-            <i class="material-icons">clear</i>
+            <i class="vicon vicon-close"></i>
           </div>
         </div>
       </div>
@@ -77,14 +77,6 @@
       */
       max: {
         value: "",
-        reflect: true
-      },
-      /*
-      @property {string} closable
-      @description Whether the datepicker has the close button
-      */
-      closable: {
-        value: "false",
         reflect: true
       },
       /*
@@ -261,8 +253,6 @@
           el._setupDaysGrid();
         }
 
-        el._setupRefs();
-
         //If the user specified a min date
         if (el.min != "" && el.min != undefined) {
           el._setupMinDate();
@@ -275,8 +265,6 @@
 
         el._setupEvents();
         el._setupInitialDate();
-
-        el._setupClosable();
 
         el._handleInitialState();
         el._handleAutoHeight();
@@ -325,21 +313,19 @@
 
         var el = this;
 
-        el._refs.calendar = el.querySelector(".vc-datepicker-calendar");
+        el._refs.calendar = el.template.querySelector(".vc-datepicker-calendar");
 
-        el._refs.selectorsContainer = el.querySelector(".vc-datepicker-daysGridSelectors");
-        el._refs.monthSelector = el.querySelector(".vc-datepicker-header .vc-datepicker-month");
-        el._refs.yearSelector = el.querySelector(".vc-datepicker-header .vc-datepicker-year");
+        el._refs.selectorsContainer = el.template.querySelector(".vc-datepicker-daysGridSelectors");
+        el._refs.monthSelector = el.template.querySelector(".vc-datepicker-header .vc-datepicker-month");
+        el._refs.yearSelector = el.template.querySelector(".vc-datepicker-header .vc-datepicker-year");
 
-        el._refs.daysGrid = el.querySelector(".vc-datepicker-daysGrid");
-        el._refs.monthsGrid = el.querySelector(".vc-datepicker-monthsGrid");
-        el._refs.yearsGrid = el.querySelector(".vc-datepicker-yearsGrid");
+        el._refs.header = el.template.querySelector(".vc-datepicker-header");
+        el._refs.body = el.template.querySelector(".vc-datepicker-body");
 
-        el._refs.header = el.querySelector(".vc-datepicker-header");
-        el._refs.body = el.querySelector(".vc-datepicker-body");
+        el._refs.previous = el.template.querySelector(".vc-datepicker-previous");
+        el._refs.next = el.template.querySelector(".vc-datepicker-next");
 
-        el._refs.previous = el.querySelector(".vc-datepicker-previous");
-        el._refs.next = el.querySelector(".vc-datepicker-next");
+        el._refs.close = el.template.querySelector(".vc-datepicker-close");
 
       },
       /*
@@ -349,6 +335,9 @@
       handleInitialState: function () {
 
         var el = this;
+
+        el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
+        el._misc.current.month = (el.month != "") ? el.month : el._misc.current.month;
 
         switch (el.selectable) {
           case "dmy":
@@ -362,9 +351,6 @@
             var previousMonth;
             var minDate;
             var maxDate;
-
-            el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
-            el._misc.current.month = (el.month != "") ? el.month : el._misc.current.month;
 
             minDate = 1 + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
             maxDate = vcomet.time.getDaysInMonth(el._misc.current.year, el._misc.current.month) + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
@@ -448,7 +434,6 @@
 
         var el = this;
 
-        // if (el.min.includes("/")) {
         if (el.min.indexOf('/') > -1) {
 
           var splittedMin = el.min.split("/");
@@ -537,10 +522,9 @@
           el._goBack(this);
         });
 
-        el.querySelector(".vc-datepicker-close").addEventListener(el._misc.downTrigger, function (e) {
+        el._refs.close.addEventListener(el._misc.downTrigger, function (e) {
           e.stopPropagation();
           e.preventDefault();
-          vcomet.triggerCallback("onClose", el, el, []);
         });
 
         el.querySelector(".vc-datepicker-header .vc-datepicker-month").addEventListener(el._misc.downTrigger, function (e) {
@@ -618,6 +602,8 @@
         daysGridContainer.appendChild(daysGrid);
         el.querySelector(".vc-datepicker-body").appendChild(daysGridContainer);
 
+        el._refs.daysGrid = daysGridContainer;
+
         el._createWeekDaysHeaders();
 
         for (var i = 1; i <= 6; i++) {
@@ -658,6 +644,8 @@
         monthsGrid.classList.add("vc-datepicker-monthsGrid", "vc-bg3");
         el.querySelector(".vc-datepicker-body").appendChild(monthsGrid);
 
+        el._refs.monthsGrid = monthsGrid;
+
         row = document.createElement("div");
         row.classList.add("vc-datepicker-row");
 
@@ -697,14 +685,19 @@
         var yearsGrid = document.createElement("div");
         var rowsFragment = document.createDocumentFragment();
 
+        var currentYear = new Date();
         var years = [];
 
-        for (var i = 2017 - 6; i < 2017 + 6; i++) {
+        currentYear = currentYear.getFullYear();
+
+        for (var i = currentYear - 6; i < currentYear + 6; i++) {
           years.push(i);
         }
 
         yearsGrid.classList.add("vc-datepicker-yearsGrid", "vc-bg3");
         el.querySelector(".vc-datepicker-body").appendChild(yearsGrid);
+
+        el._refs.yearsGrid = yearsGrid;
 
         row = document.createElement("div");
         row.classList.add("vc-datepicker-row");
@@ -729,16 +722,31 @@
 
         yearsGrid.appendChild(rowsFragment);
       },
-      /*
-      @function (private) _setupClosable
-      @description If the calendar is not closable we hide the button
-      */
-      setupClosable: function () {
 
-        if (this.closable != "true") {
-          this.querySelector(".vc-datepicker-close").classList.add("hidden");
+      /*
+      @function (private) _setInitialValue
+      @description Sets the initial value based on the data provided by the user
+      */
+      setInitialValue: function () {
+
+        var el = this;
+
+        if (Object.keys(el._misc.selected).length > 0) {
+
+          var dateObj = {
+
+            day: el._misc.selected.day ? parseInt(el._misc.selected.day) : undefined,
+            month: el._misc.selected.month ? parseInt(el._misc.current.month) + 1 : undefined,
+            year: el._misc.current.year ? parseInt(el._misc.current.year) : undefined,
+
+          };
+
+          el.value = el._getFormattedValue(dateObj);
+          el.setAttribute("valid", "true");
+
         }
-      },
+
+      }
       /*
       @function (private) _handleAutoHeight
       @description Maintains an aspect ratio for the picker relative to its width
@@ -925,7 +933,7 @@
         var currentDay = el._refs.daysGrid.querySelector('[day="' + el._misc.selected.day + '"][month="' + el._misc.selected.month + '"][year="' + el._misc.selected.year + '"]');
 
         if (currentDay) {
-          el._highlightDay(currentDay);
+          el._selectDay(currentDay);
         }
       },
       /*
@@ -1092,9 +1100,8 @@
 
           } else {
 
-            var formattedValue = el._getFormattedValue(dateObj, el.valueFormat);
+            var formattedValue = el._getFormattedValue(dateObj);
 
-            el.setAttribute("value", formattedValue);
             el.value = formattedValue;
             el.setAttribute("valid", "true");
 
@@ -1139,9 +1146,8 @@
 
             } else {
 
-              var formattedValue = el._getFormattedValue(dateObj, el.valueFormat);
+              var formattedValue = el._getFormattedValue(dateObj);
 
-              el.setAttribute("value", formattedValue);
               el.value = formattedValue;
               el.setAttribute("valid", "true");
             }
@@ -1172,7 +1178,7 @@
             el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
             el._showDaysGrid();
 
-          } else if (el.querySelector(".vc-datepicker-monthsGrid")) {
+          } else if (el._refs.monthsGrid) {
 
             if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
               el._misc.current.month = el._misc.min.month;
@@ -1197,9 +1203,8 @@
 
             } else {
 
-              var formattedValue = el._getFormattedValue(dateObj, el.valueFormat);
+              var formattedValue = el._getFormattedValue(dateObj);
 
-              el.setAttribute("value", formattedValue);
               el.value = formattedValue;
               el.setAttribute("valid", "true");
             }
@@ -1214,6 +1219,9 @@
       */
       getFormattedValue: function (obj, format) {
 
+        var el = this;
+
+        var format = el.valueFormat;
         var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
         var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
         var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
@@ -1875,7 +1883,7 @@
 
         }
 
-      }
+      },
     },
     functions: {
       /*
@@ -1964,9 +1972,8 @@
 
         }
 
-        formattedValue = el._getFormattedValue(dateObj, el.valueFormat);
+        formattedValue = el._getFormattedValue(dateObj);
 
-        el.setAttribute("value", formattedValue);
         el.value = formattedValue;
         el.setAttribute("valid", "true");
 
@@ -1974,15 +1981,18 @@
     },
     onCreated: function () {
       var el = this;
+
       el._setupMisc();
+      el._setupRefs();
+
       vcomet.createCallback("onSelected", el);
-      vcomet.createCallback("onClose", el);
       vcomet.createCallback("onShow", el);
       vcomet.createCallback("onHide", el);
     },
     onRender: function () {
       var el = this;
       el._setup();
+      el._setInitialValue();
     },
     onPropertyChanged: function (key, oldVal, newVal) {
       switch (key) {

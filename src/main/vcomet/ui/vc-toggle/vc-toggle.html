@@ -47,6 +47,15 @@
                 reflect: true
             },
             /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the checkbox
+              Default: false
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
               @property {Boolean} checked 
               @description Checkbox checked status
               Default: false
@@ -118,6 +127,21 @@
             },
 
             /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
+
+                if (vcomet.util.isTrue(el.readonly)) {
+                    el._refs.input.setAttribute("readonly", "true");
+                } else {
+                    el._refs.input.removeAttribute("readonly");
+                }
+
+            },
+
+            /*
               @function (private) _updateCheck
               @description Update checked status
             */
@@ -161,6 +185,7 @@
             }, false);
 
             el._updateDisabled();
+            el._updateReadonly();
             el._updateCheck();
             this._refs.nameLabel.innerHTML = el.label;
 
@@ -171,6 +196,9 @@
             switch (attrName) {
                 case "disabled":
                     this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadonly();
                     break;
                 case "checked":
                     this._updateCheck();
