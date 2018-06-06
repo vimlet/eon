@@ -133,14 +133,6 @@
         reflect: true
       },
       /*
-      @property {string} width
-      @description Indicates the width of the datebox
-      */
-      width: {
-        value: 200,
-        reflect: true
-      },
-      /*
       @property {string} pickerFontSize
       @description Indicates the font size of the datepicker
       */
@@ -186,6 +178,14 @@
       */
       toolbar: {
         value: "false",
+        reflect: true
+      },
+      /*
+      @property {Boolean} inline 
+      @description Space that occupies the button inside its parent container.
+      */
+      inline: {
+        value: true,
         reflect: true
       },
       /*
@@ -242,8 +242,6 @@
 
         vcomet.registerPathListener(el, "datebox");
 
-        el.style.width = el.width + "px";
-
         el._initValue();
 
       },
@@ -263,7 +261,7 @@
         datePickerElement.setAttribute("closable", "true");
         datePickerElement.setAttribute("min", el.min);
         datePickerElement.setAttribute("max", el.max);
-        datePickerElement.setAttribute("picker-font-size", el.pickerFontSize);
+        datePickerElement.setAttribute("font-size", el.pickerFontSize);
         datePickerElement.setAttribute("selectable", el.pickerSelectable);
 
         datePickerElement.onShow(function () {
@@ -645,9 +643,11 @@
         var el = this;
         var blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
 
-        el.querySelector(".vc-datebox-button").onclick = function (e) {
-          el._toggleDatePicker();
-        };
+        el.querySelector(".vc-datebox-button").addEventListener('click', function (e) {
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._toggleDatePicker();
+          }
+        }, false);
 
         document.body.addEventListener(blurTrigger, function (e) {
           el._customBlur(e, el);
@@ -971,11 +971,15 @@
           el._refs.subInputs.second.setAttribute("readonly", "true");
           el._refs.subInputs.third.setAttribute("readonly", "true");
 
+          el._refs.button.classList.remove("vc-fg1-hoverable");
+
         } else {
 
           el._refs.subInputs.first.removeAttribute("readonly");
           el._refs.subInputs.second.removeAttribute("readonly");
           el._refs.subInputs.third.removeAttribute("readonly");
+
+          el._refs.button.classList.add("vc-fg1-hoverable");
 
         }
 
@@ -1359,6 +1363,7 @@
       this._setup();
     },
     onPropertyChanged: function (key, oldVal, newVal) {
+
       switch (key) {
         case "label":
           this._updateLabel();
@@ -1370,6 +1375,7 @@
           this._updateReadOnly();
           break;
       }
+
     },
     onWindowResize: function () {
 
