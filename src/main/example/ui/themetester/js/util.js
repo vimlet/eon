@@ -20,7 +20,6 @@ function loadVCometExamples () {
         // Get node related anchor
         anchor = activePanel.querySelector("[state=" + node.id + "]");
         if(anchor) {
-            console.log('anchor', anchor, anchor.getOffsetPosition());
            // Scroll to the specific element section
            activePanel.vcometScroll.scrollTop = [anchor.getOffsetPosition(), true];
         }
