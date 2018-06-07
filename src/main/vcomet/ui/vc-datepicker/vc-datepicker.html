@@ -296,7 +296,6 @@
         el._misc.selector = {};
         el._misc.selector.type = "month";
         el._misc.selector.range = {};
-        el._misc.mask = {};
         el._misc.min = {};
         el._misc.min.active = false;
         el._misc.max = {};
@@ -1081,12 +1080,9 @@
         if (dayButton.dataset.disabled != "true") {
 
           var el = this;
+          
           // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
-          var dateObj = {
-            day: dayButton.getAttribute("day"),
-            month: (parseInt(dayButton.getAttribute("month")) + 1),
-            year: dayButton.getAttribute("year")
-          };
+          var dateObj = el._formatObj({ day: dayButton.getAttribute("day"), month: (parseInt(dayButton.getAttribute("month")) + 1), year: dayButton.getAttribute("year") });
 
           el._misc.selected.day = parseInt(dayButton.getAttribute("day"));
           el._misc.selected.month = parseInt(dayButton.getAttribute("month"));
@@ -1132,11 +1128,7 @@
           } else {
 
             // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
-            var dateObj = {
-              day: undefined,
-              month: (parseInt(monthButton.dataset.index) + 1),
-              year: el._misc.current.year
-            };
+            var dateObj = el._formatObj({ day: undefined, month: (parseInt(monthButton.dataset.index) + 1), year: el._misc.current.year });
 
             el._highlightMonth(monthButton);
 
@@ -1189,11 +1181,7 @@
 
           } else {
 
-            var dateObj = {
-              day: undefined,
-              month: undefined,
-              year: yearButton.dataset.year
-            };
+            var dateObj = el._formatObj({ day: undefined, month: undefined, year: yearButton.dataset.year });
 
             el._highlightYear(yearButton);
 
@@ -1210,6 +1198,51 @@
             }
           }
         }
+      },
+      /*
+      @function (private) {Object} _formatObj
+      @description Recieves an object with a day/year/month and returns an object with the same values with the provided format
+      @param {Object} obj
+      */
+      formatObj: function (obj) {
+
+        var el = this;
+
+        var format = el.valueFormat;
+
+        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+        
+        var finalObj = {};
+
+        finalObj.day = obj.day ? el._format(obj.day, dayFormat) : undefined;
+        finalObj.month = obj.month ? el._format(obj.month, monthFormat) : undefined;
+        finalObj.year = obj.year ? el._format(obj.year, yearFormat) : undefined;
+        
+        return finalObj;
+
+      },
+      /*
+      @function (private) {String} _format
+      @description We replace the format with the given data, in case the field's length is lower than its format then we add 0 as needed
+      @param {String} text
+      @param {String} format
+      */
+      format: function (text, format) {
+
+        var el = this;
+        
+        text = text + "";
+
+        if (text.length < format.length) {
+          for (var i = 0; i < (format.length - text.length); i++) {
+            text = "0" + text;
+          }
+        }
+
+        return text;
+
       },
       /*
       @function (private) {String} _getFormattedValue

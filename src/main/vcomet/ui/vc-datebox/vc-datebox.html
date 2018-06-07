@@ -82,7 +82,7 @@
       */
       value: {
         value: "",
-        reflect: false
+        reflect: true
       },
       /*
       @property {string} label
@@ -324,7 +324,7 @@
         var el = this;
 
         el._misc.mask.order = [];
-
+        
         var dayFormat = el.mask.match(/[d|D]{1,2}/)[0];
         var monthFormat = el.mask.match(/[M]{1,4}/)[0];
         var yearFormat = el.mask.match(/[y|Y]{2,4}/)[0];
@@ -778,6 +778,7 @@
 
         var el = this;
 
+        el._misc.preventUpdate = true;
         el.value = el._getFormattedValue(obj, el.valueFormat);
         el.setAttribute("valid", true);
 
@@ -843,7 +844,8 @@
           el._refs.datePicker._misc.selected.month = parseInt(month) - 1;
           el._refs.datePicker._misc.selected.year = parseInt(year);
 
-          el.value = el._getFormattedValue(obj, el.valueFormat);
+          el._misc.preventUpdate = true;
+          el.value = el._getFormattedValue(obj);
           el.setAttribute("valid", "true");
 
         } else {
@@ -851,26 +853,29 @@
           el.querySelector(".vc-datebox-input").classList.add("noMatches");
           el._refs.underline.classList.add("noMatches");
 
-          el.value = el._getFormattedValue(obj, el.valueFormat);
+          el._misc.preventUpdate = true;
+          el.value = el._getFormattedValue(obj);
           el.setAttribute("valid", "false");
         }
 
       },
       /*
-      @function (private) {Object} _getObjectFromValue
+      @function (private) {Object} _getObjectFromDateString
       @description Given a value with format this functions returns an object with day, month and year provided by the value
       @param {String} value
       */
-      getObjectFromValue: function (value) {
+      getObjectFromDateString: function (value) {
 
         var el = this;
+        
+        var format = el.valueFormat;
+
+        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
 
         var splittedValue = value.split(el.separator);
         var splittedFormat = el.valueFormat.split(el.separator);
-
-        var dayFormat = (el.valueFormat.match(/[d|D]{1,2}/)) ? el.valueFormat.match(/[d|D]{1,2}/)[0] : undefined;
-        var monthFormat = (el.valueFormat.match(/[M]{1,4}/)) ? el.valueFormat.match(/[M]{1,4}/)[0] : undefined;
-        var yearFormat = (el.valueFormat.match(/[y|Y]{2,4}/)) ? el.valueFormat.match(/[y|Y]{2,4}/)[0] : undefined;
 
         var dayIndex = splittedFormat.indexOf(dayFormat);
         var monthIndex = splittedFormat.indexOf(monthFormat);
@@ -896,7 +901,7 @@
           var monthInput = subInputs.querySelector('[data-field="month"] input');
           var yearInput = subInputs.querySelector('[data-field="year"] input');
 
-          var valueObj = el._getObjectFromValue(el.value);
+          var valueObj = el._getObjectFromDateString(el.value);
 
           dayInput.value = valueObj.day;
           monthInput.value = valueObj.month;
@@ -984,9 +989,11 @@
       @function (private) {String} _getFormattedValue
       @description We replace the format with the given data, in case the field's length is lower than its format then we add 0 as needed
       @param {Object} obj
-      @param {String} format
       */
-      getFormattedValue: function (obj, format) {
+      getFormattedValue: function (obj) {
+
+        var el = this;
+        var format = el.valueFormat;
 
         var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
         var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
@@ -996,42 +1003,51 @@
 
           var day = obj.day;
 
-          if (obj.day.length < dayFormat.length) {
-            for (var i = 0; i < (dayFormat.length - obj.day.length); i++) {
-              day = "0" + day;
-            }
-          }
-
+          day = el._format(day, dayFormat);
           format = format.replace(dayFormat, day);
+
         }
 
         if (obj.month) {
 
           var month = obj.month;
 
-          if (obj.month.length < monthFormat.length) {
-            for (var i = 0; i < (monthFormat.length - obj.month.length); i++) {
-              month = "0" + month;
-            }
-          }
-
+          month = el._format(month, monthFormat);
           format = format.replace(monthFormat, month);
+
         }
 
         if (obj.year) {
 
           var year = obj.year;
 
-          if (obj.year.length < yearFormat.length) {
-            for (var i = 0; i < (yearFormat.length - obj.year.length); i++) {
-              year = "0" + year;
-            }
-          }
-
+          year = el._format(year, yearFormat);
           format = format.replace(yearFormat, year);
+
         }
 
         return format;
+      },
+      /*
+      @function (private) {String} _format
+      @description We replace the format with the given data, in case the field's length is lower than its format then we add 0 as needed
+      @param {String} text
+      @param {String} format
+      */
+      format: function (text, format) {
+
+        var el = this;
+        
+        text = text + "";
+
+        if (text.length < format.length) {
+          for (var i = 0; i < (format.length - text.length); i++) {
+            text = "0" + text;
+          }
+        }
+
+        return text;
+
       },
       /*
       @function (private) {Boolean} _isMinMonth
@@ -1302,53 +1318,77 @@
             yearInput.value = el._misc.max.year;
           }
         }
-      }
-    },
-    functions: {
+      },
       /*
-      @function setValue
+      @function (private) _updateValue
       @description Allows the user tu set a new value to the element
       @param {object} date
       */
-      setValue: function (date) {
+      updateValue: function () {
 
         var el = this;
-        var subInputs = el.querySelector(".vc-datebox-subInputs");
-        var dayInput = subInputs.querySelector('[data-field="day"] input');
-        var monthInput = subInputs.querySelector('[data-field="month"] input');
-        var yearInput = subInputs.querySelector('[data-field="year"] input');
-        var day, month, year;
 
-        day = date.toLocaleString([], {
-          day: "numeric"
-        });
+        if (!el._misc.preventUpdate) {
 
-        month = date.toLocaleString([], {
-          month: "numeric"
-        });
+          var format = el.valueFormat;
 
-        year = date.toLocaleString([], {
-          year: "numeric"
-        });
+          var subInputs = el.querySelector(".vc-datebox-subInputs");
+          var dayInput = subInputs.querySelector('[data-field="day"] input');
+          var monthInput = subInputs.querySelector('[data-field="month"] input');
+          var yearInput = subInputs.querySelector('[data-field="year"] input');
 
-        el._misc.current.day = day;
-        el._misc.current.month = month;
-        el._misc.current.year = year;
+          var value = el.value;
 
-        if (el._refs.datePicker) {
+          var valueObj, day, month, year;
 
-          el._refs.datePicker._misc.current.day = day;
-          el._refs.datePicker._misc.current.month = month;
-          el._refs.datePicker._misc.current.year = year;
+          if (value.constructor == Date) {
+
+            day = value.toLocaleString([], {
+              day: "numeric"
+            });
+
+            month = value.toLocaleString([], {
+              month: "numeric"
+            });
+
+            year = value.toLocaleString([], {
+              year: "numeric"
+            });
+
+            valueObj = {
+              day: day,
+              month: month,
+              year: year
+            }
+
+          } else {
+
+            valueObj = el._getObjectFromDateString(el.value);
+
+          }
+          
+          el._misc.current.day = el._format(valueObj.day, el._misc.mask.day.format);
+          el._misc.current.month = el._format(valueObj.month, el._misc.mask.month.format);
+          el._misc.current.year = el._format(valueObj.year, el._misc.mask.year.format);
+
+          if (el._refs.datePicker) {
+
+            el._refs.datePicker._misc.current.day = el._misc.current.day;
+            el._refs.datePicker._misc.current.month = el._misc.current.month;
+            el._refs.datePicker._misc.current.year = el._misc.current.year;
+
+          }
+
+          dayInput.value = el._misc.current.day;
+          monthInput.value = el._misc.current.month;
+          yearInput.value = el._misc.current.year;
+
+          el._handleLimits(dayInput, monthInput, yearInput);
+          el._validateDate();
 
         }
 
-        dayInput.value = day;
-        monthInput.value = month;
-        yearInput.value = year;
-
-        el._handleLimits(dayInput, monthInput, yearInput);
-        el._validateDate();
+        el._misc.preventUpdate = false;
 
       }
     },
@@ -1369,6 +1409,9 @@
           break;
         case "readonly":
           this._updateReadOnly();
+          break;
+        case "value":
+          this._updateValue();
           break;
       }
 
