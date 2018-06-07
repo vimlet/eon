@@ -1,7 +1,6 @@
 <script>
   //@header A container made to swipe vc-slide elements
   vcomet.element("vc-swiper", "vc-swiper.css", {
-    themed: true,
     dependencies: [
       "../vc-slide"
     ],
@@ -152,6 +151,8 @@
       */
       setUp: function() {
         var el = this;
+        // Save a reference of the parent node for fullscreen purposes
+        el._refs.parent = el.parentNode;
         // Check swiper type
         if(el.type == "gallery"){
           el.classList.add("vc-swiper-gallery");
@@ -542,7 +543,7 @@
           var size = invertSize + (invertSize / 3);
           // Set up css rule
           var typeRuleName = el.direction == "vertical" ? ".vc-swiper-vertical": "";
-          var staticRuleName = 'vc-swiper[theme="'+ el.getAttribute("theme") +'"].vc-swiper-gallery'+ typeRuleName + ' .vc-swiper-thumbnail';
+          var staticRuleName = 'vc-swiper.vc-swiper-gallery'+ typeRuleName + ' .vc-swiper-thumbnail';
           var clss = staticRuleName + ".vc-swiper-thumbnailSize{" + el._misc.styleSizeProperty + ":" + size + "px;}";
           // Insert and save rule
           vcomet.style.sheet.insertRule(clss, 0);
@@ -782,6 +783,7 @@
       */
       toggleFullScreen: function(){
         var el = this;
+        // *WARNING* Be careful, position fixed elements do not work properly inside parent with any form of transform property
         var activated = el.classList.contains("vc-swiper-fullscreen") ? true : false;
         el.querySelector(".vc-swiper-screenBtn").style.opacity = 0;
         // Remove translate animation
@@ -789,13 +791,19 @@
         el.pagingNode.style.transition = "none";
         // Toggle full screen
         if(activated) {
-          el.classList.remove("vc-swiper-fullscreen");
+          el._refs.parent.appendChild(el);
+          // Wait until swiper is re-appended
+          setTimeout(function() {
+            el.classList.remove("vc-swiper-fullscreen");
+          }, 30);
         } else {
           el.pagingNode.style.opacity = 0;
-          el.classList.add("vc-swiper-fullscreen");
+          // Append swiper to the body
+          document.body.appendChild(el);
           // Wait for the thumbnail positioning before make the paging node visible
           setTimeout(function() {
             el.pagingNode.style.opacity = 1;
+            el.classList.add("vc-swiper-fullscreen");
           }, 30);
         }
         // Restore translate animation
