@@ -53,7 +53,31 @@
       */
       value: {
         value: "",
-        reflect: false
+        reflect: true
+      },
+      /*
+      @property {string} day
+      @description Day of the date
+      */
+      day: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {string} month
+      @description Month of the date
+      */
+      month: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {string} year
+      @description Year of the date
+      */
+      year: {
+        value: "",
+        reflect: true
       },
       /*
       @property {string} locale
@@ -120,18 +144,10 @@
         reflect: true
       },
       /*
-      @property {string} month
-      @description Only used for setting up pickers with selectable = "d"
+      @property {string} locale
+      @description Locale of the datepicker
       */
-      month: {
-        value: "",
-        reflect: true
-      },
-      /*
-      @property {string} year
-      @description Only used for setting up pickers with selectable = "m"/"d"
-      */
-      year: {
+      locale: {
         value: "",
         reflect: true
       },
@@ -237,7 +253,8 @@
         var el = this;
 
         el.locale = (el.locale != undefined && el.locale != "") ? el.locale : navigator.language;
-        el.setAttribute("valid", "false");
+
+        el._initValue();
 
         el._setupWeekDays();
 
@@ -253,28 +270,25 @@
           el._setupDaysGrid();
         }
 
-        //If the user specified a min date
-        if (el.min != "" && el.min != undefined) {
-          el._setupMinDate();
-        }
+        el._setupMinDate();
+        el._setupMaxDate();
 
-        //If the user specified a max date
-        if (el.max != "" && el.max != undefined) {
-          el._setupMaxDate();
-        }
-
-        el._setupEvents();
-        el._setupInitialDate();
+        el._updateValueWithinLimits();
 
         el._handleInitialState();
         el._handleAutoHeight();
         el._handleFonts();
+
+        el._setupEvents();
+
 
         if (vcomet.util.isTouchScreen()) {
           el.dataset.touch = "true";
         }
 
         el._updateDisabled();
+
+        el._refresh();
 
         vcomet.addResizeListener(el.querySelector(".vc-datepicker-calendar"), el.nodeName.toLowerCase(), function () {
           el._handleAutoHeight();
@@ -328,6 +342,31 @@
 
       },
       /*
+      @function (private) {Object} _getObjectFromDateString
+      @description Given a value with format this functions returns an object with day, month and year provided by the value
+      @param {String} value
+      */
+      getObjectFromDateString: function (value) {
+
+        var el = this;
+
+        var format = el.valueFormat;
+
+        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+        var splittedValue = value.split("/");
+        var splittedFormat = el.valueFormat.split("/");
+
+        var dayIndex = splittedFormat.indexOf(dayFormat);
+        var monthIndex = splittedFormat.indexOf(monthFormat);
+        var yearIndex = splittedFormat.indexOf(yearFormat);
+
+        return { day: splittedValue[dayIndex], month: splittedValue[monthIndex], year: splittedValue[yearIndex] };
+
+      },
+      /*
       @function (private) _handleInitialState
       @description andles the grid to be showed when opening the picker for the first time
       */
@@ -335,8 +374,8 @@
 
         var el = this;
 
-        el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
-        el._misc.current.month = (el.month != "") ? el.month : el._misc.current.month;
+        // el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
+        // el._misc.current.month = (el.month != "") ? el.month : el._misc.current.month;
 
         switch (el.selectable) {
           case "dmy":
@@ -347,15 +386,9 @@
             el._showMonthsGrid();
             break;
           case "d":
-            var previousMonth;
-            var minDate;
-            var maxDate;
-
-            minDate = 1 + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
-            maxDate = vcomet.time.getDaysInMonth(el._misc.current.year, el._misc.current.month) + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
-
-            el.min = minDate;
-            el.max = maxDate;
+          
+            el.min = 1 + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
+            el.max = vcomet.time.getDaysInMonth(el._misc.current.year, el._misc.current.month) + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
 
             el._setupMinDate();
             el._setupMaxDate();
@@ -364,18 +397,18 @@
             el._showDaysGrid();
             el._disableSelectors();
 
-            if (el.year != "" && el.month != "") {
-              el._disableNavigation();
-            }
+            // if (el.year != "" && el.month != "") {
+            el._disableNavigation();
+            // }
             break;
           case "m":
-            el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
+            // el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
 
             el._showMonthsGrid();
             el._disableSelectors();
-            if (el.year != "") {
-              el._disableNavigation();
-            }
+            // if (el.year != "") {
+            el._disableNavigation();
+            // }
             break;
           case "y":
             el._showYearsGrid();
@@ -433,32 +466,45 @@
 
         var el = this;
 
-        if (el.min.indexOf('/') > -1) {
+        if (el.min == "") {
+          if (el.selectable == "d") {
+            el.min = 1 + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
+          } else if (el.selectable == "m") {
+            el.min = 1 + "/" + 1 + "/" + el._misc.current.year;
+          }
+        }
 
-          var splittedMin = el.min.split("/");
+        if (el.min != "") {
 
-          el._misc.min.day = parseInt(splittedMin[0]);
-          el._misc.min.month = parseInt(splittedMin[1]) - 1;
-          el._misc.min.year = parseInt(splittedMin[2]);
+          if (el.min.indexOf('/') > -1) {
 
-        } else {
+            var splittedMin = el.min.split("/");
 
-          var date = new Date(parseInt(el.min));
+            el._misc.min.day = parseInt(splittedMin[0]);
+            el._misc.min.month = parseInt(splittedMin[1]) - 1;
+            el._misc.min.year = parseInt(splittedMin[2]);
 
-          el._misc.min.day = date.toLocaleString([], {
-            day: "numeric"
-          });
+          } else {
 
-          el._misc.min.month = date.toLocaleString([], {
-            month: "numeric"
-          });
+            var date = new Date(parseInt(el.min));
 
-          el._misc.min.year = date.toLocaleString([], {
-            year: "numeric"
-          });
+            el._misc.min.day = date.toLocaleString([], {
+              day: "numeric"
+            });
+
+            el._misc.min.month = date.toLocaleString([], {
+              month: "numeric"
+            });
+
+            el._misc.min.year = date.toLocaleString([], {
+              year: "numeric"
+            });
+          }
+
         }
 
         el._misc.min.active = true;
+
       },
       /*
       @function (private) _setupMinDate
@@ -468,32 +514,45 @@
 
         var el = this;
 
-        if (el.max.indexOf('/') > -1) {
-
-          var splittedMax = el.max.split("/");
-
-          el._misc.max.day = parseInt(splittedMax[0]);
-          el._misc.max.month = parseInt(splittedMax[1]) - 1;
-          el._misc.max.year = parseInt(splittedMax[2]);
-
-        } else {
-
-          var date = new Date(parseInt(el.max));
-
-          el._misc.max.day = date.toLocaleString([], {
-            day: "numeric"
-          });
-
-          el._misc.max.month = date.toLocaleString([], {
-            month: "numeric"
-          });
-
-          el._misc.max.year = date.toLocaleString([], {
-            year: "numeric"
-          });
+        if (el.max == "") {
+          if (el.selectable == "d") {
+            el.max = vcomet.time.getDaysInMonth(el._misc.current.year, el._misc.current.month) + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
+          } else if (el.selectable == "m") {
+            el.max = vcomet.time.getDaysInMonth(el._misc.current.year, 11) + "/" + 12 + "/" + el._misc.current.year;
+          }
         }
 
-        el._misc.max.active = true;
+        if (el.max != "") {
+
+          if (el.max.indexOf('/') > -1) {
+
+            var splittedMax = el.max.split("/");
+
+            el._misc.max.day = parseInt(splittedMax[0]);
+            el._misc.max.month = parseInt(splittedMax[1]) - 1;
+            el._misc.max.year = parseInt(splittedMax[2]);
+
+          } else {
+
+            var date = new Date(parseInt(el.max));
+
+            el._misc.max.day = date.toLocaleString([], {
+              day: "numeric"
+            });
+
+            el._misc.max.month = date.toLocaleString([], {
+              month: "numeric"
+            });
+
+            el._misc.max.year = date.toLocaleString([], {
+              year: "numeric"
+            });
+          }
+
+          el._misc.max.active = true;
+
+        }
+
       },
       /*
       @function (private) _setupEvents
@@ -542,36 +601,78 @@
           }
         });
       },
-      /*
-      @function (private) _setupInitialDate
-      @description Sets up the first date to be showed on the calendar depending on min, max dates
-      */
-      setupInitialDate: function () {
+      initValue: function () {
 
         var el = this;
-        var date = new Date();
 
-        var day = date.getDay();
-        var month = date.getMonth();
-        var year = date.getFullYear();
+        // If no value was provided by the user we create one
+        if (el.value == "") {
 
+          var date = new Date();
 
-        if ((month <= el._misc.min.month && year <= el._misc.min.year || year <= el._misc.min.year)) {
-
-          el._misc.current.month = parseInt(el._misc.min.month);
-          el._misc.current.year = el._misc.min.year;
-
-        } else if ((month >= el._misc.max.month && year >= el._misc.max.year) || year >= el._misc.max.year) {
-
-          el._misc.current.month = parseInt(el._misc.max.month);
-          el._misc.current.year = el._misc.max.year;
+          var dateObj = {
+            day: el.day != "" ? parseInt(el.day) : parseInt(date.getDate()),
+            month: el.month != "" ? parseInt(el.month) : parseInt(date.getMonth()) + 1,
+            year: el.year != "" ? parseInt(el.year) : parseInt(date.getFullYear())
+          }
 
         } else {
 
-          el._misc.current.month = month;
-          el._misc.current.year = year;
+          dateObj = el._getObjectFromDateString(el.value);
+          dateObj.month = dateObj.month - 1
+
         }
 
+        dateObj = el._formatObj(dateObj);
+
+        el._misc.current.month = dateObj.month;
+        el._misc.current.year = dateObj.year;
+        el._misc.current.day = dateObj.day;
+
+        el.value = el._getFormattedValue(dateObj, el.valueFormat);
+
+      },
+      /*
+      @function (private) _updateValueWithinLimits
+      @description Sets up the first date to be showed on the calendar depending on min, max dates
+      */
+      updateValueWithinLimits: function () {
+
+        var el = this;
+        var dateObj = el._getObjectFromDateString(el.value);
+        
+        dateObj.month = dateObj.month - 1;
+
+        // Compares if the date exceeds the min/max limits
+        if ((dateObj.month < el._misc.min.month && dateObj.year <= el._misc.min.year || dateObj.year < el._misc.min.year)) {
+
+          el._misc.current.month = parseInt(el._misc.min.month);
+          el._misc.current.year = el._misc.min.year;
+          el._misc.current.day = el._misc.min.day;
+
+        } else if ((dateObj.month > el._misc.max.month && dateObj.year >= el._misc.max.year) || dateObj.year > el._misc.max.year) {
+
+          el._misc.current.month = parseInt(el._misc.max.month);
+          el._misc.current.year = el._misc.max.year;
+          el._misc.current.day = el._misc.max.day;
+
+        } else {
+
+          el._misc.current.month = dateObj.month;
+          el._misc.current.year = dateObj.year;
+          el._misc.current.day = dateObj.day;
+
+        }
+
+        el._misc.selected.day = el._misc.current.day;
+        el._misc.selected.month = el._misc.current.month;
+        el._misc.selected.year = el._misc.current.year;
+        
+        el.value = el._getFormattedValue(el._formatObj({
+          day: el._misc.current.day,
+          month: el._misc.current.month + 1,
+          year: el._misc.current.year
+        }));
 
       },
       /*
@@ -721,7 +822,6 @@
 
         yearsGrid.appendChild(rowsFragment);
       },
-
       /*
       @function (private) _setInitialValue
       @description Sets the initial value based on the data provided by the user
@@ -740,8 +840,7 @@
 
           };
 
-          el.value = el._getFormattedValue(dateObj);
-          el.setAttribute("valid", "true");
+          el.value = el._getFormattedValue(el._formatObj(dateObj));
 
         }
 
@@ -928,8 +1027,8 @@
 
           }
         }
-
-        var currentDay = el._refs.daysGrid.querySelector('[day="' + el._misc.selected.day + '"][month="' + el._misc.selected.month + '"][year="' + el._misc.selected.year + '"]');
+        
+        var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.selected.day) + '"][month="' + parseInt(el._misc.selected.month) + '"][year="' + parseInt(el._misc.selected.year) + '"]');
 
         if (currentDay) {
           el._selectDay(currentDay);
@@ -1080,7 +1179,7 @@
         if (dayButton.dataset.disabled != "true") {
 
           var el = this;
-          
+
           // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
           var dateObj = el._formatObj({ day: dayButton.getAttribute("day"), month: (parseInt(dayButton.getAttribute("month")) + 1), year: dayButton.getAttribute("year") });
 
@@ -1099,7 +1198,6 @@
             var formattedValue = el._getFormattedValue(dateObj);
 
             el.value = formattedValue;
-            el.setAttribute("valid", "true");
 
           }
 
@@ -1141,7 +1239,7 @@
               var formattedValue = el._getFormattedValue(dateObj);
 
               el.value = formattedValue;
-              el.setAttribute("valid", "true");
+
             }
           }
         }
@@ -1194,7 +1292,7 @@
               var formattedValue = el._getFormattedValue(dateObj);
 
               el.value = formattedValue;
-              el.setAttribute("valid", "true");
+
             }
           }
         }
@@ -1213,13 +1311,13 @@
         var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
         var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
         var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
-        
+
         var finalObj = {};
 
         finalObj.day = obj.day ? el._format(obj.day, dayFormat) : undefined;
         finalObj.month = obj.month ? el._format(obj.month, monthFormat) : undefined;
         finalObj.year = obj.year ? el._format(obj.year, yearFormat) : undefined;
-        
+
         return finalObj;
 
       },
@@ -1232,8 +1330,11 @@
       format: function (text, format) {
 
         var el = this;
-        
+
+        // Makes sure that the text is a string so that length works as we expect
         text = text + "";
+        // In case there is no format provided for this text we set it as empty
+        format = format ? format : "";
 
         if (text.length < format.length) {
           for (var i = 0; i < (format.length - text.length); i++) {
@@ -1839,6 +1940,36 @@
           el._showYearsGrid();
         }
 
+        if (el._refs.yearsGrid) {
+
+          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.current.year + "']");
+
+          if (yearButton && yearButton.dataset.disabled != "true") {
+            el._highlightYear(yearButton);
+          }
+
+        }
+
+        if (el._refs.monthsGrid) {
+
+          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.current.year + "'][data-index='" + el._misc.current.month + "']");
+
+          if (monthButton && monthButton.dataset.disabled != "true") {
+            el._highlightMonth(monthButton);
+          }
+
+        }
+
+        if (el._refs.daysGrid) {
+
+          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.current.year + "'][month='" + el._misc.current.month + "'][day='" + el._misc.current.day + "']");
+
+          if (dayButton && dayButton.dataset.disabled != "true") {
+            el._highlightDay(dayButton);
+          }
+
+        }
+
       },
       /*
       @function (private) _show
@@ -1917,98 +2048,80 @@
         }
 
       },
-    },
-    functions: {
       /*
-      @property setValue
-      @description Changes the value to the provided one
-      @param {Object} date
+      @function (private) _updateValue
+      @description Allows the user tu set a new value to the element
+      @param {Object} value
       */
-      setValue: function (date) {
+      setValue: function (value) {
 
         var el = this;
-        var dateObj, formattedValue;
 
-        var day = parseInt(date.getDate());
-        var month = parseInt(date.getMonth());
-        var year = parseInt(date.getFullYear());
+        if (!el._misc.preventUpdate) {
 
-        // Check if the provided date exceeds the max date
-        if (year > el._misc.max.year) {
+          var valueObj, dateObj, formattedValue;
 
-          year = el._misc.max.year;
-          month = el._misc.max.month;
-          day = el._misc.max.day;
+          if (value.constructor == Date) {
 
-        } else if (el._isMaxMonth(year, month)) {
+            valueObj = {
+              day: parseInt(value.getDate()),
+              month: parseInt(value.getMonth()),
+              year: parseInt(value.getFullYear())
+            }
 
-          month = el._misc.max.month;
-          day = (day > el._misc.max.day) ? el._misc.max.day : day;
+          } else {
 
-        }
+            valueObj = el._getObjectFromDateString(el.value);
 
-        // Check if the provided date exceeds the min date
-        if (year < el._misc.min.year) {
-
-          year = el._misc.min.year;
-          month = el._misc.min.month;
-          day = el._misc.min.day;
-
-        } else if (el._isMinMonth(year, month)) {
-
-          month = el._misc.min.month;
-          day = (day > el._misc.min.day) ? el._misc.min.day : day;
-
-        }
-
-        el._misc.current.day = day;
-        el._misc.current.month = month;
-        el._misc.current.year = year;
-
-        dateObj = {
-
-          day: el._misc.current.day,
-          month: el._misc.current.month + 1,
-          year: el._misc.current.year,
-
-        };
-
-        el._refresh();
-
-        if (el._refs.yearsGrid) {
-
-          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.current.year + "']");
-
-          if (yearButton && yearButton.dataset.disabled != "true") {
-            el._highlightYear(yearButton);
           }
 
-        }
+          // Check if the provided date exceeds the max date
+          if (valueObj.year > el._misc.max.year) {
 
-        if (el._refs.monthsGrid) {
+            valueObj.year = el._misc.max.year;
+            valueObj.month = el._misc.max.month;
+            valueObj.day = el._misc.max.day;
 
-          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.current.year + "'][data-index='" + el._misc.current.month + "']");
+          } else if (el._isMaxMonth(valueObj.year, valueObj.month)) {
 
-          if (monthButton && monthButton.dataset.disabled != "true") {
-            el._highlightMonth(monthButton);
+            valueObj.month = el._misc.max.month;
+            valueObj.day = (valueObj.day > el._misc.max.day) ? el._misc.max.day : valueObj.day;
+
+            // If it does not exceed the max date we check if it does with the min date
+          } else if (valueObj.year < el._misc.min.year) {
+
+            valueObj.year = el._misc.min.year;
+            valueObj.month = el._misc.min.month;
+            valueObj.day = el._misc.min.day;
+
+          } else if (el._isMinMonth(valueObj.year, valueObj.month)) {
+
+            valueObj.month = el._misc.min.month;
+            valueObj.day = (valueObj.day > el._misc.min.day) ? el._misc.min.day : valueObj.day;
+
           }
 
+          el._misc.current.day = valueObj.day;
+          el._misc.current.month = valueObj.month;
+          el._misc.current.year = valueObj.year;
+
+          dateObj = {
+
+            day: el._misc.current.day,
+            month: el._misc.current.month + 1,
+            year: el._misc.current.year,
+
+          };
+
+          el._refresh();
+
+          formattedValue = el._getFormattedValue(dateObj);
+
+          el.value = formattedValue;
+
         }
 
-        if (el._refs.daysGrid) {
-
-          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.current.year + "'][month='" + el._misc.current.month + "'][day='" + el._misc.current.day + "']");
-
-          if (dayButton && dayButton.dataset.disabled != "true") {
-            el._highlightDay(dayButton);
-          }
-
-        }
-
-        formattedValue = el._getFormattedValue(dateObj);
-
-        el.value = formattedValue;
-        el.setAttribute("valid", "true");
+        el._misc.preventUpdate = false;
 
       }
     },
@@ -2025,7 +2138,7 @@
     onRender: function () {
       var el = this;
       el._setup();
-      el._setInitialValue();
+      // el._setInitialValue();
     },
     onPropertyChanged: function (key, oldVal, newVal) {
       switch (key) {
