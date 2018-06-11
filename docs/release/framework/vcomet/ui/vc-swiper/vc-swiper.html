@@ -1,61 +1,22 @@
-
 <script>
+  //@header A container made to swipe vc-slide elements
   vcomet.element("vc-swiper", "vc-swiper.css", {
+    dependencies: [
+      "../vc-slide"
+    ],
     privateProperties: {
       /*
-        @property (private) {String} sizeProperty
-        @description Slide size property depending on swiper direction
+        @property (private) {Object} _misc
+        @description Internal used data
       */
-      sizeProperty: {
-        value: "offsetWidth"
+      misc: {
+        value: {}
       },
       /*
-        @property (private) {String} styleSizeProperty
-        @description Slide size style property
+        @property (private) {Object} _refs
+        @description Quick access to the swiper structure nodes references
       */
-      styleSizeProperty: {
-        value: "width"
-      },
-      /*
-        @property (private) {Number} thumbnailSize
-        @description Slide thumbnail size value
-      */
-      thumbnailSize: {
-        value: 0
-      },
-      /*
-        @property (private) {Number} maxTranslation
-        @description Maximum translate value allowed
-      */
-      maxTranslation: {
-        value: ""
-      },
-      /*
-        @property (private) {Number} minPagingTranslation
-        @description Minimum translate value allowed on pagination node
-      */ 
-      minPagingTranslation: {
-        value: ""
-      },
-      /*
-        @property (private) {Number} maxPagingTranslation
-        @description Maximum translate value allowed on pagination node
-      */ 
-      maxPagingTranslation: {
-        value: ""
-      },
-      /*
-        @property (private) {Boolean} selectElement
-        @description Prevent thumbnails selection on pagination shift
-      */ 
-      selectElement: {
-        value: true
-      },
-      /*
-        @property (private) {Boolean} selectElement
-        @description Prevent thumbnails selection on pagination shift
-      */ 
-      styleSheet: {
+      refs: {
         value: {}
       }
     },
@@ -83,17 +44,12 @@
       /*
         @property {Boolean} externalSlide
         @description Denied slide by touching
+        Values: false, true
+        Default: false
       */
       externalSlide: {
         value: false,
         reflect: true
-      },
-      /*
-        @property {Object} wrapper
-        @description Quick access to the slides wrapper node
-      */
-      wrapper: {
-        value: {}
       },
       /*
         @property {Object} pagingNode
@@ -115,6 +71,8 @@
       /*
         @property {Boolean} navigation
         @description Whether or not navigation buttons should be displayed
+        Values: false, true
+        Default: false
       */
       navigation: {
         value: false,
@@ -137,6 +95,7 @@
       /*
         @property {Number} initialSlide
         @description Initial displayed slide index
+        Default: 0
       */
       initialSlide: {
         value: 0,
@@ -153,6 +112,7 @@
       /*
         @property {Number} slideDistance
         @description Slide translate pixels amount for each pixel move by the mouse
+        Default: 1
       */
       slideDistance: {
         value: 1
@@ -160,6 +120,7 @@
       /*
         @property {Number} thumbnailDistance
         @description Translate pixels amount for each pixel move by the mouse on pagination node
+        Default: 2
       */
       thumbnailDistance: {
         value: 2
@@ -175,6 +136,8 @@
       /*
         @property {Boolean} fullScreen
         @description Whether or not the swiper should have full screen mode
+        Values: false, true
+        Default: false
       */
       fullScreen: {
         value: false,
@@ -188,6 +151,8 @@
       */
       setUp: function() {
         var el = this;
+        // Save a reference of the parent node for fullscreen purposes
+        el._refs.parent = el.parentNode;
         // Check swiper type
         if(el.type == "gallery"){
           el.classList.add("vc-swiper-gallery");
@@ -219,21 +184,19 @@
         // Create swiper wrapper container
         var wrapper = document.createElement("div");
         wrapper.classList.add("vc-swiper-wrapper");
-        el.wrapper = wrapper;
-        // Wrapper fragment the pages are going to be appended to
-        var children = el.getSourceElements();
+        el._refs.wrapper = wrapper;
         // Get axis
         if(el.direction == "horizontal"){
-          el._sizeProperty = "offsetWidth";
-          el._styleSizeProperty = "width";
+          el._misc.sizeProperty = "offsetWidth";
+          el._misc.styleSizeProperty = "width";
         }else{
           el.classList.add("vc-swiper-vertical");
-          el._sizeProperty = "offsetHeight";
-          el._styleSizeProperty = "height";
+          el._misc.sizeProperty = "offsetHeight";
+          el._misc.styleSizeProperty = "height";
         }
         fragment.appendChild(wrapper);
         // Get maximum slide value
-        el._maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._styleSizeProperty));
+        el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
       },
       /*
         @function (private) _buildPagination
@@ -245,6 +208,7 @@
         el.thumbnails = [];
         // Is pagination activated
         if(el.pagination){
+          el._refs.styleSheet = {};
           // Create swiper pagination container
           var pagination = document.createElement("div");
           pagination.classList.add("vc-swiper-pagination");
@@ -270,9 +234,9 @@
           pagingFragment.appendChild(pagingWrapper);
           pagingNode.appendChild(pagingFragment);
           el.pagingNode = pagingWrapper;
-          // Make sure paging thumbnails are created, allowing access to thumnail size
+          // Make sure paging thumbnails are created, allowing access to thumbnail size
           el.onPagingReady(function(thumbnailSize){
-            el._thumbnailSize = thumbnailSize;
+            el._misc.thumbnailSize = thumbnailSize;
             // Add paging wrapper slide event listener
             el._addPagingSlideEventListeners();
           });
@@ -335,21 +299,21 @@
         var pagingParent = paging.parentNode;
         // Functionality control
         var throttled, mousedown, thumbnailClicked, initialValue, moveValue, translatePixels, position;
-        var delay = 50;
+        var delay = el._isTrickyBrowser() ? 10 : 60;
         // Movement information
         var axis = el.direction == "horizontal" ? "clientX" : "clientY";
         // Thumbnail size information
-        var thumbnailSize = el._thumbnailSize;
+        var thumbnailSize = el._misc.thumbnailSize;
         var thumbnailMidSize = thumbnailSize / 2;
         var marginValue = el.direction == "vertical" ? 5 : 10;
-        el._minPagingTranslation = (el._getNumProperty(el._styleSizeProperty, pagingParent) / 2) - (marginValue + thumbnailMidSize);
+        el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, pagingParent) / 2) - (marginValue + thumbnailMidSize);
         // Translate element
-        el._translate(paging, el._minPagingTranslation);
+        el._translate(paging, el._misc.minPagingTranslation);
         // Start slide on mouse down event
         pagingParent.addEventListener("pointerdown", function(e){
-          // Needed to make mouseup event work perfectly
-          e.preventDefault();
-          // Prevent mouse down functionality on secondaary mouse button is clicked
+          // ** Fix bad rendering while sliding bug on tricky browsers
+          paging.style.transition = el._isTrickyBrowser() ? "none" : "transform .2s";
+          // Prevent mouse down functionality on secondary mouse button is clicked
           if(e.button == 0){
             if(e.target.classList.contains("vc-swiper-thumbnail")){
               thumbnailClicked = e.target;
@@ -365,8 +329,8 @@
              if (!throttled) {
               // Get y/z translate pixels
               translatePixels = moveValue - e[axis];
-              // Proccess position with the new movement values
-              position = el._proccesPosition(paging, translatePixels, "thumbnails");
+              // Process position with the new movement values
+              position = el._processPosition(paging, translatePixels, "thumbnails");
               // Translate element
               el._translate(paging, position);
               // Update move value
@@ -384,14 +348,16 @@
         document.addEventListener("pointerup", function(e){
           // Make sure a movement has been fired
           if(mousedown){
+            // ** Fix bad rendering while sliding bug on tricky browsers
+            paging.style.transition = "transform .2s";
             mousedown = false;
-            // Mouse position is different from inital position
+            // Mouse position is different from initial position
             // The mousedown thumbnail target is different from mouseup ones
             if(moveValue != initialValue && thumbnailClicked == e.target){
               // Denied thumbnail selection
-              el._selectElement = false;
+              el._misc.selectElement = false;
             } else {
-              el._selectElement = true;
+              el._misc.selectElement = true;
             }
           }
         });
@@ -409,7 +375,7 @@
         control.classList.add("vc-swiper-paginationHideControl");
         // Get translate property for this swiper direction
         var prop = el.direction == "horizontal" ? "bottom" : "right";
-        var hideSizeProp = el._sizeProperty == "offsetWidth" ? "offsetHeight" : "offsetWidth";
+        var hideSizeProp = el._misc.sizeProperty == "offsetWidth" ? "offsetHeight" : "offsetWidth";
         var leaveTimeout;
         var pagingActive = true;
         // Control div on mouseover  functionality
@@ -439,7 +405,7 @@
           leaveTimeout = setTimeout(function () {
             // Hide pagination translating its width distance
             node.style[prop] = -node[hideSizeProp] + "px";
-            // Disaplay pagination control div
+            // Display pagination control div
             control.style.display = "block";
               // Increase navigation buttons size
               el.nextBtn.node.style[el.direction == "horizontal" ? "height" : "width"] = "100%";
@@ -460,7 +426,7 @@
         // Make sure the paging node has been rendered
         setTimeout(function () {
           // Get pagination node size
-          var pagingSize = el._sizeProperty == "offsetHeight"
+          var pagingSize = el._misc.sizeProperty == "offsetHeight"
                           ?  el.pagingNode["offsetWidth"]: el.pagingNode["offsetHeight"];
           // Get button node size
           var btnSize;
@@ -511,12 +477,14 @@
       */
       navClick: function() {
         var el = this;
+        
         el.backBtn.node.addEventListener("click", function(){
           el.prev();
-        });
+        }, false);
+        
         el.nextBtn.node.addEventListener("click", function(){
           el.next();
-        });
+        }, false);
       },
       /*
         @function (private) _createThumbnail
@@ -530,7 +498,7 @@
           // Create thumbnail span element
           var thumbnail = document.createElement("span");
           var thumbnailStored = thumbnail;
-          thumbnail.classList.add("vc-swiper-thumbnail");
+          thumbnail.classList.add("vc-swiper-thumbnail", "vc-unselectable");
           thumbnail.classList.add("vc-bg10");
           // Add thumbnail node
           var thumbnailFragment = document.createDocumentFragment();
@@ -546,7 +514,7 @@
             thumbnailObj.el = thumbnail;
             // Set 4:3 thumbnail size
             el._createThumbStyle(thumbnail);
-            var size = thumbnail[el._sizeProperty];
+            var size = thumbnail[el._misc.sizeProperty];
             var slideIndex = el.slides.indexOf(slideObj);
             // Trigger paging created event
             if(slideIndex === 0){
@@ -555,7 +523,7 @@
             // Set thumbnail translation range
             thumbnailStored = el._updateThumbnailRange(thumbnailObj, slideIndex, size);
           }
-          // Add thumbnail to swiper thumbails array
+          // Add thumbnail to swiper thumbnails array
           el.thumbnails.push(thumbnailStored);
           return thumbnail;
         }
@@ -563,26 +531,23 @@
       /*
         @function (private) _createThumbStyle
         @description Create the dynamic thumbnail size style rule
-        @param {Object} thumbnail [Thumnnail node]
+        @param {Object} thumbnail [Thumbnail node]
       */
       createThumbStyle: function(thumbnail){
         var el = this;
-        // Check style existance
-        if(!el._styleSheet["thumbnail"]) {
+        // Check style existence
+        if(!el._refs.styleSheet["thumbnail"]) {
           // Calculate 4:3 size ratio
-          var invertSizeProp = el._styleSizeProperty == "width" ? "height" : "width";
+          var invertSizeProp = el._misc.styleSizeProperty == "width" ? "height" : "width";
           var invertSize = el._getNumProperty(invertSizeProp, thumbnail);
           var size = invertSize + (invertSize / 3);
-
           // Set up css rule
           var typeRuleName = el.direction == "vertical" ? ".vc-swiper-vertical": "";
           var staticRuleName = 'vc-swiper.vc-swiper-gallery'+ typeRuleName + ' .vc-swiper-thumbnail';
-          var clss = staticRuleName + ".vc-swiper-thumbnailSize{" + el._styleSizeProperty + ":" + size + "px;}";
-          
+          var clss = staticRuleName + ".vc-swiper-thumbnailSize{" + el._misc.styleSizeProperty + ":" + size + "px;}";
           // Insert and save rule
-          vcomet.style.sheet.insertRule(clss);
-          el._styleSheet["thumbnail"] = vcomet.style.sheet.cssRules[0];
-
+          vcomet.style.sheet.insertRule(clss, 0);
+          el._refs.styleSheet["thumbnail"] = vcomet.style.sheet.cssRules[0];
         }
         thumbnail.classList.add("vc-swiper-thumbnailSize");
       },
@@ -592,14 +557,16 @@
       */
       updateThumbnailsSize: function(){
         var el = this;
-        // Calculate 4:3 size ratio
-        var invertSizeProp = el._styleSizeProperty == "width" ? "height" : "width";
-        var invertSize = el._getNumProperty(invertSizeProp, el.thumbnails[0].el);
-        var size = invertSize + (invertSize / 3);
-        // Update size rule
-        if (el._styleSheet.thumbnail){
-         el._styleSheet.thumbnail.style[el._styleSizeProperty] = size + "px";
-        }
+        el.onPagingReady(function(){
+          // Calculate 4:3 size ratio
+          var invertSizeProp = el._misc.styleSizeProperty == "width" ? "height" : "width";
+          var invertSize = el._getNumProperty(invertSizeProp, el.thumbnails[0].el);
+          var size = invertSize + (invertSize / 3);
+          // Update size rule
+          if (el._refs.styleSheet.thumbnail){
+           el._refs.styleSheet.thumbnail.style[el._misc.styleSizeProperty] = size + "px";
+          }
+        });
       },
       /*
         @function (private) _updateThumbnailRange
@@ -611,14 +578,14 @@
       updateThumbnailRange: function(thumbnailObj, index, size) {
         var el = this;
         var marginValue = el.direction == "vertical" ? 5 : 10;
-        size = !size ? el._thumbnailSize : size;
+        size = !size ? el._misc.thumbnailSize : size;
         // Get thumbnail centered position value
         var indexValue = ((size + marginValue) * index);
-        var min = index == 0 ? el._minPagingTranslation : el._minPagingTranslation - indexValue;
+        var min = index == 0 ? el._misc.minPagingTranslation : el._misc.minPagingTranslation - indexValue;
         var max = 0 - ((size + marginValue) * (index + 1));
         thumbnailObj.range = [min, max];
         // Update max slide value
-        el._maxPagingTranslation = min;
+        el._misc.maxPagingTranslation = min;
         return thumbnailObj;
       },
       /*
@@ -628,7 +595,7 @@
       */
       activateThumbnail: function(target){
         var el = this;
-        // Check thumbnail existance
+        // Check thumbnail existence
         if(target){
           try {
             // Active style
@@ -638,7 +605,7 @@
             target.el.classList.add("vc-swiper-thumbnailActive");
             // Get translate position
             var min = target.range[0];
-            // Translate paging wrapper to thumbail centered position
+            // Translate paging wrapper to thumbnail centered position
             if(el.direction == "horizontal"){
               el.pagingNode.style.transform = "translate3d(" + min + "px, 0px, 0px)";
             }else{
@@ -646,7 +613,7 @@
             }
           }
         }
-        // Check other thumbails status
+        // Check other thumbnails status
         for (var i = 0; i < el.thumbnails.length; i++) {
           var thumbnail = el.thumbnails[i].el || el.thumbnails[i];
           // If thumbnail is active change inactive class
@@ -665,14 +632,23 @@
       thumbnailClick: function(slideIndex, thumbnail) {
         var el = this;
         //
-        thumbnail.addEventListener("click", function(){
-          // Translate to slide position
-          if(el._selectElement){
-            el.slideTo(slideIndex);
-          }else{
-            el._selectElement = true;
+         // This fixes click not being triggered on body on iPad
+        if (/iPad|iPhone/.test(navigator.platform)) {
+            // alert("pointer");
+            thumbnail.parentNode.style.cursor = "pointer";
+            thumbnail.style.touchAction = "none";
           }
-        });
+        thumbnail.addEventListener("click", function(){
+           console.log('thumb click', el._misc.selectElement, typeof el._misc.selectElement);
+          // setTimeout(function() {
+            // Translate to slide position
+            if(el._misc.selectElement || typeof el._misc.selectElement == "undefined"){
+              el.slideTo(slideIndex);
+            }else{
+              el._misc.selectElement = true;
+            }
+          // }, 500);
+        }, true);
       },
       /*
         @function (private) _setGalleryThumbnail
@@ -717,8 +693,8 @@
       */
       updateSlideRange: function(slideObj, index){
         var el = this;
-        slideObj.range = [-Math.abs((el._getNumProperty(el._styleSizeProperty) * index))
-                      , -Math.abs((el._getNumProperty(el._styleSizeProperty) * (index + 1)))];
+        slideObj.range = [-Math.abs((el._getNumProperty(el._misc.styleSizeProperty) * index))
+                      , -Math.abs((el._getNumProperty(el._misc.styleSizeProperty) * (index + 1)))];
         return slideObj;
       },
       /*
@@ -732,32 +708,31 @@
         var clickDelay, clickCounter, clickCounter, diff, initValue, moveValue;
         clickDelay = clickCounter = clickCounter = diff = initValue = moveValue = 0;
         var resetDbClick = function(){
-          // Reset double click paramaters
+          // Reset double click parameters
           clickCounter = 0;
           clickDelay = 0;
         };
-
         // Check fullscreen functionality
         if(el.fullScreen === true || el.fullScreen === "true") {
           // Create the full screen button handler
           el._createFullScreenHandler();
-          el.wrapper.addEventListener("pointerdown", function(e){
+          el._refs.wrapper.addEventListener("pointerdown", function(e){
             e.preventDefault();
             mousedown = true;
             initValue = moveValue = e[axis];
-            // Save current date in miliseconds
+            // Save current date in milliseconds
             if(clickCounter == 0){
               clickDelay = new Date().getTime();
             }
           });
-          el.wrapper.addEventListener("pointermove", function(e){
+          el._refs.wrapper.addEventListener("pointermove", function(e){
             e.preventDefault();
             // Save movement new position;
             if(mousedown) {
               moveValue = moveValue - e[axis];
             }
           });
-          el.wrapper.addEventListener("pointerup", function(e){
+          el._refs.wrapper.addEventListener("pointerup", function(e){
             clickCounter++
             mousedown = false;
             // No movement registered
@@ -770,7 +745,7 @@
                 // Activate or deactivate full screen mode
                 el._toggleFullScreen();
               }
-              // Reset double click paramaters
+              // Reset double click parameters
               resetDbClick();
             } else {
               // Handle double click interruption
@@ -808,31 +783,38 @@
       */
       toggleFullScreen: function(){
         var el = this;
+        // *WARNING* Be careful, position fixed elements do not work properly inside parent with any form of transform property
         var activated = el.classList.contains("vc-swiper-fullscreen") ? true : false;
         el.querySelector(".vc-swiper-screenBtn").style.opacity = 0;
         // Remove translate animation
-        el.wrapper.style.transition = "none";
+        el._refs.wrapper.style.transition = "none";
         el.pagingNode.style.transition = "none";
         // Toggle full screen
         if(activated) {
-          el.classList.remove("vc-swiper-fullscreen");
+          el._refs.parent.appendChild(el);
+          // Wait until swiper is re-appended
+          setTimeout(function() {
+            el.classList.remove("vc-swiper-fullscreen");
+          }, 30);
         } else {
           el.pagingNode.style.opacity = 0;
-          el.classList.add("vc-swiper-fullscreen");
+          // Append swiper to the body
+          document.body.appendChild(el);
           // Wait for the thumbnail positioning before make the paging node visible
           setTimeout(function() {
             el.pagingNode.style.opacity = 1;
+            el.classList.add("vc-swiper-fullscreen");
           }, 30);
         }
         // Restore translate animation
         setTimeout(function() {
-          el.wrapper.style.transition = "transform .2s";
+          el._refs.wrapper.style.transition = "transform .2s";
           el.pagingNode.style.transition = "transform .2s";
         }, 60);
       },
       /*
         @function (private) _resizeFullScreenHandler
-        @description Udpate the full screen handler button dimensions
+        @description Update the full screen handler button dimensions
       */
       resizeFullScreenHandler: function(btn){
         var el = this;
@@ -856,12 +838,12 @@
         mousedown = mousedownThrottled = throttled = false;
         var initialValue, moveValue, slideCounter, position, target, translatePixels;
         var index, slideLimitValue, minTranslValue, elementTranslateMiddle, slide;
-        var delay = 50;
+        var delay = el._isTrickyBrowser() ? 10 : 60;
         var axis = el.direction == "horizontal" ? "clientX" : "clientY";
         if(!el.externalSlide || el.externalSlide === "false"){
           // Start slide on mouse down event
-          el.addEventListener("pointerdown", function(e){
-            // Needed to prevent bad mouseup event
+          el._refs.wrapper.addEventListener("pointerdown", function(e){
+            // Fix pointerup stacked bug
             e.preventDefault();
             // Check slide policy
             mousedown = el._allowSlide(e.button, e.target);
@@ -870,23 +852,24 @@
               slideCounter = !slideCounter ? 1 : slideCounter + 1;
             }, 1);
             if(mousedown) {
+              // ** Fix bad rendering while sliding bug on tricky browsers
+              el._refs.wrapper.style.transition = el._isTrickyBrowser() ? "none" : "transform .2s";
               // Get x/y value
               initialValue = moveValue = e[axis];
             }
           }, false);
           // Slide element on mouse move
-          el.addEventListener("pointermove", function(e){
+          el._refs.wrapper.addEventListener("pointermove", function(e){
             if(mousedown){
               if(slideCounter > 5) {
-                // mousedownEvt.stopPropagation();
                 e.stopPropagation();
                 if (!throttled) {
                   // Get y/z translate pixels
                   translatePixels = moveValue - e[axis];
-                  // Proccess position with the new movement values
-                  position = el._proccesPosition(el.wrapper, translatePixels, "slides");
+                  // Process position with the new movement values
+                  position = el._processPosition(el._refs.wrapper, translatePixels, "slides");
                   // Translate element
-                  el._translate(el.wrapper, position);
+                  el._translate(el._refs.wrapper, position);
                   // Update initial move value
                   moveValue = e[axis];
                   // Throttle
@@ -904,6 +887,8 @@
             // Make sure a movement has been fired
             clearInterval(el.slideTimeInterval);
             if(mousedown){
+              // ** Fix bad rendering while sliding bug on tricky browsers
+              el._refs.wrapper.style.transition = "transform .2s";
               mousedown = false;
               // Complete slide monitor
               if(slideCounter < 100){
@@ -916,19 +901,19 @@
               }else {
                 // Get translate position
                 position = el.direction == "horizontal"
-                      ? parseInt(el.wrapper.style.transform.split(",")[0].split("(")[1])
-                      : parseInt(el.wrapper.style.transform.split(",")[1]);
+                      ? parseInt(el._refs.wrapper.style.transform.split(",")[0].split("(")[1])
+                      : parseInt(el._refs.wrapper.style.transform.split(",")[1]);
                 // Get current element displayed index
                 index = el.slides.indexOf(el.currentSlide);
-                slideLimitValue = el._getNumProperty(el._styleSizeProperty) / 2;
-                minTranslValue = el._getNumProperty(el._styleSizeProperty) * index;
+                slideLimitValue = el._getNumProperty(el._misc.styleSizeProperty) / 2;
+                minTranslValue = el._getNumProperty(el._misc.styleSizeProperty) * index;
                 elementTranslateMiddle = -Math.abs(minTranslValue + slideLimitValue);
                 // Get slide from translate position value
                 slide = el._getPositionSlide(position, "slides");
                 // Execute programmed slide
                 if(position >= elementTranslateMiddle
                   && el.slides.indexOf(el.currentSlide) != el.slides.indexOf(slide)
-                  && position > (slide.range[1] + (el._getNumProperty(el._styleSizeProperty)/2))){
+                  && position > (slide.range[1] + (el._getNumProperty(el._misc.styleSizeProperty)/2))){
                     // Slide back
                     el.slideTo(index - 1);
                   }else if(position >= elementTranslateMiddle){
@@ -998,14 +983,14 @@
         }
       },
       /*
-        @function (private) _proccesPosition
-        @description Proccess a position value and add the new distance to be translate to
+        @function (private) _processPosition
+        @description Process a position value and add the new distance to be translate to
         @param {Object} node [Translate target element]
         @param {Number} pixels [Movement pixel value]
-        @param {String} slider [Targen swiper element type]
+        @param {String} slider [Target swiper element type]
         @return {Number} [Processed position value]
       */
-      proccesPosition: function(node, pixels, slider){
+      processPosition: function(node, pixels, slider){
         var el = this;
         // Get current translate value
         var position = el.direction == "horizontal"
@@ -1016,8 +1001,8 @@
         // Set translate x/y new value
         position -= (pixels * (slider == "slides" ? el.slideDistance : el.thumbnailDistance));
         // Check min and max translate limit values
-        var min = slider == "slides" ? 0 : el._minPagingTranslation;
-        var max = slider == "slides" ? el._maxTranslation : el._maxPagingTranslation;
+        var min = slider == "slides" ? 0 : el._misc.minPagingTranslation;
+        var max = slider == "slides" ? el._misc.maxTranslation : el._misc.maxPagingTranslation;
         position = position > min ? min: position;
         position = position < max ? max : position;
         return position;
@@ -1035,46 +1020,43 @@
         vcomet.addResizeListener(el, "resize", function(element){
           if (!throttled) {
             // Update maximum translation value
-            el._maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._styleSizeProperty));
+            el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
 
             // Update slides ranges
             for (i = 0; i < el.slides.length; i++) {
               el.slides[i] = el._updateSlideRange(el.slides[i], i);
             }
-            
-
             //
             el._updateThumbnailsSize();
 
-            // Update thumbnail size reference
-            el._thumbnailSize = el._getNumProperty(el._styleSizeProperty, el.thumbnails[0].el);
-
-            // Update minimum paging translation
-            el._minPagingTranslation = (el._getNumProperty(el._styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._thumbnailSize / 2));
-            
-            // Update thumbnails ranges
-            if(el.thumbnails[0]) {
-              el._thumbnailSize = el._getNumProperty(el._styleSizeProperty, el.thumbnails[0].el);
-              for (i = 0; i < el.thumbnails.length; i++) {
-                el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+            el.onPagingReady(function(){
+              // Update thumbnail size reference
+              el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
+  
+              // Update minimum paging translation
+              el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
+              // Update thumbnails ranges
+              if(el.thumbnails[0]) {
+                el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
+                for (i = 0; i < el.thumbnails.length; i++) {
+                  el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+                }
               }
-            }
+              el.currentSlide = !el.currentSlide.el ? el.slides[0] : el.currentSlide;
+              // Translate current thumbnail to its new centered position
+              currentIndex = el.slides.indexOf(el.currentSlide);
+              currentThumbnail = el.thumbnails[currentIndex];
+              if (el.type === "gallery") {
+                el._translate(el.pagingNode, currentThumbnail.range[0]);
+              }
+              // Translate current slide to its new centered position
+              el.slideTo(currentIndex);
+              if(el.navigation == "true" || el.navigation == true) {
+                // Update navigation buttons position
+                el._updateNavButtonSize();
+              }
 
-            // Translate current thumbnail to its new centered position
-            currentindex = el.slides.indexOf(el.currentSlide);
-            currentThumbnail = el.thumbnails[currentindex];
-            if (el.type === "gallery") {
-              el._translate(el.pagingNode, currentThumbnail.range[0]);
-            }
-            
-            // Translate current slide to its new centered position
-            el.slideTo(currentindex);
-            if(el.navigation == "true" || el.navigation == true) {
-              // Update navigation buttons position
-              el._updateNavButtonSize();
-            }
-
-
+            });
             // Throttle
             throttled = true;
             // Set a timeout to un-throttle
@@ -1094,7 +1076,7 @@
         var slideObj = el._createSlide(slide);
         el._createThumbnail(slide, slideObj);
         // Update max slide value
-        el._maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._styleSizeProperty));
+        el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
       },
       /*
         @function (private) {Boolean} _allowSlide
@@ -1166,14 +1148,25 @@
       getValueAsArray: function(value) {
         var el = this;
         var array = [];
-        // Check preventclose property value
+        // Check property value
         if (typeof value == "string") {
           // Convert value into an array
           value = value.replace(/\s/g, '');
           array = value.split(",");
         }
         return array[0] ? array : [];
-      }
+      },
+      /*
+        @function (private) {Boolean} _isTrickyBrowser
+        @description 
+        @param {String} value [Array or String value to be processed]
+        @return {Boolean} [Whether or not the system is running on a non standard behavior browser]
+      */
+      isTrickyBrowser: function() {
+        var browser = vcomet.util.getBrowser();
+        return browser === "IE" || browser === "Edge" || browser === "Firefox" || /iPad/.test(navigator.platform);
+      },
+      
     },
     functions: {
       /*
@@ -1190,7 +1183,9 @@
           // Get new y/z position
           var newPos =  el.currentSlide.range[0];
           // Translate element
-          el._translate(el.wrapper, newPos);
+          el._translate(el._refs.wrapper, newPos);
+          // Activate slide related thumbnail
+          el._activateThumbnail(el.thumbnails[currentIndex + 1]);
           // Trigger onSlideChange event
           vcomet.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex + 1)]);
         }
@@ -1209,7 +1204,9 @@
           // Get new y/z position
           var newPos = el.currentSlide.range[0];
           // Translate element
-          el._translate(el.wrapper, newPos);
+          el._translate(el._refs.wrapper, newPos);
+          // Activate slide related thumbnail
+          el._activateThumbnail(el.thumbnails[currentIndex + 1]);
           // Trigger onSlideChange event
           vcomet.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex - 1)]);
         }
@@ -1226,10 +1223,12 @@
         // Update current element
         el.currentSlide = el.slides[index];
         // Get new y/z position
-        var swiperHeight = el._getNumProperty(el._styleSizeProperty);
+        var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
         var newPos = swiperHeight * (index);
         // Translate element
-        el._translate(el.wrapper, -newPos);
+        el._translate(el._refs.wrapper, -newPos);
+        // Activate slide related thumbnail
+        el._activateThumbnail(el.thumbnails[index]);
         // Trigger onSlideChange event
         vcomet.triggerCallback("onSlideChange", el, el, [currentIndex, index]);
       },
@@ -1242,9 +1241,13 @@
         var el = this;
         var slideFragment = document.createDocumentFragment();
         slideFragment.appendChild(slide);
-        el.wrapper.appendChild(slideFragment);
-        // Update max slide value
-        el._maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._styleSizeProperty));
+        if (!el._refs.wrapper) {
+          el.appendChild(slideFragment);
+        } else {
+          el._refs.wrapper.appendChild(slideFragment);
+          // Update max slide value
+          el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+        }
       }
     },
     onCreated: function(){
@@ -1253,7 +1256,7 @@
       vcomet.createCallback("onSlideChange", el);
       // Create on paging ready event
       // ** Internally used for thumbnails translation calculation
-      vcomet.createCallback("onPagingReady", el);
+      vcomet.createCallback("onPagingReady", el, "ready");
       // Event target path monitor
       vcomet.registerPathListener(el);
     },
@@ -1272,19 +1275,9 @@
       // Insert gallery navigation
       el._setUpNavigation(fragment);
       el.appendChild(fragment);
+      
     },
-    onPropertyChanged: function(prop, oldValue, value){
-      var el = this;
-      if(prop == "currentSlide"){
-        // Select related thumbnail
-        var thumbnail = el.thumbnails[el.slides.indexOf(value)];
-        // Activate thumbnail on swiper current slide change
-        el._activateThumbnail(thumbnail);
-        // Disable navigation button on limit reached
-        el._hideNavBtn(value);
-      };
-    },
-    onRender: function() {
+    onTransformed: function(){
       var el = this;
       // Add wrapper resize listener
       el._addWrapperResizeListener();
@@ -1296,6 +1289,17 @@
       setTimeout(function() {
         el.slideTo(el.initialSlide);
       }, 0);
+    },
+    onPropertyChanged: function(prop, oldValue, value){
+      var el = this;
+      if(prop == "currentSlide"){
+        // Select related thumbnail
+        var thumbnail = el.thumbnails[el.slides.indexOf(value)];
+        // Activate thumbnail on swiper current slide change
+        el._activateThumbnail(thumbnail);
+        // Disable navigation button on limit reached
+        el._hideNavBtn(value);
+      };
     }
   });
 </script>

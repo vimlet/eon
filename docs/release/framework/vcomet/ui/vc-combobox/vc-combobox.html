@@ -6,9 +6,11 @@
 
     <div class="vc-combobox-main">
 
-        <div class="vc-combobox-input vc-bg4">
-            <input type="text" class="vc-fg2">
-            <i class="vc-combobox-dropButton material-icons vc-fg1-hoverable">expand_more</i>
+        <div class="vc-combobox-wrapper vc-bg4">
+            <div class="vc-combobox-input">
+                <input type="text" class="vc-fg2">
+            </div>
+            <i class="vc-combobox-dropButton vc-fg1-hoverable vc-unselectable vicon vicon-chevron-down"></i>
         </div>
 
         <span class="vc-combobox-underline"></span>
@@ -50,10 +52,10 @@
         properties: {
             /*
             @property {string} name
-            @description Name of the selector
+            @description Name of the combobox
             */
             name: {
-                value: "selector",
+                value: "",
                 reflect: true
             },
             /*
@@ -81,6 +83,14 @@
                 reflect: true
             },
             /*
+            @property {string} displayProperty
+            @description Property that will be used to get the displayValue in case a store has been provided
+            */
+            displayProperty: {
+                value: "",
+                reflect: true
+            },
+            /*
             @property {string} value
             @description The value of the dropdown
             */
@@ -96,6 +106,30 @@
                 value: "",
                 reflect: true
             },
+            /*
+            @property {Boolean} inline 
+            @description Space that occupies the button inside its parent container.
+            */
+            inline: {
+                value: true,
+                reflect: true
+            },
+            /*
+            @property {string} readonly
+            @description Toggles the readonly status of the element
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
+            @property {String} disabled
+            @description Toggles the disabled status of the element
+            */
+            disabled: {
+                value: false,
+                reflect: true
+            }
         },
 
         privateFunctions: {
@@ -108,7 +142,7 @@
                 var el = this;
 
                 el._refs.main = el.template.querySelector(".vc-combobox-main");
-                el._refs.userInput = el.template.querySelector("input");
+                el._refs.input = el.template.querySelector("input");
                 el._refs.dropDown = el.template.querySelector(".vc-combobox-dropdown");
                 el._refs.dropDownButton = el.template.querySelector(".vc-combobox-dropButton");
                 el._refs.store = el.source.querySelector("vc-store");
@@ -127,7 +161,10 @@
                 var el = this;
 
                 el._refs.scroll = document.createElement("vc-scroll");
+
                 el._refs.scroll.thickness = 8;
+                el._refs.scroll.fit = false;
+                el._refs.scroll.fillContainer = false;
 
                 el._refs.dropDown.appendChild(el._refs.scroll);
 
@@ -147,20 +184,20 @@
 
                 } else {
 
-                    el._refs.userInput.addEventListener("blur", function () {
+                    el._refs.input.addEventListener("blur", function () {
 
                         if (!el.isOnPath && !el._refs.dropDown.isOnPath) {
-                            var classListFunction = (!(el.getAttribute("value") != "") && el._refs.userInput.value != "") ? "add" : "remove";
+                            var classListFunction = (!(el.getAttribute("value") != "") && el._refs.input.value != "") ? "add" : "remove";
                             el.classList[classListFunction]("noMatches");
                         }
 
                     });
 
-                    el._refs.userInput.addEventListener("focus", function (e) {
+                    el._refs.input.addEventListener("focus", function (e) {
                         el.classList.remove("noMatches");
                     });
 
-                    el._refs.userInput.addEventListener("keyup", function (e) {
+                    el._refs.input.addEventListener("keyup", function (e) {
                         el._filterResults();
                     });
 
@@ -193,18 +230,18 @@
 
                 var el = this;
 
-                el._refs.userInput.addEventListener("focus", function () {
+                el._refs.input.addEventListener("focus", function () {
                     el._refs.underline.classList.add("animate");
                 });
 
-                el._refs.userInput.addEventListener("blur", function () {
+                el._refs.input.addEventListener("blur", function () {
                     el._refs.underline.classList.remove("animate");
                 });
 
             },
             /*
             @function setupItems
-            @description Sets up the declarative user items for the selector
+            @description Takes all the items and moves them
             */
             setupItems: function () {
 
@@ -250,6 +287,10 @@
                 }
 
             },
+            /*
+            @function setupItem
+            @description Takes a single item, adds its events and assigns its properties
+            */
             setupItem: function (item) {
 
                 var el = this;
@@ -258,8 +299,7 @@
 
                     var span = document.createElement("span");
 
-                    this.classList.add("result");
-                    this.classList.add("vc-bg2-hoverable");
+                    this.classList.add("result", "vc-bg2-hoverable");
                     this.matches = "true";
                     this.value = this.getAttribute("value");
                     this.displayValue = this.getAttribute("display-value") || this.value;
@@ -267,7 +307,13 @@
                     span.innerHTML = this.displayValue;
 
                     this.appendChild(span);
-                    this.addEventListener("click", function () { el.select(this) });
+                    this.addEventListener("click", function () {
+                        el.select(this)
+                    });
+                    this.addEventListener("pointerdown", function (e) {
+                        // Solves other vComet elements bug related to blur event functionality
+                        e.stopPropagation();
+                    });
 
                 });
 
@@ -282,7 +328,7 @@
 
                 var dropdown = el._refs.dropDown;
                 var itemsDocFragment = document.createDocumentFragment();
-                var displayValue = (el.displayValue) ? el.displayValue : el.value;
+                var displayProperty = (el.displayProperty != "") ? el.displayProperty : el._refs.store.idProperty;
                 var storeData = el._refs.store.data.asObject();
                 var item;
 
@@ -292,8 +338,8 @@
 
                     item.classList.add("vc-bg2-hoverable");
                     item.matches = "true";
-                    item.value = storeData[key][el.value];
-                    item.displayValue = storeData[key][displayValue];
+                    item.value = storeData[key][el._refs.store.idProperty];
+                    item.displayValue = storeData[key][displayProperty];
 
                     item.onRender(function () {
 
@@ -312,23 +358,22 @@
 
             },
             /*
-            @function _setupLabel
-            @description Sets the label or if none was especified it hides it
+            @function (private) {String} _setupTouchBlur
+            @description Creates the touch blur
             */
-            handleLabel: function () {
+            setupTouchBlur: function () {
 
                 var el = this;
 
-                if (el.label && el.label != "") {
+                vcomet.registerPathListener(el);
+                vcomet.registerPathListener(el._refs.dropDown);
 
-                    el._refs.data.classList.remove("hidden");
-                    el._refs.label.innerHTML = el.label;
-
-                } else {
-
-                    el._refs.data.classList.add("hidden");
-
-                }
+                document.addEventListener("touchstart", function () {
+                    if (!el.isOnPath && !el._refs.dropDown.isOnPath) {
+                        el._refs.input.blur();
+                        el.shrink();
+                    }
+                });
 
             },
             /*
@@ -340,7 +385,7 @@
                 var el = this;
 
                 var items = el._refs.dropDown.querySelectorAll("vc-item");
-                var value = el._refs.userInput.value.toLowerCase();
+                var value = el._refs.input.value.toLowerCase();
 
                 //If the input is empty we will hide the options and enable all the options to be active
                 if (value == "") {
@@ -359,11 +404,6 @@
                 } else {
                     //Check if its already expanded, if its not then expand it
                     if (!el._refs.dropDown.classList.contains("expanded")) {
-
-                        document.body.addEventListener("click", function (e) {
-                            el._customBlur(e);
-                        });
-
                         el.expand();
                     }
                     //Loop to find matches and hide those that do not match
@@ -399,7 +439,7 @@
                         matchingError = document.createElement("div");
                         matchingError.classList.add("vc-combobox-matchingError");
                         matchingError.innerHTML = "No matches found";
-                        el._refs.dropDown.vcometScroll.content.appendChild(matchingError);
+                        el._refs.scroll.content.appendChild(matchingError);
 
                         el.classList.add("noMatches");
 
@@ -415,8 +455,8 @@
 
                 }
 
-                el.setAttribute("value", "");
-                el.setAttribute("display-value", "");
+                el.value = "";
+                el.displayValue = "";
 
             },
             /*
@@ -446,26 +486,91 @@
                     el.expand();
                 }
             },
+            /*
+            @function (private) _assignDropdownStyle
+            @description Assigns the datePicker's width and position relative to the datebox
+            */
+            assignDropdownStyle: function () {
+
+                var el = this;
+
+                var top = el.getBoundingClientRect().top;
+                var left = el.getBoundingClientRect().left;
+
+                el._refs.dropDown.style.top = top + el.offsetHeight + 1 + "px";
+                el._refs.dropDown.style.left = left + "px";
+                el._refs.dropDown.style.width = el.offsetWidth + "px";
+
+            },
+            /*
+            @function (private) _updateLabel
+            @description Updates the label node with the new label
+            */
+            updateLabel: function () {
+
+                var el = this;
+
+                if (el.label != "") {
+                    el.querySelector(".vc-combobox-label").innerHTML = el.label;
+                }
+
+            },
+            /*
+            @function (private) _updateDisabled
+            @description Updates disabled status
+            */
+            updateDisabled: function () {
+
+                var el = this;
+                var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+
+                if (!vcomet.util.isTrue(el.disabled)) {
+
+                    el._refs.input.classList.add("vc-fg2");
+                    el._refs.input.classList.remove("vc-fg1-disabled");
+
+                    el._refs.data.classList.remove("vc-fg1-disabled");
+                    el._refs.main.classList.remove("vc-fg1-disabled");
+
+                    el.removeAttribute("disabled");
+                    el._refs.input.removeAttribute("disabled");
+
+                } else {
+
+                    el._refs.input.setAttribute("disabled", "true");
+
+                    el._refs.input.classList.remove("vc-fg2");
+                    el._refs.input.classList.add("vc-fg1-disabled");
+
+                    el._refs.data.classList.add("vc-fg1-disabled");
+                    el._refs.main.classList.add("vc-fg1-disabled");
+
+                }
+            },
+            /*
+            @function (private) _updateReadOnly
+            @description Updates readonly status
+            */
+            updateReadOnly: function () {
+
+                var el = this;
+
+                if (!vcomet.util.isTrue(el.readonly)) {
+
+                    el.removeAttribute("readonly");
+                    el._refs.input.removeAttribute("readonly");
+
+                } else {
+
+                    el._refs.input.setAttribute("readonly", "true");
+
+                }
+
+            },
 
         },
 
         functions: {
-            /*
-            @function (private) setValue
-            @description Updates the value
-            @param {String} value 
-            */
-            setValue: function (value, displayValue) {
-
-                var el = this;
-
-                el.value = value;
-                el.displayValue = displayValue ? displayValue : value;
-                el._refs.userInput.value = displayValue ? displayValue : value;
-
-                el._filterResults()
-
-            },
             /*
             @function addItem
             @description Adding a new option item programmaticaly
@@ -477,12 +582,13 @@
                 item.onRender(function () {
                     var span = document.createElement("span");
                     span.innerHTML = this.displayValue;
+                    this.classList.add("result", "vc-bg2-hoverable")
                     this.appendChild(span);
                     this.setAttribute("matches", "true");
                     this.addEventListener("click", function () { el.select(this) });
                 });
 
-                el._refs.dropDown.appendChild(item);
+                el._refs.scroll.content.appendChild(item);
                 el._refs.scroll.update();
             },
             /*
@@ -493,15 +599,14 @@
             select: function (item) {
                 var el = this;
 
-                var value = item.getAttribute("value") || item.value;
-                var displayValue = item.getAttribute("display-value");
-
-                el.setAttribute("value", value);
-                el.setAttribute("display-value", displayValue);
+                var value = item.value;
+                var displayValue = item.displayValue;
 
                 el.value = value;
-                el._refs.userInput.value = item.displayValue;
-                
+                el.displayValue = displayValue;
+
+                el._refs.input.value = item.displayValue;
+
                 vcomet.triggerCallback("onSelected", el, el, [item]);
 
                 el.shrink();
@@ -515,9 +620,7 @@
 
                 var el = this;
 
-                el._refs.dropDown.style.top = el.offsetTop + el.offsetHeight + 1 + "px";
-                el._refs.dropDown.style.left = el.offsetLeft + "px";
-                el._refs.dropDown.style.width = el.offsetWidth + "px";
+                el._assignDropdownStyle();
 
                 document.body.appendChild(el._refs.dropDown);
 
@@ -552,8 +655,6 @@
             el._setupRefs();
             el._setupScroll();
 
-            el._handleLabel();
-
             vcomet.createCallback("onSelected", el);
 
         },
@@ -571,14 +672,41 @@
             var el = this;
             var declarativePlaceholder = el.getAttribute("placeholder");
 
-            vcomet.registerPathListener(el);
-            vcomet.registerPathListener(el._refs.dropDown);
-
             el._setupTriggers();
             el._setupItems();
-            el._setupAnimations()
+            el._setupAnimations();
+            el._setupTouchBlur();
 
-            if (declarativePlaceholder) el._refs.userInput.placeholder = declarativePlaceholder;
+            el._updateLabel();
+            el._updateDisabled();
+            el._updateReadOnly();
+
+            if (declarativePlaceholder) el._refs.input.placeholder = declarativePlaceholder;
+
+        },
+
+        onPropertyChanged: function (key, oldVal, newVal) {
+
+            switch (key) {
+                case "label":
+                    this._updateLabel();
+                    break;
+                case "disabled":
+                    this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadOnly();
+                    break;
+            }
+
+        },
+        onWindowResize: function () {
+
+            var el = this;
+
+            if (!el._refs.dropDown.classList.contains("hidden")) {
+                el._assignDropdownStyle();
+            }
 
         }
     });

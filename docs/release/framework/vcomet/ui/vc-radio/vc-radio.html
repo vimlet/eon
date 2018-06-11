@@ -1,13 +1,15 @@
-<template>
-  <input class="vc-radiogroup-radio vc-unselectable" type="radio">
-  <label class="vc-radiogroup-radioLabel vc-unselectable" onclick="">
-    <div class="vc-radiogroup-labelText"></div>
-  </label>
+<template class="vc-unselectable">
+  <div class="vc-radio-radio">
+    <input class="vc-radio-input vc-unselectable" type="radio">
+    <label class="vc-radio-label vc-unselectable" onclick="">
+      <div class="vc-radio-labelText"></div>
+    </label>
+  </div>
 </template>
 
 <script>
-  vcomet.element("vc-radio", "", {
-
+  vcomet.element("vc-radio", "vc-radio.css", {
+    themed: true,
     properties: {
       /*
         @property {String} value 
@@ -27,7 +29,7 @@
       },
       /*
         @property {Boolean} disabled 
-        @description Radio desactivation
+        @description Radio deactivation
         Values can be: true or false
         Default: false
       */
@@ -36,69 +38,104 @@
         reflect: true
       },
       /*
-        @property {Boolean} check
+        @property {Boolean} readonly 
+        @description Toggles the readonly status of the radio element
+        Default: false
+      */
+      readonly: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} checked
         @description Radio checked status
         Values can be: true or false
         Default: false
       */
-      check: {
+      checked: {
         value: false,
         reflect: true
-      }
+      },
+      /*
+       @property {Boolean} inline 
+       @description Space that occupy the radio inside parent container.
+       By default, its size adapts to its content
+       Values can be: true or false
+       Default: true
+     */
+      inline: {
+        value: true,
+        reflect: true
+      },
     },
 
     privateProperties: {
+      // /*
+      //   @property (private) {String} _formelement 
+      //   @description Set that group is a form element
+      //   Value: radio
+      // */
+      // formelement: {
+      //   value: "radio"
+      // },      
       /*
-        @property (private) {Object} _radioNode
-        @description Store radio input node
+        @property (private) {Object} _refs 
+        @description Object with  references
       */
-      radioNode: {
+      refs: {
         value: {}
-      },
-      /*
-        @property (private) {Object} _labelNode 
-        @description Store radio label node
-      */
-      labelNode: {
-        value: {}
-      },
-
-    },
-
-    functions: {
-      /*
-        @function setValue
-        @description Set new radio value
-        @param {String} newVal [new radio value]
-      */
-      setValue: function (newVal) {
-        this.value = newVal;
-        vcomet.triggerCallback("onChange", this);
       }
     },
 
     privateFunctions: {
       /*
+        @function (private) _setValue
+        @description Set new radio value
+        @param {String} newVal [new radio value]
+      */
+      setValue: function () {
+        var el = this;
+
+        el._refs.input.setAttribute("value", el.value);
+        el._refs.input.setAttribute("id", el.value);
+        el._refs.label.setAttribute("for", el.value);
+
+        vcomet.triggerCallback("onChange", this);
+      },
+      /*
         @function (private) _updateDisabled
         @description Update disabled status
-        @param {String} newVal [new value of disabled]
       */
-      updateDisabled: function (newVal) {
+      updateDisabled: function () {
 
         // Radio disabled
-        if (!vcomet.util.isTrue(newVal)) {
+        if (!vcomet.util.isTrue(this.disabled)) {
 
-          this._radioNode.disabled = false;
-          this._radioNode.classList.remove("vc-radiogroup-disabledRadio");
-          this._radioNode.classList.remove("vc-radiogroup-checkedDisabledRadio");
+          this._refs.input.disabled = false;
+          this._refs.input.classList.remove("vc-radio-disabledRadio", "vc-radio-checkedDisabledRadio");
 
           // Radio NOT disabled
         } else {
 
-          this._radioNode.disabled = true;
-          this._radioNode.classList.add("vc-radiogroup-disabledRadio");
+          this._refs.input.disabled = true;
+          this._refs.input.classList.add("vc-radio-disabledRadio");
 
         }
+      },
+
+      /*
+      @function (private) _updateReadonly
+      @description Updates readonly status
+      */
+      updateReadonly: function () {
+        var el = this;
+
+        if (vcomet.util.isTrue(el.readonly)) {
+          el._refs.input.setAttribute("readonly", "true");
+        } else {
+          el._refs.input.removeAttribute("readonly");
+        }
+
       },
 
       /*
@@ -106,29 +143,34 @@
         @description Update check status
       */
       updateCheck: function () {
-        var span = this.querySelector(".vc-radiogroup-outspan");
-        var radioGroupHost = this.parentNode;
-        var previousChecked = vcomet.Radio.checkedRadios[radioGroupHost.name];
-        var previousSpan;
+        if (this.parentNode.tagName.toLowerCase() == "vc-group") {
+          var radioGroupHost = this.parentNode;
+          var previousChecked = vcomet.Radio.checkedRadios[radioGroupHost.name];
+          var previousSpan;
+          // Uncheck previousRadio
+          if (previousChecked) {
+  
+            previousSpan = previousChecked.querySelector(".vc-radio-outspan");
+            previousChecked._refs.input.checked = false;
+            previousChecked.checked = false;
+            previousChecked.setAttribute("checked", "false");
+            previousChecked._refs.input.classList.remove("vc-radio-checkRadio");
+            previousSpan.classList.remove("vc-radio-checked");
+            vcomet.createCallback("onUncheck", this);
+  
+          }
 
-        // Uncheck previousRadio
-        if (previousChecked) {
-
-          previousSpan = previousChecked.querySelector(".vc-radiogroup-outspan");
-          previousChecked._radioNode.checked = false;
-          previousChecked._radioNode.classList.remove("vc-radiogroup-checkRadio");
-          previousSpan.classList.remove("vc-radiogroup-checked");
-          vcomet.createCallback("onUncheck", this);
-
+          radioGroupHost.value = this.value;
+          radioGroupHost._checked = true;
+          radioGroupHost._disabled = vcomet.util.isTrue(this.disabled) ? true : false;
+          vcomet.Radio.checkedRadios[radioGroupHost.name] = this;
         }
 
         // Check new Radio
-        this._radioNode.checked = true;
-        this._radioNode.classList.add("vc-radiogroup-checkRadio");
-        span.classList.add("vc-radiogroup-checked");
-        radioGroupHost.value = this.value;
-
-        vcomet.Radio.checkedRadios[radioGroupHost.name] = this;
+        this._refs.input.checked = true;
+        this.checked = true;
+        this._refs.input.classList.add("vc-radio-checkRadio");
+        this._refs.span.classList.add("vc-radio-checked");
         vcomet.triggerCallback("onCheck", this);
 
       },
@@ -136,15 +178,27 @@
       /*
         @function (private) _setCheck
         @description Call method to update check status
-        @param {String} newVal [new value of check]
       */
-      setCheck: function (newVal) {
+      setCheck: function () {
 
-        if (vcomet.util.isTrue(newVal)) {
-          this._radioNode.checked = true;
+        if (vcomet.util.isTrue(this.checked)) {
+          this._refs.input.checked = true;
           this._updateCheck();
         }
 
+      },
+
+      /*
+        @function (private) _createRefs
+        @description Creates fast access to elements
+      */
+      createRefs: function () {
+        var el = this;
+
+        el._refs.input = el.template.querySelector(".vc-radio-input");
+        el._refs.label = el.template.querySelector(".vc-radio-label");
+        el._refs.span = document.createElement("span");
+        el._refs.inspan = document.createElement("span");
       }
 
     },
@@ -158,53 +212,54 @@
       vcomet.createCallback("onCheck", this);
       vcomet.createCallback("onUncheck", this);
 
+      this._createRefs();
     },
 
     onRender: function () {
       var el = this;
-      var radioGroupHost = el.parentNode;
-      el._radioNode = el.querySelector(".vc-radiogroup-radio");
-      var label = el.querySelector(".vc-radiogroup-radioLabel");
-      var span = document.createElement("span");
-      var inspan = document.createElement("span");
 
-      span.classList.add("vc-radiogroup-outspan");
-      span.classList.add("vc-fg1-border");
-      inspan.classList.add("vc-radiogroup-inspan");
-      label.insertBefore(span, label.firstChild);
-      span.appendChild(inspan);
-      el._radioNode.setAttribute("name", radioGroupHost.name);
-      el._radioNode.setAttribute("value", el.value);
-      el._radioNode.setAttribute("id", el.value);
-      label.setAttribute("for", el.value);
-      el.classList.add("vc-unselectable");
+      if (this.parentNode.tagName.toLowerCase() == "vc-group") {
+        var radioGroupHost = el.parentNode;
+        el._refs.input.setAttribute("name", radioGroupHost.name);
+      }
 
-      el._updateDisabled(el.disabled);
-      el._setCheck(el.check);
-      el.querySelector(".vc-radiogroup-labelText").innerHTML = el.label;
+      el._refs.span.classList.add("vc-radio-outspan", "vc-fg1-border");
+      el._refs.inspan.classList.add("vc-radio-inspan");
+      el._refs.label.insertBefore(el._refs.span, el._refs.label.firstChild);
+      el._refs.span.appendChild(el._refs.inspan);
+
+      el._setValue();
+      el._updateDisabled();
+      el._updateReadonly();
+      el._setCheck();
+      el.querySelector(".vc-radio-labelText").innerHTML = el.label;
 
       // Checking a radio option
-      el._radioNode.addEventListener("click", function (e) {
-
-        (!vcomet.util.isTrue(el.disabled) || el.disabled == null)? el._updateCheck() : null;
+      el._refs.label.addEventListener("click", function (e) {
+        ((!vcomet.util.isTrue(el.disabled) && !vcomet.util.isTrue(el.readonly)) || el.disabled == null) ? el._updateCheck() : null;
 
       }, false);
     },
 
     onPropertyChanged: function (attrName, oldVal, newVal) {
       switch (attrName) {
-        case ("disabled"):
-          this._updateDisabled(newVal);
+        case "disabled":
+          this._updateDisabled();
           break;
-        case ("check"):
-          this._setCheck(newVal);
+        case "readonly":
+          this._updateReadonly();
+          break;
+        case "check":
+          this._setCheck();
           break;
         case "label":
-          this.querySelector(".vc-radiogroup-labelText").innerHTML = newVal;
+          this.querySelector(".vc-radio-labelText").innerHTML = newVal;
+          break;
+        case "value":
+          this._setValue();
           break;
       }
     }
-
 
   });
 

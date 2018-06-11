@@ -108,6 +108,10 @@
         margin: 30px 0px;
     }
 
+    vc-doc-table{
+        margin-top:20px;
+    }
+
 
     #vc-md-viewer-goToTop {
         display: block;
@@ -139,13 +143,13 @@
         animation: vc-md-viewer-hideGoToTopAnim 0.5s forwards;
     }
 
-.tip {
-    background-color: rgb(36, 36, 41);
-    border-radius: 2px;
-    padding: 2px 4px;
-    color: white;
-    display: inline-block;
-}
+    .tip {
+        background-color: rgb(36, 36, 41);
+        border-radius: 2px;
+        padding: 2px 4px;
+        color: white;
+        display: inline-block;
+    }
 
 
     /* Safari 4.0 - 8.0 */
@@ -391,7 +395,7 @@
                     marginTop = marginTop.match(new RegExp("\\d+", "g"));
                     if (marginTop) {
                         marginTop = parseInt(marginTop) || 0;
-                    }
+                    }                    
                     scroll.scrollTo(el.querySelector("#" + id).offsetTop - (marginTop), null, 0.1);
                 }
             },
@@ -604,6 +608,8 @@
                         var cleanMatch = el._cleanMatch(matches[i], "```", "```");
                         var splitted = el._splitLanguage(cleanMatch);
                         var vcEditor = document.createElement("vc-code");
+                        console.log(splitted[1]);
+                        
                         vcEditor.value = splitted[1];
                         vcEditor.language = splitted[0];
 
@@ -686,6 +692,9 @@
                         if (el._videoImg(matches[i])) {
                             poster += el._videoImg(matches[i]);
                         }
+                        
+                        console.log("ANTEs");
+                        
                         var res = document.createElement("vc-video");
 
                         el._misc.ondrawnCont++;
@@ -887,7 +896,7 @@
                 }
             },
             // @function parseParagraph (private) [Parse a paragraph]
-            parseParagraph: function (paragraph) {
+            parseParagraph: function (paragraph, recursive) {
                 var el = this;
                 var docFragment = document.createDocumentFragment();
                 // Check the beginning of each paragraph
@@ -897,11 +906,14 @@
                     if (!el._parseData.ul) {
                         el._parseData.ul = document.createElement("ul");
                         exist = false;
+                        el._misc.nested.list.push("ul");
+                        el._misc.nested.current = "ul";
                     }
                     var li = document.createElement("li");
                     li.appendChild(el._parseText(paragraph.replace(el._regex.unorderedList, "")));
                     el._parseData.ul.appendChild(li);
-                    el._cleanMultiParagraph(docFragment, "unorderedList");
+                    if (!recursive)
+                        el._cleanMultiParagraph(docFragment, "unorderedList");
                     if (!exist) {
                         return el._parseData.ul;
                     }
@@ -915,11 +927,14 @@
                         var start = orderedListMatch.substring(0, orderedListMatch.length - 2);
                         el._parseData.ol.setAttribute("start", start);
                         exist = false;
+                        el._misc.nested.list.push("ol");
+                        el._misc.nested.current = "ol";
                     }
                     var li = document.createElement("li");
                     li.appendChild(el._parseText(paragraph.replace(el._regex.orderedList, "")));
                     el._parseData.ol.appendChild(li);
-                    el._cleanMultiParagraph(docFragment, "orderedList");
+                    if (!recursive)
+                        el._cleanMultiParagraph(docFragment, "orderedList");
                     if (!exist) {
                         return el._parseData.ol;
                     }
@@ -985,30 +1000,43 @@
                     }
                 } else {
                     var appended = false;
-                    if (el._parseData.indented) {                       
-                        appended = el._appendIndented(el._parseText(paragraph));
+                    if (el._parseData.indented) {
+                        el._parseData.indented = false;
+                        appended = el._appendIndented(el._parseParagraph(paragraph.trim(), true));
                     }
                     if (!appended) {
-                        docFragment.appendChild(el._parseText(paragraph));
-                        el._cleanMultiParagraph(docFragment, null);
+                        if (!recursive) {
+                            docFragment.appendChild(el._parseText(paragraph));
+                            el._cleanMultiParagraph(docFragment, null);
+                        } else if (el._misc.nested.current) {
+                            var p = document.createElement("p");
+                            p.appendChild(el._parseText(paragraph));
+                            el._parseData[el._misc.nested.current].childNodes[el._parseData[el._misc.nested
+                                    .current]
+                                .childNodes.length - 1].appendChild(p);
+                        }
                     }
                 }
                 return docFragment;
             },
             // @function appendIndented (private) [Append indented paragraph]
-            appendIndented: function (content) {   
+            appendIndented: function (content) {
                 var appended = false;
-                if (el._parseData.ul) {
-                    appended = true;
-                    var p = document.createElement("p");
-                    p.appendChild(content);
-                    el._parseData.ul.childNodes[el._parseData.ul.childNodes.length - 1].appendChild(p);
-                }
-                if (el._parseData.ol) {
-                    appended = true;
-                    var p = document.createElement("p");
-                    p.appendChild(content);
-                    el._parseData.ol.childNodes[el._parseData.ol.childNodes.length - 1].appendChild(p);
+                if (el._misc.nested.current) {
+                    if (!content.tagName ||el._misc.nested.current != content.tagName.toLowerCase()) {
+                        appended = true;
+                        var p = document.createElement("p");
+                        p.appendChild(content);
+                        el._parseData[el._misc.nested.current].childNodes[el._parseData[el._misc.nested.current]
+                            .childNodes.length - 1].appendChild(p);
+                    }else if(el._misc.nested.list[el._misc.nested.list.length - 2]){                        
+                        appended = true;
+                        var p = document.createElement("p");
+                        p.appendChild(content);                        
+                        el._parseData[el._misc.nested.list[el._misc.nested.list.length - 2]].childNodes[el._parseData[el._misc.nested.list[el._misc.nested.list.length - 2]]
+                            .childNodes.length - 1].appendChild(p);
+                    }
+
                 }
                 return appended;
             },
@@ -1105,7 +1133,7 @@
                 return [inner, fullUrl[0], fullUrl[1]];
             },
             // @function setLink (private) {html object} [Generate href element] @param tag
-            setLink: function (tag) {                
+            setLink: function (tag) {
                 var linkData = el._getParseLink(tag);
                 var link = document.createElement("a");
                 linkData[1] = el._sanitizeLink(linkData[1]);
@@ -1138,12 +1166,13 @@
                     } else {
                         console.log("Warning, relative link without file");
                     }
-                    link = "#!version=" + encodeURIComponent(version) + "&mode=" + encodeURIComponent(mode) + "&file=" + encodeURIComponent(file);
-                }                
+                    link = "#!version=" + encodeURIComponent(version) + "&mode=" + encodeURIComponent(mode) +
+                        "&file=" + encodeURIComponent(file);
+                }
                 return link;
             },
             // @function parseLinks (private) {string} @param str
-            parseLinks: function (str) {           
+            parseLinks: function (str) {
                 el = this;
                 var result = "";
                 var matches = str.match(el._regex.link);
@@ -1163,7 +1192,7 @@
             },
             // @function setImage (private) {html object} [Generate img element] @param tag
             setImage: function (tag) {
-                el = this;                
+                el = this;
                 var linkData = el._getParseLink(tag);
                 var link = document.createElement("img");
                 link.setAttribute("src", el._linkResolve(linkData[1]));
@@ -1181,21 +1210,21 @@
                 return path;
             },
             // @function splitImgLink (private) {string} @param str
-            splitImgLink : function(tag){
+            splitImgLink: function (tag) {
                 var el = this;
                 var result = "";
                 var matches = tag.match(el._regex.imageLinkImg);
                 var parsedResult = [];
                 var img = el._cleanMatch(matches[0], "[", "]");
                 var imgEl = el._setImage(img);
-                var link = el._cleanMatch(tag.replace(el._regex.imageLinkImg, ""), "(", ")",);
+                var link = el._cleanMatch(tag.replace(el._regex.imageLinkImg, ""), "(", ")", );
                 var imgLink = document.createElement("a");
                 imgLink.setAttribute("href", el._sanitizeLink(link));
                 imgLink.appendChild(imgEl);
                 return imgLink;
             },
             // @function parseImageLink (private) {string} @param str
-            parseImageLink: function (str) {             
+            parseImageLink: function (str) {
                 el = this;
                 var result = "";
                 var matches = str.match(el._regex.imageLink);
@@ -1215,12 +1244,12 @@
                 return result;
             },
             // @function parseImages (private) {string} @param str
-            parseImages: function (str) {             
+            parseImages: function (str) {
                 el = this;
                 var result = "";
                 var matches = str.match(el._regex.image);
                 var parsedResult = [];
-                if (matches) { 
+                if (matches) {
                     for (var i = 0; i < matches.length; i++) {
                         parsedResult.push(el._setImage(matches[i]));
                     }
@@ -1312,13 +1341,21 @@
             cleanMultiParagraph: function (docFragment, currentMatch) {
                 el = this;
                 if (currentMatch != "unorderedList" || !currentMatch) {
-                    if (el._parseData.ul) {
+                    // if (el._parseData.ul) {
+                    if (el._parseData.ul && el._misc.nested.current === "ul") {
                         el._parseData.ul = null;
+                        el._misc.nested.list.pop();
+                        el._misc.nested.current = el._misc.nested.list[el._misc.nested.list.length - 1] ||
+                            null;
                     }
                 }
                 if (currentMatch != "orderedList" || !currentMatch) {
-                    if (el._parseData.ol) {
+                    // if (el._parseData.ol) {
+                    if (el._parseData.ol && el._misc.nested.current === "ol") {
                         el._parseData.ol = null;
+                        el._misc.nested.list.pop();
+                        el._misc.nested.current = el._misc.nested.list[el._misc.nested.list.length - 1] ||
+                            null;
                     }
                 }
                 if (currentMatch != "table" || !currentMatch) {
@@ -1409,7 +1446,13 @@
         },
 
         onReady: function () {
+            var el = this;
             this._misc.goToTop = document.querySelector("#vc-md-viewer-goToTop");
+            // nested is an object to store nested stuff like lists. Current points to current paragraph, previous: previous in case of nested, list is an ordered list of nested opens.
+            el._misc.nested = {};
+            el._misc.nested.current = null;
+            el._misc.nested.previous = null;
+            el._misc.nested.list = [];
             this._onScrolled();
         }
     });

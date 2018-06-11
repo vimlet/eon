@@ -6,10 +6,10 @@
       <div class="vc-datepicker-header vc-bg1 vc-fg2">
         <div class="vc-datepicker-leftNavigation">
           <div class="vc-datepicker-previous vc-unselectable">
-            <i class="material-icons">chevron_left</i>
+            <i class="vicon vicon-chevron-left"></i>
           </div>
           <div class="vc-datepicker-next vc-unselectable">
-            <i class="material-icons">chevron_right</i>
+            <i class="vicon vicon-chevron-right"></i>
           </div>
         </div>
 
@@ -20,10 +20,10 @@
 
         <div class="vc-datepicker-rightNavigation">
           <div class="vc-datepicker-back vc-unselectable hidden">
-            <i class="material-icons">keyboard_return</i>
+            <i class="vicon vicon-arrow-back"></i>
           </div>
           <div class="vc-datepicker-close vc-unselectable">
-            <i class="material-icons">clear</i>
+            <i class="vicon vicon-close"></i>
           </div>
         </div>
       </div>
@@ -80,18 +80,10 @@
         reflect: true
       },
       /*
-      @property {string} closable
-      @description Whether the datepicker has the close button
-      */
-      closable: {
-        value: "false",
-        reflect: true
-      },
-      /*
-      @property {string} fontsize
+      @property {string} fontSize
       @description Basic fontSize from where we will determine all the sizes
       */
-      fontsize: {
+      fontSize: {
         value: 15,
         reflect: true
       },
@@ -141,6 +133,14 @@
       */
       year: {
         value: "",
+        reflect: true
+      },
+      /*
+      @property {string} disabled
+      @description Toggles the disabled status of the element
+      */
+      disabled: {
+        value: false,
         reflect: true
       }
     },
@@ -239,7 +239,6 @@
         el.locale = (el.locale != undefined && el.locale != "") ? el.locale : navigator.language;
         el.setAttribute("valid", "false");
 
-        el._setupMisc();
         el._setupWeekDays();
 
         if (el.selectable.indexOf('y') > -1) {
@@ -254,8 +253,6 @@
           el._setupDaysGrid();
         }
 
-        el._setupRefs();
-
         //If the user specified a min date
         if (el.min != "" && el.min != undefined) {
           el._setupMinDate();
@@ -269,8 +266,6 @@
         el._setupEvents();
         el._setupInitialDate();
 
-        el._setupClosable();
-
         el._handleInitialState();
         el._handleAutoHeight();
         el._handleFonts();
@@ -278,6 +273,8 @@
         if (vcomet.util.isTouchScreen()) {
           el.dataset.touch = "true";
         }
+
+        el._updateDisabled();
 
         vcomet.addResizeListener(el.querySelector(".vc-datepicker-calendar"), el.nodeName.toLowerCase(), function () {
           el._handleAutoHeight();
@@ -316,13 +313,20 @@
 
         var el = this;
 
-        el._refs.selectorsContainer = el.querySelector(".vc-datepicker-daysGridSelectors");
-        el._refs.monthSelector = el.querySelector(".vc-datepicker-header .vc-datepicker-month");
-        el._refs.yearSelector = el.querySelector(".vc-datepicker-header .vc-datepicker-year");
+        el._refs.calendar = el.template.querySelector(".vc-datepicker-calendar");
 
-        el._refs.daysGrid = el.querySelector(".vc-datepicker-daysGrid");
-        el._refs.monthsGrid = el.querySelector(".vc-datepicker-monthsGrid");
-        el._refs.yearsGrid = el.querySelector(".vc-datepicker-yearsGrid");
+        el._refs.selectorsContainer = el.template.querySelector(".vc-datepicker-daysGridSelectors");
+        el._refs.monthSelector = el.template.querySelector(".vc-datepicker-header .vc-datepicker-month");
+        el._refs.yearSelector = el.template.querySelector(".vc-datepicker-header .vc-datepicker-year");
+
+        el._refs.header = el.template.querySelector(".vc-datepicker-header");
+        el._refs.body = el.template.querySelector(".vc-datepicker-body");
+
+        el._refs.previous = el.template.querySelector(".vc-datepicker-previous");
+        el._refs.next = el.template.querySelector(".vc-datepicker-next");
+
+        el._refs.close = el.template.querySelector(".vc-datepicker-close");
+
       },
       /*
       @function (private) _handleInitialState
@@ -331,6 +335,9 @@
       handleInitialState: function () {
 
         var el = this;
+
+        el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
+        el._misc.current.month = (el.month != "") ? el.month : el._misc.current.month;
 
         switch (el.selectable) {
           case "dmy":
@@ -344,9 +351,6 @@
             var previousMonth;
             var minDate;
             var maxDate;
-
-            el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
-            el._misc.current.month = (el.month != "") ? el.month : el._misc.current.month;
 
             minDate = 1 + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
             maxDate = vcomet.time.getDaysInMonth(el._misc.current.year, el._misc.current.month) + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
@@ -430,7 +434,6 @@
 
         var el = this;
 
-        // if (el.min.includes("/")) {
         if (el.min.indexOf('/') > -1) {
 
           var splittedMin = el.min.split("/");
@@ -501,13 +504,13 @@
 
         var el = this;
 
-        el.querySelector(".vc-datepicker-previous").addEventListener(el._misc.downTrigger, function (e) {
+        el._refs.previous.addEventListener(el._misc.downTrigger, function (e) {
           e.stopPropagation();
           e.preventDefault();
           el._goToPrevious(this);
         });
 
-        el.querySelector(".vc-datepicker-next").addEventListener(el._misc.downTrigger, function (e) {
+        el._refs.next.addEventListener(el._misc.downTrigger, function (e) {
           e.stopPropagation();
           e.preventDefault();
           el._goToNext(this);
@@ -519,10 +522,9 @@
           el._goBack(this);
         });
 
-        el.querySelector(".vc-datepicker-close").addEventListener(el._misc.downTrigger, function (e) {
+        el._refs.close.addEventListener(el._misc.downTrigger, function (e) {
           e.stopPropagation();
           e.preventDefault();
-          el._hide();
         });
 
         el.querySelector(".vc-datepicker-header .vc-datepicker-month").addEventListener(el._misc.downTrigger, function (e) {
@@ -600,6 +602,8 @@
         daysGridContainer.appendChild(daysGrid);
         el.querySelector(".vc-datepicker-body").appendChild(daysGridContainer);
 
+        el._refs.daysGrid = daysGridContainer;
+
         el._createWeekDaysHeaders();
 
         for (var i = 1; i <= 6; i++) {
@@ -637,9 +641,10 @@
 
         var months = vcomet.time.getMonthNames(el.locale, "short");
 
-        monthsGrid.classList.add("vc-datepicker-monthsGrid");
-        monthsGrid.classList.add("vc-bg3");
+        monthsGrid.classList.add("vc-datepicker-monthsGrid", "vc-bg3");
         el.querySelector(".vc-datepicker-body").appendChild(monthsGrid);
+
+        el._refs.monthsGrid = monthsGrid;
 
         row = document.createElement("div");
         row.classList.add("vc-datepicker-row");
@@ -680,15 +685,19 @@
         var yearsGrid = document.createElement("div");
         var rowsFragment = document.createDocumentFragment();
 
+        var currentYear = new Date();
         var years = [];
 
-        for (var i = 2017 - 6; i < 2017 + 6; i++) {
+        currentYear = currentYear.getFullYear();
+
+        for (var i = currentYear - 6; i < currentYear + 6; i++) {
           years.push(i);
         }
 
-        yearsGrid.classList.add("vc-datepicker-yearsGrid");
-        yearsGrid.classList.add("vc-bg3");
+        yearsGrid.classList.add("vc-datepicker-yearsGrid", "vc-bg3");
         el.querySelector(".vc-datepicker-body").appendChild(yearsGrid);
+
+        el._refs.yearsGrid = yearsGrid;
 
         row = document.createElement("div");
         row.classList.add("vc-datepicker-row");
@@ -713,15 +722,30 @@
 
         yearsGrid.appendChild(rowsFragment);
       },
-      /*
-      @function (private) _setupClosable
-      @description If the calendar is not closable we hide the button
-      */
-      setupClosable: function () {
 
-        if (this.closable != "true") {
-          this.querySelector(".vc-datepicker-close").classList.add("hidden");
+      /*
+      @function (private) _setInitialValue
+      @description Sets the initial value based on the data provided by the user
+      */
+      setInitialValue: function () {
+
+        var el = this;
+
+        if (Object.keys(el._misc.selected).length > 0) {
+
+          var dateObj = {
+
+            day: el._misc.selected.day ? parseInt(el._misc.selected.day) : undefined,
+            month: el._misc.selected.month ? parseInt(el._misc.current.month) + 1 : undefined,
+            year: el._misc.current.year ? parseInt(el._misc.current.year) : undefined,
+
+          };
+
+          el.value = el._getFormattedValue(dateObj);
+          el.setAttribute("valid", "true");
+
         }
+
       },
       /*
       @function (private) _handleAutoHeight
@@ -814,10 +838,8 @@
             if (day) {
 
               day.innerHTML = previousMonthDaysToDisplay[i];
-              day.classList.add("vc-datepicker-previousMonth");
-              day.classList.add("vc-fg4");
-              day.classList.remove("vc-datepicker-current");
-              day.classList.remove("vc-fg1-active");
+              day.classList.add("vc-datepicker-previousMonth", "vc-fg4");
+              day.classList.remove("vc-datepicker-current", "vc-fg1-active");
 
               day.setAttribute("year", previous.year);
               day.setAttribute("month", previous.month);
@@ -843,12 +865,7 @@
           day = week.children[weekDaysCount];
 
           if (day) {
-            day.classList.remove("vc-datepicker-previousMonth");
-            day.classList.remove("vc-fg4");
-            day.classList.remove("vc-datepicker-nextMonth");
-            day.classList.remove("vc-fg4");
-            day.classList.remove("vc-datepicker-current");
-            day.classList.remove("vc-fg1-active");
+            day.classList.remove("vc-datepicker-previousMonth", "vc-fg4", "vc-datepicker-nextMonth", "vc-fg4", "vc-datepicker-current", "vc-fg1-active");
             day.innerHTML = i;
 
             day.setAttribute("year", year);
@@ -871,6 +888,7 @@
               disableDayAsMax = (isPreviousMonthMax || isMaxMonth && i > el._misc.max.day) ? true : false;
 
               day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin || disableDayAsMax)) ? "true" : "false";
+              day.classList[day.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
             }
 
           }
@@ -884,10 +902,8 @@
           if (day) {
 
             day.innerHTML = nextMonthDaysToDisplay[i];
-            day.classList.add("vc-datepicker-nextMonth");
-            day.classList.add("vc-fg4");
-            day.classList.remove("vc-datepicker-current");
-            day.classList.remove("vc-fg1-active");
+            day.classList.add("vc-datepicker-nextMonth", "vc-fg4");
+            day.classList.remove("vc-datepicker-current", "vc-fg1-active");
 
             day.setAttribute("year", next.year);
             day.setAttribute("month", next.month);
@@ -917,7 +933,7 @@
         var currentDay = el._refs.daysGrid.querySelector('[day="' + el._misc.selected.day + '"][month="' + el._misc.selected.month + '"][year="' + el._misc.selected.year + '"]');
 
         if (currentDay) {
-          el._highlightDay(currentDay);
+          el._selectDay(currentDay);
         }
       },
       /*
@@ -948,13 +964,14 @@
             months[i].dataset.disabled = ((disableMonthAsMin || disableMonthAsMax) || (disableMonthAsMin && disableMonthAsMax)) ? "true" : "false";
 
           } else {
-
             months[i].dataset.disabled = "false";
           }
+
+          months[i].classList[months[i].dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
         }
 
-        el._misc.selected.month = (el._misc.selected.month == undefined) ? el._misc.current.month : el._misc.selected.month;
-        el._misc.selected.year = (el._misc.selected.year == undefined) ? el._misc.current.year : el._misc.selected.year;
+        el._misc.selected.month = (typeof el._misc.selected.month == "undefined") ? el._misc.current.month : el._misc.selected.month;
+        el._misc.selected.year = (typeof el._misc.selected.year == "undefined") ? el._misc.current.year : el._misc.selected.year;
 
         var currentMonthCell = monthsGrid.querySelector('[data-index ="' + el._misc.selected.month + '"][data-year ="' + el._misc.selected.year + '"]');
 
@@ -988,12 +1005,13 @@
             disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
             disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
             row.children[j].dataset.disabled = ((disableYearAsMin || disableYearAsMax) || (disableYearAsMin && disableYearAsMax)) ? "true" : "false";
+            row.children[j].classList[row.children[j].dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
 
             year++;
           }
         }
 
-        el._misc.selected.year = (el._misc.selected.year == undefined) ? el._misc.current.year : el._misc.selected.year;
+        el._misc.selected.year = (typeof el._misc.selected.year == "undefined") ? el._misc.current.year : el._misc.selected.year;
 
         selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.selected.year + '"]')
 
@@ -1082,9 +1100,8 @@
 
           } else {
 
-            var formattedValue = el._getFormattedValue(dateObj, el.valueFormat);
+            var formattedValue = el._getFormattedValue(dateObj);
 
-            el.setAttribute("value", formattedValue);
             el.value = formattedValue;
             el.setAttribute("valid", "true");
 
@@ -1129,9 +1146,8 @@
 
             } else {
 
-              var formattedValue = el._getFormattedValue(dateObj, el.valueFormat);
+              var formattedValue = el._getFormattedValue(dateObj);
 
-              el.setAttribute("value", formattedValue);
               el.value = formattedValue;
               el.setAttribute("valid", "true");
             }
@@ -1162,7 +1178,7 @@
             el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
             el._showDaysGrid();
 
-          } else if (el.querySelector(".vc-datepicker-monthsGrid")) {
+          } else if (el._refs.monthsGrid) {
 
             if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
               el._misc.current.month = el._misc.min.month;
@@ -1187,9 +1203,8 @@
 
             } else {
 
-              var formattedValue = el._getFormattedValue(dateObj, el.valueFormat);
+              var formattedValue = el._getFormattedValue(dateObj);
 
-              el.setAttribute("value", formattedValue);
               el.value = formattedValue;
               el.setAttribute("valid", "true");
             }
@@ -1204,6 +1219,9 @@
       */
       getFormattedValue: function (obj, format) {
 
+        var el = this;
+
+        var format = el.valueFormat;
         var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
         var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
         var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
@@ -1261,12 +1279,10 @@
         var previousCurrent = el.querySelector(".vc-datepicker-daysGrid .vc-datepicker-grid .vc-datepicker-current");
 
         if (previousCurrent) {
-          previousCurrent.classList.remove("vc-datepicker-current");
-          previousCurrent.classList.remove("vc-fg1-active");
+          previousCurrent.classList.remove("vc-datepicker-current", "vc-fg1-active");
         }
 
-        dayButton.classList.add("vc-datepicker-current");
-        dayButton.classList.add("vc-fg1-active");
+        dayButton.classList.add("vc-datepicker-current", "vc-fg1-active");
       },
       /*
       @function (private) _highlightMonth
@@ -1279,12 +1295,10 @@
         var previousCurrent = el.querySelector(".vc-datepicker-monthsGrid .vc-datepicker-current");
 
         if (previousCurrent) {
-          previousCurrent.classList.remove("vc-datepicker-current");
-          previousCurrent.classList.remove("vc-fg1-active");
+          previousCurrent.classList.remove("vc-datepicker-current", "vc-fg1-active");
         }
 
-        monthButton.classList.add("vc-datepicker-current");
-        monthButton.classList.add("vc-fg1-active");
+        monthButton.classList.add("vc-datepicker-current", "vc-fg1-active");
       },
       /*
       @function (private) _highlightYear
@@ -1297,12 +1311,10 @@
         var previousCurrent = el.querySelector(".vc-datepicker-yearsGrid .vc-datepicker-current");
 
         if (previousCurrent) {
-          previousCurrent.classList.remove("vc-datepicker-current");
-          previousCurrent.classList.remove("vc-fg1-active");
+          previousCurrent.classList.remove("vc-datepicker-current", "vc-fg1-active");
         }
 
-        yearButton.classList.add("vc-datepicker-current");
-        yearButton.classList.add("vc-fg1-active");
+        yearButton.classList.add("vc-datepicker-current", "vc-fg1-active");
       },
       /*
       @function (private) {Object} _getPreviousByMonth
@@ -1478,8 +1490,11 @@
 
           el.querySelector(".vc-datepicker-back").classList.add("hidden");
 
-          el.querySelector(".vc-datepicker-previous").dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
-          el.querySelector(".vc-datepicker-next").dataset.disabled = (el._isMaxMonth(year, month)) ? "true" : "false";
+          el._refs.previous.dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
+
+          el._refs.next.dataset.disabled = (el._isMaxMonth(year, month)) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
 
         } else if (headerType == "monthsGrid") {
 
@@ -1490,8 +1505,11 @@
           el._refs.yearSelector.innerHTML = year;
           el._refs.monthSelector.classList.add("hidden");
 
-          el.querySelector(".vc-datepicker-previous").dataset.disabled = (year <= el._misc.min.year) ? "true" : "false";
-          el.querySelector(".vc-datepicker-next").dataset.disabled = (year >= el._misc.max.year) ? "true" : "false";
+          el._refs.previous.dataset.disabled = (year <= el._misc.min.year) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
+
+          el._refs.next.dataset.disabled = (year >= el._misc.max.year) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
 
           if (el._refs.daysGrid) {
 
@@ -1512,8 +1530,11 @@
           el._refs.yearSelector.innerHTML = year;
           el._refs.monthSelector.classList.add("hidden");
 
-          el.querySelector(".vc-datepicker-previous").dataset.disabled = (el._misc.selector.range.start <= el._misc.min.year) ? "true" : "false";
-          el.querySelector(".vc-datepicker-next").dataset.disabled = (el._misc.selector.range.end >= el._misc.max.year) ? "true" : "false";
+          el._refs.previous.dataset.disabled = (el._misc.selector.range.start <= el._misc.min.year) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
+
+          el._refs.next.dataset.disabled = (el._misc.selector.range.end >= el._misc.max.year) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg4");
 
           if (el._refs.daysGrid) {
 
@@ -1722,14 +1743,14 @@
 
         if (parseInt(calendar.offsetWidth) >= 240) {
 
-          baseFontSize = el.fontsize;
+          baseFontSize = el.fontSize;
           navigation = 24;
           headerConstant = 1.1111111111;
           otherGridsConstant = 1.1111111111;
 
         } else {
 
-          baseFontSize = el.fontsize * 0.75;
+          baseFontSize = el.fontSize * 0.75;
           navigation = 18;
           headerConstant = 1.197916667;
           otherGridsConstant = 1.296296296;
@@ -1787,19 +1808,38 @@
 
       },
       /*
+      @function (private) _show
+      @description Shows the calendar
+      */
+      show: function () {
+
+        var el = this;
+
+        el.classList.remove("hidden");
+        vcomet.triggerCallback("onShow", el, el, []);
+      },
+      /*
       @function (private) _hide
       @description Hides the calendar
       */
       hide: function () {
-        this.classList.add("hidden");
+
+        var el = this;
+
+        el.classList.add("hidden");
+        vcomet.triggerCallback("onHide", el, el, []);
       },
       /*
       @function (private) _disableSelectors
       @description Disables the month/year selectors
       */
       disableSelectors: function () {
+
         this.querySelector(".vc-datepicker-header .vc-datepicker-month").dataset.disabled = "true";
         this.querySelector(".vc-datepicker-header .vc-datepicker-year").dataset.disabled = "true";
+
+        this.querySelector(".vc-datepicker-leftNavigation").classList.add("vc-fg4");
+
       },
       /*
       @function (private) _disableNavigation
@@ -1811,7 +1851,39 @@
 
         this.querySelector(".vc-datepicker-leftNavigation .vc-datepicker-previous").dataset.hidden = "true";
         this.querySelector(".vc-datepicker-leftNavigation .vc-datepicker-next").dataset.hidden = "true";
-      }
+      },
+      /*
+      @function (private) _updateDisabled
+      @description Updates disabled status
+      */
+      updateDisabled: function () {
+
+        var el = this;
+        var selectedCell = el.querySelector(".vc-fg1-active");
+
+        if (vcomet.util.isTrue(el.disabled)) {
+
+          if (selectedCell) {
+            selectedCell.classList.remove("vc-fg1-active");
+            selectedCell.classList.add("vc-bg2-disabled");
+          }
+
+          el._refs.header.classList.add("vc-fg4");
+          el._refs.body.classList.add("vc-fg4");
+
+        } else {
+
+          if (selectedCell) {
+            selectedCell.classList.add("vc-fg1-active");
+            selectedCell.classList.remove("vc-bg2-disabled");
+          }
+
+          el._refs.header.classList.remove("vc-fg4");
+          el._refs.body.classList.remove("vc-fg4");
+
+        }
+
+      },
     },
     functions: {
       /*
@@ -1900,9 +1972,8 @@
 
         }
 
-        formattedValue = el._getFormattedValue(dateObj, el.valueFormat);
+        formattedValue = el._getFormattedValue(dateObj);
 
-        el.setAttribute("value", formattedValue);
         el.value = formattedValue;
         el.setAttribute("valid", "true");
 
@@ -1910,12 +1981,26 @@
     },
     onCreated: function () {
       var el = this;
+
+      el._setupMisc();
+      el._setupRefs();
+
       vcomet.createCallback("onSelected", el);
+      vcomet.createCallback("onShow", el);
+      vcomet.createCallback("onHide", el);
     },
     onRender: function () {
       var el = this;
       el._setup();
-    }
+      el._setInitialValue();
+    },
+    onPropertyChanged: function (key, oldVal, newVal) {
+      switch (key) {
+        case "disabled":
+          this._updateDisabled();
+          break;
+      }
+    },
   });
 
 </script>
