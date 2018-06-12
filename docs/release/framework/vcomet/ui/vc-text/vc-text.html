@@ -13,7 +13,6 @@
 
 <script>
     vcomet.element("vc-text", "vc-text.css", {
-        display: "inline",
         themed: true,
         dependencies: [
             "../vc-scroll"
@@ -21,30 +20,22 @@
 
         privateProperties: {
             /*
-            @property (private) {string} _formelement 
+            @property (private) {String} _formelement 
             @description Necessary property for a form
             */
             formelement: {
                 value: "textbox"
             },
             /*
-            @property (private) {string} _initialText
-            @description Text provided by the user inside the element
-            */
-            initialText: {
-                value: "",
-                reflect: false
-            },
-            /*
-            @property (private) {object} _data
+            @property (private) {Object} _misc
             @description Object with usefull information
             */
-            data: {
+            misc: {
                 value: {},
                 reflect: false
             },
             /*
-            @property (private) {object} _refs
+            @property (private) {Object} _refs
             @description Object with references to frecuently queryied nodes
             */
             refs: {
@@ -56,7 +47,7 @@
 
         properties: {
             /*
-            @property {string} name
+            @property {String} name
             @description Name to identify the element in a form
             */
             name: {
@@ -64,7 +55,7 @@
                 reflect: true
             },
             /*
-            @property {string} placeholder
+            @property {String} placeholder
             @description Placeholder for the user typing area
             */
             placeholder: {
@@ -72,7 +63,7 @@
                 reflect: true
             },
             /*
-            @property {string} label
+            @property {String} label
             @description Label for the element
             */
             label: {
@@ -80,11 +71,19 @@
                 reflect: true
             },
             /*
-            @property {string} type
+            @property {String} type
             @description Determines the type of the element (area, text, password)
             */
             type: {
                 value: "text",
+                reflect: true
+            },
+            /*
+            @property {Boolean} inline 
+            @description Space that occupies the button inside its parent container.
+            */
+            inline: {
+                value: true,
                 reflect: true
             },
             /*
@@ -96,15 +95,15 @@
                 reflect: true
             },
             /*
-            @property {string} maxlength
+            @property {String} maxlength
             @description Characters input limit
             */
-            maxlength: {
+            maxLength: {
                 value: "",
                 reflect: true
             },
             /*
-            @property {string} counter
+            @property {String} counter
             @description Whether the user wants a counter or not
             */
             counter: {
@@ -112,22 +111,29 @@
                 reflect: true
             },
             /*
-            @property {string} status
-            @description Determines the status of the element (active, readonly, disabled)
-            */
-            status: {
-                value: "active",
-                reflect: true
-            },
-            /*
-            @property {string} value
+            @property {String} value
             @description Value of the element
             */
             value: {
                 value: "",
-                reflect: false
+                reflect: true
+            },
+            /*
+            @property {string} readonly
+            @description Toggles the readonly status of the element
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
+            @property {String} disabled
+            @description Toggles the disabled status of the element
+            */
+            disabled: {
+                value: false,
+                reflect: true
             }
-
         },
 
         privateFunctions: {
@@ -139,11 +145,26 @@
 
                 var el = this;
 
+                el._setupRefs();
                 el._setupCounter();
                 el._setupForType();
                 el._setupInitialText();
-                el._updateStatus();
+                el._setupTouchBlur();
                 el._updateLabel();
+                el._updateDisabled();
+                el._updateReadOnly();
+
+            },
+            /*
+            @function (private) _setupRefs
+            @description Creates references for relevant nodes
+            */
+            setupRefs: function () {
+
+                var el = this;
+
+                el._refs.data = el.querySelector(".vc-text-data");
+                el._refs.main = el.querySelector(".vc-text-main");
 
             },
             /*
@@ -169,18 +190,81 @@
 
                 var el = this;
 
+                el._misc.area.isNative = vcomet.util.isTouchScreen();
+
+                if (!el._misc.area.isNative) {
+                    el._setupAsCustomArea();
+                } else {
+                    el._setupAsNativeArea();
+                }
+
+                el._setupAreaEvents();
+
+            },
+            /*
+            @function (private) _setupAsNativeArea
+            @description Prepares the element to work as a native textarea for touch devices
+            */
+            setupAsNativeArea: function () {
+
+                var el = this;
+
+                var main = el.querySelector(".vc-text-main");
+                var editable = document.createElement("div");
+
+                // If the user has specified a height for the textarea we set up some style and listeners for its functionality
+                if (el.areaHeight != "") {
+                    main.style.height = el.areaHeight + "px";
+                    main.style.cursor = "text";
+                }
+
+                editable = document.createElement("textarea");
+                editable.classList.add("vc-text-editable", "vc-fg2");
+                editable.setAttribute("placeholder", el.placeholder);
+                editable.setAttribute("resize", false);
+                editable.setAttribute("maxlength", el.maxLength);
+
+                el._misc.area.update = function () {
+                    el._misc.area.preventUpdate = true;
+                    el.value = el._refs.editableArea.value;
+                    el._refs.editableArea.title = el._refs.editableArea.value;
+                    el._updateCounter();
+                };
+
+                el._refs.editableArea = editable;
+
+                main.appendChild(editable);
+
+            },
+            /*
+            @function (private) _setupAsCustomArea
+            @description Prepares the element to work as a custom textarea with custom scroll
+            */
+            setupAsCustomArea: function () {
+
+                var el = this;
+
                 var main = el.querySelector(".vc-text-main");
                 var vcometScroll = document.createElement("vc-scroll");
                 var editableContainer = document.createElement("div");
                 var editable = document.createElement("div");
 
-                el._data.editable = {};
-                el._data.editable.inputEventTriggered = false;
-                el._data.editable.verticalSize = 0;
-                el._data.editable.horizontalSize = 0;
+                // If the user has specified a height for the textarea we set up some style and listeners for its functionality
+                if (el.areaHeight != "") {
+                    main.style.height = el.areaHeight + "px";
+                    main.style.cursor = "text";
+                }
 
-                el._refs = el._refs || {};
-                el._refs.editable = editable;
+                el._misc.area.update = function () {
+                    var value = el._getValue();
+                    el._misc.area.preventUpdate = true;
+                    el.value = value;
+                    el._refs.editableArea.title = value;
+                    el._saveAreaInnerHTML();
+                    el._updateCounter();
+                };
+
+                el._refs.editableArea = editable;
 
                 vcometScroll.setAttribute("thickness", "8");
 
@@ -188,32 +272,34 @@
                 editable.setAttribute("contenteditable", "true");
                 editable.setAttribute("placeholder", el.placeholder);
 
-                // If the user has specified a height for the textarea we set up some style and listeners for its functionality
-                if (el.areaHeight != "") {
+                vcomet.registerPathListener(editable);
 
-                    main.style.height = el.areaHeight + "px";
-                    main.style.cursor = "text";
+                main.addEventListener("click", function () {
 
-                    vcomet.registerPathListener(editable);
+                    // If the users clicks on the main node that is not covered by the editable
+                    if (!editable.isOnPath) {
+                        el._placeCaretAtEnd(editable);
+                    }
 
-                    main.addEventListener("click", function () {
+                });
 
-                        // If the users clicks on the main node that is not covered by the editable
-                        if (!editable.isOnPath) {
-                            el._placeCaretAtEnd(editable);
-                        }
+                // Appends the new nodes
+                editableContainer.appendChild(editable);
+                vcometScroll.appendChild(editableContainer);
+                main.appendChild(vcometScroll);
 
-                    });
+            },
+            /*
+            @function (private) _setupAreaEvents
+            @description Creates the keyboard events for the area
+            */
+            setupAreaEvents: function () {
 
-                }
+                var el = this;
 
-                // If the user is exceeding the max length we will prevent everything
-                editable.addEventListener("keypress", function (e) {
+                el._refs.editableArea.addEventListener("keydown", function (e) {
 
-                    if (el._isCharacterKeyPress(e) && el._willExceedLength()) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    } else {
+                    if (!el._misc.area.isNative) {
                         el._refresh();
                         el._handleAutoScroll();
                     }
@@ -223,43 +309,41 @@
                         vcomet.triggerCallback("onEnter", el)
                     }
 
+                    setTimeout(function () {
+                        el._misc.area.update();
+                    }, 0);
+
                 });
 
                 // Updates everything needed for new inputs and prevents keyup from triggering
-                editable.addEventListener("input", function (e) {
-                    el.value = editable.innerText;
-                    el._updateCounter();
-                    el._refresh();
-                    el._handleAutoScroll();
-                    el._data.editable.inputEventTriggered = true;
+                el._refs.editableArea.addEventListener("input", function (e) {
+                    if (!el._misc.area.isNative) {
+                        el._refresh();
+                        el._handleAutoScroll();
+                    }
+                    el._misc.area.inputEventTriggered = true;
                 });
 
                 // As some browsers doesnt handle spaces and different keys with the input event we also created the keyup event, 
                 // which will only do stuff if the input event was not triggered
-                editable.addEventListener("keyup", function (e) {
-                    if (el._data.editable.inputEventTriggered == false) {
-                        el.value = editable.innerText;
-                        el._updateCounter();
+                el._refs.editableArea.addEventListener("keyup", function (e) {
+                    if (el._misc.area.inputEventTriggered == false && !el._misc.area.isNative) {
                         el._refresh();
                         el._handleAutoScroll();
                     }
-                    el._data.editable.inputEventTriggered = false;
+                    el._misc.area.inputEventTriggered = false;
                 });
 
-                editable.addEventListener("focus", function () {
-                    if (el.status == "active") {
+                el._refs.editableArea.addEventListener("focus", function () {
+                    if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
                     }
                 });
 
-                editable.addEventListener("blur", function () {
+                el._refs.editableArea.addEventListener("blur", function () {
+                    el._restoreAreaInnerHTML();
                     el.classList.remove("focus");
                 });
-
-                // Appends the new nodes
-                editableContainer.appendChild(editable);
-                vcometScroll.appendChild(editableContainer);
-                main.appendChild(vcometScroll);
 
             },
             /*
@@ -278,14 +362,10 @@
 
                 input.setAttribute("type", el.type);
                 input.setAttribute("placeholder", el.placeholder);
+                input.setAttribute("maxlength", el.maxLength);
                 input.classList.add("vc-fg2");
 
                 input.addEventListener("keypress", function (e) {
-
-                    if (el._isCharacterKeyPress(e) && el._willExceedLength()) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
 
                     // Checks if the key press corresponds to ENTER
                     if (e.keyCode == 13) {
@@ -296,11 +376,12 @@
 
                 input.addEventListener("input", function (e) {
                     el.value = input.value;
+                    input.title = el.type.toLowerCase() != "password" ? input.value : el._refs.input.title;
                     el._updateCounter();
                 });
 
                 input.addEventListener("focus", function (e) {
-                    if (el.status == "active") {
+                    if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
                     }
                 });
@@ -320,12 +401,9 @@
 
                 var el = this;
 
-                if (el.counter != "false" && el.maxlength != "") {
-
+                if (el.counter != "false" && el.maxLength != "") {
                     var counter = el.querySelector(".vc-text-counter");
-
-                    counter.innerHTML = el.maxlength;
-
+                    counter.innerHTML = el.maxLength;
                 }
 
             },
@@ -337,98 +415,139 @@
 
                 var el = this;
 
-                if (el._initialText != "") {
+                if (el._misc.initialText != "") {
 
-                    if (el._initialText.length > parseInt(el.maxlength)) {
-                        el._initialText = el._initialText.substring(0, el.maxlength);
+                    if (el._misc.initialText.length > parseInt(el.maxLength)) {
+                        el._misc.initialText = el._misc.initialText.substring(0, el.maxLength);
                     }
 
                 }
 
                 if (el.type != "area") {
-                    el._refs.input.value = el._initialText;
+                    el._refs.input.value = el._misc.initialText;
+                    el._refs.input.title = el._refs.input.title = el.type.toLowerCase() != "password" ? el._misc.initialText : el._refs.input.title;
                 } else {
-                    el._refs.editable.innerText = el._initialText;
+                    el._refs.editableArea.innerText = el._misc.initialText;
+                    el._refs.editableArea.title = el._misc.initialText;
                 }
 
-                el.value = el._initialText;
+                el.__value = el._misc.initialText;
 
                 el._updateCounter();
 
             },
             /*
-            @function (private) {boolean} _willExceedLength
-            @description Returns a boolean whether the current value is already exceeding the maxlength or not
+            @function (private) {String} _setupTouchBlur
+            @description Creates the touch blur
             */
-            willExceedLength: function () {
-                return this.value.length >= parseInt(this.maxlength);
-            },
-            isCharacterKeyPress: function (e) {
-
-                if (typeof e.which == "undefined") {
-                    // This is IE, which only fires keypress events for printable keys
-                    return true;
-                } else if (typeof e.which == "number" && e.which > 0) {
-                    // In other browsers except old versions of WebKit, evt.which is
-                    // only greater than zero if the keypress is a printable key.
-                    // We need to filter out backspace and ctrl/alt/meta key combinations
-                    return !e.ctrlKey && !e.metaKey && !e.altKey && e.which != 8;
-                }
-
-                return false;
-            },
-            /*
-            @function (private) _updateCounter
-            @description Updates the counter with the current characters count left for typing
-            */
-            updateCounter: function () {
+            setupTouchBlur: function () {
 
                 var el = this;
 
-                if (el.counter != "false" && el.maxlength != "") {
-                    el.querySelector(".vc-text-counter").innerHTML = parseInt(el.maxlength) - el.value.length;
+                vcomet.registerPathListener(el);
+
+                document.addEventListener("touchstart", function () {
+                    if (!el.isOnPath) {
+                        var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+                        el.classList.remove("focus");
+                        typingNode.blur();
+                    }
+                });
+
+            },
+            /*
+            @function (private) {String} _saveAreaInnerHTML
+            @description Triggered when typing, it saves the innerHTML of the area while the user has not exceeded the max length
+            */
+            saveAreaInnerHTML: function () {
+
+                var el = this;
+
+                if (!el._misc.area.isNative && el.maxLength != "" && !el._valueExceedsLength()) {
+                    el._misc.area.validValueInnerHTML = el._refs.editableArea.innerHTML;
                 }
 
             },
             /*
-            @function (private) _updateStatus
-            @description Removes previous status and sets the new one
-            @param {string} oldVal [Opcional, when passing a previous status we remove the class and attribute for to avoid multiple status at the same time]
+            @function (private) {String} _saveAreaInnerHTML
+            @description Triggered when the element is blured, if the typed value exceeds the max length it restores the previous valid innerHTML
             */
-            updateStatus: function (oldVal) {
+            restoreAreaInnerHTML: function () {
 
                 var el = this;
 
-                el.classList.remove(oldVal);
+                if (!el._misc.area.isNative && el.maxLength != "" && el._valueExceedsLength()) {
 
-                if (el.status != "active") {
-                    el.classList.add(el.status);
+                    el._refs.editableArea.innerHTML = el._misc.area.validValueInnerHTML;
+                    var value = el._getValue();
+                    el._misc.area.preventUpdate = true;
+                    el._refs.editableArea.title = value;
+                    el.value = value;
+                    el._updateCounter();
+
                 }
 
-                if (el.type == "area") {
+            },
+            /*
+            @function (private) {String} _getValue
+            @description Returns the proper value for the element
+            */
+            getValue: function () {
 
-                    el._refs.editable.contentEditable = el.status != "active" ? false : true;
+                var value;
+
+                if (vcomet.util.getBrowser() == "IE" && this.type == "area") {
+
+                    // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
+                    value = this._refs.editableArea.innerHTML
+                        .replace(new RegExp("</p><p>", "g"), "\r\n")
+                        .replace(new RegExp("<br></p><p>", "g"), "\r\n")
+                        .replace(new RegExp("<p>", "g"), "")
+                        .replace(new RegExp("</p>", "g"), "")
+                        .replace(new RegExp("<br>", "g"), "");
 
                 } else {
 
-                    el._refs.input.removeAttribute(oldVal);
-                    el._refs.input.setAttribute(el.status, "");
+                    value = this._refs.editableArea.innerText;
 
                 }
 
+                return value;
             },
             /*
-            @function (private) _updateLabel
-            @description Updates the label node with the new label
+            @function (private) {Number} _getValueLength
+            @description Returns the length of the value
             */
-            updateLabel: function () {
+            getValueLength: function () {
 
                 var el = this;
+                var value, valueLength;
 
-                if (el.label != "") {
-                    el.querySelector(".vc-text-label").innerHTML = el.label;
+                if (vcomet.util.getBrowser() == "IE" && this.type == "area") {
+
+                    // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
+                    valueLength = el._refs.editableArea.innerHTML
+                        .replace(new RegExp("</p><p>", "g"), "~")
+                        .replace(new RegExp("<br></p><p>", "g"), "~")
+                        .replace(new RegExp("<p>", "g"), "")
+                        .replace(new RegExp("</p>", "g"), "")
+                        .replace(new RegExp("<br>", "g"), "").length;
+
+                } else {
+
+                    value = el.value.toString();
+                    valueLength = Array.prototype.slice.apply(value.match(/\n/g) || []).length > 1 ? value.length - 1 : value.length;
+
                 }
 
+                return valueLength;
+            },
+            /*
+            @function (private) {Boolean} _valueExceedsLength
+            @description Returns a boolean whether the current value is already exceeding the maxlength or not
+            */
+            valueExceedsLength: function () {
+                return this._getValueLength() > parseInt(this.maxLength);
             },
             /*
             @function (private) _refresh
@@ -466,6 +585,9 @@
                             if (vcometScrollbar) {
 
                                 vcometScroll.removeChild(vcometScrollbar);
+                                vcometScroll._setupVerticalScroll();
+
+                            } else if (hasDifferentVerticalSize) {
                                 vcometScroll._setupVerticalScroll();
                             }
 
@@ -509,7 +631,7 @@
             /*
             @function (private) _handleAutoScroll
             @description Called when typing, when the size has changed it manages the autoscrolling to keep the cursor visible
-            @param {object} e [event]
+            @param {Object} e [event]
             */
             handleAutoScroll: function (e) {
 
@@ -530,14 +652,14 @@
 
                     vcometScroll._handleScrollResize();
 
-                    el._data.editable.verticalSize = vcometScroll._getVerticalScrollLimit();
-                    el._data.editable.horizontalSize = vcometScroll._getHorizontalScrollLimit();
+                    el._misc.area.verticalSize = vcometScroll._getVerticalScrollLimit();
+                    el._misc.area.horizontalSize = vcometScroll._getHorizontalScrollLimit();
 
                     // Vertical check
                     if (hasDifferentVerticalSize) {
 
                         onVerticalLimit = (selectionRect.bottom <= editableRect.bottom && selectionRect.bottom >= (editableRect.bottom - errorRange));
-                        verticalPosition = onVerticalLimit ? el._data.editable.verticalSize : (selectionRect.top - editableRect.top);
+                        verticalPosition = onVerticalLimit ? el._misc.area.verticalSize : (selectionRect.top - editableRect.top);
 
                     }
 
@@ -545,7 +667,7 @@
                     if (hasDifferentHorizontalSize) {
 
                         onHorizontalLimit = (selectionRect.left <= editableRect.right && selectionRect.right >= (editableRect.right - errorRange));
-                        horizontalPosition = onHorizontalLimit ? el._data.editable.horizontalSize : (selectionRect.left - editableRect.left);
+                        horizontalPosition = onHorizontalLimit ? el._misc.area.horizontalSize : (selectionRect.left - editableRect.left);
 
                     }
 
@@ -555,7 +677,7 @@
 
             },
             /*
-            @function (private) {object} _getSelectionCoords
+            @function (private) {Object} _getSelectionCoords
             @description Returns an object with the absolute position of the cursor
             */
             getSelectionCoords: function () {
@@ -630,7 +752,7 @@
                 return { left: left, top: top, right: right, bottom: bottom };
             },
             /*
-            @function (private) {object} _getSelectionRange
+            @function (private) {Object} _getSelectionRange
             @description Returns the actual range of the selection
             */
             getSelectionRange: function () {
@@ -645,6 +767,10 @@
                 }
                 return null;
             },
+            /*
+            @function (private) {Boolean} _placeCaretAtEnd
+            @description Places the caret at the end of the element
+            */
             placeCaretAtEnd: function (div) {
 
                 div.focus();
@@ -665,84 +791,175 @@
                 }
             },
             /*
-            @function (private) {boolean} _hasDifferentVerticalSize
+            @function (private) {Boolean} _hasDifferentVerticalSize
             @description Checks if the size is different from the vertical scroll limit
             */
             hasDifferentVerticalSize: function () {
-                return this._data.editable.verticalSize != this.querySelector("vc-scroll")._getVerticalScrollLimit();
+                return this._misc.area.verticalSize != this.querySelector("vc-scroll")._getVerticalScrollLimit();
             },
             /*
-           @function (private) {boolean} _hasDifferentHorizontalSize
-           @description Checks if the size is different from the horizontal scroll limit
-           */
+            @function (private) {Boolean} _hasDifferentHorizontalSize
+            @description Checks if the size is different from the horizontal scroll limit
+            */
             hasDifferentHorizontalSize: function () {
-                return this._data.editable.horizontalSize != this.querySelector("vc-scroll")._getHorizontalScrollLimit();
+                return this._misc.area.horizontalSize != this.querySelector("vc-scroll")._getHorizontalScrollLimit();
             },
-
-        },
-
-        functions: {
             /*
-            @function (private) setValue
+            @function (private) _updateCounter
+            @description Updates the counter with the current characters count left for typing
+            */
+            updateCounter: function () {
+
+                var el = this;
+
+                if (el.counter != "false") {
+                    el.querySelector(".vc-text-counter").innerHTML = el.maxLength != "" ? (parseInt(el.maxLength) - el._getValueLength()) : el._getValueLength();
+                }
+
+            },
+            /*
+            @function (private) _updateLabel
+            @description Updates the label node with the new label
+            */
+            updateLabel: function () {
+
+                var el = this;
+
+                if (el.label != "") {
+                    el.querySelector(".vc-text-label").innerHTML = el.label;
+                }
+
+            },
+            /*
+            @function (private) _updateDisabled
+            @description Updates disabled status
+            */
+            updateDisabled: function () {
+
+                var el = this;
+                var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+
+                if (!vcomet.util.isTrue(el.disabled)) {
+
+                    typingNode.classList.add("vc-fg2");
+                    typingNode.classList.remove("vc-fg1-disabled");
+
+                    el._refs.data.classList.remove("vc-fg1-disabled");
+                    el._refs.main.classList.remove("vc-fg1-disabled");
+
+                    el.removeAttribute("disabled");
+                    typingNode.removeAttribute("disabled");
+
+                } else {
+
+                    typingNode.setAttribute("disabled", "true");
+
+                    typingNode.classList.remove("vc-fg2");
+                    typingNode.classList.add("vc-fg1-disabled");
+
+                    el._refs.data.classList.add("vc-fg1-disabled");
+                    el._refs.main.classList.add("vc-fg1-disabled");
+
+                }
+            },
+            /*
+            @function (private) _updateReadOnly
+            @description Updates readonly status
+            */
+            updateReadOnly: function () {
+
+                var el = this;
+                var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+
+                if (vcomet.util.isTrue(el.readonly)) {
+
+                    if (el.type != "area" || el._misc.area.isNative) {
+                        typingNode.setAttribute("readonly", "true");
+                    } else {
+                        el._refs.editableArea.setAttribute("contenteditable", "false");
+                    }
+
+                } else {
+
+                    if (el.type != "area" || el._misc.area.isNative) {
+                        typingNode.removeAttribute("readonly");
+                    } else {
+                        el._refs.editableArea.setAttribute("contenteditable", "true");
+                    }
+
+                }
+
+            },
+            /*
+            @function (private) _updateValue
             @description Updates the value
             @param {String} value 
             */
-            setValue: function (value) {
+            updateValue: function () {
 
                 var el = this;
 
                 if (el.type == "area") {
 
-                    el.value = value;
-                    el._refs.editable.innerText = value;
-                    el._updateCounter();
-                    el._refresh();
-                    el._handleAutoScroll();
+                    // This is set to true when the value propertyChanged is triggered from the textarea change, 
+                    // in those scenarios we dont want to update the area again
+                    if (!el._misc.area.preventUpdate) {
+
+                        el._refs.editableArea.innerText = el.value;
+                        el._refs.editableArea.title = el.value;
+
+                        el._updateCounter();
+                        el._refresh();
+                        el._handleAutoScroll();
+                    }
+
+                    el._misc.area.preventUpdate = false;
 
                 } else {
 
-                    el._refs.input.value = value;
-                    el.value = value;
+                    el._refs.input.value = el.value;
+                    el._refs.input.title = el.type.toLowerCase() != "password" ? el.value : el._refs.input.title;
 
                 }
 
             }
+
         },
 
         onCreated: function () {
 
-            this._initialText = this.source.textContent;
-            this.source.textContent = "";
+            var el = this;
+
+            el._misc.initialText = this.source.textContent;
+            el._misc.area = {};
+            el._misc.area.inputEventTriggered = false;
+            el._misc.area.verticalSize = 0;
+            el._misc.area.horizontalSize = 0;
+
+            el.source.textContent = "";
 
             vcomet.createCallback("onEnter", this);
 
         },
 
-        onInit: function () {
-            // console.log('onInit', this.nodeName);
-        },
-
-        onTransformed: function () {
-            // console.log('onTransformed', this.nodeName);
-        },
-
-        onRender: function () {
-            // console.log('onRender', this.nodeName);
-        },
-
         onBubbleRender: function () {
-            // console.log('onBubbleRender', this.nodeName);
             this._setup();
         },
 
         onPropertyChanged: function (key, oldVal, newVal) {
-            // console.log('onPropertyChanged');
+
             switch (key) {
-                case "status":
-                    this._updateStatus(oldVal);
-                    break;
                 case "label":
                     this._updateLabel();
+                    break;
+                case "disabled":
+                    this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadOnly();
+                    break;
+                case "value":
+                    this._updateValue();
                     break;
             }
 

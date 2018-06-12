@@ -78,6 +78,9 @@
 
           formChildNode = formChilds[i];
           childPrototype = el._getChildPrototypeType(formChildNode);
+          // TODO:
+          // console.log('formChildNode', formChildNode);
+          // console.log('childPrototype', childPrototype);
 
           if (childPrototype.indexOf("HTMLInputElement") !== -1
             || childPrototype.indexOf("HTMLTextAreaElement") !== -1
@@ -176,14 +179,18 @@
         inputType = formChildNode.getAttribute("type");
         elementName = formChildNode.name;
 
+        // TODO:
+        // console.log('inputType', inputType);
+        // console.log('formChildNode._formelement',formChildNode._formelement);
         // Checkbox elements
         if (inputType == "checkbox" || formChildNode._formelement == "checkbox") {
 
-          if (vcomet.util.isTrue(formChildNode.checked)) {
+          if (vcomet.util.isTrue(formChildNode.checked) && !vcomet.util.isTrue(formChildNode.disabled)) {
+            // console.log('formChildNode', formChildNode);
             elementValue = formChildNode.value;
 
-            // If the checkbox gruop has not been stored yet
-            // initialize the array that will store the values addociated with that checkbox group
+            // If the checkbox group has not been stored yet
+            // initialize the array that will store the values associated with that checkbox group
             if (!checkboxGroups[elementName]) {
 
               checkElements = [];
@@ -203,7 +210,7 @@
           // Radio button elements
         } else if (inputType == "radio" || formChildNode._formelement == "radio") {
 
-          if (vcomet.util.isTrue(formChildNode._checked)) {
+          if (vcomet.util.isTrue(formChildNode._checked) && !vcomet.util.isTrue(formChildNode._disabled)) {
 
             elementValue = formChildNode.value;
             // Adding name and value of element at the submit object
@@ -213,22 +220,26 @@
 
           // Slider elements
         } else if (inputType == "range" || formChildNode._formelement == "slider") {
-          elementName = formChildNode.name;
-          elementValue = formChildNode.value;
-          // Adding name and value of element at the submit object
-          submitElements[elementName] = elementValue;
+
+          if (!vcomet.util.isTrue(formChildNode.disabled)) {
+            elementName = formChildNode.name;
+            elementValue = formChildNode.value;
+            // Adding name and value of element at the submit object
+            submitElements[elementName] = elementValue;
+          }
 
           // Vimlet textbox, textarea and others html elements
         } else {
           elementValue = formChildNode.value;
-
-          // Control if the input has no value
-          if (elementValue !== "" && elementValue !== undefined) {
-            // Adding name and value of element at the submit object
-
-            submitElements[elementName] = elementValue;
+          if (!vcomet.util.isTrue(formChildNode.disabled)) {
+            // Control if the input has no value
+            if (elementValue !== "" && typeof elementValue != "undefined") {
+              // Adding name and value of element at the submit object
+              submitElements[elementName] = elementValue;
+            }
 
           }
+
 
         }
       },

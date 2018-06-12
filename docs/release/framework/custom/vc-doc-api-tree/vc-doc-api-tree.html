@@ -21,8 +21,8 @@
     }
 
     vc-tree .material-icons {
-        color:white;
-    }   
+        color: white;
+    }
 
     vc-tree .vc-tree-tree {
         padding-left: 10px !important;
@@ -378,7 +378,7 @@
                 var treeIcons = "none";
                 if (el._treeData.config
                     .__arrowIcon && el._treeData.config
-                    .__folderIcon) {
+                        .__folderIcon) {
                     treeIcons = "all";
                 } else if (el._treeData.config
                     .__arrowIcon) {
@@ -465,8 +465,8 @@
                 node.namePath = el._sanitizeUrl(node.namePath);
                 return node;
             },
-            // @function addSortedFiles (private) [Add files sorted manually to the tree] @param tNode
-            addSortedFiles: function (tNode) {
+            // @function addSortedFolders (private) [Add folders sorted manually to the tree] @param tNode
+            addSortedFolders: function (tNode) {
                 var el = this;
                 var pathWithoutFile = tNode.path.substring(0, tNode.path.lastIndexOf("/"));
 
@@ -497,17 +497,37 @@
                     pathWithoutFile = pathWithoutFile.replace(folderNodeOrderRegexOnce, "");
                 }
             },
+            // @function compactPaths (private) [Replace compact paths if any]
+            compactPaths: function (tNode, config) {
+                var el = this;
+                // ** Check if config compactPaths is available in this config
+                if(config && config.__compactPaths) {
+                    config.__compactPaths.forEach(function (cPath) {
+                        var pattern = new RegExp("^" + el._escapeRegExp(cPath) + ".*", "g");
+                        if (tNode.path.match(pattern)) {
+                            var split = tNode.path.split("/");
+                            var resultPath = cPath + "/.../" + split[split.length -1];
+                            tNode.path = resultPath;
+                        }
+                    });
+                }
+                return tNode;
+            },
+            escapeRegExp: function (str) {
+                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+            },
             // @function addTreeNodes (private) {element} [Fullfil tree with nodes] @param data
             addTreeNodes: function (data) {
                 var el = this;
                 el._refs.treeFragment = document.createDocumentFragment();
                 el._waitUntilTreeSetUp = data.files.length;
                 data.files.forEach(function (tNode) {
+
                     elm = document.createElement("vc-treenode");
 
                     tNode = el._sanitizeNode(tNode);
 
-                    el._addSortedFiles(tNode);
+                    el._addSortedFolders(tNode);
 
                     //Set node order and replace name[order]
                     var nodeOrderRegex = new RegExp("^\\[\\d+\\]", "gm");
@@ -520,12 +540,13 @@
 
                     el._misc.firstElem = el._misc.firstElem || elm;
                     el._setTreeNodeLinks(tNode, elm);
-                    elm = el._setNodeData(tNode, elm);
+                    elm = el._setNodeData(tNode, elm, data.config);
+
                     el._refs.treeFragment.appendChild(elm);
                 });
             },
             // @function setNodeData (private) [Set node path, name and real path] @param tNode @description Node data @param elm [Current tree node]
-            setNodeData: function (tNode, elm) {
+            setNodeData: function (tNode, elm, config) {
                 var el = this;
                 // Set node data         
                 var realPath = tNode.path;
@@ -533,6 +554,7 @@
                 cleanPath = el._removeEntries(cleanPath);
                 elm.name = tNode.name;
                 elm.path = cleanPath; // Without [sort]
+                elm = el._compactPaths(elm, config);
                 elm.realPath = realPath; // Real path with [sort] to find files at disk
                 elm.type = "file";
                 elm.namePath = tNode.namePath.replace(el._misc.folderNodeOrderRegex, ""); // Name path to show at url
@@ -566,7 +588,6 @@
                                         if (el._misc.firstElem === childNode) { // If firstElem becomes a directory, check next first element
                                             el._misc.firstElem = elm;
                                         }
-                                        //  childNode.type = "directory";
                                         childNode.onReady(function () {
                                             childNode.changeType("directory");
                                         });
@@ -630,9 +651,11 @@
                 var treeContainer = document.querySelector("#vc-doc-api-tree");
                 el._waitUntilTreeSetUp--;
                 if (el._waitUntilTreeSetUp <= 0) {
-                    el._treeOnReady();
-                    el._refs.tree.appendChild(el._refs.treeFragment);
-                    treeContainer.appendChild(el._refs.tree);
+                    setTimeout(function () {
+                        el._refs.tree.appendChild(el._refs.treeFragment);
+                        treeContainer.appendChild(el._refs.tree);
+                        el._treeOnReady();
+                    }, 0);
                 }
             },
             // @function removeEntries (private) [Remove entries folder from path] @param path
@@ -718,9 +741,9 @@
             }
         },
 
-        onCreated: function () {},
+        onCreated: function () { },
 
-        onRender: function () {},
+        onRender: function () { },
         onBubbleRender: function () {
             var el = this;
             // Get data from disk when rendered            

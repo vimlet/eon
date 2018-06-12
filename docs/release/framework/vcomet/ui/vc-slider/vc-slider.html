@@ -55,10 +55,19 @@
             },
             /*
               @property {Boolean} disabled 
-              @description Slider desactivation
+              @description Slider deactivation
               Default: false
             */
             disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the spinner
+              Default: false
+            */
+            readonly: {
                 value: false,
                 reflect: true
             },
@@ -79,7 +88,7 @@
               Default: 50%
             */
             size: {
-                value: "50%",
+                value: "",
                 reflect: true
             },
             /*
@@ -109,13 +118,23 @@
               Different depending the orientation of the slider
               Vertical slider: top, bottom, left or right
               Horizontal slider: top & bottom
-              Default: valueless
+              Default: bottom
             */
             displayPosition: {
                 value: "bottom",
                 reflect: true
             },
-
+            /*
+             @property {Boolean} inline 
+             @description Space that occupy the slider inside parent container.
+             By default, its size adapts to its content
+             Values can be: true or false
+             Default: true
+           */
+            inline: {
+                value: true,
+                reflect: true
+            }
         },
 
         privateProperties: {
@@ -128,52 +147,10 @@
                 value: "slider"
             },
             /*
-              @property (private) {Object} _sliderNode 
-              @description Store slider input node
-            */
-            sliderNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _thumbNode 
-              @description Store slider thumb node
-            */
-            thumbNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _shellNode 
-              @description Store slider shell node
-            */
-            shellNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _trackNode 
-              @description Store slider track node
-            */
-            trackNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _fillNode
-              @description Store slider fill node
-            */
-            fillNode: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _rangeValue
-              @description Store slider range node
-            */
-            rangeValue: {
-                value: {}
-            },
-            /*
-              @property (private) {String} _currentvalue
+              @property (private) {String} _currentValue
               @description Current slider value
            */
-            currentvalue: {
+            currentValue: {
                 value: ""
             },
             /*
@@ -182,85 +159,112 @@
             */
             thumbEvent: {
                 value: {}
-            }
-        },
-
-        functions: {
+            },
             /*
-              @function setValue
-              @param {String} newVal [new slider value]
-              @description Set new slider value
+              @property (private) {Object} _refs 
+              @description Object with  references
             */
-            setValue: function (newVal) {
-
-                this._sliderNode.value = newVal;
-                this._currentvalue = newVal;
-                this._updateSlider();
-                vcomet.triggerCallback("onChange", this);
-
-            }
-
+            refs: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _misc 
+              @description Stores slider useful data.
+            */
+            misc: {
+                value: {}
+            },
         },
-
         privateFunctions: {
+            /*
+              @function (private) _setValue
+              @param {String} newVal [new slider value]
+            */
+            setValue: function () {
+                var el = this;
+
+                el._refs.slider.value = el.value;
+                el._currentValue = el.value;
+                el._updateSlider(true);
+                vcomet.triggerCallback("onChange", el);
+
+            },
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.shell = el.template.querySelector(".vc-slider-shell");
+                el._refs.track = el.template.querySelector(".vc-slider-track");
+                el._refs.slider = el.template.querySelector(".vc-slider-slider");
+                el._refs.fill = el.template.querySelector(".vc-slider-fill");
+                el._refs.thumb = el.template.querySelector(".vc-slider-thumb");
+                el._refs.range = el.template.querySelector(".vc-slider-display");
+            },
             /*
               @function (private) _updateSlider
               @description Update slider view
-              @param {String} arg [control variable for vertical slider]
+              @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
             */
-            updateSlider: function (arg) {
+            updateSlider: function (privateValueKey) {
                 var el = this;
-                var sliderVal = el._sliderNode.value;
-                var percentValue = (sliderVal - el._sliderNode.min) / (el._sliderNode.max - el._sliderNode.min); /* percentage slider value */
-                var thumbPosition = -5.7;
-                var fillSize = percentValue * 100;
-                el._rangeValue.innerHTML = sliderVal;
-                (el.orientation == "horizontal") ? el._horizontalSlider(percentValue) : el._verticalSlider(percentValue, fillSize, arg);
 
-                el.value = el._sliderNode.value;
+                var sliderVal = el._refs.slider.value;
+                var thumbPosition = -5.7;
+                el._misc.percentValue = (sliderVal - el._refs.slider.min) / (el._refs.slider.max - el._refs.slider.min); /* percentage slider value */
+                var valueKey = privateValueKey ? "__value" : "value";
+
+                el._refs.range.innerHTML = sliderVal;
+                (el.orientation == "horizontal") ? el._horizontalSlider() : el._verticalSlider();
+                el[valueKey] = el._refs.slider.value;
+                el._refs.slider.setAttribute("value", el._refs.slider.value);
             },
 
 
             /*
             @function (private) _horizontalSlider
             @description Specify horizontal slider view style
-            @param {Number} percentValue [percentage slider value]
             */
-            horizontalSlider: function (percentValue) {
+            horizontalSlider: function () {
+                var el = this;
                 var trackSize = 100;
 
-                this._fillNode.style.width = (percentValue * trackSize) + "%";
-                this._trackNode.style.width = trackSize + "%"; /* adjust for border */
+                el.style.width = (el.size) ? el.size : el.offsetWidth;
+                el._refs.fill.style.width = (el._misc.percentValue * trackSize) + "%";
+                el._refs.track.style.width = trackSize + "%"; /* adjust for border */
             },
 
             /*
               @function (private) _verticalSlider
               @description Specify vertical slider view style
-              @param {Number} percentValue [percentage slider value]
-              @param {Number} fillSize [Correspond to value of slider]
-              @param {String} arg [control variable to check first time update slider]
             */
-            verticalSlider: function (percentValue, fillSize, arg) {
+            verticalSlider: function () {
+                var el = this;
 
                 // If its the first the verticalSlider is called then we have
                 // to invert the width and height
-                if (arg && arg == "first") {
+                if (el._misc.first) {
                     // Stores the width of the input when it is horizontal,
                     // then use it as height when it is vertical
-                    var actualNodeWidth = this.offsetWidth;
+                    var actualNodeWidth = el.offsetWidth;
+                    el._misc.first = false;
 
                     // Sets an automatic width for the vertical slider, because the value of the height when
                     // it was horizontal may not be a correct measurement
-                    this.style.width = "auto";
-                    this.style.height = actualNodeWidth + "px";
+                    el.style.width = "auto";
 
-                    (navigator.userAgent.indexOf("Firefox") != -1 || navigator.userAgent.indexOf("Trident") != -1) ? this._sliderNode.setAttribute("orient", "vertical") : null;
+                    // Sets height of slider depending on the properties inline and size 
+                    if (vcomet.util.isTrue(el.inline)) {
+                        el.style.height = el.size == "" ? "auto" : el.size;
+                    } else {
+                        el.style.height = el.size;
+                    }
 
+                    // Sets the property to place the slider in vertical for IE and Firefox browsers
+                    (vcomet.util.getBrowser() == "Firefox" || vcomet.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
                 }
-
-                this.style.display = "inline-block";
-                this._fillNode.style.height = (percentValue * 100) + "%";
-
             },
 
             /*
@@ -270,18 +274,19 @@
             thumbMotion: function () {
                 var el = this;
 
-                el._thumbNode.addEventListener("pointerdown", startThumb, false);
+                el._refs.thumb.addEventListener("pointerdown", startThumb, false);
                 el._thumbEvent = startThumb;
 
                 function startThumb(e) {
-                    el._startY = e.clientY;
-                    document.addEventListener("pointermove", moveThumb, false);
-                    document.addEventListener("pointerup", function stopThumb(e) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
+                        el._startY = e.clientY;
+                        document.addEventListener("pointermove", moveThumb, false);
+                        document.addEventListener("pointerup", function stopThumb(e) {
 
-                        document.removeEventListener("pointermove", moveThumb, false);
-                        document.removeEventListener("pointerup", stopThumb, false);
-                    }, false);
-
+                            document.removeEventListener("pointermove", moveThumb, false);
+                            document.removeEventListener("pointerup", stopThumb, false);
+                        }, false);
+                    }
                 }
 
                 function moveThumb(e) {
@@ -293,7 +298,7 @@
 
             /*
               @function (private) _interactionSlider
-              @description Funtionality when interacting with the slider
+              @description Functionality when interacting with the slider
               Only for thumb interaction and click interaction on iOS devices
               @param {Object} e [Event]
             */
@@ -304,83 +309,129 @@
                 var min = parseInt(el.min);
 
                 if (el.orientation == "horizontal") {
-                    trackSize = el._sliderNode.offsetWidth;
-                    var shellLeft = el._shellNode.getBoundingClientRect().left;
+                    trackSize = el._refs.slider.offsetWidth;
+                    var shellLeft = el._refs.shell.getBoundingClientRect().left;
                     var trackRight = shellLeft + trackSize;
 
                     if (e.clientX <= trackRight && e.clientX >= shellLeft) {
-                        el._sliderNode.value = (((e.clientX - shellLeft) / trackSize) * (max - min)) + min;
+                        el._refs.slider.value = (((e.clientX - shellLeft) / trackSize) * (max - min)) + min;
                         el._updateSlider();
                     }
 
                 } else {
-                    trackSize = el._sliderNode.offsetHeight;
-                    var shellTop = el._shellNode.getBoundingClientRect().top;
+                    trackSize = el._refs.slider.offsetHeight;
+                    var shellTop = el._refs.shell.getBoundingClientRect().top;
                     var trackBottom = shellTop + trackSize;
-                    var sliderNode = parseInt(el._sliderNode.value);
+                    var sliderNode = parseInt(el._refs.slider.value);
                     var positionDiff;
 
                     if (e.clientY <= trackBottom && e.clientY >= shellTop) {
 
-                        // When interacion is moving the thumb
+                        // When interaction is moving the thumb
                         if (el._startY) {
                             positionDiff = el._startY - e.clientY;
                             el._startY = e.clientY;
 
                             // Vertical click slider on iOS
                         } else {
-                            positionDiff = el._fillNode.getBoundingClientRect().top - e.clientY;
+                            positionDiff = el._refs.fill.getBoundingClientRect().top - e.clientY;
                         }
 
-                        el._fillNode.style.height = (el._fillNode.offsetHeight + positionDiff) + "px";
-                        el._sliderNode.value = ((el._fillNode.offsetHeight / trackSize) * (max - min)) + min;
-                        el._rangeValue.innerHTML = el._sliderNode.value;
-                        el.value = el._sliderNode.value;
+                        el._refs.fill.style.height = (el._refs.fill.offsetHeight + positionDiff) + "px";
+                        el._refs.slider.value = ((el._refs.fill.offsetHeight / trackSize) * (max - min)) + min;
+                        el._refs.range.innerHTML = el._refs.slider.value;
+                        el.value = el._refs.slider.value;
                     }
                 }
             },
 
             /*
+              @function (private) _setSliderListeners
+              @description Sets slider listeners
+            */
+            setSliderListeners: function () {
+                var el = this;
+
+                // On IE, Safari and IOS devices not work event "input"
+                // So is necessary a click event
+                el._refs.slider.addEventListener("click", function (e) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
+                        if (vcomet.util.getBrowser() == "IE" || vcomet.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
+                            // On iOS devices and IE clicking on the input does not update its status
+                            // Is is necessary  to do it programmatically
+                            el._interactionSlider(e);
+                            el._updateCurrentValue();
+                        }
+                        // For the vertical slider it is necessary to update its height when clicking
+                        el._updateVerticalHeight();
+
+                    }
+                }, false);
+
+                el._refs.slider.addEventListener("input", function (e) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
+                        el._updateSlider();
+                        el._updateCurrentValue();
+                    }
+                }, false);
+            },
+
+            /*
               @function (private) _updateDisabled
               @description Updates disabled status and activates the thumb motion when it is not disabled
-              @param {String} newVal [new value of disabled]
             */
-            updateDisabled: function (newVal) {
-                var shell = this.querySelector(".vc-slider-shell");
+            updateDisabled: function () {
+                var el = this;
 
-                if (!vcomet.util.isTrue(newVal)) {
-                    this._sliderNode.removeAttribute("disabled");
-                    shell.classList.remove("vc-slider-disabled");
-                    this._rangeValue.classList.remove("vc-fg1-disabled");
-                    this._fillNode.classList.remove("vc-bg1-disabled");
-                    this._thumbNode.classList.remove("vc-bg1-disabled");
-                    this._fillNode.classList.add("vc-fg1-active");
-                    this._thumbNode.classList.add("vc-fg1-active");
-                    this._trackNode.classList.remove("vc-bg1-disabled");
-                    this._thumbMotion();
+                if (!vcomet.util.isTrue(el.disabled)) {
+                    el._refs.slider.removeAttribute("disabled");
+                    el._refs.shell.classList.remove("vc-slider-disabled");
+                    el._refs.range.classList.remove("vc-fg1-disabled");
+                    el._refs.fill.classList.remove("vc-bg1-disabled");
+                    el._refs.fill.classList.add("vc-fg1-active");
+                    el._refs.thumb.classList.remove("vc-bg1-disabled");
+                    el._refs.thumb.classList.add("vc-fg1-active");
+                    el._refs.track.classList.remove("vc-bg1-disabled");
+
+                    el._thumbMotion();
 
                 } else {
-                    this._sliderNode.setAttribute("disabled", "true");
-                    shell.classList.add("vc-slider-disabled");
-                    this._rangeValue.classList.add("vc-fg1-disabled");
-                    this._fillNode.classList.add("vc-bg1-disabled");
-                    this._thumbNode.classList.add("vc-bg1-disabled");
-                    this._fillNode.classList.remove("vc-fg1-active");
-                    this._thumbNode.classList.remove("vc-fg1-active");
-                    this._trackNode.classList.add("vc-bg1-disabled");
-                    this._thumbNode.removeEventListener("pointerdown", this._thumbEvent, false);
+                    el._refs.slider.setAttribute("disabled", "true");
+                    el._refs.shell.classList.add("vc-slider-disabled");
+                    el._refs.range.classList.add("vc-fg1-disabled");
+                    el._refs.fill.classList.add("vc-bg1-disabled");
+                    el._refs.thumb.classList.add("vc-bg1-disabled");
+                    el._refs.fill.classList.remove("vc-fg1-active");
+                    el._refs.thumb.classList.remove("vc-fg1-active");
+                    el._refs.track.classList.add("vc-bg1-disabled");
+                    el._refs.thumb.removeEventListener("pointerdown", el._thumbEvent, false);
+                }
+
+            },
+
+            /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
+
+                if (vcomet.util.isTrue(el.readonly)) {
+                    el._refs.slider.setAttribute("readonly", "true");
+                } else {
+                    el._refs.slider.removeAttribute("readonly");
                 }
 
             },
 
             /*
               @function (private) _updateCurrentValue
-              @description Updates slider current vlaue and trigger onCHange callback
+              @description Updates slider current value and trigger onChange callback
             */
             updateCurrentValue: function () {
                 var el = this;
-                (el.value !== el._currentvalue) ? vcomet.triggerCallback("onChange", el) : null;
-                el._currentvalue = (el.value !== el._currentvalue) ? el.value : el._currentvalue;
+                (el.value !== el._currentValue) ? vcomet.triggerCallback("onChange", el) : null;
+                el._currentValue = (el.value !== el._currentValue) ? el.value : el._currentValue;
             },
 
             /*
@@ -393,66 +444,58 @@
                 // Small devices view
                 if (window.innerWidth <= vcomet.tabletWidth) {
                     el.setAttribute("version", "tablet");
-                    el.style.width = "100%";
 
                     // Desktop view
                 } else {
                     el.setAttribute("version", "desktop");
-                    el.style.width = (el.size) ? el.size : el.offsetWidth;
                 }
 
-                el._updateSlider("first");
+                el._updateSlider();
 
             },
+
+            /*
+             @function (private) _updateVerticalHeight
+             @description Updates fill's height on vertical sliders
+           */
+            updateVerticalHeight: function () {
+                var el = this;
+
+                if (el.orientation == "vertical") {
+                    el._refs.fill.style.height = (el._misc.percentValue * 100) + "%";
+                }
+            }
 
         },
 
         onCreated: function () {
             vcomet.createCallback("onChange", this);
+            this._createRefs();
+
+            this._misc.first = true;
         },
 
         onRender: function () {
             var el = this;
 
-            el._shellNode = el.querySelector(".vc-slider-shell");
-            el._trackNode = el.querySelector(".vc-slider-track");
-            el._sliderNode = el.querySelector(".vc-slider-slider");
-            el._fillNode = el.querySelector(".vc-slider-fill");
-            el._thumbNode = el.querySelector(".vc-slider-thumb");
-            el._rangeValue = el.querySelector(".vc-slider-display");
-
-            el._sliderNode.setAttribute("name", el.name);
-            el._sliderNode.setAttribute("value", el.value);
-            el._sliderNode.setAttribute("min", el.min);
-            el._sliderNode.setAttribute("max", el.max);
+            el._refs.slider.setAttribute("name", el.name);
+            el._refs.slider.setAttribute("value", el.value);
+            el._refs.slider.setAttribute("min", el.min);
+            el._refs.slider.setAttribute("max", el.max);
             el.setAttribute("touch-action", "none");
             el._verifyScreenResolution();
 
-            el._currentvalue = el.value;
+            el._currentValue = el.value;
 
-            // On IE and IOS devices not work event "input"
-            // So is necessary a click event
-            if (vcomet.util.getBrowser() == "IE" || /iPad|iPhone|iPod/.test(navigator.platform)) {
-
-                el._sliderNode.addEventListener("click", function (event) {
-                    // On iOS devices clicking on the input does not update its status
-                    // Is is necessary  to do it programmatically
-                    /iPad|iPhone|iPod/.test(navigator.platform) ? el._interactionSlider(event) : el._updateSlider();
-                    el._updateCurrentValue();
-                }, false);
-
-            } else {
-                el._sliderNode.addEventListener("input", function (e) {
-                    el._updateSlider();
-                    el._updateCurrentValue();
-                }, false);
-            }
+            el._setSliderListeners();
 
             if (el.orientation == "horizontal" && el.displayAlign != "center") {
                 el.displayPosition = "";
             }
 
-            el._updateDisabled(el.disabled);
+            el._updateDisabled();
+            el._updateReadonly();
+            el._updateVerticalHeight();
 
         },
 
@@ -463,10 +506,17 @@
         onPropertyChanged: function (attrName, oldVal, newVal) {
             switch (attrName) {
                 case "disabled":
-                    this._updateDisabled(newVal);
+                    this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadonly();
+                    break;
+                case "value":
+                    this._setValue();
                     break;
             }
-        }
+        },
+
     });
 
 </script>

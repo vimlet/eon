@@ -21,7 +21,7 @@
             <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
           </div>
         </div>
-        <i class="material-icons vc-datebox-button vc-fg2 vc-fg1-hoverable">today</i>
+        <i class="vc-datebox-button vc-fg2 vc-fg1-hoverable vicon vicon-calendar"></i>
       </div>
       <span class="vc-datebox-underline"></span>
     </div>
@@ -64,7 +64,7 @@
       */
       formelement: {
         value: "date"
-      },
+      }
     },
 
     properties: {
@@ -133,30 +133,6 @@
         reflect: true
       },
       /*
-      @property {string} width
-      @description Indicates the width of the datebox
-      */
-      width: {
-        value: 200,
-        reflect: true
-      },
-      /*
-      @property {string} pickerWidth
-      @description Indicates the width of the datepicker
-      */
-      pickerWidth: {
-        value: 500,
-        reflect: true
-      },
-      /*
-      @property {string} pickerHeight
-      @description Indicates the height of the datepicker
-      */
-      pickerHeight: {
-        value: 360,
-        reflect: true
-      },
-      /*
       @property {string} pickerFontSize
       @description Indicates the font size of the datepicker
       */
@@ -204,6 +180,30 @@
         value: "false",
         reflect: true
       },
+      /*
+      @property {Boolean} inline 
+      @description Space that occupies the button inside its parent container.
+      */
+      inline: {
+        value: true,
+        reflect: true
+      },
+      /*
+      @property {string} readonly
+      @description Toggles the readonly status of the element
+      */
+      readonly: {
+        value: false,
+        reflect: true
+      },
+      /*
+      @property {string} disabled
+      @description Toggles the disabled status of the element
+      */
+      disabled: {
+        value: false,
+        reflect: true
+      }
     },
     privateFunctions: {
       /*
@@ -221,7 +221,10 @@
         el._setupRefs();
         el._setupMask();
         el._setupEvents();
+
         el._updateLabel();
+        el._updateDisabled();
+        el._updateReadOnly();
 
         if (el.min != "" && el.min != undefined) el._setupMinDate();
         if (el.max != "" && el.max != undefined) el._setupMaxDate();
@@ -239,7 +242,7 @@
 
         vcomet.registerPathListener(el, "datebox");
 
-        el.style.width = el.width + "px";
+        el._initValue();
 
       },
       /*
@@ -251,18 +254,22 @@
         var el = this;
         var datePickerElement = document.createElement("vc-datepicker");
 
-        datePickerElement.classList.add("vc-datebox-picker");
-        datePickerElement.classList.add("hidden");
+        datePickerElement.classList.add("vc-datebox-picker", "hidden");
         datePickerElement.setAttribute("locale", el.locale);
         datePickerElement.setAttribute("week-days-format", el.weekDaysFormat);
         datePickerElement.setAttribute("week-start", el.weekStart);
-        datePickerElement.setAttribute("closable", "true");
         datePickerElement.setAttribute("min", el.min);
         datePickerElement.setAttribute("max", el.max);
-        datePickerElement.setAttribute("width", el.pickerWidth);
-        datePickerElement.setAttribute("height", el.pickerHeight);
-        datePickerElement.setAttribute("picker-font-size", el.pickerFontSize);
+        datePickerElement.setAttribute("font-size", el.pickerFontSize);
         datePickerElement.setAttribute("selectable", el.pickerSelectable);
+
+        datePickerElement.onShow(function () {
+          el._addFocusStyle();
+        });
+
+        datePickerElement.onHide(function () {
+          el._removeFocusStyle();
+        });
 
         vcomet.registerPathListener(datePickerElement, "datepicker");
 
@@ -300,7 +307,12 @@
         el._refs.subInputs.second = el.querySelector(".vc-datebox-subInputs .second input");
         el._refs.subInputs.third = el.querySelector(".vc-datebox-subInputs .third input");
 
-        el._refs.underline = el.querySelector(".vc-datebox-underline")
+        el._refs.underline = el.querySelector(".vc-datebox-underline");
+
+        el._refs.data = el.querySelector(".vc-datebox-data");
+        el._refs.main = el.querySelector(".vc-datebox-main");
+
+        el._refs.button = el.querySelector(".vc-datebox-button");
 
       },
       /*
@@ -425,24 +437,24 @@
         el._labelNode = el.querySelector(".vc-datebox-label");
 
         el._refs.subInputs.first.addEventListener("focus", function (e) {
-          el._handleFocus(this);
-          el._refs.underline.classList.add("animate");
-          el.classList.add("focus");
-          el._labelNode.classList.add("vc-fg1");
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._handleFocus(this);
+            el._addFocusStyle();
+          }
         }, true);
 
         el._refs.subInputs.second.addEventListener("focus", function (e) {
-          el._handleFocus(el._refs.subInputs.second);
-          el._refs.underline.classList.add("animate");
-          el.classList.add("focus");
-          el._labelNode.classList.add("vc-fg1");
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._handleFocus(el._refs.subInputs.second);
+            el._addFocusStyle();
+          }
         }, true);
 
         el._refs.subInputs.third.addEventListener("focus", function (e) {
-          el._handleFocus(el._refs.subInputs.third);
-          el._refs.underline.classList.add("animate");
-          el.classList.add("focus");
-          el._labelNode.classList.add("vc-fg1");
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._handleFocus(el._refs.subInputs.third);
+            el._addFocusStyle();
+          }
         }, true);
 
       },
@@ -460,9 +472,7 @@
             el._refs.subInputs.first.textContent = "0" + el._refs.subInputs.first.textContent;
           }
 
-          el._refs.underline.classList.remove("animate");
-          el.classList.remove("focus");
-          el._labelNode.classList.remove("vc-fg1");
+          el._removeFocusStyle();
 
         }, true);
 
@@ -472,9 +482,7 @@
             el._refs.subInputs.second.textContent = "0" + el._refs.subInputs.second.textContent;
           }
 
-          el._refs.underline.classList.remove("animate");
-          el.classList.remove("focus");
-          el._labelNode.classList.remove("vc-fg1");
+          el._removeFocusStyle();
 
         }, true);
 
@@ -484,9 +492,7 @@
             el._refs.subInputs.third.textContent = "0" + el._refs.subInputs.third.textContent;
           }
 
-          el._refs.underline.classList.remove("animate");
-          el.classList.remove("focus");
-          el._labelNode.classList.remove("vc-fg1");
+          el._removeFocusStyle();
 
         }, true);
 
@@ -565,7 +571,7 @@
 
         var el = this;
 
-        if (el.min.indexOf('/') > -1) {
+        if (el.min.indexOf("/") > -1) {
 
           var splittedMin = el.min.split("/");
 
@@ -636,9 +642,11 @@
         var el = this;
         var blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
 
-        el.querySelector(".vc-datebox-button").onclick = function (e) {
-          el._toggleDatePicker();
-        };
+        el.querySelector(".vc-datebox-button").addEventListener('click', function (e) {
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._toggleDatePicker();
+          }
+        }, false);
 
         document.body.addEventListener(blurTrigger, function (e) {
           el._customBlur(e, el);
@@ -651,6 +659,24 @@
       */
       setupToolbarMode: function () {
         this.querySelector(".vc-datebox-main").classList.add("toolbar");
+      },
+      addFocusStyle: function () {
+
+        var el = this;
+
+        el._refs.underline.classList.add("animate");
+        el.classList.add("focus");
+        el._labelNode.classList.add("vc-fg1");
+
+      },
+      removeFocusStyle: function () {
+
+        var el = this;
+
+        el._refs.underline.classList.remove("animate");
+        el.classList.remove("focus");
+        el._labelNode.classList.remove("vc-fg1");
+
       },
       /*
       @function (private) _toggleDatePicker
@@ -675,17 +701,16 @@
 
         var el = this;
 
-        el._refs.datePicker.style.top = el.offsetTop + el.offsetHeight + 2 + "px";
-        el._refs.datePicker.style.left = el.offsetLeft + "px";
-        el._refs.datePicker.style.width = el.offsetWidth + "px";
+        el._assignDatePickerStyle();
 
         el._refs.datePicker._refresh();
 
         document.body.appendChild(el._refs.datePicker);
 
-        el._refs.datePicker.classList.remove("hidden");
+        el._refs.datePicker._show();
 
         el._refs.datePicker._handleAutoHeight();
+        el._refs.datePicker._handleFonts();
 
       },
       /*
@@ -699,6 +724,39 @@
         el._refs.datePicker._hide();
         el.querySelector(".vc-datebox-main").appendChild(el._refs.datePicker);
 
+      },
+      /*
+      @function (private) _assignDatePickerStyle
+      @description Assigns the datePicker's width and position relative to the datebox
+      */
+      assignDatePickerStyle: function () {
+
+        var el = this;
+
+        if (window.innerWidth <= vcomet.tabletWidth) {
+
+          if (!el._refs.datePicker.classList.contains("vc-datebox-device")) {
+
+            el._refs.datePicker.style.top = "0";
+            el._refs.datePicker.style.left = "0";
+            el._refs.datePicker.style.width = "100%";
+            el._refs.datePicker.style.height = "100%";
+            el._refs.datePicker.classList.add("vc-datebox-device");
+            el._refs.datePicker.classList.add("vc-bg1-modal");
+
+          }
+
+        } else {
+
+          el._refs.datePicker.classList.remove("vc-datebox-device");
+          el._refs.datePicker.classList.remove("vc-bg1-modal");
+
+          el._refs.datePicker.style.top = el.getBoundingClientRect().top + el.offsetHeight + "px";
+          el._refs.datePicker.style.left = el.getBoundingClientRect().left + "px";
+          el._refs.datePicker.style.width = el.offsetWidth + "px";
+          el._refs.datePicker.style.height = "auto";
+
+        }
       },
       /*
       @function (private) _customBlur
@@ -720,7 +778,6 @@
 
         var el = this;
 
-        el.setAttribute("value", el._getFormattedValue(obj, el.valueFormat));
         el.value = el._getFormattedValue(obj, el.valueFormat);
         el.setAttribute("valid", true);
 
@@ -786,7 +843,6 @@
           el._refs.datePicker._misc.selected.month = parseInt(month) - 1;
           el._refs.datePicker._misc.selected.year = parseInt(year);
 
-          el.setAttribute("value", el._getFormattedValue(obj, el.valueFormat));
           el.value = el._getFormattedValue(obj, el.valueFormat);
           el.setAttribute("valid", "true");
 
@@ -795,9 +851,60 @@
           el.querySelector(".vc-datebox-input").classList.add("noMatches");
           el._refs.underline.classList.add("noMatches");
 
-          el.setAttribute("value", "");
           el.value = el._getFormattedValue(obj, el.valueFormat);
           el.setAttribute("valid", "false");
+        }
+
+      },
+      /*
+      @function (private) {Object} _getObjectFromValue
+      @description Given a value with format this functions returns an object with day, month and year provided by the value
+      @param {String} value
+      */
+      getObjectFromValue: function (value) {
+
+        var el = this;
+
+        var splittedValue = value.split(el.separator);
+        var splittedFormat = el.valueFormat.split(el.separator);
+
+        var dayFormat = (el.valueFormat.match(/[d|D]{1,2}/)) ? el.valueFormat.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (el.valueFormat.match(/[M]{1,4}/)) ? el.valueFormat.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (el.valueFormat.match(/[y|Y]{2,4}/)) ? el.valueFormat.match(/[y|Y]{2,4}/)[0] : undefined;
+
+        var dayIndex = splittedFormat.indexOf(dayFormat);
+        var monthIndex = splittedFormat.indexOf(monthFormat);
+        var yearIndex = splittedFormat.indexOf(yearFormat);
+
+        return { day: splittedValue[dayIndex], month: splittedValue[monthIndex], year: splittedValue[yearIndex] };
+
+      },
+      /*
+      @function (private) _initValue
+      @description If a value has been provided by the user we set it for our element
+      */
+      initValue: function () {
+
+        var el = this;
+
+        if (el.value != "") {
+
+          var splittedMin = el.value.split("/");
+
+          var subInputs = el.querySelector(".vc-datebox-subInputs");
+          var dayInput = subInputs.querySelector('[data-field="day"] input');
+          var monthInput = subInputs.querySelector('[data-field="month"] input');
+          var yearInput = subInputs.querySelector('[data-field="year"] input');
+
+          var valueObj = el._getObjectFromValue(el.value);
+
+          dayInput.value = valueObj.day;
+          monthInput.value = valueObj.month;
+          yearInput.value = valueObj.year;
+
+          el._handleLimits(dayInput, monthInput, yearInput);
+          el._validateDate();
+
         }
 
       },
@@ -811,6 +918,65 @@
 
         if (el.label != "") {
           el.querySelector(".vc-datebox-label").innerHTML = el.label;
+        }
+
+      },
+      /*
+      @function (private) _updateDisabled
+      @description Updates disabled status
+      */
+      updateDisabled: function () {
+
+        var el = this;
+
+        if (!vcomet.util.isTrue(el.disabled)) {
+
+          el.querySelector(".vc-datebox-subInputs").classList.add("vc-fg1-border");
+          el.querySelector(".vc-datebox-subInputs").classList.remove("vc-fg1-disabled");
+
+          el._refs.button.classList.add("vc-fg2");
+          el._refs.button.classList.remove("vc-fg1-disabled");
+
+          el._refs.data.classList.remove("vc-fg1-disabled");
+          el._refs.main.classList.remove("vc-fg1-disabled");
+
+        } else {
+
+          el.querySelector(".vc-datebox-subInputs").classList.remove("vc-fg1-border");
+          el.querySelector(".vc-datebox-subInputs").classList.add("vc-fg1-disabled");
+
+          el._refs.button.classList.remove("vc-fg2");
+          el._refs.button.classList.add("vc-fg1-disabled");
+
+          el._refs.data.classList.add("vc-fg1-disabled");
+          el._refs.main.classList.add("vc-fg1-disabled");
+
+        }
+      },
+      /*
+      @function (private) _updateReadOnly
+      @description Updates readonly status
+      */
+      updateReadOnly: function () {
+
+        var el = this;
+
+        if (vcomet.util.isTrue(el.readonly)) {
+
+          el._refs.subInputs.first.setAttribute("readonly", "true");
+          el._refs.subInputs.second.setAttribute("readonly", "true");
+          el._refs.subInputs.third.setAttribute("readonly", "true");
+
+          el._refs.button.classList.remove("vc-fg1-hoverable");
+
+        } else {
+
+          el._refs.subInputs.first.removeAttribute("readonly");
+          el._refs.subInputs.second.removeAttribute("readonly");
+          el._refs.subInputs.third.removeAttribute("readonly");
+
+          el._refs.button.classList.add("vc-fg1-hoverable");
+
         }
 
       },
@@ -988,8 +1154,7 @@
           if (!(selection.anchorNode === subInput && selection.extentOffset > 0 && selection.type == "Range")) {
 
             if (!(aux.length >= el._misc.mask[subInput.parentNode.dataset.field].format.length)) {
-
-              subInput.value = aux + String.fromCharCode(e.keyCode);
+              subInput.value = aux + el._getStringFromKeyCode(e.keyCode);
               e.preventDefault();
               e.stopPropagation();
             }
@@ -1004,6 +1169,14 @@
           vcomet.triggerCallback("onEnter", el)
         }
 
+      },
+      /*
+      @function (private) _getStringFromKeyCode
+      @description Receives a keyCode and returns the string value (intented for numeric)
+      @param {String} keyCode
+      */
+      getStringFromKeyCode: function (keyCode) {
+        return String.fromCharCode((keyCode >= 96 && keyCode <= 105) ? keyCode - 48 : keyCode)
       },
       /*
       @function (private) _handleKeyUp
@@ -1186,11 +1359,28 @@
       this._setup();
     },
     onPropertyChanged: function (key, oldVal, newVal) {
+
       switch (key) {
         case "label":
           this._updateLabel();
           break;
+        case "disabled":
+          this._updateDisabled();
+          break;
+        case "readonly":
+          this._updateReadOnly();
+          break;
       }
+
+    },
+    onWindowResize: function () {
+
+      var el = this;
+
+      if (el._refs.datePicker && !el._refs.datePicker.classList.contains("hidden")) {
+        el._assignDatePickerStyle();
+      }
+
     }
   });
 

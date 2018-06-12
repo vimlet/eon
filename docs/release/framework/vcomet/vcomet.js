@@ -159,6 +159,13 @@ vcomet.needLocalStringPolyfill = function () {
   return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
 }
 
+vcomet.needClassListAddPolyfill = function () {
+  var div = document.createElement("div");
+  div.classList.add("class1", "class2");
+
+  return div.classList.contains("class2") ? false : true;
+}
+
 // ############################################################################################
 // POLYFILL IMPORTS
 // ############################################################################################
@@ -201,6 +208,44 @@ if (vcomet.needLocalStringPolyfill()) {
       return proxied.apply(this, arguments);
     };
   })(Date.prototype.toLocaleString);
+
+}
+//
+if (vcomet.needClassListAddPolyfill()) {
+  
+  (function (proxied) {
+
+    DOMTokenList.prototype.add = function () {
+      
+      if(arguments.length > 1) {
+        
+        for (var i = 0; i < arguments.length; i++) {
+          proxied.apply(this, [arguments[i]]);
+        }
+        
+      } else {
+        return proxied.apply(this, arguments);
+      }
+
+    };
+  })(DOMTokenList.prototype.add);
+  
+  (function (proxied) {
+
+    DOMTokenList.prototype.remove = function () {
+
+      if (arguments.length > 1) {
+
+        for (var i = 0; i < arguments.length; i++) {
+          proxied.apply(this, [arguments[i]]);
+        }
+
+      } else {
+        return proxied.apply(this, arguments);
+      }
+
+    };
+  })(DOMTokenList.prototype.remove);
 
 }
 
@@ -3126,9 +3171,11 @@ vcomet.$1 = function (query) {
   return document.querySelector(query);
 };
 
-// window definitions will use any other framework $ and $1 if found
+// window & document definitions will use any other framework $ and $1 if found
 window.$ = window.$ || vcomet.$;
 window.$1 = window.$1 || vcomet.$1;
+document.$ = document.$ || vcomet.$;
+document.$1 = document.$1 || vcomet.$1;
 
 // TODO: MOVE THIS EXCEPT DOMREADY TO VCOMET.DOM
 (function () {
@@ -3277,7 +3324,7 @@ window.$1 = window.$1 || vcomet.$1;
    * @param {[type]} el     [description]
    * @param {[type]} parent [description]
    */
-  self.offsetRight = function (el, parent) {
+  vcomet.dom.offsetRight = function (el, parent) {
     // Get parent the element is relative to
     parent = !parent ? document.documentElement || document.body : parent;
     var docWidth = parent.offsetWidth;
@@ -3289,12 +3336,12 @@ window.$1 = window.$1 || vcomet.$1;
     return offsetRight;
   };
   /**
-     * The bottom position (in pixels) relative to the bottom side of the specified parent
-     * * If no parent is specified, document body is de default one
-     * @param {[type]} el     [description]
-     * @param {[type]} parent [description]
-     */
-  self.offsetBottom = function (el, parent) {
+   * The bottom position (in pixels) relative to the bottom side of the specified parent
+   * * If no parent is specified, document body is de default one
+   * @param {[type]} el     [description]
+   * @param {[type]} parent [description]
+   */
+  vcomet.dom.offsetBottom = function (el, parent) {
     // Get parent the element is relative to
     parent = !parent ? document.documentElement || document.body : parent;
     var docHeight = parent.offsetHeight;
@@ -3306,12 +3353,12 @@ window.$1 = window.$1 || vcomet.$1;
     return offsetBottom;
   };
   /**
-     * Get element transform axis value
-     * @param  {[type]}  el   [description]
-     * @param  {[type]}  axis [description]
-     * @return {Boolean}      [description]
-     */
-  self.getTransformAxis = function (el, axis) {
+   * Get element transform axis value
+   * @param  {[type]}  el   [description]
+   * @param  {[type]}  axis [description]
+   * @return {Boolean}      [description]
+   */
+  vcomet.dom.getTransformAxis = function (el, axis) {
     var value;
     // Get element transform property
     var transform = el.style.transform;
@@ -3332,12 +3379,12 @@ window.$1 = window.$1 || vcomet.$1;
     return value;
   };
   /**
-     * Move a node the specified pixels distance
-     * @param  {[type]} node     [description]
-     * @param  {[type]} distance [description]
-     * @return {[type]}          [description]
-     */
-  self.translate = function (el, axis, value) {
+   * Move a node the specified pixels distance
+   * @param  {[type]} node     [description]
+   * @param  {[type]} distance [description]
+   * @return {[type]}          [description]
+   */
+  vcomet.dom.translate = function (el, axis, value) {
     // Set the new node translate position
     switch (axis.toLowerCase()) {
       case "x":
@@ -3403,7 +3450,7 @@ vcomet.createCallback("onScriptsReady", vcomet, "ready");
 
 // Imports the requested custom element file, admits arrays and strings
 vcomet.import = function (param) {
-    
+
     if (param.constructor === Array) {
 
         for (var i = 0; i < param.length; i++) {
@@ -3419,7 +3466,7 @@ vcomet.import = function (param) {
 };
 
 vcomet.insertImport = function (href) {
-    
+
     var elementName;
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
@@ -3525,13 +3572,14 @@ vcomet.insertImport = function (href) {
                         vcomet.handleScriptsAppend();
                         // When all the scripts are properly appended and ready then we import dependencies and see if we have finished all the imports
                         vcomet.onScriptsReady(function () {
-                            
+
                             // Handles the dependencies and returns a boolean for whether there are pendings imports or not
                             var hasPendingImports = vcomet.handleDependencies();
                             
                             // If there are no more dependencies to handle trigger onImportsReady
                             if (!hasPendingImports && !vcomet.imports.ready && vcomet.imports.count == vcomet.imports.total && vcomet.imports.total == Object.keys(vcomet.imports.config).length) {
                                 vcomet.imports.ready = true;
+
                                 vcomet.triggerCallback('onImportsReady', vcomet);
                             } else {
                                 vcomet.__onScriptsReady__triggered = false;
@@ -3605,10 +3653,10 @@ vcomet.handleStyleAppend = function () {
 };
 
 vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
-    
+
     var elementNames = Object.keys(vcomet.imports.scripts);
-    var resume = Number.isInteger(elementIndex) && Number.isInteger(scriptIndex) ? true : false;
-    var elementScriptsKeys, elementScripts;
+    var resume = !isNaN(elementIndex - 1) && !isNaN(scriptIndex - 1) ? true : false;
+    var elementScriptsKeys, elementScripts, script;
 
     // If it has to resume a previous scripts append we start from that index
     for (var i = resume ? elementIndex : 0; i < elementNames.length; i++) {
@@ -3633,7 +3681,13 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
             } else {
 
-                // Here we take the current script text and add our code to remove the script once its finished
+                // iPad fix, if we tried to append the script saved in elementScripts directly the script was not executing
+                script = document.createElement("script");
+                script.innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML;
+                elementScripts[elementScriptsKeys[j]] = script;
+                
+                // // Here we take the current script text and add our code to remove the script once its finished
+                elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML;
                 elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML +
                     "var elementNames = Object.keys(vcomet.imports.scripts);" +
                     "var elementScripts = vcomet.imports.scripts[elementNames[" + i + "]];" +
@@ -3660,7 +3714,7 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
 };
 
-vcomet.removeScriptsReadyScripts = function () {  
+vcomet.removeScriptsReadyScripts = function () {
     var el = this;
     var scriptReadyScripts = document.head.querySelectorAll("script[scriptsready-script]");
 
@@ -4043,7 +4097,9 @@ vcomet.interpolation.handleInterpolationVariables = function (el, config) {
     bindString = "data." + currentVariable.getAttribute("bind");
     bindValue = vcomet.object.readFromPath(el, bindString);
 
-    vcomet.object.assignToPath(el, bindString, bindValue ? bindValue : "");
+    bindValue = typeof bindValue == "undefined" ? "" : bindValue;
+
+    vcomet.object.assignToPath(el, bindString, bindValue);
   }
 
   vcomet.interpolation.setupDataChangeCallback(el, config);
@@ -4316,7 +4372,7 @@ vcomet.constructClass = function (baseElement) {
 };
 
 vcomet.element = function (name, stylePath, config) {
-
+    
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
 
@@ -4562,8 +4618,8 @@ vcomet.createAttributesObserver = function (el, config) {
 
                 // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
-
-                value = el[propertyName] ? el[propertyName] : "";
+                
+                value = el.hasOwnProperty(propertyName) ? el[propertyName] : "";
                 el.setAttribute(observeAttributesKeys[i], value);
 
             }
@@ -5117,7 +5173,7 @@ vcomet.declare = function (name, baseElement) {
     // Constructs the element class
     var elementClass = vcomet.constructClass(baseElement);
 
-    // Element constructor: Important! never modify element attributes or childs here
+    // Element constructor: Important! never modify element attributes or children here
     elementClass.onCreated(function () {
 
         var el = this;
@@ -5431,7 +5487,7 @@ vcomet.time.defaultLocale = {
      */
   vcomet.addResizeListener = function(element, key, fn) {
     //
-    var isIE = navigator.userAgent.match(/Trident/);
+    var isIE = navigator.userAgent.match(/Trident/) && document.documentMode;
     //
     if (!element.__resizeListeners) {
       element.__resizeListeners = {};
@@ -5440,10 +5496,6 @@ vcomet.time.defaultLocale = {
         element.__resizeTrigger = element;
         element.attachEvent("onresize", resizeListener);
       } else {
-        // Set relative position for resize trigger positioning
-        if (getComputedStyle(element).position == "static") {
-          element.style.position = "relative";
-        }
         // Create trigger object
         // ** Object tag also supports resize event and the remaining global events!
         var obj = (element.__resizeTrigger = document.createElement("object"));
@@ -5489,8 +5541,8 @@ vcomet.time.defaultLocale = {
     }
   };
 
-   // Resize triggering!
-   function resizeListener(e) {
+  // Resize triggering!
+  function resizeListener(e) {
     var win = e.target || e.srcElement;
     // Get resize funciton to be triggered and suscribe itto cancel function
     if (win.__resizeRAF) cancelFrame(win.__resizeRAF);

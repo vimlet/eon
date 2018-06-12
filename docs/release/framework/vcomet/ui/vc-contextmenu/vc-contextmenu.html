@@ -1,13 +1,14 @@
 <template>
-    <div class="vc-contextmenu-wrapper vc-bg2-boxshadow">
-        <!-- Only small devices -->
-        <div class="vc-contextmenu-close vc-bg2">
-            <i class="vc-contextmenu-closeIcon vicon vicon-close"></i>
+    <div class="vc-contextmenu-wrapper">
+        <div class="vc-contextmenu-container vc-bg2 vc-bg2-boxshadow">
+            <!-- Only small devices -->
+            <div class="vc-contextmenu-close vc-bg2">
+                <i class="vc-contextmenu-closeIcon vicon vicon-close"></i>
+            </div>
+            <vc-scroll arrowScrolls="true" thickness="6" fill-container="false">
+                <div class="vc-contextmenu-contextmenu vc-bg2 vc-unselectable"></div>
+            </vc-scroll>
         </div>
-        <vc-scroll arrowScrolls="true">
-            <div class="vc-contextmenu-contextmenu vc-bg2 vc-unselectable"></div>
-        </vc-scroll>
-
     </div>
 </template>
 
@@ -38,13 +39,6 @@
                 value: {}
             },
             /*
-              @property (private) {Object} _hideEvent 
-              @description Store hide event
-            */
-            hideEvent: {
-                value: {}
-            },
-            /*
               @property (private) {Object} _contextmenuEvent
               @description Store contextmenu event
             */
@@ -53,7 +47,7 @@
             },
             /*
               @property (private) {Object} _clickContextmenuEvent
-              @description Store contextmenu samll devices event
+              @description Store contextmenu small devices event
             */
             clickContextmenuEvent: {
                 value: {}
@@ -65,9 +59,30 @@
             lastDevice: {
                 value: ""
             },
+            /*
+              @property (private) {Object} _refs 
+              @description Object with  references
+            */
+            refs: {
+                value: {}
+            }
         },
 
         privateFunctions: {
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.contextmenu = el.template.querySelector(".vc-contextmenu-contextmenu");
+                el._refs.wrapper = el.template.querySelector(".vc-contextmenu-wrapper");
+                el._refs.container = el.template.querySelector(".vc-contextmenu-container");
+                el._refs.close = el.template.querySelector(".vc-contextmenu-close");
+                el._refs.closeIcon = el.template.querySelector(".vc-contextmenu-closeIcon");
+                el._refs.scroll = el.template.querySelector("vc-scroll");
+            },
             /*
               @function (private) _setContextmenuEvent
               @description Set event to open contextmenu
@@ -77,27 +92,26 @@
                 var posX;
                 var posY;
 
-                if (el.getAttribute("version") == "desktop") {
+                if (el._refs.wrapper.dataset.version == "desktop") {
 
                     triggerElement.addEventListener("contextmenu", contextmenuEvent);
 
                     function contextmenuEvent(e) {
-
                         posX = e.clientX;
                         posY = e.clientY;
+
                         el.show(posX, posY);
 
                         var exceedsObject = el._exceedsWindow();
 
                         (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
-
                     };
 
                     el._contextmenuEvent = contextmenuEvent;
                 }
 
                 // Long touch event functionality
-                if (el.getAttribute("version") == "smalldevice") {
+                if (el._refs.wrapper.dataset.version == "device") {
                     var onLongTouch;
                     var timer, lockerTimer;
                     var touchDuration = 800;
@@ -139,7 +153,7 @@
             */
             exceedsWindow: function () {
                 var el = this;
-                var elementRect = el.getBoundingClientRect();
+                var elementRect = el._refs.wrapper.getBoundingClientRect();
                 var returnObject = {};
 
                 returnObject.exceeds = false;
@@ -176,10 +190,8 @@
               @param {Object} exceedsObject [Side where contextmenu exceed window limits]
             */
             relocateContextmenu: function (posX, posY, exceedsObject) {
-
                 this.style.left = (exceedsObject.sides.right) ? posX - (this.clientWidth - 1) + "px" : this.style.left;
                 this.style.top = (exceedsObject.sides.bottom) ? posY - (this.clientHeight - 1) + "px" : this.style.top;
-
             },
 
             /*
@@ -201,11 +213,10 @@
                     (item.getAttribute("icon")) ? el._setupIcon(item) : null;
 
                     itemsDocFragment.appendChild(item);
-
                 }
 
                 // Move documentFragment to shadowRoot
-                el._contextmenuNode.appendChild(itemsDocFragment);
+                el._refs.contextmenu.appendChild(itemsDocFragment);
 
             },
 
@@ -231,7 +242,6 @@
                 var iconAttribute = item.icon;
                 var iconPosition = item.iconPosition;
                 var icon;
-
 
                 if (iconAttribute.indexOf("</i>") !== -1) {
                     var tempDiv = document.createElement("div");
@@ -263,14 +273,11 @@
                 var el = this;
 
                 if (!el.classList.contains("vc-contextmenu-responsive")) {
-                    el._closeNode.classList.add("vc-contextmenu-closeVisible");
-                    el._closeIconNode.addEventListener("click", hideEvent);
+                    el._refs.close.classList.add("vc-contextmenu-closeVisible");
 
-                    function hideEvent() {
-                        el.setAttribute("visible", "false");
-                        document.body.removeEventListener("click", hideEvent);
-                        vcomet.triggerCallback("onHide", this);
-                    }
+                    el._refs.closeIcon.addEventListener("click", function () {
+                        el.hide();
+                    });
                 }
 
             },
@@ -282,20 +289,7 @@
             verifyScreenResolution: function () {
                 var el = this;
 
-                // Small devices view
-                if (window.innerWidth <= vcomet.tabletWidth || navigator.userAgent.match(/Tablet|iPad|iPod/i)) {
-                    el.setAttribute("version", "smalldevice");
-
-                    // Desktop view
-                } else {
-                    el.setAttribute("version", "desktop");
-                }
-
-                if (el.getAttribute("version") != el._lastDevice) {
-                    el._lastDevice = el.getAttribute("version");
-                    el._updateDeviceOptions();
-                }
-
+                el._refs.wrapper.dataset.version = (vcomet.util.isTouchScreen()) ? "device" : "desktop";
             },
 
 
@@ -309,13 +303,13 @@
 
                 for (var i = 0; i < triggerLength; i++) {
 
-                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el.getAttribute("version") == "desktop") {
+                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el._refs.wrapper.dataset.version == "desktop") {
                         el._triggerNode[i].setAttribute("oncontextmenu", "return false");
                         el._triggerNode[i].removeEventListener("click", el._clickContextmenuEvent);
                         el._setContextmenuEvent(el._triggerNode[i]);
                     }
 
-                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el.getAttribute("version") != "desktop") {
+                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el._refs.wrapper.dataset.version !== "desktop") {
                         el._triggerNode[i].removeAttribute("oncontextmenu");
                         el._triggerNode[i].removeEventListener("contextmenu", el._contextmenuEvent);
                         el._setContextmenuEvent(el._triggerNode[i]);
@@ -333,11 +327,11 @@
                 var el = this;
 
                 if (openContextmenu.length == 1) {
-                    openContextmenu[0].element.setAttribute("visible", "false");
+                    openContextmenu[0].element.classList.remove("vc-contextmenu-wrapper-visible");
                     openContextmenu.splice(0);
                 }
 
-            }
+            },
 
         },
 
@@ -352,39 +346,28 @@
                 var el = this;
 
                 // Contextmenu opened by a click event for the responsive functionality
-                if (posX == undefined && posY == undefined) {
+                if (typeof posX == "undefined" && typeof posY == "undefined") {
+                    el._refs.wrapper.classList.add("vc-contextmenu-wrapper-visible", "vc-bg1-modal");
+                    
+                    document.body.appendChild(el._refs.wrapper);
                     el._setResponsiveClose();
-                    el.setAttribute("click-open", "true");
-                    el.setAttribute("visible", "true");
-                    el.classList.add("vc-bg1-modal");
 
                 } else {
                     var openContextmenu = vcomet.contextmenu.openContextmenu;
                     var openContextmenuObject = {};
 
-                    // In case that previously the contextmenu was open with the click event
-                    // is necessary to remove its functionality
-                    if (el.hasAttribute("click-open")) {
-                        // var close = el.querySelector(".vc-contextmenu-close");
-                        el._closeNode.classList.remove("vc-contextmenu-closeVisible");
-
-                        el.classList.remove("vc-contextmenu-responsive");
-                        el.classList.remove("vc-bg1-modal");
-                        el.removeAttribute("click-open");
-                        // close.parentNode.removeChild(close);
-                    }
-
                     el._verifyOpenContextmenu(openContextmenu);
-                    openContextmenuObject.element = el;
+                    openContextmenuObject.element = el._refs.wrapper;
                     vcomet.contextmenu.openContextmenu.push(openContextmenuObject);
-                    el.style.top = posY + "px";
-                    el.style.left = posX + "px";
-                    el.setAttribute("visible", "true");
-                    el.hide();
+                    el._refs.wrapper.style.top = posY + "px";
+                    el._refs.wrapper.style.left = posX + "px";
+                    // Appends the wrapper node to the body to control when it is in an absolute container
+                    document.body.appendChild(el._refs.wrapper);
+                    el._refs.wrapper.classList.add("vc-contextmenu-wrapper-visible");
                 }
 
                 vcomet.triggerCallback("onShow", this);
-                el._wrapperNode.vcometScroll.update();
+                el._refs.scroll.update();
 
             },
 
@@ -392,29 +375,25 @@
              @function hide
              @description Hide contextmenu
             */
-            hide: function () {
+            hide: function (el) {
                 var el = this;
+                var verticalScroll = el.querySelector(".vc-contextmenu-wrapper .vc-scroll-verticalScroll");
 
-                document.body.addEventListener("click", hideEvent);
-
-                function hideEvent(e) {
-                    var verticalScroll = el.querySelector(".vc-contextmenu-wrapper .vc-scroll-verticalScroll");
-
-                    if ((!verticalScroll && (el.getAttribute("visible") == "true")) || ((el.getAttribute("visible") == "true") && (verticalScroll.isOnPath == false))) {
-                        ((el.getAttribute("visible") == "true")) ? el.setAttribute("visible", "false") : null;
-                        document.body.removeEventListener("click", hideEvent);
-                    }
-
-                    vcomet.triggerCallback("onHide", this);
+                if ((!verticalScroll && el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) || (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible") && (verticalScroll.isOnPath == false))) {
+                    el._refs.wrapper.classList.remove("vc-contextmenu-wrapper-visible", "vc-bg1-modal");
+                    el._refs.close.classList.remove("vc-contextmenu-closeVisible");
+                    el._refs.wrapper.style.top = "0";
+                    el._refs.wrapper.style.left = "0";
+                    el.appendChild(el._refs.wrapper);
+                    document.body.removeEventListener("click", el._hideEvent);
                 }
 
-                el._hideEvent = hideEvent;
-
+                vcomet.triggerCallback("onHide", this);
             },
 
             /*
               @function addItem
-              @description Add new contextmenu node item programmaticaly
+              @description Add new contextmenu node item programmatically
               @param {Object} item [Node to add to contextmenu]
             */
             addItem: function (item) {
@@ -424,8 +403,7 @@
                 (item.value) ? this._setupSpan(item) : null;
                 item.classList.add("vc-bg2-hoverable");
 
-                this._contextmenuNode.appendChild(item);
-
+                this._refs.contextmenu.appendChild(item);
             },
 
             /*
@@ -434,7 +412,7 @@
               @param {Object} item [Node to removes from contextmenu] 
              */
             removeItem: function (item) {
-                this._contextmenuNode.removeChild(item);
+                this._refs.contextmenu.removeChild(item);
             },
 
             /*
@@ -450,7 +428,7 @@
                 (newItem.icon) ? this._setupIcon(newItem) : null;
                 newItem.classList.add("vc-bg2-hoverable");
 
-                this._contextmenuNode.replaceChild(newItem, oldItem);
+                this._refs.contextmenu.replaceChild(newItem, oldItem);
 
             }
 
@@ -463,16 +441,12 @@
             vcomet.createCallback("onShow", this);
             vcomet.createCallback("onHide", this);
 
-            // Global contextemenu variables
+            // Global contextmenu variables
             vcomet.contextmenu = vcomet.contextmenu || {
                 openContextmenu: []
             };
 
-            el._contextmenuNode = el.template.querySelector(".vc-contextmenu-contextmenu");
-            el._wrapperNode = el.template.querySelector(".vc-contextmenu-wrapper");
-            el._closeNode = el.template.querySelector(".vc-contextmenu-close");
-            el._closeIconNode = el.template.querySelector(".vc-contextmenu-closeIcon");
-
+            el._createRefs();
         },
 
         onBubbleRender: function () {
@@ -483,16 +457,30 @@
             triggerLength = el._triggerNode.length;
 
             el._verifyScreenResolution();
+            el._updateDeviceOptions();
             el._setupItems(sourceNodes);
 
-            el._wrapperNode.vcometScroll.onVerticalScrollCreated(function (verticalScroll) {
+            el._refs.scroll.onVerticalScrollCreated(function (verticalScroll) {
                 vcomet.registerPathListener(verticalScroll);
             });
 
+            window.addEventListener("blur", function () {
+                if (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) {
+                    el.hide();
+                }
+            });
+
+            document.body.addEventListener("click", function () {
+                if (el._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible")) {
+                    el.hide();
+                }
+            });
         },
 
         onWindowResize: function (event) {
-            this._verifyScreenResolution();
+            if (this._refs.wrapper.classList.contains("vc-contextmenu-wrapper-visible") && this._refs.wrapper.dataset.version == "desktop") {
+                this.hide();
+            }
         }
 
     });
