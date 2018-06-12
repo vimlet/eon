@@ -257,18 +257,9 @@
         el._initValue();
 
         el._setupWeekDays();
-
-        if (el.selectable.indexOf('y') > -1) {
-          el._setupYearsGrid();
-        }
-
-        if (el.selectable.indexOf('m') > -1) {
-          el._setupMonthsGrid();
-        }
-
-        if (el.selectable.indexOf('d') > -1) {
-          el._setupDaysGrid();
-        }
+        el._setupYearsGrid();
+        el._setupMonthsGrid();
+        el._setupDaysGrid();
 
         el._setupMinDate();
         el._setupMaxDate();
@@ -281,13 +272,11 @@
 
         el._setupEvents();
 
-
         if (vcomet.util.isTouchScreen()) {
           el.dataset.touch = "true";
         }
 
         el._updateDisabled();
-
         el._refresh();
 
         vcomet.addResizeListener(el.querySelector(".vc-datepicker-calendar"), el.nodeName.toLowerCase(), function () {
@@ -386,7 +375,7 @@
             el._showMonthsGrid();
             break;
           case "d":
-          
+
             el.min = 1 + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
             el.max = vcomet.time.getDaysInMonth(el._misc.current.year, el._misc.current.month) + "/" + (parseInt(el._misc.current.month) + 1) + "/" + el._misc.current.year;
 
@@ -640,7 +629,7 @@
 
         var el = this;
         var dateObj = el._getObjectFromDateString(el.value);
-        
+
         dateObj.month = dateObj.month - 1;
 
         // Compares if the date exceeds the min/max limits
@@ -667,7 +656,7 @@
         el._misc.selected.day = el._misc.current.day;
         el._misc.selected.month = el._misc.current.month;
         el._misc.selected.year = el._misc.current.year;
-        
+
         el.value = el._getFormattedValue(el._formatObj({
           day: el._misc.current.day,
           month: el._misc.current.month + 1,
@@ -683,47 +672,52 @@
 
         var el = this;
 
-        var week;
-        var day;
+        if (el.selectable.indexOf('d') > -1) {
 
-        var daysGridContainer = document.createElement("div");
-        var weekDaysContainer = document.createElement("div");
-        var daysGrid = document.createElement("div");
+          var week;
+          var day;
 
-        var weeksFragment = document.createDocumentFragment();
+          var daysGridContainer = document.createElement("div");
+          var weekDaysContainer = document.createElement("div");
+          var daysGrid = document.createElement("div");
 
-        daysGridContainer.style.zIndex = -1;
+          var weeksFragment = document.createDocumentFragment();
 
-        daysGridContainer.classList.add("vc-datepicker-daysGrid");
-        weekDaysContainer.classList.add("vc-datepicker-weekDays");
-        daysGrid.classList.add("vc-datepicker-grid");
+          daysGridContainer.style.zIndex = -1;
 
-        daysGridContainer.appendChild(weekDaysContainer);
-        daysGridContainer.appendChild(daysGrid);
-        el.querySelector(".vc-datepicker-body").appendChild(daysGridContainer);
+          daysGridContainer.classList.add("vc-datepicker-daysGrid");
+          weekDaysContainer.classList.add("vc-datepicker-weekDays");
+          daysGrid.classList.add("vc-datepicker-grid");
 
-        el._refs.daysGrid = daysGridContainer;
+          daysGridContainer.appendChild(weekDaysContainer);
+          daysGridContainer.appendChild(daysGrid);
+          el.querySelector(".vc-datepicker-body").appendChild(daysGridContainer);
 
-        el._createWeekDaysHeaders();
+          el._refs.daysGrid = daysGridContainer;
 
-        for (var i = 1; i <= 6; i++) {
+          el._createWeekDaysHeaders();
 
-          week = document.createElement("div");
-          week.classList.add("vc-datepicker-week");
+          for (var i = 1; i <= 6; i++) {
 
-          for (var j = 1; j <= 7; j++) {
+            week = document.createElement("div");
+            week.classList.add("vc-datepicker-week");
 
-            day = document.createElement("div");
-            day.classList.add("vc-datepicker-day");
-            day.addEventListener(el._misc.downTrigger, function (e) {
-              el._selectDay(this);
-            });
+            for (var j = 1; j <= 7; j++) {
 
-            week.appendChild(day);
+              day = document.createElement("div");
+              day.classList.add("vc-datepicker-day");
+              day.addEventListener(el._misc.downTrigger, function (e) {
+                el._selectDay(this);
+              });
+
+              week.appendChild(day);
+            }
+            weeksFragment.appendChild(week);
           }
-          weeksFragment.appendChild(week);
+          daysGrid.appendChild(weeksFragment);
+
         }
-        daysGrid.appendChild(weeksFragment);
+
       },
       /*
       @function (private) _setupMonthsGrid
@@ -733,43 +727,48 @@
 
         var el = this;
 
-        var row;
-        var month;
+        if (el.selectable.indexOf('m') > -1) {
 
-        var monthsGrid = document.createElement("div");
-        var rowsFragment = document.createDocumentFragment();
+          var row;
+          var month;
 
-        var months = vcomet.time.getMonthNames(el.locale, "short");
+          var monthsGrid = document.createElement("div");
+          var rowsFragment = document.createDocumentFragment();
 
-        monthsGrid.classList.add("vc-datepicker-monthsGrid", "vc-sect1");
-        el.querySelector(".vc-datepicker-body").appendChild(monthsGrid);
+          var months = vcomet.time.getMonthNames(el.locale, "short");
 
-        el._refs.monthsGrid = monthsGrid;
+          monthsGrid.classList.add("vc-datepicker-monthsGrid", "vc-sect1");
+          el.querySelector(".vc-datepicker-body").appendChild(monthsGrid);
 
-        row = document.createElement("div");
-        row.classList.add("vc-datepicker-row");
+          el._refs.monthsGrid = monthsGrid;
 
-        for (var i = 0; i < months.length; i++) {
+          row = document.createElement("div");
+          row.classList.add("vc-datepicker-row");
 
-          month = document.createElement("div");
-          month.classList.add("month");
-          month.innerHTML = months[i];
-          month.dataset.index = i;
+          for (var i = 0; i < months.length; i++) {
 
-          month.addEventListener(el._misc.downTrigger, function (e) {
-            el._selectMonth(this);
-          });
+            month = document.createElement("div");
+            month.classList.add("month");
+            month.innerHTML = months[i];
+            month.dataset.index = i;
 
-          row.appendChild(month);
+            month.addEventListener(el._misc.downTrigger, function (e) {
+              el._selectMonth(this);
+            });
 
-          if (row.childNodes.length == 4) {
-            rowsFragment.appendChild(row);
-            row = document.createElement("div");
-            row.classList.add("vc-datepicker-row");
+            row.appendChild(month);
+
+            if (row.childNodes.length == 4) {
+              rowsFragment.appendChild(row);
+              row = document.createElement("div");
+              row.classList.add("vc-datepicker-row");
+            }
           }
+
+          monthsGrid.appendChild(rowsFragment);
+
         }
 
-        monthsGrid.appendChild(rowsFragment);
       },
       /*
       @function (private) _setupYearsGrid
@@ -779,48 +778,53 @@
 
         var el = this;
 
-        var row;
-        var year;
+        if (el.selectable.indexOf('y') > -1) {
 
-        var yearsGrid = document.createElement("div");
-        var rowsFragment = document.createDocumentFragment();
+          var row;
+          var year;
 
-        var currentYear = new Date();
-        var years = [];
+          var yearsGrid = document.createElement("div");
+          var rowsFragment = document.createDocumentFragment();
 
-        currentYear = currentYear.getFullYear();
+          var currentYear = new Date();
+          var years = [];
 
-        for (var i = currentYear - 6; i < currentYear + 6; i++) {
-          years.push(i);
-        }
+          currentYear = currentYear.getFullYear();
 
-        yearsGrid.classList.add("vc-datepicker-yearsGrid", "vc-sect1");
-        el.querySelector(".vc-datepicker-body").appendChild(yearsGrid);
-
-        el._refs.yearsGrid = yearsGrid;
-
-        row = document.createElement("div");
-        row.classList.add("vc-datepicker-row");
-
-        for (var i = 0; i < years.length; i++) {
-
-          year = document.createElement("div");
-          year.classList.add("vc-datepicker-year");
-
-          year.addEventListener(el._misc.downTrigger, function (e) {
-            el._selectYear(this);
-          });
-
-          row.appendChild(year);
-
-          if (row.childNodes.length == 4) {
-            rowsFragment.appendChild(row);
-            row = document.createElement("div");
-            row.classList.add("vc-datepicker-row");
+          for (var i = currentYear - 6; i < currentYear + 6; i++) {
+            years.push(i);
           }
+
+          yearsGrid.classList.add("vc-datepicker-yearsGrid", "vc-sect1");
+          el.querySelector(".vc-datepicker-body").appendChild(yearsGrid);
+
+          el._refs.yearsGrid = yearsGrid;
+
+          row = document.createElement("div");
+          row.classList.add("vc-datepicker-row");
+
+          for (var i = 0; i < years.length; i++) {
+
+            year = document.createElement("div");
+            year.classList.add("vc-datepicker-year");
+
+            year.addEventListener(el._misc.downTrigger, function (e) {
+              el._selectYear(this);
+            });
+
+            row.appendChild(year);
+
+            if (row.childNodes.length == 4) {
+              rowsFragment.appendChild(row);
+              row = document.createElement("div");
+              row.classList.add("vc-datepicker-row");
+            }
+          }
+
+          yearsGrid.appendChild(rowsFragment);
+
         }
 
-        yearsGrid.appendChild(rowsFragment);
       },
       /*
       @function (private) _setInitialValue
@@ -937,7 +941,7 @@
 
               day.innerHTML = previousMonthDaysToDisplay[i];
               day.classList.add("vc-datepicker-previousMonth", "vc-fg2-disabled");
-              day.classList.remove("vc-datepicker-current", "vc-fg1-active");
+              day.classList.remove("vc-datepicker-current", "vc-bg2-active");
 
               day.setAttribute("year", previous.year);
               day.setAttribute("month", previous.month);
@@ -963,7 +967,7 @@
           day = week.children[weekDaysCount];
 
           if (day) {
-            day.classList.remove("vc-datepicker-previousMonth", "vc-fg2-disabled", "vc-datepicker-nextMonth", "vc-fg2-disabled", "vc-datepicker-current", "vc-fg1-active");
+            day.classList.remove("vc-datepicker-previousMonth", "vc-fg2-disabled", "vc-datepicker-nextMonth", "vc-fg2-disabled", "vc-datepicker-current", "vc-bg2-active");
             day.innerHTML = i;
 
             day.setAttribute("year", year);
@@ -1001,7 +1005,7 @@
 
             day.innerHTML = nextMonthDaysToDisplay[i];
             day.classList.add("vc-datepicker-nextMonth", "vc-fg2-disabled");
-            day.classList.remove("vc-datepicker-current", "vc-fg1-active");
+            day.classList.remove("vc-datepicker-current", "vc-bg2-active");
 
             day.setAttribute("year", next.year);
             day.setAttribute("month", next.month);
@@ -1027,7 +1031,7 @@
 
           }
         }
-        
+
         var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.selected.day) + '"][month="' + parseInt(el._misc.selected.month) + '"][year="' + parseInt(el._misc.selected.year) + '"]');
 
         if (currentDay) {
@@ -1052,7 +1056,7 @@
 
           months[i].dataset.year = year;
           months[i].classList.remove("vc-datepicker-current");
-          months[i].classList.remove("vc-fg1-active");
+          months[i].classList.remove("vc-bg2-active");
 
           if (el._misc.current.year == el._misc.min.year || el._misc.current.year == el._misc.max.year) {
 
@@ -1074,7 +1078,7 @@
         var currentMonthCell = monthsGrid.querySelector('[data-index ="' + el._misc.selected.month + '"][data-year ="' + el._misc.selected.year + '"]');
 
         if (currentMonthCell) {
-          el._highlightMonth(currentMonthCell);
+          el._highlight(currentMonthCell, el.querySelector(".vc-datepicker-monthsGrid .vc-datepicker-current"));
         }
       },
       /*
@@ -1098,7 +1102,7 @@
             row.children[j].innerHTML = year;
             row.children[j].dataset.year = year;
             row.children[j].classList.remove("vc-datepicker-current");
-            row.children[j].classList.remove("vc-fg1-active");
+            row.children[j].classList.remove("vc-bg2-active");
 
             disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
             disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
@@ -1114,7 +1118,7 @@
         selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.selected.year + '"]')
 
         if (selectedYearCell) {
-          el._highlightYear(selectedYearCell);
+          el._highlight(selectedYearCell, el.querySelector(".vc-datepicker-yearsGrid .vc-datepicker-current"));
         }
       },
       /*
@@ -1187,7 +1191,7 @@
           el._misc.selected.month = parseInt(dayButton.getAttribute("month"));
           el._misc.selected.year = parseInt(dayButton.getAttribute("year"));
 
-          el._highlightDay(dayButton);
+          el._highlight(dayButton, el.querySelector(".vc-datepicker-daysGrid .vc-datepicker-grid .vc-datepicker-current"));
 
           if (el.__onSelected.length > 0) {
 
@@ -1228,7 +1232,7 @@
             // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
             var dateObj = el._formatObj({ day: undefined, month: (parseInt(monthButton.dataset.index) + 1), year: el._misc.current.year });
 
-            el._highlightMonth(monthButton);
+            el._highlight(monthButton, el.querySelector(".vc-datepicker-monthsGrid .vc-datepicker-current"));
 
             if (el.__onSelected.length > 0) {
 
@@ -1281,7 +1285,7 @@
 
             var dateObj = el._formatObj({ day: undefined, month: undefined, year: yearButton.dataset.year });
 
-            el._highlightYear(yearButton);
+            el._highlight(yearButton, el.querySelector(".vc-datepicker-yearsGrid .vc-datepicker-current"));
 
             if (el.__onSelected.length > 0) {
 
@@ -1403,52 +1407,19 @@
       },
 
       /*
-      @function (private) _highlightDay
+      @function (private) _highlight
       @description Highlights the button and removes highlight in the previous one
       @param {Object} dayButton
       */
-      highlightDay: function (dayButton) {
+      highlight: function (selected, previous) {
 
         var el = this;
-        var previousCurrent = el.querySelector(".vc-datepicker-daysGrid .vc-datepicker-grid .vc-datepicker-current");
 
-        if (previousCurrent) {
-          previousCurrent.classList.remove("vc-datepicker-current", "vc-fg1-active");
+        if (previous) {
+          previous.classList.remove("vc-datepicker-current", "vc-bg2-active");
         }
 
-        dayButton.classList.add("vc-datepicker-current", "vc-fg1-active");
-      },
-      /*
-      @function (private) _highlightMonth
-      @description Highlights the button and removes highlight in the previous one
-      @param {Object} monthButton
-      */
-      highlightMonth: function (monthButton) {
-
-        var el = this;
-        var previousCurrent = el.querySelector(".vc-datepicker-monthsGrid .vc-datepicker-current");
-
-        if (previousCurrent) {
-          previousCurrent.classList.remove("vc-datepicker-current", "vc-fg1-active");
-        }
-
-        monthButton.classList.add("vc-datepicker-current", "vc-fg1-active");
-      },
-      /*
-      @function (private) _highlightYear
-      @description Highlights the button and removes highlight in the previous one
-      @param {Object} yearButton
-      */
-      highlightYear: function (yearButton) {
-
-        var el = this;
-        var previousCurrent = el.querySelector(".vc-datepicker-yearsGrid .vc-datepicker-current");
-
-        if (previousCurrent) {
-          previousCurrent.classList.remove("vc-datepicker-current", "vc-fg1-active");
-        }
-
-        yearButton.classList.add("vc-datepicker-current", "vc-fg1-active");
+        selected.classList.add("vc-datepicker-current", "vc-bg2-active");
       },
       /*
       @function (private) {Object} _getPreviousByMonth
@@ -1945,7 +1916,7 @@
           var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.current.year + "']");
 
           if (yearButton && yearButton.dataset.disabled != "true") {
-            el._highlightYear(yearButton);
+            el._highlight(yearButton, el.querySelector(".vc-datepicker-yearsGrid .vc-datepicker-current"));
           }
 
         }
@@ -1955,7 +1926,7 @@
           var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.current.year + "'][data-index='" + el._misc.current.month + "']");
 
           if (monthButton && monthButton.dataset.disabled != "true") {
-            el._highlightMonth(monthButton);
+            el._highlight(monthButton, el.querySelector(".vc-datepicker-monthsGrid .vc-datepicker-current"));
           }
 
         }
@@ -1965,7 +1936,7 @@
           var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.current.year + "'][month='" + el._misc.current.month + "'][day='" + el._misc.current.day + "']");
 
           if (dayButton && dayButton.dataset.disabled != "true") {
-            el._highlightDay(dayButton);
+            el._highlight(dayButton, el.querySelector(".vc-datepicker-daysGrid .vc-datepicker-grid .vc-datepicker-current"));
           }
 
         }
@@ -2023,12 +1994,12 @@
       updateDisabled: function () {
 
         var el = this;
-        var selectedCell = el.querySelector(".vc-fg1-active");
+        var selectedCell = el.querySelector(".vc-bg2-active");
 
         if (vcomet.util.isTrue(el.disabled)) {
 
           if (selectedCell) {
-            selectedCell.classList.remove("vc-fg1-active");
+            selectedCell.classList.remove("vc-bg2-active");
             selectedCell.classList.add("vc-bg2-disabled");
           }
 
@@ -2038,7 +2009,7 @@
         } else {
 
           if (selectedCell) {
-            selectedCell.classList.add("vc-fg1-active");
+            selectedCell.classList.add("vc-bg2-active");
             selectedCell.classList.remove("vc-bg2-disabled");
           }
 
