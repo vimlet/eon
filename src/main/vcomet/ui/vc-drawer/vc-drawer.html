@@ -86,9 +86,24 @@
       preventDragNodes: {
         value: "",
         reflect: true
+      },
+      /*
+        @property {Array} spacing
+        @description Margin to be left from viewport edges
+      */
+      spacing: {
+        value: 0,
+        reflect: true
       }
     },
     privateProperties: {
+      /*
+        @property (private) {Object} _refs
+        @description
+      */
+      refs: {
+        value: {}
+      },
       /*
         @property (private) {Object} _misc
         @description Internal used data
@@ -99,12 +114,16 @@
     },
     privateFunctions: {
       /*
-        @function (private) __initMisc
+        @function (private) _initMisc
         @description Initialize miscellaneous private properties
       */
       initMisc: function () {
         var el = this;
         el._misc.dragCallbacks = {};
+        // Get size property from drawer type
+        el._misc.offsetProperty = el.type == "left" || el.type == "right" ? "offsetWidth" : "offsetHeight";
+        el._misc.sizeProperty = el.type == "left" || el.type == "right" ? "height" : "width";
+        el._refs.styleSheet = {};
       },
       /*
         @function (private) _initialDisplay
@@ -112,14 +131,27 @@
       */
       initialDisplay: function () {
         var el = this;
-        // Get size property from drawer type
-        el._misc.sizeProperty = el.type == "left" || el.type == "right" ? "offsetWidth" : "offsetHeight";
+
+        var ruleName = ".vc-drawer-absolute";
+
+        if(!vcomet.dom.classExists(ruleName)) {
+          // Set up static css rule
+          var marginPosition = el.type == "right" || el.type == "left" ? "top" : "left";
+          var clss = ruleName + "{" + marginPosition + ":" + el.spacing + "px;\n\
+                    " + el._misc.sizeProperty + ":calc(100% - " + el.spacing + "px); \n\
+                  }";
+          // Insert and save rule
+          vcomet.style.sheet.insertRule(clss);
+          el._refs.styleSheet["drawer"] = vcomet.style.sheet.cssRules[0];
+        }
         // Static and no collapsible drawer
         if (vcomet.util.isTrue(el.static) && (el.staticLimit > 0 && window.innerWidth > el.staticLimit)) {
+          el.classList.remove("vc-drawer-absolute");
           el.classList.add("vc-drawer-static");
           el.closable = false;
           el._translate(0);
         } else {
+          el.classList.add("vc-drawer-absolute");
           // Drawer initial displaying
           if (!vcomet.util.isTrue(el.hide)) {
             el.style.opacity = 1;
@@ -253,7 +285,7 @@
                 // Get transform axis value
                 position = vcomet.dom.getTransformAxis(el, axis.substring(axis.length - 1));
                 // Get middle drawer position
-                middlePosition = sign == -1 ? -Math.abs(el[el._misc.sizeProperty] / 2) : el[el._misc.sizeProperty] / 2;
+                middlePosition = sign == -1 ? -Math.abs(el[el._misc.offsetProperty] / 2) : el[el._misc.offsetProperty] / 2;
                 if ((sign == -1 && position > middlePosition) || (sign == 1 && position < middlePosition)) {
                   el.show();
                 } else {
@@ -319,7 +351,7 @@
       */
       processPosition: function (position, pixels) {
         var el = this;
-        var limitValue = el[el._misc.sizeProperty];
+        var limitValue = el[el._misc.offsetProperty];
         // Monitor node first position null value
         position = !position ? 0 : position;
         // Set translate x/y new value
@@ -341,19 +373,19 @@
         // Check drawer position
         switch (el.type) {
           case "left":
-            value = !value && value != 0 ? -el[el._misc.sizeProperty] : -Math.abs(value);
+            value = !value && value != 0 ? -el[el._misc.offsetProperty] : -Math.abs(value);
             el.style.transform = "translate3d(" + value + "px,0px,0px)";
             break;
           case "right":
-            value = !value && value != 0 ? el[el._misc.sizeProperty] : value;
+            value = !value && value != 0 ? el[el._misc.offsetProperty] : value;
             el.style.transform = "translate3d(" + value + "px,0px,0px)";
             break;
           case "top":
-              value = !value && value != 0 ? -el[el._misc.sizeProperty] : -Math.abs(value);
+              value = !value && value != 0 ? -el[el._misc.offsetProperty] : -Math.abs(value);
               el.style.transform = "translate3d(0px, " + value + "px, 0px)";
             break;
           case "bottom":
-              value = !value && value != 0 ? el[el._misc.sizeProperty] : value;
+              value = !value && value != 0 ? el[el._misc.offsetProperty] : value;
               el.style.transform = "translate3d(0px, " + value + "px, 0px)";
             break;
         }
@@ -523,13 +555,16 @@
         if (el.staticLimit > 0) {
           if (window.innerWidth < el.staticLimit && !vcomet.util.isTrue(el.closable)) {
             el.closable = true;
+            // Make absolute
             el.classList.remove("vc-drawer-static");
+            el.classList.add("vc-drawer-absolute");
           } else if(window.innerWidth > el.staticLimit && vcomet.util.isTrue(el.closable)){
             el.closable = false;
             // Avoid drawer from resize blinking 
             if(el._misc.displayed == false){
               el.style.transition="none";
             }
+            el.classList.remove("vc-drawer-absolute");
             el.classList.add("vc-drawer-static");
             el.show();
             if(el.style.transition == "none"){
