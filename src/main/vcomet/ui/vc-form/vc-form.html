@@ -3,15 +3,47 @@
   vcomet.element("vc-form", null, {
     properties: {
       /*
+        @property {String} querySeparator 
+        @description Set query separator
+      */
+      querySeparator: {
+        value: "?",
+        reflect: true
+      },
+      /*
+        @property {String} paramSeparator 
+        @description Set param separator
+      */
+      paramSeparator: {
+        value: "&",
+        reflect: true
+      },
+      /*
+        @property {String} type 
+        @description Set form type
+      */
+      type: {
+        value: "html",
+        reflect: true
+      },
+      /*
+        @property {String} url 
+        @description Set where to send form data
+      */
+      url: {
+        value: "",
+        reflect: true
+      },
+      /*
         @property {String} action 
-        @description Set where send form data
+        @description Same as url, respecting html standard
       */
       action: {
         value: "",
         reflect: true
       },
       /*
-        @property {String} action 
+        @property {String} method 
         @description Set how send form data
       */
       method: {
@@ -21,47 +53,9 @@
     },
     privateFunctions: {
       /*
-        @function (private) {Object} _getData 
-        @description Return form data
-      */
-      getData: function () {
-        var el = this;
-        var formChilds = el.childNodes;
-        var submitElements = {};
-        var checkElements = [];
-        var checkboxGroups = {};
-        var childPrototype = "not input";
-        var inputType;
-        var elementName;
-        var elementValue;
-
-        el._recursiveFormChilds(submitElements, formChilds, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups);
-
-        // User custom elements
-        if (el.querySelectorAll("[isform]").length !== 0) {
-          var isform;
-
-          isform = el.querySelectorAll("[isform]");
-
-          for (var i = 0; i < isform.length; i++) {
-
-            elementName = isform[i].getAttribute("name");
-            elementValue = isform[i].getAttribute("value");
-            // Adding name and value of element at the submit object
-            submitElements[elementName] = elementValue;
-
-          }
-
-        }
-
-        return submitElements;
-
-      },
-
-      /*
         @function (private) _recursiveFormChilds
         @description Loop through form childs
-        @param {Object} submitElements [Will contain input type form data]
+        @param {Object} data [Will contain input type form data]
         @param {Array} formChilds [Form child node]
         @param {String} childPrototype [html type]
         @param {String} inputType [Will contain form child node input type]
@@ -70,7 +64,7 @@
         @param {Array} checkElements [Will contain checked nodes of checkbox input type]
         @param {Object} checkboxGroups [Will contain checkbox groups of checkbox input type]
       */
-      recursiveFormChilds: function (submitElements, formChilds, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups) {
+      recursiveFormChilds: function (data, formChilds, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups) {
         var el = this;
         var formChildNode;
 
@@ -78,29 +72,26 @@
 
           formChildNode = formChilds[i];
           childPrototype = el._getChildPrototypeType(formChildNode);
-          // TODO:
-          // console.log('formChildNode', formChildNode);
-          // console.log('childPrototype', childPrototype);
 
           if (childPrototype.indexOf("HTMLInputElement") !== -1
             || childPrototype.indexOf("HTMLTextAreaElement") !== -1
             || childPrototype.indexOf("HTMLSelectElement") !== -1
             || formChildNode._formelement) {
 
-            el._setSubmitElements(submitElements, formChildNode, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups);
+            el._setDataElements(data, formChildNode, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups);
 
           } else if (formChildNode.childNodes.length != 0) {
 
-            el._recursiveFormChilds(submitElements, formChildNode.childNodes, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups);
+            el._recursiveFormChilds(data, formChildNode.childNodes, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups);
           }
         }
 
       },
 
       /*
-        @function (private) {object} _setSubmitElements
-        @description Set to submitElements object form data
-        @param {Object} submitElements [Will contain input type form data]
+        @function (private) {object} _setDataElements
+        @description Set to data object form data
+        @param {Object} data [Will contain input type form data]
         @param {Object} formChildNode [Form child node]
         @param {String} childPrototype [html type]
         @param {String} inputType [Will contain form child node input type]
@@ -109,12 +100,12 @@
         @param {Array} checkElements [Will contain checked nodes of checkbox input type]
         @param {Object} checkboxGroups [Will contain checkbox groups of checkbox input type]
       */
-      setSubmitElements: function (submitElements, formChildNode, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups) {
+      setDataElements: function (data, formChildNode, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups) {
         var el = this;
 
         // Input elements
         if (childPrototype.indexOf("HTMLInputElement") !== -1 || formChildNode._formelement) {
-          el._setInputSubmitElements(formChildNode, inputType, elementName, elementValue, checkboxGroups, checkElements, submitElements);
+          el._setInputData(formChildNode, inputType, elementName, elementValue, checkboxGroups, checkElements, data);
         }
 
         // HTML text area elements
@@ -124,19 +115,17 @@
           elementValue = formChildNode.value;
 
           // Adding name and value of element at the submit object
-          submitElements[elementName] = elementValue;
+          data[elementName] = elementValue;
 
         }
 
         // HTML select elements
         if (childPrototype.indexOf("HTMLSelectElement") !== -1) {
-
           elementName = formChildNode.name;
           elementValue = formChildNode.value;
 
           // Adding name and value of element at the submit object
-          submitElements[elementName] = elementValue;
-
+          data[elementName] = elementValue;
         }
 
       },
@@ -165,23 +154,20 @@
       },
 
       /*
-        @function (private) _setInputSubmitElements
-        @description Set to submitElements object input type form data
+        @function (private) _setInputData
+        @description Set to data object input type form data
         @param {Object} formChildNode [Form child node]
         @param {String} inputType [Will contain form child node input type]
         @param {String} elementName [Will contain form child node name]
         @param {String} elementValue [Will contain form child node value]
         @param {Object} checkboxGroups [Will contain checkbox groups of checkbox input type]
         @param {Array} checkElements [Will contain checked nodes of checkbox input type]
-        @param {Object} submitElements [Will contain input type form data]
+        @param {Object} data [Will contain input type form data]
       */
-      setInputSubmitElements: function (formChildNode, inputType, elementName, elementValue, checkboxGroups, checkElements, submitElements) {
+      setInputData: function (formChildNode, inputType, elementName, elementValue, checkboxGroups, checkElements, data) {
         inputType = formChildNode.getAttribute("type");
         elementName = formChildNode.name;
 
-        // TODO:
-        // console.log('inputType', inputType);
-        // console.log('formChildNode._formelement',formChildNode._formelement);
         // Checkbox elements
         if (inputType == "checkbox" || formChildNode._formelement == "checkbox") {
 
@@ -203,7 +189,7 @@
             }
 
             // Adding name of checkbox group and the checked values at the submit object
-            submitElements[elementName] = checkboxGroups[elementName];
+            data[elementName] = checkboxGroups[elementName];
 
           }
 
@@ -214,7 +200,7 @@
 
             elementValue = formChildNode.value;
             // Adding name and value of element at the submit object
-            submitElements[elementName] = elementValue;
+            data[elementName] = elementValue;
 
           }
 
@@ -225,104 +211,159 @@
             elementName = formChildNode.name;
             elementValue = formChildNode.value;
             // Adding name and value of element at the submit object
-            submitElements[elementName] = elementValue;
+            data[elementName] = elementValue;
           }
 
-          // Vimlet textbox, textarea and others html elements
+          // vComet textbox, textarea and others html elements
         } else {
           elementValue = formChildNode.value;
           if (!vcomet.util.isTrue(formChildNode.disabled)) {
             // Control if the input has no value
             if (elementValue !== "" && typeof elementValue != "undefined") {
               // Adding name and value of element at the submit object
-              submitElements[elementName] = elementValue;
+              data[elementName] = elementValue;
             }
-
           }
-
-
         }
       },
 
       /*
-        @function (private) {String} _generateParam
+        @function (private) {String} _generateParams
         @description Return an string of form data for ajax request
-        @param {Object} formData [Form data]
+        @param {Object} data [Form data]
       */
-      generateParam: function (formData) {
-        var param = "?";
-        var formDataKeys = Object.keys(formData);
+      generateParams: function (data) {
+        var param = "";
+        var dataKeys = Object.keys(data);
         var i;
 
-        for (i = 0; i < formDataKeys.length; i++) {
+        for (i = 0; i < dataKeys.length; i++) {
+          param += dataKeys[i] + "=" + data[dataKeys[i]];
 
-          param += formDataKeys[i] + "=" + formData[formDataKeys[i]];
-
-          if (i < formDataKeys.length - 1) {
-            param += "&";
+          if (i < dataKeys.length - 1) {
+            param += this.paramSeparator;
           }
-
         }
 
         return param.replace(/,/g, "+");
-
       },
+
+      htmlSubmit: function (action, data, method) {
+        method = method.toUpperCase() || "GET";
+
+        if (method == "GET") {
+          // Cleaner version for GET
+          window.location.href = action + this.querySeparator + this._generateParams(data);;
+        } else {
+          // Other methods require a real html form
+          var form = document.createElement("form");
+          form.setAttribute("method", method);
+          form.setAttribute("action", action);
+
+          for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+              var hiddenField = document.createElement("input");
+              hiddenField.setAttribute("type", "hidden");
+              hiddenField.setAttribute("name", key);
+              hiddenField.setAttribute("value", data[key]);
+              form.appendChild(hiddenField);
+            }
+          }
+
+          document.body.appendChild(form);
+          form.submit();
+        }
+      },
+
+      xhrSubmit: function (url, method, payload, contentType) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+          if (this.readyState == 4) {
+            var error = this.status >= 200 && this.status < 300;
+
+            vcomet.triggerCallback("onSubmit", el, null, [error, {
+              url: url,
+              method: method,
+              status: this.status,
+              response: this.response
+            }]);
+          };
+        };
+
+        xhr.open(method, url);
+        if (contentType) {
+          xhr.setRequestHeader("Content-Type", contentType);
+        }
+        if (payload) {
+          xhr.send(payload);
+        } else {
+          xhr.send();
+        }
+      }
 
     },
 
     functions: {
       /*
-        @function submitForm
-        @description Sent the form data
-      */
-      submitForm: function () {
+       @function {Object} getData 
+       @description Return form values as an object
+     */
+      getData: function () {
         var el = this;
-        var action = el.action;
-        var method = el.method.toUpperCase();
-        var formData = el._getData();
-        var param = el._generateParam(formData);
-        var xhr = new XMLHttpRequest();
+        var formChilds = el.childNodes;
+        var data = {};
+        var checkElements = [];
+        var checkboxGroups = {};
+        var childPrototype = "not input";
+        var inputType;
+        var elementName;
+        var elementValue;
 
+        el._recursiveFormChilds(data, formChilds, childPrototype, inputType, elementName, elementValue, checkElements, checkboxGroups);
 
+        // User custom elements
+        if (el.querySelectorAll("[isform]").length !== 0) {
+          var isform = el.querySelectorAll("[isform]");
 
-        if (method == "GET") {
-          // GET
-          xhr.open('GET', action + param);
-          xhr.onload = function () {
-
-            if (xhr.status === 200) {
-              console.log('Status ' + xhr.statusText + '\n' + action + param);
-              vcomet.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
-            } else {
-              console.log('Request failed.  Returned status of ' + xhr.status);
-            }
-
-          };
-
-          xhr.send();
-
-        } else if (method == "POST") {
-
-          // TODO: POST Verify that it sends the data to the server
-          xhr.open('POST', action + param);
-          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-          xhr.onload = function () {
-
-            if (xhr.readyState == 4 && xhr.status == 200) {
-              vcomet.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
-              // console.log(xhr.responseText);
-            } else {
-              console.log('Request failed.  Returned status of ' + xhr.status);
-            }
-
-          };
-
-          xhr.send(param);
-
-        } else {
-          vcomet.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
+          for (var i = 0; i < isform.length; i++) {
+            elementName = isform[i].getAttribute("name");
+            elementValue = isform[i].getAttribute("value");
+            // Adding name and value of element at the submit object
+            data[elementName] = elementValue;
+          }
         }
 
+        return data;
+      },
+      /*
+        @function submit
+        @description Sent the form data
+      */
+      submit: function () {
+        var el = this;
+        var type = el.type.toLowerCase();
+        var url = el.url ? el.url : el.action;
+        var method = el.method.toUpperCase();
+        var data = el.getData();
+
+        if (type == "html") { // Mimics html form including redirect
+          el._htmlSubmit(url, data, method);
+        } else if (type == "query") { // Uses query string with the given method
+          el._xhrSubmit(url + el.querySeparator + el._generateParams(data), method);
+        } else if (type == "form-data") { // Uses query string with GET and FormData with all others.
+          if(method == "GET") {
+            // Since GET can't have a body send a query string instead
+            el._xhrSubmit(url + el.querySeparator + el._generateParams(data), method);
+          }else {
+            var formData = new FormData();
+            for (var key in data) {
+              formData.append(key, data[key]);
+            }
+            el._xhrSubmit(url, method, formData, "application/x-www-form-urlencoded");
+          }
+        } else if (type == "json") { // Uses a JSON payload and the given method
+          el._xhrSubmit(url, method, JSON.stringify(data), "application/json");
+        }
       }
     },
 
@@ -337,7 +378,7 @@
 
       if (submit) {
         submit.addEventListener("click", function () {
-          el.submitForm();
+          el.submit();
         }, true);
 
       }
