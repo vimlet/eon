@@ -63,6 +63,16 @@ vcomet.element("vc-tree", "vc-tree.css", {
       drag: {
         value: false,
         reflect: true
+      },
+      /*
+        @property {Boolean} joinDirs
+        @description
+        Values true, false
+        Default: true
+      */
+      joinDirs: {
+        value: false,
+        reflect: true
       }
     },
     privateProperties: {
@@ -116,7 +126,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
       */
       refresh: function (filter) {
         var el = this;
-        var parentNode;
+        var parentNode, filterProp;
         var filterNodes = {};
         var fragment = document.createDocumentFragment();
         // Remove current tree nodes
@@ -128,7 +138,8 @@ vcomet.element("vc-tree", "vc-tree.css", {
           // Append new refreshed tree nodes
           el._misc.srcNodes.forEach(function (cNode) {
             parentNode = cNode._refs.parentNode;
-            if (filter && cNode.path.toLowerCase().includes(filter.toLowerCase())) {
+            filterProp = cNode._misc.joined ? cNode._refs.nameNode.innerHTML : cNode.path;
+            if (filter && filterProp.toLowerCase().includes(filter.toLowerCase())) {
               // Append node to its tree node parent
               if (!filterNodes[parentNode.path]) {
                 fragment.appendChild(cNode);
