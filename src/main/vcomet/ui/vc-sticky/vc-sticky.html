@@ -268,7 +268,7 @@
         var el = this;
         // Trigger sticky event only if it is needed
         var throttled = false;
-        var delay = 20;
+        var delay = 0;
         // Check sticky position
         el._refs.setPositionFn = function (arg) {
           // Only apply throttled on desktop devices (Higher scroll call number)
@@ -279,12 +279,14 @@
             // Fixed behavior
             el._fixedMonitor(el._misc.viewPosition, el._misc.offsetPos, el._misc.initOffsetPos, el.wrapper.style.position);
             el._animationMonitor(arg);
-            // Throttle
-            throttled = true;
-            // Set a timeout to un-throttle
-            setTimeout(function () {
-              throttled = false;
-            }, delay);
+            // Throttle only using custom vc-scroll
+            if(el.vcScroll) {
+              throttled = true;
+              // Set a timeout to un-throttle
+              setTimeout(function () {
+                throttled = false;
+              }, delay);
+            }
           }
         };
         // Check scroll parent container
@@ -293,7 +295,7 @@
             el.vcScroll.onScrolled(el._refs.setPositionFn);
           });
         } else if (el.fixContainer.tagName.toLowerCase() == "body") {
-          document.addEventListener("scroll", el._refs.setPositionFn);
+          window.addEventListener("scroll", el._refs.setPositionFn);
         } else {
           el.fixContainer.addEventListener("scroll", el._refs.setPositionFn);
         }
