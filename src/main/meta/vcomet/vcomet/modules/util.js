@@ -154,7 +154,7 @@ vcomet.ajax = function (url, options, cb) {
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {
     if (this.readyState == 4) {
-      var success = this.status < 200 && this.status >= 300;
+      var success = this.status >= 200 && this.status < 300;
       cb(success, {
         url: url,
         method: options.method,
