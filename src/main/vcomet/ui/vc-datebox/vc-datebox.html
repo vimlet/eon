@@ -35,7 +35,7 @@
     themed: true,
     privateProperties: {
       /*
-      @property (private) {object} _subInputs
+      @property (private) {Object} _subInputs
       @description Object that contains the different subinputs
       */
       subInputs: {
@@ -43,7 +43,7 @@
         reflect: false
       },
       /*
-      @property (private) {object} _misc
+      @property (private) {Object} _misc
       @description Object with usefull information
       */
       misc: {
@@ -51,7 +51,7 @@
         reflect: false
       },
       /*
-      @property (private) {object} _refs
+      @property (private) {Object} _refs
       @description Object with usefull information
       */
       refs: {
@@ -59,7 +59,7 @@
         reflect: false
       },
       /*
-      @property (private) {string} _formelement 
+      @property (private) {String} _formelement 
       @description Necessary property for a form
       */
       formelement: {
@@ -69,7 +69,7 @@
 
     properties: {
       /*
-      @property {string} name
+      @property {String} name
       @description Name to identify the element in a form
       */
       name: {
@@ -77,7 +77,7 @@
         reflect: true
       },
       /*
-      @property {string} value
+      @property {String} value
       @description Value of the element
       */
       value: {
@@ -85,7 +85,7 @@
         reflect: true
       },
       /*
-      @property {string} label
+      @property {String} label
       @description Label for the element
       */
       label: {
@@ -93,7 +93,7 @@
         reflect: true
       },
       /*
-      @property {string} locale
+      @property {String} locale
       @description Locale to be used in the datebox
       */
       locale: {
@@ -101,7 +101,7 @@
         reflect: true
       },
       /*
-      @property {string} mask
+      @property {String} mask
       @description Date format of the input
       */
       mask: {
@@ -109,7 +109,7 @@
         reflect: true
       },
       /*
-      @property {string} separator
+      @property {String} separator
       @description Indicates the separator for the date
       */
       separator: {
@@ -117,7 +117,7 @@
         reflect: true
       },
       /*
-      @property {string} min
+      @property {String} min
       @description Indicates the inferior limit of the date
       */
       min: {
@@ -125,7 +125,7 @@
         reflect: true
       },
       /*
-      @property {string} max
+      @property {String} max
       @description Indicates the superior limit of the date
       */
       max: {
@@ -133,7 +133,7 @@
         reflect: true
       },
       /*
-      @property {string} pickerFontSize
+      @property {Number} pickerFontSize
       @description Indicates the font size of the datepicker
       */
       pickerFontSize: {
@@ -141,7 +141,7 @@
         reflect: true
       },
       /*
-      @property {string} pickerSelectable
+      @property {String} pickerSelectable
       @description Indicates the selectable values of the datepicker (day, month and year)
       */
       pickerSelectable: {
@@ -149,7 +149,7 @@
         reflect: true
       },
       /*
-      @property {string} weekStart
+      @property {String} weekStart
       @description Indicates the first day of the week for the datepicker
       */
       weekStart: {
@@ -157,7 +157,7 @@
         reflect: true
       },
       /*
-      @property {string} weekDaysFormat
+      @property {String} weekDaysFormat
       @description Indicates the format of the weekdays header
       */
       weekDaysFormat: {
@@ -165,7 +165,7 @@
         reflect: true
       },
       /*
-      @property {string} valueFormat
+      @property {String} valueFormat
       @description Indicates the format of the value
       */
       valueFormat: {
@@ -173,11 +173,11 @@
         reflect: true
       },
       /*
-      @property {string} toolbar
+      @property {Boolean} toolbar
       @description Indicates whether its in toolbar mode or not
       */
       toolbar: {
-        value: "false",
+        value: false,
         reflect: true
       },
       /*
@@ -189,7 +189,7 @@
         reflect: true
       },
       /*
-      @property {string} readonly
+      @property {Boolean} readonly
       @description Toggles the readonly status of the element
       */
       readonly: {
@@ -197,11 +197,19 @@
         reflect: true
       },
       /*
-      @property {string} disabled
+      @property {Boolean} disabled
       @description Toggles the disabled status of the element
       */
       disabled: {
         value: false,
+        reflect: true
+      },
+      /*
+      @property {Boolean} default
+      @description Whether it sets "today" as the default value or not, if no value is provided
+      */
+      default: {
+        value: true,
         reflect: true
       }
     },
@@ -217,8 +225,8 @@
         el.locale = (el.locale != undefined && el.locale != "") ? el.locale : navigator.language;
 
         el._setupMisc();
-        el._setupDatePicker();
         el._setupRefs();
+        el._setupDatePicker();
         el._setupMask();
         el._setupEvents();
 
@@ -247,12 +255,13 @@
       },
       /*
       @function (private) _setupDatePicker
-      @description Sets up the datePicker and appends it to the datebox
+      @description Creates the datePicker and appends it to the datebox
       */
       setupDatePicker: function () {
 
         var el = this;
         var datePickerElement = document.createElement("vc-datepicker");
+        var blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
 
         datePickerElement.classList.add("vc-datebox-picker", "hidden");
         datePickerElement.setAttribute("locale", el.locale);
@@ -262,6 +271,8 @@
         datePickerElement.setAttribute("max", el.max);
         datePickerElement.setAttribute("font-size", el.pickerFontSize);
         datePickerElement.setAttribute("selectable", el.pickerSelectable);
+        datePickerElement.setAttribute("value-format", el.valueFormat);
+        datePickerElement.setAttribute("default", el.default);
 
         datePickerElement.onShow(function () {
           el._addFocusStyle();
@@ -269,6 +280,16 @@
 
         datePickerElement.onHide(function () {
           el._removeFocusStyle();
+        });
+
+        el._refs.button.addEventListener('click', function (e) {
+          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+            el._toggleDatePicker();
+          }
+        }, false);
+
+        document.body.addEventListener(blurTrigger, function (e) {
+          el._customBlur(e, el);
         });
 
         vcomet.registerPathListener(datePickerElement, "datepicker");
@@ -324,7 +345,7 @@
         var el = this;
 
         el._misc.mask.order = [];
-        
+
         var dayFormat = el.mask.match(/[d|D]{1,2}/)[0];
         var monthFormat = el.mask.match(/[M]{1,4}/)[0];
         var yearFormat = el.mask.match(/[y|Y]{2,4}/)[0];
@@ -412,7 +433,7 @@
       },
       /*
       @function (private) _setupEvents
-      @description Sets up the events for the subinputs
+      @description Creates the events for the subinputs
       */
       setupEvents: function () {
 
@@ -424,12 +445,10 @@
         el._setupOnKeyUpEvents();
         el._setupPasteEvents();
 
-        el._setupDatePickerTrigger();
-
       },
       /*
       @function (private) _setupFocusEvents
-      @description Sets up the focus events for the subinputs
+      @description Creates the focus events for the subinputs
       */
       setupFocusEvents: function () {
 
@@ -599,7 +618,7 @@
         el._misc.min.active = true;
       },
       /*
-      @function (private) _setupMinDate
+      @function (private) _setupMaxDate
       @description Sets up the superior limit of the date
       */
       setupMaxDate: function () {
@@ -634,32 +653,16 @@
         el._misc.max.active = true;
       },
       /*
-      @function (private) _setupDatePickerTrigger
-      @description Sets up the triggers to display/hide the datepicker
-      */
-      setupDatePickerTrigger: function () {
-
-        var el = this;
-        var blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
-
-        el.querySelector(".vc-datebox-button").addEventListener('click', function (e) {
-          if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
-            el._toggleDatePicker();
-          }
-        }, false);
-
-        document.body.addEventListener(blurTrigger, function (e) {
-          el._customBlur(e, el);
-        });
-
-      },
-      /*
       @function (private) _setupToolbarMode
       @description Adds whats needed to overwrite the default style
       */
       setupToolbarMode: function () {
         this.querySelector(".vc-datebox-main").classList.add("toolbar");
       },
+      /*
+      @function (private) _addFocusStyle
+      @description When focused, it adds the corresponding style
+      */
       addFocusStyle: function () {
 
         var el = this;
@@ -669,6 +672,10 @@
         el._labelNode.classList.add("vc-fg1");
 
       },
+      /*
+      @function (private) _addFocusStyle
+      @description When focused, it removes the corresponding style
+      */
       removeFocusStyle: function () {
 
         var el = this;
@@ -695,7 +702,7 @@
       },
       /*
       @function (private) _showDatePicker
-      @description Shows the picker
+      @description Shows the datepicker
       */
       showDatePicker: function () {
 
@@ -715,7 +722,7 @@
       },
       /*
       @function (private) _hideDatePicker
-      @description Hides the picker
+      @description Hides the datepicker
       */
       hideDatePicker: function () {
 
@@ -761,8 +768,8 @@
       /*
       @function (private) _customBlur
       @description Hides the datepicker if its not being targeted
-      @param {object} e
-      @param {object} el
+      @param {Object} e
+      @param {Object} el
       */
       customBlur: function (e, el) {
         if (!el.isOnPath && !el._refs.datePicker.isOnPath) {
@@ -772,7 +779,7 @@
       /*
       @function (private) _onDatePickerSelection
       @description Triggered when the user selects a day on the datePicker
-      @param {object} obj
+      @param {Object} obj
       */
       onDatePickerSelection: function (obj) {
 
@@ -868,7 +875,7 @@
       getObjectFromDateString: function (value) {
 
         var el = this;
-        
+
         var format = el.valueFormat;
 
         var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
@@ -1036,7 +1043,7 @@
       format: function (text, format) {
 
         var el = this;
-        
+
         text = text + "";
 
         if (text.length < format.length) {
@@ -1086,7 +1093,7 @@
       /*
       @function (private) {Number}  _getCaretPosition
       @description function_description
-      @param {object} editableDiv
+      @param {Object} editableDiv
       */
       getCaretPosition: function (editableDiv) {
         var caretPos = 0,
@@ -1115,7 +1122,7 @@
       /*
       @function (private) {Boolean} _isNumeric
       @description Whether the recieved key event has a numeric value or not
-      @param {object} e
+      @param {Object} e
       */
       isNumeric: function (e) {
         return (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
@@ -1123,8 +1130,8 @@
       /*
       @function (private) _handleKeyDown
       @description Handles the typing and the date correction, if the subinput reaches its limit it jumpes to the next one
-      @param {object} subInput
-      @param {object} e
+      @param {Object} subInput
+      @param {Object} e
       */
       handleKeyDown: function (subInput, e) {
 
@@ -1186,7 +1193,7 @@
 
       },
       /*
-      @function (private) _getStringFromKeyCode
+      @function (private) {String} _getStringFromKeyCode
       @description Receives a keyCode and returns the string value (intented for numeric)
       @param {String} keyCode
       */
@@ -1196,8 +1203,8 @@
       /*
       @function (private) _handleKeyUp
       @description Handles the key up event
-      @param {object} subInput 
-      @param {object} e [event]
+      @param {Object} subInput 
+      @param {Object} e [event]
       */
       handleKeyUp: function (subInput, e) {
 
@@ -1229,7 +1236,7 @@
 
       },
       /*
-      @function (private) {string} _getSelectionText
+      @function (private) {String} _getSelectionText
       @description Gets the selected text
       */
       getSelectionText: function () {
@@ -1290,9 +1297,9 @@
       /*
       @function (private) _handleLimits
       @description Handles the limits such as min/max date
-      @param {object} dayInput
-      @param {object} monthInput
-      @param {object} yearInput
+      @param {Object} dayInput
+      @param {Object} monthInput
+      @param {Object} yearInput
       */
       handleLimits: function (dayInput, monthInput, yearInput) {
 
@@ -1365,7 +1372,7 @@
             valueObj = el._getObjectFromDateString(el.value);
 
           }
-          
+
           el._misc.current.day = el._format(valueObj.day, el._misc.mask.day.format);
           el._misc.current.month = el._format(valueObj.month, el._misc.mask.month.format);
           el._misc.current.year = el._format(valueObj.year, el._misc.mask.year.format);
