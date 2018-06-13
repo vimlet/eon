@@ -4392,7 +4392,7 @@ vcomet.constructClass = function (baseElement) {
 };
 
 vcomet.element = function (name, stylePath, config) {
-    
+
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
 
@@ -4552,8 +4552,25 @@ vcomet.parse = function (el, config) {
     vcomet.importPublic(el, config);
     vcomet.importPrivate(el, config);
 
+    vcomet.defineParentComponent(el);
+
     vcomet.triggerAllCallbackEvents(el, config, "onParsed");
     vcomet.registry.updateElementStatus(el, "parsed");
+
+};
+
+vcomet.defineParentComponent = function (el) {
+
+    var propDescriptor = {};
+
+    propDescriptor.get = function () {
+        el.__parentComponent = el.__parentComponent ? el.__parentComponent : vcomet.getEnclosingComponent(el);
+        return el.__parentComponent;
+    };
+
+    propDescriptor.set = function () {};
+
+    Object.defineProperty(el, "parentComponent", propDescriptor);
 
 };
 
@@ -4638,7 +4655,7 @@ vcomet.createAttributesObserver = function (el, config) {
 
                 // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
-                
+
                 value = el.hasOwnProperty(propertyName) ? el[propertyName] : "";
                 el.setAttribute(observeAttributesKeys[i], value);
 
@@ -4744,12 +4761,13 @@ vcomet.importData = function (el, config) {
     }
 
 }
+
 vcomet.importPublic = function (el, config) {
 
     if (config.properties) {
         var keys = Object.keys(config.properties);
         var attributeKey;
-        
+
         for (var i = 0; i < keys.length; i++) {
             attributeKey = vcomet.util.camelToHyphenCase(keys[i]);
             // If the element has one of the reflected attributes we send that value as the value of the property
@@ -4830,7 +4848,6 @@ vcomet.triggerAllCallbackEvents = function (el, config, callback, params) {
 
 };
 
-// vcomet.transform = function (name, config, el, elementDoc, template) {
 vcomet.transform = function (el, config) {
 
     if (!vcomet.registry.isTransformed(el)) {
@@ -5285,7 +5302,7 @@ vcomet.declare = function (name, baseElement) {
     });
 
     elementClass.onDetached(function () {
-
+        this.__parentComponent = null;
     });
 
     elementClass.onAttributeChanged(function (attrName, oldVal, newVal) {
