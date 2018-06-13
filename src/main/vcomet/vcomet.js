@@ -3399,6 +3399,26 @@ document.$1 = document.$1 || vcomet.$1;
     }
   };
 
+  /**
+   * Whether or not the class exists in the dom
+   * @param  {[type]} className [description]
+   * @return {[type]}          [description]
+   */
+  vcomet.dom.classExists = function (className) {
+    var el = this;
+    var classes = vcomet.style.sheet.cssRules;
+    var cls;
+    
+    for (var i = 0; i < classes.length; i++) {
+        cls = classes[i];
+  
+        if(cls.selectorText == className){
+        return true;
+        }
+    }
+    return false;
+  };
+
   // Register if the element is on the path on mouse events
   self.registerPathListener = function (el) {
     el.isOnPath = false;

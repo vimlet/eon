@@ -27,3 +27,14 @@ function loadVCometExamples () {
         activePanel.vcometScroll.update();
     })
 }
+
+function toggleMenu(forceAction) {
+    
+    var drawer = document.querySelector(".tTreeContainer");
+    if ((drawer._misc.displayed && !forceAction) || forceAction == "close") {
+        drawer.close();
+    } else if ((!drawer._misc.displayed && !forceAction) || forceAction == "open") {
+        drawer.show();
+    }
+
+}

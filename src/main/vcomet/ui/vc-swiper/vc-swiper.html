@@ -534,16 +534,19 @@
       */
       createThumbStyle: function(thumbnail){
         var el = this;
+        
+        var typeRuleName = el.direction == "vertical" ? ".vc-swiper-vertical": "";
+        var staticRuleName = 'vc-swiper.vc-swiper-gallery'+ typeRuleName + ' .vc-swiper-thumbnail';
+        var className = staticRuleName + ".vc-swiper-thumbnailSize";
+
         // Check style existence
-        if(!el._refs.styleSheet["thumbnail"]) {
+        if(!vcomet.dom.classExists(className)) {
           // Calculate 4:3 size ratio
           var invertSizeProp = el._misc.styleSizeProperty == "width" ? "height" : "width";
           var invertSize = el._getNumProperty(invertSizeProp, thumbnail);
           var size = invertSize + (invertSize / 3);
           // Set up css rule
-          var typeRuleName = el.direction == "vertical" ? ".vc-swiper-vertical": "";
-          var staticRuleName = 'vc-swiper.vc-swiper-gallery'+ typeRuleName + ' .vc-swiper-thumbnail';
-          var clss = staticRuleName + ".vc-swiper-thumbnailSize{" + el._misc.styleSizeProperty + ":" + size + "px;}";
+          var clss = className + "{" + el._misc.styleSizeProperty + ":" + size + "px;}";
           // Insert and save rule
           vcomet.style.sheet.insertRule(clss, 0);
           el._refs.styleSheet["thumbnail"] = vcomet.style.sheet.cssRules[0];

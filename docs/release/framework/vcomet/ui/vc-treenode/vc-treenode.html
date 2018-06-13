@@ -217,7 +217,7 @@
           var label, srt;
           // Check if the path contains escaped characters
           str = el.path.split("/").pop();
-          str = str == "..." ? el.path : str;
+          str = str == "..." ? el.path.replace("/", "") : str;
           // Set node name if not exists
           el.name = !el.name ? str : el.name;
           // Set extension if not exists
@@ -229,7 +229,7 @@
           if (el.type != "directory" && vcomet.util.isTrue(el._refs.hostTree.showExtension)) {
             label += el.extension;
           }
-          el._refs.nameNode.innerHTML = label;
+          el._refs.head.querySelector(".vc-treenode-name").innerHTML = label;
         },
   
         /*
@@ -321,7 +321,6 @@
         makeExpandable: function (expandIcon) {
           var el = this;
           var tree = el._refs.hostTree;
-          var children = el._refs.wrapper.children;
           expandIcon = !expandIcon ? el._refs.head.querySelector(".vc-treenode-expand") : expandIcon;
           var icon = expandIcon.nextSibling.nextSibling;
           el._misc.expandable = true;
@@ -336,15 +335,6 @@
           if (!el._misc.expandFunction) {
             // Set expandable property
             el._misc.expandFunction = "expandIcon";
-          }
-
-          // Join single directory child
-          if(vcomet.util.isTrue(el._refs.hostTree.joinDirs) && children.length == 1 && children[0].type == "directory") {
-            // Set the joined names result as the displayed node name 
-            el._refs.nameNode.innerHTML = el.name + "/" + children[0].name;
-            // Hide children after its path has been joined to its parent's
-            children[0]._refs.head.style.display = "none";
-            el._misc.joined = true;
           }
         },
         /*
@@ -484,8 +474,8 @@
   
           // Tree node shell quick access
           el._refs.head = el.head = el.template.querySelector(".vc-treenode-head");
-          el._refs.nameNode = el._refs.head.querySelector(".vc-treenode-name");
           el._refs.wrapper = el.template.querySelector(".vc-treenode-wrapper");
+          
           // Parent node not exists
           if (parentPath && !parentNode) {
             // Create parent node
@@ -494,7 +484,7 @@
             
             // Check if the path contains escaped characters
             parentStr = parentPath.split("/").pop();
-            node.name = parentStr == "..." ? parentPath : parentPath.split("/").pop();
+            node.name = parentStr == "..." ? parentPath.replace("/", "") : parentPath.split("/").pop();
             // Make sure the node path is added to the tree source nodes array
             if(el._refs.hostTree._misc.srcNodes.indexOf(node.path) < 0){
               el._refs.hostTree._misc.srcNodes.push(node);
@@ -531,7 +521,6 @@
         var el = this;
         var expandIcon, icon;
         var tree = el._refs.hostTree;
-        
         expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
         // Monitor _expandable property
         if (prop == "_expandable") {
