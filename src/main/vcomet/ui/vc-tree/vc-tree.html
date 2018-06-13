@@ -501,14 +501,24 @@ vcomet.element("vc-tree", "vc-tree.css", {
             sortArray.push([nodeRef.name, nodeRef.order, nodeRef.type, nodeRef.path]);
           }
           // Sort alphabetically
-          sortArray.sort();
-          // Sort by type
           sortArray.sort(function (a, b) {
-            return a[2] - b[2];
-          });
-          // Sort by order
-          sortArray.sort(function (a, b) {
-            return a[1] - b[1];
+            // Order values
+            o1 = a[1];
+            o2 = b[1];
+            // Type values
+            t1 = a[2].toLowerCase();
+            t2 = b[2].toLowerCase();
+            // Name values
+            n1 = a[0].toLowerCase();
+            n2 = b[0].toLowerCase();
+            // Compare order
+            if (o1 > o2) {return 1;}
+            if (o1 < o2) {return -1;}
+            // Compare type 
+            if (t1 < t2) {return -1;}
+            if (t1 > t2) {return 1;}
+            // Ensure multiple languages accents correct sorting
+            return n1.localeCompare(n2);
           });
           // Append sorted nodes
           for (var i = 0; i < sortArray.length; i++) {

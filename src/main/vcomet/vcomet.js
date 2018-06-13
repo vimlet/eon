@@ -4392,7 +4392,7 @@ vcomet.constructClass = function (baseElement) {
 };
 
 vcomet.element = function (name, stylePath, config) {
-    
+
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
 
@@ -4552,8 +4552,25 @@ vcomet.parse = function (el, config) {
     vcomet.importPublic(el, config);
     vcomet.importPrivate(el, config);
 
+    vcomet.defineParentComponent(el);
+
     vcomet.triggerAllCallbackEvents(el, config, "onParsed");
     vcomet.registry.updateElementStatus(el, "parsed");
+
+};
+
+vcomet.defineParentComponent = function (el) {
+
+    var propDescriptor = {};
+
+    propDescriptor.get = function () {
+        el.__parentComponent = el.__parentComponent ? el.__parentComponent : vcomet.getEnclosingComponent(el);
+        return el.__parentComponent;
+    };
+
+    propDescriptor.set = function () { };
+
+    Object.defineProperty(el, "parentComponent", propDescriptor);
 
 };
 
@@ -4624,23 +4641,26 @@ vcomet.createAttributesObserver = function (el, config) {
     // First we check if we have attributes to observe
     if (observeAttributesKeys.length > 0) {
 
-        var propertyName, value;
+        var property, privateProperty, value;
 
         // For each observe attribute if check which value should be assign to it
         for (var i = 0; i < observeAttributesKeys.length; i++) {
 
-            propertyName = "__" + vcomet.util.hyphenToCamelCase(observeAttributesKeys[i]);
+            property = vcomet.util.hyphenToCamelCase(observeAttributesKeys[i]);
+            privateProperty = "__" + property;
 
             // If the attribute already has a value we assign this value to its corresponding property
             if (el.getAttribute(observeAttributesKeys[i])) {
 
-                el[propertyName] = el.getAttribute(observeAttributesKeys[i]);
+                el[privateProperty] = el.getAttribute(observeAttributesKeys[i]);
 
                 // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
-                
-                value = el.hasOwnProperty(propertyName) ? el[propertyName] : "";
-                el.setAttribute(observeAttributesKeys[i], value);
+
+                if (config.properties[property].reflectDefault) {
+                    value = el.hasOwnProperty(privateProperty) ? el[privateProperty] : "";
+                    el.setAttribute(observeAttributesKeys[i], value);
+                }
 
             }
 
@@ -4744,12 +4764,13 @@ vcomet.importData = function (el, config) {
     }
 
 }
+
 vcomet.importPublic = function (el, config) {
 
     if (config.properties) {
         var keys = Object.keys(config.properties);
         var attributeKey;
-        
+
         for (var i = 0; i < keys.length; i++) {
             attributeKey = vcomet.util.camelToHyphenCase(keys[i]);
             // If the element has one of the reflected attributes we send that value as the value of the property
@@ -4830,7 +4851,6 @@ vcomet.triggerAllCallbackEvents = function (el, config, callback, params) {
 
 };
 
-// vcomet.transform = function (name, config, el, elementDoc, template) {
 vcomet.transform = function (el, config) {
 
     if (!vcomet.registry.isTransformed(el)) {
@@ -5285,7 +5305,7 @@ vcomet.declare = function (name, baseElement) {
     });
 
     elementClass.onDetached(function () {
-
+        this.__parentComponent = null;
     });
 
     elementClass.onAttributeChanged(function (attrName, oldVal, newVal) {
@@ -5735,6 +5755,54 @@ vcomet.util.isTouchScreen = function () {
   return "ontouchstart" in window;
 };
 
+vcomet.ajax = function (url, options, cb) {
+  options = options || {};
+  options.method = options.method ? options.method.toUpperCase() : "GET";
+  options.querySeparator = options.querySeparator || "?";
+  options.paramSeparator = options.paramSeparator || "&";
+  options.payload = options.payload || null;
+  options.async = options.async || null;
+  options.user = options.user || null;
+  options.password = options.password || null;
+
+  var xhr = options.xhr || new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (this.readyState == 4) {
+      var success = this.status < 200 && this.status >= 300;
+      cb(success, {
+        url: url,
+        method: options.method,
+        xhr: this,
+        status: this.status,
+        response: this.response,
+        responseText: this.responseText
+      });
+    }
+  };
+
+  if(options.params) { 
+    var paramsKeys = Object.keys(options.params);
+    if(paramsKeys.length > 0) {      
+      url += options.querySeparator + paramsKeys[0] + "=" + options.params[paramsKeys[0]];
+      for (var i = 1; i < paramsKeys.length; i++) {
+        url += options.paramSeparator + paramsKeys[i] + "=" + options.params[paramsKeys[i]]; 
+      }
+    }
+  }
+
+  xhr.open(options.method, url, options.async, options.user, options.password);
+  if (options.contentType) {
+    xhr.setRequestHeader("Content-Type", options.contentType);
+  }
+
+  if (options.headers) {
+    for(var header in options.headers) {
+      xhr.setRequestHeader(header, options.headers[header]);
+    }
+  }
+
+  xhr.send(options.payload);
+};
 
 vcomet.history = vcomet.history || {};
 

@@ -40,7 +40,7 @@
     themed: true,
     properties: {
       /*
-      @property {string} name
+      @property {String} name
       @description Name to identify the element in a form
       */
       name: {
@@ -48,7 +48,7 @@
         reflect: true
       },
       /*
-      @property {string} value
+      @property {String} value
       @description Value of the element
       */
       value: {
@@ -56,7 +56,7 @@
         reflect: true
       },
       /*
-      @property {string} day
+      @property {String} day
       @description Day of the date
       */
       day: {
@@ -64,7 +64,7 @@
         reflect: true
       },
       /*
-      @property {string} month
+      @property {String} month
       @description Month of the date
       */
       month: {
@@ -72,7 +72,7 @@
         reflect: true
       },
       /*
-      @property {string} year
+      @property {String} year
       @description Year of the date
       */
       year: {
@@ -80,7 +80,7 @@
         reflect: true
       },
       /*
-      @property {string} locale
+      @property {String} locale
       @description If not provided we will use the navigator language
       */
       locale: {
@@ -88,7 +88,7 @@
         reflect: true
       },
       /*
-      @property {string} min
+      @property {String} min
       @description Indicates the inferior limit of the date
       */
       min: {
@@ -96,7 +96,7 @@
         reflect: true
       },
       /*
-      @property {string} max
+      @property {String} max
       @description Indicates the superior limit of the date
       */
       max: {
@@ -104,7 +104,7 @@
         reflect: true
       },
       /*
-      @property {string} fontSize
+      @property {Number} fontSize
       @description Basic fontSize from where we will determine all the sizes
       */
       fontSize: {
@@ -112,7 +112,7 @@
         reflect: true
       },
       /*
-      @property {string} weekStart
+      @property {String} weekStart
       @description Indicates the first day of the week for the datepicker
       */
       weekStart: {
@@ -120,7 +120,7 @@
         reflect: true
       },
       /*
-      @property {string} weekDaysFormat
+      @property {String} weekDaysFormat
       @description Indicates the format of the weekdays header
       */
       weekDaysFormat: {
@@ -128,7 +128,7 @@
         reflect: true
       },
       /*
-      @property {string} valueFormat
+      @property {String} valueFormat
       @description Indicates the format of the value
       */
       valueFormat: {
@@ -136,7 +136,7 @@
         reflect: true
       },
       /*
-      @property {string} pickerselectable
+      @property {String} pickerselectable
       @description Indicates the selectable values of the datepicker (day, month and year)
       */
       selectable: {
@@ -144,7 +144,7 @@
         reflect: true
       },
       /*
-      @property {string} locale
+      @property {String} locale
       @description Locale of the datepicker
       */
       locale: {
@@ -152,18 +152,26 @@
         reflect: true
       },
       /*
-      @property {string} disabled
+      @property {Boolean} disabled
       @description Toggles the disabled status of the element
       */
       disabled: {
         value: false,
+        reflect: true
+      },
+      /*
+      @property {Boolean} default
+      @description Whether it sets "today" as the default value or not, if no value is provided
+      */
+      default: {
+        value: true,
         reflect: true
       }
     },
 
     privateProperties: {
       /*
-      @property (private) {object} _daysGrid
+      @property (private) {Object} _daysGrid
       @description Reference to the daysGrid node
       */
       daysGrid: {
@@ -171,7 +179,7 @@
         reflect: false
       },
       /*
-      @property (private) {object} _monthsGrid
+      @property (private) {Object} _monthsGrid
       @description Reference to the monthsGrid node
       */
       monthsGrid: {
@@ -179,7 +187,7 @@
         reflect: false
       },
       /*
-      @property (private) {object} _yearsGrid
+      @property (private) {Object} _yearsGrid
       @description Reference to the yearsGrid node
       */
       yearsGrid: {
@@ -187,7 +195,7 @@
         reflect: false
       },
       /*
-      @property (private) {array} _weekDays
+      @property (private) {Array} _weekDays
       @description Stores all the data for the weekDays
       */
       weekDays: {
@@ -195,7 +203,7 @@
         reflect: false
       },
       /*
-      @property (private) {object} _selectorsContainer
+      @property (private) {Object} _selectorsContainer
       @description Reference to the header selectors container
       */
       selectorsContainer: {
@@ -203,7 +211,7 @@
         reflect: false
       },
       /*
-      @property (private) {array} _monthSelector
+      @property (private) {Array} _monthSelector
       @description Reference to the monthSelector
       */
       monthSelector: {
@@ -211,7 +219,7 @@
         reflect: false
       },
       /*
-      @property (private) {array} _yearSelector
+      @property (private) {Array} _yearSelector
       @description Reference to the yearSelector
       */
       yearSelector: {
@@ -219,7 +227,7 @@
         reflect: false
       },
       /*
-      @property (private) {object} _misc
+      @property (private) {Object} _misc
       @description Object with usefull information
       */
       misc: {
@@ -227,7 +235,7 @@
         reflect: false
       },
       /*
-      @property (private) {object} _refs
+      @property (private) {Object} _refs
       @description Object with usefull information
       */
       refs: {
@@ -235,7 +243,7 @@
         reflect: false
       },
       /*
-      @property (private) {string} _formelement 
+      @property (private) {String} _formelement 
       @description Necessary property for a form
       */
       formelement: {
@@ -263,6 +271,8 @@
 
         el._setupMinDate();
         el._setupMaxDate();
+
+        el._setupSeparator();
 
         el._updateValueWithinLimits();
 
@@ -345,8 +355,8 @@
         var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
         var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
 
-        var splittedValue = value.split("/");
-        var splittedFormat = el.valueFormat.split("/");
+        var splittedValue = value.split(el._misc.separator);
+        var splittedFormat = el.valueFormat.split(el._misc.separator);
 
         var dayIndex = splittedFormat.indexOf(dayFormat);
         var monthIndex = splittedFormat.indexOf(monthFormat);
@@ -362,9 +372,6 @@
       handleInitialState: function () {
 
         var el = this;
-
-        // el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
-        // el._misc.current.month = (el.month != "") ? el.month : el._misc.current.month;
 
         switch (el.selectable) {
           case "dmy":
@@ -386,18 +393,15 @@
             el._showDaysGrid();
             el._disableSelectors();
 
-            // if (el.year != "" && el.month != "") {
             el._disableNavigation();
-            // }
+
             break;
           case "m":
-            // el._misc.current.year = (el.year != "") ? el.year : el._misc.current.year;
 
             el._showMonthsGrid();
             el._disableSelectors();
-            // if (el.year != "") {
             el._disableNavigation();
-            // }
+
             break;
           case "y":
             el._showYearsGrid();
@@ -590,35 +594,43 @@
           }
         });
       },
+      /*
+      @function (private) _initValue
+      @description Creates an initial value for the datepicker
+      */
       initValue: function () {
 
         var el = this;
+        var dateObj;
 
         // If no value was provided by the user we create one
         if (el.value == "") {
 
           var date = new Date();
 
-          var dateObj = {
+          dateObj = {
             day: el.day != "" ? parseInt(el.day) : parseInt(date.getDate()),
-            month: el.month != "" ? parseInt(el.month) : parseInt(date.getMonth()) + 1,
+            month: el.month != "" ? parseInt(el.month) : parseInt(date.getMonth()),
             year: el.year != "" ? parseInt(el.year) : parseInt(date.getFullYear())
           }
 
         } else {
 
           dateObj = el._getObjectFromDateString(el.value);
-          dateObj.month = dateObj.month - 1
+          dateObj.month = dateObj.month - 1;
 
         }
 
         dateObj = el._formatObj(dateObj);
-
+        
         el._misc.current.month = dateObj.month;
         el._misc.current.year = dateObj.year;
         el._misc.current.day = dateObj.day;
 
-        el.value = el._getFormattedValue(dateObj, el.valueFormat);
+        if (el.value == "" && vcomet.util.isTrue(el.default)) {
+          el.value = el._getFormattedValue(dateObj, el.valueFormat);
+
+        }
 
       },
       /*
@@ -628,40 +640,45 @@
       updateValueWithinLimits: function () {
 
         var el = this;
-        var dateObj = el._getObjectFromDateString(el.value);
 
-        dateObj.month = dateObj.month - 1;
+        if (el.value != "") {
 
-        // Compares if the date exceeds the min/max limits
-        if ((dateObj.month < el._misc.min.month && dateObj.year <= el._misc.min.year || dateObj.year < el._misc.min.year)) {
+          var dateObj = el._getObjectFromDateString(el.value);
 
-          el._misc.current.month = parseInt(el._misc.min.month);
-          el._misc.current.year = el._misc.min.year;
-          el._misc.current.day = el._misc.min.day;
+          dateObj.month = dateObj.month - 1;
 
-        } else if ((dateObj.month > el._misc.max.month && dateObj.year >= el._misc.max.year) || dateObj.year > el._misc.max.year) {
+          // Compares if the date exceeds the min/max limits
+          if ((dateObj.month < el._misc.min.month && dateObj.year <= el._misc.min.year || dateObj.year < el._misc.min.year)) {
 
-          el._misc.current.month = parseInt(el._misc.max.month);
-          el._misc.current.year = el._misc.max.year;
-          el._misc.current.day = el._misc.max.day;
+            el._misc.current.month = parseInt(el._misc.min.month);
+            el._misc.current.year = el._misc.min.year;
+            el._misc.current.day = el._misc.min.day;
 
-        } else {
+          } else if ((dateObj.month > el._misc.max.month && dateObj.year >= el._misc.max.year) || dateObj.year > el._misc.max.year) {
 
-          el._misc.current.month = dateObj.month;
-          el._misc.current.year = dateObj.year;
-          el._misc.current.day = dateObj.day;
+            el._misc.current.month = parseInt(el._misc.max.month);
+            el._misc.current.year = el._misc.max.year;
+            el._misc.current.day = el._misc.max.day;
+
+          } else {
+
+            el._misc.current.month = dateObj.month;
+            el._misc.current.year = dateObj.year;
+            el._misc.current.day = dateObj.day;
+
+          }
+
+          el._misc.selected.day = el._misc.current.day;
+          el._misc.selected.month = el._misc.current.month;
+          el._misc.selected.year = el._misc.current.year;
+
+          el.value = el._getFormattedValue(el._formatObj({
+            day: el._misc.current.day,
+            month: el._misc.current.month + 1,
+            year: el._misc.current.year
+          }));
 
         }
-
-        el._misc.selected.day = el._misc.current.day;
-        el._misc.selected.month = el._misc.current.month;
-        el._misc.selected.year = el._misc.current.year;
-
-        el.value = el._getFormattedValue(el._formatObj({
-          day: el._misc.current.day,
-          month: el._misc.current.month + 1,
-          year: el._misc.current.year
-        }));
 
       },
       /*
@@ -827,26 +844,23 @@
 
       },
       /*
-      @function (private) _setInitialValue
-      @description Sets the initial value based on the data provided by the user
+      @function (private) {String} _setupSeparator
+      @description Takes the value format and saves its separator
       */
-      setInitialValue: function () {
+      setupSeparator: function () {
 
         var el = this;
 
-        if (Object.keys(el._misc.selected).length > 0) {
+        var format = el.valueFormat;
+        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
 
-          var dateObj = {
+        format = format.replace(dayFormat, "");
+        format = format.replace(monthFormat, "");
+        format = format.replace(yearFormat, "");
 
-            day: el._misc.selected.day ? parseInt(el._misc.selected.day) : undefined,
-            month: el._misc.selected.month ? parseInt(el._misc.current.month) + 1 : undefined,
-            year: el._misc.current.year ? parseInt(el._misc.current.year) : undefined,
-
-          };
-
-          el.value = el._getFormattedValue(el._formatObj(dateObj));
-
-        }
+        el._misc.separator = format[0];
 
       },
       /*
@@ -1031,9 +1045,9 @@
 
           }
         }
-
+        
         var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.selected.day) + '"][month="' + parseInt(el._misc.selected.month) + '"][year="' + parseInt(el._misc.selected.year) + '"]');
-
+        
         if (currentDay) {
           el._selectDay(currentDay);
         }
@@ -1072,9 +1086,6 @@
           months[i].classList[months[i].dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
         }
 
-        el._misc.selected.month = (typeof el._misc.selected.month == "undefined") ? el._misc.current.month : el._misc.selected.month;
-        el._misc.selected.year = (typeof el._misc.selected.year == "undefined") ? el._misc.current.year : el._misc.selected.year;
-
         var currentMonthCell = monthsGrid.querySelector('[data-index ="' + el._misc.selected.month + '"][data-year ="' + el._misc.selected.year + '"]');
 
         if (currentMonthCell) {
@@ -1112,9 +1123,7 @@
             year++;
           }
         }
-
-        el._misc.selected.year = (typeof el._misc.selected.year == "undefined") ? el._misc.current.year : el._misc.selected.year;
-
+        
         selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.selected.year + '"]')
 
         if (selectedYearCell) {
@@ -1179,7 +1188,7 @@
       @param {Object} dayButton
       */
       selectDay: function (dayButton) {
-
+        
         if (dayButton.dataset.disabled != "true") {
 
           var el = this;
@@ -1412,9 +1421,9 @@
       @param {Object} dayButton
       */
       highlight: function (selected, previous) {
-
+        
         var el = this;
-
+        
         if (previous) {
           previous.classList.remove("vc-datepicker-current", "vc-bg2-active");
         }
@@ -1913,7 +1922,7 @@
 
         if (el._refs.yearsGrid) {
 
-          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.current.year + "']");
+          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.selected.year + "']");
 
           if (yearButton && yearButton.dataset.disabled != "true") {
             el._highlight(yearButton, el.querySelector(".vc-datepicker-yearsGrid .vc-datepicker-current"));
@@ -1923,7 +1932,7 @@
 
         if (el._refs.monthsGrid) {
 
-          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.current.year + "'][data-index='" + el._misc.current.month + "']");
+          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.selected.year + "'][data-index='" + el._misc.selected.month + "']");
 
           if (monthButton && monthButton.dataset.disabled != "true") {
             el._highlight(monthButton, el.querySelector(".vc-datepicker-monthsGrid .vc-datepicker-current"));
@@ -1933,7 +1942,7 @@
 
         if (el._refs.daysGrid) {
 
-          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.current.year + "'][month='" + el._misc.current.month + "'][day='" + el._misc.current.day + "']");
+          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.selected.year + "'][month='" + el._misc.selected.month + "'][day='" + el._misc.selected.day + "']");
 
           if (dayButton && dayButton.dataset.disabled != "true") {
             el._highlight(dayButton, el.querySelector(".vc-datepicker-daysGrid .vc-datepicker-grid .vc-datepicker-current"));
@@ -2109,7 +2118,6 @@
     onRender: function () {
       var el = this;
       el._setup();
-      // el._setInitialValue();
     },
     onPropertyChanged: function (key, oldVal, newVal) {
       switch (key) {

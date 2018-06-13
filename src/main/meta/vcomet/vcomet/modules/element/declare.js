@@ -98,7 +98,7 @@ vcomet.declare = function (name, baseElement) {
     });
 
     elementClass.onDetached(function () {
-
+        this.__parentComponent = null;
     });
 
     elementClass.onAttributeChanged(function (attrName, oldVal, newVal) {

@@ -140,3 +140,52 @@ vcomet.util.isTrue = function(a) {
 vcomet.util.isTouchScreen = function () {
   return "ontouchstart" in window;
 };
+
+vcomet.ajax = function (url, options, cb) {
+  options = options || {};
+  options.method = options.method ? options.method.toUpperCase() : "GET";
+  options.querySeparator = options.querySeparator || "?";
+  options.paramSeparator = options.paramSeparator || "&";
+  options.payload = options.payload || null;
+  options.async = options.async || null;
+  options.user = options.user || null;
+  options.password = options.password || null;
+
+  var xhr = options.xhr || new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (this.readyState == 4) {
+      var success = this.status < 200 && this.status >= 300;
+      cb(success, {
+        url: url,
+        method: options.method,
+        xhr: this,
+        status: this.status,
+        response: this.response,
+        responseText: this.responseText
+      });
+    }
+  };
+
+  if(options.params) { 
+    var paramsKeys = Object.keys(options.params);
+    if(paramsKeys.length > 0) {      
+      url += options.querySeparator + paramsKeys[0] + "=" + options.params[paramsKeys[0]];
+      for (var i = 1; i < paramsKeys.length; i++) {
+        url += options.paramSeparator + paramsKeys[i] + "=" + options.params[paramsKeys[i]]; 
+      }
+    }
+  }
+
+  xhr.open(options.method, url, options.async, options.user, options.password);
+  if (options.contentType) {
+    xhr.setRequestHeader("Content-Type", options.contentType);
+  }
+
+  if (options.headers) {
+    for(var header in options.headers) {
+      xhr.setRequestHeader(header, options.headers[header]);
+    }
+  }
+
+  xhr.send(options.payload);
+};
