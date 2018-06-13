@@ -4568,7 +4568,7 @@ vcomet.defineParentComponent = function (el) {
         return el.__parentComponent;
     };
 
-    propDescriptor.set = function () {};
+    propDescriptor.set = function () { };
 
     Object.defineProperty(el, "parentComponent", propDescriptor);
 
@@ -4641,23 +4641,26 @@ vcomet.createAttributesObserver = function (el, config) {
     // First we check if we have attributes to observe
     if (observeAttributesKeys.length > 0) {
 
-        var propertyName, value;
+        var property, privateProperty, value;
 
         // For each observe attribute if check which value should be assign to it
         for (var i = 0; i < observeAttributesKeys.length; i++) {
 
-            propertyName = "__" + vcomet.util.hyphenToCamelCase(observeAttributesKeys[i]);
+            property = vcomet.util.hyphenToCamelCase(observeAttributesKeys[i]);
+            privateProperty = "__" + property;
 
             // If the attribute already has a value we assign this value to its corresponding property
             if (el.getAttribute(observeAttributesKeys[i])) {
 
-                el[propertyName] = el.getAttribute(observeAttributesKeys[i]);
+                el[privateProperty] = el.getAttribute(observeAttributesKeys[i]);
 
                 // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
 
-                value = el.hasOwnProperty(propertyName) ? el[propertyName] : "";
-                el.setAttribute(observeAttributesKeys[i], value);
+                if (config.properties[property].reflectDefault) {
+                    value = el.hasOwnProperty(privateProperty) ? el[privateProperty] : "";
+                    el.setAttribute(observeAttributesKeys[i], value);
+                }
 
             }
 
