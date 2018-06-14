@@ -18,7 +18,6 @@
         </div>
     </div>
 
-
 </template>
 
 <!-- <script data-src="vc-appmenu.js"></script> -->
@@ -40,6 +39,16 @@
             */
             location: {
                 value: "right",
+                reflect: true
+            },
+            /*
+              @property {Boolean} defaultStyle 
+              @description 
+              Values: true, false
+              Default: true
+            */
+            defaultStyle: {
+                value: true,
                 reflect: true
             }
         },
@@ -163,6 +172,18 @@
                 el._refs.close = el.template.querySelector(".vc-appmenu-close");
                 el._refs.closeIcon = el.template.querySelector(".vc-appmenu-closeIcon");
                 el._refs.scroll = document.createElement("vc-scroll");
+            },
+            /*
+              @function (private) _setDefaultStyle
+              @description Check if the default element style should be applied
+            */
+            setDefaultStyle: function () {
+                var el = this;
+                // Check default style configuration
+                if(vcomet.util.isTrue(el.defaultStyle)) {
+                    // Wrapper style
+                    el._refs.wrapper.classList.add("vc-spaced");
+                }
             },
             /*
               @function (private) _locateAppsBox
@@ -358,6 +379,8 @@
             el._refs.scroll.appendChild(el._refs.wrapper);
             el._refs.windowBox.appendChild(el._refs.scroll);
 
+            // ** Apply default items positioning style
+            el._setDefaultStyle();
         },
 
         onInit: function () {
