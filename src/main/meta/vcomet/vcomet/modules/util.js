@@ -154,7 +154,7 @@ vcomet.ajax = function (url, options, cb) {
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {
     if (this.readyState == 4) {
-      var success = this.status < 200 && this.status >= 300;
+      var success = this.status >= 200 && this.status < 300;
       cb(success, {
         url: url,
         method: options.method,
@@ -176,7 +176,12 @@ vcomet.ajax = function (url, options, cb) {
     }
   }
 
-  xhr.open(options.method, url, options.async, options.user, options.password);
+  if(options.async || options.user || options.password) {
+    xhr.open(options.method, url, options.async, options.user, options.password);
+  } else {
+    xhr.open(options.method, url);
+  }
+  
   if (options.contentType) {
     xhr.setRequestHeader("Content-Type", options.contentType);
   }
