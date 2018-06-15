@@ -133,8 +133,47 @@ vcomet.util.getBrowser = function () {
   return browserName;
 };
 
-vcomet.util.isTrue = function(a) {
-	return a == true || a == "true";
+/**
+ * Replace or add params to specified url
+ * @param  {[type]} url [description]
+ * @param  {[type]} paramsObj [description]
+ * @return {[type]}      [description]
+ */
+vcomet.util.getBrowserScrollBarWidth = function () {
+
+  if (!vcomet.__browserScrollBarWidth) {
+
+    var outer = document.createElement("div");
+    outer.style.visibility = "hidden";
+    outer.style.width = "100px";
+    outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+
+    document.body.appendChild(outer);
+
+    var widthNoScroll = outer.offsetWidth;
+    // force scrollbars
+    outer.style.overflow = "scroll";
+
+    // add innerdiv
+    var inner = document.createElement("div");
+    inner.style.width = "100%";
+    outer.appendChild(inner);
+
+    var widthWithScroll = inner.offsetWidth;
+
+    // remove divs
+    outer.parentNode.removeChild(outer);
+
+    vcomet.__browserScrollBarWidth = widthNoScroll - widthWithScroll;
+
+  }
+
+  return vcomet.__browserScrollBarWidth;
+  
+};
+
+vcomet.util.isTrue = function (a) {
+  return a == true || a == "true";
 };
 
 vcomet.util.isTouchScreen = function () {

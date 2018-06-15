@@ -35,14 +35,6 @@
     themed: true,
     privateProperties: {
       /*
-      @property (private) {Object} _subInputs
-      @description Object that contains the different subinputs
-      */
-      subInputs: {
-        value: {},
-        reflect: false
-      },
-      /*
       @property (private) {Object} _misc
       @description Object with usefull information
       */
@@ -106,14 +98,6 @@
       */
       mask: {
         value: "YYYYMMDD",
-        reflect: true
-      },
-      /*
-      @property {String} separator
-      @description Indicates the separator for the date
-      */
-      separator: {
-        value: "-",
         reflect: true
       },
       /*
@@ -227,9 +211,11 @@
 
         el._setupMisc();
         el._setupRefs();
+        el._setupSeparator();
         el._setupDatePicker();
         el._setupMask();
         el._setupEvents();
+        el._setupOverlay();
 
         el._updateLabel();
         el._updateDisabled();
@@ -290,15 +276,42 @@
           }
         }, false);
 
+        datePickerElement._refs.close.addEventListener('pointerdown', function (e) {
+          el._hideDatePicker();
+        }, false);
+
         document.body.addEventListener(blurTrigger, function (e) {
-          el._customBlur(e, el);
+          if (!el.isOnPath && !el._refs.datePicker.isOnPath && !el._refs.overlay.classList.contains("vc-datebox-device")) {
+            el._hideDatePicker();
+          }
         });
 
         vcomet.registerPathListener(datePickerElement, "datepicker");
 
-        el.querySelector(".vc-datebox-main").appendChild(datePickerElement);
+        el._refs.main.appendChild(datePickerElement);
 
         el._refs.datePicker = datePickerElement;
+      },
+      /*
+      @function (private) _setupOverlay
+      @description Sets up basic properties for the data object
+      */
+      setupOverlay: function () {
+
+        var el = this;
+        console.log('what');
+        el._refs.overlay = document.createElement("div");
+        el._refs.overlay.classList.add("vc-datebox-overlay");
+        el._refs.overlay.classList.add("vc-bg1-modal");
+        el._refs.overlay.appendChild(el._refs.datePicker);
+
+        // Prevents scrolling on mobile devices
+        window.addEventListener("touchstart", function (e) {
+          if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-datebox-device")) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+
       },
       /*
       @function (private) _setupMisc
@@ -314,6 +327,7 @@
         el._misc.min.active = false;
         el._misc.max = {};
         el._misc.max.active = false;
+        el._misc.modal = {};
 
       },
       /*
@@ -411,10 +425,10 @@
         firstSection.start = 0;
         firstSection.end = el._misc.mask[el._misc.mask.order[0]].format.length;
 
-        secondSection.start = firstSection.end + el.separator.length;
+        secondSection.start = firstSection.end + el._misc.separator.length;
         secondSection.end = secondSection.start + el._misc.mask[el._misc.mask.order[1]].format.length;
 
-        thirdSection.start = secondSection.end + el.separator.length;
+        thirdSection.start = secondSection.end + el._misc.separator.length;
         thirdSection.end = thirdSection.start + el._misc.mask[el._misc.mask.order[2]].format.length;
 
         el._refs.subInputs.first.parentNode.dataset.field = el._misc.mask.order[0];
@@ -429,7 +443,7 @@
         var separators = el.querySelectorAll(".vc-datebox-subInputs .vc-datebox-separator");
 
         for (var i = 0; i < separators.length; i++) {
-          separators[i].innerHTML = el.separator;
+          separators[i].innerHTML = el._misc.separator;
         }
 
       },
@@ -655,11 +669,31 @@
         el._misc.max.active = true;
       },
       /*
+      @function (private) {String} _setupSeparator
+      @description Takes the value format and saves its separator
+      */
+      setupSeparator: function () {
+
+        var el = this;
+
+        var format = el.valueFormat;
+        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+        format = format.replace(dayFormat, "");
+        format = format.replace(monthFormat, "");
+        format = format.replace(yearFormat, "");
+
+        el._misc.separator = format[0];
+
+      },
+      /*
       @function (private) _setupToolbarMode
       @description Adds whats needed to overwrite the default style
       */
       setupToolbarMode: function () {
-        this.querySelector(".vc-datebox-main").classList.add("toolbar");
+        el._refs.main.classList.add("toolbar");
       },
       /*
       @function (private) _addFocusStyle
@@ -697,7 +731,7 @@
 
         if (el._refs.datePicker.classList.contains("hidden")) {
           el._showDatePicker();
-        } else {
+        } else if (!el._refs.datePicker.classList.contains("hidden")) {
           el._hideDatePicker();
         }
 
@@ -710,16 +744,22 @@
 
         var el = this;
 
+        el._assignModalStyle();
         el._assignDatePickerStyle();
 
         el._refs.datePicker._refresh();
 
-        document.body.appendChild(el._refs.datePicker);
+        document.body.appendChild(el._refs.overlay);
 
         el._refs.datePicker._show();
 
         el._refs.datePicker._handleAutoHeight();
         el._refs.datePicker._handleFonts();
+
+        el._misc.modal.active = true;
+
+        el._misc.modal.windowScrollY = window.scrollY;
+        el._misc.modal.windowScrollX = window.scrollX;
 
       },
       /*
@@ -731,7 +771,102 @@
         var el = this;
 
         el._refs.datePicker._hide();
-        el.querySelector(".vc-datebox-main").appendChild(el._refs.datePicker);
+
+        if (el._refs.overlay.parentNode) {
+          el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+        }
+
+        if (el._misc.modal.active) {
+          el._revertModalStyle();
+        }
+
+        el._misc.modal.active = false;
+
+      },
+      /*
+      @function (private) _assignModalStyle
+      @description Handles the overlay modal style
+      */
+      assignModalStyle: function () {
+
+        var el = this;
+        
+        // Gets the body style from two different sources
+        var computedStyle = window.getComputedStyle(document.body);
+        var boundingClientRect = document.body.getBoundingClientRect();
+        
+        //  Checks if there are vertical/horizontal scrolls on window
+        var windowHasVerticalScroll = (document.body.offsetHeight - window.innerHeight) > 0;
+        var windowHasHorizontalScroll = (document.body.offsetWidth - window.innerWidth) > 0;
+        
+        // Gets all the margins of the body
+        var horizontalMarginSpace = parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight) / 2;
+        var verticalMarginSpace = parseFloat(computedStyle.marginTop) + parseFloat(computedStyle.marginBottom) / 2;
+
+        var widthDifferenceCalc = (parseInt(boundingClientRect.width) - parseInt(computedStyle.width)) / 2;
+
+        var verticalCalc = parseInt(window.innerWidth + window.pageXOffset + widthDifferenceCalc - document.body.clientWidth);
+        var horizontalCalc = parseInt(window.innerHeight - (boundingClientRect.height + boundingClientRect.top));
+        var scrollBarWidth = vcomet.util.getBrowserScrollBarWidth();
+        
+        el._misc.modal.verticalAdjustement = windowHasVerticalScroll && (verticalCalc >= 0 && verticalCalc <= scrollBarWidth);
+        el._misc.modal.horizontalAdjustement = windowHasHorizontalScroll && (horizontalCalc >= 0 && horizontalCalc <= scrollBarWidth);
+        
+        // Adjusts the body style to keep it visually intact when adding overflow
+        if (el._misc.modal.verticalAdjustement || el._misc.modal.horizontalAdjustement) {
+
+          if (el._misc.modal.verticalAdjustement) {
+
+            // Saves and assigns a width and Left style
+            el._misc.modal.previousStyleWidth = parseInt(document.body.style.width);
+            el._misc.modal.previousStyleLeft = parseInt(document.body.style.left);
+
+            document.body.style.width = document.body.offsetWidth + "px";
+            document.body.style.left = boundingClientRect.left + "px";
+
+          }
+
+          if (el._misc.modal.horizontalAdjustement) {
+            
+            // Saves and assigns a top style
+            el._misc.modal.previousStyleTop = parseInt(document.body.style.top);
+            document.body.style.top = boundingClientRect.top + "px";
+
+          }
+
+          // Saves and assigns a position style
+          el._misc.modal.previousStylePosition = document.body.style.position;
+          document.body.style.position = "absolute";
+          
+          // Shows/Hides the disabled scrollbars in the overlay
+          el._refs.overlay.style.overflowY = windowHasVerticalScroll ? "scroll" : "";
+          el._refs.overlay.style.overflowX = windowHasHorizontalScroll ? "scroll" : "";
+
+          document.body.classList.add("vc-body-modal");
+
+        }
+
+      },
+      /*
+      @function (private) _revertModalStyle
+      @description Reverts the assigned modal style
+      */
+      revertModalStyle: function () {
+
+        var el = this;
+
+        document.body.classList.remove("vc-body-modal");
+        
+        // Removes the modal style and restores the previous style 
+        document.body.style.width = el._misc.modal.previousStyleWidth ? el._misc.modal.previousStyleWidth : "";
+        document.body.style.left = el._misc.modal.previousStyleLeft ? el._misc.modal.previousStyleLeft : "";
+        document.body.style.top = el._misc.modal.previousStyleTop ? el._misc.modal.previousStyleTop : "";
+        document.body.style.position = el._misc.modal.previousStylePosition ? el._misc.modal.previousStylePosition : "";
+
+        el._misc.modal.previousStyleWidth = undefined;
+        el._misc.modal.previousStyleLeft = undefined;
+        el._misc.modal.previousStyleTop = undefined;
+        el._misc.modal.previousStylePosition = undefined;
 
       },
       /*
@@ -746,19 +881,16 @@
 
           if (!el._refs.datePicker.classList.contains("vc-datebox-device")) {
 
-            el._refs.datePicker.style.top = "0";
-            el._refs.datePicker.style.left = "0";
-            el._refs.datePicker.style.width = "100%";
-            el._refs.datePicker.style.height = "100%";
-            el._refs.datePicker.classList.add("vc-datebox-device");
-            el._refs.datePicker.classList.add("vc-bg1-modal");
+            el._refs.datePicker.style.top = "auto";
+            el._refs.datePicker.style.left = "auto";
+
+            el._refs.overlay.classList.add("vc-datebox-device")
 
           }
 
         } else {
 
-          el._refs.datePicker.classList.remove("vc-datebox-device");
-          el._refs.datePicker.classList.remove("vc-bg1-modal");
+          el._refs.overlay.classList.remove("vc-datebox-device");
 
           el._refs.datePicker.style.top = el.getBoundingClientRect().top + el.offsetHeight + "px";
           el._refs.datePicker.style.left = el.getBoundingClientRect().left + "px";
@@ -766,17 +898,7 @@
           el._refs.datePicker.style.height = "auto";
 
         }
-      },
-      /*
-      @function (private) _customBlur
-      @description Hides the datepicker if its not being targeted
-      @param {Object} e
-      @param {Object} el
-      */
-      customBlur: function (e, el) {
-        if (!el.isOnPath && !el._refs.datePicker.isOnPath) {
-          el._hideDatePicker();
-        }
+
       },
       /*
       @function (private) _onDatePickerSelection
@@ -799,7 +921,8 @@
         el._refs.subInputs.second.value = obj[el._misc.mask.order[1]];
         el._refs.subInputs.third.value = obj[el._misc.mask.order[2]];
 
-        el._refs.datePicker._hide();
+        el._hideDatePicker();
+
       },
       /*
       @function (private) _validateDate
@@ -884,8 +1007,8 @@
         var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
         var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
 
-        var splittedValue = value.split(el.separator);
-        var splittedFormat = el.valueFormat.split(el.separator);
+        var splittedValue = value.split(el._misc.separator);
+        var splittedFormat = el.valueFormat.split(el._misc.separator);
 
         var dayIndex = splittedFormat.indexOf(dayFormat);
         var monthIndex = splittedFormat.indexOf(monthFormat);
@@ -1429,7 +1552,7 @@
       var el = this;
 
       if (el._refs.datePicker && !el._refs.datePicker.classList.contains("hidden")) {
-        el._assignDatePickerStyle();
+        el._hideDatePicker();
       }
 
     }

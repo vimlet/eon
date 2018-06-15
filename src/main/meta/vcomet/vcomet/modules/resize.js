@@ -50,7 +50,7 @@
           "style",
           "display: block; position: absolute; \n\
                           top: 0; left: 0; height: 100%; width: 100%; overflow: hidden;\n\
-                          pointer-events: none; z-index: -1;"
+                          pointer-events: none; z-index: -1; visibility: hidden"
         );
         // Store resize element
         obj.__resizeElement = element;
