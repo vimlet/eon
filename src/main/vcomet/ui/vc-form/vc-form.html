@@ -57,9 +57,11 @@
         original = original || this;
         node = node || this;
 
-        var children = node.childNodes; // node.children could probably increase performance
-        for (var i = 0; i < children.length; i++) {
-          original._walkRecursive(original, children[i], fn);
+        if (!node._formElement) {
+          var children = node.childNodes; // node.children could probably increase performance
+          for (var i = 0; i < children.length; i++) {
+            original._walkRecursive(original, children[i], fn);
+          }
         }
         fn(node);
       },
@@ -117,6 +119,22 @@
         }, function (success, data) {
           vcomet.triggerCallback("onSubmit", el, null, [success, data]);
         });
+      },
+
+      handleCheckbox: function (data, node) {
+        var checkboxProperty = data[node.name];
+        if (node.checked) {
+          if (checkboxProperty) {
+            if (Object.prototype.toString.call(checkboxProperty) === "[object Array]") {
+              checkboxProperty.push(node.value);
+            } else {
+              data[node.name] = [data[node.name], node.value];
+            }
+
+          } else {
+            data[node.name] = node.value;
+          }
+        }
       }
 
     },
@@ -127,24 +145,53 @@
         @description Return form values as an object
       */
       getData: function () {
+        var el = this;
         var data = {};
 
         // Walk form recursively
-        this._walkRecursive(this, this, function (node) {
+        el._walkRecursive(el, el, function (node) {
 
-          // vcomet element
-          if (node._formElement && node.name !== "") {
-            data[node.name] = node.value;
+          // Only add elements if they have name, value and not disabled
+          if (node.name !== "" && node.value && !node.disabled) {
+            // vComet elements
+            if (node._formElement) {
+              if (node.nodeName.toLowerCase() == "vc-checkbox" || node.nodeName.toLowerCase() == "vc-toggle") {
+                el._handleCheckbox(data, node);
+              } else {
+                data[node.name] = node.value;
+              }
+            }
+
+            // HTML form elements
+            else if (node instanceof HTMLInputElement) {
+
+              // Handle radio
+              if (node.type.toLowerCase() == "radio") {
+                if (node.checked) {
+                  data[node.name] = node.value;
+                }
+              }
+
+              // Handle checkbox
+              else if (node.type.toLowerCase() == "checkbox") {
+                el._handleCheckbox(data, node);
+              }
+
+              // Handle all other HTMLInputElement
+              else {
+                data[node.name] = node.value;
+              }
+            }
+
+            // Other HTML form elements
+            else if (node instanceof HTMLTextAreaElement
+              || node instanceof HTMLOptionElement
+              || node instanceof HTMLSelectElement
+              || node instanceof HTMLDataListElement) {
+              data[node.name] = node.value;
+            }
           }
 
-          // HTML form elements
-          else if ((node instanceof HTMLInputElement
-            || node instanceof HTMLTextAreaElement
-            || node instanceof HTMLOptionElement
-            || node instanceof HTMLSelectElement
-            || node instanceof HTMLDataListElement) && node.name !== "") {
-            data[node.name] = node.value;
-          }
 
         });
 
