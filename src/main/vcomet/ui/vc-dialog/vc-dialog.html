@@ -179,6 +179,16 @@
            */
             footer: {
                 value: {}
+            },
+            /*
+              @property {Boolean} defaultStyle 
+              @description 
+              Values: true, false
+              Default: true
+            */
+            defaultStyle: {
+                value: true,
+                reflect: true
             }
         },
         privateProperties: {
@@ -219,7 +229,18 @@
                 el._refs.userContent = el.source.querySelector("[type='content']");
                 el._refs.userFooter = el.source.querySelector("[type='footer']");
             },
-
+            /*
+              @function (private) _setDefaultStyle
+              @description Check if the default element style should be applied
+            */
+            setDefaultStyle: function () {
+                var el = this;
+                // Check default style configuration
+                if(vcomet.util.isTrue(el.defaultStyle)) {
+                    // Wrapper style
+                    el._refs.dialog.classList.add("vc-spaced");
+                }
+            },
             /*
               @function (private) _addHeading
               @description Add dialog heading and its different options
@@ -1211,6 +1232,10 @@
             vcomet.createCallback("onClosed", el);
 
             el._createRefs();
+
+            // ** Apply default items positioning style
+            el._setDefaultStyle();
+
             el._misc.drag = {};
             el._misc.resize = {};
             el._misc.scaled = {};

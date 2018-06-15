@@ -267,7 +267,11 @@
       get: function (id) {
         var el = this;
         // Store get request
-        var result = vcomet.StoreMemory.get(id, el);
+        if(id) {
+          var result = vcomet.StoreMemory.fetch(el);
+        } else {
+          var result = vcomet.StoreMemory.get(id, el);
+        }
         // Check filter keys
         if (el.keys) {
           el.filter(el.keys);
@@ -287,7 +291,11 @@
         el.onGetRemote(fn);
         // Store get request
         try {
-          var result = vcomet[el.module].getRemote(id, el);
+          if(id) {
+            var result = vcomet[el.module].fetch(el);
+          } else {
+            var result = vcomet[el.module].getRemote(id, el);
+          }
         } catch (e) {
           vcomet.error.log("store", "Store " + el.type + " type does not support get requests callbacks");
         }
@@ -513,9 +521,7 @@
       vcomet.createCallback("onReplaceRemote", el);
       vcomet.createCallback("onUpdateRemote", el);
       vcomet.createCallback("onRemoveRemote", el);
-    },
-    onInit: function () {
-      var el = this;
+
       // Set first url assigned value as the store root url
       el._rootUrl = el.url;
       // Require store type module
