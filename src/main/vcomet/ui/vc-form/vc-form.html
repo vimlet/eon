@@ -57,12 +57,26 @@
         original = original || this;
         node = node || this;
 
+        // Exclude formElement children since sometimes they wrap html form elements.
         if (!node._formElement) {
           var children = node.childNodes; // node.children could probably increase performance
           for (var i = 0; i < children.length; i++) {
             original._walkRecursive(original, children[i], fn);
           }
         }
+        fn(node);
+      },
+
+      clearRecursive: function (original, node, fn) {
+        original = original || this;
+        node = node || this;
+
+        // Note this time we don't prevent access to formElement children. 
+        var children = node.childNodes; // node.children could probably increase performance
+        for (var i = 0; i < children.length; i++) {
+          original._clearRecursive(original, children[i], fn);
+        }
+
         fn(node);
       },
 
@@ -157,6 +171,10 @@
             if (node._formElement) {
               if (node.nodeName.toLowerCase() == "vc-checkbox" || node.nodeName.toLowerCase() == "vc-toggle") {
                 el._handleCheckbox(data, node);
+              } else if (node.nodeName.toLowerCase() == "vc-radio") {
+                if (node.checked) {
+                  data[node.name] = node.value;
+                }
               } else {
                 data[node.name] = node.value;
               }
@@ -196,6 +214,45 @@
         });
 
         return data;
+      },
+
+      clear() {
+        var el = this;
+        el._clearRecursive(el, el, function (node) {
+
+          // vComet elements
+          if (node._formElement) {
+            if (node.nodeName.toLowerCase() == "vc-checkbox"
+              || node.nodeName.toLowerCase() == "vc-toggle"
+              || node.nodeName.toLowerCase() == "vc-radio") { // TODO: Review radio
+              node.checked = false;
+            } else {
+              // node.value = ""; // TODO: call if exists node.clear() to deal with "" != Number type issue 
+            }
+          }
+
+          // HTML form elements
+          else if (node instanceof HTMLInputElement) {
+
+            // Handle radio and checkbox
+            if (node.type.toLowerCase() == "radio" || node.type.toLowerCase() == "checkbox") {
+              node.checked = false;
+            }
+            // Handle all other HTMLInputElement
+            else {
+              node.value = "";
+            }
+          }
+
+          // Other HTML form elements
+          else if (node instanceof HTMLTextAreaElement
+            || node instanceof HTMLOptionElement
+            || node instanceof HTMLSelectElement
+            || node instanceof HTMLDataListElement) {
+            node.value = "";
+          }
+
+        });
       },
 
       /*
