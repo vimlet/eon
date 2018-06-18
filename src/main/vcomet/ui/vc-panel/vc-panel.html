@@ -213,18 +213,26 @@
       removeTemplate: function (tmp) {
         var el = this;
         var fragment = document.createDocumentFragment();
-        var child;
+        var child, scrpt;
         var children = !tmp.children[0] ? tmp.content.children : tmp.children;
         children = [].slice.call(children);
         // Move nodes to the tree container safely
         while (children.length) {
           // Build nodes structure
           child = children.shift();
+          childScripts = child.querySelectorAll("script");
           // Check scripts
           if (child.tagName == "SCRIPT") {
             // Inject deferred script text from stored ones
             positionId = child.getAttribute("_positionId");
             child.text = positionId ? el._refs.scripts[positionId] : child.text;
+          } else if(childScripts[0]) {
+            for (var i = 0; i < childScripts.length; i++) {
+              scrpt = childScripts[i];
+              // Inject deferred script text from stored ones
+              positionId = scrpt.getAttribute("_positionId");
+              scrpt.text = positionId ? el._refs.scripts[positionId] : scrpt.text;
+            }
           }
           fragment.appendChild(child);
         }
