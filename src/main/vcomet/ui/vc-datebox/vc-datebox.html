@@ -209,6 +209,8 @@
 
         el.locale = (el.locale != undefined && el.locale != "") ? el.locale : navigator.language;
 
+        el._initDefault();
+
         el._setupMisc();
         el._setupRefs();
         el._setupSeparator();
@@ -237,7 +239,6 @@
 
         vcomet.registerPathListener(el, "datebox");
 
-        el._initDefault();
         el._initValue();
 
       },
@@ -252,7 +253,8 @@
         var blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
 
         datePickerElement.classList.add("vc-datebox-picker", "hidden");
-
+        
+        datePickerElement.value = el.value ? el.value : datePickerElement.value;
         datePickerElement.locale = el.locale;
         datePickerElement.weekDaysFormat = el.weekDaysFormat;
         datePickerElement.weekStart = el.weekStart;
@@ -1023,11 +1025,7 @@
       @description If a value has been provided by the user we set it for our element
       */
       initDefault: function () {
-
-        var el = this;
-
-        el.value = el.default != "" && el.value == "" ? el.default : el.value;
-
+        this.value = this.default != "" && this.value == "" ? this.default : this.value;
       },
       /*
       @function (private) _initValue
@@ -1036,7 +1034,7 @@
       initValue: function () {
 
         var el = this;
-
+        
         if (el.value != "") {
 
           var splittedMin = el.value.split("/");
@@ -1470,7 +1468,7 @@
       updateValue: function () {
 
         var el = this;
-
+        
         if (!el._misc.preventUpdate) {
 
           var format = el.valueFormat;

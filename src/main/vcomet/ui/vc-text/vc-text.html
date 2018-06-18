@@ -120,6 +120,14 @@
                 reflect: true
             },
             /*
+            @property {String} default
+            @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+            */
+            default: {
+                value: "",
+                reflect: true
+            },
+            /*
             @property {string} readonly
             @description Toggles the readonly status of the element
             */
@@ -149,7 +157,10 @@
                 el._setupRefs();
                 el._setupCounter();
                 el._setupForType();
-                el._setupInitialText();
+
+                el._initDefault();
+                el._initValue();
+
                 el._setupTouchBlur();
                 el._updateLabel();
                 el._updateDisabled();
@@ -228,7 +239,6 @@
                 el._misc.area.update = function () {
                     el._misc.area.preventUpdate = true;
                     el.value = el._refs.editableArea.value;
-                    el._refs.editableArea.title = el._refs.editableArea.value;
                     el._updateCounter();
                 };
 
@@ -260,7 +270,6 @@
                     var value = el._getValue();
                     el._misc.area.preventUpdate = true;
                     el.value = value;
-                    el._refs.editableArea.title = value;
                     el._saveAreaInnerHTML();
                     el._updateCounter();
                 };
@@ -377,7 +386,6 @@
 
                 input.addEventListener("input", function (e) {
                     el.value = input.value;
-                    input.title = el.type.toLowerCase() != "password" ? input.value : el._refs.input.title;
                     el._updateCounter();
                 });
 
@@ -406,35 +414,6 @@
                     var counter = el.querySelector(".vc-text-counter");
                     counter.innerHTML = el.maxLength;
                 }
-
-            },
-            /*
-            @function (private) _setupInitialText
-            @description In case the user specified a text we will move it here
-            */
-            setupInitialText: function () {
-
-                var el = this;
-
-                if (el._misc.initialText != "") {
-
-                    if (el._misc.initialText.length > parseInt(el.maxLength)) {
-                        el._misc.initialText = el._misc.initialText.substring(0, el.maxLength);
-                    }
-
-                }
-
-                if (el.type != "area") {
-                    el._refs.input.value = el._misc.initialText;
-                    el._refs.input.title = el._refs.input.title = el.type.toLowerCase() != "password" ? el._misc.initialText : el._refs.input.title;
-                } else {
-                    el._refs.editableArea.innerText = el._misc.initialText;
-                    el._refs.editableArea.title = el._misc.initialText;
-                }
-
-                el.__value = el._misc.initialText;
-
-                el._updateCounter();
 
             },
             /*
@@ -482,11 +461,46 @@
                     el._refs.editableArea.innerHTML = el._misc.area.validValueInnerHTML;
                     var value = el._getValue();
                     el._misc.area.preventUpdate = true;
-                    el._refs.editableArea.title = value;
                     el.value = value;
                     el._updateCounter();
 
                 }
+
+            },
+            /*
+            @function (private) _initDefault
+            @description If a value has been provided by the user we set it for our element
+            */
+            initDefault: function () {
+                this.value = this.default != "" && this.value == "" ? this.default : this.value;
+            },
+            /*
+            @function (private) _initValue
+            @description Sets the initial value depending if an innerText or a value has been provided
+            */
+            initValue: function () {
+
+                var el = this;
+
+                el._misc.initialText = el.value != "" ? el.value : el._misc.initialText;
+
+                if (el._misc.initialText != "") {
+
+                    if (el._misc.initialText.length > parseInt(el.maxLength)) {
+                        el._misc.initialText = el._misc.initialText.substring(0, el.maxLength);
+                    }
+
+                }
+
+                if (el.type != "area") {
+                    el._refs.input.value = el._misc.initialText;
+                } else {
+                    el._refs.editableArea.innerText = el._misc.initialText;
+                }
+
+                el.__value = el._misc.initialText;
+
+                el._updateCounter();
 
             },
             /*
@@ -907,7 +921,6 @@
                     if (!el._misc.area.preventUpdate) {
 
                         el._refs.editableArea.innerText = el.value;
-                        el._refs.editableArea.title = el.value;
 
                         el._updateCounter();
                         el._refresh();
@@ -919,7 +932,6 @@
                 } else {
 
                     el._refs.input.value = el.value;
-                    el._refs.input.title = el.type.toLowerCase() != "password" ? el.value : el._refs.input.title;
 
                 }
 
@@ -927,11 +939,38 @@
 
         },
 
+        functions: {
+            /*
+            @function clear
+            @description Empties the value
+            */
+            clear: function () {
+                this.value = "";
+            },
+            /*
+            @function reset
+            @description Resets the value of the element to the default one, if no default is provided then empties the value
+            */
+            reset: function () {
+
+                var el = this;
+
+                if (el.default != "") {
+                    el.value = el.default;
+                } else {
+                    el.clear();
+                }
+
+            }
+        },
+
         onCreated: function () {
 
             var el = this;
 
             el._misc.initialText = this.source.textContent;
+            el.value = el.value == "" && el._misc.initialText != "" ? el._misc.initialText : el.value;
+            
             el._misc.area = {};
             el._misc.area.inputEventTriggered = false;
             el._misc.area.verticalSize = 0;
