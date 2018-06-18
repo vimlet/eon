@@ -155,16 +155,19 @@
             /* 
               @function (private) _updateCheck
               @description Update checked status
-              @param {String} newVal [New value of checked]
+              @param {String} oldVal [Old value]
             */
-            updateCheck: function () {
+            updateCheck: function (oldVal) {
                 var el = this;
-
+                
                 if (!vcomet.util.isTrue(el.checked)) {
                     el._refs.input.checked = false;
                     el._refs.input.removeAttribute("checked");
                     el._refs.input.classList.remove("vc-checkbox-checked");
-                    vcomet.triggerCallback("onUncheck", el);
+
+                    if (vcomet.util.isTrue(oldVal)) {
+                        vcomet.triggerCallback("onUncheck", el);
+                    }
 
                 } else {
                     el._refs.input.checked = true;
@@ -234,7 +237,7 @@
                     this._updateReadonly();
                     break;
                 case "checked":
-                    this._updateCheck();
+                    this._updateCheck(oldVal);
                     break;
                 case "label":
                     this._refs.labelText.innerHTML = newVal;
