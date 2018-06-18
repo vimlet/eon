@@ -57,6 +57,14 @@
         reflect: true
       },
       /*
+      @property {Boolean} default
+      @description Sets checked status by default when the element is reset
+      */
+      default: {
+        value: false,
+        reflect: true
+      },
+      /*
        @property {Boolean} inline 
        @description Space that occupy the radio inside parent container.
        By default, its size adapts to its content
@@ -69,7 +77,7 @@
       },
     },
 
-    privateProperties: {    
+    privateProperties: {
       /*
         @property (private) {Object} _refs 
         @description Object with  references
@@ -78,7 +86,30 @@
         value: {}
       }
     },
+    functions: {
+      /*
+      @function clear
+      @description Unchecks the element
+      */
+      clear: function () {
+        this.checked = false;
+      },
+      /*
+      @function reset
+      @description Resets checked status of the element to the default one
+      */
+      reset: function () {
+        var el = this;
 
+        if (vcomet.util.isTrue(el.default)) {
+          el.checked = el.default;
+          console.log('el.checked', el.checked);
+        } else {
+          el.clear();
+        }
+
+      }
+    },
     privateFunctions: {
       /*
         @function (private) _setValue
@@ -136,58 +167,84 @@
         @param {String} oldVal [Old value]
       */
       updateCheck: function (oldVal) {
-        if (this.parentNode.tagName.toLowerCase() == "vc-group") {
-          var radioGroupHost = this.parentNode;
-        }
-
         if (!vcomet.util.isTrue(oldVal)) {
-          if (radioGroupHost) {
-            var previousChecked = vcomet.Radio.checkedRadios[radioGroupHost.name];
-            var previousSpan;
-
-            // Uncheck previousRadio
-            if (previousChecked) {
-              previousSpan = previousChecked.querySelector(".vc-radio-outspan");
-              previousChecked._refs.input._checked = false;
-              previousChecked._checked = false;
-              previousChecked.setAttribute("checked", "false");
-              previousChecked._refs.input.classList.remove("vc-radio-checkRadio");
-              previousSpan.classList.remove("vc-radio-checked");
-              vcomet.createCallback("onUncheck", this);
-
-            }
-
-            radioGroupHost.value = this.value;
-            radioGroupHost._checked = true;
-            radioGroupHost.disabled = vcomet.util.isTrue(this.disabled) ? true : false;
-            vcomet.Radio.checkedRadios[radioGroupHost.name] = this;
-          }
-
-          // Check new Radio
-          this._refs.input.checked = true;
-          this._refs.input._checked = true;
-          this._checked = true;
-          this._refs.input.classList.add("vc-radio-checkRadio");
-          this._refs.span.classList.add("vc-radio-checked");
-          vcomet.triggerCallback("onCheck", this);
+          this._handleCheck();
 
           // Programmatic radio uncheck 
         } else {
-          if (radioGroupHost) {
-            radioGroupHost.value = "";
-            radioGroupHost._checked = false;
-            radioGroupHost.disabled = vcomet.util.isTrue(this.disabled) ? true : false;
-            vcomet.Radio.checkedRadios[radioGroupHost.name] = "";
+          if (oldVal === this.checked.toString()) {
+            this._handleCheck();
+          } else {
+
+            this._handleUncheck();
           }
-         
-          this._refs.input.checked = false;
-          this._refs.input._checked = false;
-          this._checked = false;
-          this._refs.input.classList.remove("vc-radio-checkRadio");
-          this._refs.span.classList.remove("vc-radio-checked");
-          vcomet.triggerCallback("onCheck", this);
 
         }
+      },
+
+
+
+
+      /*
+        @function (private) _setCheck
+        @description Call method to update check status  
+      */
+      handleCheck: function (radioGroupHost) {
+        if (this.parentNode.tagName.toLowerCase() == "vc-group") {
+          var radioGroupHost = this.parentNode;
+        }
+        if (radioGroupHost) {
+          var previousChecked = vcomet.Radio.checkedRadios[radioGroupHost.name];
+          var previousSpan;
+
+          // Uncheck previousRadio
+          if (previousChecked) {
+            previousSpan = previousChecked.querySelector(".vc-radio-outspan");
+            previousChecked._refs.input._checked = false;
+            previousChecked._checked = false;
+            previousChecked.setAttribute("checked", "false");
+            previousChecked._refs.input.classList.remove("vc-radio-checkRadio");
+            previousSpan.classList.remove("vc-radio-checked");
+            vcomet.createCallback("onUncheck", this);
+
+          }
+
+          radioGroupHost.value = this.value;
+          radioGroupHost._checked = true;
+          radioGroupHost.disabled = vcomet.util.isTrue(this.disabled) ? true : false;
+          vcomet.Radio.checkedRadios[radioGroupHost.name] = this;
+        }
+
+        // Check new Radio
+        this._refs.input.checked = true;
+        this._refs.input._checked = true;
+        this._checked = true;
+        this._refs.input.classList.add("vc-radio-checkRadio");
+        this._refs.span.classList.add("vc-radio-checked");
+        vcomet.triggerCallback("onCheck", this);
+      },
+
+      /*
+        @function (private) _setCheck
+        @description Call method to update check status    
+      */
+      handleUncheck: function () {
+        if (this.parentNode.tagName.toLowerCase() == "vc-group") {
+          var radioGroupHost = this.parentNode;
+        }
+        if (radioGroupHost) {
+          radioGroupHost.value = "";
+          radioGroupHost._checked = false;
+          radioGroupHost.disabled = vcomet.util.isTrue(this.disabled) ? true : false;
+          vcomet.Radio.checkedRadios[radioGroupHost.name] = "";
+        }
+
+        this._refs.input.checked = false;
+        this._refs.input._checked = false;
+        this._checked = false;
+        this._refs.input.classList.remove("vc-radio-checkRadio");
+        this._refs.span.classList.remove("vc-radio-checked");
+        vcomet.triggerCallback("onCheck", this);
       },
 
       /*
@@ -241,6 +298,7 @@
       el._refs.label.insertBefore(el._refs.span, el._refs.label.firstChild);
       el._refs.span.appendChild(el._refs.inspan);
 
+      el.default = vcomet.util.isTrue(el.default) && !vcomet.util.isTrue(el.checked) ? el.default : el.checked;
       el._setValue();
       el._updateDisabled();
       el._updateReadonly();
@@ -250,7 +308,7 @@
       // Checking a radio option
       el._refs.label.addEventListener("click", function (e) {
         if ((!vcomet.util.isTrue(el.disabled) && !vcomet.util.isTrue(el.readonly)) || el.disabled == null) {
-          el._updateCheck()
+          el._updateCheck();
         }
 
       }, false);

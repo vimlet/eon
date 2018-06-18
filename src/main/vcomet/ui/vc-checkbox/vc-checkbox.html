@@ -65,6 +65,14 @@
                 reflect: true
             },
             /*
+            @property {Boolean} default
+            @description Sets checked status by default when the element is reset
+            */
+            default: {
+                value: false,
+                reflect: true
+            },
+            /*
              @property {Boolean} inline 
              @description Space that occupy the checkbox inside parent container.
              By default, its size adapts to its content
@@ -99,6 +107,29 @@
             */
             refs: {
                 value: {}
+            }
+        },
+        functions: {
+            /*
+            @function clear
+            @description Unchecks the element
+            */
+            clear: function () {
+                this.checked = false;
+            },
+            /*
+            @function reset
+            @description Resets checked status of the element to the default one
+            */
+            reset: function () {
+                var el = this;
+               
+                if (vcomet.util.isTrue(el.default)) {
+                    el.checked = el.default;
+                } else {
+                    el.clear();
+                }
+
             }
         },
 
@@ -159,7 +190,7 @@
             */
             updateCheck: function (oldVal) {
                 var el = this;
-                
+
                 if (!vcomet.util.isTrue(el.checked)) {
                     el._refs.input.checked = false;
                     el._refs.input.removeAttribute("checked");
@@ -208,8 +239,8 @@
             el._refs.label.insertBefore(el._refs.span, el._refs.label.firstChild);
             el._refs.span.classList.add("vc-checkbox-span", "vc-bg2-border");
             el._currentValue = el.value;
-
             el._refs.labelText.innerHTML = el.label;
+            el.default = vcomet.util.isTrue(el.default) && !vcomet.util.isTrue(el.checked) ? el.default : el.checked;
 
             // Checking or unchecking the checkbox
             el._refs.label.addEventListener("click", function (e) {
