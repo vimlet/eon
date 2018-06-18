@@ -55,6 +55,16 @@
             deploy: {
                 value: "regard",
                 reflect: true
+            },
+            /*
+              @property {Boolean} defaultStyle 
+              @description 
+              Values: true, false
+              Default: true
+            */
+            defaultStyle: {
+                value: true,
+                reflect: true
             }
         },
 
@@ -65,7 +75,14 @@
            */
             maxHeight: {
                 value: 0
-            }
+            },
+            /*
+              @property (private) {Object} _refs 
+              @description Object with references
+            */
+            refs: {
+                value: {}
+            },
         },
 
         functions: {
@@ -88,7 +105,7 @@
             addItem: function (item) {
                 (item.value) ? this._setupSpan(item) : null;
                 item.classList.add("vc-togglemenu-item");
-                this._content.vcometScroll.content.appendChild(item);
+                this._refs.content.vcometScroll.content.appendChild(item);
             },
             /*
               @function removeItem 
@@ -96,7 +113,7 @@
               @param {Object} item [Node to removes from togglemenu] 
              */
             removeItem: function (item) {
-                this._content.vcometScroll.content.removeChild(item);
+                this._refs.content.vcometScroll.content.removeChild(item);
             },
             /*
               @function replaceItem 
@@ -110,11 +127,23 @@
                 }
 
                 newItem.classList.add("vc-togglemenu-item");
-                this._content.vcometScroll.content.replaceChild(newItem, oldItem);
+                this._refs.content.vcometScroll.content.replaceChild(newItem, oldItem);
             }
         },
 
         privateFunctions: {
+             /*
+              @function (private) _setDefaultStyle
+              @description Check if the default element style should be applied
+            */
+            setDefaultStyle: function () {
+                var el = this;
+                // Check default style configuration
+                if(vcomet.util.isTrue(el.defaultStyle)) {
+                    // Wrapper style
+                    el._refs.content.classList.add("vc-spaced");
+                }
+            },
             /*
               @function (private) _setupItems
               @description Set up declarative user togglemenu items
@@ -134,8 +163,8 @@
                 }
 
                 // Move documentFragment to shadowRoot
-                el._content.vcometScroll.content.appendChild(itemsDocFragment);
-                el._content.vcometScroll.update();
+                el._refs.content.vcometScroll.content.appendChild(itemsDocFragment);
+                el._refs.content.vcometScroll.update();
 
             },
             /*
@@ -157,22 +186,22 @@
             setMeasurements: function () {
                 var el = this;
                 style = el.currentStyle || window.getComputedStyle(el);
-                var contentStyle = window.getComputedStyle(el._content);
-                var buttonStyle = window.getComputedStyle(el._button);
+                var contentStyle = window.getComputedStyle(el._refs.content);
+                var buttonStyle = window.getComputedStyle(el._refs.button);
 
-                // el._content.style.width = parseInt(buttonStyle.width) + "px";
+                // el._refs.content.style.width = parseInt(buttonStyle.width) + "px";
 
                 if (el.deploy == "overlap") {
-                    el._content.style.position = "absolute";
+                    el._refs.content.style.position = "absolute";
                     el.parentNode.style.position = "relative";
-                    el._content.style.top = el._button.offsetHeight + "px";
+                    el._refs.content.style.top = el._refs.button.offsetHeight + "px";
                 }
 
                 if (el.occupy == "fit") {
                     var offsetTopEl = (el.deploy == "regard") ? (el.offsetTop - el.parentNode.offsetTop) : el.offsetTop;
 
-                    el._maxHeight = el.parentNode.clientHeight - (parseInt(style.marginTop) + parseInt(style.marginBottom) + el._button.offsetHeight) - offsetTopEl;
-                    el._content.style.maxHeight = el._maxHeight + "px";
+                    el._maxHeight = el.parentNode.clientHeight - (parseInt(style.marginTop) + parseInt(style.marginBottom) + el._refs.button.offsetHeight) - offsetTopEl;
+                    el._refs.content.style.maxHeight = el._maxHeight + "px";
                 }
 
             },
@@ -186,8 +215,8 @@
                 var totalItemsHeight = 0;
 
                 if (el.occupy == "fit") {
-                    totalItemsHeight = el._content.vcometScroll.content.scrollHeight;
-                    el._content.style.height = totalItemsHeight + "px";
+                    totalItemsHeight = el._refs.content.vcometScroll.content.scrollHeight;
+                    el._refs.content.style.height = totalItemsHeight + "px";
 
                 } else {
                     var style = window.getComputedStyle(el);
@@ -197,12 +226,12 @@
                     if (el.deploy == "overlap") {
                         var parentNode = el.parentNode.offsetHeight;
 
-                        el._content.style.height = parentNode - (el.offsetTop + el._button.offsetHeight + elMargins) + "px";
+                        el._refs.content.style.height = parentNode - (el.offsetTop + el._refs.button.offsetHeight + elMargins) + "px";
 
                     } else {
                         var offsetTopEl = el.offsetTop - el.parentNode.offsetTop;
 
-                        el._content.style.height = el.parentNode.clientHeight - (parseInt(style.marginTop) + parseInt(style.marginBottom) + el._button.offsetHeight) - offsetTopEl + "px";
+                        el._refs.content.style.height = el.parentNode.clientHeight - (parseInt(style.marginTop) + parseInt(style.marginBottom) + el._refs.button.offsetHeight) - offsetTopEl + "px";
                     }
                 }
             },
@@ -219,10 +248,10 @@
                     el.autoAdjustHeight = true;
 
                 } else {
-                    el._content.classList.remove("vc-togglemenu-display");
-                    el._button.classList.remove("vc-togglemenu-buttonActive");
+                    el._refs.content.classList.remove("vc-togglemenu-display");
+                    el._refs.button.classList.remove("vc-togglemenu-buttonActive");
                     el.autoAdjustHeight = false;
-                    el._content.style.height = 0;
+                    el._refs.content.style.height = 0;
                 }
 
             },
@@ -235,23 +264,23 @@
                 var el = this;
                 var icon = this.querySelector(".vc-togglemenu-arrow");
 
-                el._content.classList.add("vc-togglemenu-transition");
+                el._refs.content.classList.add("vc-togglemenu-transition");
 
-                if (el._content.classList.contains("vc-togglemenu-display")) {
+                if (el._refs.content.classList.contains("vc-togglemenu-display")) {
                     el._firstUndisplay = (el._firstUndisplay == "false") ? "true" : el._firstUndisplay;
-                    el._content.style.height = (el._firstUndisplay == "false") ? this._content.offsetHeight + "px" : null;
-                    el._content.style.height = 0;
-                    el._button.classList.add("vc-bg1-hoverable");
-                    el._content.classList.remove("vc-togglemenu-display");
-                    el._button.classList.remove("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
+                    el._refs.content.style.height = (el._firstUndisplay == "false") ? this._refs.content.offsetHeight + "px" : null;
+                    el._refs.content.style.height = 0;
+                    el._refs.button.classList.add("vc-bg1-hoverable");
+                    el._refs.content.classList.remove("vc-togglemenu-display");
+                    el._refs.button.classList.remove("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
                     vcomet.triggerCallback("onUndisplay", this);
                     el.autoAdjustHeight = false;
-                    el._content.style.height = 0;
+                    el._refs.content.style.height = 0;
 
                 } else {
-                    el._content.classList.add("vc-togglemenu-display");
-                    el._button.classList.remove("vc-bg1-hoverable");
-                    el._button.classList.add("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
+                    el._refs.content.classList.add("vc-togglemenu-display");
+                    el._refs.button.classList.remove("vc-bg1-hoverable");
+                    el._refs.button.classList.add("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
                     vcomet.triggerCallback("onDisplay", this);
                     el._setDisplayHeight();
 
@@ -261,38 +290,37 @@
 
         onCreated: function () {
             var el = this;
-            el._button = el.template.querySelector(".vc-togglemenu-button");
-            el._title = el.template.querySelector(".vc-togglemenu-title");
-            el._content = el.template.querySelector(".vc-togglemenu-content");
+            el._refs.button = el.template.querySelector(".vc-togglemenu-button");
+            el._refs.title = el.template.querySelector(".vc-togglemenu-title");
+            el._refs.content = el.template.querySelector(".vc-togglemenu-content");
+
+            // ** Apply default items positioning style
+            el._setDefaultStyle();
 
             vcomet.createCallback("onChange", this);
             vcomet.createCallback("onDisplay", this);
             vcomet.createCallback("onUndisplay", this);
         },
 
-        onInit: function () {
-
-        },
-
         onBubbleRender: function () {
             var el = this;
             var sourceNodes = el.getSourceElements();
 
-            el._title.innerHTML = el.heading;
+            el._refs.title.innerHTML = el.heading;
             el._setupItems(sourceNodes);
             el._setMeasurements();
             el._updateDisplay();
 
             // Sets buttons listener for display the togglemenu
-            el._button.addEventListener("click", function () {
+            el._refs.button.addEventListener("click", function () {
                 el._displayTogglemenu();
             }, false);
 
             // Resizes toggle content when adds or deletes elements
-            // vcomet.addResizeListener(el._content, el.tagName + el.uid, function () {
-            //     var differentHeight = (parseInt(el._content.style.height) != el._content);
-            vcomet.addResizeListener(el._content.vcometScroll.content, el.tagName + el.uid, function () {
-                var differentHeight = (parseInt(el._content.style.height) != el._content.vcometScroll.content.scrollHeight);
+            // vcomet.addResizeListener(el._refs.content, el.tagName + el.uid, function () {
+            //     var differentHeight = (parseInt(el._refs.content.style.height) != el._refs.content);
+            vcomet.addResizeListener(el._refs.content.vcometScroll.content, el.tagName + el.uid, function () {
+                var differentHeight = (parseInt(el._refs.content.style.height) != el._refs.content.vcometScroll.content.scrollHeight);
 
                 (el.autoAdjustHeight && differentHeight) ? el._setDisplayHeight() : null;
             });
@@ -300,10 +328,10 @@
         },
 
         onWindowResize: function (event) {
-            this._content.classList.remove("vc-togglemenu-transition");
+            this._refs.content.classList.remove("vc-togglemenu-transition");
             this._setMeasurements();
 
-            if (this._content.classList.contains("vc-togglemenu-display")) {
+            if (this._refs.content.classList.contains("vc-togglemenu-display")) {
                 this._setDisplayHeight();
             }
         },
@@ -314,9 +342,7 @@
                     this._updateDisplay();
                     break;
             }
-
         }
-
     });
 
 </script>

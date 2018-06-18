@@ -1,6 +1,6 @@
 <template></template>
 <script>
-  vcomet.element("vc-form", null, {
+  vcomet.element("vc-form", "vc-form.css", {
     properties: {
       /*
         @property {String} querySeparator 
@@ -49,6 +49,16 @@
       method: {
         value: "",
         reflect: true
+      },
+      /*
+        @property {Boolean} defaultStyle 
+        @description Wether or not the default style should be applied
+        Values: true, false
+        Default: true
+      */
+      defaultStyle: {
+          value: true,
+          reflect: true
       }
     },
     privateFunctions: {
@@ -149,8 +159,23 @@
             data[node.name] = node.value;
           }
         }
-      }
+      },
 
+      /*
+        @function (private) _setDefaultStyle
+        @description Apply the default element style
+      */
+      setDefaultStyle: function () {
+          var el = this;
+          // Check default style configuration
+          if(vcomet.util.isTrue(el.defaultStyle)) {
+              el.classList.add("vc-spaced");
+          }
+          // Check fill behavior
+          if(vcomet.util.isTrue(el.fill)) {
+              el.classList.add("vc-fill");
+          }
+      }
     },
 
     functions: {
@@ -288,6 +313,8 @@
 
     onCreated: function () {
       vcomet.createCallback("onSubmit", this);
+      // ** Apply default items positioning style
+      this._setDefaultStyle();
     },
 
 

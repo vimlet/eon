@@ -139,6 +139,16 @@
       idProperty: {
         value: "",
         reflect: true
+      },
+      /*
+        @property {Boolean} fill 
+        @description 
+        Values: true, false
+        Default: true
+      */
+      fill: {
+          value: true,
+          reflect: true
       }
     },
     privateFunctions: {
@@ -160,6 +170,18 @@
         el._refs.pageSelector = el.querySelector(".pageSelector");
         el._refs.entriesCount = el.querySelector(".vc-grid-entriesCount");
         el.store = el.querySelector("vc-store");
+      },
+      /*
+        @function (private) _setDefaultStyle
+        @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+          var el = this;
+          // Check fill behavior
+          if(vcomet.util.isTrue(el.fill)) {
+            // Content style
+            el.classList.add("vc-fill");
+          }
       },
       /*
       @function (private) _setupMisc
@@ -2067,6 +2089,14 @@
       el._defineDataSourceType();
 
       vcomet.createCallback("onEdit", el);
+
+    },
+    onInit: function () {
+
+      var el = this;
+
+      // ** Apply default items positioning style
+      el._setDefaultStyle();
 
     },
 
