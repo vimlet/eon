@@ -9,7 +9,7 @@ The store is a non visual element created to provide and manipulate data from a 
 ``` [html]
 <head>
   <script>
-    vcomet.import("/vcomet/data/store/vc-store.html");
+    vcomet.import("/vcomet/data/vc-store/vc-store.html");
   </script>
 <head>
 ```
