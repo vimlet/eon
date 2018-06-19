@@ -1,57 +1,3 @@
-<style>
-    vc-editor {
-        height: 100%;
-        width: 100%;
-        max-height: 450px;
-        position: relative;
-    }
-
-    .vc-editor-padding {
-        height: 100%;
-        width: 100%;
-        padding: 10px 0px;
-        box-sizing: border-box;
-        background-color: #1e1e1e;
-        position: absolute;
-    }
-
-    #vc-editor-content {
-        width: 100%;
-        height: 100%;
-        min-height: 10px;
-        box-sizing: border-box;
-        min-width: 100%;
-        flex-grow: 1;
-    }
-
-    vc-editor vc-loading {
-        width: 100%;
-        height: 100%;
-        min-height: 300px;
-        box-sizing: border-box;
-    }
-
-    #vc-editor-loading {
-        width: 100%;
-        height: 100%;
-        min-height: 300px;
-        box-sizing: border-box;
-    }
-
-    vc-editor span {
-        font-family: Consolas, "Courier New", monospace !important;
-        font-size: 14px !important;
-    }
-
-    .vc-editor-until-render {
-        display: none;
-    }
-
-    .monaco-editor {
-        overflow: hidden !important;
-        box-sizing: border-box !important;
-    }
-</style>
 
 <template>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -63,7 +9,7 @@
 </template>
 
 <script>
-    vcomet.element("vc-editor", null, {
+    vcomet.element("vc-editor", "vc-editor.css", {
 
         dependencies: [
             "../vc-loading"
@@ -117,10 +63,10 @@
                 }
                 require.config({
                     paths: {
-                        'vs': 'framework/custom/vc-editor/vs'
+                        'vs': vcomet.basePath + '/ui/vc-editor/vs'
                     }
                 });
-                require(['vs/editor/editor.main'], function () {
+                require([vcomet.basePath + '/ui/vc-editor/vs/editor/editor.main'], function () {
                     el._refs.editor = monaco.editor.create(el.querySelector("#vc-editor-content"), {
                         value: el.value,
                         language: el.language,
@@ -163,7 +109,7 @@
 
         onCreated: function () {
             var el = this;
-            vcomet.amd.require(["framework/custom/vc-editor/vs/loader.js"], function () {
+            vcomet.amd.require([vcomet.basePath + "/ui/vc-editor/vs/loader.js"], function () {
                 vcomet.triggerCallback("onloader", el, el, [el]);
             });
             // Custom callback to know when monaco editor is ready to be used
@@ -174,6 +120,7 @@
 
         onReady: function () {
             var el = this;
+            console.log('on Ready');
             el.onloader(function () {
                 el._init();
             });
