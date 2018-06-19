@@ -50,18 +50,18 @@
         @property {Boolean} checked
         @description Radio checked status
         Values can be: true or false
-        Default: false
       */
       checked: {
-        value: false,
+        value: "",
         reflect: true
       },
       /*
       @property {Boolean} default
       @description Sets checked status by default when the element is reset
+      Values can be: true or false
       */
       default: {
-        value: false,
+        value: "",
         reflect: true
       },
       /*
@@ -103,7 +103,6 @@
 
         if (vcomet.util.isTrue(el.default)) {
           el.checked = el.default;
-          console.log('el.checked', el.checked);
         } else {
           el.clear();
         }
@@ -162,32 +161,21 @@
       },
 
       /*
-        @function (private) _updateCheck
-        @description Update check status
-        @param {String} oldVal [Old value]
+        @function (private) _setCheck
+        @description Call method to update check status  
       */
-      updateCheck: function (oldVal) {
-        if (!vcomet.util.isTrue(oldVal)) {
+      // setCheck: function (oldVal) {
+      setCheck: function () {
+        if (vcomet.util.isTrue(this.checked)) {
           this._handleCheck();
-
-          // Programmatic radio uncheck 
         } else {
-          if (oldVal === this.checked.toString()) {
-            this._handleCheck();
-          } else {
-
-            this._handleUncheck();
-          }
-
+          this._handleUncheck();
         }
       },
 
-
-
-
       /*
-        @function (private) _setCheck
-        @description Call method to update check status  
+        @function (private) _handleCheck
+        @description Changes different element values to check status
       */
       handleCheck: function (radioGroupHost) {
         if (this.parentNode.tagName.toLowerCase() == "vc-group") {
@@ -200,7 +188,7 @@
           // Uncheck previousRadio
           if (previousChecked) {
             previousSpan = previousChecked.querySelector(".vc-radio-outspan");
-            previousChecked._refs.input._checked = false;
+            previousChecked._refs.input.checked = false;
             previousChecked._checked = false;
             previousChecked.setAttribute("checked", "false");
             previousChecked._refs.input.classList.remove("vc-radio-checkRadio");
@@ -217,46 +205,34 @@
 
         // Check new Radio
         this._refs.input.checked = true;
-        this._refs.input._checked = true;
-        this._checked = true;
         this._refs.input.classList.add("vc-radio-checkRadio");
         this._refs.span.classList.add("vc-radio-checked");
         vcomet.triggerCallback("onCheck", this);
       },
 
       /*
-        @function (private) _setCheck
-        @description Call method to update check status    
+        @function (private) _handleUncheck
+        @description Changes different element values to uncheck status 
       */
       handleUncheck: function () {
         if (this.parentNode.tagName.toLowerCase() == "vc-group") {
           var radioGroupHost = this.parentNode;
         }
+
         if (radioGroupHost) {
           radioGroupHost.value = "";
+          // Group checked
           radioGroupHost._checked = false;
           radioGroupHost.disabled = vcomet.util.isTrue(this.disabled) ? true : false;
           vcomet.Radio.checkedRadios[radioGroupHost.name] = "";
         }
 
         this._refs.input.checked = false;
-        this._refs.input._checked = false;
-        this._checked = false;
         this._refs.input.classList.remove("vc-radio-checkRadio");
         this._refs.span.classList.remove("vc-radio-checked");
         vcomet.triggerCallback("onCheck", this);
       },
 
-      /*
-        @function (private) _setCheck
-        @description Call method to update check status
-        @param {String} oldVal [Old value]        
-      */
-      setCheck: function (oldVal) {
-        if (vcomet.util.isTrue(this.checked) || vcomet.util.isTrue(oldVal)) {
-          this._updateCheck(oldVal);
-        }
-      },
 
       /*
         @function (private) _createRefs
@@ -298,7 +274,7 @@
       el._refs.label.insertBefore(el._refs.span, el._refs.label.firstChild);
       el._refs.span.appendChild(el._refs.inspan);
 
-      el.default = vcomet.util.isTrue(el.default) && !vcomet.util.isTrue(el.checked) ? el.default : el.checked;
+      el.checked = el.default != "" && el.checked == "" ? el.default : el.checked;
       el._setValue();
       el._updateDisabled();
       el._updateReadonly();
@@ -308,10 +284,11 @@
       // Checking a radio option
       el._refs.label.addEventListener("click", function (e) {
         if ((!vcomet.util.isTrue(el.disabled) && !vcomet.util.isTrue(el.readonly)) || el.disabled == null) {
-          el._updateCheck();
+          el.checked = true;
         }
 
       }, false);
+
     },
 
     onPropertyChanged: function (attrName, oldVal, newVal) {
@@ -323,7 +300,7 @@
           this._updateReadonly();
           break;
         case "checked":
-          this._setCheck(oldVal);
+          this._setCheck();
           break;
         case "label":
           this.querySelector(".vc-radio-labelText").innerHTML = newVal;

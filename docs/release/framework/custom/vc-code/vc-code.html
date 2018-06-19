@@ -29,8 +29,8 @@
 
 <script>
     /*
-                            @header Highlighter for html <code>. Wraps a string within <pre><code></code></pre> and higlight it.
-                            */
+                    @header Highlighter for html <code>. Wraps a string within <pre><code></code></pre> and higlight it.
+                    */
     vcomet.element("vc-code", null, {
 
         properties: {
@@ -39,7 +39,7 @@
                 reflect: false
             },
             language: {
-                value: "none",
+                value: null,
                 reflect: true
             },
             lineNumbers: {
@@ -58,16 +58,10 @@
         },
 
         functions: {
-            // @function highlight (public) [Higlight current codeblock]
+            //@function highlight (public) [Higlight current codeblock]
             highlight: function () {
                 var el = this;
                 Prism.highlightElement(el._refs.pre);
-            },
-            // @function refresh (public) [Calculate size again]
-            refresh: function () {
-                var el = this;
-                el.highlight();
-                el._setWidth();
             }
         },
 
@@ -82,22 +76,20 @@
             //@function setWidth (private) [Adjust pre width to content width]
             setWidth: function () {
                 var el = this;
-
-                console.log("el._refs.pre.scrollWidth", el._refs.pre.scrollWidth);
-                console.log("el._refs.pre.clientWidth", el._refs.pre.clientWidth);
-
-
                 if (el._refs.pre.scrollWidth > el._refs.pre.clientWidth) {
                     el._refs.pre.style.width = el._refs.pre.scrollWidth + "px";
                     el._refs.pre.style.boxSizing = "initial";
-                    el._refs.scroll.update();
                 }
             },
             //@function setLanguage (private)
             setLanguage: function () {
                 var el = this;
-                el._refs.pre.classList.add("language-" + el.language);
-                el._refs.code.classList.add("language-" + el.language);
+                if (el.language && el.language != "null") {
+                    el._refs.pre.classList.add("language-" + el.language);
+                    el._refs.code.classList.add("language-" + el.language);
+                } else {
+                    el._refs.code.classList.add("language-none");
+                }
             },
             //@function setLineNumbers (private)
             setLineNumbers: function () {
