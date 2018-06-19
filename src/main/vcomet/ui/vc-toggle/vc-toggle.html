@@ -58,10 +58,19 @@
             /*
               @property {Boolean} checked 
               @description Checkbox checked status
-              Default: false
+              Values can be: true or false
             */
             checked: {
-                value: false,
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {Boolean} default
+            @description Sets checked status by default when the element is reset
+            Values can be: true or false
+            */
+            default: {
+                value: "",
                 reflect: true
             },
             /*
@@ -92,6 +101,30 @@
             */
             refs: {
                 value: {}
+            }
+        },
+
+        functions: {
+            /*
+            @function clear
+            @description Unchecks the element
+            */
+            clear: function () {
+                this.checked = false;
+            },
+            /*
+            @function reset
+            @description Resets checked status of the element to the default one
+            */
+            reset: function () {
+                var el = this;
+
+                if (vcomet.util.isTrue(el.default)) {
+                    el.checked = el.default;
+                } else {
+                    el.clear();
+                }
+
             }
         },
 
@@ -172,6 +205,9 @@
             var el = this;
 
             el._refs.input.setAttribute("name", el.name);
+            el.checked = el.default != "" && el.checked == "" ? el.default : el.checked;
+            el._refs.nameLabel.innerHTML = el.label;
+
 
             // Checking or unchecking the checkbox
             el._refs.label.addEventListener("click", function (e) {
@@ -187,7 +223,6 @@
             el._updateDisabled();
             el._updateReadonly();
             el._updateCheck();
-            this._refs.nameLabel.innerHTML = el.label;
 
         },
 

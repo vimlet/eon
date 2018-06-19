@@ -12,7 +12,6 @@
     vc-playground vc-panel {
         height: 100%;
         width: 100%;
-      overflow: hidden !important;
     }
 
     #vc-playground-content {
@@ -29,9 +28,9 @@
         box-sizing: border-box;
     }
 
-    /* vc-playground vc-gutter vc-section {
+    vc-playground vc-gutter vc-section {
         height: 100% !important;
-    } */
+    }
 
     vc-playground vc-gutter vc-editor {
         margin-bottom: 0px;
@@ -89,34 +88,23 @@
 <script>
     vcomet.element("vc-playground", null, {
 
-        dependencies: [
-            "../vc-editor",
-            "../../vcomet/ui/vc-tabs",
-            "../../vcomet/ui/vc-tab",
-            "../../vcomet/ui/vc-gutter",
-            "../../vcomet/ui/vc-scroll",
-            "../../vcomet/ui/vc-section",
-            "../../vcomet/ui/vc-panel",
-            "../vc-loading"
-        ],
-
         properties: {
             head: {
                 value: "",
-                reflect: false
+                reflect: true
             },
             body: {
                 value: "",
-                reflect: false
+                reflect: true
             },
             js: {
                 value: "",
-                reflect: false
+                reflect: true
             },
             css: {
                 value: "",
-                reflect: false
-            }
+                reflect: true
+            },
         },
 
         privateProperties: {
@@ -125,7 +113,7 @@
             },
             misc: {
                 value: {
-                    editorsLoaded: 1, // Flag to control that all editors and the iframe are loaded. 0 when they are
+                    editorsLoaded: 5, // Flag to control that all editors and the iframe are loaded. 0 when they are
                     iframeFirstLoad: false // Flag to control first iframe onload as it is called many times when content is modified
                 }
             }
@@ -150,20 +138,7 @@
                             }
                             break;
                         case "html":
-                            if (!el._refs.html) {
-                                el._setHtmlEditor();
-                            }
                             el._refs.htmlPanel.querySelector("vc-gutter").resize();
-                            break;
-                        case "css":
-                            if (!el._refs.css) {
-                                el._setCssEditor();
-                            }
-                            break;
-                        case "js":
-                            if (!el._refs.js) {
-                                el._setJsEditor();
-                            }
                             break;
                     }
                 });
@@ -180,9 +155,7 @@
                 el._refs.result.onload = function () {
                     if (!el._misc.iframeFirstLoad) {
                         el._misc.iframeFirstLoad = true;
-                        setTimeout(function() {
-                            el._editorsLoaded();
-                        }, 0);
+                        el._editorsLoaded();
                     }
                 }
                 resultTab.appendChild(el._refs.result);
@@ -191,14 +164,10 @@
             // @function setHtmlTab (private) [Set up html tab, it contains head and body editors]
             setHtmlTab: function () {
                 var el = this;
-                el._refs.htmlTab = document.createElement("vc-panel");
-                el._refs.htmlTab.allowScroll = false;
-                el._refs.htmlTab.name = "html";
-                el._refs.htmlTab.title = "Html";
-                return el._refs.htmlTab;
-            },
-            setHtmlEditor: function () {
-                var el = this;
+                var htmlTab = document.createElement("vc-panel");
+                htmlTab.allowScroll = false;
+                htmlTab.name = "html";
+                htmlTab.title = "Html";
                 var htmlGutter = document.createElement("vc-gutter");
                 htmlGutter.collapsible = true;
                 htmlGutter.type = "vertical";
@@ -207,11 +176,9 @@
                 el._refs.html = {};
                 el._refs.html.head = document.createElement("vc-editor");
                 el._refs.html.head.oneditorready(function (currentEditor) {
-                    el._refs.html.head.setValue(el.head);
+                    el._editorsLoaded()
                 });
-                el._refs.html.head.onchange(function () {
-                    el.head = el._refs.html.head.getValue();
-                });
+                el._refs.html.head.value = el.head;
                 el._refs.html.head.language = "html";
                 var headTag = document.createElement("div");
                 headTag.classList.add("vc-playground-htmlTags");
@@ -220,11 +187,9 @@
                 el._refs.html.head.readonly = false;
                 el._refs.html.body = document.createElement("vc-editor");
                 el._refs.html.body.oneditorready(function () {
-                    el._refs.html.body.setValue(el.body);
+                    el._editorsLoaded();
                 });
-                el._refs.html.body.onchange(function () {
-                    el.body = el._refs.html.body.getValue();
-                });
+                el._refs.html.body.value = el.body;
                 el._refs.html.body.language = "html";
                 var bodyTag = document.createElement("div");
                 bodyTag.classList.add("vc-playground-htmlTags");
@@ -239,58 +204,49 @@
                 el._refs.htmlPanel.allowScroll = false;
                 el._refs.htmlPanel.setAttribute("allow-scroll", false);
                 el._refs.htmlPanel.appendChild(htmlGutter);
-                el._refs.htmlTab.appendChild(el._refs.htmlPanel);
+                htmlTab.appendChild(el._refs.htmlPanel);
+                return htmlTab;
             },
-            // @function setJsTab (private) [Set up js tab]
+            // @function setJsTab (private) [Set up js tab editor]
             setJsTab: function () {
                 var el = this;
-                el._refs.jsTab = document.createElement("vc-panel");
-                el._refs.jsTab.allowScroll = false;
-                el._refs.jsTab.name = "js";
-                el._refs.jsTab.title = "Js";
-                return el._refs.jsTab;
-            },
-            setJsEditor: function () {
-                var el = this;
+                var jsTab = document.createElement("vc-panel");
+                jsTab.allowScroll = false;
+                jsTab.name = "js";
+                jsTab.title = "Js";
                 el._refs.js = document.createElement("vc-editor");
                 el._refs.js.minheight = 564;
                 el._refs.js.oneditorready(function () {
-                    el._refs.js.setValue(el.js);
+                    el._editorsLoaded();
                 });
-                el._refs.js.onchange(function () {
-                    el.js = el._refs.js.getValue();
-                });
+                el._refs.js.value = el.js;
                 el._refs.js.language = "javascript";
                 el._refs.js.readonly = false;
-                el._refs.jsTab.appendChild(el._refs.js);
+                jsTab.appendChild(el._refs.js);
+                return jsTab;
             },
-            // @function setCssTab (private) [Set up css tab]
+            // @function setCssTab (private) [Set up css tab editor]
             setCssTab: function () {
                 var el = this;
-                el._refs.cssTab = document.createElement("vc-panel");
-                el._refs.cssTab.allowScroll = false;
-                el._refs.cssTab.name = "css";
-                el._refs.cssTab.title = "Css";
-                return el._refs.cssTab;
-            },
-            // @function setCssEditor (private) [Set up css editor]
-            setCssEditor: function () {
-                var el = this;
+                var cssTab = document.createElement("vc-panel");
+                cssTab.allowScroll = false;
+                cssTab.name = "css";
+                cssTab.title = "Css";
                 el._refs.css = document.createElement("vc-editor");
                 el._refs.css.minheight = 564;
                 el._refs.css.oneditorready(function () {
-                    el._refs.css.setValue(el.css);
+                    el._editorsLoaded();
                 });
-                el._refs.css.onchange(function () {
-                    el.css = el._refs.css.getValue();
-                });
+                el._refs.css.value = el.css;
                 el._refs.css.language = "css";
                 el._refs.css.readonly = false;
-                el._refs.cssTab.appendChild(el._refs.css);
+                cssTab.appendChild(el._refs.css);
+                return cssTab;
             },
             // @function setStructure (private) [Set up playground content]
             setStructure: function () {
                 var el = this;
+                el._refs.editor = {};
                 el._setTabs();
                 var resultTab = el._setResultTab();
                 var htmlTab = el._setHtmlTab();
@@ -347,13 +303,13 @@
             getResultString: function () {
                 var el = this;
                 var iframeSrc = "<!DOCTYPE html><html><head>";
-                iframeSrc += el.head;
+                iframeSrc += el._refs.html.head.getValue();
                 iframeSrc += "<style>";
-                iframeSrc += el.css;
+                iframeSrc += el._refs.css.getValue();
                 iframeSrc += "</style>";
-                iframeSrc += "</head><body>" + el.body;
+                iframeSrc += "</head><body>" + el._refs.html.body.getValue();
                 iframeSrc += "<script>";
-                iframeSrc += el.js;
+                iframeSrc += el._refs.js.getValue();
                 iframeSrc += "<\/script>";
                 iframeSrc += "</body></html>";
                 return iframeSrc;
@@ -418,6 +374,10 @@
             var el = this;
             el._init();
         },
+
+        onBubbleRender: function () {
+            var el = this;
+        }
 
 
     });

@@ -1,6 +1,7 @@
 <script>
   //@header A container made to swipe vc-slide elements
   vcomet.element("vc-swiper", "vc-swiper.css", {
+    themed: true,
     dependencies: [
       "../vc-slide"
     ],
@@ -151,8 +152,6 @@
       */
       setUp: function() {
         var el = this;
-        // Save a reference of the parent node for fullscreen purposes
-        el._refs.parent = el.parentNode;
         // Check swiper type
         if(el.type == "gallery"){
           el.classList.add("vc-swiper-gallery");
@@ -498,7 +497,7 @@
           // Create thumbnail span element
           var thumbnail = document.createElement("span");
           var thumbnailStored = thumbnail;
-          thumbnail.classList.add("vc-swiper-thumbnail", "vc-unselectable");
+          thumbnail.classList.add("vc-swiper-thumbnail");
           thumbnail.classList.add("vc-bg10");
           // Add thumbnail node
           var thumbnailFragment = document.createDocumentFragment();
@@ -543,7 +542,7 @@
           var size = invertSize + (invertSize / 3);
           // Set up css rule
           var typeRuleName = el.direction == "vertical" ? ".vc-swiper-vertical": "";
-          var staticRuleName = 'vc-swiper.vc-swiper-gallery'+ typeRuleName + ' .vc-swiper-thumbnail';
+          var staticRuleName = 'vc-swiper[theme="'+ el.getAttribute("theme") +'"].vc-swiper-gallery'+ typeRuleName + ' .vc-swiper-thumbnail';
           var clss = staticRuleName + ".vc-swiper-thumbnailSize{" + el._misc.styleSizeProperty + ":" + size + "px;}";
           // Insert and save rule
           vcomet.style.sheet.insertRule(clss, 0);
@@ -639,10 +638,10 @@
             thumbnail.style.touchAction = "none";
           }
         thumbnail.addEventListener("click", function(){
-           console.log('thumb click', el._misc.selectElement, typeof el._misc.selectElement);
+          // alert('thumb click');
           // setTimeout(function() {
             // Translate to slide position
-            if(el._misc.selectElement || typeof el._misc.selectElement == "undefined"){
+            if(el._misc.selectElement){
               el.slideTo(slideIndex);
             }else{
               el._misc.selectElement = true;
@@ -783,7 +782,6 @@
       */
       toggleFullScreen: function(){
         var el = this;
-        // *WARNING* Be careful, position fixed elements do not work properly inside parent with any form of transform property
         var activated = el.classList.contains("vc-swiper-fullscreen") ? true : false;
         el.querySelector(".vc-swiper-screenBtn").style.opacity = 0;
         // Remove translate animation
@@ -791,19 +789,13 @@
         el.pagingNode.style.transition = "none";
         // Toggle full screen
         if(activated) {
-          el._refs.parent.appendChild(el);
-          // Wait until swiper is re-appended
-          setTimeout(function() {
-            el.classList.remove("vc-swiper-fullscreen");
-          }, 30);
+          el.classList.remove("vc-swiper-fullscreen");
         } else {
           el.pagingNode.style.opacity = 0;
-          // Append swiper to the body
-          document.body.appendChild(el);
+          el.classList.add("vc-swiper-fullscreen");
           // Wait for the thumbnail positioning before make the paging node visible
           setTimeout(function() {
             el.pagingNode.style.opacity = 1;
-            el.classList.add("vc-swiper-fullscreen");
           }, 30);
         }
         // Restore translate animation
@@ -1184,8 +1176,6 @@
           var newPos =  el.currentSlide.range[0];
           // Translate element
           el._translate(el._refs.wrapper, newPos);
-          // Activate slide related thumbnail
-          el._activateThumbnail(el.thumbnails[currentIndex + 1]);
           // Trigger onSlideChange event
           vcomet.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex + 1)]);
         }
@@ -1205,8 +1195,6 @@
           var newPos = el.currentSlide.range[0];
           // Translate element
           el._translate(el._refs.wrapper, newPos);
-          // Activate slide related thumbnail
-          el._activateThumbnail(el.thumbnails[currentIndex + 1]);
           // Trigger onSlideChange event
           vcomet.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex - 1)]);
         }
@@ -1227,8 +1215,6 @@
         var newPos = swiperHeight * (index);
         // Translate element
         el._translate(el._refs.wrapper, -newPos);
-        // Activate slide related thumbnail
-        el._activateThumbnail(el.thumbnails[index]);
         // Trigger onSlideChange event
         vcomet.triggerCallback("onSlideChange", el, el, [currentIndex, index]);
       },
@@ -1241,13 +1227,9 @@
         var el = this;
         var slideFragment = document.createDocumentFragment();
         slideFragment.appendChild(slide);
-        if (!el._refs.wrapper) {
-          el.appendChild(slideFragment);
-        } else {
-          el._refs.wrapper.appendChild(slideFragment);
-          // Update max slide value
-          el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
-        }
+        el._refs.wrapper.appendChild(slideFragment);
+        // Update max slide value
+        el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
       }
     },
     onCreated: function(){
