@@ -71,7 +71,7 @@ function createGutter () {
     var programGutter = document.createElement("vc-gutter");
     // Create gutter
     programGutter.setAttribute("type", "vertical");
-    programGutter.setAttribute("collapsable", true);
+    programGutter.setAttribute("collapsible", true);
     // Declare sections
     var section = document.createElement("vc-section");
     var section2 = document.createElement("vc-section");
