@@ -48,11 +48,11 @@ vcomet.ready(function () {
 ```
 
 ## Examples
-### Collapsable sections
+### Collapsible sections
 
 ``` [html]
 <!-- Horizontal gutter -->
-<vc-gutter collapsable="true" splitterSize="10">
+<vc-gutter collapsible="true" splitterSize="10">
     <vc-section>
         <div> content </div>
         <div> content </div>
@@ -63,13 +63,13 @@ vcomet.ready(function () {
     </vc-section>
 </vc-gutter>
 ```
-Gutter sections can be collapsable for a dynamic and flexible behaviour. On the contrary, the gutter provides other properties like `allowDrag` to build a static content layout. 
+Gutter sections can be collapsible for a dynamic and flexible behaviour. On the contrary, the gutter provides other properties like `allowDrag` to build a static content layout. 
 
 ### Nested gutters
 
 ``` [html]
 <!-- Horizontal gutter -->
-<vc-gutter collapsable="true">
+<vc-gutter collapsible="true">
     <vc-section>
         <!-- Vertical gutter -->
         <vc-gutter type="vertical">
