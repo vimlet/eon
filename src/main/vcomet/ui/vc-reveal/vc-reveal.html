@@ -1,3 +1,7 @@
+<template>
+    <vc-anchor></vc-anchor>
+    <div class="vc-reveal-wrapper"></div>
+</template>
 <script>
     vcomet.element("vc-reveal", "vc-reveal.css", {
         dependencies: [
@@ -34,6 +38,17 @@
         },
         privateFunctions: {
             /*
+                @function (private) _createRefs
+                @description
+            */
+            createRefs: function () {
+                var el = this;
+
+                // Store references
+                el._refs.wrapper = el.template.querySelector(".vc-reveal-wrapper");
+                el._refs.anchor = el.template.querySelector("vc-anchor");
+            },
+            /*
                 @function (private) _setDefaultStyle
                 @description Check if the default element style should be applied
             */
@@ -51,12 +66,26 @@
             // Create content related callbacks
 
             // Store references
-
+            el._createRefs();
             // ** Apply default items positioning style
             el._setDefaultStyle();
         },
         onInit: function () {
             var el = this;
+            var wrapperFragment = document.createDocumentFragment();
+
+            // Create vc-anchor
+
+            // Move source nodes to the wrapper element
+            // Get source nodes
+            var children = el.getSourceElements();
+            // Move children nodes to the new node safely
+            while (children.length) {
+                // From first to last...
+                wrapperFragment.appendChild(children.shift());
+            }
+            console.log('', el._refs);
+            el._refs.wrapper.appendChild(wrapperFragment);
         }
     });
 </script>
