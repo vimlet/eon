@@ -58,12 +58,11 @@
                 var el = this;
                 el._refs.tabs = document.createElement("vc-tabs");
                 el._refs.tabs.dragging = false;
+                el._refs.tabs.closable = false;
                 el._refs.tabs.onTabSelected(function (tab) {
                     switch (tab.name) {
                         case "result":
-                            if (el._misc.editorsLoaded === 0) {
-                                el._showResult();
-                            }
+                            el._showResult();
                             break;
                         case "html":
                             if (!el._refs.html) {
@@ -92,16 +91,7 @@
                 resultTab.scrollType = "none"
                 resultTab.name = "result";
                 resultTab.title = "Result";
-                el._refs.result = document.createElement("iframe");
-                el._refs.result.onload = function () {
-                    if (!el._misc.iframeFirstLoad) {
-                        el._misc.iframeFirstLoad = true;
-                        setTimeout(function () {
-                            el._editorsLoaded();
-                        }, 0);
-                    }
-                }
-                resultTab.appendChild(el._refs.result);
+                el._refs.result = resultTab;
                 return resultTab;
             },
             // @function setHtmlTab (private) [Set up html tab, it contains head and body editors]
