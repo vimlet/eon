@@ -33,9 +33,13 @@
 
     vc-menu[layout="horizontal"] vc-item {
         line-height: 50px;
-        min-width: 100px;
+        min-width: 116px;
         flex-grow: 0 !important;
         color: #e6e6e6 !important;
+    }
+
+    vc-menu .vc-menu-wrapper {
+        background-color: transparent !important;
     }
 
     #menuFunctionsContainer,
@@ -50,6 +54,7 @@
         padding: 0px !important;
     }
 
+    vc-searchbar .vc-searchbar-main,
     .vc-doc-api-menuSearchBar .field {
         background-color: transparent !important;
     }
@@ -258,6 +263,13 @@
         <vc-layout id="vc-doc-api-apiMenu">
 
             <vc-menu layout="horizontal" separators="false" background="true" direction="bottom-right">
+                <vc-item type="dropdown" id="menuHtmlAttributesBlock" name="Html attributes" class="vc-doc-api-menuDropdown" onclick="this.querySelector('vc-scroll').update()">
+                    <vc-searchbar id="menuHtmlAttributes" class="vc-doc-api-menuSearchBar">
+                        <vc-text placeholder="Search" type="search" name="name" value="" onkeyup="document.querySelector('#menuHtmlAttributes').search(document.querySelector('#menuHtmlAttributes'));"></vc-text>
+                    </vc-searchbar>
+                    <div id="menuHtmlAttributesContainer"></div>
+                </vc-item>
+
                 <vc-item type="dropdown" name="Properties" class="vc-doc-api-menuDropdown" onclick="this.querySelector('vc-scroll').update()">
                     <vc-searchbar id="menuProperties" class="vc-doc-api-menuSearchBar">
                         <vc-text placeholder="Search" type="search" name="name" value="" onkeyup="document.querySelector('#menuProperties').search(document.querySelector('#menuProperties'));"></vc-text>
@@ -281,6 +293,13 @@
                 <div id="vc-doc-api-header">
                 </div>
                 <div>
+                    <div class="vc-doc-api-block" id="htmlA">
+                        <div class="vc-doc-api-t2">
+                            Html attributes
+                        </div>
+                        <vc-doc-table id="htmlAttributesTable" class="vc-doc-api-noExist" columntitle="Attribute, Type, Description" columnwidth="200px ,200px ,calc(100% - 400px)"></vc-doc-table>
+                    </div>
+
                     <div class="vc-doc-api-block">
                         <div class="vc-doc-api-t2">
                             Properties
@@ -342,7 +361,7 @@
 
         functions: {
             // @function setData (public) [Set up document] @param data @param config
-            setData(data, config) {
+            setData(data, config) {                
                 this._setupData(data, config);
             },
             // @function togglePrivate (public) [Toggle private api] @param el [Toggle button]
@@ -458,9 +477,13 @@
                 document.querySelector("#privateFunctionDetails").innerHTML = "";
                 document.querySelector("#vc-doc-api-header").innerHTML = "";
                 document.querySelector("#menuPropertiesContainer").innerHTML = "";
+                document.querySelector("#menuHtmlAttributesContainer").innerHTML = "";
                 document.querySelector("#menuFunctionsContainer").innerHTML = "";
                 document.querySelector("#noPublicProp").classList.add("vc-doc-api-noExist");
+                document.querySelector("#htmlA").classList.remove("vc-doc-api-noExist");
+                document.querySelector("#menuHtmlAttributesBlock").classList.remove("vc-doc-api-noExist");
                 document.querySelector("#noPrivateProp").classList.add("vc-doc-api-noExist");
+                document.querySelector("#htmlAttributesTable").classList.add("vc-doc-api-noExist");
                 document.querySelector("#publicPropTable").classList.add("vc-doc-api-noExist");
                 document.querySelector("#privatePropTable").classList.add("vc-doc-api-noExist");
                 el._hidePrivate();
@@ -472,9 +495,10 @@
 
                 el._cleanData();
 
-                el._misc.parsedCount = 3; // Counter to know when all api parts are appended
+                el._misc.parsedCount = 4; // Counter to know when all api parts are appended
                 //// Internal functions
                 var PRIVATE = "private";
+                var __hasHtmlAttributes = null;
                 var __hasPublicProperties = null;
                 var __hasPrivateProperties = null;
                 var __hasPublicFunctions = null;
@@ -494,6 +518,40 @@
                         typeStr = "";
                     }
                     return typeStr;
+                }
+
+                //@function hasHtmlAttributes [Return if current doc has html attributes or not]
+                function hasHtmlAttributes(){
+                    if (__hasHtmlAttributes === null) {
+                        __hasHtmlAttributes = false;
+                        if(data.htmlAttributes.length > 0){
+                                __hasHtmlAttributes = true;
+                        }
+                    }                    
+                    return __hasHtmlAttributes;
+                }
+
+                //@function getHtmlAttributes [Return json with html attributes]
+                function getHtmlAttributes(){
+                    var htmlAttributes = [];
+                    if (hasHtmlAttributes()) {
+                        data.htmlAttributes.forEach(function (htmlA) {
+                                var currentHtmlA = {};
+                                currentHtmlA.data = [];
+                                currentHtmlA.id = "htmlA" + htmlA.name;
+                                currentHtmlA.data.push({
+                                    value: htmlA.name
+                                });
+                                currentHtmlA.data.push({
+                                    value: formatType(htmlA.type)
+                                });
+                                currentHtmlA.data.push({
+                                    value: formatDescription(htmlA.description)
+                                });
+                                htmlAttributes.push(currentHtmlA);
+                        });
+                    }
+                    return htmlAttributes;
                 }
 
                 //@function hasPublicProperties [Return if current doc has public properties or not]
@@ -891,6 +949,7 @@
                                 1);
                         }
                     }
+                    descriptionStr = descriptionStr === undefined ? "" : descriptionStr;
                     return descriptionStr;
                 }
 
@@ -915,7 +974,19 @@
                 }, 0);
 
 
-
+                // Set html attributes
+                if(hasHtmlAttributes()){
+                    var htmlAttributeTable = document.querySelector("#htmlAttributesTable");
+                    htmlAttributeTable.cleanTable();
+                    htmlAttributeTable.classList.remove("vc-doc-api-noExist");
+                    var htmlAttributes = getHtmlAttributes();
+                    htmlAttributes.forEach(function (ha) {
+                        htmlAttributeTable.addRow(ha);
+                    });
+                }else{
+                    document.querySelector("#htmlA").classList.add("vc-doc-api-noExist");
+                    document.querySelector("#menuHtmlAttributesBlock").classList.add("vc-doc-api-noExist");
+                }
                 // Set public properties
                 if (hasPublicProperties()) {
                     var publicPropertyTable = document.querySelector("#publicPropTable");
@@ -970,6 +1041,36 @@
                     document.querySelector("#noPrivateFuncSumm").classList.remove("vc-doc-api-noExist");
                 }
 
+                // Set html attributes menu
+                var htmlAttributesMenuContainer = document.querySelector("#menuHtmlAttributesContainer");
+                var htmlAttributesMenuScroll = document.createElement("vc-scroll");
+                htmlAttributesMenuScroll.thickness = 8;
+                var hasMenuPublicHtmlA = false;
+                data.htmlAttributes.forEach(function (htmlA) {
+                    var htmlAItem = document.createElement("vc-item");
+                    htmlAItem.classList.add("vc-doc-api-menuSearchItem");
+                    htmlAItem.setAttribute("onclick",
+                        'document.querySelector("vc-doc-api").goTo(this, "htmlA' + htmlA.name +
+                        '");');
+                    hasMenuPublicHtmlA = true;
+                    htmlAItem.setAttribute("name", htmlA.name);
+                    htmlAItem.setAttribute("value", htmlA.name);
+                    htmlAItem.innerText = htmlA.name;
+                    htmlAttributesMenuScroll.appendChild(htmlAItem);
+                });
+                if (!hasMenuPublicHtmlA) {
+                    var htmlAItem = document.createElement("vc-item");
+                    htmlAItem.setAttribute("name", "None");
+                    htmlAItem.setAttribute("value", "None");
+                    htmlAItem.innerText = "None";
+                    htmlAItem.classList.add("vc-doc-api-menuSearchItem");
+                    htmlAttributesMenuScroll.appendChild(htmlAItem);
+                }
+                htmlAttributesMenuContainer.appendChild(htmlAttributesMenuScroll);
+
+                setTimeout(function () {
+                    document.querySelector('vc-doc-api')._onDrawn();
+                }, 0);
                 // Set properties menu
                 var propertiesMenuContainer = document.querySelector("#menuPropertiesContainer");
                 var propertiesMenuScroll = document.createElement("vc-scroll");
@@ -1068,6 +1169,22 @@
             el._init();
             el.togglePrivate(); // Hide private properties and functions at the beggining
             // Initialize menu search bars
+            document.querySelector("#menuHtmlAttributes").onSearch(function (filters) {
+                var name = filters.name;
+                var toFilterChilds = document.querySelector("#menuHtmlAttributesContainer").querySelector(
+                    ".vc-scroll-content").children;
+
+                for (var i = 0; i < toFilterChilds.length; i++) {
+                    if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem") &&
+                        toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem") &&
+                        toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) >
+                        -1) {
+                        toFilterChilds[i].classList.remove("vc-doc-api-searchHide");
+                    } else if (toFilterChilds[i].classList.contains("vc-doc-api-menuSearchItem")) {
+                        toFilterChilds[i].classList.add("vc-doc-api-searchHide");
+                    }
+                }
+            });
             document.querySelector("#menuProperties").onSearch(function (filters) {
                 var name = filters.name;
                 var toFilterChilds = document.querySelector("#menuPropertiesContainer").querySelector(

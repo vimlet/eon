@@ -16,7 +16,7 @@
       },
       /*
       @property (private) {Object} _misc
-      @description Object with usefull information
+      @description Object with useful information
       */
       misc: {
         value: {},
@@ -820,7 +820,7 @@
         }
 
         square.classList.add("vc-scroll-square");
-        square.classList.add("vc-bg1");
+        square.classList.add("vc-bg8");
         square.classList.add("vc-scroll-active");
 
         //The square width and height depends on the vertical and horizontal scroll thickness
@@ -1662,11 +1662,11 @@
           el._refs.verticalBar.style.transform = "translate3d(0, " + finalBarTopPosition + "px, 0)";
 
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
-          barTopProportion = (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight) / parseFloat(verticalBarTop);
-          proportionalScrollTop = parseFloat(el.content.scrollHeight - el.offsetHeight) / barTopProportion;
+          barTopProportion = (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight) / parseFloat(finalBarTopPosition);
+          // proportionalScrollTop = parseFloat(el.content.scrollHeight - el.offsetHeight) / barTopProportion;
+          proportionalScrollTop = parseFloat(el._getVerticalScrollLimit()) / barTopProportion;
 
           el._misc.vertical.position = -proportionalScrollTop;
-
           el._verticalUpdate(el._misc.vertical.position);
           el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
 
@@ -1823,7 +1823,7 @@
           el._refs.horizontalBar.style.transform = "translate3d(" + finalBarLeftPosition + "px, 0, 0)";
 
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
-          barLeftProportion = parseFloat(el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / (parseFloat(horizontalBarLeft))
+          barLeftProportion = parseFloat(el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / (parseFloat(finalBarLeftPosition))
           proportionalScrollLeft = (parseFloat(el.content.scrollWidth - el.offsetWidth) / barLeftProportion);
 
           el._horizontalUpdate(-proportionalScrollLeft);
@@ -1884,8 +1884,7 @@
 
         scroll.classList.add("vc-scroll-verticalScroll");
         rail.classList.add("vc-scroll-verticalRail");
-        bar.classList.add("vc-scroll-verticalBar");
-        bar.classList.add("vc-bg1");
+        bar.classList.add("vc-scroll-verticalBar", "vc-bg8");
 
         scroll.classList.add("vc-scroll-active");
 
@@ -1925,8 +1924,7 @@
 
         scroll.classList.add("vc-scroll-horizontalScroll");
         rail.classList.add("vc-scroll-horizontalRail");
-        bar.classList.add("vc-scroll-horizontalBar");
-        bar.classList.add("vc-bg1");
+        bar.classList.add("vc-scroll-horizontalBar", "vc-bg8");
 
         scroll.classList.add("vc-scroll-active");
 
@@ -1971,11 +1969,7 @@
         downIcon.innerHTML = "expand_more";
 
         upButton.appendChild(upIcon);
-        upButton.classList.add("vc-scroll-arrowButton");
-        upButton.classList.add("vc-bg1");
-        upButton.classList.add("vc-fg4");
-        upButton.classList.add("vc-fg1-hoverable");
-        upButton.classList.add("vc-unselectable");
+        upButton.classList.add("vc-scroll-arrowButton", "vc-bg8", "vc-fg1-hoverable", "vc-unselectable");
         upButton.style.height = el.thickness + "px";
         upButton.style.width = el.thickness + "px";
         upButton.dataset.direction = "up";
@@ -1985,11 +1979,7 @@
         };
 
         downButton.appendChild(downIcon);
-        downButton.classList.add("vc-scroll-arrowButton");
-        downButton.classList.add("vc-bg1");
-        downButton.classList.add("vc-fg4");
-        downButton.classList.add("vc-fg1-hoverable");
-        downButton.classList.add("vc-unselectable");
+        downButton.classList.add("vc-scroll-arrowButton", "vc-bg8", "vc-fg1-hoverable", "vc-unselectable");
         downButton.style.height = el.thickness + "px";
         downButton.style.width = el.thickness + "px";
         downButton.dataset.direction = "down";
@@ -2028,11 +2018,7 @@
         rightIcon.innerHTML = "chevron_right";
 
         leftButton.appendChild(leftIcon);
-        leftButton.classList.add("vc-scroll-arrowButton");
-        leftButton.classList.add("vc-unselectable");
-        leftButton.classList.add("vc-bg1");
-        leftButton.classList.add("vc-fg4");
-        leftButton.classList.add("vc-fg1-hoverable");
+        leftButton.classList.add("vc-scroll-arrowButton", "vc-unselectable", "vc-bg8", "vc-fg1-hoverable");
         leftButton.style.height = el.thickness + "px";
         leftButton.style.width = el.thickness + "px";
         leftButton.dataset.direction = "left";
@@ -2042,11 +2028,7 @@
         });
 
         rightButton.appendChild(rightIcon);
-        rightButton.classList.add("vc-scroll-arrowButton");
-        rightButton.classList.add("vc-unselectable");
-        rightButton.classList.add("vc-bg1");
-        rightButton.classList.add("vc-fg4");
-        rightButton.classList.add("vc-fg1-hoverable");
+        rightButton.classList.add("vc-scroll-arrowButton", "vc-unselectable", "vc-bg8", "vc-fg1-hoverable");
         rightButton.style.height = el.thickness + "px";
         rightButton.style.width = el.thickness + "px";
         rightButton.dataset.direction = "right";
@@ -2192,6 +2174,7 @@
 
         var el = this;
         var scrollLimit, currentScroll, translatePercentage;
+       
         if (el._misc.vertical.created) {
 
           scrollLimit = el._getVerticalScrollLimit();
