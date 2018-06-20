@@ -1,3 +1,4 @@
+
 <template>
     <vc-loading></vc-loading>
     <div id="vc-playground-content" class="vc-playground-until-render"></div>
@@ -261,16 +262,11 @@
             // @function showResult (private) [Show result at iframe]
             showResult: function () {
                 var el = this;
-                el._refs.result.innerHTML = "";
-                var iframe = document.createElement("iframe");
-                iframe.onload = function () {
-                    var iframeContent = iframe.contentWindow.document || iframe.contentDocument;
-                    var iframeSrc = el._getResultString();
-                    iframeContent.open();
-                    iframeContent.write(iframeSrc);
-                    iframeContent.close();
-                }
-                el._refs.result.appendChild(iframe);
+                var iframeContent = el._refs.result.contentWindow.document || el._refs.result.contentDocument;
+                var iframeSrc = el._getResultString();
+                iframeContent.open();
+                iframeContent.write(iframeSrc);
+                iframeContent.close();
             },
             // @function getResultString (private) [Format result into a string to be written at iframe]
             getResultString: function () {
@@ -300,23 +296,15 @@
                 var el = this;
                 if (data.js) {
                     el.js = data.js;
-                } else {
-                    el.js = "";
                 }
                 if (data.css) {
                     el.css = data.css;
-                } else {
-                    el.css = "";
                 }
                 if (data.head) {
                     el.head = data.head;
-                } else {
-                    el.head = "";
                 }
                 if (data.body) {
                     el.body = data.body;
-                } else {
-                    el.body = "";
                 }
                 el._refresh();
             },
@@ -349,7 +337,8 @@
             }
         },
 
-        onCreated: function () {},
+        onCreated: function () {
+        },
 
         onReady: function () {
             var el = this;
