@@ -261,11 +261,16 @@
             // @function showResult (private) [Show result at iframe]
             showResult: function () {
                 var el = this;
-                var iframeContent = el._refs.result.contentWindow.document || el._refs.result.contentDocument;
-                var iframeSrc = el._getResultString();
-                iframeContent.open();
-                iframeContent.write(iframeSrc);
-                iframeContent.close();
+                el._refs.result.innerHTML = "";
+                var iframe = document.createElement("iframe");
+                iframe.onload = function () {
+                    var iframeContent = iframe.contentWindow.document || iframe.contentDocument;
+                    var iframeSrc = el._getResultString();
+                    iframeContent.open();
+                    iframeContent.write(iframeSrc);
+                    iframeContent.close();
+                }
+                el._refs.result.appendChild(iframe);
             },
             // @function getResultString (private) [Format result into a string to be written at iframe]
             getResultString: function () {
