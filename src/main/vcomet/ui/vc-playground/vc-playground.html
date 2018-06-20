@@ -1,0 +1,350 @@
+
+<template>
+    <vc-loading></vc-loading>
+    <div id="vc-playground-content" class="vc-playground-until-render"></div>
+</template>
+
+<script>
+    vcomet.element("vc-playground", "vc-playground.css", {
+
+        dependencies: [
+            "../vc-editor",
+            "../vc-tabs",
+            "../vc-gutter",
+            "../vc-scroll",
+            "../vc-panel",
+            "../vc-loading"
+        ],
+
+        properties: {
+            head: {
+                value: "",
+                reflect: false
+            },
+            body: {
+                value: "",
+                reflect: false
+            },
+            js: {
+                value: "",
+                reflect: false
+            },
+            css: {
+                value: "",
+                reflect: false
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {
+                    editorsLoaded: 1, // Flag to control that all editors and the iframe are loaded. 0 when they are
+                    iframeFirstLoad: false // Flag to control first iframe onload as it is called many times when content is modified
+                }
+            }
+        },
+
+        privateFunctions: {
+            // @function init (private) [Set up playground]
+            init: function () {
+                var el = this;
+                el._setStructure();
+            },
+            // @function setTabs (private) [Generate vc-tabs]
+            setTabs: function () {
+                var el = this;
+                el._refs.tabs = document.createElement("vc-tabs");
+                el._refs.tabs.dragging = false;
+                el._refs.tabs.onTabSelected(function (tab) {
+                    switch (tab.name) {
+                        case "result":
+                            if (el._misc.editorsLoaded === 0) {
+                                el._showResult();
+                            }
+                            break;
+                        case "html":
+                            if (!el._refs.html) {
+                                el._setHtmlEditor();
+                            }
+                            el._refs.htmlPanel.querySelector("vc-gutter").resize();
+                            break;
+                        case "css":
+                            if (!el._refs.css) {
+                                el._setCssEditor();
+                            }
+                            break;
+                        case "js":
+                            if (!el._refs.js) {
+                                el._setJsEditor();
+                            }
+                            break;
+                    }
+                });
+            },
+            // @function setResultTab (private) [Set up result tab]
+            setResultTab: function () {
+                var el = this;
+                var resultTab = document.createElement("vc-panel");
+                resultTab.allowScroll = false;
+                resultTab.scrollType = "none"
+                resultTab.name = "result";
+                resultTab.title = "Result";
+                el._refs.result = document.createElement("iframe");
+                el._refs.result.onload = function () {
+                    if (!el._misc.iframeFirstLoad) {
+                        el._misc.iframeFirstLoad = true;
+                        setTimeout(function () {
+                            el._editorsLoaded();
+                        }, 0);
+                    }
+                }
+                resultTab.appendChild(el._refs.result);
+                return resultTab;
+            },
+            // @function setHtmlTab (private) [Set up html tab, it contains head and body editors]
+            setHtmlTab: function () {
+                var el = this;
+                el._refs.htmlTab = document.createElement("vc-panel");
+                el._refs.htmlTab.allowScroll = false;
+                el._refs.htmlTab.name = "html";
+                el._refs.htmlTab.title = "Html";
+                return el._refs.htmlTab;
+            },
+            setHtmlEditor: function () {
+                var el = this;
+                var htmlGutter = document.createElement("vc-gutter");
+                htmlGutter.collapsable = true;
+                htmlGutter.type = "vertical";
+                var headSection = document.createElement("vc-section");
+                var bodySection = document.createElement("vc-section");
+                el._refs.html = {};
+                el._refs.html.head = document.createElement("vc-editor");
+                el._refs.html.head.oneditorready(function (currentEditor) {
+                    el._refs.html.head.setValue(el.head);
+                });
+                el._refs.html.head.onchange(function () {
+                    el.head = el._refs.html.head.getValue();
+                });
+                el._refs.html.head.language = "html";
+                var headTag = document.createElement("div");
+                headTag.classList.add("vc-playground-htmlTags");
+                headTag.innerHTML = "head";
+                headSection.appendChild(headTag);
+                el._refs.html.head.readonly = false;
+                el._refs.html.body = document.createElement("vc-editor");
+                el._refs.html.body.oneditorready(function () {
+                    el._refs.html.body.setValue(el.body);
+                });
+                el._refs.html.body.onchange(function () {
+                    el.body = el._refs.html.body.getValue();
+                });
+                el._refs.html.body.language = "html";
+                var bodyTag = document.createElement("div");
+                bodyTag.classList.add("vc-playground-htmlTags");
+                bodyTag.innerHTML = "body";
+                bodySection.appendChild(bodyTag);
+                el._refs.html.body.readonly = false;
+                headSection.appendChild(el._refs.html.head);
+                bodySection.appendChild(el._refs.html.body);
+                htmlGutter.appendChild(headSection);
+                htmlGutter.appendChild(bodySection);
+                el._refs.htmlPanel = document.createElement("vc-panel");
+                el._refs.htmlPanel.allowScroll = false;
+                el._refs.htmlPanel.setAttribute("allow-scroll", false);
+                el._refs.htmlPanel.appendChild(htmlGutter);
+                el._refs.htmlTab.appendChild(el._refs.htmlPanel);
+            },
+            // @function setJsTab (private) [Set up js tab]
+            setJsTab: function () {
+                var el = this;
+                el._refs.jsTab = document.createElement("vc-panel");
+                el._refs.jsTab.allowScroll = false;
+                el._refs.jsTab.name = "js";
+                el._refs.jsTab.title = "Js";
+                return el._refs.jsTab;
+            },
+            setJsEditor: function () {
+                var el = this;
+                el._refs.js = document.createElement("vc-editor");
+                el._refs.js.minheight = 564;
+                el._refs.js.oneditorready(function () {
+                    el._refs.js.setValue(el.js);
+                });
+                el._refs.js.onchange(function () {
+                    el.js = el._refs.js.getValue();
+                });
+                el._refs.js.language = "javascript";
+                el._refs.js.readonly = false;
+                el._refs.jsTab.appendChild(el._refs.js);
+            },
+            // @function setCssTab (private) [Set up css tab]
+            setCssTab: function () {
+                var el = this;
+                el._refs.cssTab = document.createElement("vc-panel");
+                el._refs.cssTab.allowScroll = false;
+                el._refs.cssTab.name = "css";
+                el._refs.cssTab.title = "Css";
+                return el._refs.cssTab;
+            },
+            // @function setCssEditor (private) [Set up css editor]
+            setCssEditor: function () {
+                var el = this;
+                el._refs.css = document.createElement("vc-editor");
+                el._refs.css.minheight = 564;
+                el._refs.css.oneditorready(function () {
+                    el._refs.css.setValue(el.css);
+                });
+                el._refs.css.onchange(function () {
+                    el.css = el._refs.css.getValue();
+                });
+                el._refs.css.language = "css";
+                el._refs.css.readonly = false;
+                el._refs.cssTab.appendChild(el._refs.css);
+            },
+            // @function setStructure (private) [Set up playground content]
+            setStructure: function () {
+                var el = this;
+                el._setTabs();
+                var resultTab = el._setResultTab();
+                var htmlTab = el._setHtmlTab();
+                var jsTab = el._setJsTab();
+                var cssTab = el._setCssTab();
+                el._refs.tabs.appendChild(resultTab);
+                el._refs.tabs.appendChild(htmlTab);
+                el._refs.tabs.appendChild(jsTab);
+                el._refs.tabs.appendChild(cssTab);
+                el.querySelector("#vc-playground-content").appendChild(el._refs.tabs);
+                el.querySelector("#vc-playground-content").querySelector(".vc-tabs-tabsSection").appendChild(
+                    el._setFullSCreenBttn());
+            },
+            setFullSCreenBttn: function () {
+                var el = this;
+                el._misc.fullscreen = false;
+                var fullScreenBtt = document.createElement("div");
+                fullScreenBtt.classList.add("vc-playground-fullScreenBttn");
+                el._refs.fullScreenIcon = document.createElement("i");
+                el._refs.fullScreenIcon.classList.add("material-icons");
+                el._refs.fullScreenIcon.innerHTML = "fullscreen";
+                fullScreenBtt.appendChild(el._refs.fullScreenIcon);
+                fullScreenBtt.setAttribute("onclick",
+                    "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
+                return fullScreenBtt;
+            },
+            // @function editorLoaded (private) [Each time that a component is loaded this function is called. When all components are loaded result is launched.]
+            editorsLoaded: function () {
+                var el = this;
+                el._misc.editorsLoaded--;
+                if (el._misc.editorsLoaded === 0) {
+                    el._showResult();
+                    el._show();
+                }
+            },
+            // @function refresh (private) [Update stored data to vc-editor]
+            refresh: function () {
+                var el = this;
+                if (el._refs.html && el._refs.html.head) {
+                    el._refs.html.head.setValue(el.head);
+                }
+                if (el._refs.html && el._refs.html.body) {
+                    el._refs.html.body.setValue(el.body);
+                }
+                if (el._refs.js) {
+                    el._refs.js.setValue(el.js);
+                }
+                if (el._refs.css) {
+                    el._refs.css.setValue(el.css);
+                }
+                el._showResult();
+            },
+            // @function showResult (private) [Show result at iframe]
+            showResult: function () {
+                var el = this;
+                var iframeContent = el._refs.result.contentWindow.document || el._refs.result.contentDocument;
+                var iframeSrc = el._getResultString();
+                iframeContent.open();
+                iframeContent.write(iframeSrc);
+                iframeContent.close();
+            },
+            // @function getResultString (private) [Format result into a string to be written at iframe]
+            getResultString: function () {
+                var el = this;
+                var iframeSrc = "<!DOCTYPE html><html><head>";
+                iframeSrc += el.head;
+                iframeSrc += "<style>";
+                iframeSrc += el.css;
+                iframeSrc += "</style>";
+                iframeSrc += "</head><body>" + el.body;
+                iframeSrc += "<script>";
+                iframeSrc += el.js;
+                iframeSrc += "<\/script>";
+                iframeSrc += "</body></html>";
+                return iframeSrc;
+            },
+            // @function show (private) [Hides loading mask and shows playground]
+            show: function () {
+                var el = this;
+                el.querySelector("#vc-playground-content").classList.remove("vc-playground-until-render");
+                el.querySelector("vc-loading").hide();
+            }
+        },
+        functions: {
+            // @function setData (public) [Set data to the playground]
+            setData: function (data) {
+                var el = this;
+                if (data.js) {
+                    el.js = data.js;
+                }
+                if (data.css) {
+                    el.css = data.css;
+                }
+                if (data.head) {
+                    el.head = data.head;
+                }
+                if (data.body) {
+                    el.body = data.body;
+                }
+                el._refresh();
+            },
+            // @function toggleFullScreen (public) [Toggle full screen mode]
+            toggleFullScreen: function () {
+                var el = this;
+                el._misc.fullscreen = !el._misc.fullscreen;
+                if (el._misc.fullscreen) {
+                    el._refs.fullScreenIcon.innerHTML = "fullscreen_exit";
+                    el.style.height = "100%";
+                    el.style.width = "100%";
+                    el.style.position = "fixed";
+                    el.style.top = "0px";
+                    el.style.left = "0px";
+                    el.style.zIndex = "9999";
+                    el._misc.parent = el.parentNode;
+                    el._misc.nextSibling = el.nextSibling;
+                    document.body.appendChild(el);
+                } else {
+                    el._refs.fullScreenIcon.innerHTML = "fullscreen";
+                    el.style = "";
+                    if (el._misc.nextSibling) {
+                        el._misc.parent.insertBefore(el, el._misc.nextSibling);
+                    } else {
+                        el._misc.parent.appendChild(el);
+                    }
+                }
+                el._showResult();
+                el._refs.htmlPanel.querySelector("vc-gutter").resize();
+            }
+        },
+
+        onCreated: function () {
+        },
+
+        onReady: function () {
+            var el = this;
+            el._init();
+        },
+
+
+    });
+</script>

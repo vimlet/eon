@@ -3,7 +3,7 @@
         height: 100%;
         width: 100%;
         max-height: 450px;
-        position:relative;
+        position: relative;
     }
 
     .vc-editor-padding {
@@ -11,8 +11,8 @@
         width: 100%;
         padding: 10px 0px;
         box-sizing: border-box;
-        background-color:#1e1e1e;
-        position:absolute;
+        background-color: #1e1e1e;
+        position: absolute;
     }
 
     #vc-editor-content {
@@ -48,7 +48,6 @@
     }
 
     .monaco-editor {
-        /* padding: 10px 0px; */
         overflow: hidden !important;
         box-sizing: border-box !important;
     }
@@ -60,12 +59,16 @@
     <vc-loading></vc-loading>
     <div class="vc-editor-padding">
         <div id="vc-editor-content" class="vc-editor-until-render"></div>
-</div>
+    </div>
 </template>
 
 <script>
     vcomet.element("vc-editor", null, {
 
+        dependencies: [
+            "../vc-loading"
+        ],
+        
         properties: {
             value: {
                 value: "",
@@ -159,14 +162,21 @@
         },
 
         onCreated: function () {
+            var el = this;
+            vcomet.amd.require(["framework/custom/vc-editor/vs/loader.js"], function () {
+                vcomet.triggerCallback("onloader", el, el, [el]);
+            });
             // Custom callback to know when monaco editor is ready to be used
-            vcomet.createCallback("oneditorready", this);
+            vcomet.createCallback("oneditorready", this, "ready");
             vcomet.createCallback("onchange", this);
+            vcomet.createCallback("onloader", this, "ready");
         },
 
         onReady: function () {
             var el = this;
-            el._init();
+            el.onloader(function () {
+                el._init();
+            });
             el._misc.paddingOffset = 20;
         },
 

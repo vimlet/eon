@@ -36,6 +36,14 @@
                 reflect: true
             },
             /*
+            @property {Number} default
+            @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+            */
+            default: {
+                value: "",
+                reflect: true
+            },
+            /*
               @property {Number} min 
               @description Slider minimum range value
               Value must be an integer
@@ -175,17 +183,45 @@
                 value: {}
             },
         },
+        functions: {
+            /*
+            @function clear
+            @description Empties the value
+            */
+            clear: function () {
+                this.value = 0;
+            },
+            /*
+            @function reset
+            @description Resets the value of the element to the default one, if no default is provided then empties the value
+            */
+            reset: function () {
+                var el = this;
+
+                if (el.default != "") {
+                    el.value = el.default;
+                } else {
+                    el.clear();
+                }
+
+            }
+        },
         privateFunctions: {
+
             /*
               @function (private) _setValue
               @param {String} newVal [new slider value]
             */
             setValue: function () {
                 var el = this;
-
                 el._refs.slider.value = el.value;
                 el._currentValue = el.value;
                 el._updateSlider(true);
+
+                if (el.orientation == "vertical") {
+                    el._updateVerticalHeight();
+                }
+
                 vcomet.triggerCallback("onChange", el);
 
             },
@@ -242,7 +278,7 @@
             */
             verticalSlider: function () {
                 var el = this;
-
+                
                 // If its the first the verticalSlider is called then we have
                 // to invert the width and height
                 if (el._misc.first) {
@@ -265,6 +301,7 @@
                     // Sets the property to place the slider in vertical for IE and Firefox browsers
                     (vcomet.util.getBrowser() == "Firefox" || vcomet.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
                 }
+                
             },
 
             /*
@@ -476,6 +513,7 @@
         onRender: function () {
             var el = this;
 
+            el.value = el.default != "" && el.value == "" ? el.default : el.value;
             el._refs.slider.setAttribute("name", el.name);
             el._refs.slider.setAttribute("value", el.value);
             el._refs.slider.setAttribute("min", el.min);

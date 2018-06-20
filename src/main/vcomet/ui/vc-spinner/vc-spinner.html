@@ -32,11 +32,18 @@
             },
             /*
               @property {Number} value 
-              @description spinner value
-              default: 0
+              @description Spinner value
             */
             value: {
                 value: 0,
+                reflect: true
+            },
+            /*
+            @property {Number} default
+            @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+            */
+            default: {
+                value: "",
                 reflect: true
             },
             /*
@@ -146,6 +153,29 @@
                 value: {}
             }
         },
+        functions: {
+            /*
+            @function clear
+            @description Empties the value
+            */
+            clear: function () {
+                this.value = 0;
+            },
+            /*
+            @function reset
+            @description Resets the value of the element to the default one, if no default is provided then empties the value
+            */
+            reset: function () {
+                var el = this;
+
+                if (el.default != "") {
+                    el.value = el.default;
+                } else {
+                    el.clear();
+                }
+
+            }
+        },
         privateFunctions: {
             /*
               @function (private) _createRefs
@@ -162,6 +192,7 @@
                 el._refs.inputBar = el.template.querySelector(".vc-spinner-inputBar");
 
             },
+
             /*
               @function (private) _setValue
               @description Set new spinner value
@@ -173,10 +204,9 @@
                 var valueKey = privateValueKey ? "__value" : "value";
                 var newValue;
 
-                if (el.value) {
+                if (el.value !== "") {
                     newValue = this._checkMin(value);
-                    newValue = this._checkMax(value);
-
+                    newValue = this._checkMax(newValue);
                     // If we have to fix the value because it exceeds any of the limits we update the elements value
                     if (parseInt(newValue) != parseInt(value)) {
                         setTimeout(function () {
@@ -391,7 +421,7 @@
             checkMin: function (value) {
                 var el = this;
                 var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : parseInt(value);
-
+              
                 return returnValue;
             },
 
@@ -403,7 +433,7 @@
             checkMax: function (value) {
                 var el = this;
                 var returnValue = (el.max && parseInt(value) > parseInt(el.max)) ? parseInt(el.max) : parseInt(value);
-
+        
                 return returnValue;
             }
         },
@@ -420,6 +450,7 @@
             var el = this;
 
             // Sets a default value set by the user
+            el.value = el.default != "" && el.value == "" ? el.default : el.value;
             el._setValue();
 
             el._updateDisabled();
