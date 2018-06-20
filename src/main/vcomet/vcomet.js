@@ -3470,7 +3470,7 @@ vcomet.createCallback("onScriptsReady", vcomet, "ready");
 
 // Imports the requested custom element file, admits arrays and strings
 vcomet.import = function (param) {
-
+    console.log('IMPORT', param);
     if (param.constructor === Array) {
 
         for (var i = 0; i < param.length; i++) {
@@ -3505,7 +3505,9 @@ vcomet.insertImport = function (href) {
     vcomet.imports.templates = vcomet.imports.templates || {};
     vcomet.imports.paths = vcomet.imports.paths || {};
     vcomet.imports.config = vcomet.imports.config || {};
-
+    console.log('elementName', elementName);
+    console.log('vcomet', vcomet);
+    console.log('vcomet.imports.templates', vcomet.imports.templates);
     if (!(elementName in vcomet.imports.templates)) {
 
         // Increment total
@@ -3523,7 +3525,7 @@ vcomet.insertImport = function (href) {
         var xhttp = new XMLHttpRequest();
 
         xhttp.onreadystatechange = function () {
-
+          
             if (this.readyState == 4 && this.status == 200) {
 
                 var importFragment = vcomet.fragmentFromString(this.responseText);
@@ -3711,8 +3713,9 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
                 elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML +
                     "var elementNames = Object.keys(vcomet.imports.scripts);" +
                     "var elementScripts = vcomet.imports.scripts[elementNames[" + i + "]];" +
-                    "var scriptKey = Object.keys(elementScripts)[" + j + "];" +
-                    "elementScripts[scriptKey].parentNode.removeChild(elementScripts[scriptKey]);";
+                    "var scriptKey = Object.keys(elementScripts)[" + j + "]";
+                    // "var scriptKey = Object.keys(elementScripts)[" + j + "];" +
+                    // "elementScripts[scriptKey].parentNode.removeChild(elementScripts[scriptKey]);";
 
                 document.head.appendChild(elementScripts[elementScriptsKeys[j]]);
 
@@ -4395,7 +4398,7 @@ vcomet.element = function (name, stylePath, config) {
 
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
-
+  console.log('stylePath', stylePath);
     // If the user provided a style path then we create its link and append it
     if (stylePath != "") {
 

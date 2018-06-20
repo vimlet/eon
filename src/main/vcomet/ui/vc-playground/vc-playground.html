@@ -245,12 +245,21 @@
             // @function refresh (private) [Update stored data to vc-editor]
             refresh: function () {
                 var el = this;
-                el._refs.html.head.setValue(el.head);
-                el._refs.html.body.setValue(el.body);
-                el._refs.js.setValue(el.js);
-                el._refs.css.setValue(el.css);
+                if (el._refs.html && el._refs.html.head) {
+                    el._refs.html.head.setValue(el.head);
+                }
+                if (el._refs.html && el._refs.html.body) {
+                    el._refs.html.body.setValue(el.body);
+                }
+                if (el._refs.js) {
+                    el._refs.js.setValue(el.js);
+                }
+                if (el._refs.css) {
+                    el._refs.css.setValue(el.css);
+                }
+                el._showResult();
             },
-            // @function showResult (private) [Show result at inframe]
+            // @function showResult (private) [Show result at iframe]
             showResult: function () {
                 var el = this;
                 var iframeContent = el._refs.result.contentWindow.document || el._refs.result.contentDocument;
@@ -289,13 +298,13 @@
                     el.js = data.js;
                 }
                 if (data.css) {
-                    el.js = data.css;
+                    el.css = data.css;
                 }
                 if (data.head) {
-                    el.js = data.head;
+                    el.head = data.head;
                 }
                 if (data.body) {
-                    el.js = data.body;
+                    el.body = data.body;
                 }
                 el._refresh();
             },

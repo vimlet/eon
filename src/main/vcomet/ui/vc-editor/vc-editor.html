@@ -3,8 +3,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <vc-loading></vc-loading>
-    <div class="vc-editor-padding">
-        <div id="vc-editor-content" class="vc-editor-until-render"></div>
+    <div class="vc-editor-padding vc-editor-until-render">
+        <div id="vc-editor-content"></div>
     </div>
 </template>
 
@@ -51,8 +51,8 @@
         },
 
         privateFunctions: {
-            // @function init (private) create monaco editor @param data @param language
-            init: function (data, language) {
+            // @function init (private) create monaco editor
+            init: function () {
                 var el = this;
                 var readonly = false;
                 if (el.readonly === "readonly") {
@@ -66,7 +66,7 @@
                         'vs': vcomet.basePath + '/ui/vc-editor/vs'
                     }
                 });
-                require([vcomet.basePath + '/ui/vc-editor/vs/editor/editor.main'], function () {
+                require(['vs/editor/editor.main'], function () {
                     el._refs.editor = monaco.editor.create(el.querySelector("#vc-editor-content"), {
                         value: el.value,
                         language: el.language,
@@ -102,7 +102,7 @@
             // @function show (private) [Hides loading mask and shows editor]
             show: function () {
                 var el = this;
-                el.querySelector("#vc-editor-content").classList.remove("vc-editor-until-render");
+                el.querySelector("#vc-editor-content").parentNode.classList.remove("vc-editor-until-render");
                 el.querySelector("vc-loading").hide();
             }
         },
@@ -120,7 +120,6 @@
 
         onReady: function () {
             var el = this;
-            console.log('on Ready');
             el.onloader(function () {
                 el._init();
             });
