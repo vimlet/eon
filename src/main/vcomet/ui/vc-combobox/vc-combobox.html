@@ -46,7 +46,15 @@
             refs: {
                 value: {},
                 reflect: false
-            }
+            },
+            /*
+            @property (private) {Object} _misc
+            @description Object with usefull information
+            */
+            misc: {
+                value: {},
+                reflect: false
+            },
         },
 
         properties: {
@@ -64,7 +72,8 @@
             */
             filter: {
                 value: "false",
-                reflect: true
+                reflect: true,
+                reflectDefault: true
             },
             /*
             @property {string} placeholder
@@ -103,6 +112,14 @@
             @description The displayValue of the item
             */
             displayValue: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {String} default
+            @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+            */
+            default: {
                 value: "",
                 reflect: true
             },
@@ -188,21 +205,34 @@
                     el._refs.input.addEventListener("blur", function () {
 
                         if (!el.isOnPath && !el._refs.dropDown.isOnPath) {
-                            var classListFunction = (!(el.getAttribute("value") != "") && el._refs.input.value != "") ? "add" : "remove";
-                            el.classList[classListFunction]("noMatches");
+                            // When blur occurs and no item has been selected when clear the input
+                            if (el.value == "") {
+                                el._refs.input.value = "";
+                            }
                         }
 
                     });
 
                     el._refs.input.addEventListener("focus", function (e) {
-                        el.classList.remove("noMatches");
+                        el.expand();
                     });
 
                     el._refs.input.addEventListener("keyup", function (e) {
-                        el._filterResults();
+                        el._filter();
                     });
 
                 }
+
+            },
+            /*
+            @function _setupMisc
+            @description Sets up the listener to the click events
+            */
+            setupMisc: function () {
+
+                var el = this;
+
+                el._misc.items = {};
 
             },
             /*
@@ -219,7 +249,9 @@
                 });
 
                 document.body.addEventListener("click", function (e) {
-                    el._customBlur(e, el);
+                    if (el.isOnPath == false) {
+                        el.shrink();
+                    }
                 });
 
             },
@@ -279,11 +311,15 @@
 
                         el._setupItem(item);
 
+                        el._misc.items[item.value] = item;
+
                         itemsDocFragment.appendChild(item);
 
                     }
 
                     el._refs.scroll.content.appendChild(itemsDocFragment);
+
+                    el._initValue();
 
                 }
 
@@ -342,6 +378,8 @@
                     item.value = storeData[key][el._refs.store.idProperty];
                     item.displayValue = storeData[key][displayProperty];
 
+                    el._misc.items[item.value] = item;
+
                     item.onRender(function () {
 
                         var span = document.createElement("span");
@@ -356,6 +394,8 @@
                 }
 
                 el._refs.scroll.content.appendChild(itemsDocFragment);
+
+                el._initValue();
 
             },
             /*
@@ -378,52 +418,62 @@
 
             },
             /*
-            @function filterResults
-            @description Filters the items based on the user input
-            @param {object} input [User input element]
+            @function (private) _setupMatchingErrorItem
+            @description Creates the touch blur
             */
-            filterResults: function () {
+            setupMatchingErrorItem: function () {
+
+                var el = this;
+
+                el._refs.matchingErrorItem = document.createElement("div");
+                el._refs.matchingErrorItem.classList.add("vc-combobox-matchingError");
+                el._refs.matchingErrorItem.innerHTML = "No matches found";
+
+            },
+            /*
+            @function (private) _initValue
+            @description Sets the initial value depending if an item with the provided value exists
+            */
+            initValue: function () {
+
+                var el = this;
+
+                if (el.value != "" && el._misc.items.hasOwnProperty(el.value)) {
+                    el.select(el._misc.items[el.value]);
+                }
+
+            },
+            /*
+            @function (private) _filter
+            @description Takes the value of the input and filters the dropdown items
+            */
+            filter: function () {
+
                 var el = this;
 
                 var items = el._refs.dropDown.querySelectorAll("vc-item");
                 var value = el._refs.input.value.toLowerCase();
 
-                //If the input is empty we will hide the options and enable all the options to be active
-                if (value == "") {
+                //Check if its already expanded, if its not then expand it
+                if (el._refs.dropDown.classList.contains("hidden")) {
+                    el.expand();
+                }
 
-                    if (el._refs.dropDown.classList.contains("expanded")) {
-                        el.shrink();
-                    }
+                //Loop to find matches and hide those that do not match
+                for (var i = 0; i < items.length; i++) {
 
-                    var hiddenItems = el._refs.dropDown.querySelectorAll('[matches="false"]');
+                    if (!(items[i].getAttribute("display-value").toLowerCase().match("^" + value))) {
 
-                    for (var i = 0; i < hiddenItems.length; i++) {
-                        hiddenItems[i].setAttribute("matches", "true");
-                        hiddenItems[i].classList.remove("hidden");
-                    }
+                        if (!items[i].classList.contains("hidden")) {
+                            items[i].classList.add("hidden");
+                            items[i].setAttribute("matches", "false");
+                        }
 
-                } else {
-                    //Check if its already expanded, if its not then expand it
-                    if (!el._refs.dropDown.classList.contains("expanded")) {
-                        el.expand();
-                    }
-                    //Loop to find matches and hide those that do not match
-                    for (var i = 0; i < items.length; i++) {
+                    } else {
 
-                        if (!(items[i].getAttribute("display-value").toLowerCase().match("^" + value))) {
-
-                            if (!items[i].classList.contains("hidden")) {
-                                items[i].classList.add("hidden");
-                                items[i].setAttribute("matches", "false");
-                            }
-
-                        } else {
-
-                            if (items[i].classList.contains("hidden")) {
-                                items[i].classList.remove("hidden");
-                                items[i].setAttribute("matches", "true");
-                            }
-
+                        if (items[i].classList.contains("hidden")) {
+                            items[i].classList.remove("hidden");
+                            items[i].setAttribute("matches", "true");
                         }
 
                     }
@@ -431,28 +481,14 @@
                 }
 
                 var matchedItems = el._refs.dropDown.querySelectorAll('[matches="true"]');
-                var matchingError = el._refs.dropDown.querySelector(".vc-combobox-matchingError");
 
                 if (matchedItems.length == 0) {
 
-                    if (!matchingError) {
+                    el._showMatchingError();
 
-                        matchingError = document.createElement("div");
-                        matchingError.classList.add("vc-combobox-matchingError");
-                        matchingError.innerHTML = "No matches found";
-                        el._refs.scroll.content.appendChild(matchingError);
-
-                        el.classList.add("noMatches");
-
-                    }
                 } else {
 
-                    if (matchingError) {
-
-                        matchingError.parentNode.removeChild(matchingError);
-                        el.classList.remove("noMatches");
-
-                    }
+                    el._hideMatchingError();
 
                 }
 
@@ -461,17 +497,49 @@
 
             },
             /*
-            @function customBlur
-            @description Checks if the user clicked outside the dropdown, if so it shrinks the dropdown
-            @param {object} e
+            @function (private) _undoFilter
+            @description Shows all the previously filtered items
             */
-            customBlur: function (e) {
+            undoFilter: function () {
+
+                var el = this;
+                var hiddenItems = el._refs.dropDown.querySelectorAll('[matches="false"]');
+
+                for (var i = 0; i < hiddenItems.length; i++) {
+                    hiddenItems[i].setAttribute("matches", "true");
+                    hiddenItems[i].classList.remove("hidden");
+                }
+
+                el._hideMatchingError();
+
+            },
+            /*
+            @function (private) _showMatchingError
+            @description Shows matching error on the dropdown
+            */
+            showMatchingError: function () {
 
                 var el = this;
 
-                if (el.isOnPath == false) {
-                    el.shrink();
+                el._refs.scroll.content.appendChild(el._refs.matchingErrorItem);
+                el.classList.add("noMatches");
+
+            },
+            /*
+            @function (private) _hideMatchingError
+            @description Hides matching error on the dropdown
+            */
+            hideMatchingError: function () {
+
+                var el = this;
+
+                if (el._refs.matchingErrorItem.parentNode) {
+
+                    el._refs.matchingErrorItem.parentNode.removeChild(el._refs.matchingErrorItem);
+                    el.classList.remove("noMatches");
+
                 }
+
             },
             /*
             @function toggleDropdown
@@ -568,6 +636,41 @@
                 }
 
             },
+            /*
+            @function (private) _updateValue
+            @description Updates the value
+            */
+            updateValue: function () {
+
+                var el = this;
+                var item = el._misc.items[el.value];
+                console.log('updateValue', el.value);
+                // if (!el._misc.preventUpdate) {
+
+                    if (item) {
+
+                        var value = item.value;
+                        var displayValue = item.displayValue;
+
+                        // el.value = value;
+                        el.displayValue = displayValue;
+
+                        el._refs.input.value = item.displayValue;
+
+                    } else {
+                        
+                        // el._misc.preventUpdate = true;
+                        el._value = "";
+                        el.displayValue = "";
+                        el._refs.input.value = "";
+
+                    }
+
+                // }
+
+                // el._misc.preventUpdate = false;
+
+            }
 
         },
 
@@ -580,6 +683,9 @@
             addItem: function (item) {
 
                 var el = this;
+
+                el._misc.items[item.value] = item;
+
                 item.onRender(function () {
                     var span = document.createElement("span");
                     span.innerHTML = this.displayValue;
@@ -623,12 +729,17 @@
 
                 el._assignDropdownStyle();
 
-                document.body.appendChild(el._refs.dropDown);
+                el._refs.scroll.scrollTop = 0;
 
                 el._refs.dropDown.classList.remove("hidden");
                 el._refs.underline.classList.add("animate");
 
                 el.classList.add("focus");
+
+                el._undoFilter();
+
+                document.body.appendChild(el._refs.dropDown);
+
                 el._refs.scroll.update();
 
             },
@@ -644,6 +755,28 @@
                 el._refs.underline.classList.remove("animate");
 
                 el.appendChild(el._refs.dropDown);
+
+            },
+            /*
+            @function clear
+            @description Empties the value
+            */
+            clear: function () {
+                this.value = "";
+            },
+            /*
+            @function reset
+            @description Resets the value of the element to the default one, if no default is provided then empties the value
+            */
+            reset: function () {
+
+                var el = this;
+
+                if (el.default != "") {
+                    el.value = el.default;
+                } else {
+                    el.clear();
+                }
 
             }
 
@@ -664,25 +797,31 @@
 
             var el = this;
 
+            var declarativePlaceholder = el.getAttribute("placeholder");
+
+            el._setupMisc();
+            el._setupTriggers();
+            el._setupAnimations();
+            el._setupTouchBlur();
+            el._setupMatchingErrorItem();
+
+            el._updateLabel();
+            el._updateDisabled();
+            el._updateReadOnly();
+
             el._setupType();
+
+            if (declarativePlaceholder) el._refs.input.placeholder = declarativePlaceholder;
 
         },
 
         onRender: function () {
 
             var el = this;
-            var declarativePlaceholder = el.getAttribute("placeholder");
 
-            el._setupTriggers();
+            el.value = el.value == "" && el.default != "" ? el.default : el.value;
+
             el._setupItems();
-            el._setupAnimations();
-            el._setupTouchBlur();
-
-            el._updateLabel();
-            el._updateDisabled();
-            el._updateReadOnly();
-
-            if (declarativePlaceholder) el._refs.input.placeholder = declarativePlaceholder;
 
         },
 
@@ -697,6 +836,9 @@
                     break;
                 case "readonly":
                     this._updateReadOnly();
+                    break;
+                case "value":
+                    this._updateValue();
                     break;
             }
 
