@@ -40,10 +40,7 @@
                 value: {}
             },
             misc: {
-                value: {
-                    editorsLoaded: 1, // Flag to control that all editors and the iframe are loaded. 0 when they are
-                    iframeFirstLoad: false // Flag to control first iframe onload as it is called many times when content is modified
-                }
+                value: {}
             }
         },
 
@@ -58,12 +55,11 @@
                 var el = this;
                 el._refs.tabs = document.createElement("vc-tabs");
                 el._refs.tabs.dragging = false;
+                el._refs.tabs.closable = false;
                 el._refs.tabs.onTabSelected(function (tab) {
                     switch (tab.name) {
                         case "result":
-                            if (el._misc.editorsLoaded === 0) {
-                                el._showResult();
-                            }
+                            el._showResult();
                             break;
                         case "html":
                             if (!el._refs.html) {
@@ -92,16 +88,7 @@
                 resultTab.scrollType = "none"
                 resultTab.name = "result";
                 resultTab.title = "Result";
-                el._refs.result = document.createElement("iframe");
-                el._refs.result.onload = function () {
-                    if (!el._misc.iframeFirstLoad) {
-                        el._misc.iframeFirstLoad = true;
-                        setTimeout(function () {
-                            el._editorsLoaded();
-                        }, 0);
-                    }
-                }
-                resultTab.appendChild(el._refs.result);
+                el._refs.result = resultTab;
                 return resultTab;
             },
             // @function setHtmlTab (private) [Set up html tab, it contains head and body editors]
@@ -233,40 +220,27 @@
                     "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
                 return fullScreenBtt;
             },
-            // @function editorLoaded (private) [Each time that a component is loaded this function is called. When all components are loaded result is launched.]
-            editorsLoaded: function () {
-                var el = this;
-                el._misc.editorsLoaded--;
-                if (el._misc.editorsLoaded === 0) {
-                    el._showResult();
-                    el._show();
-                }
-            },
             // @function refresh (private) [Update stored data to vc-editor]
             refresh: function () {
                 var el = this;
-                if (el._refs.html && el._refs.html.head) {
-                    el._refs.html.head.setValue(el.head);
-                }
-                if (el._refs.html && el._refs.html.body) {
-                    el._refs.html.body.setValue(el.body);
-                }
-                if (el._refs.js) {
-                    el._refs.js.setValue(el.js);
-                }
-                if (el._refs.css) {
-                    el._refs.css.setValue(el.css);
-                }
-                el._showResult();
+                el._refs.html.head.setValue(el.head);
+                el._refs.html.body.setValue(el.body);
+                el._refs.js.setValue(el.js);
+                el._refs.css.setValue(el.css);
             },
-            // @function showResult (private) [Show result at iframe]
+            // @function showResult (private) [Show result at inframe]
             showResult: function () {
                 var el = this;
-                var iframeContent = el._refs.result.contentWindow.document || el._refs.result.contentDocument;
-                var iframeSrc = el._getResultString();
-                iframeContent.open();
-                iframeContent.write(iframeSrc);
-                iframeContent.close();
+                el._refs.result.innerHTML = "";
+                var iframe = document.createElement("iframe");
+                iframe.onload = function () {
+                    var iframeContent = iframe.contentWindow.document || iframe.contentDocument;
+                    var iframeSrc = el._getResultString();
+                    iframeContent.open();
+                    iframeContent.write(iframeSrc);
+                    iframeContent.close();
+                }
+                el._refs.result.appendChild(iframe);
             },
             // @function getResultString (private) [Format result into a string to be written at iframe]
             getResultString: function () {
@@ -298,13 +272,13 @@
                     el.js = data.js;
                 }
                 if (data.css) {
-                    el.css = data.css;
+                    el.js = data.css;
                 }
                 if (data.head) {
-                    el.head = data.head;
+                    el.js = data.head;
                 }
                 if (data.body) {
-                    el.body = data.body;
+                    el.js = data.body;
                 }
                 el._refresh();
             },
