@@ -17,7 +17,9 @@
 
     </div>
 
-    <div class="vc-combobox-dropdown vc-bg3 vc-bg2-boxshadow hidden"></div>
+    <div class="vc-combobox-dropdown vc-sect1 vc-boxshadow2 hidden">
+        <div class="vc-combobox-modalFilter vc-bg8"></div>
+    </div>
 
 </template>
 
@@ -171,20 +173,37 @@
 
             },
             /*
-            @function _setupScroll
-            @description Assigns some quick access to some node to avoid using same querySelectors all the time
+            @function _setupDropdown
+            @description Prepares the dropdown to hold the items
             */
-            setupScroll: function () {
+            setupDropdown: function () {
 
                 var el = this;
 
                 el._refs.scroll = document.createElement("vc-scroll");
+                el._refs.modalInput = document.createElement("input");
 
                 el._refs.scroll.thickness = 8;
                 el._refs.scroll.fit = false;
                 el._refs.scroll.fillContainer = false;
 
+                el._refs.modalInput.classList.add("vc-fg2");
+                el._refs.modalInput.placeholder = el.placeholder != "" ? el.placeholder : "Filter";
+
+                el._refs.modalInput.addEventListener('focus', function (e) {
+                    el._misc.modal.inputFocus = true;
+                }, false);
+
+                el._refs.modalInput.addEventListener('blur', function (e) {
+                    el._misc.modal.inputFocus = false;
+                }, false);
+
+                el._refs.modalInput.addEventListener("keyup", function (e) {
+                    el._filter();
+                });
+
                 el._refs.dropDown.appendChild(el._refs.scroll);
+                el._refs.dropDown.querySelector(".vc-combobox-modalFilter").appendChild(el._refs.modalInput);
 
             },
             /*
@@ -232,6 +251,7 @@
 
                 var el = this;
 
+                el._misc.modal = {};
                 el._misc.items = {};
 
             },
@@ -249,7 +269,8 @@
                 });
 
                 document.body.addEventListener("click", function (e) {
-                    if (el.isOnPath == false) {
+                    if (!el.isOnPath && !el._refs.dropDown.isOnPath && !el._refs.overlay.classList.contains("vc-combobox-device")) {
+                        el._refs.input.blur();
                         el.shrink();
                     }
                 });
@@ -269,6 +290,38 @@
 
                 el._refs.input.addEventListener("blur", function () {
                     el._refs.underline.classList.remove("animate");
+                });
+
+            },
+            /*
+            @function (private) _setupOverlay
+            @description Sets up basic properties for the data object
+            */
+            setupOverlay: function () {
+
+                var el = this;
+
+                el._refs.overlay = document.createElement("div");
+                el._refs.overlay.classList.add("vc-combobox-overlay", "vc-bg1-modal");
+                el._refs.overlay.appendChild(el._refs.dropDown);
+
+                // Prevents scrolling on mobile devices
+                window.addEventListener("touchstart", function (e) {
+                    if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device")) {
+                        if (!el._refs.dropDown.isOnPath) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            el._misc.modal.blur = true;
+                        }
+                    }
+                }, { passive: false });
+
+                // On touch end it blurs the modal dropdown
+                window.addEventListener("touchend", function (e) {
+                    if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device") && el._misc.modal.blur) {
+                        el._misc.modal.blur = false;
+                        el.shrink();
+                    }
                 });
 
             },
@@ -336,7 +389,7 @@
 
                     var span = document.createElement("span");
 
-                    this.classList.add("result", "vc-bg3-hoverable");
+                    this.classList.add("result", "vc-bg1-hoverable", "vc-fg1-hoverable");
                     this.matches = "true";
                     this.value = this.getAttribute("value");
                     this.displayValue = this.getAttribute("display-value") || this.value;
@@ -373,7 +426,7 @@
 
                     item = document.createElement("vc-item");
 
-                    item.classList.add("vc-bg3-hoverable");
+                    item.classList.add("vc-bg1-hoverable", "vc-fg1-hoverable");
                     item.matches = "true";
                     item.value = storeData[key][el._refs.store.idProperty];
                     item.displayValue = storeData[key][displayProperty];
@@ -405,12 +458,13 @@
             setupTouchBlur: function () {
 
                 var el = this;
+                var blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
 
                 vcomet.registerPathListener(el);
                 vcomet.registerPathListener(el._refs.dropDown);
 
-                document.addEventListener("touchstart", function () {
-                    if (!el.isOnPath && !el._refs.dropDown.isOnPath) {
+                document.addEventListener(blurTrigger, function () {
+                    if (!el.isOnPath && !el._refs.dropDown.isOnPath && !el._refs.overlay.classList.contains("vc-combobox-device")) {
                         el._refs.input.blur();
                         el.shrink();
                     }
@@ -429,6 +483,13 @@
                 el._refs.matchingErrorItem.classList.add("vc-combobox-matchingError");
                 el._refs.matchingErrorItem.innerHTML = "No matches found";
 
+            },
+            /*
+            @function (private) _initDefault
+            @description If a value has been provided by the user we set it for our element
+            */
+            initDefault: function () {
+                this.value = this.default != "" && this.value == "" ? this.default : this.value;
             },
             /*
             @function (private) _initValue
@@ -452,7 +513,7 @@
                 var el = this;
 
                 var items = el._refs.dropDown.querySelectorAll("vc-item");
-                var value = el._refs.input.value.toLowerCase();
+                var value = el._misc.modal.inputFocus ? el._refs.modalInput.value.toLowerCase() : el._refs.input.value.toLowerCase();
 
                 //Check if its already expanded, if its not then expand it
                 if (el._refs.dropDown.classList.contains("hidden")) {
@@ -492,7 +553,7 @@
 
                 }
 
-                el.value = "";
+                el._value = "";
                 el.displayValue = "";
 
             },
@@ -511,6 +572,9 @@
                 }
 
                 el._hideMatchingError();
+
+                // We set the modalInput value to empty in case its been used to filter
+                el._refs.modalInput.value = "";
 
             },
             /*
@@ -550,7 +614,7 @@
                 var el = this;
 
                 if (!el._refs.dropDown.classList.contains("hidden")) {
-                    el.shrink();
+                    // el.shrink();
                 } else {
                     el.expand();
                 }
@@ -563,12 +627,28 @@
 
                 var el = this;
 
-                var top = el.getBoundingClientRect().top;
-                var left = el.getBoundingClientRect().left;
+                if (window.innerWidth <= vcomet.tabletWidth) {
 
-                el._refs.dropDown.style.top = top + el.offsetHeight + 1 + "px";
-                el._refs.dropDown.style.left = left + "px";
-                el._refs.dropDown.style.width = el.offsetWidth + "px";
+                    if (!el._refs.overlay.classList.contains("vc-combobox-device")) {
+
+                        el._refs.dropDown.style.top = "auto";
+                        el._refs.dropDown.style.left = "auto";
+
+                        el._refs.overlay.classList.add("vc-combobox-device");
+                        el._refs.overlay.classList.add("vc-bg1-modal");
+
+                    }
+
+                } else {
+
+                    el._refs.overlay.classList.remove("vc-combobox-device");
+                    el._refs.overlay.classList.remove("vc-bg1-modal");
+
+                    el._refs.dropDown.style.top = el.getBoundingClientRect().top + el.offsetHeight + 1 + "px";
+                    el._refs.dropDown.style.left = el.getBoundingClientRect().left + "px";
+                    el._refs.dropDown.style.width = el.offsetWidth + "px";
+
+                }
 
             },
             /*
@@ -644,33 +724,111 @@
 
                 var el = this;
                 var item = el._misc.items[el.value];
-                console.log('updateValue', el.value);
-                // if (!el._misc.preventUpdate) {
 
-                    if (item) {
+                if (item) {
 
-                        var value = item.value;
-                        var displayValue = item.displayValue;
+                    var value = item.value;
+                    var displayValue = item.displayValue;
 
-                        // el.value = value;
-                        el.displayValue = displayValue;
+                    el.displayValue = displayValue;
 
-                        el._refs.input.value = item.displayValue;
+                    el._refs.input.value = item.displayValue;
 
-                    } else {
-                        
-                        // el._misc.preventUpdate = true;
-                        el._value = "";
-                        el.displayValue = "";
-                        el._refs.input.value = "";
+                } else {
+
+                    el._value = "";
+                    el.displayValue = "";
+                    el._refs.input.value = "";
+
+                }
+
+            },
+            /*
+            @function (private) _assignModalStyle
+            @description Handles the overlay modal style
+            */
+            assignModalStyle: function () {
+
+                var el = this;
+
+                // Gets the body style from two different sources
+                var computedStyle = window.getComputedStyle(document.body);
+                var boundingClientRect = document.body.getBoundingClientRect();
+
+                //  Checks if there are vertical/horizontal scrolls on window
+                var windowHasVerticalScroll = (document.body.scrollHeight - window.innerHeight) > 0;
+                var windowHasHorizontalScroll = (document.body.scrollWidth - window.innerWidth) > 0;
+
+                // Gets all the margins of the body
+                var horizontalMarginSpace = parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight) / 2;
+                var verticalMarginSpace = parseFloat(computedStyle.marginTop) + parseFloat(computedStyle.marginBottom) / 2;
+
+                var widthDifferenceCalc = (parseInt(boundingClientRect.width) - parseInt(computedStyle.width)) / 2;
+
+                var verticalCalc = parseInt(window.innerWidth + window.pageXOffset + widthDifferenceCalc - document.body.clientWidth);
+                var horizontalCalc = parseInt(window.innerHeight - (boundingClientRect.height + boundingClientRect.top));
+                var scrollBarWidth = vcomet.util.getBrowserScrollBarWidth();
+
+                el._misc.modal.verticalAdjustement = windowHasVerticalScroll && (verticalCalc >= 0 && verticalCalc <= scrollBarWidth);
+                el._misc.modal.horizontalAdjustement = windowHasHorizontalScroll && (horizontalCalc >= 0 && horizontalCalc <= scrollBarWidth);
+
+                // Adjusts the body style to keep it visually intact when adding overflow
+                if (el._misc.modal.verticalAdjustement || el._misc.modal.horizontalAdjustement) {
+
+                    if (el._misc.modal.verticalAdjustement) {
+
+                        // Saves and assigns a width and Left style
+                        el._misc.modal.previousStyleWidth = parseInt(document.body.style.width);
+                        el._misc.modal.previousStyleLeft = parseInt(document.body.style.left);
+
+                        document.body.style.width = document.body.offsetWidth + "px";
+                        document.body.style.left = boundingClientRect.left + "px";
 
                     }
 
-                // }
+                    if (el._misc.modal.horizontalAdjustement) {
 
-                // el._misc.preventUpdate = false;
+                        // Saves and assigns a top style
+                        el._misc.modal.previousStyleTop = parseInt(document.body.style.top);
+                        document.body.style.top = boundingClientRect.top + "px";
 
-            }
+                    }
+
+                    // Saves and assigns a position style
+                    el._misc.modal.previousStylePosition = document.body.style.position;
+                    document.body.style.position = "absolute";
+
+                    // Shows/Hides the disabled scrollbars in the overlay
+                    el._refs.overlay.style.overflowY = windowHasVerticalScroll ? "scroll" : "";
+                    el._refs.overlay.style.overflowX = windowHasHorizontalScroll ? "scroll" : "";
+
+                    document.body.classList.add("vc-body-modal");
+
+                }
+
+            },
+            /*
+            @function (private) _revertModalStyle
+            @description Reverts the assigned modal style
+            */
+            revertModalStyle: function () {
+
+                var el = this;
+
+                document.body.classList.remove("vc-body-modal");
+
+                // Removes the modal style and restores the previous style 
+                document.body.style.width = el._misc.modal.previousStyleWidth ? el._misc.modal.previousStyleWidth : "";
+                document.body.style.left = el._misc.modal.previousStyleLeft ? el._misc.modal.previousStyleLeft : "";
+                document.body.style.top = el._misc.modal.previousStyleTop ? el._misc.modal.previousStyleTop : "";
+                document.body.style.position = el._misc.modal.previousStylePosition ? el._misc.modal.previousStylePosition : "";
+
+                el._misc.modal.previousStyleWidth = undefined;
+                el._misc.modal.previousStyleLeft = undefined;
+                el._misc.modal.previousStyleTop = undefined;
+                el._misc.modal.previousStylePosition = undefined;
+
+            },
 
         },
 
@@ -689,7 +847,7 @@
                 item.onRender(function () {
                     var span = document.createElement("span");
                     span.innerHTML = this.displayValue;
-                    this.classList.add("result", "vc-bg3-hoverable")
+                    this.classList.add("result", "vc-bg1-hoverable", "vc-fg1-hoverable")
                     this.appendChild(span);
                     this.setAttribute("matches", "true");
                     this.addEventListener("click", function () { el.select(this) });
@@ -727,6 +885,7 @@
 
                 var el = this;
 
+                el._assignModalStyle();
                 el._assignDropdownStyle();
 
                 el._refs.scroll.scrollTop = 0;
@@ -738,9 +897,14 @@
 
                 el._undoFilter();
 
-                document.body.appendChild(el._refs.dropDown);
+                document.body.appendChild(el._refs.overlay);
 
-                el._refs.scroll.update();
+                // el._refs.scroll.update();
+                setTimeout(function () {
+                    el._refs.scroll.update();
+                }, 100);
+
+                el._misc.modal.active = true;
 
             },
             /*
@@ -754,7 +918,17 @@
                 el._refs.dropDown.classList.add("hidden");
                 el._refs.underline.classList.remove("animate");
 
-                el.appendChild(el._refs.dropDown);
+                // el.appendChild(el._refs.dropDown);
+                if (el._refs.overlay.parentNode) {
+                    el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+                }
+
+                if (el._misc.modal.active) {
+                    el._revertModalStyle();
+                }
+
+                el._misc.modal.active = false;
+                el._misc.modal.inputFocus = false;
 
             },
             /*
@@ -786,8 +960,9 @@
 
             var el = this;
 
+            el._setupMisc();
             el._setupRefs();
-            el._setupScroll();
+            el._setupDropdown();
 
             vcomet.createCallback("onSelected", el);
 
@@ -799,7 +974,6 @@
 
             var declarativePlaceholder = el.getAttribute("placeholder");
 
-            el._setupMisc();
             el._setupTriggers();
             el._setupAnimations();
             el._setupTouchBlur();
@@ -810,6 +984,9 @@
             el._updateReadOnly();
 
             el._setupType();
+            el._setupOverlay();
+
+            el._initDefault();
 
             if (declarativePlaceholder) el._refs.input.placeholder = declarativePlaceholder;
 
@@ -818,8 +995,6 @@
         onRender: function () {
 
             var el = this;
-
-            el.value = el.value == "" && el.default != "" ? el.default : el.value;
 
             el._setupItems();
 
@@ -847,8 +1022,8 @@
 
             var el = this;
 
-            if (!el._refs.dropDown.classList.contains("hidden")) {
-                el._assignDropdownStyle();
+            if (el._misc.modal.active && !el._misc.modal.inputFocus) {
+                el.shrink();
             }
 
         }
