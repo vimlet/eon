@@ -1,0 +1,250 @@
+<template>
+    <vc-anchor></vc-anchor>
+    <div class="vc-reveal-wrapper"></div>
+</template>
+<script>
+    vcomet.element("vc-reveal", "vc-reveal.css", {
+        dependencies: [
+            "../vc-anchor",
+            "../vc-scroll"
+        ],
+        privateProperties: {
+            /*
+                @property (private) {Object} _refs 
+                @description Quick access to the reveal structure nodes
+            */
+            refs: {
+                value: {}
+            },
+            /*
+                @property (private) {Object} _misc 
+                @description Internal used data
+            */
+            misc: {
+                value: {}
+            }
+        },
+        properties: {
+            /*
+                @property {Boolean} fill 
+                @description 
+                
+                Values: true, false
+                Default: true
+            */
+            fill: {
+                value: false,
+                reflect: true
+            },
+            /*
+                @property {String} type 
+                @description 
+                Values: fade, top, bottom, left, right
+                Default: bottom
+            */
+            type: {
+                value: "bottom",
+                reflect: true
+            },
+            /*
+                @property {Number} delay 
+                @description 
+                Default: 0
+            */
+            delay: {
+                value: 0,
+                reflect: true
+            },
+            /*
+                @property {Number} duration 
+                @description Milliseconds
+                Default: 1000
+            */
+            duration: {
+                value: 10000,
+                reflect: true
+            },
+            /*
+                @property {String} easing 
+                @description 
+                Default: linear, ease, ease-out
+            */
+            easing: {
+                value: "ease-out",
+                reflect: true
+            }
+        },
+        privateFunctions: {
+            /*
+                @function (private) _createRefs
+                @description
+            */
+            createRefs: function () {
+                var el = this;
+                // Store references
+                el._refs.wrapper = el.template.querySelector(".vc-reveal-wrapper");
+                el._refs.anchor = el.template.querySelector("vc-anchor");
+                el._misc.posProp = ~["top", "bottom"].indexOf(el.type) ? "top" : "left";
+            },
+            /*
+                @function (private) _setDefaultStyle
+                @description Check if the default element style should be applied
+            */
+            setDefaultStyle: function () {
+                var el = this;
+                // Check fill behavior
+                if (vcomet.util.isTrue(el.fill)) {
+                    // Content style
+                    el.classList.add("vc-fill");
+                }
+            },
+            /*
+                @function (private) _setUpLayout
+                @description 
+            */
+            setUpLayout: function () {
+                var el = this;
+                var wrapperFragment = document.createDocumentFragment();
+                var children = el.getSourceElements();
+                // Move source nodes to the wrapper element safely
+                while (children.length) {
+                    // From first to last...
+                    wrapperFragment.appendChild(children.shift());
+                }
+                el._refs.wrapper.appendChild(wrapperFragment);
+            },
+            /*
+                @function (private) _setUpAnimation
+                @description 
+            */
+            setUpAnimation: function () {
+                var el = this;
+                // Check type
+                if(el.type === "bottom") {
+                    el._refs.wrapper.style.top = el.offsetHeight + "px";
+                }
+            },
+            /*
+                @function (private) _setUpAnchor
+                @description 
+            */
+            setUpAnchor: function () {
+                var el = this;
+
+                el._refs.anchor.onReached(function(){
+                    if(this.getAttribute("uid") === "4") {
+
+                    }
+                    // Trigger animation
+                    el._animate();
+                });
+
+            },
+            /*
+                @function (private) _animate
+                @description 
+            */
+            animate: function () {
+                var el = this;
+                var cancel = false;
+                // Set animation duration
+                // var duration = !time ? parseInt(el.duration) : time;
+                // Increase proportionally the duration on partial animations
+                var duration = el.limit === 0 ? time : duration / el.limit;
+                var endTime = +new Date() + el.duration;
+                // Load animation function
+                el._misc.animFunction = function(){
+                    // Get animation progress
+                    var currentTime = +new Date();
+                    var remaining = (endTime - currentTime);
+                    var rate = remaining / duration;
+                    // Get animation progress rate
+                    // var rate = el._runEffect(remaining/duration);
+
+                    // Get animation progress rate applying effects
+                    cancel = el._runAnimation(rate);
+                    
+                    if(!cancel){
+                        window.requestAnimationFrame(el._misc.animFunction);
+                    }
+                }
+                // Start animation function loop
+                el._misc.animFunction();
+            },
+            /*
+                @function (private) _runEffect
+                @description Process rate according to the animation formula
+                @param {Number} rate [Maximum progress value reachable]
+                @return {Number} [Progress rate resulted]
+            */
+            runEffect: function(rate){
+                var el = this;
+                // Check loader selected effect
+                switch (el.easing) {
+                case "linear":
+                    // -- LINEAR FORMULA --
+                    rate = 1 - rate;
+                    break;
+                case "ease":
+                    // -- EASING FORMULA --
+                    rate = 1 - Math.pow(rate, 3);
+                    break;
+                case "ease-out":
+                    // -- EASING FORMULA --
+                    rate = 1 - Math.pow(rate, 10);
+                    break;
+                }
+                return rate;
+            },
+            /*
+                @function {String} (private) _runAnimation
+                @description Animation
+                @return {String} [Whether or not animation should be cancelled]
+            */
+            runAnimation: function(rate){
+                var el = this;
+
+                var end = 0;
+                var start = parseInt(el._refs.wrapper.style[el._misc.posProp]);
+                // Check if the animation has ended
+                if (rate >= 1) {
+                    window.cancelAnimationFrame(el._misc.animFunction);
+                    return "cancel";
+                } else {
+                    // console.log('rate',rate , start, (rate * (end - start) + start));
+                    // Translate item
+                    el._refs.wrapper.style[el._misc.posProp] = (rate * (end - start) + start) + "px";
+                    // Fade in item
+                    // el._refs.wrapper.style[el._misc.posProp] = start * rate;
+                }
+
+            }
+
+        },
+        onCreated: function () {
+            var el = this;
+            // Create content related callbacks
+
+            // Store references
+            el._createRefs();
+            // ** Apply default items positioning style
+            el._setDefaultStyle();
+        },
+        onInit: function () {
+            var el = this;
+            // Create reveal element structure
+            el._setUpLayout();
+        },
+        onTransformed: function () {
+            var el = this;
+            // 
+            el._setUpAnimation();
+
+            //
+            el._setUpAnchor();
+        },
+        onResize: function(){
+            // Update animation position values
+        }
+    });
+</script>

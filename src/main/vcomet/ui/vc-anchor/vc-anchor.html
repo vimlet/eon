@@ -3,7 +3,7 @@
         properties: {
             /*
                 @property {String} type
-                @description Viewport relative activation posiiton
+                @description Viewport relative activation position
                 Values: visible, top, mid, bottom
                 Default: visible
             */
@@ -48,8 +48,7 @@
                 @description Element offset position
             */
             offsetPosition: {
-                value: 0,
-                reflect: true
+                value: 0
             },
             /*
                 @property {Number} offsetSpacing
@@ -110,16 +109,18 @@
             monitorAnchorVisibility: function () {
                 var el = this;
                 // On scroll
-                var vcScrollEl = document.querySelector(el.vcScroll);
+               
                 var throttled = false;
                 var delay = 15;
                 function activateAnchor(arg) {
                     if (!throttled) {
-                        if (el.state != vcomet.history.current && el.offsetParent) {
-                            if (el._isInViewport() && !vcomet.history.cancelNavigation) {
-                                vcomet.triggerCallback("onAnchorActivated", el, el, [el.state]);
+                       if(el.offsetParent && el._isInViewport()) {
+                            vcomet.triggerCallback("onReached", el, el);
+
+                            if(el.state != vcomet.history.current && !vcomet.history.cancelNavigation) {
+                                vcomet.triggerCallback("onActivated", el, el, [el.state]);
                             }
-                        }
+                       }
                     }
                     // Throttle
                     throttled = true;
@@ -129,7 +130,8 @@
                     }, delay);
                 };
                 // Check parent scroll container
-                if (vcScrollEl) {
+                if (el.vcScroll) {
+                    var vcScrollEl = document.querySelector(el.vcScroll);
                     vcScrollEl.onScrolled(activateAnchor);
                 } else {
                     document.addEventListener("scroll", activateAnchor);
@@ -154,6 +156,11 @@
                     return el._isInMid(rect);
                     // Is in viewport
                 } else {
+                    // if(el.getAttribute("uid") === "4") {
+                    //     console.log(el, rect)
+                    //     console.log(el._isVisible(rect))
+
+                    // }
                     return el._isVisible(rect);
                 }
             },
@@ -189,7 +196,7 @@
             },
             /*
               @function (private) _isVisible
-              @description Whehter or not the anchor is in the viewport
+              @description Whether or not the anchor is in the viewport
               @param {Object} rect [The size of an element and its position relative to the viewport]
               @return {Boolean} [Condition check result]
             */
@@ -219,7 +226,8 @@
             }
         },
         onCreated: function () {
-            vcomet.createCallback("onAnchorActivated", this);
+            vcomet.createCallback("onReached", this);
+            vcomet.createCallback("onActivated", this);
         },
         onInit: function () {
             var el = this;
@@ -228,9 +236,11 @@
         },
         onRender: function () {
             var el = this;
-            document.querySelector(el.vcScroll).onBubbleRender(function(){
-                el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
-            });
+            if (el.vcScroll) {
+                document.querySelector(el.vcScroll).onBubbleRender(function(){
+                    el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
+                });
+            }
         }
     });
 </script>

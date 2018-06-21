@@ -183,26 +183,31 @@
         if (position == "fixed") {
           // Append sticky wrapper to the body
           el.fixContainer.appendChild(el.wrapper);
-          // Check custom wrapper class
-          if (el.fixedClass) {
-            el.wrapper.classList.add(el.fixedClass);
-          }
           // Set element position fixed
           el.wrapper.style.position = el.fixContainer.tagName.toLowerCase() == "body" ? "fixed" : "absolute";
           el.wrapper.style[el.side] = el.spacing + "px";
           el.wrapper.style[fitSide] = 0;
+          // Check custom wrapper class
+          setTimeout(function(){
+            if (el.fixedClass) {
+              el.wrapper.classList.add(el.fixedClass);
+              vcomet.triggerCallback("onPositionChanged", el, el, ["fixed"]);
+            }
+          }, 0);
         } else {
           // Append sticky wrapper back to the element
           el.appendChild(el.wrapper);
-          // Check custom wrapper class
-          if (el.fixedClass) {
-            el.wrapper.classList.remove(el.fixedClass);
-          }
           // Move back sticky element to its initial position
           el.wrapper.style.position = "relative";
           el.wrapper.style[el.side] = "auto";
+          // Check custom wrapper class
+          setTimeout(function(){
+            if (el.fixedClass) {
+              el.wrapper.classList.remove(el.fixedClass);
+              vcomet.triggerCallback("onPositionChanged", el, el, ["relative"]);
+            }
+          }, 0);
         }
-        vcomet.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
       },
       /*
         @function (private) _animationMonitor
