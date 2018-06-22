@@ -17,9 +17,7 @@
 
     </div>
 
-    <div class="vc-combobox-dropdown vc-sect1 vc-boxshadow2 hidden">
-        <div class="vc-combobox-modalFilter vc-bg8"></div>
-    </div>
+    <div class="vc-combobox-dropdown vc-sect1 vc-boxshadow2 hidden"></div>
 
 </template>
 
@@ -181,29 +179,42 @@
                 var el = this;
 
                 el._refs.scroll = document.createElement("vc-scroll");
-                el._refs.modalInput = document.createElement("input");
 
                 el._refs.scroll.thickness = 8;
                 el._refs.scroll.fit = false;
                 el._refs.scroll.fillContainer = false;
 
-                el._refs.modalInput.classList.add("vc-fg2");
-                el._refs.modalInput.placeholder = el.placeholder != "" ? el.placeholder : "Filter";
-
-                el._refs.modalInput.addEventListener('focus', function (e) {
-                    el._misc.modal.inputFocus = true;
-                }, false);
-
-                el._refs.modalInput.addEventListener('blur', function (e) {
-                    el._misc.modal.inputFocus = false;
-                }, false);
-
-                el._refs.modalInput.addEventListener("keyup", function (e) {
-                    el._filter();
-                });
-
                 el._refs.dropDown.appendChild(el._refs.scroll);
-                el._refs.dropDown.querySelector(".vc-combobox-modalFilter").appendChild(el._refs.modalInput);
+
+                if (vcomet.util.isTrue(el.filter)) {
+
+                    var modalInputWrapper = document.createElement("div");
+
+                    modalInputWrapper.classList.add("vc-combobox-modalFilter", "vc-bg8");
+
+                    el._refs.modalInput = document.createElement("input");
+
+                    el._refs.modalInput.classList.add("vc-fg2");
+                    el._refs.modalInput.placeholder = el.placeholder != "" ? el.placeholder : "Filter";
+
+                    el._refs.modalInput.addEventListener('focus', function (e) {
+                        // When the device modal input is focused, it shows the keyboard, this keyboard triggers onWindowResize, 
+                        // since onWindowResize we want to hide the dropdown this variable helps us know
+                        //  if the resize event was triggered by the input or the window manually resizing
+                        el._misc.modal.inputFocus = true;
+                    }, false);
+
+                    el._refs.modalInput.addEventListener('blur', function (e) {
+                        el._misc.modal.inputFocus = false;
+                    }, false);
+
+                    el._refs.modalInput.addEventListener("keyup", function (e) {
+                        el._filter();
+                    });
+
+                    modalInputWrapper.appendChild(el._refs.modalInput);
+                    el._refs.dropDown.insertBefore(modalInputWrapper, el._refs.dropDown.childNodes[0]);
+                }
 
             },
             /*
@@ -574,7 +585,9 @@
                 el._hideMatchingError();
 
                 // We set the modalInput value to empty in case its been used to filter
-                el._refs.modalInput.value = "";
+                if (el._refs.modalInput) {
+                    el._refs.modalInput.value = "";
+                }
 
             },
             /*
