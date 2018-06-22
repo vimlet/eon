@@ -253,7 +253,7 @@
         var blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
 
         datePickerElement.classList.add("vc-datebox-picker", "hidden");
-        
+
         datePickerElement.value = el.value ? el.value : datePickerElement.value;
         datePickerElement.locale = el.locale;
         datePickerElement.weekDaysFormat = el.weekDaysFormat;
@@ -278,11 +278,6 @@
           }
         }, false);
 
-        datePickerElement._refs.close.addEventListener('click', function (e) {
-          alert("close");
-          el._hideDatePicker();
-        }, true);
-
         document.body.addEventListener(blurTrigger, function (e) {
           if (!el.isOnPath && !el._refs.datePicker.isOnPath && !el._refs.overlay.classList.contains("vc-datebox-device")) {
             el._hideDatePicker();
@@ -305,15 +300,26 @@
 
         el._refs.overlay = document.createElement("div");
         el._refs.overlay.classList.add("vc-datebox-overlay");
-        el._refs.overlay.classList.add("vc-bg1-modal");
         el._refs.overlay.appendChild(el._refs.datePicker);
 
         // Prevents scrolling on mobile devices
         window.addEventListener("touchstart", function (e) {
           if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-datebox-device")) {
-            e.preventDefault();
+            if (!el._refs.datePicker.isOnPath) {
+              e.preventDefault();
+              e.stopPropagation();
+              el._misc.modal.blur = true;
+            }
           }
         }, { passive: false });
+
+        // On touch end it blurs the modal dropdown
+        window.addEventListener("touchend", function (e) {
+          if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-datebox-device") && el._misc.modal.blur) {
+            el._misc.modal.blur = false;
+            el._hideDatePicker();
+          }
+        });
 
       },
       /*
@@ -761,9 +767,6 @@
 
         el._misc.modal.active = true;
 
-        el._misc.modal.windowScrollY = window.scrollY;
-        el._misc.modal.windowScrollX = window.scrollX;
-
       },
       /*
       @function (private) _hideDatePicker
@@ -799,8 +802,8 @@
         var boundingClientRect = document.body.getBoundingClientRect();
 
         //  Checks if there are vertical/horizontal scrolls on window
-        var windowHasVerticalScroll = (document.body.offsetHeight - window.innerHeight) > 0;
-        var windowHasHorizontalScroll = (document.body.offsetWidth - window.innerWidth) > 0;
+        var windowHasVerticalScroll = (document.body.scrollHeight - window.innerHeight) > 0;
+        var windowHasHorizontalScroll = (document.body.scrollWidth - window.innerWidth) > 0;
 
         // Gets all the margins of the body
         var horizontalMarginSpace = parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight) / 2;
@@ -882,18 +885,20 @@
 
         if (window.innerWidth <= vcomet.tabletWidth) {
 
-          if (!el._refs.datePicker.classList.contains("vc-datebox-device")) {
+          if (!el._refs.overlay.classList.contains("vc-datebox-device")) {
 
             el._refs.datePicker.style.top = "auto";
             el._refs.datePicker.style.left = "auto";
 
-            el._refs.overlay.classList.add("vc-datebox-device")
+            el._refs.overlay.classList.add("vc-datebox-device");
+            el._refs.overlay.classList.add("vc-bg1-modal");
 
           }
 
         } else {
 
           el._refs.overlay.classList.remove("vc-datebox-device");
+          el._refs.overlay.classList.remove("vc-bg1-modal");
 
           el._refs.datePicker.style.top = el.getBoundingClientRect().top + el.offsetHeight + "px";
           el._refs.datePicker.style.left = el.getBoundingClientRect().left + "px";
@@ -1034,7 +1039,7 @@
       initValue: function () {
 
         var el = this;
-        
+
         if (el.value != "") {
 
           var splittedMin = el.value.split("/");
@@ -1178,7 +1183,7 @@
       format: function (text, format) {
 
         var el = this;
-        
+
         text = text ? text + "" : "";
 
         if (text.length > 0 && text.length < format.length) {
@@ -1468,7 +1473,7 @@
       updateValue: function () {
 
         var el = this;
-        
+
         if (!el._misc.preventUpdate) {
 
           var format = el.valueFormat;
@@ -1513,7 +1518,7 @@
           el._misc.current.year = el._format(valueObj.year, el._misc.mask.year.format);
 
           if (el._refs.datePicker) {
-            
+
             el._refs.datePicker._misc.current.day = el._misc.current.day ? el._misc.current.day : el._refs.datePicker._misc.current.day;
             el._refs.datePicker._misc.current.month = el._misc.current.month ? el._misc.current.month : el._refs.datePicker._misc.current.month;
             el._refs.datePicker._misc.current.year = el._misc.current.year ? el._misc.current.year : el._refs.datePicker._misc.current.year;
@@ -1589,7 +1594,7 @@
 
       var el = this;
 
-      if (el._refs.datePicker && !el._refs.datePicker.classList.contains("hidden")) {
+      if (el._misc.modal.active) {
         el._hideDatePicker();
       }
 
