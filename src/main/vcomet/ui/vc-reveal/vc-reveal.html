@@ -123,6 +123,7 @@
                 el._refs.anchor = el.template.querySelector("vc-anchor");
                 el._misc.posProp = ~["top", "bottom"].indexOf(el.type) ? "top" : "left";
                 el._misc.posInvert = ~["top", "left"].indexOf(el.type) ? false : true;
+                
                 // ** TODO 
                 el._misc.offsetProp = ~["top", "bottom"].indexOf(el.type) ? "offsetheight" : "offsetWidth";
             },
@@ -159,10 +160,12 @@
             */
             setStartPosition: function () {
                 var el = this;
+                el.end = !el.end ? 0 : parseInt(el.end);
                 // Check type
                 if(el.type === "bottom") {
-                    el._refs.wrapper.style.transform = "translate3d(0, " + el.offsetHeight + "px" + ", 0)";
-                    el._misc.startTranslate = el.offsetHeight;
+                    console.log('el.end', el.end);
+                    el._refs.wrapper.style.transform = "translate3d(0, " + (el.offsetHeight + el.end) + "px" + ", 0)";
+                    el._misc.startTranslate = (el.offsetHeight + el.end);
                 } else if((el.type === "top")) {
                     el._refs.wrapper.style.transform = "translate3d(0, " + -el.offsetHeight + "px" + ", 0)";
                     el._misc.startTranslate = -el.offsetHeight;
@@ -185,11 +188,6 @@
                     // Trigger animation
                     el._animate();
                 });
-
-                // ** OPTIONAL
-                // el._refs.anchor.onHidden(function(){
-                //     // Restore
-                // });
 
             },
             
@@ -225,19 +223,22 @@
             runAnimation: function(rate){
                 var el = this;
 
-                var end = !el.end ? 0 : el.end;
                 // ** TODO - Implement end customizable value 
                 // var end = el.end == 1 ? el[el._misc.offsetProp] : 0 ;
                 // Get translate current position
                 var currentTranslatePos = el._getCurrentTranslate();
-                var reached = currentTranslatePos == end;
+
+                // Check if translate values sign change
+                var reached = el._misc.posInvert ? currentTranslatePos <= el.end : currentTranslatePos >= el.end;
+
                 // Check if the animation has ended
                 if (rate >= 1 || reached) {
                     window.cancelAnimationFrame(el._misc.animFunction);
+                    vcomet.triggerCallback("onAnimationEnd", el, el);
                     return "cancel";
                 } else {
                     // Translate item
-                    el._setTranslateValue((1 - rate) * el._misc.startTranslate);
+                    el._setTranslateValue((1 - rate) * (el._misc.startTranslate));
                     // Fade in item
                     el._refs.wrapper.style.opacity = 1 * rate;
                 }
@@ -284,7 +285,7 @@
         onCreated: function () {
             var el = this;
             // Create content related callbacks
-
+            vcomet.createCallback("onAnimationEnd", this);
             // Store references
             el._createRefs();
             // ** Apply default items positioning style
@@ -304,6 +305,12 @@
         },
         onResize: function(){
             // Update animation position values
+        },
+        onPropertyChanged: function(prop, oldVal, value){
+            // 
+            if (prop == "type") {
+                console.log('prop', prop, "value", value);
+            }
         }
     });
 </script>
