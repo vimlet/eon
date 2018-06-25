@@ -85,21 +85,16 @@
         },
         privateFunctions: {
             /*
-                @function (private) _animate
-                @description 
+                @function (private) 
+                @description
             */
-            animate: function () {
-                var el = this;
-                var cancel = false;
-                // Set animation duration;
-                el.duration = parseInt(el.duration);
-                // Increase proportionally the duration on partial animations
-                var endTime = +new Date() + el.duration;
+            setUpAnimation: function () {
+                var el = this
                 // Load animation function
                 el._misc.animFunction = function(){
                     // Get animation progress
                     var currentTime = +new Date();
-                    var remaining = (endTime - currentTime);
+                    var remaining = (el._misc.endTime - currentTime);
                     // Get animation progress rate
                     var rate = el._runEffect(remaining/el.duration);
                     // Get animation progress rate applying effects
@@ -109,6 +104,18 @@
                         window.requestAnimationFrame(el._misc.animFunction);
                     }
                 }
+            },
+            /*
+                @function (private) _animate
+                @description 
+            */
+            animate: function () {
+                var el = this;
+                var cancel = false;
+                // Set animation duration;
+                el.duration = parseInt(el.duration);
+                // Increase proportionally the duration on partial animations
+                el._misc.endTime = +new Date() + el.duration;
                 // Start animation function loop
                 el._misc.animFunction();
             }, 
@@ -121,11 +128,18 @@
                 // Store references
                 el._refs.wrapper = el.template.querySelector(".vc-reveal-wrapper");
                 el._refs.anchor = el.template.querySelector("vc-anchor");
+                
+            },
+            /*
+                @function (private) _setUpMisc
+                @description
+            */
+            setUpMisc: function () {
+                var el = this;
                 el._misc.posProp = ~["top", "bottom"].indexOf(el.type) ? "top" : "left";
                 el._misc.posInvert = ~["top", "left"].indexOf(el.type) ? false : true;
-                
                 // ** TODO 
-                el._misc.offsetProp = ~["top", "bottom"].indexOf(el.type) ? "offsetheight" : "offsetWidth";
+                el._misc.offsetProp = ~["top", "bottom"].indexOf(el.type) ? "offsetHeight" : "offsetWidth";
             },
             /*
                 @function (private) _setDefaultStyle
@@ -163,12 +177,11 @@
                 el.end = !el.end ? 0 : parseInt(el.end);
                 // Check type
                 if(el.type === "bottom") {
-                    console.log('el.end', el.end);
                     el._refs.wrapper.style.transform = "translate3d(0, " + (el.offsetHeight + el.end) + "px" + ", 0)";
                     el._misc.startTranslate = (el.offsetHeight + el.end);
                 } else if((el.type === "top")) {
-                    el._refs.wrapper.style.transform = "translate3d(0, " + -el.offsetHeight + "px" + ", 0)";
-                    el._misc.startTranslate = -el.offsetHeight;
+                    el._refs.wrapper.style.transform = "translate3d(0, " + -(el.offsetHeight + el.end) + "px" + ", 0)";
+                    el._misc.startTranslate = -(el.offsetHeight + el.end);
                 } else if((el.type === "right")) {
                     el._refs.wrapper.style.transform = "translate3d(" + el.offsetWidth + "px" + ", 0, 0)";
                     el._misc.startTranslate = el.offsetHeight;
@@ -230,9 +243,10 @@
 
                 // Check if translate values sign change
                 var reached = el._misc.posInvert ? currentTranslatePos <= el.end : currentTranslatePos >= el.end;
-
+                
                 // Check if the animation has ended
                 if (rate >= 1 || reached) {
+                    el._misc.invertDirection = false;
                     window.cancelAnimationFrame(el._misc.animFunction);
                     vcomet.triggerCallback("onAnimationEnd", el, el);
                     return "cancel";
@@ -262,7 +276,11 @@
             */
             setTranslateValue: function(value){
                 var el = this;
-
+                //
+                if(!el._misc.posInvert) {
+                    value += el.end;
+                }
+                //
                 if(el._misc.posProp == "top") {
                     el._refs.wrapper.style.transform = "translate3d(0," + value + "px, 0)";
                 } else {
@@ -277,6 +295,8 @@
             */
             play: function () {
                 var el = this;
+                // Reset misc
+                el._setUpMisc();
                 el._setStartPosition();
                 el._animate();
             }, 
@@ -288,6 +308,8 @@
             vcomet.createCallback("onAnimationEnd", this);
             // Store references
             el._createRefs();
+            // Store references
+            el._setUpMisc();
             // ** Apply default items positioning style
             el._setDefaultStyle();
         },
@@ -295,6 +317,8 @@
             var el = this;
             // Create reveal element structure
             el._setUpLayout();
+            //
+            el._setUpAnimation();
         },
         onTransformed: function () {
             var el = this;
@@ -307,9 +331,17 @@
             // Update animation position values
         },
         onPropertyChanged: function(prop, oldVal, value){
+            var el = this;
             // 
             if (prop == "type") {
-                console.log('prop', prop, "value", value);
+                // Reset misc
+                el._setUpMisc();
+                // Reset misc
+                el._setStartPosition();
+                // Increase proportionally the duration on partial animations
+                el._misc.endTime = +new Date() + el.duration;
+                console.log('NEW DATA');
+
             }
         }
     });

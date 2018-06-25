@@ -1,5 +1,5 @@
 <template>
-    <div class="vc-dialog-dialog vc-bg1 vc-boxshadow1">
+    <div class="vc-dialog-dialog vc-bg1 vc-boxshadow1 vc-defaultStyle">
         <div class="vc-dialog-heading vc-sect1 vc-unselectable">
             <div class="vc-dialog-headingButtons">
                 <i class="vc-dialog-minimize vc-fg1-hoverable vc-dialog-hidden vicon vicon-minimize"></i>
@@ -7,7 +7,7 @@
                 <i class="vc-dialog-close vc-fg1-hoverable vicon vicon-close"></i>
             </div>
         </div>
-        <vc-scroll arrowScrolls="true" thickness="10" fill-container="false">
+        <vc-scroll arrowScrolls="true" thickness="10" fill-container="true" fit="true">
         </vc-scroll>
     </div>
 </template>
@@ -236,9 +236,23 @@
             setDefaultStyle: function () {
                 var el = this;
                 // Check default style configuration
-                if(vcomet.util.isTrue(el.defaultStyle)) {
-                    // Wrapper style
-                    el._refs.dialog.classList.add("vc-spaced");
+                if(!vcomet.util.isTrue(el.defaultStyle)) {
+                    // Remove default style
+                    el._refs.dialog.classList.remove("vc-spaced-container");
+                    el._refs.dialog.classList.remove("vc-defaultStyle");
+                    el._refs.userContent.classList.remove("vc-spaced-container");
+                } else {
+                    // Spaced items container
+                    var spacedItemsContainer = document.createElement("div");
+                    var spacedFragment = document.createDocumentFragment();
+                    spacedItemsContainer.classList.add("vc-spaced-items-container");
+                    // Append content into the new spaced items container
+                    var nodes = [].slice.call(el._refs.userContent.childNodes);
+                    while (nodes.length) {
+                        spacedFragment.appendChild(nodes.shift());
+                    }
+                    spacedItemsContainer.appendChild(spacedFragment);
+                    el._refs.userContent.appendChild(spacedItemsContainer);
                 }
             },
             /*
@@ -293,7 +307,7 @@
                 el._refs.userContent = el._refs.userContent ? el._refs.userContent : document.createElement("vc-section");
 
                 el._refs.userContent.type = "content";
-                el._refs.userContent.classList.add("vc-dialog-content");
+                el._refs.userContent.classList.add("vc-dialog-content", "vc-spaced-container");
                 el._refs.scroll.appendChild(el._refs.userContent);
 
                 el.content = el._refs.userContent;
@@ -308,7 +322,7 @@
 
                 el.footer = el._refs.userFooter ? el._refs.userFooter : document.createElement("vc-section");
                 el.footer.type = "footer";
-                el.footer.classList.add("vc-dialog-footer", "vc-sect1", "vc-unselectable");
+                el.footer.classList.add("vc-dialog-footer", "vc-spaced-items-container", "vc-sect1", "vc-unselectable");
 
                 el._handleFooterAppend();
             },
@@ -1174,7 +1188,6 @@
                             el._moveToFront();
                         }
                     });
-                    console.log('VIS');
                     el._refs.dialog.classList.add("vc-dialog-visible");
 
                     document.body.appendChild(el._refs.dialog);
