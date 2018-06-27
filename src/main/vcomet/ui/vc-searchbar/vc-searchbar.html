@@ -1,26 +1,45 @@
 <template>
 
-<div class="vc-searchbar-main vc-bg1 vc-fg1 vc-boxshadow1 vc-unselectable">
-  <div class="vc-searchbar-searchbar">
-    <div class="vc-searchbar-filtersButton vc-fg1-hoverable">
-      <i class="vicon vicon-list"></i>
-    </div>
-    <div class="vc-searchbar-fields">
+  <div class="vc-searchbar-main vc-bg1 vc-fg1 vc-boxshadow1 vc-unselectable vc-spaced-container">
+    <div class="vc-searchbar-searchbar">
+      <div class="vc-searchbar-filtersButton vc-fg1-hoverable">
+        <i class="vicon vicon-list"></i>
+      </div>
+      <div class="vc-searchbar-fields">
 
+      </div>
+      <div class="vc-searchbar-searchButton vc-fg1-hoverable">
+        <i class="vicon vicon-search"></i>
+      </div>
     </div>
-    <div class="vc-searchbar-searchButton vc-fg1-hoverable">
-      <i class="vicon vicon-search"></i>
-    </div>
-  </div>
 
   </div>
 
 </template>
 
 <script>
-  vcomet.element("vc-searchbar", "vc-searchbar.css",{
+  vcomet.element("vc-searchbar", "vc-searchbar.css", {
 
+    properties: {
+      /*
+        @property {Boolean} defaultStyle 
+        @description Wether or not the default style should be applied
+        Values: true, false
+        Default: true
+      */
+      defaultStyle: {
+        value: true,
+        reflect: true
+      }
+    },
     privateProperties: {
+      /*
+        @property (private) {Object} _refs 
+        @description Object with references
+      */
+      refs: {
+          value: {}
+      },
       /*
       @property {object} fields
       @description Node reference to the fields container
@@ -46,12 +65,38 @@
         reflect: false
       }
     },
+    privateFunctions: {
+      /*
+        @function (private) _setDefaultStyle
+        @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+        var el = this;
+        // Check default style configuration
+        if (!vcomet.util.isTrue(el.defaultStyle)) {
+          // Remove default style
+          el._refs.main.remove("vc-spaced-container");
+        } else {
+          // Spaced items container
+          var spacedItemsContainer = document.createElement("div");
+          var spacedFragment = document.createDocumentFragment();
+          spacedItemsContainer.classList.add("vc-spaced-items-container");
+          // Append content into the new spaced items container
+          var nodes = [].slice.call(el._refs.main.childNodes);
+          while (nodes.length) {
+            spacedFragment.appendChild(nodes.shift());
+          }
+          spacedItemsContainer.appendChild(spacedFragment);
+          el._refs.main.appendChild(spacedItemsContainer);
+        }
+      }
+    },
     functions: {
       /*
       @function setup
       @description Here we setup everything we need for the element
       */
-      setup: function() {
+      setup: function () {
 
         var el = this;
 
@@ -62,7 +107,7 @@
 
         vcomet.registerPathListener(el);
       },
-      setupSourceNodes: function() {
+      setupSourceNodes: function () {
 
         var el = this;
         var sourceNodes = el.getSourceElements();
@@ -83,24 +128,24 @@
       @description Sets up the event listeners needed
       @param {param_type} param_name [param_description]
       */
-      setupEvents: function() {
+      setupEvents: function () {
 
         var el = this;
 
         //Creates the customBlur event listener
-        document.addEventListener("mousedown", function(e) {
+        document.addEventListener("mousedown", function (e) {
           if (e.button == 0) {
             el.customBlur(e);
           }
         });
 
         //Creates the search listener for the searchButton
-        el.querySelector(".vc-searchbar-searchButton").onclick = function() {
+        el.querySelector(".vc-searchbar-searchButton").onclick = function () {
           el.search();
         };
 
         //Creates the event for toggling the filters dropdown
-        el.querySelector(".vc-searchbar-filtersButton").onmousedown = function(e) {
+        el.querySelector(".vc-searchbar-filtersButton").onmousedown = function (e) {
           el.toggleFilters(e);
         };
       },
@@ -108,7 +153,7 @@
       @function setupFilters
       @description Sets up the filters dropdown with the user provided elements
       */
-      setupFilters: function() {
+      setupFilters: function () {
 
         var el = this;
         var filtersDropdown = el._filters;
@@ -128,7 +173,7 @@
       @function setupFields
       @description Sets up the user provided elements as fields, we encapsulate them and add some style to it
       */
-      setupFields: function() {
+      setupFields: function () {
 
         var fieldsContainer = this.querySelector(".vc-searchbar-fields");
         var fragment = document.createDocumentFragment();
@@ -153,7 +198,7 @@
       @function search
       @description When the search function is triggered we also trigger the onSearch callback
       */
-      search: function() {
+      search: function () {
 
         var el = this;
 
@@ -191,7 +236,7 @@
       @function customBlur
       @description Hides the filters dropdown
       */
-      customBlur: function(e) {
+      customBlur: function (e) {
 
         var el = this;
 
@@ -210,7 +255,7 @@
       @description Toggles the visibility of the filters dropdown
       @param {object} e [event]
       */
-      toggleFilters: function(e) {
+      toggleFilters: function (e) {
 
         var el = this;
 
@@ -223,10 +268,15 @@
         e.stopPropagation();
       }
     },
-    onCreated: function() {
+    onCreated: function () {
       vcomet.createCallback("onSearch", this);
+      this._refs.main = this.template.querySelector(".vc-searchbar-main");
     },
-    onRender: function() {
+    onTransformed: function () {
+      // ** Apply default items positioning style
+      this._setDefaultStyle();
+    },
+    onRender: function () {
       this.setup();
     }
   });

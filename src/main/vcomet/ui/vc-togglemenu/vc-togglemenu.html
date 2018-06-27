@@ -132,16 +132,34 @@
         },
 
         privateFunctions: {
-             /*
+            /*
               @function (private) _setDefaultStyle
               @description Check if the default element style should be applied
             */
             setDefaultStyle: function () {
                 var el = this;
                 // Check default style configuration
-                if(vcomet.util.isTrue(el.defaultStyle)) {
-                    // Wrapper style
-                    el._refs.content.classList.add("vc-spaced");
+                if (!vcomet.util.isTrue(el.defaultStyle)) {
+                    // Remove default style
+                    el._refs.content.remove("vc-spaced-container");
+                } else {
+                    // Spaced items container
+                    var spacedItemsContainer = document.createElement("div");
+                    var spacedFragment = document.createDocumentFragment();
+                    spacedItemsContainer.classList.add("vc-spaced-items-container");
+                    // Wait for vc-scroll onReady to append elements in the new spaced wrapper element
+                    el._refs.content.vcometScroll.onReady(function () {
+                        el._refs.content.vcometScroll.content.classList.remove("vc-spaced-container");
+                        // Append content into the new spaced items container
+                        var nodes = [].slice.call(el._refs.content.vcometScroll.content.childNodes);
+                        while (nodes.length) {
+                            spacedFragment.appendChild(nodes.shift());
+                        }
+                        spacedItemsContainer.appendChild(spacedFragment);
+                        el._refs.content.vcometScroll.content.appendChild(spacedItemsContainer);
+                        // Set the spaced wrapper as the new content container
+                        el.content = spacedItemsContainer;
+                    });
                 }
             },
             /*
@@ -294,14 +312,16 @@
             el._refs.title = el.template.querySelector(".vc-togglemenu-title");
             el._refs.content = el.template.querySelector(".vc-togglemenu-content");
 
-            // ** Apply default items positioning style
-            el._setDefaultStyle();
-
             vcomet.createCallback("onChange", this);
             vcomet.createCallback("onDisplay", this);
             vcomet.createCallback("onUndisplay", this);
+
         },
 
+        onTransformed: function () {
+            // ** Apply default items positioning style
+            this._setDefaultStyle();
+        },
         onBubbleRender: function () {
             var el = this;
             var sourceNodes = el.getSourceElements();
