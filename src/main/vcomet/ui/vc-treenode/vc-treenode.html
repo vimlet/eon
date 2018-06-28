@@ -1,7 +1,7 @@
 <template>
     <div class="vc-treenode-head vc-unselectable">
-      <i class="material-icons vc-treenode-expand vc-fg2">expand_more</i>
-      <i class="material-icons vc-treenode-icon vc-fg2">folder</i>
+      <i class="vicon vicon-chevron-down vc-treenode-expand vc-fg2"></i>
+      <i class="vicon vicon-folder vc-treenode-icon vc-fg2"></i>
       <div class="vc-treenode-name vc-fg2 vc-unselectable"></div>
     </div>
     <div class="vc-treenode-wrapper">
@@ -52,8 +52,8 @@
           reflect: true
         },
         /*
-          @property {String} icon 
-          @description Tree node icon
+          @property {String} TODO icon 
+          @description TODO - Tree node icons object
         */
         icon: {
           value: "",
@@ -251,20 +251,17 @@
           expandIcon.style.display = ["all", "expand"].indexOf(tree.icons) > -1 ? "block" : "none";
           // Set node icon
           if (["all", "type"].indexOf(tree.icons) > -1) {
-            if (el.icon) {
-              icon.innerHTML = el.icon;
-            } else {
-              // Check icon
-              if (el.type !== "directory") {
-                icon.innerHTML = "insert_drive_file";
-              } else if (el.type === "directory" && !vcomet.util.isTrue(el.initExpanded)) {
-                el.expanded = false;
-                expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
-                icon.innerHTML = "folder";
+            // Check icon
+            if (el.type !== "directory") {
+              el._toggleNodeIcon(icon);
+            } else if (el.type === "directory" && !vcomet.util.isTrue(el.initExpanded)) {
+              el.expanded = false;
+              if(["expand", "all"].indexOf(tree.icons) > -1) {
+                el._toggleExpandIcon(expandIcon, false);
               }
+              el._toggleNodeIcon(icon, false, true);
             }
           }
-  
           // Set draggable behaviour
           if (vcomet.util.isTrue(el._refs.hostTree.drag)) {
             el.setAttribute("draggable", true);
@@ -272,6 +269,41 @@
           // Declare dragging monitor variables
           el._misc.dragging = {};
           el._misc.dragging.functions = {};
+        },
+
+        /*
+          @function (private) _toggleNodeIcon
+          @description
+        */
+        toggleExpandIcon: function (icon, expand) {
+          var el = this;
+
+          if(expand) {
+            icon.classList.add("vicon-chevron-down");
+            icon.classList.remove("vicon-chevron-right");
+          } else {
+            icon.classList.add("vicon-chevron-right");
+            icon.classList.remove("vicon-chevron-down");
+          }
+
+        },
+        /*
+          @function (private) _toggleNodeIcon
+          @description
+        */
+        toggleNodeIcon: function (icon, open, dir) {
+          var el = this;
+          if(dir) {
+            if(open){
+              icon.classList.add("vicon-folder-open");
+              icon.classList.remove("vicon-folder");
+            } else {
+              icon.classList.add("vicon-folder");
+              icon.classList.remove("vicon-folder-open");
+            }
+          } else {
+            icon.classList.add("vicon-file");
+          }
         },
         /*
           @function (private) _splitExtension
@@ -307,7 +339,10 @@
               // Check configurable initial state
               if (!vcomet.util.isTrue(parent.initExpanded)) {
                 parent.toggleExpand(expandIcon);
-                expandIcon.innerHTML = ["expand", "all"].indexOf(el._refs.hostTree.icons) > -1 ? "chevron_right" : "";
+
+                if(["expand", "all"].indexOf(el._refs.hostTree.icons) > -1) {
+                  el._toggleExpandIcon(expandIcon);
+                }
               }
             }
           }
@@ -325,9 +360,11 @@
           var icon = expandIcon.nextSibling.nextSibling;
           el._misc.expandable = true;
           el.expanded = true;
-          icon.innerHTML = ["all", "type"].indexOf(tree.icons) > -1 && vcomet.util.isTrue(el.initExpanded) ?
-            "folder_open" : "folder";
-  
+          // Set expanded node icon
+          if(["all", "type"].indexOf(tree.icons) > -1 && vcomet.util.isTrue(el.initExpanded)) {
+            el._toggleNodeIcon(icon, true, true);
+          }
+
           expandIcon.style.visibility = ["expand", "all"].indexOf(tree.icons) > -1 ? "visible" : "";
   
           el._refs.wrapper.style.display = "flex";
@@ -540,11 +577,25 @@
           icon = expandIcon.nextSibling.nextSibling;
           // Check expandable conditions
           if ((vcomet.util.isTrue(el.expanded)) && el._refs.wrapper.children[0]) {
-            expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "expand_more" : "";
-            icon.innerHTML = ["type", "all"].indexOf(tree.icons) > -1 ? "folder_open" : "";
+
+            if(["expand", "all"].indexOf(tree.icons) > -1) {
+              el._toggleExpandIcon(expandIcon, true);
+            }
+
+            if(["type", "all"].indexOf(tree.icons) > -1) {
+              el._toggleNodeIcon(icon, true, true);
+            }
+
           } else {
-            expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
-            icon.innerHTML = ["type", "all"].indexOf(tree.icons) > -1 ? "folder" : "";
+
+            if(["expand", "all"].indexOf(tree.icons) > -1) {
+              el._toggleExpandIcon(expandIcon, false);
+            } 
+
+            if(["type", "all"].indexOf(tree.icons) > -1) {
+              el._toggleNodeIcon(icon, false, true);
+            }
+
           }
         } else if (prop == "selected" || prop == "marked") {
           if (vcomet.util.isTrue(value)) {

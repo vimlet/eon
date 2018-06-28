@@ -1,5 +1,14 @@
 <script>
     vcomet.element("vc-anchor", "", {
+        privateProperties: {
+            /*
+                @property (private) {Object} _misc 
+                @description Internal used data
+            */
+            misc: {
+                value: {}
+            }
+        },
         properties: {
             /*
                 @property {String} type
@@ -115,11 +124,21 @@
                 function activateAnchor(arg) {
                     if (!throttled) {
                        if(el.offsetParent && el._isInViewport()) {
-                            vcomet.triggerCallback("onReached", el, el);
+                            
+                            if(!el._misc.reached) {
+                                el._misc.reached = true;
+                                vcomet.triggerCallback("onVisible", el, el);
+                            }
 
                             if(el.state != vcomet.history.current && !vcomet.history.cancelNavigation) {
                                 vcomet.triggerCallback("onActivated", el, el, [el.state]);
                             }
+                       } else {
+                        // ** OPTIONAL
+                        //    if(el._misc.reached) {
+                        //         el._misc.reached = false;
+                        //         vcomet.triggerCallback("onHidden", el, el);
+                        //    }
                        }
                     }
                     // Throttle
@@ -226,7 +245,8 @@
             }
         },
         onCreated: function () {
-            vcomet.createCallback("onReached", this);
+            vcomet.createCallback("onVisible", this);
+            vcomet.createCallback("onHidden", this);
             vcomet.createCallback("onActivated", this);
         },
         onInit: function () {

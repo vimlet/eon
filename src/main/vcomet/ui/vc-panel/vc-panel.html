@@ -105,9 +105,52 @@
       scrollType: {
         value: "auto",
         reflect: true
+      },
+      /*
+        @property {Boolean} defaultStyle 
+        @description Wether or not the default style should be applied
+        Values: true, false
+        Default: true
+      */
+      defaultStyle: {
+          value: true,
+          reflect: true
       }
     },
     privateFunctions: {
+      /*
+        @function (private) _setDefaultStyle
+        @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+          var el = this;
+          // Check default style configuration
+          if(!vcomet.util.isTrue(el.defaultStyle)) {
+              // Remove default style
+              el.content.classList.remove("vc-spaced-container");
+              el.classList.remove("vc-defaultStyle");
+          } else {
+              // Spaced items container
+              var spacedItemsContainer = document.createElement("div");
+              var spacedFragment = document.createDocumentFragment();
+              spacedItemsContainer.classList.add("vc-spaced-items-container");
+              el.content.classList.add("vc-spaced-container");
+              // Append content into the new spaced items container
+              var nodes = [].slice.call(el.content.childNodes);
+              while (nodes.length) {
+                spacedFragment.appendChild(nodes.shift());
+              }
+              spacedItemsContainer.appendChild(spacedFragment);
+              el.content.appendChild(spacedItemsContainer);
+              // Set the spaced wrapper as the new content container
+              el.content = spacedItemsContainer;
+              
+          }
+          // Check fill behavior
+          if(vcomet.util.isTrue(el.fill)) {
+              el.classList.add("vc-fill");
+          }
+      },
       /*
         @function (private) importContent
         @description Set panel content local or from remote html
@@ -361,6 +404,7 @@
       }
       // Get body container
       el.content = vcomet.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
+      // Check the default style configuration
     },
     onTransformed: function () {
       var el = this;
@@ -368,6 +412,9 @@
       el._importContent();
       // Append content wrapper if the element is not the root
       if (!el._refs.wrapper.isEqualNode(el)) { el.appendChild(el._refs.wrapper) }
+      // ** Apply default items positioning style
+      el._setDefaultStyle();
+      
     },
     onPropertyChanged: function (attrName, oldVal, newVal) {
       var el = this;

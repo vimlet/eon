@@ -4,7 +4,7 @@
         <label class="vc-combobox-label"></label>
     </div>
 
-    <div class="vc-combobox-main">
+    <div class="vc-combobox-main vc-fg2">
 
         <div class="vc-combobox-wrapper vc-bg2">
             <div class="vc-combobox-input">
@@ -17,7 +17,7 @@
 
     </div>
 
-    <div class="vc-combobox-dropdown vc-sect1 vc-boxshadow2 hidden"></div>
+    <div class="vc-combobox-dropdown vc-fg2 vc-sect1 vc-boxshadow2 hidden"></div>
 
 </template>
 
@@ -49,7 +49,7 @@
             },
             /*
             @property (private) {Object} _misc
-            @description Object with usefull information
+            @description Object with useful information
             */
             misc: {
                 value: {},
@@ -89,7 +89,8 @@
             */
             label: {
                 value: "",
-                reflect: true
+                reflect: true,
+                reflectDefault: true
             },
             /*
             @property {string} displayProperty
@@ -317,6 +318,14 @@
                 el._refs.overlay.appendChild(el._refs.dropDown);
 
                 // Prevents scrolling on mobile devices
+                el._refs.overlay.addEventListener("wheel", function (e) {
+                        if (!el._refs.dropDown.isOnPath) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                }, { passive: false });
+
+                // Prevents scrolling on mobile devices
                 window.addEventListener("touchstart", function (e) {
                     if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device")) {
                         if (!el._refs.dropDown.isOnPath) {
@@ -331,6 +340,13 @@
                 window.addEventListener("touchend", function (e) {
                     if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device") && el._misc.modal.blur) {
                         el._misc.modal.blur = false;
+                        el.shrink();
+                    }
+                });
+
+                // If the user scrolls the window scrollbar we hide the dropdown
+                window.addEventListener("scroll", function (e) {
+                    if (el._misc.modal.active) {
                         el.shrink();
                     }
                 });
@@ -755,93 +771,7 @@
 
                 }
 
-            },
-            /*
-            @function (private) _assignModalStyle
-            @description Handles the overlay modal style
-            */
-            assignModalStyle: function () {
-
-                var el = this;
-
-                // Gets the body style from two different sources
-                var computedStyle = window.getComputedStyle(document.body);
-                var boundingClientRect = document.body.getBoundingClientRect();
-
-                //  Checks if there are vertical/horizontal scrolls on window
-                var windowHasVerticalScroll = (document.body.scrollHeight - window.innerHeight) > 0;
-                var windowHasHorizontalScroll = (document.body.scrollWidth - window.innerWidth) > 0;
-
-                // Gets all the margins of the body
-                var horizontalMarginSpace = parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight) / 2;
-                var verticalMarginSpace = parseFloat(computedStyle.marginTop) + parseFloat(computedStyle.marginBottom) / 2;
-
-                var widthDifferenceCalc = (parseInt(boundingClientRect.width) - parseInt(computedStyle.width)) / 2;
-
-                var verticalCalc = parseInt(window.innerWidth + window.pageXOffset + widthDifferenceCalc - document.body.clientWidth);
-                var horizontalCalc = parseInt(window.innerHeight - (boundingClientRect.height + boundingClientRect.top));
-                var scrollBarWidth = vcomet.util.getBrowserScrollBarWidth();
-
-                el._misc.modal.verticalAdjustement = windowHasVerticalScroll && (verticalCalc >= 0 && verticalCalc <= scrollBarWidth);
-                el._misc.modal.horizontalAdjustement = windowHasHorizontalScroll && (horizontalCalc >= 0 && horizontalCalc <= scrollBarWidth);
-
-                // Adjusts the body style to keep it visually intact when adding overflow
-                if (el._misc.modal.verticalAdjustement || el._misc.modal.horizontalAdjustement) {
-
-                    if (el._misc.modal.verticalAdjustement) {
-
-                        // Saves and assigns a width and Left style
-                        el._misc.modal.previousStyleWidth = parseInt(document.body.style.width);
-                        el._misc.modal.previousStyleLeft = parseInt(document.body.style.left);
-
-                        document.body.style.width = document.body.offsetWidth + "px";
-                        document.body.style.left = boundingClientRect.left + "px";
-
-                    }
-
-                    if (el._misc.modal.horizontalAdjustement) {
-
-                        // Saves and assigns a top style
-                        el._misc.modal.previousStyleTop = parseInt(document.body.style.top);
-                        document.body.style.top = boundingClientRect.top + "px";
-
-                    }
-
-                    // Saves and assigns a position style
-                    el._misc.modal.previousStylePosition = document.body.style.position;
-                    document.body.style.position = "absolute";
-
-                    // Shows/Hides the disabled scrollbars in the overlay
-                    el._refs.overlay.style.overflowY = windowHasVerticalScroll ? "scroll" : "";
-                    el._refs.overlay.style.overflowX = windowHasHorizontalScroll ? "scroll" : "";
-
-                    document.body.classList.add("vc-body-modal");
-
-                }
-
-            },
-            /*
-            @function (private) _revertModalStyle
-            @description Reverts the assigned modal style
-            */
-            revertModalStyle: function () {
-
-                var el = this;
-
-                document.body.classList.remove("vc-body-modal");
-
-                // Removes the modal style and restores the previous style 
-                document.body.style.width = el._misc.modal.previousStyleWidth ? el._misc.modal.previousStyleWidth : "";
-                document.body.style.left = el._misc.modal.previousStyleLeft ? el._misc.modal.previousStyleLeft : "";
-                document.body.style.top = el._misc.modal.previousStyleTop ? el._misc.modal.previousStyleTop : "";
-                document.body.style.position = el._misc.modal.previousStylePosition ? el._misc.modal.previousStylePosition : "";
-
-                el._misc.modal.previousStyleWidth = undefined;
-                el._misc.modal.previousStyleLeft = undefined;
-                el._misc.modal.previousStyleTop = undefined;
-                el._misc.modal.previousStylePosition = undefined;
-
-            },
+            }
 
         },
 
@@ -898,7 +828,6 @@
 
                 var el = this;
 
-                el._assignModalStyle();
                 el._assignDropdownStyle();
 
                 el._refs.scroll.scrollTop = 0;
@@ -912,7 +841,6 @@
 
                 document.body.appendChild(el._refs.overlay);
 
-                // el._refs.scroll.update();
                 setTimeout(function () {
                     el._refs.scroll.update();
                 }, 100);
@@ -934,10 +862,6 @@
                 // el.appendChild(el._refs.dropDown);
                 if (el._refs.overlay.parentNode) {
                     el._refs.overlay.parentNode.removeChild(el._refs.overlay);
-                }
-
-                if (el._misc.modal.active) {
-                    el._revertModalStyle();
                 }
 
                 el._misc.modal.active = false;

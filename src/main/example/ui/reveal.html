@@ -16,7 +16,8 @@
     <!-- UI components -->
     <script>
         vcomet.import([
-            "/vcomet/ui/vc-reveal"
+            "/vcomet/ui/vc-reveal",
+            "/vcomet/ui/vc-stack"
         ]);
     </script>
 
@@ -25,28 +26,135 @@
 <body>
     <div class="container main">
         <div class="card">
+            <h1>STACK WHEEL REVEAL</h1>
+            <div class="twoColumns ex-stack-container" style="flex-wrap: wrap;">
+                <!-- SECTION MENU CONTROLLER -->
+                <div class="ex-stack-menu">
+                    <div onclick='document.querySelector("vc-stack").swapToPanel("1")'>
+                        Section 1
+                    </div>
+                    <div onclick='document.querySelector("vc-stack").swapToPanel("2")'>
+                        Section 2
+                    </div>
+                    <div onclick='document.querySelector("vc-stack").swapToPanel("3")'>
+                        Section 3
+                    </div>
+                </div>
+                <!-- END SECTION MENU CONTROLLER -->
+
+                <!-- VC-STACK -->
+                <vc-stack class="ex-stack">
+                    <vc-panel name="1">
+                            <vc-reveal class="ex-reveal ex-stack-reveal" end="150">
+                                <div class="ex-item"></div>
+                            </vc-reveal>
+                    </vc-panel>
+                    <vc-panel name="2">
+                            <vc-reveal class="ex-reveal ex-stack-reveal" end="150">
+                                <div class="ex-item ex-red"></div>
+                            </vc-reveal>
+                    </vc-panel>
+                    <vc-panel name="3">
+                            <vc-reveal class="ex-reveal ex-stack-reveal" end="150">
+                                    <div class="ex-item"></div>
+                            </vc-reveal>
+                    </vc-panel>
+                </vc-stack>
+                <!-- END VC-STACK -->
+
+            </div>
+        </div>
+        <div class="card">
             <h1>REVEAL</h1>
             <div class="twoColumns" style="flex-wrap: wrap;">
 
                 <!-- vc reveal -->
-                <vc-reveal class="ex-reveal">
+                <vc-reveal class="ex-reveal" end="15">
                     <div class="ex-item"></div>
                 </vc-reveal>
-                <!-- vc reveal -->
-                <vc-reveal class="ex-reveal">
+               
+                <!-- <vc-reveal class="ex-reveal" type="right">
                     <div class="ex-item ex-red"></div>
                 </vc-reveal>
-                <!-- vc reveal -->
-                <vc-reveal class="ex-reveal">
+                <vc-reveal class="ex-reveal" type="top">
                     <div class="ex-item"></div>
                 </vc-reveal>
-                <!-- vc reveal -->
-                <vc-reveal class="ex-reveal">
+                <vc-reveal class="ex-reveal" type="left">
                     <div class="ex-item ex-red"></div>
-                </vc-reveal>
+                </vc-reveal> -->
+
+                 <div class="ex-reveal"></div>
+                <div class="ex-reveal"></div>
+                <div class="ex-reveal"></div>
+                <div class="ex-reveal"></div>
+                <div class="ex-reveal"></div>
 
             </div>
         </div>
     </div>
+    <script>
+        
+        // Replay animation
+        vcomet.onReady(function(){
+
+            // STACK WHEEL REVEAL
+            var stack = document.querySelector("vc-stack");
+            var activeReveal;
+            var idx = 0;
+            var cancelWheelSwipe = false;
+
+            // Trigger first panel reveal animation
+            stack.getActivePanel().querySelector("vc-reveal").play();
+            stack.onSwapped(function(prev, target){
+                activeReveal = target.querySelector("vc-reveal");
+
+                // On reveal animation ends
+                activeReveal.onAnimationEnd(function(){
+                    idx = parseInt(target.name) - 1;
+                    console.log('onAnimationEnd ', target.name, idx);
+                    cancelWheelSwipe = false;
+                });
+
+                activeReveal.play();
+            });
+
+            // Wheel functionality
+            stack.addEventListener("wheel", function(){
+                event.preventDefault();
+
+                // Check if animation has ended
+                if(!cancelWheelSwipe) {
+                    if(event.deltaY > 0) {
+                        // Wheel down
+                        if(idx < (Object.keys(stack._misc.panels).length - 1)) {
+                            console.log('down idx', idx);
+                            cancelWheelSwipe = true;
+                            stack._misc.panels[idx + 1].querySelector("vc-reveal").type = "bottom";
+                            stack.swapToPanelByIndex(idx + 1);
+                        }
+                    } else {
+                        // Wheel up
+                        if(idx > 0) {
+                            cancelWheelSwipe = true;
+                            console.log('up idx', idx, stack._misc.panels[idx]);
+                            // if(idx > 1) {
+                                stack._misc.panels[idx].querySelector("vc-reveal").type = "top";
+                            // } else {
+                                console.log('PANEL', idx, stack._misc.panels);
+                            // }
+                            stack.swapToPanelByIndex(idx - 1);
+                        }
+                    }
+                }
+
+            });
+
+            var rev = document.querySelector("vc-reveal");
+            setTimeout(function() {
+                // rev.play();
+            }, 2000);
+        });
+
+    </script>
 </body>
 <html>

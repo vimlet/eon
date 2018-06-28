@@ -172,6 +172,8 @@
                 bodySection.appendChild(el._refs.html.body);
                 htmlGutter.appendChild(headSection);
                 htmlGutter.appendChild(bodySection);
+
+                // ** Check panel default style configuration
                 el._refs.htmlPanel = document.createElement("vc-panel");
                 el._refs.htmlPanel.allowScroll = false;
                 el._refs.htmlPanel.setAttribute("allow-scroll", false);
@@ -191,16 +193,14 @@
                 });
                 el._refs.html.head.language = "html";
                 var headTag = document.createElement("div");
-                headTag.classList.add("vc-playground-htmlTags", "vc-playground-htmlTags-button",
-                    "vc-playground-htmlTags-enabled");
-                el._refs.html.enabledView = "head";
+                headTag.classList.add("vc-playground-htmlTags", "vc-playground-htmlTags-button");
                 headTag.innerHTML = "head";
                 headTag.parent = el;
                 headTag.setAttribute("onclick", "this.parent.toggleSingleHtmlView('head');");
-                headTag.style.marginRight = "50px";
+                headTag.style.marginRight = "55px";
+                el._refs.html.head.classList.add("vc-playground-editor-hidden");
                 el._refs.html.head.readonly = false;
                 el._refs.html.body = document.createElement("vc-editor");
-                el._refs.html.body.classList.add("vc-playground-editor-hidden");
                 el._refs.html.body.oneditorready(function () {
                     el._refs.html.body.setValue(el.body);
                 });
@@ -209,15 +209,18 @@
                 });
                 el._refs.html.body.language = "html";
                 var bodyTag = document.createElement("div");
-                bodyTag.classList.add("vc-playground-htmlTags", "vc-playground-htmlTags-button");
+                bodyTag.classList.add("vc-playground-htmlTags", "vc-playground-htmlTags-button", "vc-playground-htmlTags-enabled");
+                el._refs.html.enabledView = "body";
                 bodyTag.innerHTML = "body";
                 bodyTag.parent = el;
                 bodyTag.setAttribute("onclick", "this.parent.toggleSingleHtmlView('body');");
                 el._refs.html.body.readonly = false;
-                el._refs.htmlTab.appendChild(headTag);
-                el._refs.htmlTab.appendChild(bodyTag);
-                el._refs.htmlTab.appendChild(el._refs.html.head);
-                el._refs.htmlTab.appendChild(el._refs.html.body);
+                // ** Append section to the panel content (Spaced container if default style is active)
+                el._refs.htmlTab.content.appendChild(headTag);
+                el._refs.htmlTab.content.appendChild(bodyTag);
+                el._refs.htmlTab.content.appendChild(el._refs.html.head);
+                el._refs.htmlTab.content.appendChild(el._refs.html.body);
+         
             },
             // @function setJsTab (private) [Set up js tab]
             setJsTab: function () {
@@ -240,7 +243,8 @@
                 });
                 el._refs.js.language = "javascript";
                 el._refs.js.readonly = false;
-                el._refs.jsTab.appendChild(el._refs.js);
+                // ** Append section to the panel content (Spaced container if default style is active)
+                 el._refs.jsTab.content.appendChild(el._refs.js);
             },
             // @function setCssTab (private) [Set up css tab]
             setCssTab: function () {
@@ -264,7 +268,8 @@
                 });
                 el._refs.css.language = "css";
                 el._refs.css.readonly = false;
-                el._refs.cssTab.appendChild(el._refs.css);
+                // ** Append section to the panel content (Spaced container if default style is active)
+                el._refs.cssTab.content.appendChild(el._refs.css);
             },
             // @function setStructure (private) [Set up playground content]
             setStructure: function () {
@@ -292,8 +297,7 @@
                 var fullScreenBtt = document.createElement("div");
                 fullScreenBtt.classList.add("vc-playground-fullScreenBttn");
                 el._refs.fullScreenIcon = document.createElement("i");
-                el._refs.fullScreenIcon.classList.add("material-icons");
-                el._refs.fullScreenIcon.innerHTML = "fullscreen";
+                el._refs.fullScreenIcon.classList.add("vicon","vicon-fullscreen");
                 fullScreenBtt.appendChild(el._refs.fullScreenIcon);
                 fullScreenBtt.setAttribute("onclick",
                     "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
@@ -375,7 +379,8 @@
                 var el = this;
                 el._misc.fullscreen = !el._misc.fullscreen;
                 if (el._misc.fullscreen) {
-                    el._refs.fullScreenIcon.innerHTML = "fullscreen_exit";
+                    el._refs.fullScreenIcon.classList.add("vicon-fullscreen-exit");
+                    el._refs.fullScreenIcon.classList.remove("vicon-fullscreen");
                     el.style.height = "100%";
                     el.style.width = "100%";
                     el.style.position = "fixed";
@@ -386,7 +391,8 @@
                     el._misc.nextSibling = el.nextSibling;
                     document.body.appendChild(el);
                 } else {
-                    el._refs.fullScreenIcon.innerHTML = "fullscreen";
+                    el._refs.fullScreenIcon.classList.add("vicon-fullscreen");
+                    el._refs.fullScreenIcon.classList.remove("vicon-fullscreen-exit");
                     el.style = "";
                     if (el._misc.nextSibling) {
                         el._misc.parent.insertBefore(el, el._misc.nextSibling);

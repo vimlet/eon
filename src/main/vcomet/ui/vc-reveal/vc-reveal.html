@@ -47,6 +47,15 @@
                 reflect: true
             },
             /*
+                @property {Number} end 
+                @description 
+                Default: 0
+            */
+            end: {
+                value: 0,
+                reflect: true
+            },
+            /*
                 @property {Number} delay 
                 @description 
                 Default: 0
@@ -61,7 +70,7 @@
                 Default: 1000
             */
             duration: {
-                value: 10000,
+                value: 1000,
                 reflect: true
             },
             /*
@@ -70,11 +79,46 @@
                 Default: linear, ease, ease-out
             */
             easing: {
-                value: "ease-out",
+                value: "ease",
                 reflect: true
             }
         },
         privateFunctions: {
+            /*
+                @function (private) 
+                @description
+            */
+            setUpAnimation: function () {
+                var el = this
+                // Load animation function
+                el._misc.animFunction = function(){
+                    // Get animation progress
+                    var currentTime = +new Date();
+                    var remaining = (el._misc.endTime - currentTime);
+                    // Get animation progress rate
+                    var rate = el._runEffect(remaining/el.duration);
+                    // Get animation progress rate applying effects
+                    cancel = el._runAnimation(rate);
+                    
+                    if(!cancel){
+                        window.requestAnimationFrame(el._misc.animFunction);
+                    }
+                }
+            },
+            /*
+                @function (private) _animate
+                @description 
+            */
+            animate: function () {
+                var el = this;
+                var cancel = false;
+                // Set animation duration;
+                el.duration = parseInt(el.duration);
+                // Increase proportionally the duration on partial animations
+                el._misc.endTime = +new Date() + el.duration;
+                // Start animation function loop
+                el._misc.animFunction();
+            }, 
             /*
                 @function (private) _createRefs
                 @description
@@ -84,7 +128,18 @@
                 // Store references
                 el._refs.wrapper = el.template.querySelector(".vc-reveal-wrapper");
                 el._refs.anchor = el.template.querySelector("vc-anchor");
+                
+            },
+            /*
+                @function (private) _setUpMisc
+                @description
+            */
+            setUpMisc: function () {
+                var el = this;
                 el._misc.posProp = ~["top", "bottom"].indexOf(el.type) ? "top" : "left";
+                el._misc.posInvert = ~["top", "left"].indexOf(el.type) ? false : true;
+                // ** TODO 
+                el._misc.offsetProp = ~["top", "bottom"].indexOf(el.type) ? "offsetHeight" : "offsetWidth";
             },
             /*
                 @function (private) _setDefaultStyle
@@ -114,15 +169,26 @@
                 el._refs.wrapper.appendChild(wrapperFragment);
             },
             /*
-                @function (private) _setUpAnimation
+                @function (private) _setItemStartPosition
                 @description 
             */
-            setUpAnimation: function () {
+            setStartPosition: function () {
                 var el = this;
+                el.end = !el.end ? 0 : parseInt(el.end);
                 // Check type
                 if(el.type === "bottom") {
-                    el._refs.wrapper.style.top = el.offsetHeight + "px";
-                }
+                    el._refs.wrapper.style.transform = "translate3d(0, " + (el.offsetHeight + el.end) + "px" + ", 0)";
+                    el._misc.startTranslate = (el.offsetHeight + el.end);
+                } else if((el.type === "top")) {
+                    el._refs.wrapper.style.transform = "translate3d(0, " + -(el.offsetHeight + el.end) + "px" + ", 0)";
+                    el._misc.startTranslate = -(el.offsetHeight + el.end);
+                } else if((el.type === "right")) {
+                    el._refs.wrapper.style.transform = "translate3d(" + el.offsetWidth + "px" + ", 0, 0)";
+                    el._misc.startTranslate = el.offsetHeight;
+                } else if((el.type === "left")) {
+                    el._refs.wrapper.style.transform = "translate3d(" + -el.offsetWidth + "px" + ", 0, 0)";
+                    el._misc.startTranslate = -el.offsetHeight;
+                } 
             },
             /*
                 @function (private) _setUpAnchor
@@ -131,46 +197,13 @@
             setUpAnchor: function () {
                 var el = this;
 
-                el._refs.anchor.onReached(function(){
-                    if(this.getAttribute("uid") === "4") {
-
-                    }
+                el._refs.anchor.onVisible(function(){
                     // Trigger animation
                     el._animate();
                 });
 
             },
-            /*
-                @function (private) _animate
-                @description 
-            */
-            animate: function () {
-                var el = this;
-                var cancel = false;
-                // Set animation duration
-                // var duration = !time ? parseInt(el.duration) : time;
-                // Increase proportionally the duration on partial animations
-                var duration = el.limit === 0 ? time : duration / el.limit;
-                var endTime = +new Date() + el.duration;
-                // Load animation function
-                el._misc.animFunction = function(){
-                    // Get animation progress
-                    var currentTime = +new Date();
-                    var remaining = (endTime - currentTime);
-                    var rate = remaining / duration;
-                    // Get animation progress rate
-                    // var rate = el._runEffect(remaining/duration);
-
-                    // Get animation progress rate applying effects
-                    cancel = el._runAnimation(rate);
-                    
-                    if(!cancel){
-                        window.requestAnimationFrame(el._misc.animFunction);
-                    }
-                }
-                // Start animation function loop
-                el._misc.animFunction();
-            },
+            
             /*
                 @function (private) _runEffect
                 @description Process rate according to the animation formula
@@ -187,46 +220,96 @@
                     break;
                 case "ease":
                     // -- EASING FORMULA --
-                    rate = 1 - Math.pow(rate, 3);
+                    rate = 1 - Math.pow(rate, 4);
                     break;
                 case "ease-out":
-                    // -- EASING FORMULA --
-                    rate = 1 - Math.pow(rate, 10);
+                    // -- EASING OUT FORMULA --
+                    // rate = 1 - Math.pow(rate, 3);
                     break;
                 }
                 return rate;
             },
             /*
-                @function {String} (private) _runAnimation
+                @function (private) _runAnimation
                 @description Animation
-                @return {String} [Whether or not animation should be cancelled]
             */
             runAnimation: function(rate){
                 var el = this;
 
-                var end = 0;
-                var start = parseInt(el._refs.wrapper.style[el._misc.posProp]);
+                // ** TODO - Implement end customizable value 
+                // var end = el.end == 1 ? el[el._misc.offsetProp] : 0 ;
+                // Get translate current position
+                var currentTranslatePos = el._getCurrentTranslate();
+
+                // Check if translate values sign change
+                var reached = el._misc.posInvert ? currentTranslatePos <= el.end : currentTranslatePos >= el.end;
+                
                 // Check if the animation has ended
-                if (rate >= 1) {
+                if (rate >= 1 || reached) {
+                    el._misc.invertDirection = false;
                     window.cancelAnimationFrame(el._misc.animFunction);
+                    vcomet.triggerCallback("onAnimationEnd", el, el);
                     return "cancel";
                 } else {
-                    // console.log('rate',rate , start, (rate * (end - start) + start));
                     // Translate item
-                    el._refs.wrapper.style[el._misc.posProp] = (rate * (end - start) + start) + "px";
+                    el._setTranslateValue((1 - rate) * (el._misc.startTranslate));
                     // Fade in item
-                    // el._refs.wrapper.style[el._misc.posProp] = start * rate;
+                    el._refs.wrapper.style.opacity = 1 * rate;
                 }
+            },
+            /*
+                @function (private) _getCurrentTranslate
+                @description 
+            */
+            getCurrentTranslate: function(){
+                var el = this;
 
+                if(el._misc.posProp == "top") {
+                    return parseInt(el._refs.wrapper.style.transform.split(",")[1]);
+                } else {
+                    return parseInt(el._refs.wrapper.style.transform.split(",")[0].split("(")[1]);
+                }
+            },
+            /*
+                @function (private) _setTranslateValue
+                @description 
+            */
+            setTranslateValue: function(value){
+                var el = this;
+                //
+                if(!el._misc.posInvert) {
+                    value += el.end;
+                }
+                //
+                if(el._misc.posProp == "top") {
+                    el._refs.wrapper.style.transform = "translate3d(0," + value + "px, 0)";
+                } else {
+                    el._refs.wrapper.style.transform = "translate3d(" + value + "px, 0, 0)";
+                }
             }
-
+        },
+        functions: {
+            /*
+                @function (private) _play
+                @description 
+            */
+            play: function () {
+                var el = this;
+                // Reset misc
+                el._setUpMisc();
+                el._setStartPosition();
+                el._animate();
+            }, 
+            
         },
         onCreated: function () {
             var el = this;
             // Create content related callbacks
-
+            vcomet.createCallback("onAnimationEnd", this);
             // Store references
             el._createRefs();
+            // Store references
+            el._setUpMisc();
             // ** Apply default items positioning style
             el._setDefaultStyle();
         },
@@ -234,17 +317,32 @@
             var el = this;
             // Create reveal element structure
             el._setUpLayout();
+            //
+            el._setUpAnimation();
         },
         onTransformed: function () {
             var el = this;
             // 
-            el._setUpAnimation();
-
+            el._setStartPosition();
             //
             el._setUpAnchor();
         },
         onResize: function(){
             // Update animation position values
+        },
+        onPropertyChanged: function(prop, oldVal, value){
+            var el = this;
+            // 
+            if (prop == "type") {
+                // Reset misc
+                el._setUpMisc();
+                // Reset misc
+                el._setStartPosition();
+                // Increase proportionally the duration on partial animations
+                el._misc.endTime = +new Date() + el.duration;
+                console.log('NEW DATA');
+
+            }
         }
     });
 </script>

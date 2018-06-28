@@ -160,16 +160,29 @@
           }
         }
       },
-
       /*
         @function (private) _setDefaultStyle
-        @description Apply the default element style
+        @description Check if the default element style should be applied
       */
       setDefaultStyle: function () {
           var el = this;
           // Check default style configuration
-          if(vcomet.util.isTrue(el.defaultStyle)) {
-              el.classList.add("vc-spaced");
+          if(!vcomet.util.isTrue(el.defaultStyle)) {
+              // Remove default style
+              el.classList.remove("vc-defaultStyle");
+          } else {
+              // Spaced items container
+              var spacedItemsContainer = document.createElement("div");
+              var spacedFragment = document.createDocumentFragment();
+              spacedItemsContainer.classList.add("vc-spaced-items-container");
+              el.classList.add("vc-defaultStyle");
+              // Append content into the new spaced items container
+              var nodes = [].slice.call(el.template.childNodes);
+              while (nodes.length) {
+                spacedFragment.appendChild(nodes.shift());
+              }
+              spacedItemsContainer.appendChild(spacedFragment);
+              el.appendChild(spacedItemsContainer);
           }
           // Check fill behavior
           if(vcomet.util.isTrue(el.fill)) {
@@ -313,6 +326,8 @@
 
     onCreated: function () {
       vcomet.createCallback("onSubmit", this);
+    },
+    onInit: function () {
       // ** Apply default items positioning style
       this._setDefaultStyle();
     },

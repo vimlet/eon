@@ -1,6 +1,7 @@
 <script>
   //@header A container made to swipe vc-slide elements
   vcomet.element("vc-swiper", "vc-swiper.css", {
+    themed: true,
     dependencies: [
       "../vc-slide"
     ],
@@ -61,12 +62,13 @@
       /*
         @property {String} pagination
         @description Pagination type
-        Values: filled, hideable
+        Values: filled, hideable, hidden
         Default: filled
       */
       pagination: {
-        value: "filled", // (filled), hideable
-        reflect: true
+        value: "hidden", // (filled), hideable, hidden
+        reflect: true,
+        reflectDefault: true
       },
       /*
         @property {Boolean} navigation
@@ -142,9 +144,31 @@
       fullScreen: {
         value: false,
         reflect: true
+      },
+      /*
+        @property {Boolean} fill 
+        @description 
+        Values: true, false
+        Default: true
+      */
+      fill: {
+          value: true,
+          reflect: true
       }
     },
     privateFunctions: {
+      /*
+        @function (private) _setDefaultStyle
+        @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+          var el = this;
+          // Check fill behavior
+          if(vcomet.util.isTrue(el.fill)) {
+            // Content style
+            el.classList.add("vc-fill");
+          }
+      },
       /*
         @function (private) _setUp
         @description Configure swiper
@@ -207,7 +231,7 @@
         var el = this;
         el.thumbnails = [];
         // Is pagination activated
-        if(el.pagination){
+        if(el.pagination != "hidden"){
           el._refs.styleSheet = {};
           // Create swiper pagination container
           var pagination = document.createElement("div");
@@ -225,7 +249,7 @@
       */
       buildGalleryPagination: function(pagingNode) {
         var el = this;
-        if(el.type == "gallery"){
+        if(el.type == "gallery" && el.pagination != "hidden"){
           var pagingFragment = document.createDocumentFragment();
           // Create swiper wrapper container
           var pagingWrapper = document.createElement("div");
@@ -260,12 +284,12 @@
         if(vcomet.util.isTrue(el.navigation)){
           // Create navigation next button
           var nextBtn = document.createElement("i");
-          nextBtn.className = " material-icons vc-swiper-navBtn vc-fg1-hoverable vc-bg1-modal2-hoverable vc-swiper-next vc-unselectable"
-          nextBtn.innerHTML = el.direction == "horizontal" ? "keyboard_arrow_right" : "keyboard_arrow_down"
+          nextBtn.className = " vicon vc-swiper-navBtn vc-fg1-hoverable vc-bg1-modal2-hoverable vc-swiper-next vc-unselectable"
+          if(el.direction == "horizontal") {  nextBtn.classList.add("vicon-chevron-right"); } else { nextBtn.classList.add("vicon-chevron-down"); }
           // Create navigation back button
           var backBtn = document.createElement("i");
-          backBtn.className = " material-icons vc-swiper-navBtn vc-fg1-hoverable vc-bg1-modal2-hoverable vc-swiper-back vc-unselectable"
-          backBtn.innerHTML = el.direction == "horizontal" ? "keyboard_arrow_left" : "keyboard_arrow_up"
+          backBtn.className = " vicon vc-swiper-navBtn vc-fg1-hoverable vc-bg1-modal2-hoverable vc-swiper-back vc-unselectable"
+          if(el.direction == "horizontal") {  backBtn.classList.add("vicon-chevron-left"); } else { backBtn.classList.add("vicon-chevron-up"); }
           // Get swiper type size properties
           var sizeValue = el.direction == "horizontal"
                   ? el._getNumProperty("height", el.pagingNode) : el._getNumProperty("width", el.pagingNode);
@@ -277,7 +301,7 @@
           el.backBtn = {node: backBtn,
                         minSize: btnSizeValue - sizeValue};
           // If pagination is not hidable change clickable zone size
-          if(el.pagination){
+          if(el.pagination != "hidden"){
             el._decreaseNavButtonHeight(el.nextBtn);
             el._decreaseNavButtonHeight(el.backBtn);
           }
@@ -494,7 +518,7 @@
       */
       createThumbnail: function(slide, slideObj){
         var el = this;
-        if(el.pagination){
+        if(el.pagination != "hidden"){
           // Create thumbnail span element
           var thumbnail = document.createElement("span");
           var thumbnailStored = thumbnail;
@@ -766,8 +790,7 @@
         var btn = document.createElement("div");
         var sizeProp = el.direction == "horizontal" ? "offsetWidth" : "offsetHeight";
       
-        btn.className = "material-icons vc-swiper-screenBtn vc-bg2-hoverable-modal vc-fg1-hoverable vc-unselectable"
-        btn.innerHTML = "crop_free";
+        btn.className = "vicon vicon-fullscreen vc-swiper-screenBtn vc-bg2-hoverable-modal vc-fg1-hoverable vc-unselectable"
         // Set screen button initial size
         el._resizeFullScreenHandler(btn);
         el.appendChild(btn);
@@ -1204,9 +1227,13 @@
       vcomet.createCallback("onPagingReady", el, "ready");
       // Event target path monitor
       vcomet.registerPathListener(el);
+       // ** Apply default items positioning style
+       el._setDefaultStyle();
     },
     onInit: function() {
       var el = this;
+      // Set default font color
+      el.classList.add("vc-fg1");
       // Pointer events attribute required
       el.setAttribute("touch-action", "none");
       // Set up swiper
