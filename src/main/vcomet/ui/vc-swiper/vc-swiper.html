@@ -62,12 +62,13 @@
       /*
         @property {String} pagination
         @description Pagination type
-        Values: filled, hideable
+        Values: filled, hideable, hidden
         Default: filled
       */
       pagination: {
-        value: "filled", // (filled), hideable
-        reflect: true
+        value: "hidden", // (filled), hideable, hidden
+        reflect: true,
+        reflectDefault: true
       },
       /*
         @property {Boolean} navigation
@@ -230,7 +231,7 @@
         var el = this;
         el.thumbnails = [];
         // Is pagination activated
-        if(el.pagination){
+        if(el.pagination != "hidden"){
           el._refs.styleSheet = {};
           // Create swiper pagination container
           var pagination = document.createElement("div");
@@ -248,7 +249,7 @@
       */
       buildGalleryPagination: function(pagingNode) {
         var el = this;
-        if(el.type == "gallery"){
+        if(el.type == "gallery" && el.pagination != "hidden"){
           var pagingFragment = document.createDocumentFragment();
           // Create swiper wrapper container
           var pagingWrapper = document.createElement("div");
@@ -300,7 +301,7 @@
           el.backBtn = {node: backBtn,
                         minSize: btnSizeValue - sizeValue};
           // If pagination is not hidable change clickable zone size
-          if(el.pagination){
+          if(el.pagination != "hidden"){
             el._decreaseNavButtonHeight(el.nextBtn);
             el._decreaseNavButtonHeight(el.backBtn);
           }
@@ -517,7 +518,7 @@
       */
       createThumbnail: function(slide, slideObj){
         var el = this;
-        if(el.pagination){
+        if(el.pagination != "hidden"){
           // Create thumbnail span element
           var thumbnail = document.createElement("span");
           var thumbnailStored = thumbnail;
