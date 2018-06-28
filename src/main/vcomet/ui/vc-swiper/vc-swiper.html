@@ -1,6 +1,7 @@
 <script>
   //@header A container made to swipe vc-slide elements
   vcomet.element("vc-swiper", "vc-swiper.css", {
+    themed: true,
     dependencies: [
       "../vc-slide"
     ],
@@ -142,9 +143,31 @@
       fullScreen: {
         value: false,
         reflect: true
+      },
+      /*
+        @property {Boolean} fill 
+        @description 
+        Values: true, false
+        Default: true
+      */
+      fill: {
+          value: true,
+          reflect: true
       }
     },
     privateFunctions: {
+      /*
+        @function (private) _setDefaultStyle
+        @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+          var el = this;
+          // Check fill behavior
+          if(vcomet.util.isTrue(el.fill)) {
+            // Content style
+            el.classList.add("vc-fill");
+          }
+      },
       /*
         @function (private) _setUp
         @description Configure swiper
@@ -1203,6 +1226,8 @@
       vcomet.createCallback("onPagingReady", el, "ready");
       // Event target path monitor
       vcomet.registerPathListener(el);
+       // ** Apply default items positioning style
+       el._setDefaultStyle();
     },
     onInit: function() {
       var el = this;
