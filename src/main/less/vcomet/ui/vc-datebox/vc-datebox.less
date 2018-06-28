@@ -1,45 +1,16 @@
 @element: vc-datebox;
 
-.vc-datebox-overlay {
-  position: fixed;
-  margin: 0;
-  z-index: 100;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+@{element} { 
+  min-width: 200px; 
 }
 
-.vc-datebox-picker {
-  position: fixed;
-}
-
-.vc-datebox-overlay.vc-datebox-device {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.vc-datebox-overlay.vc-datebox-device .vc-datebox-picker {
-  width: 90%;
-  max-width: 90%;
-  min-width: 90%;
-  position: relative;
-}
-
-.vc-datebox-overlay.vc-datebox-device .vc-datepicker-close {
-  display: flex;
-}
-
-.vc-datebox-picker.hidden {
-  display: none;
-}
-
-@{element} {
-
-  &[inline="true"] {
+@{element}[inline="true"] {
     display: inline-block; 
     width: 200px; 
+  }
+
+  @{element}[type="calendar"][inline="false"] { 
+    width: 100%; 
   }
 
   .@{element}-data {
@@ -49,7 +20,7 @@
     display: flex;
   }
 
-  &[label=""][counter="false"] .@{element}-data {
+  @{element}[label=""] .@{element}-data {
     display: none;
   }
 
@@ -71,20 +42,18 @@
     align-items: flex-end;
   }
 
-  &[disabled="true"] {
+  @{element}[disabled="true"] {
     pointer-events: none;
   }
 
   .@{element}-main {
     position: relative;
     display: flex;
-    flex-direction: column;
   
     align-items: center;
     justify-content: center;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    min-width: 200px;
   }
   
   .@{element}-input {
@@ -93,13 +62,6 @@
     flex-direction: column;
     width: 100%;
     border: none;
-  }
-  
-  .@{element}-input .@{element}-wrapper {
-    display: flex;
-    flex-direction: row;
-  
-    align-items: center;
   }
   
   .@{element}-subInputs {
@@ -167,7 +129,7 @@
     flex-grow: 0;
   }
   
-  &:not([readonly="true"]) .vc-datebox-button {
+  @{element}:not([readonly="true"]) .vc-datebox-button {
     cursor: pointer;
   }
   
@@ -200,20 +162,294 @@
   
   // TOOLBAR DISPLAY
 
-  &[toolbar="true"] {
+  @{element}[toolbar="true"] {
     border: none;
   }
   
-  &[toolbar="true"] .@{element}-underline {
+  @{element}[toolbar="true"] .@{element}-underline {
     display: none;
   }
   
-  &[toolbar="true"] .@{element}-main {
+  @{element}[toolbar="true"] .@{element}-main {
     border: none;
   }
 
-  &[toolbar="true"] .@{element}-data {
+  @{element}[toolbar="true"] .@{element}-data {
     display: none;
   }
 
+  .@{element}-overlay {
+    position: fixed;
+    margin: 0;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .@{element}-picker {
+    position: absolute;
+  }
+  
+  .@{element}-overlay.@{element}-device {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .@{element}-overlay.@{element}-device .@{element}-calendar {
+    width: 90%;
+    max-width: 90%;
+    min-width: 90%;
+    position: relative;
+  }
+
+  // Calendar related style
+
+.@{element}-year, .@{element}-month {
+  cursor: pointer;
+}
+
+@{element}:not([selectable*=y]) .@{element}-year:hover, .@{element}-yearsGridSelectors .@{element}-year:hover {
+  text-decoration: none;
+  cursor: default;
+}
+
+@{element}:not([data-touch="true"]) .@{element}-day:hover {
+  cursor: pointer;
+}
+
+@{element}[disabled="true"] {
+  pointer-events: none;
+}
+
+.@{element}-calendar {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  flex-direction: column;
+  min-height: 180px;
+}
+
+.@{element}-wrapper {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  cursor: default;
+
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.@{element}-header {
+  font-size: 20px;
+  font-weight: bold;
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 18%;
+  max-height: 60px;
+  text-transform: capitalize;
+  box-sizing: border-box;
+
+  align-items: center;
+  justify-content: center;
+}
+
+div[data-disabled="true"]:hover  {
+  cursor: default;
+  text-decoration: none;
+}
+
+.@{element}-header .@{element}-hidden {
+  display: none;
+}
+
+.@{element}-daysGridSelectors, .@{element}-monthsGridSelectors, .@{element}-yearsGridSelectors {
+  display: flex;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.@{element}-daysGridSelectors .@{element}-month {
+  display: flex;
+  height: 100%;
+  padding-right: 1.5%;
+
+  align-items: center;
+  flex-grow: 1;
+  justify-content: flex-end;
+}
+
+.@{element}-monthsGridSelectors .@{element}-month {
+  display: none;
+}
+
+.@{element}-daysGridSelectors .@{element}-year {
+  display: flex;
+  height: 100%;
+  padding-left: 1.5%;
+
+  align-items: center;
+  flex-grow: 1;
+  justify-content: flex-start;
+}
+
+.@{element}-monthsGridSelectors .@{element}-year {
+  display: flex;
+  height: 100%;
+
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.@{element}-leftNavigation {
+  position: absolute;
+  left: 0;
+  display: flex;
+  width: 22%;
+  max-width: 120px;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+}
+
+.@{element}-rightNavigation {
+  position: absolute;
+  right: 0;
+  display: flex;
+  width: 22%;
+  max-width: 120px;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+
+  justify-content: flex-end;
+}
+
+.@{element}-previous, .@{element}-next, .@{element}-back, .@{element}-close {
+  display: flex;
+  width: 50%;
+  height: 100%;
+  cursor: pointer;
+  -webkit-transition: background-color 0.3s;
+     -moz-transition: background-color 0.3s;
+       -o-transition: background-color 0.3s;
+          transition: background-color 0.3s;
+
+  align-items: center;
+  flex-grow: 0;
+  justify-content: center;
+}
+
+.@{element}-body {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 5px 10px 5px;
+
+  flex-grow: 1;
+}
+
+.@{element}-body .@{element}-row div {
+  display: flex;
+  text-transform: capitalize;
+
+  align-items: center;
+  flex-basis: 0;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.@{element}-body .vc-bg1-hoverable:not([data-disabled="true"]) {
+  cursor: pointer;
+}
+
+.@{element}-body div[data-disabled="true"] {
+  text-decoration: line-through;
+  pointer-events: none;
+  cursor: default;
+}
+
+.@{element}-daysGrid {
+  display: flex;
+  flex-direction: column;
+
+  flex-grow: 1;
+}
+
+.@{element}-daysGrid .@{element}-weekDays {
+  font-size: 15px;
+  font-weight: bold;
+  display: flex;
+  width: 100%;
+  height: 30px;
+  margin-bottom: 10px;
+  text-transform: capitalize;
+
+  align-items: center;
+  flex-grow: 0;
+  justify-content: center;
+}
+
+.@{element}-daysGrid .@{element}-grid {
+  display: flex;
+  flex-direction: column;
+
+  flex-grow: 1;
+}
+.@{element}-row, .@{element}-week {
+  display: flex;
+  width: 100%;
+
+  flex-grow: 1;
+}
+
+.@{element}-monthsGrid, .@{element}-yearsGrid {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  -webkit-transition: opacity 0.1s;
+     -moz-transition: opacity 0.1s;
+       -o-transition: opacity 0.1s;
+          transition: opacity 0.1s;
+  opacity: 0;
+}
+
+.@{element}-dayHeader {
+  display: flex;
+  height: 100%;
+  cursor: default;
+
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.@{element}-day {
+  display: flex;
+
+  align-items: center;
+  flex-basis: 0;
+  flex-grow: 1;
+  justify-content: center;
 }

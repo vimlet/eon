@@ -1,30 +1,57 @@
 <template>
 
+  <!-- Default date input elements -->
   <div class="vc-datebox-data">
     <label class="vc-datebox-label"></label>
   </div>
 
   <div class="vc-datebox-main vc-bg2 vc-unselectable">
 
-    <div class="vc-datebox-input">
-      <div class="vc-datebox-wrapper">
-        <div class="vc-datebox-subInputs">
-          <div class="vc-datebox-subInput first">
-            <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
-          </div>
-          <div class="vc-datebox-separator"></div>
-          <div class="vc-datebox-subInput second">
-            <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
-          </div>
-          <div class="vc-datebox-separator"></div>
-          <div class="vc-datebox-subInput third">
-            <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
-          </div>
-        </div>
-        <i class="vc-datebox-button vc-fg2 vc-fg2-hoverable vicon vicon-calendar"></i>
+    <div class="vc-datebox-subInputs">
+      <div class="vc-datebox-subInput first">
+        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
       </div>
-      <span class="vc-datebox-underline"></span>
+      <div class="vc-datebox-separator"></div>
+      <div class="vc-datebox-subInput second">
+        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
+      </div>
+      <div class="vc-datebox-separator"></div>
+      <div class="vc-datebox-subInput third">
+        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
+      </div>
     </div>
+    <i class="vc-datebox-button vc-fg2 vc-fg2-hoverable vicon vicon-calendar"></i>
+
+  </div>
+
+  <span class="vc-datebox-underline"></span>
+
+  <!-- Date calendar elements -->
+  <div class="vc-datebox-calendar vc-unselectable vc-sect1 vc-boxshadow2">
+
+    <div class="vc-datebox-header">
+      <div class="vc-datebox-leftNavigation">
+        <div class="vc-datebox-previous vc-unselectable vc-fg1-hoverable">
+          <i class="vicon vicon-chevron-left"></i>
+        </div>
+        <div class="vc-datebox-next vc-unselectable vc-fg1-hoverable">
+          <i class="vicon vicon-chevron-right"></i>
+        </div>
+      </div>
+
+      <div class="vc-datebox-daysGridSelectors">
+        <div class="vc-datebox-month vc-fg1-hoverable"></div>
+        <div class="vc-datebox-year vc-fg1-hoverable"></div>
+      </div>
+
+      <div class="vc-datebox-rightNavigation">
+        <div class="vc-datebox-back vc-unselectable vc-datebox-hidden vc-fg1-hoverable">
+          <i class="vicon vicon-arrow-back"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="vc-datebox-body"> </div>
 
   </div>
 
@@ -85,12 +112,38 @@
         reflect: true
       },
       /*
+      @property {Number} fontSize
+      @description Basic font size from which we will determine all the sizes
+      */
+      fontSize: {
+        value: 14,
+        reflect: true
+      },
+      /*
+      @property {String} type
+      @description Determines the type of the date selection (input or calendar)
+      */
+      type: {
+        value: "input",
+        reflect: true
+      },
+      /*
+      @property {String} selectable
+      @description Indicates the selectable values of the calendar (day, month and year)
+      */
+      selectable: {
+        value: "dmy",
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
       @property {String} label
       @description Label for the element
       */
       label: {
         value: "",
-        reflect: true
+        reflect: true,
+        reflectDefault: true
       },
       /*
       @property {String} locale
@@ -125,22 +178,6 @@
         reflect: true
       },
       /*
-      @property {Number} pickerFontSize
-      @description Indicates the font size of the datepicker
-      */
-      pickerFontSize: {
-        value: 16,
-        reflect: true
-      },
-      /*
-      @property {String} pickerSelectable
-      @description Indicates the selectable values of the datepicker (day, month and year)
-      */
-      pickerSelectable: {
-        value: "dmy",
-        reflect: true
-      },
-      /*
       @property {String} weekStart
       @description Indicates the first day of the week for the datepicker
       */
@@ -149,10 +186,10 @@
         reflect: true
       },
       /*
-      @property {String} weekDaysFormat
-      @description Indicates the format of the weekdays header
+      @property {String} weekFormat
+      @description Indicates the format of the week days header
       */
-      weekDaysFormat: {
+      weekFormat: {
         value: "short",
         reflect: true
       },
@@ -197,6 +234,30 @@
         value: false,
         reflect: true
       },
+      /*
+      @property {Number} day
+      @description Toggles the disabled status of the element
+      */
+      day: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Number} month
+      @description Toggles the disabled status of the element
+      */
+      month: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Number} year
+      @description Toggles the disabled status of the element
+      */
+      year: {
+        value: "",
+        reflect: true
+      }
     },
     privateFunctions: {
       /*
@@ -209,122 +270,185 @@
 
         el.locale = (el.locale != undefined && el.locale != "") ? el.locale : navigator.language;
 
+        el._refs.calendar.setAttribute("selectable", el.selectable);
+
         el._initDefault();
 
-        el._setupMisc();
-        el._setupRefs();
+        el._setupMinDate();
+        el._setupMaxDate();
+
         el._setupSeparator();
-        el._setupDatePicker();
         el._setupMask();
         el._setupEvents();
-        el._setupOverlay();
+
+        el._setupCalendar();
+
+        el._setupToolbarMode();
+
+        el._initValue();
+
+        el._refresh();
 
         el._updateLabel();
         el._updateDisabled();
         el._updateReadOnly();
 
-        if (el.min != "" && el.min != undefined) el._setupMinDate();
-        if (el.max != "" && el.max != undefined) el._setupMaxDate();
-        if (el.toolbar == "true") el._setupToolbarMode();
+      },
+      /*
+      @function (private) _setupType
+      @description Creates the structure of the element depending on the type
+      */
+      setupType: function () {
 
-        if (vcomet.util.isTouchScreen()) {
-          el.dataset.touch = "true";
+        var el = this;
+
+        var calendarFragment = document.createDocumentFragment();
+        var dataFragment = document.createDocumentFragment();
+        var inputFragment = document.createDocumentFragment();
+
+        // Separates the template into 3 different fragments, depending on the type we will reappend 
+        // the elements we need
+        calendarFragment.appendChild(el.template.querySelector(".vc-datebox-calendar"));
+        dataFragment.appendChild(el.template.querySelector(".vc-datebox-data"));
+        inputFragment.appendChild(el.template);
+
+        if (el.type == "calendar") {
+
+          el.template.appendChild(dataFragment);
+          el.template.appendChild(calendarFragment);
+
+          vcomet.addResizeListener(el._refs.calendar, "calendar", function () {
+            el._handleAutoHeight();
+            el._handleFonts();
+          });
+
+        } else {
+
+          el.template.appendChild(dataFragment);
+          el.template.appendChild(inputFragment);
+
+          el._refs.overlay.appendChild(calendarFragment);
+
         }
-
-        el._refs.datePicker.onSelected(function (obj) {
-          el._onDatePickerSelection(obj)
-        });
-
-        el.setAttribute("valid", "false");
-
-        vcomet.registerPathListener(el, "datebox");
-
-        el._initValue();
 
       },
       /*
-      @function (private) _setupDatePicker
-      @description Creates the datePicker and appends it to the datebox
+      @function (private) _setupCalendar
+      @description Prepares the calendar and its grids/events
       */
-      setupDatePicker: function () {
+      setupCalendar: function () {
 
         var el = this;
-        var datePickerElement = document.createElement("vc-datepicker");
-        var blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
 
-        datePickerElement.classList.add("vc-datebox-picker", "hidden");
+        el._setupWeekDays();
+        el._setupYearsGrid();
+        el._setupMonthsGrid();
+        el._setupDaysGrid();
 
-        datePickerElement.value = el.value ? el.value : datePickerElement.value;
-        datePickerElement.locale = el.locale;
-        datePickerElement.weekDaysFormat = el.weekDaysFormat;
-        datePickerElement.weekStart = el.weekStart;
-        datePickerElement.min = el.min;
-        datePickerElement.max = el.max;
-        datePickerElement.fontSize = el.pickerFontSize;
-        datePickerElement.selectable = el.pickerSelectable;
-        datePickerElement.valueFormat = el.valueFormat;
+        el._handleAutoHeight();
+        el._handleFonts();
 
-        datePickerElement.onShow(function () {
-          el._addFocusStyle();
-        });
+        // Events
 
-        datePickerElement.onHide(function () {
-          el._removeFocusStyle();
-        });
-
-        el._refs.button.addEventListener('click', function (e) {
+        el._refs.calendarButton.addEventListener('click', function (e) {
           if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
-            el._toggleDatePicker();
+            el._showCalendar();
           }
         }, false);
 
-        document.body.addEventListener(blurTrigger, function (e) {
-          if (!el.isOnPath && !el._refs.datePicker.isOnPath && !el._refs.overlay.classList.contains("vc-datebox-device")) {
-            el._hideDatePicker();
+        el._refs.previous.addEventListener(el._misc.downTrigger, function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          el._goToPrevious(this);
+        });
+
+        el._refs.next.addEventListener(el._misc.downTrigger, function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          el._goToNext(this);
+        });
+
+        el._refs.calendar.querySelector(".vc-datebox-back").addEventListener(el._misc.downTrigger, function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          el._goBack(this);
+        });
+
+        el._refs.calendar.querySelector(".vc-datebox-header .vc-datebox-month").addEventListener(el._misc.downTrigger, function (e) {
+          if (this.dataset.disabled != "true") {
+            e.stopPropagation();
+            e.preventDefault();
+            el._showMonthsGrid();
           }
         });
 
-        vcomet.registerPathListener(datePickerElement, "datepicker");
+        el._refs.calendar.querySelector(".vc-datebox-header .vc-datebox-year").addEventListener(el._misc.downTrigger, function (e) {
+          if (this.dataset.disabled != "true") {
+            e.stopPropagation();
+            e.preventDefault();
+            el._showYearsGrid();
+          }
+        });
 
-        el._refs.main.appendChild(datePickerElement);
+        vcomet.registerPathListener(el._refs.calendar, "calendar");
 
-        el._refs.datePicker = datePickerElement;
       },
       /*
-      @function (private) _setupOverlay
-      @description Sets up basic properties for the data object
-      */
+            @function (private) _setupOverlay
+            @description Sets up basic properties for the data object
+            */
       setupOverlay: function () {
 
         var el = this;
 
         el._refs.overlay = document.createElement("div");
-        el._refs.overlay.classList.add("vc-datebox-overlay");
-        el._refs.overlay.appendChild(el._refs.datePicker);
+        el._refs.overlay.classList.add("vc-datebox-overlay", "vc-bg1-modal");
 
         // Prevents scrolling on mobile devices
-        window.addEventListener("touchstart", function (e) {
-          if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-datebox-device")) {
-            if (!el._refs.datePicker.isOnPath) {
-              e.preventDefault();
-              e.stopPropagation();
-              el._misc.modal.blur = true;
-            }
+        el._refs.overlay.addEventListener("wheel", function (e) {
+          if (!el._refs.calendar.isOnPath) {
+            e.preventDefault();
+            e.stopPropagation();
           }
         }, { passive: false });
 
-        // On touch end it blurs the modal dropdown
+        // Prevents scrolling on mobile devices
+        window.addEventListener("touchstart", function (e) {
+          if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device") && !el._refs.calendar.isOnPath) {
+            e.preventDefault();
+            e.stopPropagation();
+            el._misc.modal.blur = true;
+          }
+        }, { passive: false });
+
+        // On touch end it blurs the modal calendar
         window.addEventListener("touchend", function (e) {
-          if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-datebox-device") && el._misc.modal.blur) {
+          if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device") && el._misc.modal.blur) {
             el._misc.modal.blur = false;
-            el._hideDatePicker();
+            el._hideCalendar();
+          }
+        });
+
+        // Prevents scrolling on mobile devices
+        el._refs.overlay.addEventListener("click", function (e) {
+          if (el._misc.modal.active && !el._refs.calendar.isOnPath) {
+            e.preventDefault();
+            e.stopPropagation();
+            el._hideCalendar();
+          }
+        });
+
+        // If the user scrolls the window scrollbar we hide the calendar
+        window.addEventListener("scroll", function (e) {
+          if (el._misc.modal.active) {
+            el._hideCalendar();
           }
         });
 
       },
       /*
       @function (private) _setupMisc
-      @description Sets up basic properties for the data object
+      @description Sets up basic properties for the misc object
       */
       setupMisc: function () {
 
@@ -338,6 +462,15 @@
         el._misc.max.active = false;
         el._misc.modal = {};
 
+        el._misc.weekDays = {};
+        el._misc.current = {};
+        el._misc.selected = {};
+        el._misc.selector = {};
+        el._misc.selector.range = {};
+
+        el._misc.downTrigger = vcomet.util.isTouchScreen() ? "touchstart" : "mousedown";
+        el._misc.blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
+
       },
       /*
       @function (private) _setupRefs
@@ -347,18 +480,33 @@
 
         var el = this;
 
+        // Input related references
+        el._refs.subInputsWrapper = el.template.querySelector(".vc-datebox-subInputs");
         el._refs.subInputs = {};
 
-        el._refs.subInputs.first = el.querySelector(".vc-datebox-subInputs .first input");
-        el._refs.subInputs.second = el.querySelector(".vc-datebox-subInputs .second input");
-        el._refs.subInputs.third = el.querySelector(".vc-datebox-subInputs .third input");
+        el._refs.subInputs.first = el.template.querySelector(".vc-datebox-subInputs .first input");
+        el._refs.subInputs.second = el.template.querySelector(".vc-datebox-subInputs .second input");
+        el._refs.subInputs.third = el.template.querySelector(".vc-datebox-subInputs .third input");
 
-        el._refs.underline = el.querySelector(".vc-datebox-underline");
+        el._refs.underline = el.template.querySelector(".vc-datebox-underline");
 
-        el._refs.data = el.querySelector(".vc-datebox-data");
-        el._refs.main = el.querySelector(".vc-datebox-main");
+        el._refs.data = el.template.querySelector(".vc-datebox-data");
+        el._refs.main = el.template.querySelector(".vc-datebox-main");
 
-        el._refs.button = el.querySelector(".vc-datebox-button");
+        el._refs.calendarButton = el.template.querySelector(".vc-datebox-button");
+
+        // Calendar related references
+        el._refs.calendar = el.template.querySelector(".vc-datebox-calendar");
+
+        el._refs.selectorsContainer = el._refs.calendar.querySelector(".vc-datebox-daysGridSelectors");
+        el._refs.monthSelector = el._refs.calendar.querySelector(".vc-datebox-header .vc-datebox-month");
+        el._refs.yearSelector = el._refs.calendar.querySelector(".vc-datebox-header .vc-datebox-year");
+
+        el._refs.header = el._refs.calendar.querySelector(".vc-datebox-header");
+        el._refs.body = el._refs.calendar.querySelector(".vc-datebox-body");
+
+        el._refs.previous = el._refs.calendar.querySelector(".vc-datebox-previous");
+        el._refs.next = el._refs.calendar.querySelector(".vc-datebox-next");
 
       },
       /*
@@ -483,21 +631,21 @@
         el._refs.subInputs.first.addEventListener("focus", function (e) {
           if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
             el._handleFocus(this);
-            el._addFocusStyle();
+            el._assignFocusStyle();
           }
         }, true);
 
         el._refs.subInputs.second.addEventListener("focus", function (e) {
           if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
             el._handleFocus(el._refs.subInputs.second);
-            el._addFocusStyle();
+            el._assignFocusStyle();
           }
         }, true);
 
         el._refs.subInputs.third.addEventListener("focus", function (e) {
           if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
             el._handleFocus(el._refs.subInputs.third);
-            el._addFocusStyle();
+            el._assignFocusStyle();
           }
         }, true);
 
@@ -516,7 +664,7 @@
             el._refs.subInputs.first.textContent = "0" + el._refs.subInputs.first.textContent;
           }
 
-          el._removeFocusStyle();
+          el._revertFocusStyle();
 
         }, true);
 
@@ -526,7 +674,7 @@
             el._refs.subInputs.second.textContent = "0" + el._refs.subInputs.second.textContent;
           }
 
-          el._removeFocusStyle();
+          el._revertFocusStyle();
 
         }, true);
 
@@ -536,7 +684,7 @@
             el._refs.subInputs.third.textContent = "0" + el._refs.subInputs.third.textContent;
           }
 
-          el._removeFocusStyle();
+          el._revertFocusStyle();
 
         }, true);
 
@@ -615,32 +763,22 @@
 
         var el = this;
 
-        if (el.min.indexOf("/") > -1) {
+        if (el.min != "") {
 
-          var splittedMin = el.min.split("/");
+          if (el.min.indexOf("/") > -1) {
 
-          el._misc.min.day = parseInt(splittedMin[0]);
-          el._misc.min.month = parseInt(splittedMin[1]) - 1;
-          el._misc.min.year = parseInt(splittedMin[2]);
+            var splittedMin = el.min.split("/");
 
-        } else {
+            el._misc.min.day = parseInt(splittedMin[0]);
+            el._misc.min.month = parseInt(splittedMin[1]) - 1;
+            el._misc.min.year = parseInt(splittedMin[2]);
 
-          var date = new Date(parseInt(el.min));
+            el._misc.min.active = true;
 
-          el._misc.min.day = date.toLocaleString([], {
-            day: "numeric"
-          });
+          }
 
-          el._misc.min.month = date.toLocaleString([], {
-            month: "numeric"
-          });
-
-          el._misc.min.year = date.toLocaleString([], {
-            year: "numeric"
-          });
         }
 
-        el._misc.min.active = true;
       },
       /*
       @function (private) _setupMaxDate
@@ -650,32 +788,22 @@
 
         var el = this;
 
-        if (el.max.indexOf('/') > -1) {
+        if (el.max != "") {
 
-          var splittedMax = el.max.split("/");
+          if (el.max.indexOf('/') > -1) {
 
-          el._misc.max.day = parseInt(splittedMax[0]);
-          el._misc.max.month = parseInt(splittedMax[1]) - 1;
-          el._misc.max.year = parseInt(splittedMax[2]);
+            var splittedMax = el.max.split("/");
 
-        } else {
+            el._misc.max.day = parseInt(splittedMax[0]);
+            el._misc.max.month = parseInt(splittedMax[1]) - 1;
+            el._misc.max.year = parseInt(splittedMax[2]);
 
-          var date = new Date(parseInt(el.max));
+            el._misc.max.active = true;
 
-          el._misc.max.day = date.toLocaleString([], {
-            day: "numeric"
-          });
+          }
 
-          el._misc.max.month = date.toLocaleString([], {
-            month: "numeric"
-          });
-
-          el._misc.max.year = date.toLocaleString([], {
-            year: "numeric"
-          });
         }
 
-        el._misc.max.active = true;
       },
       /*
       @function (private) {String} _setupSeparator
@@ -702,13 +830,222 @@
       @description Adds whats needed to overwrite the default style
       */
       setupToolbarMode: function () {
-        el._refs.main.classList.add("toolbar");
+
+        var el = this;
+
+        if (vcomet.util.isTrue(el.toolbar)) {
+          el._refs.main.classList.add("toolbar");
+        }
+
       },
       /*
-      @function (private) _addFocusStyle
+      @function (private) _setupWeekDays
+      @description Sets up the weekdays, including its locale, format and weekDayStart
+      */
+      setupWeekDays: function () {
+
+        var el = this;
+
+        function reorderWeekDays(array, oldIndex, newIndex) {
+          while (oldIndex < 0) {
+            oldIndex += array.length;
+          }
+          while (newIndex < 0) {
+            newIndex += array.length;
+          }
+          if (newIndex >= array.length) {
+            var k = newIndex - array.length;
+            while ((k--) + 1) {
+              array.push(undefined);
+            }
+          }
+          array.splice(newIndex, 0, array.splice(oldIndex, 1)[0]);
+          return array;
+        }
+
+        el._misc.weekDays.display = vcomet.time.getWeekDays(el.locale, el.weekFormat);
+        el._misc.weekDays.keys = vcomet.time.getWeekDays("en", "long");
+
+        if (el._misc.weekDays.keys[0].toLowerCase() != el.weekStart.toLowerCase()) {
+
+          for (var i = 0; i < el._misc.weekDays.keys.length; i++) {
+
+            el._misc.weekDays.display = reorderWeekDays(el._misc.weekDays.display, 6, 0);
+            el._misc.weekDays.keys = reorderWeekDays(el._misc.weekDays.keys, 6, 0);
+
+            if (el._misc.weekDays.keys[0].toLowerCase() == el.weekStart.toLowerCase()) {
+              break;
+            }
+          }
+        }
+      },
+      /*
+      @function (private) _setupDaysGrid
+      @description Sets up the days Grid
+      */
+      setupDaysGrid: function () {
+
+        var el = this;
+
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('d') > -1) {
+
+          var week;
+          var day;
+
+          var daysGridContainer = document.createElement("div");
+          var weekDaysContainer = document.createElement("div");
+          var daysGrid = document.createElement("div");
+
+          var weeksFragment = document.createDocumentFragment();
+
+          daysGridContainer.style.zIndex = -1;
+
+          daysGridContainer.classList.add("vc-datebox-daysGrid");
+          weekDaysContainer.classList.add("vc-datebox-weekDays");
+          daysGrid.classList.add("vc-datebox-grid");
+
+          daysGridContainer.appendChild(weekDaysContainer);
+          daysGridContainer.appendChild(daysGrid);
+          el._refs.calendar.querySelector(".vc-datebox-body").appendChild(daysGridContainer);
+
+          el._refs.daysGrid = daysGridContainer;
+
+          el._createWeekDaysHeaders();
+
+          for (var i = 1; i <= 6; i++) {
+
+            week = document.createElement("div");
+            week.classList.add("vc-datebox-week");
+
+            for (var j = 1; j <= 7; j++) {
+
+              day = document.createElement("div");
+              day.classList.add("vc-datebox-day", "vc-bg1-hoverable", "vc-fg1-hoverable");
+              day.addEventListener(el._misc.downTrigger, function (e) {
+                el._selectDay(this);
+              });
+
+              week.appendChild(day);
+            }
+            weeksFragment.appendChild(week);
+          }
+          daysGrid.appendChild(weeksFragment);
+
+        }
+
+      },
+      /*
+      @function (private) _setupMonthsGrid
+      @description Sets up the months Grid
+      */
+      setupMonthsGrid: function () {
+
+        var el = this;
+
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('m') > -1) {
+
+          var row;
+          var month;
+
+          var monthsGrid = document.createElement("div");
+          var rowsFragment = document.createDocumentFragment();
+
+          var months = vcomet.time.getMonthNames(el.locale, "short");
+
+          monthsGrid.classList.add("vc-datebox-monthsGrid", "vc-sect1");
+          el._refs.calendar.querySelector(".vc-datebox-body").appendChild(monthsGrid);
+
+          el._refs.monthsGrid = monthsGrid;
+
+          row = document.createElement("div");
+          row.classList.add("vc-datebox-row");
+
+          for (var i = 0; i < months.length; i++) {
+
+            month = document.createElement("div");
+            month.classList.add("vc-datebox-month", "vc-bg1-hoverable", "vc-fg1-hoverable");
+            month.innerHTML = months[i];
+            month.dataset.index = i;
+
+            month.addEventListener(el._misc.downTrigger, function (e) {
+              el._selectMonth(this);
+            });
+
+            row.appendChild(month);
+
+            if (row.childNodes.length == 4) {
+              rowsFragment.appendChild(row);
+              row = document.createElement("div");
+              row.classList.add("vc-datebox-row");
+            }
+          }
+
+          monthsGrid.appendChild(rowsFragment);
+
+        }
+
+      },
+      /*
+      @function (private) _setupYearsGrid
+      @description Sets up the years Grid
+      */
+      setupYearsGrid: function () {
+
+        var el = this;
+
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('y') > -1) {
+
+          var row;
+          var year;
+
+          var yearsGrid = document.createElement("div");
+          var rowsFragment = document.createDocumentFragment();
+
+          var currentYear = new Date();
+          var years = [];
+
+          currentYear = currentYear.getFullYear();
+
+          for (var i = currentYear - 6; i < currentYear + 6; i++) {
+            years.push(i);
+          }
+
+          yearsGrid.classList.add("vc-datebox-yearsGrid", "vc-sect1");
+          el._refs.calendar.querySelector(".vc-datebox-body").appendChild(yearsGrid);
+
+          el._refs.yearsGrid = yearsGrid;
+
+          row = document.createElement("div");
+          row.classList.add("vc-datebox-row");
+
+          for (var i = 0; i < years.length; i++) {
+
+            year = document.createElement("div");
+            year.classList.add("vc-datebox-year", "vc-bg1-hoverable", "vc-fg1-hoverable");
+
+            year.addEventListener(el._misc.downTrigger, function (e) {
+              el._selectYear(this);
+            });
+
+            row.appendChild(year);
+
+            if (row.childNodes.length == 4) {
+              rowsFragment.appendChild(row);
+              row = document.createElement("div");
+              row.classList.add("vc-datebox-row");
+            }
+          }
+
+          yearsGrid.appendChild(rowsFragment);
+
+        }
+
+      },
+      /*
+      @function (private) _assignFocusStyle
       @description When focused, it adds the corresponding style
       */
-      addFocusStyle: function () {
+      assignFocusStyle: function () {
 
         var el = this;
 
@@ -718,10 +1055,10 @@
 
       },
       /*
-      @function (private) _addFocusStyle
-      @description When focused, it removes the corresponding style
+      @function (private) _revertFocusStyle
+      @description On blur, removes the corresponding style
       */
-      removeFocusStyle: function () {
+      revertFocusStyle: function () {
 
         var el = this;
 
@@ -731,155 +1068,10 @@
 
       },
       /*
-      @function (private) _toggleDatePicker
-      @description Shows/Hides the picker depending on its state
-      */
-      toggleDatePicker: function () {
-
-        var el = this;
-
-        if (el._refs.datePicker.classList.contains("hidden")) {
-          el._showDatePicker();
-        } else if (!el._refs.datePicker.classList.contains("hidden")) {
-          el._hideDatePicker();
-        }
-
-      },
-      /*
-      @function (private) _showDatePicker
-      @description Shows the datepicker
-      */
-      showDatePicker: function () {
-
-        var el = this;
-
-        el._assignModalStyle();
-        el._assignDatePickerStyle();
-
-        el._refs.datePicker._refresh();
-
-        document.body.appendChild(el._refs.overlay);
-
-        el._refs.datePicker._show();
-
-        el._refs.datePicker._handleAutoHeight();
-        el._refs.datePicker._handleFonts();
-
-        el._misc.modal.active = true;
-
-      },
-      /*
-      @function (private) _hideDatePicker
-      @description Hides the datepicker
-      */
-      hideDatePicker: function () {
-
-        var el = this;
-
-        el._refs.datePicker._hide();
-
-        if (el._refs.overlay.parentNode) {
-          el._refs.overlay.parentNode.removeChild(el._refs.overlay);
-        }
-
-        if (el._misc.modal.active) {
-          el._revertModalStyle();
-        }
-
-        el._misc.modal.active = false;
-
-      },
-      /*
-      @function (private) _assignModalStyle
-      @description Handles the overlay modal style
-      */
-      assignModalStyle: function () {
-
-        var el = this;
-
-        // Gets the body style from two different sources
-        var computedStyle = window.getComputedStyle(document.body);
-        var boundingClientRect = document.body.getBoundingClientRect();
-
-        //  Checks if there are vertical/horizontal scrolls on window
-        var windowHasVerticalScroll = (document.body.scrollHeight - window.innerHeight) > 0;
-        var windowHasHorizontalScroll = (document.body.scrollWidth - window.innerWidth) > 0;
-
-        // Gets all the margins of the body
-        var horizontalMarginSpace = parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight) / 2;
-        var verticalMarginSpace = parseFloat(computedStyle.marginTop) + parseFloat(computedStyle.marginBottom) / 2;
-
-        var widthDifferenceCalc = (parseInt(boundingClientRect.width) - parseInt(computedStyle.width)) / 2;
-
-        var verticalCalc = parseInt(window.innerWidth + window.pageXOffset + widthDifferenceCalc - document.body.clientWidth);
-        var horizontalCalc = parseInt(window.innerHeight - (boundingClientRect.height + boundingClientRect.top));
-        var scrollBarWidth = vcomet.util.getBrowserScrollBarWidth();
-
-        el._misc.modal.verticalAdjustement = windowHasVerticalScroll && (verticalCalc >= 0 && verticalCalc <= scrollBarWidth);
-        el._misc.modal.horizontalAdjustement = windowHasHorizontalScroll && (horizontalCalc >= 0 && horizontalCalc <= scrollBarWidth);
-
-        // Adjusts the body style to keep it visually intact when adding overflow
-        if (el._misc.modal.verticalAdjustement || el._misc.modal.horizontalAdjustement) {
-
-          if (el._misc.modal.verticalAdjustement) {
-
-            // Saves and assigns a width and Left style
-            el._misc.modal.previousStyleWidth = parseInt(document.body.style.width);
-            el._misc.modal.previousStyleLeft = parseInt(document.body.style.left);
-
-            document.body.style.width = document.body.offsetWidth + "px";
-            document.body.style.left = boundingClientRect.left + "px";
-
-          }
-
-          if (el._misc.modal.horizontalAdjustement) {
-
-            // Saves and assigns a top style
-            el._misc.modal.previousStyleTop = parseInt(document.body.style.top);
-            document.body.style.top = boundingClientRect.top + "px";
-
-          }
-
-          // Saves and assigns a position style
-          el._misc.modal.previousStylePosition = document.body.style.position;
-          document.body.style.position = "absolute";
-
-          // Shows/Hides the disabled scrollbars in the overlay
-          el._refs.overlay.style.overflowY = windowHasVerticalScroll ? "scroll" : "";
-          el._refs.overlay.style.overflowX = windowHasHorizontalScroll ? "scroll" : "";
-
-          document.body.classList.add("vc-body-modal");
-
-        }
-
-      },
-      /*
-      @function (private) _revertModalStyle
-      @description Reverts the assigned modal style
-      */
-      revertModalStyle: function () {
-
-        var el = this;
-
-        document.body.classList.remove("vc-body-modal");
-
-        // Removes the modal style and restores the previous style 
-        document.body.style.width = el._misc.modal.previousStyleWidth ? el._misc.modal.previousStyleWidth : "";
-        document.body.style.left = el._misc.modal.previousStyleLeft ? el._misc.modal.previousStyleLeft : "";
-        document.body.style.top = el._misc.modal.previousStyleTop ? el._misc.modal.previousStyleTop : "";
-        document.body.style.position = el._misc.modal.previousStylePosition ? el._misc.modal.previousStylePosition : "";
-
-        el._misc.modal.previousStyleWidth = undefined;
-        el._misc.modal.previousStyleLeft = undefined;
-        el._misc.modal.previousStyleTop = undefined;
-        el._misc.modal.previousStylePosition = undefined;
-
-      },
-      /*
-      @function (private) _assignDatePickerStyle
+      @function (private) _assignCalendarStyle
       @description Assigns the datePicker's width and position relative to the datebox
       */
-      assignDatePickerStyle: function () {
+      assignCalendarStyle: function () {
 
         var el = this;
 
@@ -887,8 +1079,8 @@
 
           if (!el._refs.overlay.classList.contains("vc-datebox-device")) {
 
-            el._refs.datePicker.style.top = "auto";
-            el._refs.datePicker.style.left = "auto";
+            el._refs.calendar.style.top = "auto";
+            el._refs.calendar.style.left = "auto";
 
             el._refs.overlay.classList.add("vc-datebox-device");
             el._refs.overlay.classList.add("vc-bg1-modal");
@@ -900,43 +1092,57 @@
           el._refs.overlay.classList.remove("vc-datebox-device");
           el._refs.overlay.classList.remove("vc-bg1-modal");
 
-          el._refs.datePicker.style.top = el.getBoundingClientRect().top + el.offsetHeight + "px";
-          el._refs.datePicker.style.left = el.getBoundingClientRect().left + "px";
-          el._refs.datePicker.style.width = el.offsetWidth + "px";
-          el._refs.datePicker.style.height = "auto";
+          el._refs.calendar.style.top = el.getBoundingClientRect().top + 1 + el.offsetHeight + "px";
+          el._refs.calendar.style.left = el.getBoundingClientRect().left + "px";
+          el._refs.calendar.style.width = el.offsetWidth + "px";
+          el._refs.calendar.style.height = "auto";
 
         }
 
       },
       /*
-      @function (private) _onDatePickerSelection
-      @description Triggered when the user selects a day on the datePicker
-      @param {Object} obj
+      @function (private) _showCalendar
+      @description Shows the datepicker
       */
-      onDatePickerSelection: function (obj) {
+      showCalendar: function () {
 
         var el = this;
 
-        el._misc.preventUpdate = true;
-        el.value = el._getFormattedValue(obj, el.valueFormat);
-        el.setAttribute("valid", true);
+        el._assignCalendarStyle();
+        el._assignFocusStyle();
 
-        el._misc.current.day = obj.day;
-        el._misc.current.month = obj.month;
-        el._misc.current.year = obj.year;
+        el._refresh();
 
-        el._refs.subInputs.first.value = obj[el._misc.mask.order[0]];
-        el._refs.subInputs.second.value = obj[el._misc.mask.order[1]];
-        el._refs.subInputs.third.value = obj[el._misc.mask.order[2]];
+        document.body.appendChild(el._refs.overlay);
 
-        el._hideDatePicker();
+        el._handleAutoHeight();
+        el._handleFonts();
+
+        el._misc.modal.active = true;
 
       },
       /*
-      @function (private) _validateDate
+      @function (private) _hideCalendar
+      @description Hides the datepicker
+      */
+      hideCalendar: function () {
+
+        var el = this;
+
+        el._revertFocusStyle();
+
+        if (el._refs.overlay.parentNode) {
+          el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+        }
+
+        el._misc.modal.active = false;
+
+      },
+      /*
+      @function (private) _validate
       @description Validates if what the user typed is a valid date
       */
-      validateDate: function () {
+      validate: function () {
 
         var el = this;
 
@@ -969,33 +1175,20 @@
         //If its valid we remove the error classes, and update everything according to the new date
         if (validDate) {
 
-          el.querySelector(".vc-datebox-input").classList.remove("noMatches");
-          el._refs.underline.classList.remove("noMatches");
+          el._refs.underline.classList.remove("vc-datebox-noMatches");
 
           el._misc.current.day = parseInt(day);
           el._misc.current.month = parseInt(month) - 1;
           el._misc.current.year = parseInt(year);
 
-          el._refs.datePicker._misc.current.day = parseInt(day);
-          el._refs.datePicker._misc.current.month = parseInt(month) - 1;
-          el._refs.datePicker._misc.current.year = parseInt(year);
-
-          el._refs.datePicker._misc.selected.day = parseInt(day);
-          el._refs.datePicker._misc.selected.month = parseInt(month) - 1;
-          el._refs.datePicker._misc.selected.year = parseInt(year);
-
           el._misc.preventUpdate = true;
-          el.value = el._getFormattedValue(obj);
-          el.setAttribute("valid", "true");
+
+          el.value = el._generateOutputValue(obj);
+
 
         } else {
 
-          el.querySelector(".vc-datebox-input").classList.add("noMatches");
-          el._refs.underline.classList.add("noMatches");
-
-          el._misc.preventUpdate = true;
-          el.value = el._getFormattedValue(obj);
-          el.setAttribute("valid", "false");
+          el._refs.underline.classList.add("vc-datebox-noMatches");
 
         }
 
@@ -1039,104 +1232,52 @@
       initValue: function () {
 
         var el = this;
+        var dateObj;
 
-        if (el.value != "") {
+        // If no value was provided by the user we create one
+        if (el.value == "") {
 
-          var splittedMin = el.value.split("/");
+          var date = new Date();
 
-          var subInputs = el.querySelector(".vc-datebox-subInputs");
-          var dayInput = subInputs.querySelector('[data-field="day"] input');
-          var monthInput = subInputs.querySelector('[data-field="month"] input');
-          var yearInput = subInputs.querySelector('[data-field="year"] input');
-
-          var valueObj = el._getObjectFromDateString(el.value);
-
-          dayInput.value = valueObj.day;
-          monthInput.value = valueObj.month;
-          yearInput.value = valueObj.year;
-
-          el._handleLimits(dayInput, monthInput, yearInput);
-          el._validateDate();
-
-        }
-
-      },
-      /*
-      @function (private) _updateLabel
-      @description Updates the label node with the new label
-      */
-      updateLabel: function () {
-
-        var el = this;
-
-        if (el.label != "") {
-          el.querySelector(".vc-datebox-label").innerHTML = el.label;
-        }
-
-      },
-      /*
-      @function (private) _updateDisabled
-      @description Updates disabled status
-      */
-      updateDisabled: function () {
-
-        var el = this;
-
-        if (!vcomet.util.isTrue(el.disabled)) {
-
-          el.querySelector(".vc-datebox-subInputs").classList.remove("vc-fg2-disabled");
-
-          el._refs.button.classList.add("vc-fg2");
-          el._refs.button.classList.remove("vc-fg2-disabled");
-
-          el._refs.data.classList.remove("vc-fg2-disabled");
-          el._refs.main.classList.remove("vc-fg2-disabled");
+          dateObj = {
+            day: el.day != "" ? parseInt(el.day) : parseInt(date.getDate()),
+            month: el.month != "" ? parseInt(el.month) : parseInt(date.getMonth()) + 1,
+            year: el.year != "" ? parseInt(el.year) : parseInt(date.getFullYear())
+          }
 
         } else {
 
-          el.querySelector(".vc-datebox-subInputs").classList.add("vc-fg2-disabled");
-
-          el._refs.button.classList.remove("vc-fg2");
-          el._refs.button.classList.add("vc-fg2-disabled");
-
-          el._refs.data.classList.add("vc-fg2-disabled");
-          el._refs.main.classList.add("vc-fg2-disabled");
-
-        }
-      },
-      /*
-      @function (private) _updateReadOnly
-      @description Updates readonly status
-      */
-      updateReadOnly: function () {
-
-        var el = this;
-
-        if (vcomet.util.isTrue(el.readonly)) {
-
-          el._refs.subInputs.first.setAttribute("readonly", "true");
-          el._refs.subInputs.second.setAttribute("readonly", "true");
-          el._refs.subInputs.third.setAttribute("readonly", "true");
-
-          el._refs.button.classList.remove("vc-fg1-hoverable");
-
-        } else {
-
-          el._refs.subInputs.first.removeAttribute("readonly");
-          el._refs.subInputs.second.removeAttribute("readonly");
-          el._refs.subInputs.third.removeAttribute("readonly");
-
-          el._refs.button.classList.add("vc-fg1-hoverable");
+          dateObj = el._getObjectFromDateString(el.value);
 
         }
 
+        if (el._exceedsMinDate(dateObj)) {
+
+          dateObj.day = el._misc.min.day;
+          dateObj.month = el._misc.min.month + 1;
+          dateObj.year = el._misc.min.year;
+
+        } else if (el._exceedsMaxDate(dateObj)) {
+
+          dateObj.day = el._misc.max.day;
+          dateObj.month = el._misc.max.month + 1;
+          dateObj.year = el._misc.max.year;
+
+        }
+
+        dateObj = el._formatObj(dateObj);
+
+        el.value = el._generateOutputValue(dateObj, el.valueFormat);
+
+        el._updateValue();
+
       },
       /*
-      @function (private) {String} _getFormattedValue
+      @function (private) {String} _generateOutputValue
       @description We replace the format with the given data, in case the field's length is lower than its format then we add 0 as needed
       @param {Object} obj
       */
-      getFormattedValue: function (obj) {
+      generateOutputValue: function (obj) {
 
         var el = this;
         var format = el.valueFormat;
@@ -1368,7 +1509,7 @@
               el._handleCorrection();
             }
 
-            el._validateDate();
+            el._validate();
 
           }
 
@@ -1454,22 +1595,1147 @@
           if ((dayInputValue < el._misc.min.day && monthInputValue <= el._misc.min.month && yearInputValue == el._misc.min.year) || (monthInputValue < el._misc.min.month && yearInputValue == el._misc.min.year) || yearInputValue < el._misc.min.year) {
 
             dayInput.value = el._misc.min.day;
-            monthInput.value = parseInt(el._misc.min.month) + 1;
+            monthInput.value = el._misc.min.month;
             yearInput.value = el._misc.min.year;
 
           } else if ((dayInputValue > el._misc.max.day && monthInputValue >= el._misc.max.month && yearInputValue == el._misc.max.year) || (monthInputValue > el._misc.max.month && yearInputValue == el._misc.max.year) || yearInputValue > el._misc.max.year) {
 
             dayInput.value = el._misc.max.day;
-            monthInput.value = parseInt(el._misc.max.month) + 1;
+            monthInput.value = el._misc.max.month;
             yearInput.value = el._misc.max.year;
           }
         }
       },
       /*
-      @function (private) _updateValue
-      @description Allows the user tu set a new value to the element
-      @param {Object} value
+      @function (private) {Boolean} _exceedsMinDate
+      @description Returns whether the provided date exceeds the minimal date or not
+      @param {Object} dateObj
       */
+      exceedsMinDate: function (dateObj) {
+
+        var el = this;
+
+        if (el._misc.min.active) {
+          var exceedsDay = dateObj.day < el._misc.min.day && dateObj.month == el._misc.min.month && dateObj.year == el._misc.min.year;
+          var exceedsMonth = dateObj.month < el._misc.min.month && dateObj.year == el._misc.min.year;
+          var exceedsYear = dateObj.year < el._misc.min.year;
+        }
+
+        return exceedsDay || exceedsMonth || exceedsYear ? true : false;
+
+      },
+      /*
+      @function (private) {Boolean} _exceedsMaxDate
+      @description Returns whether the provided date exceeds the maximum date or not
+      @param {Object} dateObj
+      */
+      exceedsMaxDate: function (dateObj) {
+
+        var el = this;
+
+        if (el._misc.max.active) {
+          var exceedsDay = dateObj.day > el._misc.min.day && dateObj.month == el._misc.min.month && dateObj.year == el._misc.min.year;
+          var exceedsMonth = dateObj.month > el._misc.max.month && dateObj.year == el._misc.max.year;
+          var exceedsYear = dateObj.year > el._misc.max.year;
+        }
+
+        return exceedsDay || exceedsMonth || exceedsYear ? true : false;
+
+      },
+      /*
+      @function (private) _createWeekDaysHeaders
+      @description Creates the weekdays headers for the daysGrid
+      */
+      createWeekDaysHeaders: function () {
+
+        var el = this;
+
+        var dayHeadersFragment = document.createDocumentFragment();
+        var dayHeader;
+
+        for (var i = 0; i < el._misc.weekDays.keys.length; i++) {
+
+          dayHeader = document.createElement("div");
+          dayHeader.classList.add("vc-datebox-dayHeader");
+          dayHeader.innerHTML = el._misc.weekDays.display[i];
+
+          dayHeadersFragment.appendChild(dayHeader);
+        }
+
+        el._refs.calendar.querySelector(".vc-datebox-daysGrid .vc-datebox-weekDays").appendChild(dayHeadersFragment);
+      },
+      /*
+      @function (private) _refresh
+      @description Shows the picker and the corresponding grid
+      */
+      refresh: function () {
+
+        var el = this;
+
+        if (el._refs.daysGrid) {
+
+          el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
+          el._updateHeaderSelectors("daysGrid", el._misc.current.year, el._misc.current.month);
+          el._showDaysGrid();
+
+        } else if (el._refs.monthsGrid) {
+
+          el._updateHeaderSelectors("monthsGrid");
+          el._showMonthsGrid();
+
+        } else if (el._refs.yearsGrid) {
+
+          el._updateHeaderSelectors("yearsGrid");
+          el._showYearsGrid();
+        }
+
+        if (el._refs.yearsGrid) {
+
+          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.selected.year + "']");
+
+          if (yearButton && yearButton.dataset.disabled != "true") {
+            el._highlight(yearButton, el.querySelector(".vc-datebox-yearsGrid .vc-datebox-current"));
+          }
+
+        }
+
+        if (el._refs.monthsGrid) {
+
+          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.selected.year + "'][data-index='" + el._misc.selected.month + "']");
+
+          if (monthButton && monthButton.dataset.disabled != "true") {
+            el._highlight(monthButton, el.querySelector(".vc-datebox-monthsGrid .vc-datebox-current"));
+          }
+
+        }
+
+        if (el._refs.daysGrid) {
+
+          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.selected.year + "'][month='" + parseInt(el._misc.selected.month) + "'][day='" + parseInt(el._misc.selected.day) + "']");
+
+          if (dayButton && dayButton.dataset.disabled != "true") {
+            el._highlight(dayButton, el.querySelector(".vc-datebox-daysGrid .vc-datebox-grid .vc-datebox-current"));
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _updateHeaderSelectors
+      @description Updates the header depending on the grid passed as parameters
+      @param {String} headerType
+      @param {Number} year
+      @param {Number} month
+      */
+      updateHeaderSelectors: function (headerType, year, month) {
+
+        var el = this;
+
+        var backButton = el._refs.calendar.querySelector(".vc-datebox-back");
+
+        if (headerType == "daysGrid") {
+
+          year = (!year) ? el._misc.current.year : year;
+          month = (!month) ? el._misc.current.month : month;
+
+          el._refs.selectorsContainer.setAttribute("class", "vc-datebox-daysGridSelectors");
+
+          el._refs.yearSelector.innerHTML = year;
+          el._refs.yearSelector.classList.remove("vc-datebox-hidden");
+
+          // Depending on the selectable we enabled/disable the hover class
+          el._refs.yearSelector.classList[!el.selectable.indexOf("y") > -1 ? "remove" : "add"]("vc-fg1-hoverable");
+          el._refs.monthSelector.classList[!el.selectable.indexOf("m") > -1 ? "remove" : "add"]("vc-fg1-hoverable");
+
+          el._refs.monthSelector.innerHTML = vcomet.time.getMonthName(el.locale, month, "long");
+          el._refs.monthSelector.classList.remove("vc-datebox-hidden");
+
+          backButton.classList.add("vc-datebox-hidden");
+
+          el._refs.previous.dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+
+          el._refs.next.dataset.disabled = (el._isMaxMonth(year, month)) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+
+        } else if (headerType == "monthsGrid") {
+
+          year = (!year) ? el._misc.current.year : year;
+
+          el._refs.selectorsContainer.setAttribute("class", "vc-datebox-monthsGridSelectors");
+
+          el._refs.yearSelector.innerHTML = year;
+          el._refs.monthSelector.classList.add("vc-datebox-hidden");
+
+          // Depending on the selectable we enabled/disable the hover class
+          el._refs.yearSelector.classList[!el.selectable.indexOf("y") > -1 ? "remove" : "add"]("vc-fg1-hoverable");
+          el._refs.monthSelector.classList[!el.selectable.indexOf("m") > -1 ? "remove" : "add"]("vc-fg1-hoverable");
+
+          el._refs.previous.dataset.disabled = (year <= el._misc.min.year) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+
+          el._refs.next.dataset.disabled = (year >= el._misc.max.year) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+
+          if (el._refs.daysGrid) {
+
+            backButton.classList.remove("vc-datebox-hidden");
+            backButton.dataset.grid = "days";
+
+          } else {
+
+            backButton.classList.add("vc-datebox-hidden");
+          }
+
+        } else if (headerType == "yearsGrid") {
+
+          year = (!year) ? el._misc.selector.range.start + "-" + el._misc.selector.range.end : year;
+
+          el._refs.selectorsContainer.setAttribute("class", "vc-datebox-yearsGridSelectors");
+
+          el._refs.yearSelector.innerHTML = year;
+          el._refs.yearSelector.classList.remove("vc-fg1-hoverable");
+
+          el._refs.monthSelector.classList.add("vc-datebox-hidden");
+
+          el._refs.previous.dataset.disabled = (el._misc.selector.range.start <= el._misc.min.year) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+
+          el._refs.next.dataset.disabled = (el._misc.selector.range.end >= el._misc.max.year) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+
+          if (el._refs.daysGrid) {
+
+            backButton.classList.remove("vc-datebox-hidden");
+            backButton.dataset.grid = "days";
+
+          } else if (el._refs.monthsGrid) {
+
+            backButton.classList.remove("vc-datebox-hidden");
+            backButton.dataset.grid = "months";
+
+          } else {
+
+            backButton.classList.add("vc-datebox-hidden");
+          }
+        }
+
+      },
+      /*
+      @function (private) _highlight
+      @description Highlights the button and removes highlight in the previous one
+      @param {Object} dayButton
+      */
+      highlight: function (selected, previous) {
+
+        var el = this;
+
+        if (previous) {
+          previous.classList.remove("vc-datebox-current", "vc-bg2-active");
+        }
+
+        selected.classList.add("vc-datebox-current", "vc-bg2-active");
+      },
+      /*
+      @function (private) {Object} _formatObj
+      @description Recieves an object with a day/year/month and returns an object with the same values with the provided format
+      @param {Object} obj
+      */
+      formatObj: function (obj) {
+
+        var el = this;
+
+        var format = el.valueFormat;
+
+        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+        var finalObj = {};
+
+        finalObj.day = obj.day ? el._format(obj.day, dayFormat) : undefined;
+        finalObj.month = obj.month ? el._format(obj.month, monthFormat) : undefined;
+        finalObj.year = obj.year ? el._format(obj.year, yearFormat) : undefined;
+
+        return finalObj;
+
+      },
+      /*
+      @function (private) _handleAutoHeight
+      @description Maintains an aspect ratio for the picker relative to its width
+      */
+      handleAutoHeight: function () {
+
+        var el = this;
+        var calendar = el._refs.calendar;
+
+        if (calendar.offsetWidth != 0) {
+          calendar.style.height = (parseFloat(calendar.offsetWidth) * 0.839) + "px";
+        }
+
+      },
+      /*
+      @function (private) _handleFonts
+      @description It handles the fontSizes for different picker widths
+      */
+      handleFonts: function () {
+
+        var el = this;
+        var calendar = el._refs.calendar;
+
+        var baseFontSize, weekDaysConstant, headerConstant;
+        var daysFontSize, weekDaysFontSize, headerFontSize, navigation, otherGridsFontSize;
+
+        weekDaysConstant = 1.0667;
+
+        if (parseInt(calendar.offsetWidth) >= 240) {
+
+          baseFontSize = el.fontSize;
+          navigation = 24;
+          headerConstant = 1.1111111111;
+          otherGridsConstant = 1.1111111111;
+
+        } else {
+
+          baseFontSize = el.fontSize * 0.75;
+          navigation = 18;
+          headerConstant = 1.197916667;
+          otherGridsConstant = 1.296296296;
+        }
+
+        daysFontSize = baseFontSize;
+        weekDaysFontSize = baseFontSize / weekDaysConstant;
+        headerFontSize = baseFontSize * headerConstant;
+        otherGridsFontSize = baseFontSize * otherGridsConstant
+
+        if (calendar.querySelector(".vc-datebox-daysGrid")) {
+          calendar.querySelector(".vc-datebox-daysGrid .vc-datebox-grid").style.fontSize = baseFontSize + "px";
+          calendar.querySelector(".vc-datebox-daysGrid .vc-datebox-weekDays").style.fontSize = weekDaysFontSize + "px";
+        }
+
+        if (calendar.querySelector(".vc-datebox-monthsGrid")) {
+          calendar.querySelector(".vc-datebox-monthsGrid").style.fontSize = otherGridsFontSize + "px"
+        }
+
+        if (calendar.querySelector(".vc-datebox-yearsGrid")) {
+          calendar.querySelector(".vc-datebox-yearsGrid").style.fontSize = otherGridsFontSize + "px"
+        }
+
+        calendar.querySelector(".vc-datebox-header").style.fontSize = headerFontSize + "px";
+
+        calendar.querySelector(".vc-datebox-back i").style.fontSize = navigation + "px";
+        calendar.querySelector(".vc-datebox-previous i").style.fontSize = navigation + "px";
+        calendar.querySelector(".vc-datebox-next i").style.fontSize = navigation + "px";
+      },
+      /*
+      @function (private) _goBack
+      @description It shows the corresponding grid
+      @param {Object} backButton
+      */
+      goBack: function (backButton) {
+
+        var el = this;
+
+        if (backButton.dataset.grid == "days") {
+
+          el._showDaysGrid();
+
+        } else if (backButton.dataset.grid == "months") {
+
+          el._showMonthsGrid();
+
+        } else if (backButton.dataset.grid == "years") {
+
+          el._showYearsGrid();
+        }
+
+      },
+      /*
+      @function (private) _goToPrevious
+      @description Handles the redirection to whether the month/year/day previous callback
+      @param {Object} button
+      */
+      goToPrevious: function (button) {
+
+        var el = this;
+
+        if (el._misc.selector.type == "month") {
+          el._goToPreviousMonth(button);
+        } else if (el._misc.selector.type == "year") {
+          el._goToPreviousYear(button);
+        } else if (el._misc.selector.type == "yearsRange") {
+          el._goToPreviousYearsRange(button);
+        }
+      },
+      /*
+      @function (private) _goToPreviousMonth
+      @description Fills the daysGrid with the previous Month
+      @param {Object} button
+      */
+      goToPreviousMonth: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+
+          var previous = el._getPreviousByMonth(el._misc.current.year, el._misc.current.month);
+
+
+          el._fillDaysGrid(previous.year, previous.month);
+          el._updateHeaderSelectors("daysGrid", previous.year, previous.month);
+        }
+      },
+      /*
+      @function (private) _goToNext
+      @description Handles the redirection to whether the month/year/day next callback
+      @param {Object} button
+      */
+      goToNext: function (button) {
+
+        var el = this;
+
+        if (el._misc.selector.type == "month") {
+          el._goToNextMonth(button);
+        } else if (el._misc.selector.type == "year") {
+          el._goToNextYear(button);
+        } else if (el._misc.selector.type == "yearsRange") {
+          el._goToNextYearsRange(button);
+        }
+      },
+      /*
+      @function (private) _goToNextMonth
+      @description Fills the daysGrid with the next Month
+      @param {Object} button
+      */
+      goToNextMonth: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+          var next = el._getNextByMonth(el._misc.current.year, el._misc.current.month);
+
+          el._fillDaysGrid(next.year, next.month);
+          el._updateHeaderSelectors("daysGrid", next.year, next.month);
+        }
+      },
+      /*
+      @function (private) _goToPreviousYear
+      @description Changes the actual year, for the previous one
+      @param {Object} button
+      */
+      goToPreviousYear: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+
+          el._misc.current.year = el._misc.current.year - 1;
+
+          el._updateHeaderSelectors("monthsGrid");
+          el._fillMonthsGrid();
+        }
+      },
+      /*
+      @function (private) _goToNextYear
+      @description Changes the actual year, for the next one
+      @param {Object} button
+      */
+      goToNextYear: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+
+          el._misc.current.year = parseInt(el._misc.current.year) + 1;
+
+          el._updateHeaderSelectors("monthsGrid");
+          el._fillMonthsGrid();
+        }
+      },
+      /*
+      @function (private) _goToPreviousYearsRange
+      @description Changes the actual years range, for the previous one
+      @param {Object} button
+      */
+      goToPreviousYearsRange: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+          el._misc.selector.range.start = el._misc.selector.range.start - 12;
+          el._misc.selector.range.end = el._misc.selector.range.start + 11;
+
+          el._fillYearsGrid();
+          el._updateHeaderSelectors("yearsGrid");
+        }
+      },
+      /*
+      @function (private) _goToNextYearsRange
+      @description Changes the actual years range, for the next one
+      @param {Object} button
+      */
+      goToNextYearsRange: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+          el._misc.selector.range.end = el._misc.selector.range.end + 12;
+          el._misc.selector.range.start = el._misc.selector.range.end - 11;
+
+          el._fillYearsGrid();
+          el._updateHeaderSelectors("yearsGrid");
+        }
+      },
+      /*
+      @function (private) _fillDaysGrid
+      @description Fills the grid with the corresponding days for the provided year/month
+      @param {Number} year
+      @param {Number} month
+      */
+      fillDaysGrid: function (year, month) {
+
+        var el = this;
+
+        var gridWeeks = el._refs.calendar.querySelector(".vc-datebox-grid").children;
+
+        var monthDays = vcomet.time.getDaysInMonth(year, month);
+        var monthFirstWeekDay = vcomet.time.firstWeekDay("en", year, month, "long");
+
+        var previous = el._getPreviousByMonth(year, month);
+        var next = el._getNextByMonth(year, month);
+
+        var previousMonthDaysToDisplay = el._getPreviousMonthDaysToDisplay(year, month);
+        var nextMonthDaysToDisplay = el._getNextMonthDaysToDisplay(year, month, monthDays, previousMonthDaysToDisplay);
+
+        var week = gridWeeks[0];
+
+        var currentWeek = 0;
+        var weekDaysCount = 0;
+        var dummyDay, day;
+
+        var areLimits = (el._misc.min.active == true || el._misc.max.active == true);
+
+        if (areLimits) {
+          var isPreviousMonthMin = el._isMinMonth(previous.year, previous.month);
+          var isMinMonth = el._isMinMonth(year, month);
+          var isNextMonthMin = el._isMinMonth(next.year, next.month);
+
+          var isPreviousMonthMax = el._isMaxMonth(previous.year, previous.month);
+          var isMaxMonth = el._isMaxMonth(year, month);
+          var isNextMonthMax = el._isMaxMonth(next.year, next.month);
+
+          var disableDayAsMin, disableDayAsMax;
+        }
+
+        el._misc.current.year = year;
+        el._misc.current.month = month;
+
+        //Create previous Month Days
+        for (var i = 0; i < previousMonthDaysToDisplay.length; i++) {
+          if (el._misc.weekDays.keys[i] == monthFirstWeekDay) {
+            break;
+          } else {
+
+            day = week.children[weekDaysCount];
+
+            if (day) {
+
+              day.innerHTML = previousMonthDaysToDisplay[i];
+              day.classList.add("vc-datebox-previousMonth", "vc-fg2-disabled");
+              day.classList.remove("vc-datebox-current", "vc-bg2-active");
+
+              day.setAttribute("year", previous.year);
+              day.setAttribute("month", previous.month);
+              day.setAttribute("day", previousMonthDaysToDisplay[i]);
+
+              if (areLimits) {
+
+                disableDayAsMin = (isPreviousMonthMin && previousMonthDaysToDisplay[i] < el._misc.min.day || isMinMonth || isNextMonthMin) ? true : false;
+                disableDayAsMax = (isPreviousMonthMax && previousMonthDaysToDisplay[i] > el._misc.max.day) ? true : false;
+
+                day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin || disableDayAsMax)) ? "true" : "false";
+              }
+
+            }
+
+            weekDaysCount++;
+          }
+        }
+
+        //Create actual month days
+        for (var i = 1; i <= monthDays; i++) {
+
+          day = week.children[weekDaysCount];
+
+          if (day) {
+            day.classList.remove("vc-datebox-previousMonth", "vc-fg2-disabled", "vc-datebox-nextMonth", "vc-fg2-disabled", "vc-datebox-current", "vc-bg2-active");
+            day.innerHTML = i;
+
+            day.setAttribute("year", year);
+            day.setAttribute("month", parseInt(month));
+            day.setAttribute("day", i);
+
+            weekDaysCount++;
+
+            if (weekDaysCount == 7) {
+
+              week = gridWeeks[currentWeek + 1];
+              weekDaysCount = 0;
+
+              currentWeek++;
+            }
+
+            if (areLimits) {
+
+              disableDayAsMin = (isMinMonth && i < el._misc.min.day || isNextMonthMin) ? true : false;
+              disableDayAsMax = (isPreviousMonthMax || isMaxMonth && i > el._misc.max.day) ? true : false;
+
+              day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin || disableDayAsMax)) ? "true" : "false";
+              day.classList[day.dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+            }
+
+          }
+        }
+
+        //Create next month days
+        for (var i = 0; i < nextMonthDaysToDisplay.length; i++) {
+
+          day = week.children[weekDaysCount];
+
+          if (day) {
+
+            day.innerHTML = nextMonthDaysToDisplay[i];
+            day.classList.add("vc-datebox-nextMonth", "vc-fg2-disabled");
+            day.classList.remove("vc-datebox-current", "vc-bg2-active");
+
+            day.setAttribute("year", next.year);
+            day.setAttribute("month", parseInt(next.month));
+            day.setAttribute("day", nextMonthDaysToDisplay[i]);
+
+            weekDaysCount++;
+
+            if (weekDaysCount == 7) {
+
+              week = gridWeeks[currentWeek + 1];
+              weekDaysCount = 0;
+
+              currentWeek++;
+            }
+
+            if (areLimits) {
+
+              disableDayAsMin = (isNextMonthMin && nextMonthDaysToDisplay[i] < el._misc.min.day) ? true : false;
+              disableDayAsMax = (isNextMonthMax && nextMonthDaysToDisplay[i] > el._misc.max.day || isMaxMonth || isPreviousMonthMax) ? true : false;
+
+              day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin || disableDayAsMax)) ? "true" : "false";
+            }
+
+          }
+        }
+
+        var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.selected.day) + '"][month="' + parseInt(el._misc.selected.month) + '"][year="' + parseInt(el._misc.selected.year) + '"]');
+
+        if (currentDay) {
+          el._highlight(currentDay);
+        }
+      },
+      /*
+      @function (private) _fillMonthsGrid
+      @description When the monthsGrid is about the be showed, we handle the ones that the user can click on, and also point out the current month if needed
+      */
+      fillMonthsGrid: function () {
+
+        var el = this;
+        var monthsGrid = el._refs.calendar.querySelector(".vc-datebox-monthsGrid");
+        var months = monthsGrid.querySelectorAll('[data-index]');
+        var month, disableMonthAsMin, disableMonthAsMax;
+
+        for (var i = 0; i < 12; i++) {
+
+          year = el._misc.current.year;
+          month = months[i].dataset.index;
+
+          months[i].dataset.year = year;
+          months[i].classList.remove("vc-datebox-current");
+          months[i].classList.remove("vc-bg2-active");
+
+          if (el._misc.current.year == el._misc.min.year || el._misc.current.year == el._misc.max.year) {
+
+            disableMonthAsMin = (year == el._misc.min.year && month < el._misc.min.month || year < el._misc.min.year) ? true : false;
+            disableMonthAsMax = (year == el._misc.max.year && month > el._misc.max.month || year > el._misc.max.year) ? true : false;
+
+            months[i].dataset.disabled = ((disableMonthAsMin || disableMonthAsMax) || (disableMonthAsMin && disableMonthAsMax)) ? "true" : "false";
+
+          } else {
+            months[i].dataset.disabled = "false";
+          }
+
+          months[i].classList[months[i].dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+        }
+
+        var currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.selected.month) + '"][data-year ="' + parseInt(el._misc.selected.year) + '"]');
+
+        if (currentMonthCell) {
+          el._highlight(currentMonthCell, el.querySelector(".vc-datebox-monthsGrid .vc-datebox-current"));
+        }
+      },
+      /*
+      @function (private) _fillYearsGrid
+      @description Fills the grid with the year corresponding to the years range
+      */
+      fillYearsGrid: function () {
+
+        var el = this;
+        var yearsGrid = el._refs.calendar.querySelector(".vc-datebox-yearsGrid");
+        var yearsGridRow = yearsGrid.children;
+        var year = el._misc.selector.range.start;
+        var row;
+        var selectedYearCell;
+
+        for (var i = 0; i < yearsGridRow.length; i++) {
+
+          row = yearsGridRow[i];
+
+          for (var j = 0; j < 4; j++) {
+            row.children[j].innerHTML = year;
+            row.children[j].dataset.year = year;
+            row.children[j].classList.remove("vc-datebox-current");
+            row.children[j].classList.remove("vc-bg2-active");
+
+            disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
+            disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
+            row.children[j].dataset.disabled = ((disableYearAsMin || disableYearAsMax) || (disableYearAsMin && disableYearAsMax)) ? "true" : "false";
+            row.children[j].classList[row.children[j].dataset.disabled == "true" ? "add" : "remove"]("vc-fg2-disabled");
+
+            year++;
+          }
+        }
+
+        selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.selected.year + '"]')
+
+        if (selectedYearCell) {
+          el._highlight(selectedYearCell, el.querySelector(".vc-datebox-yearsGrid .vc-datebox-current"));
+        }
+      },
+      /*
+      @function (private) _selectDay
+      @description Selects the day clicked and runs its default behavior if the user didnt specify a custom callback
+      @param {Object} dayButton
+      */
+      selectDay: function (dayButton) {
+
+        if (dayButton.dataset.disabled != "true") {
+
+          var el = this;
+
+          // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
+          var dateObj = el._formatObj({ day: dayButton.getAttribute("day"), month: (parseInt(dayButton.getAttribute("month")) + 1), year: dayButton.getAttribute("year") });
+          var formattedValue = el._generateOutputValue(dateObj);
+
+          el._misc.selected.day = parseInt(dayButton.getAttribute("day"));
+          el._misc.selected.month = parseInt(dayButton.getAttribute("month"));
+          el._misc.selected.year = parseInt(dayButton.getAttribute("year"));
+
+          el._highlight(dayButton, el._refs.calendar.querySelector(".vc-datebox-daysGrid .vc-datebox-grid .vc-datebox-current"));
+          el._hideCalendar();
+
+          el.value = formattedValue;
+
+        }
+      },
+      /*
+      @function (private) _selectMonth
+      @description Selects the month clicked and runs its default behavior if the user didnt specify a specific funcion
+      @param {Object} monthButton
+      */
+      selectMonth: function (monthButton) {
+
+        var el = this;
+
+        if (monthButton.dataset.disabled != "true") {
+
+          el._misc.current.month = parseInt(monthButton.dataset.index);
+          el._misc.selected.month = parseInt(monthButton.dataset.index);
+          el._misc.selected.year = parseInt(el._misc.current.year);
+
+          if (el._refs.daysGrid) {
+
+            el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
+            el._showDaysGrid();
+
+          } else {
+
+            // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
+            var dateObj = el._formatObj({ day: undefined, month: (parseInt(monthButton.dataset.index) + 1), year: el._misc.current.year });
+            var formattedValue = el._generateOutputValue(dateObj);
+
+            el._highlight(monthButton, el.querySelector(".vc-datebox-monthsGrid .vc-datebox-current"));
+
+            el._misc.preventUpdate = true;
+            el.value = formattedValue;
+
+          }
+        }
+      },
+      /*
+      @function (private) _selectYear
+      @description Selects the year clicked and runs its default behavior if the user didnt specify a specific funcion
+      @param {Object} yearButton
+      */
+      selectYear: function (yearButton) {
+
+        var el = this;
+
+        if (yearButton.dataset.disabled != "true") {
+
+          el._misc.current.year = parseInt(yearButton.dataset.year);
+          el._misc.selected.year = parseInt(yearButton.dataset.year);
+
+          if (el._refs.daysGrid) {
+
+            if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
+              el._misc.current.month = el._misc.min.month;
+              el._misc.selected.month = el._misc.min.month;
+            }
+
+            el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
+            el._showDaysGrid();
+
+          } else if (el._refs.monthsGrid) {
+
+            if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
+              el._misc.current.month = el._misc.min.month;
+              el._misc.selected.month = el._misc.min.month;
+            }
+
+            el._showMonthsGrid();
+
+          } else {
+
+            var dateObj = el._formatObj({ day: undefined, month: undefined, year: yearButton.dataset.year });
+            var formattedValue = el._generateOutputValue(dateObj);
+
+            el._highlight(yearButton, el.querySelector(".vc-datebox-yearsGrid .vc-datebox-current"));
+
+            el._misc.preventUpdate = true;
+
+            el.value = formattedValue;
+
+          }
+        }
+      },
+      /*
+      @function (private) _showDaysGrid
+      @description Shows the daysGrid and hides the other ones, it also updates the headerSelectors
+      */
+      showDaysGrid: function () {
+
+        var el = this;
+
+        el._refs.daysGrid.style.zIndex = 0;
+        el._refs.daysGrid.style.opacity = 1;
+
+        if (el._refs.monthsGrid) {
+          el._hideMonthsGrid();
+        }
+
+        if (el._refs.yearsGrid) {
+          el._hideYearsGrid();
+        }
+
+        el._updateHeaderSelectors("daysGrid");
+        el._misc.selector.type = "month";
+      },
+      /*
+      @function (private) _hideDaysGrid
+      @description Hides the days grid
+      */
+      hideDaysGrid: function () {
+
+        var el = this;
+
+        el._refs.daysGrid.style.zIndex = -1;
+        el._refs.daysGrid.style.opacity = 0;
+      },
+      /*
+      @function (private) _showMonthsGrid
+      @description Shows the months grid and hides the other ones, it also updates the headerSelectors
+      */
+      showMonthsGrid: function () {
+
+        var el = this;
+
+        el._refs.monthsGrid.style.zIndex = 0;
+        el._refs.monthsGrid.style.opacity = 1;
+
+        if (el._refs.daysGrid) {
+          el._hideDaysGrid();
+        }
+
+        if (el._refs.yearsGrid) {
+          el._hideYearsGrid();
+        }
+
+        el._updateHeaderSelectors("monthsGrid");
+        el._fillMonthsGrid();
+
+        el._misc.selector.type = "year";
+      },
+      /*
+      @function (private) _hideMonthsGrid
+      @description Hides the monthsGrid
+      */
+      hideMonthsGrid: function () {
+
+        var el = this;
+
+        el._refs.monthsGrid.style.zIndex = -1;
+        el._refs.monthsGrid.style.opacity = 0;
+      },
+      /*
+      @function (private) _showYearsGrid
+      @description Shows the yearsGrid and hides the other ones, it also updates the headerSelectors
+      */
+      showYearsGrid: function () {
+
+        var el = this;
+
+        el._refs.yearsGrid.style.zIndex = 1;
+        el._refs.yearsGrid.style.opacity = 1;
+
+        if (el._refs.monthsGrid) {
+          el._hideMonthsGrid();
+        }
+
+        if (el._refs.daysGrid) {
+          el._hideDaysGrid();
+        }
+
+        el._misc.selector.range.start = parseInt(el._misc.current.year) - 6;
+        el._misc.selector.range.end = parseInt(el._misc.current.year) + 5;
+
+        el._fillYearsGrid();
+        el._updateHeaderSelectors("yearsGrid");
+
+        el._misc.selector.type = "yearsRange";
+      },
+      /*
+      @function (private) _hideYearsGrid
+      @description Hides the yearsGrid
+      */
+      hideYearsGrid: function () {
+
+        var el = this;
+
+        el._refs.yearsGrid.style.zIndex = -1;
+        el._refs.yearsGrid.style.opacity = 0;
+      },
+      /*
+      @function (private) {Object} _getPreviousByMonth
+      @description Gets the previos month, the year is returned aswell in case the current month is January
+      @param {Number} year
+      @param {Number} month
+      */
+      getPreviousByMonth: function (year, month) {
+
+        if (parseInt(month) - 1 < 0) {
+          month = 11
+          year = parseInt(year) - 1;
+        } else {
+          month = parseInt(month) - 1;
+        }
+
+        return {
+          "month": month,
+          "year": year
+        };
+      },
+      /*
+          @function (private) {Object} _getNextByMonth
+          @description Gets the next month, the year is returned aswell in case the current month is December
+          @param {Number} year
+          @param {Number} month
+          */
+      getNextByMonth: function (year, month) {
+
+        if (parseInt(month) + 1 > 11) {
+          month = 0
+          year = parseInt(year) + 1;
+        } else {
+          month = parseInt(month) + 1;
+        }
+
+        return {
+          "month": month,
+          "year": year
+        };
+      },
+      /*
+      @function (private) {Array} _getPreviousMonthDaysToDisplay
+      @description Gets the previos month days to show along the current month
+      @param {Number} year
+      @param {Number} month
+      */
+      getPreviousMonthDaysToDisplay: function (year, month) {
+
+        var el = this;
+
+        var monthFirstWeekDay = vcomet.time.firstWeekDay("en", year, month, "long");
+
+        var previous = el._getPreviousByMonth(year, month);
+        var previousMonthDaysToDisplay = [];
+        var previousMonthDays;
+
+        var daysUntilMonthStart = 0;
+
+        previousMonthDays = vcomet.time.getDaysInMonth(previous.year, previous.month)
+
+        for (var i = 0; i < el._misc.weekDays.keys.length; i++) {
+          if (monthFirstWeekDay != el._misc.weekDays.keys[i]) {
+            previousMonthDaysToDisplay.push(previousMonthDays - i)
+          } else {
+            break;
+          }
+        }
+
+        return previousMonthDaysToDisplay.reverse();
+      },
+      /*
+      @function (private) {Array} _getNextMonthDaysToDisplay
+      @description Gets the next month days to show along the current month
+      @param {Number} year
+      @param {Number} month
+      @param {Number} monthDays
+      @param {Array} previousMonthDaysToDisplay
+      */
+      getNextMonthDaysToDisplay: function (year, month, monthDays, previousMonthDaysToDisplay) {
+
+        var el = this;
+
+        var nextMonthDaysToDisplay = [];
+        var remainingDaysToFill = 42 - monthDays - previousMonthDaysToDisplay.length;
+
+        //Theres no need to know which is the current month as they all start the same
+        for (var i = 1; i <= remainingDaysToFill; i++) {
+          nextMonthDaysToDisplay.push(i);
+        }
+
+        return nextMonthDaysToDisplay;
+      },
+      /*
+      @function (private) _updateLabel
+      @description Updates the label node with the new label
+      */
+      updateLabel: function () {
+
+        var el = this;
+
+        if (el.label != "") {
+          el.querySelector(".vc-datebox-label").innerHTML = el.label;
+        }
+
+      },
+      /*
+      @function (private) _updateDisabled
+      @description Updates disabled status
+      */
+      updateDisabled: function () {
+
+        var el = this;
+
+        if (el.type == "calendar") {
+
+          var selectedCell = el.querySelector(".vc-bg2-active");
+
+          if (vcomet.util.isTrue(el.disabled)) {
+            
+            if (selectedCell) {
+              selectedCell.classList.remove("vc-bg2-active");
+              selectedCell.classList.add("vc-bg2-disabled");
+            }
+            
+            el._refs.data.classList.add("vc-fg2-disabled");
+            el._refs.header.classList.add("vc-fg2-disabled");
+            el._refs.body.classList.add("vc-fg2-disabled");
+
+          } else {
+
+            if (selectedCell) {
+              selectedCell.classList.add("vc-bg2-active");
+              selectedCell.classList.remove("vc-bg2-disabled");
+            }
+            
+            el._refs.data.classList.remove("vc-fg2-disabled");
+            el._refs.header.classList.remove("vc-fg2-disabled");
+            el._refs.body.classList.remove("vc-fg2-disabled");
+
+          }
+
+        } else {
+
+          if (vcomet.util.isTrue(el.disabled)) {
+
+            el._refs.subInputsWrapper.classList.add("vc-fg2-disabled");
+
+            el._refs.calendarButton.classList.remove("vc-fg2");
+            el._refs.calendarButton.classList.add("vc-fg2-disabled");
+
+            el._refs.data.classList.add("vc-fg2-disabled");
+            el._refs.main.classList.add("vc-fg2-disabled");
+
+            el._hideCalendar();
+
+          } else {
+
+            el._refs.subInputsWrapper.classList.remove("vc-fg2-disabled");
+
+            el._refs.calendarButton.classList.add("vc-fg2");
+            el._refs.calendarButton.classList.remove("vc-fg2-disabled");
+
+            el._refs.data.classList.remove("vc-fg2-disabled");
+            el._refs.main.classList.remove("vc-fg2-disabled");
+
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _updateReadOnly
+      @description Updates readonly status
+      */
+      updateReadOnly: function () {
+
+        var el = this;
+
+        if (vcomet.util.isTrue(el.readonly)) {
+
+          el._refs.subInputs.first.setAttribute("readonly", "true");
+          el._refs.subInputs.second.setAttribute("readonly", "true");
+          el._refs.subInputs.third.setAttribute("readonly", "true");
+
+          el._refs.calendarButton.classList.remove("vc-fg1-hoverable");
+
+        } else {
+
+          el._refs.subInputs.first.removeAttribute("readonly");
+          el._refs.subInputs.second.removeAttribute("readonly");
+          el._refs.subInputs.third.removeAttribute("readonly");
+
+          el._refs.calendarButton.classList.add("vc-fg1-hoverable");
+
+          if (el.type != "calendar") {
+            el._hideCalendar();
+          }
+
+        }
+
+      },
+      /*
+            @function (private) _updateValue
+            @description Allows the user tu set a new value to the element
+            @param {Object} value
+            */
       updateValue: function () {
 
         var el = this;
@@ -1478,10 +2744,10 @@
 
           var format = el.valueFormat;
 
-          var subInputs = el.querySelector(".vc-datebox-subInputs");
-          var dayInput = subInputs.querySelector('[data-field="day"] input');
-          var monthInput = subInputs.querySelector('[data-field="month"] input');
-          var yearInput = subInputs.querySelector('[data-field="year"] input');
+          var subInputsWrapper = el._refs.subInputsWrapper;
+          var dayInput = subInputsWrapper.querySelector('[data-field="day"] input');
+          var monthInput = subInputsWrapper.querySelector('[data-field="month"] input');
+          var yearInput = subInputsWrapper.querySelector('[data-field="year"] input');
 
           var value = el.value;
 
@@ -1513,34 +2779,25 @@
 
           }
 
-          el._misc.current.day = el._format(valueObj.day, el._misc.mask.day.format);
-          el._misc.current.month = el._format(valueObj.month, el._misc.mask.month.format);
-          el._misc.current.year = el._format(valueObj.year, el._misc.mask.year.format);
+          el._misc.current.day = valueObj.day;
+          el._misc.current.month = valueObj.month - 1;
+          el._misc.current.year = valueObj.year;
 
-          if (el._refs.datePicker) {
+          el._misc.selected.day = el._misc.current.day;
+          el._misc.selected.month = el._misc.current.month;
+          el._misc.selected.year = el._misc.current.year;
 
-            el._refs.datePicker._misc.current.day = el._misc.current.day ? el._misc.current.day : el._refs.datePicker._misc.current.day;
-            el._refs.datePicker._misc.current.month = el._misc.current.month ? el._misc.current.month : el._refs.datePicker._misc.current.month;
-            el._refs.datePicker._misc.current.year = el._misc.current.year ? el._misc.current.year : el._refs.datePicker._misc.current.year;
+          dayInput.value = el._format(valueObj.day, el._misc.mask.day.format);
+          monthInput.value = el._format(valueObj.month, el._misc.mask.month.format);
+          yearInput.value = el._format(valueObj.year, el._misc.mask.year.format);
 
-            el._refs.datePicker._misc.selected.day = el._misc.current.day;
-            el._refs.datePicker._misc.selected.month = el._misc.current.month;
-            el._refs.datePicker._misc.selected.year = el._misc.current.year;
-
-          }
-
-          dayInput.value = el._misc.current.day;
-          monthInput.value = el._misc.current.month;
-          yearInput.value = el._misc.current.year;
-
-          el._handleLimits(dayInput, monthInput, yearInput);
-          el._validateDate();
+          el._refresh();
 
         }
 
         el._misc.preventUpdate = false;
 
-      }
+      },
     },
     functions: {
       /*
@@ -1567,7 +2824,27 @@
       }
     },
     onCreated: function () {
+
+      var el = this;
+
       vcomet.createCallback("onEnter", this);
+
+      if (vcomet.util.isTouchScreen()) {
+        el.dataset.touch = "true";
+      }
+
+      vcomet.registerPathListener(el, "date");
+
+    },
+    onInit: function () {
+
+      var el = this;
+
+      el._setupMisc();
+      el._setupRefs();
+      el._setupOverlay();
+      el._setupType();
+
     },
     onRender: function () {
       this._setup();
@@ -1595,7 +2872,7 @@
       var el = this;
 
       if (el._misc.modal.active) {
-        el._hideDatePicker();
+        el._hideCalendar();
       }
 
     }
