@@ -9,10 +9,9 @@
 
   <script>
     vcomet.import([
-      "/vcomet/ui/vc-datebox",
-      "/vcomet/ui/vc-datepicker",
-      "/vcomet/ui/vc-button",
-      "/vcomet/ui/vc-form"
+      "/vcomet/ui/vc-date",
+      "/vcomet/ui/vc-form",
+      "/vcomet/ui/vc-button"
     ]);
   </script>
 
@@ -31,8 +30,6 @@
     body {
       padding-top: 40px;
       padding-bottom: 40px;
-      /* padding-right: 10px;
-      padding-left: 10px; */
       margin-right: 10px;
       box-sizing: border-box;
     }
@@ -58,7 +55,6 @@
 
     .example {
       background-color: #2d2d2d;
-      padding: 10px;
       box-sizing: border-box;
       margin: 0;
       padding: 40px;
@@ -67,26 +63,30 @@
       justify-content: space-between;
     }
 
-    .card.datepicker .example {
+    .calendarDate .example {
       flex-direction: column;
     }
 
     .row {
       display: flex;
+      width: 100%;
     }
 
     .row:first-child {
       margin-bottom: 40px;
     }
 
-    .row vc-datepicker:first-child,
-    vc-datebox:first-child {
-      margin-right: 40px;
+    vc-date {
+      margin-right : 40px;
     }
 
-    vc-datepicker,
-    vc-datebox {
+    vc-date:last-child {
+      margin-right: 0;
+    }
+
+    vc-date {
       flex-grow: 1;
+      flex-basis: 0;
     }
 
     vc-button {
@@ -107,20 +107,25 @@
       .example {
         flex-direction: column;
         align-items: center;
+        padding: 20px;
       }
+
       .row {
         flex-direction: column;
         width: 100%;
       }
-      .row vc-datepicker[theme="noire"] {
-        flex-direction: column;
-        width: 100%;
-      }
-      .row vc-datepicker:first-child,
-      vc-datebox:first-child {
+
+      vc-date {
+        width: 100% !important;
         margin-right: 0;
         margin-bottom: 40px;
       }
+
+      vc-date:last-child {
+        margin-right: 0;
+        margin-bottom: 0;
+      }
+
       vc-button {
         display: block !important;
         margin-right: 10px;
@@ -136,34 +141,34 @@
 
     <vc-form default-style="false" action="#" method="get">
 
-      <div class="card datebox">
-        <h1>DATEBOX</h1>
+      <div class="card inputDate">
+        <h1>INPUT DATE</h1>
         <div class="example">
-          <vc-datebox inline="false" value="2017/08/04" mask="DDMMYYYY" name="disabled" label="Disabled" min="01/12/1994"
-            max="25/06/2017" week-start="monday" value-format="YYYY/MM/DD" picker-font-size=14.4 picker-selectable="dmy"
-            disabled="true">
-          </vc-datebox>
-          <vc-datebox default="2017-08-04" name="date" inline="false" week-start="monday" week-days-format="short" value-format="YYYY-MM-DD" picker-font-size=14.4 picker-selectable="dmy">
-          </vc-datebox>
+
+          <vc-date type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" label="Disabled" disabled="true"
+            week-start=
+            "monday" value-format="YYYY/MM/DD" >
+          </vc-date>
+
+          <vc-date min="03/07/1969" default="1969-07-06" name="defaultInput" label="Default" week-format="short" 
+            value-format="YYYY-MM-DD">
+          </vc-date>
+
         </div>
       </div>
 
-      <div class="card datepicker">
-        <h1>DATEPICKER</h1>
+      <div class="card calendarDate">
+        <h1>CALENDAR DATE</h1>
         <div class="example">
 
           <div class="row">
-            <vc-datepicker name="onlyDays" day="9" month="9" year="2024" week-start="wednesday" font-size=14.4 week-days-format="short" value-format="YYYY/MM/DD"
-              locale="en" selectable="d" min="02/09/2024"> </vc-datepicker>
-            <vc-datepicker name="onlyMonths" year="1994" week-start="monday" font-size=14.4 week-days-format="short" value-format="YYYY/MM"
-              locale="es" selectable="m"> </vc-datepicker>
+              <vc-date disabled="true" selectable="dmy" label="Disabled" type="calendar" name="disabledCalendar"></vc-date>
+              <vc-date selectable="dmy" label="Default" type="calendar" name="defaultCalendar"></vc-date>
           </div>
 
           <div class="row">
-            <vc-datepicker name="onlyYears" min="01/12/1994" max="25/06/2021" week-start="monday" font-size=14.4
-              week-days-format="short" value-format="YYYY" locale="en" selectable="y"> </vc-datepicker>
-            <vc-datepicker week-start="monday" font-size=14.4 week-days-format="short" value-format="YYYY/MM/DD"
-              locale="en" selectable="dmy"> </vc-datepicker>
+              <vc-date selectable="my" label="Months" type="calendar" name="monthsCalendar"></vc-date>
+              <vc-date selectable="y" label="Years" type="calendar" name="yearsCalendar"></vc-date>
           </div>
 
 
@@ -181,22 +186,20 @@
     vcomet.onReady(function () {
 
       setTimeout(function () {
-        // document.querySelector('[name="date"]').value = "2018-07-02";
+        // document.querySelector('[name="date"]').value = "2018-09-02";
         // document.querySelector('[name="date"]').value = new Date();
-        document.querySelector('[name="date"]').clear();
+        // document.querySelector('[name="date"]').clear();
         // document.querySelector('[name="onlyDays"]').value = new Date();
-      //   document.querySelector('[name="onlyMonths"]').setValue(new Date());
-      //   document.querySelector('[name="onlyYears"]').setValue(new Date());
+        //   document.querySelector('[name="onlyMonths"]').setValue(new Date());
+        //   document.querySelector('[name="onlyYears"]').setValue(new Date());
       }, 1000);
 
       setTimeout(function () {
-        
-        document.querySelector('[name="date"]').reset();
-        // document.querySelector("vc-datebox[name='disabled']").disabled = false;
-        // document.querySelector("vc-datebox[name='disabled']").readonly = true;
-        // document.querySelector("vc-datebox[name='disabled']").label = "Read Only";
 
-        // document.querySelector("vc-datepicker[name='onlyMonths']").disabled = true;
+        // document.querySelector('[name="date"]').reset();
+        // document.querySelector("vc-date[name='disabled']").disabled = false;
+        // document.querySelector("vc-date[name='disabled']").readonly = true;
+        // document.querySelector("vc-date[name='disabled']").label = "Read Only";
 
       }, 2000);
 
