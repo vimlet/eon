@@ -14,22 +14,47 @@
         value: {},
       }
     },
-    properties: {
-      /*
-      @property {Boolean} hover
-      @description 
-      */
-      hover: {
-        value: false,
-        reflect: true
-      }
-    },
+    properties: {},
     privateFunctions: {
       /*
-      @function _setup
-      @description Sets up the menu items and its dropdown recursively
+      @function (private) _setup
+      @description Sets up everything needed for the component
       */
       setup: function () {
+
+        var el = this;
+
+        el._setupMisc();
+        el._setupRefs();
+
+        el._setupDesktopBehavior();
+        el._setupDeviceBehavior();
+
+        el._handleWindowSize();
+
+      },
+      /*
+      @function (private) _setupMisc
+      @description Prepares the misc object to hold usefull information
+      */
+      setupMisc: function () {
+
+        var el = this;
+
+        el._misc.dropdowns = {};
+        el._misc.dropdowns.path = [];
+
+        el._misc.modal = {};
+        el._misc.roots = [];
+        el._misc.tree = {};
+        el._misc.items = {};
+
+      },
+      /*
+      @function (private) _setupRefs
+      @description Prepares the refs object to hold usefull references
+      */
+      setupRefs: function () {
 
         var el = this;
 
@@ -40,13 +65,14 @@
         el._refs.device.path = [];
         el._refs.device.items = {};
 
-        el._misc.dropdowns = {};
-        el._misc.dropdowns.path = [];
+      },
+      /*
+      @function (private) _setupDesktopBehavior
+      @description Prepares everything needed for the desktop behavior
+      */
+      setupDesktopBehavior: function () {
 
-        el._misc.modal = {};
-        el._misc.roots = [];
-        el._misc.tree = {};
-        el._misc.items = {};
+        var el = this;
 
         el._refs.wrapper = document.createElement("div");
         el._refs.wrapper.classList.add("vc-menu-wrapper", "vc-fg1", "vc-unselectable");
@@ -58,39 +84,24 @@
           el._misc.roots.push([el._refs.wrapper.children[i].getAttribute("name")]);
         }
 
-        el._setupOverlay();
-
         el.appendChild(el._refs.wrapper);
 
-        el._setupForDevice();
-
-        console.log('el._misc', el._misc);
-        console.log('el._refs', el._refs);
-
       },
-      setupOverlay: function () {
-
-        var el = this;
-
-        el._refs.overlay = document.createElement("div");
-        el._refs.overlay.classList.add("vc-menu-overlay");
-
-        el._refs.overlay.addEventListener("wheel", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-        });
-
-      },
-      setupForDevice: function () {
+      /*
+      @function (private) _setupDeviceBehavior
+      @description Prepares everything needed for the device behavior
+      */
+      setupDeviceBehavior: function () {
 
         var el = this;
         var item;
 
-        el._setupDeviceModal();
-        el._setupDeviceButton();
+        el._setupDeviceModalNode();
+        el._setupDeviceModalTrigger();
 
-        el._refs.device.pages["roots"] = document.createElement("div");
-        el._refs.device.pages["roots"].classList.add("vc-menu-page", "vc-sect1");
+        el._refs.device.pages["main"] = document.createElement("div");
+        el._refs.device.pages["main"].classList.add("vc-menu-page", "vc-sect1");
+        el._refs.device.pages["main"].dataset.main = "true";
 
         for (var i = 0; i < el._misc.roots.length; i++) {
 
@@ -100,44 +111,18 @@
             el._setupDevicePage(item);
           }
 
-          el._refs.device.pages["roots"].appendChild(item);
+          el._refs.device.pages["main"].appendChild(item);
 
         }
 
-        el._refs.modalBody.appendChild(el._refs.device.pages["roots"]);
+        el._refs.modalBody.appendChild(el._refs.device.pages["main"]);
 
       },
-      setupDeviceButton: function () {
-        
-        var el = this;
-        var icon = document.createElement("i");
-        
-        icon.classList.add("vicon", "vicon-menu");
-
-        el._refs.device.button = document.createElement("div");
-        el._refs.device.button.classList.add("vc-menu-modalButton", "vc-fg1");
-        el._refs.device.button.appendChild(icon);
-
-        el.appendChild(el._refs.device.button);
-
-      },
-      back: function () {
-
-        var el = this;
-        var lastPage = el._refs.device.pages[el._refs.device.path.pop()];
-
-        if (lastPage) {
-          setTimeout(function () {
-            lastPage.classList.add("vc-menu-hidden");
-          }, 0);
-        }
-
-        if (el._refs.device.path.length == 0) {
-          el._refs.backButton.classList.add("vc-menu-hidden")
-        }
-
-      },
-      setupDeviceModal: function () {
+      /*
+      @function (private) _setupDeviceModalNode
+      @description Prepares the node in which the user will experience the modal behavior
+      */
+      setupDeviceModalNode: function () {
 
         var el = this;
 
@@ -156,7 +141,11 @@
         el._refs.backButton.classList.add("vc-menu-button", "vc-menu-hidden", "vicon", "vicon-arrow-back");
 
         el._refs.backButton.addEventListener("click", function () {
-          el._back();
+          el._previousPage();
+        });
+
+        el._refs.closeButton.addEventListener("click", function () {
+          el.hideModalView();
         });
 
         el._refs.modalHead.appendChild(el._refs.backButton);
@@ -165,9 +154,34 @@
         el._refs.modal.appendChild(el._refs.modalHead);
         el._refs.modal.appendChild(el._refs.modalBody);
 
-        document.body.appendChild(el._refs.modal);
+      },
+      /*
+      @function (private) _setupDeviceModalTrigger
+      @description Prepares the button that will trigger the modal node to appear
+      */
+      setupDeviceModalTrigger: function () {
+
+        var el = this;
+        var icon = document.createElement("i");
+
+        icon.classList.add("vicon", "vicon-menu");
+
+        el._refs.device.button = document.createElement("div");
+        el._refs.device.button.classList.add("vc-menu-modalButton", "vc-fg1");
+        el._refs.device.button.appendChild(icon);
+
+        el._refs.device.button.addEventListener("click", function () {
+          el.showModalView();
+        });
+
+        el.appendChild(el._refs.device.button);
 
       },
+      /*
+      @function (private) _setupDeviceItem
+      @description Takes the cloned declarative items and moves them to the modal view
+      @param {String} name 
+      */
       setupDeviceItem: function (name) {
 
         var el = this;
@@ -180,9 +194,18 @@
 
         item.appendChild(span);
 
+        item.addEventListener("click", function () {
+          el.hideModalView();
+        });
+
         return item;
 
       },
+      /*
+      @function (private) _setupDevicePage
+      @description Creates a page for the child items
+      @param {object} item 
+      */
       setupDevicePage: function (item) {
 
         var el = this;
@@ -224,18 +247,34 @@
         el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
 
       },
+      /*
+      @function (private) _setupItem
+      @description Creates a page for the child items
+      @param {object} item 
+      */
       setupItem: function (item) {
 
         var el = this;
-        
+        var nameNode;
+
         el._misc.tree[item.getAttribute("name")] = [];
         el._refs.device.items[item.getAttribute("name")] = item.cloneNode(false);
 
         el._setupDropdown(item);
-        el._setupVisuals(item);
         el._setupEvents(item);
 
+        nameNode = document.createElement("span");
+        nameNode.innerHTML = item.getAttribute("name");
+        item.appendChild(nameNode);
+
+        item.classList.add("vc-sect3-hoverable");
+
       },
+      /*
+      @function (private) _setupDropdown
+      @description Creates a dropdown for the child items
+      @param {object} item 
+      */
       setupDropdown: function (item) {
 
         var el = this;
@@ -269,110 +308,42 @@
         }
 
       },
-      setupVisuals: function (item) {
-
-        var name = item.getAttribute("name");
-
-        if (name != "") {
-          var nameNode = document.createElement("span");
-          nameNode.innerHTML = name;
-          item.appendChild(nameNode);
-        }
-
-        item.classList.add("vc-sect3-hoverable");
-
-      },
       /*
-      @function setupEvents
-      @description Sets up the click events for the menu items
+      @function _setupEvents
+      @description Sets up the events for the menu item
       @param {object} item
       */
       setupEvents: function (item) {
 
         var el = this;
 
-        vcomet.registerPathListener(item);
+        // Dropdown item visited
+        item.addEventListener("pointerenter", function (e) {
+          // Check if menu dropdown is already displayed
+          if (!item.classList.contains("vc-sect3")) {
+            // Highlights the item
+            item.classList.add("vc-sect3");
+            el._showDropdown(item);
+          }
+        });
 
-        // el._setupClickEvents(item);
-        el._setupHoverEvents(item);
-
-      },
-      /*
-      @function (private) setupHoverEvents
-      @description Creates the hover events for the item
-      @param {object} item
-      */
-      setupHoverEvents: function (item) {
-
-        var el = this;
-
-        if (vcomet.util.isTrue(el.hover)) {
-
-          // Dropdown item visited
-          item.addEventListener("pointerenter", function (e) {
-
-            // Check if menu dropdown is already displayed
-            if (!item.classList.contains("vc-sect3")) {
-              el._highlight(item);
-              el._showDropdown(item);
-            }
-
-          });
-
-          // Dropdown item left
-          item.addEventListener("pointerleave", function (e) {
-
-            // Check if menu dropdown is already hidden
-            if (item.classList.contains("vc-sect3")) {
-              el._removeHighlight(item);
-              el._hideDropdown(item);
-            }
-
-          });
-
-
-        }
-
-      },
-      /*
-      @function (private) setupClickEvents
-      @description Creates the click events for the item
-      @param {object} item
-      */
-      setupClickEvents: function (item, dropdownTrigger, dropdown) {
-
-        var el = this;
-
-        // Dropdown item clicked
-        document.body.addEventListener("pointerdown", function (e) {
-
-          if (vcomet.util.isTouchScreen() || (!vcomet.util.isTouchScreen() && el.hover != "true")) {
-
-            if (dropdownTrigger.isOnPath) {
-
-              el._toggleDropdown(item);
-
-            } else if (!item.isOnPath) {
-
-              item.style.visibility = "hidden";
-              item.dataset.visible = false;
-              item.style.visibility = "visible";
-
-              item.classList.remove("vc-sect3");
-
-            }
-
+        // Dropdown item left
+        item.addEventListener("pointerleave", function (e) {
+          // Check if menu dropdown is already hidden
+          if (item.classList.contains("vc-sect3")) {
+            // Removes the item highlight
+            item.classList.remove("vc-sect3");
+            el._hideDropdown(item);
           }
 
         });
 
       },
-      highlight: function (item) {
-        item.classList.add("vc-sect3");
-      },
-      removeHighlight: function (item) {
-        item.classList.remove("vc-sect3");
-      },
+      /*
+      @function _showDropdown
+      @description Shows the dropdown for the given item
+      @param {object} item
+      */
       showDropdown: function (item) {
 
         var el = this;
@@ -382,6 +353,11 @@
         }
 
       },
+      /*
+      @function _hideDropdown
+      @description Hides the dropdown for the given item
+      @param {object} item
+      */
       hideDropdown: function (item) {
 
         var el = this;
@@ -398,6 +374,11 @@
         }
 
       },
+      /*
+      @function _assignDropdownStyle
+      @description Determines and assigns the location of the dropdown
+      @param {object} item
+      */
       assignDropdownStyle: function (item) {
 
         var el = this;
@@ -411,14 +392,32 @@
         el._misc.dropdowns.path.push(item.name);
 
       },
-      handleWindowResize: function () {
-        
-        var el = this;
+      /*
+      @function _previousPage
+      @description For the device modal view
+      */
+      previousPage: function () {
 
-        if (window.innerWidth <= vcomet.tabletWidth) {
-          console.log('device');
+        var el = this;
+        var lastPage = el._refs.device.pages[el._refs.device.path.pop()];
+
+        if (lastPage) {
+          setTimeout(function () {
+            lastPage.classList.add("vc-menu-hidden");
+          }, 0);
         }
 
+        if (el._refs.device.path.length == 0) {
+          el._refs.backButton.classList.add("vc-menu-hidden")
+        }
+
+      },
+      /*
+      @function _handleWindowSize
+      @description Toggles between the device and desktop view depending on the window size
+      */
+      handleWindowSize: function () {
+        this.classList[window.innerWidth <= vcomet.tabletWidth ? "add" : "remove"]("vc-menu-device");
       },
       /*
       @function exceesWindow
@@ -451,17 +450,63 @@
         }
 
         return returnObject;
+      }
+    },
+    functions: {
+      /*
+      @function showModalView
+      @description Displays the modal view to nagivate through the menu options
+      */
+      showModalView: function () {
+
+        var el = this;
+
+        document.body.appendChild(el._refs.modal);
+
+        setTimeout(function () {
+          el._refs.modal.style.opacity = 1;
+        }, 0);
+
       },
+      /*
+      @function showModalView
+      @description Hides the modal view
+      */
+      hideModalView: function () {
+
+        var el = this;
+
+        var hideFunction = function () {
+
+          var visiblePages = el._refs.modalBody.querySelectorAll(".vc-menu-page:not(.vc-menu-hidden)");
+
+          document.body.removeChild(el._refs.modal);
+          el._refs.modal.removeEventListener("transitionend", hideFunction);
+
+          for (var i = 0; i < visiblePages.length; i++) {
+            if (!visiblePages[i].dataset || !visiblePages[i].dataset.main) {
+              visiblePages[i].classList.add("vc-menu-hidden");
+            }
+          }
+
+          el._refs.device.path = [];
+          el._refs.backButton.classList.add("vc-menu-hidden");
+
+        }
+
+        if (el._refs.modal.style.opacity != 0) {
+          el._refs.modal.addEventListener("transitionend", hideFunction);
+          el._refs.modal.style.opacity = 0;
+        }
+
+      }
     },
     onInit: function () {
-
-      var el = this;
-
-      el._setup();
-
+      this._setup();
     },
     onWindowResize: function () {
-      this._handleWindowResize();
+      this._handleWindowSize();
+      this.hideModalView();
     }
   });
 </script>
