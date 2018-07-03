@@ -88,7 +88,7 @@
                         prop = vcomet.dom.offsetBottom(el);
                         break;
                 }
-                return prop;
+                 return prop;
             },
             /*
               @property (private) positionResizeListener
@@ -119,13 +119,14 @@
             monitorAnchorVisibility: function () {
                 var el = this;
                 // On scroll
-               
                 var throttled = false;
                 var delay = 15;
-                function activateAnchor(arg) {
+
+                el._misc.activeAnchorFn = function () {
                     if (!throttled) {
-                       if(el.offsetParent && el._isInViewport()) {
-                            
+                        if(el.offsetParent && el._isInViewport()) {
+                            // Store scroll container position
+                            el._misc.scrollTop = document.body.scrollTop;
                             if(!el._misc.reached) {
                                 el._misc.reached = true;
                                 vcomet.triggerCallback("onVisible", el, el);
@@ -152,9 +153,9 @@
                 // Check parent scroll container
                 if (el.vcScroll) {
                     var vcScrollEl = document.querySelector(el.vcScroll);
-                    vcScrollEl.onScrolled(activateAnchor);
+                    vcScrollEl.onScrolled(el._misc.activeAnchorFn);
                 } else {
-                    document.addEventListener("scroll", activateAnchor);
+                    window.addEventListener('scroll', el._misc.activeAnchorFn, false);
                 }
             },
             /*
@@ -176,11 +177,6 @@
                     return el._isInMid(rect);
                     // Is in viewport
                 } else {
-                    // if(el.getAttribute("uid") === "4") {
-                    //     console.log(el, rect)
-                    //     console.log(el._isVisible(rect))
-
-                    // }
                     return el._isVisible(rect);
                 }
             },
@@ -196,7 +192,7 @@
             },
             /*
               @function (private) _isOnTop
-              @description Whehter or not the anchor is on the top of the viewport
+              @description Whether or not the anchor is on the top of the viewport
               @return {Boolean} [Condition check result]
             */
             isOnTop: function (rect) {
@@ -206,7 +202,7 @@
             },
             /*
               @function (private) _isInBottom
-              @description Whehter or not the anchor is in the bottom of the viewport
+              @description Whether or not the anchor is in the bottom of the viewport
               @return {Boolean} [Condition check result]
             */
             isInBottom: function (rect) {
@@ -258,6 +254,10 @@
         onRender: function () {
             var el = this;
             el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
+            // Store scroll container position
+            el._misc.scrollTop = document.body.scrollTop;
+            // Check anchor visibility
+            el._misc.activeAnchorFn();
             // TO BE REMOVED
             // if (el.vcScroll) {
             //     document.querySelector(el.vcScroll).onBubbleRender(function(){
