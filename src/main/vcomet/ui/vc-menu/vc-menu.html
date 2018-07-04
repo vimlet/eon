@@ -136,6 +136,8 @@
         el._refs.modalBody = document.createElement("div");
 
         el._refs.backButton = document.createElement("div");
+        el._refs.path = document.createElement("div");
+        el._refs.pathSpan = document.createElement("span");
         el._refs.closeButton = document.createElement("div");
 
         el._refs.modal.classList.add("vc-menu-modal", "vc-sect1", "vc-fg1");
@@ -143,6 +145,7 @@
         el._refs.modalBody.classList.add("vc-menu-body");
 
         el._refs.closeButton.classList.add("vc-menu-button", "vicon", "vicon-close");
+        el._refs.path.classList.add("vc-menu-path");
         el._refs.backButton.classList.add("vc-menu-button", "vc-menu-hidden", "vicon", "vicon-arrow-back");
 
         el._refs.backButton.addEventListener("click", function () {
@@ -153,7 +156,10 @@
           el.hideModalView();
         });
 
+        el._refs.path.appendChild(el._refs.pathSpan);
+
         el._refs.modalHead.appendChild(el._refs.backButton);
+        el._refs.modalHead.appendChild(el._refs.path);
         el._refs.modalHead.appendChild(el._refs.closeButton);
 
         el._refs.modal.appendChild(el._refs.modalHead);
@@ -194,7 +200,7 @@
         var item = el._refs.device.items[name];
         var link = document.createElement("a");
         var span = document.createElement("span");
-        
+
         span.innerHTML = item.getAttribute("name");
 
         link.appendChild(span);
@@ -248,6 +254,7 @@
           setTimeout(function () {
             el._refs.device.pages[item.name].classList.remove("vc-menu-hidden");
             el._refs.device.path.push(item.name);
+            el._refs.pathSpan.innerHTML = el._refs.device.path.length > 0 ? el._refs.device.path[el._refs.device.path.length - 1] : "";
 
             if (el._refs.device.path.length > 0) {
               el._refs.backButton.classList.remove("vc-menu-hidden")
@@ -433,6 +440,8 @@
           el._refs.backButton.classList.add("vc-menu-hidden")
         }
 
+        el._refs.pathSpan.innerHTML = el._refs.device.path.length > 0 ? el._refs.device.path[el._refs.device.path.length - 1] : "";
+
       },
       /*
       @function _handleWindowSize
@@ -482,6 +491,8 @@
       showModalView: function () {
 
         var el = this;
+
+        el._refs.pathSpan.innerHTML = "";
 
         document.body.appendChild(el._refs.modal);
 
