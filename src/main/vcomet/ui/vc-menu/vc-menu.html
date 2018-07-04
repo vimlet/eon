@@ -14,7 +14,12 @@
         value: {},
       }
     },
-    properties: {},
+    properties: {
+      spacing: {
+        value: 0,
+        reflect: true
+      }
+    },
     privateFunctions: {
       /*
       @function (private) _setup
@@ -187,16 +192,24 @@
         var el = this;
 
         var item = el._refs.device.items[name];
+        var link = document.createElement("a");
         var span = document.createElement("span");
+        
+        span.innerHTML = item.getAttribute("name");
 
-        item.name = name;
-        span.innerHTML = name;
+        link.appendChild(span);
 
-        item.appendChild(span);
+        if (item.hasAttribute("href")) {
+          link.setAttribute("href", item.getAttribute("href"));
+        }
 
-        item.addEventListener("click", function () {
-          el.hideModalView();
-        });
+        if (!(el._misc.tree[name].length > 0)) {
+          item.addEventListener("click", function () {
+            el.hideModalView();
+          });
+        }
+
+        item.appendChild(link);
 
         return item;
 
@@ -255,7 +268,7 @@
       setupItem: function (item) {
 
         var el = this;
-        var nameNode;
+        var link, span;
 
         el._misc.tree[item.getAttribute("name")] = [];
         el._refs.device.items[item.getAttribute("name")] = item.cloneNode(false);
@@ -263,9 +276,17 @@
         el._setupDropdown(item);
         el._setupEvents(item);
 
-        nameNode = document.createElement("span");
-        nameNode.innerHTML = item.getAttribute("name");
-        item.appendChild(nameNode);
+        link = document.createElement("a");
+        span = document.createElement("span");
+        span.innerHTML = item.getAttribute("name");
+
+        link.appendChild(span);
+
+        if (item.hasAttribute("href")) {
+          link.setAttribute("href", item.getAttribute("href"));
+        }
+
+        item.appendChild(link);
 
         item.classList.add("vc-sect3-hoverable");
 
@@ -384,6 +405,7 @@
         var el = this;
         var dropdown = el._refs.dropdowns[item.name];
 
+        dropdown.style[el._misc.dropdowns.path.length > 0 ? "paddingLeft" : "paddingTop"] =  parseInt(el.spacing) + "px";
         dropdown.dataset.position = el._misc.dropdowns.path.length > 0 ? "right" : "bottom";
         dropdown.style.height = (item.offsetHeight * dropdown.querySelectorAll("vc-item").length) + "px";
 
