@@ -50,9 +50,12 @@
         el._misc.dropdowns.path = [];
 
         el._misc.modal = {};
-        el._misc.roots = [];
+        el._misc.main = [];
         el._misc.tree = {};
         el._misc.items = {};
+
+        el._misc.displayDuration = 500;
+        el._misc.hideDuration = 300;
 
       },
       /*
@@ -79,14 +82,15 @@
 
         var el = this;
 
+        // Creats the vc-items wrapper
         el._refs.wrapper = document.createElement("div");
         el._refs.wrapper.classList.add("vc-menu-wrapper", "vc-fg1", "vc-unselectable");
         el._refs.wrapper.appendChild(el.template);
 
-        // Append source nodes
+        // Loops through the first level of vc-items and saves them as the main items
         for (var i = 0; i < el._refs.wrapper.children.length; i++) {
           el._setupItem(el._refs.wrapper.children[i]);
-          el._misc.roots.push([el._refs.wrapper.children[i].getAttribute("name")]);
+          el._misc.main.push([el._refs.wrapper.children[i].getAttribute("name")]);
         }
 
         el.appendChild(el._refs.wrapper);
@@ -101,19 +105,22 @@
         var el = this;
         var item;
 
-        el._setupDeviceModalNode();
-        el._setupDeviceModalTrigger();
+        el._setupModalView();
+        el._setupModalViewTrigger();
 
+        // Creates the main page
         el._refs.device.pages["main"] = document.createElement("div");
         el._refs.device.pages["main"].classList.add("vc-menu-page", "vc-sect1");
         el._refs.device.pages["main"].dataset.main = "true";
 
-        for (var i = 0; i < el._misc.roots.length; i++) {
+        // Loops through the main items and appends them to the main page, then checks if they have 
+        // vc-item childs to create more pages, and loops through those childs to see if more pages are needed
+        for (var i = 0; i < el._misc.main.length; i++) {
 
-          item = el._setupDeviceItem(el._misc.roots[i]);
+          item = el._setupModalItem(el._misc.main[i]);
 
           if (el._misc.tree[item.name].length > 0) {
-            el._setupDevicePage(item);
+            el._setupModalPage(item);
           }
 
           el._refs.device.pages["main"].appendChild(item);
@@ -124,10 +131,10 @@
 
       },
       /*
-      @function (private) _setupDeviceModalNode
+      @function (private) _setupModalView
       @description Prepares the node in which the user will experience the modal behavior
       */
-      setupDeviceModalNode: function () {
+      setupModalView: function () {
 
         var el = this;
 
@@ -167,10 +174,10 @@
 
       },
       /*
-      @function (private) _setupDeviceModalTrigger
+      @function (private) _setupModalViewTrigger
       @description Prepares the button that will trigger the modal node to appear
       */
-      setupDeviceModalTrigger: function () {
+      setupModalViewTrigger: function () {
 
         var el = this;
         var icon = document.createElement("i");
@@ -182,18 +189,18 @@
         el._refs.device.button.appendChild(icon);
 
         el._refs.device.button.addEventListener("click", function () {
-          el.showModalView();
+          el.displayModalView();
         });
 
         el.appendChild(el._refs.device.button);
 
       },
       /*
-      @function (private) _setupDeviceItem
+      @function (private) _setupModalItem
       @description Takes the cloned declarative items and moves them to the modal view
       @param {String} name 
       */
-      setupDeviceItem: function (name) {
+      setupModalItem: function (name) {
 
         var el = this;
 
@@ -221,56 +228,9 @@
 
       },
       /*
-      @function (private) _setupDevicePage
-      @description Creates a page for the child items
-      @param {object} item 
-      */
-      setupDevicePage: function (item) {
-
-        var el = this;
-
-        var items = el._misc.tree[item.name];
-        var child;
-
-        el._refs.device.pages[item.name] = document.createElement("div");
-        el._refs.device.pages[item.name].classList.add("vc-menu-page", "vc-sect1", "vc-menu-hidden");
-
-        for (var i = 0; i < items.length; i++) {
-
-          child = el._setupDeviceItem(items[i]);
-
-          if (el._misc.tree[child.name].length > 0) {
-            el._setupDevicePage(child);
-          }
-
-          el._refs.device.pages[item.name].appendChild(child);
-
-        }
-
-        item.addEventListener("click", function () {
-
-          el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
-
-          setTimeout(function () {
-            el._refs.device.pages[item.name].classList.remove("vc-menu-hidden");
-            el._refs.device.path.push(item.name);
-            el._refs.pathSpan.innerHTML = el._refs.device.path.length > 0 ? el._refs.device.path[el._refs.device.path.length - 1] : "";
-
-            if (el._refs.device.path.length > 0) {
-              el._refs.backButton.classList.remove("vc-menu-hidden")
-            }
-
-          }, 0);
-
-        });
-
-        el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
-
-      },
-      /*
       @function (private) _setupItem
       @description Creates a page for the child items
-      @param {object} item 
+      @param {Object} item 
       */
       setupItem: function (item) {
 
@@ -301,7 +261,7 @@
       /*
       @function (private) _setupDropdown
       @description Creates a dropdown for the child items
-      @param {object} item 
+      @param {Object} item 
       */
       setupDropdown: function (item) {
 
@@ -339,7 +299,7 @@
       /*
       @function _setupEvents
       @description Sets up the events for the menu item
-      @param {object} item
+      @param {Object} item
       */
       setupEvents: function (item) {
 
@@ -368,9 +328,133 @@
 
       },
       /*
+      @function (private) _setupModalPage
+      @description Creates a page for the child items
+      @param {Object} item 
+      */
+      setupModalPage: function (item) {
+
+        var el = this;
+
+        var items = el._misc.tree[item.name];
+        var child;
+
+        el._refs.device.pages[item.name] = document.createElement("div");
+        el._refs.device.pages[item.name].classList.add("vc-menu-page", "vc-sect1");
+
+        for (var i = 0; i < items.length; i++) {
+
+          child = el._setupModalItem(items[i]);
+
+          if (el._misc.tree[child.name].length > 0) {
+            el._setupModalPage(child);
+          }
+
+          el._refs.device.pages[item.name].appendChild(child);
+
+        }
+
+        item.addEventListener("click", function () {
+
+          el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
+
+          el._displayPage(el._refs.device.pages[item.name], true);
+
+          el._refs.device.path.push(item.name);
+          el._refs.pathSpan.innerHTML = item.name;
+          el._refs.backButton.classList.remove("vc-menu-hidden");
+
+        });
+
+        el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
+
+      },
+      /*
+      @function (private) _displayPage
+      @description Displays the provided page with/without animate
+      @param {Object} page
+      @param {Boolean} animate
+      */
+      displayPage: function (page, animate) {
+
+        var el = this;
+
+        if (animate) {
+
+          var endTime = + new Date() + el._misc.displayDuration;
+
+          var frameFunction = function () {
+
+            var runTime = + new Date();
+            var progress = (endTime - runTime) / el._misc.displayDuration;
+
+            // Ease progress
+            progress = Math.pow(progress, 3) * 100;
+            progress = progress < 0 ? 0 : progress;
+
+            page.style.transform = "translate3d(" + progress + "%, 0, 0)";
+
+            if (progress > 0) {
+              window.requestAnimationFrame(frameFunction);
+            }
+
+          }
+
+          frameFunction();
+
+        } else {
+
+          page.style.transform = "translate3d(0%, 0, 0)";
+
+        }
+
+      },
+      /*
+      @function (private) _hidePage
+      @description Hides the provided page with/without animation
+      @param {Object} page
+      @param {Boolean} animate
+      */
+      hidePage: function (page, animate) {
+
+        var el = this;
+
+        if (animate) {
+
+          var endTime = + new Date() + el._misc.hideDuration;
+
+          var frameFunction = function () {
+
+            var runTime = + new Date();
+            var progress = (endTime - runTime) / el._misc.hideDuration;
+
+            progress = 1 - progress;
+
+            // Ease progress
+            progress = Math.pow(progress, 3) * 100;
+            progress = progress > 100 ? 100 : progress;
+
+            page.style.transform = "translate3d(" + progress + "%, 0, 0)";
+
+            if (progress < 100) {
+              window.requestAnimationFrame(frameFunction);
+            }
+
+          }
+
+          frameFunction();
+
+        } else {
+
+          page.style.transform = "translate3d(100%, 0, 0)";
+
+        }
+
+      },
+      /*
       @function _showDropdown
       @description Shows the dropdown for the given item
-      @param {object} item
+      @param {Object} item
       */
       showDropdown: function (item) {
 
@@ -384,7 +468,7 @@
       /*
       @function _hideDropdown
       @description Hides the dropdown for the given item
-      @param {object} item
+      @param {Object} item
       */
       hideDropdown: function (item) {
 
@@ -405,14 +489,14 @@
       /*
       @function _assignDropdownStyle
       @description Determines and assigns the location of the dropdown
-      @param {object} item
+      @param {Object} item
       */
       assignDropdownStyle: function (item) {
 
         var el = this;
         var dropdown = el._refs.dropdowns[item.name];
 
-        dropdown.style[el._misc.dropdowns.path.length > 0 ? "paddingLeft" : "paddingTop"] =  parseInt(el.spacing) + "px";
+        dropdown.style[el._misc.dropdowns.path.length > 0 ? "paddingLeft" : "paddingTop"] = parseInt(el.spacing) + "px";
         dropdown.dataset.position = el._misc.dropdowns.path.length > 0 ? "right" : "bottom";
         dropdown.style.height = (item.offsetHeight * dropdown.querySelectorAll("vc-item").length) + "px";
 
@@ -431,9 +515,7 @@
         var lastPage = el._refs.device.pages[el._refs.device.path.pop()];
 
         if (lastPage) {
-          setTimeout(function () {
-            lastPage.classList.add("vc-menu-hidden");
-          }, 0);
+          el._hidePage(lastPage, true);
         }
 
         if (el._refs.device.path.length == 0) {
@@ -453,7 +535,7 @@
       /*
       @function exceesWindow
       @description If the dropdown to be opened exceeds we return an object with data about the sides that have ben exceeded
-      @param {object} element
+      @param {Object} element
       */
       exceedsWindow: function (element) {
 
@@ -485,24 +567,27 @@
     },
     functions: {
       /*
-      @function showModalView
+      @function displayModalView
       @description Displays the modal view to nagivate through the menu options
       */
-      showModalView: function () {
+      displayModalView: function () {
 
         var el = this;
 
+        // Empties the path span since we are in the main page
         el._refs.pathSpan.innerHTML = "";
 
+        // Appends the modal view
         document.body.appendChild(el._refs.modal);
 
+        // After being appended we set the opacity in a timeout so that the transition takes place
         setTimeout(function () {
           el._refs.modal.style.opacity = 1;
         }, 0);
 
       },
       /*
-      @function showModalView
+      @function hideModalView
       @description Hides the modal view
       */
       hideModalView: function () {
@@ -516,17 +601,20 @@
           document.body.removeChild(el._refs.modal);
           el._refs.modal.removeEventListener("transitionend", hideFunction);
 
+          // Takes all the visible pages and hides them except for the main one
           for (var i = 0; i < visiblePages.length; i++) {
             if (!visiblePages[i].dataset || !visiblePages[i].dataset.main) {
-              visiblePages[i].classList.add("vc-menu-hidden");
+              el._hidePage(visiblePages[i]);
             }
           }
 
+          // Empties the path and hides the back button
           el._refs.device.path = [];
           el._refs.backButton.classList.add("vc-menu-hidden");
 
         }
 
+        // Only hide the modal view if its not already hidden
         if (el._refs.modal.style.opacity != 0) {
           el._refs.modal.addEventListener("transitionend", hideFunction);
           el._refs.modal.style.opacity = 0;
