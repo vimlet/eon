@@ -1,7 +1,7 @@
 <template>
     <vc-anchor></vc-anchor>
     <div class="vc-reveal-relative">
-            <div class="vc-reveal-wrapper"></div>
+        <div class="vc-reveal-wrapper"></div>
     </div>
 </template>
 <script>
@@ -209,12 +209,10 @@
             */
             setUpAnchor: function () {
                 var el = this;
-
                 el._refs.anchor.onVisible(function(){
                     // Trigger animation
                     el._animate();
                 });
-
             },
             
             /*
@@ -342,15 +340,18 @@
         },
         onBubbleRender: function () {
             var el = this;
-            var scrollTop = el._refs.anchor._misc.scrollTop;
-            // Check if scroll has left behind the anchor offset position
-            if(el._refs.anchor.offsetPosition <= scrollTop) {
-                // Trigger anchor activation
-                if(!el._refs.anchor.reached) {
-                    el._refs.anchor.reached = true;
-                    vcomet.triggerCallback("onVisible", el._refs.anchor, el._refs.anchor);
+            // Wait until anchor has finished its life cycle
+            el._refs.anchor.onReady(function(){
+                var scrollTop = el._refs.anchor._misc.scrollTop;
+                // Check if scroll has left behind the anchor offset position
+                if(el._refs.anchor.offsetPosition <= scrollTop) {
+                    // Trigger anchor activation
+                    if(!el._refs.anchor.reached) {
+                        el._refs.anchor.reached = true;
+                        vcomet.triggerCallback("onVisible", el._refs.anchor, el._refs.anchor);
+                    }
                 }
-            }
+            });
         },
         onResize: function(){
             // Update animation position values
