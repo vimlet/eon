@@ -50,6 +50,7 @@
         el._misc.dropdowns.path = [];
 
         el._misc.modal = {};
+        el._misc.modal.pages = {};
         el._misc.main = [];
         el._misc.tree = {};
         el._misc.items = {};
@@ -69,7 +70,6 @@
         el._refs.dropdowns = {};
 
         el._refs.device = {};
-        el._refs.device.pages = {};
         el._refs.device.path = [];
         el._refs.device.items = {};
 
@@ -109,9 +109,9 @@
         el._setupModalViewTrigger();
 
         // Creates the main page
-        el._refs.device.pages["main"] = document.createElement("div");
-        el._refs.device.pages["main"].classList.add("vc-menu-page", "vc-sect1");
-        el._refs.device.pages["main"].dataset.main = "true";
+        el._misc.modal.pages["main"] = document.createElement("div");
+        el._misc.modal.pages["main"].classList.add("vc-menu-page", "vc-sect1");
+        el._misc.modal.pages["main"].dataset.main = "true";
 
         // Loops through the main items and appends them to the main page, then checks if they have 
         // vc-item childs to create more pages, and loops through those childs to see if more pages are needed
@@ -123,11 +123,11 @@
             el._setupModalPage(item);
           }
 
-          el._refs.device.pages["main"].appendChild(item);
+          el._misc.modal.pages["main"].appendChild(item);
 
         }
 
-        el._refs.modalBody.appendChild(el._refs.device.pages["main"]);
+        el._refs.modalBody.appendChild(el._misc.modal.pages["main"]);
 
       },
       /*
@@ -339,8 +339,8 @@
         var items = el._misc.tree[item.name];
         var child;
 
-        el._refs.device.pages[item.name] = document.createElement("div");
-        el._refs.device.pages[item.name].classList.add("vc-menu-page", "vc-sect1");
+        el._misc.modal.pages[item.name] = document.createElement("div");
+        el._misc.modal.pages[item.name].classList.add("vc-menu-page", "vc-sect1");
 
         for (var i = 0; i < items.length; i++) {
 
@@ -350,15 +350,15 @@
             el._setupModalPage(child);
           }
 
-          el._refs.device.pages[item.name].appendChild(child);
+          el._misc.modal.pages[item.name].appendChild(child);
 
         }
 
         item.addEventListener("click", function () {
 
-          el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
+          el._refs.modalBody.appendChild(el._misc.modal.pages[item.name]);
 
-          el._displayPage(el._refs.device.pages[item.name], true);
+          el._displayPage(el._misc.modal.pages[item.name], true);
 
           el._refs.device.path.push(item.name);
           el._refs.pathSpan.innerHTML = item.name;
@@ -366,7 +366,7 @@
 
         });
 
-        el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
+        el._refs.modalBody.appendChild(el._misc.modal.pages[item.name]);
 
       },
       /*
@@ -512,7 +512,7 @@
       previousPage: function () {
 
         var el = this;
-        var lastPage = el._refs.device.pages[el._refs.device.path.pop()];
+        var lastPage = el._misc.modal.pages[el._refs.device.path.pop()];
 
         if (lastPage) {
           el._hidePage(lastPage, true);
@@ -579,6 +579,9 @@
 
         // Appends the modal view
         document.body.appendChild(el._refs.modal);
+        
+        // Triggers onModalDisplay callback
+        vcomet.triggerCallback("onModalDisplay", el, el, [el._refs.modal]);
 
         // After being appended we set the opacity in a timeout so that the transition takes place
         setTimeout(function () {
@@ -621,6 +624,13 @@
         }
 
       }
+    },
+    onCreated: function () {
+
+      var el = this;
+
+      vcomet.createCallback("onModalDisplay", el);
+
     },
     onInit: function () {
       this._setup();
