@@ -297,6 +297,25 @@
                 } else {
                     el._refs.wrapper.style.transform = "translate3d(" + value + "px, 0, 0)";
                 }
+            },
+            /*
+                @function (private) _refresh
+                @description 
+            */
+            refresh: function(value){
+                var el = this;
+                // Wait until anchor has finished its life cycle
+                el._refs.anchor.onReady(function(){
+                    var scrollTop = el._refs.anchor._misc.scrollTop;
+                    // Check if scroll has left behind the anchor offset position
+                    if(el._refs.anchor.offsetPosition <= scrollTop) {
+                        // Trigger anchor activation
+                        if(!el._refs.anchor.reached) {
+                            el._refs.anchor.reached = true;
+                            vcomet.triggerCallback("onVisible", el._refs.anchor, el._refs.anchor);
+                        }
+                    }
+                });
             }
         },
         functions: {
@@ -339,22 +358,10 @@
             el._setUpAnchor();
         },
         onBubbleRender: function () {
-            var el = this;
-            // Wait until anchor has finished its life cycle
-            el._refs.anchor.onReady(function(){
-                var scrollTop = el._refs.anchor._misc.scrollTop;
-                // Check if scroll has left behind the anchor offset position
-                if(el._refs.anchor.offsetPosition <= scrollTop) {
-                    // Trigger anchor activation
-                    if(!el._refs.anchor.reached) {
-                        el._refs.anchor.reached = true;
-                        vcomet.triggerCallback("onVisible", el._refs.anchor, el._refs.anchor);
-                    }
-                }
-            });
+            this._refresh();
         },
         onResize: function(){
-            // Update animation position values
+            this._refresh();
         },
         onPropertyChanged: function(prop, oldVal, value){
             var el = this;
