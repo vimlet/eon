@@ -50,6 +50,8 @@
         el._misc.dropdowns.path = [];
 
         el._misc.modal = {};
+        el._misc.modal.path = [];
+
         el._misc.main = [];
         el._misc.tree = {};
         el._misc.items = {};
@@ -71,7 +73,7 @@
         el._refs.modal = {};
         el._refs.modalPages = {};
 
-        el._refs.ModalPath = [];
+        el._refs.modalPath = [];
         el._refs.modalItems = {};
 
       },
@@ -111,7 +113,7 @@
 
         // Creates the main page
         el._refs.modalPages["main"] = document.createElement("div");
-        el._refs.modalPages["main"].classList.add("vc-menu-page", "vc-sect1");
+        el._refs.modalPages["main"].classList.add("vc-menu-page", "vc-sect1", "vc-menu-front");
         el._refs.modalPages["main"].dataset.main = "true";
 
         // Loops through the main items and appends them to the main page, then checks if they have 
@@ -157,7 +159,7 @@
         el._refs.backButton.classList.add("vc-menu-button", "vc-menu-hidden", "vicon", "vicon-arrow-back");
 
         el._refs.backButton.addEventListener("click", function () {
-          el._previousPage();
+          el._back();
         });
 
         el._refs.closeButton.addEventListener("click", function () {
@@ -175,8 +177,8 @@
 
         // Prevents scrolling on desktop
         el._refs.modal.addEventListener("wheel", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+          e.preventDefault();
+          e.stopPropagation();
         }, { passive: false });
 
         // If the user scrolls the window scrollbar we hide the dropdown
@@ -370,11 +372,9 @@
 
         item.addEventListener("click", function () {
 
-          el._refs.modalBody.appendChild(el._refs.modalPages[item.name]);
-
           el._displayPage(el._refs.modalPages[item.name], true);
 
-          el._refs.ModalPath.push(item.name);
+          el._refs.modalPath.push(item.name);
           el._refs.pathSpan.innerHTML = item.name;
           el._refs.backButton.classList.remove("vc-menu-hidden");
 
@@ -393,76 +393,66 @@
 
         var el = this;
 
-        if (animate) {
+        var currentPage = el._refs.modalPages[el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "main"];
+        
+        var displayFunction = function () {
 
-          var endTime = + new Date() + el._misc.displayDuration;
+          currentPage.removeEventListener("transitionend", displayFunction);
+          el._refs.modalBody.appendChild(page);
 
-          var frameFunction = function () {
+          setTimeout(function () {
+            page.classList.add("vc-menu-front");
+          }, 0);
 
-            var runTime = + new Date();
-            var progress = (endTime - runTime) / el._misc.displayDuration;
+        }
 
-            // Ease progress
-            progress = Math.pow(progress, 3) * 100;
-            progress = progress < 0 ? 0 : progress;
-
-            page.style.transform = "translate3d(" + progress + "%, 0, 0)";
-
-            if (progress > 0) {
-              window.requestAnimationFrame(frameFunction);
-            }
-
-          }
-
-          frameFunction();
-
-        } else {
-
-          page.style.transform = "translate3d(0%, 0, 0)";
-
+        // Only hide the modal view if its not already hidden
+        if (window.getComputedStyle(currentPage).opacity == 1) {
+          currentPage.addEventListener("transitionend", displayFunction);
+          currentPage.classList.remove("vc-menu-front");
         }
 
       },
       /*
-      @function (private) _hidePage
+      @function (private) _back
       @description Hides the provided page with/without animation
-      @param {Object} page
-      @param {Boolean} animate
       */
-      hidePage: function (page, animate) {
+      back: function (page, animate) {
 
         var el = this;
 
-        if (animate) {
+        var currentPage = el._refs.modalPages[el._refs.modalPath.pop()];
+        var previousPage = el._refs.modalPages[el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "main"];
 
-          var endTime = + new Date() + el._misc.hideDuration;
+        if (currentPage) {
 
-          var frameFunction = function () {
+          var hideFunction = function () {
 
-            var runTime = + new Date();
-            var progress = (endTime - runTime) / el._misc.hideDuration;
+            currentPage.removeEventListener("transitionend", hideFunction);
 
-            progress = 1 - progress;
+            el._refs.modalBody.appendChild(previousPage);
 
-            // Ease progress
-            progress = Math.pow(progress, 3) * 100;
-            progress = progress > 100 ? 100 : progress;
-
-            page.style.transform = "translate3d(" + progress + "%, 0, 0)";
-
-            if (progress < 100) {
-              window.requestAnimationFrame(frameFunction);
-            }
+            setTimeout(function () {
+              previousPage.classList.add("vc-menu-front");
+            }, 0);
 
           }
 
-          frameFunction();
-
-        } else {
-
-          page.style.transform = "translate3d(100%, 0, 0)";
+          // Only hide the modal view if its not already hidden
+          if (currentPage.classList.contains("vc-menu-front")) {
+            currentPage.addEventListener("transitionend", hideFunction);
+            currentPage.classList.remove("vc-menu-front");
+          }
 
         }
+
+        // Hides the back button if we are in the main page
+        if (el._refs.modalPath.length == 0) {
+          el._refs.backButton.classList.add("vc-menu-hidden");
+        }
+        
+        // Empties the path span
+        el._refs.pathSpan.innerHTML = el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "";
 
       },
       /*
@@ -520,26 +510,6 @@
 
       },
       /*
-      @function _previousPage
-      @description For the device modal view
-      */
-      previousPage: function () {
-
-        var el = this;
-        var lastPage = el._refs.modalPages[el._refs.ModalPath.pop()];
-
-        if (lastPage) {
-          el._hidePage(lastPage, true);
-        }
-
-        if (el._refs.ModalPath.length == 0) {
-          el._refs.backButton.classList.add("vc-menu-hidden")
-        }
-
-        el._refs.pathSpan.innerHTML = el._refs.ModalPath.length > 0 ? el._refs.ModalPath[el._refs.ModalPath.length - 1] : "";
-
-      },
-      /*
       @function _handleWindowSize
       @description Toggles between the device and desktop view depending on the window size
       */
@@ -590,6 +560,8 @@
 
         // Empties the path span since we are in the main page
         el._refs.pathSpan.innerHTML = "";
+        el._misc.currentPage = el._refs.modalPages.main;
+        el._misc.modal.path = [el._refs.modalPages.main];
 
         // Appends the modal view
         document.body.appendChild(el._refs.modal);
@@ -623,12 +595,15 @@
           // Takes all the visible pages and hides them except for the main one
           for (var i = 0; i < visiblePages.length; i++) {
             if (!visiblePages[i].dataset || !visiblePages[i].dataset.main) {
-              el._hidePage(visiblePages[i]);
+              el._refs.modalBody.insertBefore(visiblePages[i], el._refs.modalBody.childNodes[0]);
+              visiblePages[i].classList.remove("vc-menu-front");
+            } else {
+              visiblePages[i].classList.add("vc-menu-front");
             }
           }
 
           // Empties the path and hides the back button
-          el._refs.ModalPath = [];
+          el._refs.modalPath = [];
           el._refs.backButton.classList.add("vc-menu-hidden");
 
         }
