@@ -68,10 +68,11 @@
 
         el._refs.dropdowns = {};
 
-        el._refs.device = {};
-        el._refs.device.pages = {};
-        el._refs.device.path = [];
-        el._refs.device.items = {};
+        el._refs.modal = {};
+        el._refs.modalPages = {};
+
+        el._refs.ModalPath = [];
+        el._refs.modalItems = {};
 
       },
       /*
@@ -109,9 +110,9 @@
         el._setupModalViewTrigger();
 
         // Creates the main page
-        el._refs.device.pages["main"] = document.createElement("div");
-        el._refs.device.pages["main"].classList.add("vc-menu-page", "vc-sect1");
-        el._refs.device.pages["main"].dataset.main = "true";
+        el._refs.modalPages["main"] = document.createElement("div");
+        el._refs.modalPages["main"].classList.add("vc-menu-page", "vc-sect1");
+        el._refs.modalPages["main"].dataset.main = "true";
 
         // Loops through the main items and appends them to the main page, then checks if they have 
         // vc-item childs to create more pages, and loops through those childs to see if more pages are needed
@@ -123,11 +124,11 @@
             el._setupModalPage(item);
           }
 
-          el._refs.device.pages["main"].appendChild(item);
+          el._refs.modalPages["main"].appendChild(item);
 
         }
 
-        el._refs.modalBody.appendChild(el._refs.device.pages["main"]);
+        el._refs.modalBody.appendChild(el._refs.modalPages["main"]);
 
       },
       /*
@@ -172,6 +173,19 @@
         el._refs.modal.appendChild(el._refs.modalHead);
         el._refs.modal.appendChild(el._refs.modalBody);
 
+        // Prevents scrolling on desktop
+        el._refs.modal.addEventListener("wheel", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+
+        // If the user scrolls the window scrollbar we hide the dropdown
+        window.addEventListener("scroll", function (e) {
+          if (el._misc.modal.active) {
+            el.hideModalView();
+          }
+        });
+
       },
       /*
       @function (private) _setupModalViewTrigger
@@ -184,15 +198,15 @@
 
         icon.classList.add("vicon", "vicon-menu");
 
-        el._refs.device.button = document.createElement("div");
-        el._refs.device.button.classList.add("vc-menu-modalButton", "vc-fg1");
-        el._refs.device.button.appendChild(icon);
+        el._refs.modalButton = document.createElement("div");
+        el._refs.modalButton.classList.add("vc-menu-modalButton", "vc-fg1");
+        el._refs.modalButton.appendChild(icon);
 
-        el._refs.device.button.addEventListener("click", function () {
+        el._refs.modalButton.addEventListener("click", function () {
           el.displayModalView();
         });
 
-        el.appendChild(el._refs.device.button);
+        el.appendChild(el._refs.modalButton);
 
       },
       /*
@@ -204,7 +218,7 @@
 
         var el = this;
 
-        var item = el._refs.device.items[name];
+        var item = el._refs.modalItems[name];
         var link = document.createElement("a");
         var span = document.createElement("span");
 
@@ -238,7 +252,7 @@
         var link, span;
 
         el._misc.tree[item.getAttribute("name")] = [];
-        el._refs.device.items[item.getAttribute("name")] = item.cloneNode(false);
+        el._refs.modalItems[item.getAttribute("name")] = item.cloneNode(false);
 
         el._setupDropdown(item);
         el._setupEvents(item);
@@ -339,8 +353,8 @@
         var items = el._misc.tree[item.name];
         var child;
 
-        el._refs.device.pages[item.name] = document.createElement("div");
-        el._refs.device.pages[item.name].classList.add("vc-menu-page", "vc-sect1");
+        el._refs.modalPages[item.name] = document.createElement("div");
+        el._refs.modalPages[item.name].classList.add("vc-menu-page", "vc-sect1");
 
         for (var i = 0; i < items.length; i++) {
 
@@ -350,23 +364,23 @@
             el._setupModalPage(child);
           }
 
-          el._refs.device.pages[item.name].appendChild(child);
+          el._refs.modalPages[item.name].appendChild(child);
 
         }
 
         item.addEventListener("click", function () {
 
-          el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
+          el._refs.modalBody.appendChild(el._refs.modalPages[item.name]);
 
-          el._displayPage(el._refs.device.pages[item.name], true);
+          el._displayPage(el._refs.modalPages[item.name], true);
 
-          el._refs.device.path.push(item.name);
+          el._refs.ModalPath.push(item.name);
           el._refs.pathSpan.innerHTML = item.name;
           el._refs.backButton.classList.remove("vc-menu-hidden");
 
         });
 
-        el._refs.modalBody.appendChild(el._refs.device.pages[item.name]);
+        el._refs.modalBody.appendChild(el._refs.modalPages[item.name]);
 
       },
       /*
@@ -512,17 +526,17 @@
       previousPage: function () {
 
         var el = this;
-        var lastPage = el._refs.device.pages[el._refs.device.path.pop()];
+        var lastPage = el._refs.modalPages[el._refs.ModalPath.pop()];
 
         if (lastPage) {
           el._hidePage(lastPage, true);
         }
 
-        if (el._refs.device.path.length == 0) {
+        if (el._refs.ModalPath.length == 0) {
           el._refs.backButton.classList.add("vc-menu-hidden")
         }
 
-        el._refs.pathSpan.innerHTML = el._refs.device.path.length > 0 ? el._refs.device.path[el._refs.device.path.length - 1] : "";
+        el._refs.pathSpan.innerHTML = el._refs.ModalPath.length > 0 ? el._refs.ModalPath[el._refs.ModalPath.length - 1] : "";
 
       },
       /*
@@ -580,10 +594,15 @@
         // Appends the modal view
         document.body.appendChild(el._refs.modal);
 
+        // Triggers onModalDisplay callback
+        vcomet.triggerCallback("onModalDisplay", el, el, [el._refs.modal]);
+
         // After being appended we set the opacity in a timeout so that the transition takes place
         setTimeout(function () {
           el._refs.modal.style.opacity = 1;
         }, 0);
+
+        el._misc.modal.active = true;
 
       },
       /*
@@ -609,7 +628,7 @@
           }
 
           // Empties the path and hides the back button
-          el._refs.device.path = [];
+          el._refs.ModalPath = [];
           el._refs.backButton.classList.add("vc-menu-hidden");
 
         }
@@ -618,9 +637,17 @@
         if (el._refs.modal.style.opacity != 0) {
           el._refs.modal.addEventListener("transitionend", hideFunction);
           el._refs.modal.style.opacity = 0;
+          el._misc.modal.active = false;
         }
 
       }
+    },
+    onCreated: function () {
+
+      var el = this;
+
+      vcomet.createCallback("onModalDisplay", el);
+
     },
     onInit: function () {
       this._setup();
