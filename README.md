@@ -8,10 +8,10 @@
 [//]: # (badges)
 
 <p align='center'>
-<a href='https://github.com/vimlet/VimletComet/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526922237522/license.svg?raw=true' title='License' alt='license'></a>
-<a href='https://vimlet.com/downloads'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526922237522/build.svg?raw=true' title='Build' alt='build'></a>
-<img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526922237522/semver.svg?raw=true' title='Semver' alt='semver'>
-<a href='https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1526922237522/docs.svg?raw=true' title='Docs' alt='docs'></a>
+<a href='https://github.com/vimlet/VimletComet/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1530868538617/license.svg?raw=true' title='License' alt='license'></a>
+<a href='https://vimlet.com/downloads'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1530868538617/build.svg?raw=true' title='Build' alt='build'></a>
+<img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1530868538617/semver.svg?raw=true' title='Semver' alt='semver'>
+<a href='https://vimlet.com/vimlet/VimletComet/master/docs/release/index.html'><img src='https://vimlet.com/vimlet/VimletComet/master/docs/readme/1530868538617/docs.svg?raw=true' title='Docs' alt='docs'></a>
 </p>
 
 [//]: # (badges)
