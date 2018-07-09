@@ -229,7 +229,9 @@
                 if (!vcomet.util.isTrue(el.filter)) {
 
                     el._refs.main.classList.add("vc-fg1-hoverable");
-                    el._refs.main.querySelector("input").setAttribute("disabled", "disabled");
+                    el._refs.main.querySelector("input").addEventListener("touchstart", function (e) {
+                        e.stopPropagation();
+                    });
 
                 } else {
 
@@ -254,10 +256,15 @@
                     });
 
                 }
-                
+
                 // This listener is meant for devices, it does not matter where the user touches we will open de dropdown
-                el.addEventListener("touchstart", function (e) {
-                    if (window.innerWidth <= vcomet.tabletWidth) {
+                if (window.innerWidth <= vcomet.tabletWidth) {
+
+                    el._refs.main.querySelector("input").addEventListener("touchstart", function (e) {
+                        e.stopPropagation();
+                    });
+
+                    el.addEventListener("click", function (e) {
 
                         e.stopPropagation();
                         e.preventDefault();
@@ -267,8 +274,10 @@
                             el._refs.modalInput.focus();
                         }
 
-                    }
-                });
+                    });
+
+                }
+
             },
             /*
             @function _setupMisc
