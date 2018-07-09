@@ -246,6 +246,7 @@
 
                     el._refs.input.addEventListener("focus", function (e) {
                         el.expand();
+                        el._refs.modalInput.focus();
                     });
 
                     el._refs.input.addEventListener("keyup", function (e) {
@@ -253,7 +254,21 @@
                     });
 
                 }
+                
+                // This listener is meant for devices, it does not matter where the user touches we will open de dropdown
+                el.addEventListener("touchstart", function (e) {
+                    if (window.innerWidth <= vcomet.tabletWidth) {
 
+                        e.stopPropagation();
+                        e.preventDefault();
+                        el.expand();
+
+                        if (vcomet.util.isTrue(el.filter)) {
+                            el._refs.modalInput.focus();
+                        }
+
+                    }
+                });
             },
             /*
             @function _setupMisc
@@ -319,10 +334,10 @@
 
                 // Prevents scrolling on mobile devices
                 el._refs.overlay.addEventListener("wheel", function (e) {
-                        if (!el._refs.dropDown.isOnPath) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        }
+                    if (!el._refs.dropDown.isOnPath) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
                 }, { passive: false });
 
                 // Prevents scrolling on mobile devices
@@ -346,7 +361,7 @@
 
                 // If the user scrolls the window scrollbar we hide the dropdown
                 window.addEventListener("scroll", function (e) {
-                    if (el._misc.modal.active) {
+                    if (el._misc.modal.active && !el._refs.overlay.classList.contains("vc-combobox-device")) {
                         el.shrink();
                     }
                 });
@@ -859,7 +874,6 @@
                 el._refs.dropDown.classList.add("hidden");
                 el._refs.underline.classList.remove("animate");
 
-                // el.appendChild(el._refs.dropDown);
                 if (el._refs.overlay.parentNode) {
                     el._refs.overlay.parentNode.removeChild(el._refs.overlay);
                 }
@@ -959,9 +973,9 @@
 
             var el = this;
 
-            if (el._misc.modal.active && !el._misc.modal.inputFocus) {
-                el.shrink();
-            }
+            // if (el._misc.modal.active && !el._misc.modal.inputFocus) {
+            //     el.shrink();
+            // }
 
         }
     });
