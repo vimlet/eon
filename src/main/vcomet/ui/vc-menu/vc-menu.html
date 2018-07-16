@@ -1,302 +1,525 @@
-<template>
-
-  <div class="vc-menu-wrapper vc-sect1 vc-unselectable">
-  </div>
-
-</template>
+<template class="vc-sect1"></template>
 
 <script>
   vcomet.element("vc-menu", "vc-menu.css", {
 
     dependencies: [
-      "../vc-item",
-      "../vc-combobox",
-      "../vc-scroll"
+      "../vc-item"
     ],
+    privateProperties: {
+      refs: {
+        value: {},
+      },
+      misc: {
+        value: {},
+      }
+    },
     properties: {
-      /*
-      @property {String} layout
-      @description Indicates the disposition of the menu items
-      */
-      layout: {
-        value: "horizontal",
-        reflect: true
-      },
-      /*
-      @property {Boolean} hover
-      @description 
-      */
-      hover: {
-        value: "false",
-        reflect: true
-      },
-      /*
-      @property separators
-      @description Indicates whether there will be indicators or not separating the menu items
-      */
-      separators: {
-        value: "false",
-        reflect: true
-      },
-      /*
-      @property direction
-      @description Indicates the direction that the dropdown will follow when opening
-      */
-      direction: {
-        value: "bottom-right",
+      spacing: {
+        value: 0,
         reflect: true
       }
     },
     privateFunctions: {
       /*
-      @function _setup
-      @description Sets up the menu items and its dropdown recursively
+      @function (private) _setup
+      @description Sets up everything needed for the component
       */
       setup: function () {
 
         var el = this;
 
-        var fragment = document.createDocumentFragment();
-        var srcNodes = el.getSourceElements();
-        var menuItems = el.querySelectorAll("vc-item");
-        var i;
+        el._setupMisc();
+        el._setupRefs();
 
-        // Append source nodes
-        for (i = 0; i < srcNodes.length; i++) {
-          fragment.appendChild(srcNodes[i]);
-        }
-        // Set up vc-item elements
-        for (i = 0; i < menuItems.length; i++) {
-          el._setupItem(menuItems[i]);
-        }
+        el._setupDesktopBehavior();
+        el._setupDeviceBehavior();
 
-        el.querySelector(".vc-menu-wrapper").appendChild(fragment);
+        el._handleWindowSize();
 
       },
-      setupItem: function (item) {
+      /*
+      @function (private) _setupMisc
+      @description Prepares the misc object to hold usefull information
+      */
+      setupMisc: function () {
+
         var el = this;
 
-        if (item.getAttribute("type") == "dropdown") {
+        el._misc.dropdowns = {};
+        el._misc.dropdowns.path = [];
 
-          el._setupDropdownMenuItem(item);
+        el._misc.modal = {};
+        el._misc.modal.path = [];
 
-        } else {
+        el._misc.main = [];
+        el._misc.tree = {};
+        el._misc.items = {};
 
+        el._misc.displayDuration = 500;
+        el._misc.hideDuration = 300;
+
+      },
+      /*
+      @function (private) _setupRefs
+      @description Prepares the refs object to hold usefull references
+      */
+      setupRefs: function () {
+
+        var el = this;
+
+        el._refs.dropdowns = {};
+
+        el._refs.modal = {};
+        el._refs.modalPages = {};
+
+        el._refs.modalPath = [];
+        el._refs.modalItems = {};
+
+      },
+      /*
+      @function (private) _setupDesktopBehavior
+      @description Prepares everything needed for the desktop behavior
+      */
+      setupDesktopBehavior: function () {
+
+        var el = this;
+
+        // Creats the vc-items wrapper
+        el._refs.wrapper = document.createElement("div");
+        el._refs.wrapper.classList.add("vc-menu-wrapper", "vc-fg1", "vc-unselectable");
+        el._refs.wrapper.appendChild(el.template);
+
+        // Loops through the first level of vc-items and saves them as the main items
+        for (var i = 0; i < el._refs.wrapper.children.length; i++) {
+          el._setupItem(el._refs.wrapper.children[i]);
+          el._misc.main.push([el._refs.wrapper.children[i].getAttribute("name")]);
+        }
+
+        el.appendChild(el._refs.wrapper);
+
+      },
+      /*
+      @function (private) _setupDeviceBehavior
+      @description Prepares everything needed for the device behavior
+      */
+      setupDeviceBehavior: function () {
+
+        var el = this;
+        var item;
+
+        el._setupModalView();
+        el._setupModalViewTrigger();
+
+        // Creates the main page
+        el._refs.modalPages["main"] = document.createElement("div");
+        el._refs.modalPages["main"].classList.add("vc-menu-page", "vc-sect1", "vc-menu-front");
+        el._refs.modalPages["main"].dataset.main = "true";
+
+        // Loops through the main items and appends them to the main page, then checks if they have 
+        // vc-item childs to create more pages, and loops through those childs to see if more pages are needed
+        for (var i = 0; i < el._misc.main.length; i++) {
+
+          item = el._setupModalItem(el._misc.main[i]);
+
+          if (el._misc.tree[item.name].length > 0) {
+            el._setupModalPage(item);
+          }
+
+          el._refs.modalPages["main"].appendChild(item);
+
+        }
+
+        el._refs.modalBody.appendChild(el._refs.modalPages["main"]);
+
+      },
+      /*
+      @function (private) _setupModalView
+      @description Prepares the node in which the user will experience the modal behavior
+      */
+      setupModalView: function () {
+
+        var el = this;
+
+        el._refs.modal = document.createElement("div");
+        el._refs.modalHead = document.createElement("div");
+        el._refs.modalBody = document.createElement("div");
+
+        el._refs.backButton = document.createElement("div");
+        el._refs.path = document.createElement("div");
+        el._refs.pathSpan = document.createElement("span");
+        el._refs.closeButton = document.createElement("div");
+
+        el._refs.modal.classList.add("vc-menu-modal", "vc-sect1", "vc-fg1");
+        el._refs.modalHead.classList.add("vc-menu-head");
+        el._refs.modalBody.classList.add("vc-menu-body");
+
+        el._refs.closeButton.classList.add("vc-menu-button", "vicon", "vicon-close");
+        el._refs.path.classList.add("vc-menu-path");
+        el._refs.backButton.classList.add("vc-menu-button", "vc-menu-hidden", "vicon", "vicon-arrow-back");
+
+        el._refs.backButton.addEventListener("click", function () {
+          el._back();
+        });
+
+        el._refs.closeButton.addEventListener("click", function () {
+          el.hideModalView();
+        });
+
+        el._refs.path.appendChild(el._refs.pathSpan);
+
+        el._refs.modalHead.appendChild(el._refs.backButton);
+        el._refs.modalHead.appendChild(el._refs.path);
+        el._refs.modalHead.appendChild(el._refs.closeButton);
+
+        el._refs.modal.appendChild(el._refs.modalHead);
+        el._refs.modal.appendChild(el._refs.modalBody);
+
+        // Prevents scrolling on desktop
+        el._refs.modal.addEventListener("wheel", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }, { passive: false });
+
+        // If the user scrolls the window scrollbar we hide the dropdown
+        window.addEventListener("scroll", function (e) {
+          if (el._misc.modal.active) {
+            el.hideModalView();
+          }
+        });
+
+      },
+      /*
+      @function (private) _setupModalViewTrigger
+      @description Prepares the button that will trigger the modal node to appear
+      */
+      setupModalViewTrigger: function () {
+
+        var el = this;
+        var icon = document.createElement("i");
+
+        icon.classList.add("vicon", "vicon-menu");
+
+        el._refs.modalButton = document.createElement("div");
+        el._refs.modalButton.classList.add("vc-menu-modalButton", "vc-fg1");
+        el._refs.modalButton.appendChild(icon);
+
+        el._refs.modalButton.addEventListener("click", function () {
+          el.displayModalView();
+        });
+
+        el.appendChild(el._refs.modalButton);
+
+      },
+      /*
+      @function (private) _setupModalItem
+      @description Takes the cloned declarative items and moves them to the modal view
+      @param {String} name 
+      */
+      setupModalItem: function (name) {
+
+        var el = this;
+
+        var item = el._refs.modalItems[name];
+        var link = document.createElement("a");
+        var span = document.createElement("span");
+
+        span.innerHTML = item.getAttribute("name");
+
+        link.appendChild(span);
+
+        if (item.hasAttribute("href")) {
+          link.setAttribute("href", item.getAttribute("href"));
+        }
+
+        if (!(el._misc.tree[name].length > 0)) {
           item.addEventListener("click", function () {
-            el._hideVisibleMenuItems();
+            el.hideModalView();
           });
-
-          el._setupVisuals(item);
-
         }
 
-      },
-      setupVisuals: function (item) {
+        item.appendChild(link);
 
-        var name = item.getAttribute("name");
-        var icon = item.getAttribute("icon");
-
-        if (name != "") {
-          var nameNode = document.createElement("span");
-          nameNode.innerHTML = name;
-          item.appendChild(nameNode);
-        }
-
-        if (icon != "") {
-          var iconNode = document.createElement("i");
-          iconNode.innerHTML = icon;
-          iconNode.classList.add("material-icons");
-          item.appendChild(iconNode);
-        }
-
-        item.classList.add("vc-menu-header", "vc-sect3-hoverable");
+        return item;
 
       },
       /*
-      @function _setupDropdownMenuItem
-      @description Sets up the dropdowns with it direction, childs...
-      @param {object} item
-      @param {string} direction
+      @function (private) _setupItem
+      @description Creates a page for the child items
+      @param {Object} item 
       */
-      setupDropdownMenuItem: function (item, direction) {
+      setupItem: function (item) {
 
         var el = this;
-        var innerItems = item.children;
-        var itemsDropdown = document.createElement("div");
-        var indicator = document.createElement("div");
-        var dropdownItemsFragment = document.createDocumentFragment();
+        var link, span;
 
-        var yAxisDirection = (el.direction.indexOf("top") > -1) ? "top" : "bottom";
-        var xAxisDirection = (el.direction.indexOf("left") > -1) ? "left" : "right";
+        el._misc.tree[item.getAttribute("name")] = [];
+        el._refs.modalItems[item.getAttribute("name")] = item.cloneNode(false);
 
-        var dropdownTrigger = document.createElement("vc-item");
+        el._setupDropdown(item);
+        el._setupEvents(item);
 
-        var innerDropdownDirection;
+        link = document.createElement("a");
+        span = document.createElement("span");
+        span.innerHTML = item.getAttribute("name");
 
-        while (innerItems.length > 0) {
+        link.appendChild(span);
 
-          // el._setupItem(innerItems[0]);
-          dropdownItemsFragment.appendChild(innerItems[0]);
-
+        if (item.hasAttribute("href")) {
+          link.setAttribute("href", item.getAttribute("href"));
         }
 
-        dropdownTrigger.classList.add("dropdownTrigger");
-        dropdownTrigger.setAttribute("name", item.getAttribute("name"));
-        dropdownTrigger.setAttribute("icon", item.getAttribute("icon"));
+        item.appendChild(link);
 
-        el._setupVisuals(dropdownTrigger);
-        el._setupItemEvents(item, dropdownTrigger, itemsDropdown);
-
-        itemsDropdown.classList.add("vc-menu-dropdown", "vc-sect1");
-        itemsDropdown.appendChild(dropdownItemsFragment);
-
-        item.appendChild(dropdownTrigger);
-        item.appendChild(itemsDropdown);
+        item.classList.add("vc-sect3-hoverable");
 
       },
       /*
-      @function setupItemEvents
-      @description Sets up the click events for the menu items
-      @param {object} item
+      @function (private) _setupDropdown
+      @description Creates a dropdown for the child items
+      @param {Object} item 
       */
-      setupItemEvents: function (item, dropdownTrigger, dropdown) {
+      setupDropdown: function (item) {
 
         var el = this;
 
-        vcomet.registerPathListener(item);
-        vcomet.registerPathListener(dropdownTrigger);
+        if (item.children.length > 0) {
 
-        item.dataset.visible = false;
+          var dropdown = document.createElement("div");
+          var wrapper = document.createElement("div");
+          var child;
 
-        el._setupClickEvents(item, dropdownTrigger, dropdown);
-        el._setupHoverEvents(item, dropdownTrigger, dropdown);
+          dropdown.classList.add("vc-menu-dropdown", "vc-fg1");
+          wrapper.classList.add("vc-menu-wrapper", "vc-sect1");
 
-      },
-      /*
-      @function (private) setupHoverEvents
-      @description Creates the hover events for the item
-      @param {object} item
-      */
-      setupHoverEvents: function (item, dropdownTrigger, dropdown) {
+          while (item.children.length > 0) {
 
-        var el = this;
+            child = item.children[0];
 
-        if (el.hover == "true" || el.hover == true) {
-
-          // Dropdown item visited
-          dropdownTrigger.addEventListener("pointerover", function (e) {
-
-            if (!vcomet.util.isTouchScreen()) {
-
-              // Check if menu dropdown is already displayed
-              if (!item.dataset.visible || item.dataset.visible == "false") {
-                el._toggleDropdown(item);
-              }
-
+            if (child.nodeName.toLowerCase() == "vc-item") {
+              el._setupItem(child);
+              el._misc.tree[item.getAttribute("name")].push(child.getAttribute("name"));
             }
 
+            wrapper.appendChild(child);
 
-          });
+          }
 
-          // Dropdown item left
-          item.addEventListener("pointerleave", function (e) {
+          el._refs.dropdowns[item.getAttribute("name")] = dropdown;
 
-            if (!vcomet.util.isTouchScreen()) {
-
-              // Check if menu dropdown is already hidden
-              if (item.dataset.visible == true || item.dataset.visible == "true") {
-                el._toggleDropdown(item);
-              }
-
-            }
-
-          });
+          dropdown.appendChild(wrapper);
 
         }
 
       },
       /*
-      @function (private) setupClickEvents
-      @description Creates the click events for the item
-      @param {object} item
+      @function _setupEvents
+      @description Sets up the events for the menu item
+      @param {Object} item
       */
-      setupClickEvents: function (item, dropdownTrigger, dropdown) {
+      setupEvents: function (item) {
 
         var el = this;
 
-        // Dropdown item clicked
-        document.body.addEventListener("pointerdown", function (e) {
+        // Dropdown item visited
+        item.addEventListener("pointerenter", function (e) {
+          // Check if menu dropdown is already displayed
+          if (!item.classList.contains("vc-sect3")) {
+            // Highlights the item
+            item.classList.add("vc-sect3");
+            el._showDropdown(item);
+          }
+        });
 
-          if (vcomet.util.isTouchScreen() || (!vcomet.util.isTouchScreen() && el.hover != "true")) {
-
-            if (dropdownTrigger.isOnPath) {
-
-              el._toggleDropdown(item);
-
-            } else if (!item.isOnPath) {
-              
-              item.style.visibility = "hidden";
-              item.dataset.visible = false;
-              item.style.visibility = "visible";
-
-              item.classList.remove("vc-sect3");
-
-            }
-
+        // Dropdown item left
+        item.addEventListener("pointerleave", function (e) {
+          // Check if menu dropdown is already hidden
+          if (item.classList.contains("vc-sect3")) {
+            // Removes the item highlight
+            item.classList.remove("vc-sect3");
+            el._hideDropdown(item);
           }
 
         });
 
       },
       /*
-        @function 
-        @description
+      @function (private) _setupModalPage
+      @description Creates a page for the child items
+      @param {Object} item 
       */
-      toggleDropdown: function (item, display) {
+      setupModalPage: function (item) {
 
-        var classListFunction = item.dataset.visible == "true" || item.dataset.visible == true ? "remove" : "add";
-        // Change dropdown displaying property
-        item.style.visibility = "hidden";
-        item.dataset.visible = item.dataset.visible == "true" || item.dataset.visible == true ? false : true;
-        item.style.visibility = "visible";
-        
-        item.classList[classListFunction]("vc-sect3");
+        var el = this;
+
+        var items = el._misc.tree[item.name];
+        var child;
+
+        el._refs.modalPages[item.name] = document.createElement("div");
+        el._refs.modalPages[item.name].classList.add("vc-menu-page", "vc-sect1");
+
+        for (var i = 0; i < items.length; i++) {
+
+          child = el._setupModalItem(items[i]);
+
+          if (el._misc.tree[child.name].length > 0) {
+            el._setupModalPage(child);
+          }
+
+          el._refs.modalPages[item.name].appendChild(child);
+
+        }
+
+        item.addEventListener("click", function () {
+
+          el._displayPage(el._refs.modalPages[item.name], true);
+
+          el._refs.modalPath.push(item.name);
+          el._refs.pathSpan.innerHTML = item.name;
+          el._refs.backButton.classList.remove("vc-menu-hidden");
+
+        });
+
+        el._refs.modalBody.appendChild(el._refs.modalPages[item.name]);
 
       },
       /*
-      @function hideVisibleMenuItems
-      @description Hides the visible dropdowns of the menu
+      @function (private) _displayPage
+      @description Displays the provided page with/without animate
+      @param {Object} page
+      @param {Boolean} animate
       */
-      hideVisibleMenuItems: function () {
+      displayPage: function (page, animate) {
+
         var el = this;
-        var visibleMenuItems = el.querySelectorAll('vc-item[data-visible="true"]');
 
-        console.log('hideVisibleMenuItems');
+        var currentPage = el._refs.modalPages[el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "main"];
+        
+        var displayFunction = function () {
 
-        for (var i = 0; i < visibleMenuItems.length; i++) {
-          // This visibility style declarations is for internet explorer to properly refresh the visual changes
-          visibleMenuItems[i].style.visibility = "hidden";
-          visibleMenuItems[i].dataset.visible = false;
-          visibleMenuItems[i].style.visibility = "visible";
+          currentPage.removeEventListener("transitionend", displayFunction);
+          el._refs.modalBody.appendChild(page);
+
+          setTimeout(function () {
+            page.classList.add("vc-menu-front");
+          }, 0);
+
+        }
+
+        // Only hide the modal view if its not already hidden
+        if (window.getComputedStyle(currentPage).opacity == 1) {
+          currentPage.addEventListener("transitionend", displayFunction);
+          currentPage.classList.remove("vc-menu-front");
+        }
+
+      },
+      /*
+      @function (private) _back
+      @description Hides the provided page with/without animation
+      */
+      back: function (page, animate) {
+
+        var el = this;
+
+        var currentPage = el._refs.modalPages[el._refs.modalPath.pop()];
+        var previousPage = el._refs.modalPages[el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "main"];
+
+        if (currentPage) {
+
+          var hideFunction = function () {
+
+            currentPage.removeEventListener("transitionend", hideFunction);
+
+            el._refs.modalBody.appendChild(previousPage);
+
+            setTimeout(function () {
+              previousPage.classList.add("vc-menu-front");
+            }, 0);
+
+          }
+
+          // Only hide the modal view if its not already hidden
+          if (currentPage.classList.contains("vc-menu-front")) {
+            currentPage.addEventListener("transitionend", hideFunction);
+            currentPage.classList.remove("vc-menu-front");
+          }
+
+        }
+
+        // Hides the back button if we are in the main page
+        if (el._refs.modalPath.length == 0) {
+          el._refs.backButton.classList.add("vc-menu-hidden");
+        }
+        
+        // Empties the path span
+        el._refs.pathSpan.innerHTML = el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "";
+
+      },
+      /*
+      @function _showDropdown
+      @description Shows the dropdown for the given item
+      @param {Object} item
+      */
+      showDropdown: function (item) {
+
+        var el = this;
+
+        if (el._refs.dropdowns[item.name]) {
+          el._assignDropdownStyle(item);
+        }
+
+      },
+      /*
+      @function _hideDropdown
+      @description Hides the dropdown for the given item
+      @param {Object} item
+      */
+      hideDropdown: function (item) {
+
+        var el = this;
+        var pathIndex = el._misc.dropdowns.path.indexOf(item.name);
+
+        if (el._refs.dropdowns[item.name]) {
+
+          el._refs.dropdowns[item.name].parentNode.removeChild(el._refs.dropdowns[item.name]);
+
+          for (var i = el._misc.dropdowns.path.length; pathIndex < i; i--) {
+            el._misc.dropdowns.path.pop()
+          }
 
         }
 
       },
       /*
-      @function stashMenuItems
-      @description Saves the declarative content to a template to be used when transformed
+      @function _assignDropdownStyle
+      @description Determines and assigns the location of the dropdown
+      @param {Object} item
       */
-      stashMenuItems: function () {
+      assignDropdownStyle: function (item) {
 
-        var template = document.createElement("template");
-        template.innerHTML = this.innerHTML;
-        this.innerHTML = "";
-        this.appendChild(template);
+        var el = this;
+        var dropdown = el._refs.dropdowns[item.name];
+
+        dropdown.style[el._misc.dropdowns.path.length > 0 ? "paddingLeft" : "paddingTop"] = parseInt(el.spacing) + "px";
+        dropdown.dataset.position = el._misc.dropdowns.path.length > 0 ? "right" : "bottom";
+        dropdown.style.height = (item.offsetHeight * dropdown.querySelectorAll("vc-item").length) + "px";
+
+        item.appendChild(dropdown);
+
+        el._misc.dropdowns.path.push(item.name);
+
+      },
+      /*
+      @function _handleWindowSize
+      @description Toggles between the device and desktop view depending on the window size
+      */
+      handleWindowSize: function () {
+        this.classList[window.innerWidth <= vcomet.tabletWidth ? "add" : "remove"]("vc-menu-device");
       },
       /*
       @function exceesWindow
       @description If the dropdown to be opened exceeds we return an object with data about the sides that have ben exceeded
-      @param {object} element
+      @param {Object} element
       */
       exceedsWindow: function (element) {
 
@@ -324,34 +547,89 @@
         }
 
         return returnObject;
-      },
-      /*
-      @function relocateDropdownIfNeeded
-      @description Handles the relocation of the dropdown
-      @param {param_type} param_name [param_description]
-      */
-      relocateDropdownIfNeeded: function (item) {
-
-        var exceedsObject = this._exceedsWindow(item.querySelector(".vc-menu-dropdown"));
-
-        if (exceedsObject.exceeds == true) {
-
-          var yAxisDirection = (item.dataset.direction.indexOf("top") > -1) ? "top" : "bottom";
-          var xAxisDirection = (item.dataset.direction.indexOf("left") > -1) ? "left" : "right";
-
-          xAxisDirection = (exceedsObject.sides.indexOf("left") != -1) ? "right" : xAxisDirection;
-          xAxisDirection = (exceedsObject.sides.indexOf("right") != -1) ? "left" : xAxisDirection;
-
-          yAxisDirection = (exceedsObject.sides.indexOf("bottom") != -1) ? "top" : yAxisDirection;
-          yAxisDirection = (exceedsObject.sides.indexOf("top") != -1) ? "bottom" : yAxisDirection;
-
-          item.dataset.direction = yAxisDirection + "-" + xAxisDirection;
-        }
       }
     },
-    onInit: function () { },
-    onRender: function () {
+    functions: {
+      /*
+      @function displayModalView
+      @description Displays the modal view to nagivate through the menu options
+      */
+      displayModalView: function () {
+
+        var el = this;
+
+        // Empties the path span since we are in the main page
+        el._refs.pathSpan.innerHTML = "";
+        el._misc.currentPage = el._refs.modalPages.main;
+        el._misc.modal.path = [el._refs.modalPages.main];
+
+        // Appends the modal view
+        document.body.appendChild(el._refs.modal);
+
+        // Triggers onModalDisplay callback
+        vcomet.triggerCallback("onModalDisplay", el, el, [el._refs.modal]);
+
+        // After being appended we set the opacity in a timeout so that the transition takes place
+        setTimeout(function () {
+          el._refs.modal.style.opacity = 1;
+        }, 0);
+
+        el._misc.modal.active = true;
+
+      },
+      /*
+      @function hideModalView
+      @description Hides the modal view
+      */
+      hideModalView: function () {
+
+        var el = this;
+
+        var hideFunction = function () {
+
+          var visiblePages = el._refs.modalBody.querySelectorAll(".vc-menu-page:not(.vc-menu-hidden)");
+
+          document.body.removeChild(el._refs.modal);
+          el._refs.modal.removeEventListener("transitionend", hideFunction);
+
+          // Takes all the visible pages and hides them except for the main one
+          for (var i = 0; i < visiblePages.length; i++) {
+            if (!visiblePages[i].dataset || !visiblePages[i].dataset.main) {
+              el._refs.modalBody.insertBefore(visiblePages[i], el._refs.modalBody.childNodes[0]);
+              visiblePages[i].classList.remove("vc-menu-front");
+            } else {
+              visiblePages[i].classList.add("vc-menu-front");
+            }
+          }
+
+          // Empties the path and hides the back button
+          el._refs.modalPath = [];
+          el._refs.backButton.classList.add("vc-menu-hidden");
+
+        }
+
+        // Only hide the modal view if its not already hidden
+        if (el._refs.modal.style.opacity != 0) {
+          el._refs.modal.addEventListener("transitionend", hideFunction);
+          el._refs.modal.style.opacity = 0;
+          el._misc.modal.active = false;
+        }
+
+      }
+    },
+    onCreated: function () {
+
+      var el = this;
+
+      vcomet.createCallback("onModalDisplay", el);
+
+    },
+    onInit: function () {
       this._setup();
+    },
+    onWindowResize: function () {
+      this._handleWindowSize();
+      this.hideModalView();
     }
   });
 </script>

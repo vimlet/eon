@@ -1,6 +1,8 @@
 <template>
     <vc-anchor></vc-anchor>
-    <div class="vc-reveal-wrapper"></div>
+    <div class="vc-reveal-relative">
+        <div class="vc-reveal-wrapper"></div>
+    </div>
 </template>
 <script>
     vcomet.element("vc-reveal", "vc-reveal.css", {
@@ -81,6 +83,14 @@
             easing: {
                 value: "ease",
                 reflect: true
+            },
+            /*
+                @property {String} wrapperClass 
+                @description 
+            */
+            wrapperClass: {
+                value: "",
+                reflect: true
             }
         },
         privateFunctions: {
@@ -128,7 +138,10 @@
                 // Store references
                 el._refs.wrapper = el.template.querySelector(".vc-reveal-wrapper");
                 el._refs.anchor = el.template.querySelector("vc-anchor");
-                
+                // Set up wrapper custom class
+                if(el.wrapperClass) {
+                    el._refs.wrapper.classList.add(el.wrapperClass);
+                }
             },
             /*
                 @function (private) _setUpMisc
@@ -196,12 +209,13 @@
             */
             setUpAnchor: function () {
                 var el = this;
-
-                el._refs.anchor.onVisible(function(){
-                    // Trigger animation
-                    el._animate();
+                // Make sure anchor has its callbacks created
+                el._refs.anchor.onCreated(function(){
+                    el._refs.anchor.onVisible(function(){
+                        // Trigger animation
+                        el._animate();
+                    });
                 });
-
             },
             
             /*
@@ -286,6 +300,25 @@
                 } else {
                     el._refs.wrapper.style.transform = "translate3d(" + value + "px, 0, 0)";
                 }
+            },
+            /*
+                @function (private) _refresh
+                @description 
+            */
+            refresh: function(value){
+                var el = this;
+                // Wait until anchor has finished its life cycle
+                el._refs.anchor.onReady(function(){
+                    var scrollTop = el._refs.anchor._misc.scrollTop;
+                    // Check if scroll has left behind the anchor offset position
+                    if(el._refs.anchor.offsetPosition <= scrollTop) {
+                        // Trigger anchor activation
+                        if(!el._refs.anchor.reached) {
+                            el._refs.anchor.reached = true;
+                            vcomet.triggerCallback("onVisible", el._refs.anchor, el._refs.anchor);
+                        }
+                    }
+                });
             }
         },
         functions: {
@@ -327,8 +360,11 @@
             //
             el._setUpAnchor();
         },
+        onBubbleRender: function () {
+            this._refresh();
+        },
         onResize: function(){
-            // Update animation position values
+            this._refresh();
         },
         onPropertyChanged: function(prop, oldVal, value){
             var el = this;
@@ -340,7 +376,6 @@
                 el._setStartPosition();
                 // Increase proportionally the duration on partial animations
                 el._misc.endTime = +new Date() + el.duration;
-                console.log('NEW DATA');
 
             }
         }
