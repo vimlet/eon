@@ -57,8 +57,8 @@
         Default: true
       */
       defaultStyle: {
-          value: true,
-          reflect: true
+        value: true,
+        reflect: true
       }
     },
     privateFunctions: {
@@ -69,7 +69,7 @@
 
         // Exclude formElement children since sometimes they wrap html form elements.
         if (!node._formElement) {
-          var children = node.childNodes; // node.children could probably increase performance
+          var children = node.children; // node.children could probably increase performance
           for (var i = 0; i < children.length; i++) {
             original._walkRecursive(original, children[i], fn);
           }
@@ -82,7 +82,7 @@
         node = node || this;
 
         // Note this time we don't prevent access to formElement children. 
-        var children = node.childNodes; // node.children could probably increase performance
+        var children = node.children; // node.children could probably increase performance
         for (var i = 0; i < children.length; i++) {
           original._clearRecursive(original, children[i], fn);
         }
@@ -146,8 +146,9 @@
       },
 
       handleCheckbox: function (data, node) {
+
         var checkboxProperty = data[node.name];
-        if (node.checked) {
+        if (vcomet.util.isTrue(node.checked)) {
           if (checkboxProperty) {
             if (Object.prototype.toString.call(checkboxProperty) === "[object Array]") {
               checkboxProperty.push(node.value);
@@ -165,19 +166,19 @@
         @description Check if the default element style should be applied
       */
       setDefaultStyle: function () {
-          var el = this;
-          // Check default style configuration
-          if(!vcomet.util.isTrue(el.defaultStyle)) {
-              // Remove default style
-              el.classList.remove("vc-spaced-container");
-          } else {
-              // Spaced items style
-              el.classList.add("vc-spaced-container");
-          }
-          // Check fill behavior
-          if(vcomet.util.isTrue(el.fill)) {
-              el.classList.add("vc-fill");
-          }
+        var el = this;
+        // Check default style configuration
+        if (!vcomet.util.isTrue(el.defaultStyle)) {
+          // Remove default style
+          el.classList.remove("vc-spaced-container");
+        } else {
+          // Spaced items style
+          el.classList.add("vc-spaced-container");
+        }
+        // Check fill behavior
+        if (vcomet.util.isTrue(el.fill)) {
+          el.classList.add("vc-fill");
+        }
       }
     },
 
@@ -192,9 +193,10 @@
 
         // Walk form recursively
         el._walkRecursive(el, el, function (node) {
-
+          
           // Only add elements if they have name, value and not disabled
-          if (node.name !== "" && node.value && !node.disabled) {
+          if (node.name !== "" && !vcomet.util.isTrue(node.disabled)) {
+
             // vComet elements
             if (node._formElement) {
               if (node.nodeName.toLowerCase() == "vc-checkbox" || node.nodeName.toLowerCase() == "vc-toggle") {
@@ -213,7 +215,7 @@
 
               // Handle radio
               if (node.type.toLowerCase() == "radio") {
-                if (node.checked) {
+                if (node.hasOwnProperty("checked")) {
                   data[node.name] = node.value;
                 }
               }
@@ -231,7 +233,6 @@
 
             // Other HTML form elements
             else if (node instanceof HTMLTextAreaElement
-              || node instanceof HTMLOptionElement
               || node instanceof HTMLSelectElement
               || node instanceof HTMLDataListElement) {
               data[node.name] = node.value;
