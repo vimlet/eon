@@ -872,7 +872,7 @@
         mousedown = mousedownThrottled = throttled = false;
         var initialValue, moveValue, slideCounter, position, target, translatePixels;
         var index, slideLimitValue, minTranslValue, elementTranslateMiddle, slide;
-        var delay = el._isTrickyBrowser() ? 10 : 60;
+        var delay = el._isTrickyBrowser() ? 10 : 20;
         var axis = el.direction == "horizontal" ? "clientX" : "clientY";
         if (!el.externalSlide || el.externalSlide === "false") {
           // Start slide on mouse down event
@@ -895,7 +895,7 @@
           // Slide element on mouse move
           el._refs.wrapper.addEventListener("pointermove", function (e) {
             if (mousedown) {
-              if(slideCounter > 5) {
+              if(slideCounter > 1) {
                 if (!throttled) {
                   // Get y/z translate pixels
                   translatePixels = moveValue - e[axis];
@@ -903,6 +903,9 @@
                   position = el._processPosition(el._refs.wrapper, translatePixels, "slides");
                   // Translate element
                   el._translate(el._refs.wrapper, position);
+                  if(translatePixels) {
+                    vcomet.triggerCallback("onDragStarted", el, el);
+                  }
                   // Update initial move value
                   moveValue = e[axis];
                   // Throttle
@@ -959,6 +962,7 @@
               }
             }
             slideCounter = 0;
+            vcomet.triggerCallback("onDragStoped", el, el);
           });
         }
       },
@@ -1228,6 +1232,10 @@
       var el = this;
       // Create on slide change event callback
       vcomet.createCallback("onSlideChange", el);
+      // 
+      vcomet.createCallback("onDragStarted", el);
+      // 
+      vcomet.createCallback("onDragStoped", el);
       // Create on paging ready event
       // ** Internally used for thumbnails translation calculation
       vcomet.createCallback("onPagingReady", el, "ready");
