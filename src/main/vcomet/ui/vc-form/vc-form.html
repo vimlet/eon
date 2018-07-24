@@ -91,9 +91,9 @@
       },
 
       /*
-        @function (private) {String} _generateParams
-        @description Return an string of form data for ajax request
-        @param {Object} data [Form data]
+      @function (private) {String} _generateParams
+      @description Return an string of form data for ajax request
+      @param {Object} data [Form data]
       */
       generateParams: function (data) {
         var dataKeys = Object.keys(data);
@@ -153,17 +153,21 @@
             if (Object.prototype.toString.call(checkboxProperty) === "[object Array]") {
               checkboxProperty.push(node.value);
             } else {
-              data[node.name] = [data[node.name], node.value];
+              data[node.name] = data[node.name] = "" ? [node.value] : [data[node.name], node.value];
             }
 
           } else {
             data[node.name] = node.value;
           }
+        } else {
+          if (!checkboxProperty) {
+            data[node.name] = "";
+          }
         }
       },
       /*
-        @function (private) _setDefaultStyle
-        @description Check if the default element style should be applied
+      @function (private) _setDefaultStyle
+      @description Check if the default element style should be applied
       */
       setDefaultStyle: function () {
         var el = this;
@@ -179,13 +183,57 @@
         if (vcomet.util.isTrue(el.fill)) {
           el.classList.add("vc-fill");
         }
+      },
+      /*
+      @function (private) {Boolean} _isCheckBox
+      @description Returns whether the provided node is a checkbox or not
+      @param {Object} node
+      */
+      isCheckBox: function (node) {
+        if (node.nodeName.toLowerCase() == "vc-checkbox" || (node instanceof HTMLInputElement && node.type.toLowerCase() == "checkbox")) {
+          return true;
+        }
+        return false;
+      },
+      /*
+      @function (private) {Boolean} _isRadioButton
+      @description Returns whether the provided node is a radio or not
+      @param {Object} node
+      */
+      isRadioButton: function (node) {
+        if (node.nodeName.toLowerCase() == "vc-radio" || (node instanceof HTMLInputElement && node.type.toLowerCase() == "radio")) {
+          return true;
+        }
+        return false;
+      },
+      /*
+      @function (private) {Boolean} _isRadioGroup
+      @description Returns whether the provided node is a radio group or not
+      @param {Object} node
+      */
+      isRadioGroup: function (node) {
+        if (node.nodeName.toLowerCase() == "vc-group") {
+          return true;
+        }
+        return false;
+      },
+      /*
+      @function (private) {Boolean} _isToggle
+      @description Returns whether the provided node is a toggle or not
+      @param {Object} node
+      */
+      isToggle: function (node) {
+        if (node.nodeName.toLowerCase() == "vc-toggle") {
+          return true;
+        }
+        return false;
       }
     },
 
     functions: {
       /*
-        @function {Object} getData 
-        @description Return form values as an object
+      @function {Object} getData 
+      @description Return form values as an object
       */
       getData: function () {
         var el = this;
@@ -193,7 +241,7 @@
 
         // Walk form recursively
         el._walkRecursive(el, el, function (node) {
-          
+
           // Only add elements if they have name, value and not disabled
           if (node.name !== "" && !vcomet.util.isTrue(node.disabled)) {
 
@@ -202,9 +250,7 @@
               if (node.nodeName.toLowerCase() == "vc-checkbox" || node.nodeName.toLowerCase() == "vc-toggle") {
                 el._handleCheckbox(data, node);
               } else if (node.nodeName.toLowerCase() == "vc-radio") {
-                if (node.checked) {
-                  data[node.name] = node.value;
-                }
+                data[node.name] = node.checked ? node.value : "";
               } else {
                 data[node.name] = node.value;
               }
@@ -215,9 +261,7 @@
 
               // Handle radio
               if (node.type.toLowerCase() == "radio") {
-                if (node.hasOwnProperty("checked")) {
-                  data[node.name] = node.value;
-                }
+                data[node.name] = node.hasOwnProperty("checked") ? node.value : "";
               }
 
               // Handle checkbox
@@ -244,7 +288,67 @@
 
         return data;
       },
+      /*
+      @function {Object} setData 
+      @description Sets the provided data to the form elements
+      @param {Object} data [Form data]
+      */
+      setData: function (data) {
 
+        var el = this;
+        var value, isArrayValue, node, nodes;
+        
+        // Loops through the data keys and searchs for the elements with that key as its name
+        for (var key in data) {
+
+          nodes = el.querySelectorAll("[name='" + key + "']");
+          value = data[key];
+          isArrayValue = (Object.prototype.toString.call(value) === '[object Array]');
+          
+          // if its a radio, checkbox or toggle we loop through the nodes to see if they are in the value array
+          if (el._isRadioButton(nodes[0]) || el._isCheckBox(nodes[0]) || el._isToggle(nodes[0])) {
+
+            for (var i = 0; i < nodes.length; i++) {
+              nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || value == nodes[i].value) ? true : false;
+            }
+            
+            // if its a readio group we take the radio childs and loop through them
+          } else if (el._isRadioGroup(nodes[0])) {
+
+            nodes = el.querySelectorAll("vc-radio");
+
+            for (var i = 0; i < nodes.length; i++) {
+              nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || value == nodes[i].value) ? true : false;
+            }
+            
+            // else just assign the value to the node
+          } else {
+
+            for (var i = 0; i < nodes.length; i++) {
+
+              nodes[i].value = value;
+
+            }
+
+          }
+
+        }
+
+      },
+      /*
+      @function {Object} saveData 
+      @description Saves the current data of the form elements
+      @param {Object} data [Form data]
+      */
+      saveData: function () {
+        var el = this;
+        el._savedData = el.getData();
+        return el._savedData;
+      },
+      /*
+      @function {Object} clear 
+      @description Clears the form elements
+      */
       clear: function () {
         var el = this;
         el._clearRecursive(el, el, function (node) {
@@ -255,7 +359,11 @@
               || node.nodeName.toLowerCase() == "vc-radio") { // TODO: Review radio
               node.checked = false;
             } else {
-              // node.value = ""; // TODO: call if exists node.clear() to deal with "" != Number type issue 
+              if (node.clear) {
+                node.clear();
+              } else {
+                node.value = "";
+              }
             }
           }
 
@@ -274,7 +382,6 @@
 
           // Other HTML form elements
           else if (node instanceof HTMLTextAreaElement
-            || node instanceof HTMLOptionElement
             || node instanceof HTMLSelectElement
             || node instanceof HTMLDataListElement) {
             node.value = "";
@@ -282,10 +389,17 @@
 
         });
       },
-
       /*
-        @function submit
-        @description Sent the form data
+      @function {Object} restore 
+      @description Restores the form elements to the previous saved data
+      */
+      restore: function () {
+        var el = this;
+        el.setData(el._savedData);
+      },
+      /*
+      @function submit
+      @description Sends the form data
       */
       submit: function () {
         var el = this;
@@ -333,6 +447,10 @@
           el.submit();
         }, true);
       }
+    },
+
+    onReady: function () {
+      this.saveData();
     }
 
   });
