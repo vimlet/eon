@@ -148,7 +148,7 @@
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition < 0 && ~["static", "relative"].indexOf(position)) {
             el._fix("fixed");
-        } else if (el.offsetParent && el._misc.viewPosition >= 0 && ~["fixed", "absolute"].indexOf(position)) {
+        } else if (!el.offsetParent || (el.offsetParent && el._misc.viewPosition >= 0 && ~["fixed", "absolute"].indexOf(position))) {
             el._fix("relative");
         }
       },
@@ -167,7 +167,7 @@
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition > limitValue && ~["static", "relative"].indexOf(position)) {
           el._fix("fixed");
-        } else if (el.offsetParent && el._misc.viewPosition <= limitValue && ~["fixed", "absolute"].indexOf(position)) {
+        } else if (!el.offsetParent || (el.offsetParent && el._misc.viewPosition <= limitValue && ~["fixed", "absolute"].indexOf(position))) {
           el._fix("relative");
         }
       },
@@ -313,14 +313,17 @@
       */
       refresh: function () {
         var el = this;
-        
+        var position = window.getComputedStyle(el.wrapper).position;
+        // Update offset value when resized on relative position
+        if (el.offsetParent && position == "relative") {
+          el._misc.initOffsetPos = Math.abs(el._getOffsetProp());
+        }
         // Copy size property from parent if no single style has been applied to the wrapper node
         if(!el.fixedClass) {
           el.wrapper.style.width = el.side == "top" || el.side == "bottom" ? "100%" : el.offsetWidth + "px";
           el.wrapper.style.height = el.side == "top" || el.side == "bottom" ? el.offsetHeight + "px" : "100%";
         }
-
-        el._refs.setPositionFn.call();
+        el._fixedMonitor();
       }
     },
     onCreated: function () {
@@ -339,21 +342,20 @@
       el._misc.viewPosition = sticky.getBoundingClientRect()[el.side];
       // Check scroll container
       el._setFixContainer();
-      // Fixed behavior
-      el._fixedMonitor();
       // Animation monitoring
       el._animationMonitor();
       // Sticky fixed functionality
       el._scrollSticky();
     },
+    onRender: function(){
+      var el = this;
+      // Fixed behavior
+      setTimeout(function () {
+        el._fixedMonitor();
+      }, 2000);
+    },
     onResize: function(){
       var el = this;
-
-      var position = window.getComputedStyle(el.wrapper).position;
-      // Update offset value when resized on relative position
-      if (el.offsetParent && position == "relative") {
-        el._misc.initOffsetPos = Math.abs(el._getOffsetProp());
-      }
       el.refresh();
     },
     onPropertyChanged: function (attrName, oldVal, newVal) {
