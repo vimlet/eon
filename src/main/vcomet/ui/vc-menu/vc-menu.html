@@ -2,7 +2,7 @@
 
 <script>
   vcomet.element("vc-menu", "vc-menu.css", {
-
+    themed: true,
     dependencies: [
       "../vc-item"
     ],
@@ -224,7 +224,7 @@
         var link = document.createElement("a");
         var span = document.createElement("span");
 
-        span.innerHTML = item.getAttribute("name");
+        span.innerHTML = item.getAttribute("label");
 
         link.appendChild(span);
 
@@ -261,7 +261,7 @@
 
         link = document.createElement("a");
         span = document.createElement("span");
-        span.innerHTML = item.getAttribute("name");
+        span.innerHTML = item.getAttribute("label");
 
         link.appendChild(span);
 
@@ -375,7 +375,7 @@
           el._displayPage(el._refs.modalPages[item.name], true);
 
           el._refs.modalPath.push(item.name);
-          el._refs.pathSpan.innerHTML = item.name;
+          el._refs.pathSpan.innerHTML = item.label;
           el._refs.backButton.classList.remove("vc-menu-hidden");
 
         });
@@ -466,6 +466,7 @@
 
         if (el._refs.dropdowns[item.name]) {
           el._assignDropdownStyle(item);
+          vcomet.triggerCallback("onDropdownDisplay", el, el, [item.name, el._refs.dropdowns[item.name]]);
         }
 
       },
@@ -622,6 +623,7 @@
       var el = this;
 
       vcomet.createCallback("onModalDisplay", el);
+      vcomet.createCallback("onDropdownDisplay", el);
 
     },
     onInit: function () {
