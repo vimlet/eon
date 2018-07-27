@@ -180,13 +180,14 @@
           e.preventDefault();
           e.stopPropagation();
         }, { passive: false });
-
-        // If the user scrolls the window scrollbar we hide the dropdown
-        window.addEventListener("scroll", function (e) {
-          if (el._misc.modal.active) {
-            el.hideModalView();
-          }
-        });
+        
+        // TODO: Consider if this is necessary or not
+        // If the user scrolls the window scrollbar we hide the modal view
+        // window.addEventListener("scroll", function (e) {
+        //   if (el._misc.modal.active) {
+        //     el.hideModalView();
+        //   }
+        // });
 
       },
       /*
@@ -484,6 +485,8 @@
 
           el._refs.dropdowns[item.name].parentNode.removeChild(el._refs.dropdowns[item.name]);
 
+          vcomet.triggerCallback("onDropdownClose", el, el, [item.name, el._refs.dropdowns[item.name]]);
+
           for (var i = el._misc.dropdowns.path.length; pathIndex < i; i--) {
             el._misc.dropdowns.path.pop()
           }
@@ -611,6 +614,7 @@
 
         // Only hide the modal view if its not already hidden
         if (el._refs.modal.style.opacity != 0) {
+          vcomet.triggerCallback("onModalClose", el, el, [el._refs.modal]);
           el._refs.modal.addEventListener("transitionend", hideFunction);
           el._refs.modal.style.opacity = 0;
           el._misc.modal.active = false;
@@ -623,7 +627,10 @@
       var el = this;
 
       vcomet.createCallback("onModalDisplay", el);
+      vcomet.createCallback("onModalClose", el);
+
       vcomet.createCallback("onDropdownDisplay", el);
+      vcomet.createCallback("onDropdownClose", el);
 
     },
     onInit: function () {
