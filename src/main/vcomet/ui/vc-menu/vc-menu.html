@@ -180,7 +180,7 @@
           e.preventDefault();
           e.stopPropagation();
         }, { passive: false });
-        
+
         // TODO: Consider if this is necessary or not
         // If the user scrolls the window scrollbar we hide the modal view
         // window.addEventListener("scroll", function (e) {
@@ -343,6 +343,11 @@
 
         });
 
+        item.addEventListener("click", function (e) {
+          // Hides all the dropdowns
+          el._hideAllDropdowns();
+        });
+
       },
       /*
       @function (private) _setupModalPage
@@ -395,7 +400,7 @@
         var el = this;
 
         var currentPage = el._refs.modalPages[el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "main"];
-        
+
         var displayFunction = function () {
 
           currentPage.removeEventListener("transitionend", displayFunction);
@@ -451,7 +456,7 @@
         if (el._refs.modalPath.length == 0) {
           el._refs.backButton.classList.add("vc-menu-hidden");
         }
-        
+
         // Empties the path span
         el._refs.pathSpan.innerHTML = el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "";
 
@@ -480,9 +485,9 @@
 
         var el = this;
         var pathIndex = el._misc.dropdowns.path.indexOf(item.name);
-
-        if (el._refs.dropdowns[item.name]) {
-
+        
+        if (pathIndex > -1 && el._refs.dropdowns[item.name]) {
+          
           el._refs.dropdowns[item.name].parentNode.removeChild(el._refs.dropdowns[item.name]);
 
           vcomet.triggerCallback("onDropdownClose", el, el, [item.name, el._refs.dropdowns[item.name]]);
@@ -492,6 +497,31 @@
           }
 
         }
+
+      },
+      /*
+      @function _hideAllDropdowns
+      @description Hides all the dropdowns
+      */
+      hideAllDropdowns: function () {
+
+        var el = this;
+        var dropdown;
+
+        for (var i = el._misc.dropdowns.path.length; 0 < i; i--) {
+
+          dropdown = el._misc.dropdowns.path.pop();
+
+          if (el._refs.dropdowns[dropdown]) {
+
+            el._refs.dropdowns[dropdown].parentNode.removeChild(el._refs.dropdowns[dropdown]);
+            vcomet.triggerCallback("onDropdownClose", el, el, [dropdown, el._refs.dropdowns[el._refs.dropdowns[dropdown]]]);
+
+          }
+
+        }
+
+        el._misc.dropdowns.path = [];
 
       },
       /*
