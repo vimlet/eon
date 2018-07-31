@@ -1,0 +1,82 @@
+// Creates a namespace for requirejs
+vcomet.resize = vcomet.resize || {};
+
+(function () {
+  
+  <% template("resize/ResizeListener.js") %>
+
+}).apply(vcomet.resize);
+
+
+/**
+ *
+ * @param  {[type]} element [description]
+ * @param  {[type]} key      [description]
+ * @param  {Function} callback     [description]
+ * @return {[type]}            [description]
+ */
+vcomet.addResizeListener = function (element, key, fn) {
+
+  if ('ResizeObserver' in window) {
+
+    element.__resizeObservers = element.__resizeObservers || {};
+
+    // If there is already a resizeObserver with that key, 
+    // we disconnect/delete it, and create a new one with the provided callback
+    if (element.__resizeObservers[key]) {
+      element.__resizeObservers[key].disconnect();
+      delete element.__resizeObservers[key];
+    }
+
+    // Creates the resizeObserver for the element with the provided callback
+    element.__resizeObservers[key] = new ResizeObserver(fn);
+    element.__resizeObservers[key].observe(element);
+
+  } else {
+
+    vcomet.onReady(function () {
+
+      element.__resizeListeners = element.__resizeListeners || {};
+
+      // If there is already a resizeListener with that key, 
+      // we remove it, and create a new one with the provided callback
+      if (element.__resizeListeners[key]) {
+        vcomet.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
+      }
+
+      // Creates the resizeObserver for the element with the provided callback
+      element.__resizeListeners[key] = fn;
+      vcomet.resize.ResizeListener.add(element, element.__resizeListeners[key]);
+
+    });
+
+  }
+
+};
+
+/**
+ *
+ * @param  {[type]} element [description]
+ * @param  {[type]} key      [description]
+ * @return {[type]}            [description]
+ */
+vcomet.removeResizeListener = function (element, key) {
+
+  if ('ResizeObserver' in window) {
+
+    // Checks if the key already exists and disconnects/deletes it
+    if (element.__resizeObservers[key]) {
+      element.__resizeObservers[key].disconnect();
+      delete element.__resizeObservers[key];
+    }
+
+  } else {
+
+    // Checks if there is a resizeListener with that key and removes it
+    if (element.__resizeListeners[key]) {
+      vcomet.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
+    }
+
+  }
+
+};
