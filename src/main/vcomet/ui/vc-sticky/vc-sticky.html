@@ -218,7 +218,7 @@
         var el = this;
         if (el.animPosition) {
           // Parent is the document body element or vc-scroll if sticky is currently relative positioned
-          var parent = el.vcScroll && ~["static", "relative"].indexOf(window.getComputedStyle(el.wrapper).position) ? el.vcScroll : document.documentElement;
+          var parent = el._refs.vcScroll && ~["static", "relative"].indexOf(window.getComputedStyle(el.wrapper).position) ? el._refs.vcScroll : document.documentElement;
           var scrollValue = scrollMisc && scrollMisc[el._misc.scrollProp] ? scrollMisc[el._misc.scrollProp] : parent[el._misc.scrollProp];
           el.wrapper.style.transition = "all .2s";
           // Check animation scroll position
@@ -259,11 +259,11 @@
       setFixContainer: function () {
         var el = this;
         // Sticky inside vc-scroll container
-        el.vcScroll = el.vcScroll ? document.querySelector(el.vcScroll) : false;
+        el._refs.vcScroll = el.vcScroll ? document.querySelector(el.vcScroll) : false;
         // Sticky fix container
         el.fixContainer = !el.fixContainer ? document.body : document.querySelector(el.fixContainer);
         el.fixContainer = !el.fixContainer ? document.body : el.fixContainer;
-        el.vcScroll = el.fixContainer.tagName.toLowerCase() == "vc-scroll" ? el.fixContainer : el.vcScroll;
+        el._refs.vcScroll = el.fixContainer.tagName.toLowerCase() == "vc-scroll" ? el.fixContainer : el._refs.vcScroll;
       },
       /*
         @function (private) _scrollSticky
@@ -285,7 +285,7 @@
             el._fixedMonitor(el._misc.viewPosition, el._misc.offsetPos, el._misc.initOffsetPos, el.wrapper.style.position);
             el._animationMonitor(arg);
             // Throttle only using custom vc-scroll
-            if(el.vcScroll) {
+            if(el._refs.vcScroll) {
               throttled = true;
               // Set a timeout to un-throttle
               setTimeout(function () {
@@ -295,9 +295,9 @@
           }
         };
         // Check scroll parent container
-        if (el.vcScroll) {
-          el.vcScroll.onCreated(function(){
-            el.vcScroll.onScrolled(el._refs.setPositionFn);
+        if (el._refs.vcScroll) {
+          el._refs.vcScroll.onCreated(function(){
+            el._refs.vcScroll.onScrolled(el._refs.setPositionFn);
           });
         } else if (el.fixContainer.tagName.toLowerCase() == "body") {
           window.addEventListener("scroll", el._refs.setPositionFn);
@@ -361,7 +361,7 @@
     onPropertyChanged: function (attrName, oldVal, newVal) {
       var el = this;
       // Monitor wrapper fixed displaying with vc-scroll integration
-      if (attrName == "_viewPosition" && el.vcScroll) {
+      if (attrName == "_viewPosition" && el._refs.vcScroll) {
         el.wrapper.style.display = newVal == -el.spacing ? "none" : "flex";
       }
     }
