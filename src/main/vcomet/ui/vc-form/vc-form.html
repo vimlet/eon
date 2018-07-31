@@ -69,24 +69,11 @@
 
         // Exclude formElement children since sometimes they wrap html form elements.
         if (!node._formElement) {
-          var children = node.children; // node.children could probably increase performance
+          var children = node.children;
           for (var i = 0; i < children.length; i++) {
             original._walkRecursive(original, children[i], fn);
           }
         }
-        fn(node);
-      },
-
-      clearRecursive: function (original, node, fn) {
-        original = original || this;
-        node = node || this;
-
-        // Note this time we don't prevent access to formElement children. 
-        var children = node.children; // node.children could probably increase performance
-        for (var i = 0; i < children.length; i++) {
-          original._clearRecursive(original, children[i], fn);
-        }
-
         fn(node);
       },
 
@@ -297,36 +284,40 @@
 
         var el = this;
         var value, isArrayValue, node, nodes;
-        
+
         // Loops through the data keys and searchs for the elements with that key as its name
         for (var key in data) {
 
           nodes = el.querySelectorAll("[name='" + key + "']");
           value = data[key];
           isArrayValue = (Object.prototype.toString.call(value) === '[object Array]');
-          
-          // if its a radio, checkbox or toggle we loop through the nodes to see if they are in the value array
-          if (el._isRadioButton(nodes[0]) || el._isCheckBox(nodes[0]) || el._isToggle(nodes[0])) {
 
-            for (var i = 0; i < nodes.length; i++) {
-              nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || value == nodes[i].value) ? true : false;
-            }
-            
-            // if its a readio group we take the radio childs and loop through them
-          } else if (el._isRadioGroup(nodes[0])) {
+          if (nodes.length > 0) {
 
-            nodes = el.querySelectorAll("vc-radio");
+            // if its a radio, checkbox or toggle we loop through the nodes to see if they are in the value array
+            if (el._isRadioButton(nodes[0]) || el._isCheckBox(nodes[0]) || el._isToggle(nodes[0])) {
 
-            for (var i = 0; i < nodes.length; i++) {
-              nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || value == nodes[i].value) ? true : false;
-            }
-            
-            // else just assign the value to the node
-          } else {
+              for (var i = 0; i < nodes.length; i++) {
+                nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || value == nodes[i].value) ? true : false;
+              }
 
-            for (var i = 0; i < nodes.length; i++) {
+              // if its a readio group we take the radio childs and loop through them
+            } else if (el._isRadioGroup(nodes[0])) {
 
-              nodes[i].value = value;
+              nodes = el.querySelectorAll("vc-radio");
+
+              for (var i = 0; i < nodes.length; i++) {
+                nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || value == nodes[i].value) ? true : false;
+              }
+
+              // else just assign the value to the node
+            } else {
+
+              for (var i = 0; i < nodes.length; i++) {
+
+                nodes[i].value = value;
+
+              }
 
             }
 
@@ -351,7 +342,7 @@
       */
       clear: function () {
         var el = this;
-        el._clearRecursive(el, el, function (node) {
+        el._walkRecursive(el, el, function (node) {
           // vComet elements
           if (node._formElement) {
             if (node.nodeName.toLowerCase() == "vc-checkbox"

@@ -221,10 +221,10 @@
       @description Searches the panels and appends them in the stack
       */
       importPanels: function () {
-        
+
         var el = this;
         var children = Array.prototype.slice.apply(el.children);
-        
+
         for (var i = 0; i < children.length; i++) {
 
           if (children[i].nodeName.toLowerCase() == "vc-panel") {
@@ -254,7 +254,7 @@
             el._refs.tabsScrolls.classList.add("enabled");
 
           }
-          
+
         }, 0);
 
       },
@@ -264,7 +264,7 @@
       @param {String} name
       */
       selectTab: function (name) {
-        
+
         var el = this;
 
         el._refs.stack.swapToPanel(name);
@@ -322,7 +322,7 @@
       @param {Object} e [event]
       */
       handleDragOver: function (e) {
-        
+
         if (this._misc.isDragging) {
 
           if (e.preventDefault) {
@@ -357,7 +357,7 @@
 
           targetOrder = el._misc.dragging.position === "left" ? parseInt(targetOrder) : parseInt(targetOrder) + 1;
           targetTab = el._refs.tabsWrapper.querySelector('.vc-tabs-tab[data-order="' + targetOrder + '"]');
-          
+
           el._refs.tabsWrapper.insertBefore(this._misc.dragging.source, targetTab);
           el._misc.isDragging = false;
 
@@ -376,7 +376,7 @@
       @param {Object} e [event]
       */
       handleTabsDetection: function (e) {
-        
+
         var el = this;
 
         var dropArea = el._misc.dragging.dropArea;
@@ -548,6 +548,29 @@
     },
     functions: {
       /*
+      @function addPanel
+      @description Creates a tab for the provided panel
+      @param {Object} panel
+      */
+      addPanel: function (panel) {
+
+        var el = this;
+
+        el._refs.stack.addPanel(panel);
+
+        tab = el._createPanelTab(panel);
+
+        tab.dataset.order = el._refs.stack._misc.indexedPanels.length - 1;
+
+        el._misc.tabs[tab.dataset.panel] = tab;
+
+        el._refs.tabsWrapper.appendChild(tab);
+        el._refs.tabsWrapper.appendChild(el._misc.dragging.dropArea);
+
+        el._handleTabsScrollsStatus();
+
+      },
+      /*
       @function select
       @description Unselects the current tab and selects the requested one
       @param {String} name
@@ -658,7 +681,7 @@
     onTransformed: function () {
 
       var el = this;
-      
+
       el._importPanels();
 
       el._setupTabs();
