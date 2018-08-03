@@ -441,7 +441,7 @@
                     var span = document.createElement("span");
 
                     this.classList.add("result", "vc-bg1-hoverable", "vc-fg1-hoverable");
-                    this.matches = "true";
+                    this.dataset.matches = true;
                     this.value = this.getAttribute("value");
                     this.displayValue = this.getAttribute("display-value") || this.value;
 
@@ -478,7 +478,7 @@
                     item = document.createElement("vc-item");
 
                     item.classList.add("vc-bg1-hoverable", "vc-fg1-hoverable");
-                    item.matches = "true";
+                    item.dataset.matches = true;
                     item.value = storeData[key][el._refs.store.idProperty];
                     item.displayValue = storeData[key][displayProperty];
 
@@ -578,21 +578,22 @@
 
                         if (!items[i].classList.contains("hidden")) {
                             items[i].classList.add("hidden");
-                            items[i].setAttribute("matches", "false");
+                            items[i].dataset.matches = false;
+                            
                         }
 
                     } else {
 
                         if (items[i].classList.contains("hidden")) {
                             items[i].classList.remove("hidden");
-                            items[i].setAttribute("matches", "true");
+                            items[i].dataset.matches = true;
                         }
 
                     }
 
                 }
 
-                var matchedItems = el._refs.dropDown.querySelectorAll('[matches="true"]');
+                var matchedItems = el._refs.dropDown.querySelectorAll('[data-matches="true"]');
 
                 if (matchedItems.length == 0) {
 
@@ -615,10 +616,10 @@
             undoFilter: function () {
 
                 var el = this;
-                var hiddenItems = el._refs.dropDown.querySelectorAll('[matches="false"]');
+                var hiddenItems = el._refs.dropDown.querySelectorAll('[data-matches="false"]');
 
                 for (var i = 0; i < hiddenItems.length; i++) {
-                    hiddenItems[i].setAttribute("matches", "true");
+                    hiddenItems[i].dataset.matches = true;
                     hiddenItems[i].classList.remove("hidden");
                 }
 
@@ -816,7 +817,7 @@
                     span.innerHTML = this.displayValue;
                     this.classList.add("result", "vc-bg1-hoverable", "vc-fg1-hoverable")
                     this.appendChild(span);
-                    this.setAttribute("matches", "true");
+                    this.dataset.matches = true;
                     this.addEventListener("click", function () { el.select(this) });
                 });
 

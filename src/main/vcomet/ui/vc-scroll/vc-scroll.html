@@ -1827,7 +1827,7 @@
           //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
           barLeftProportion = parseFloat(el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) / (parseFloat(finalBarLeftPosition))
           proportionalScrollLeft = (parseFloat(el.content.scrollWidth - el.offsetWidth) / barLeftProportion);
-
+          
           el._horizontalUpdate(-proportionalScrollLeft);
           el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
 
@@ -2009,10 +2009,10 @@
         var leftIcon = document.createElement("i");
         var rightIcon = document.createElement("i");
 
-        leftIcon.classList.add("vicon vicon-chevron-left", "vc-fg1");
+        leftIcon.classList.add("vicon","vicon-chevron-left", "vc-fg1");
         leftIcon.style.fontSize = el.thickness + "px";
 
-        rightIcon.classList.add("vicon vicon-chevron-right", "vc-fg1");
+        rightIcon.classList.add("vicon","vicon-chevron-right", "vc-fg1");
         rightIcon.style.fontSize = el.thickness + "px";
 
         leftButton.appendChild(leftIcon);
@@ -2152,6 +2152,7 @@
         if (el._misc.horizontal.created) {
 
           scrollLimit = el._getHorizontalScrollLimit();
+          
           currentScroll = Math.abs(translatePosition) > scrollLimit ? scrollLimit : Math.abs(translatePosition);
           translatePercentage = (currentScroll / scrollLimit) * 100;
 
@@ -2216,7 +2217,8 @@
         if (el.scrollWidth == el.offsetWidth && el.content.scrollWidth != el.content.offsetWidth) {
           limit = el.content.scrollWidth - el.content.offsetWidth;
         } else {
-          limit = el.scrollWidth - el.offsetWidth;
+          // limit = el.scrollWidth - el.offsetWidth; It was not working this way since el.scrollWidth was changing while scrolling
+          limit = el.content.scrollWidth - el.offsetWidth;
         }
 
         return limit;
