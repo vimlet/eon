@@ -4420,6 +4420,16 @@ vcomet.collectObserveData = function (el, config) {
                 el.__observeProperties[propertiesKeys[i]] = true;
             }
 
+            // If the property has reflect active but it has no value we set an empty string
+            if (config.properties[propertiesKeys[i]].reflect && !config.properties[propertiesKeys[i]].hasOwnProperty("value")) {
+                config.properties[propertiesKeys[i]].value = "";
+            }
+
+            // If the property has reflect but its value is of type object we set reflect to false
+            if (config.properties[propertiesKeys[i]].reflect && typeof config.properties[propertiesKeys[i]].value == "object") {
+                config.properties[propertiesKeys[i]].reflect = false;
+            }
+
             // Add reflect to observeAttributes
             if (config.properties[propertiesKeys[i]].reflect) {
                 el.__observeAttributes[vcomet.util.camelToHyphenCase(propertiesKeys[i])] = true;
@@ -4479,12 +4489,20 @@ vcomet.createAttributesObserver = function (el, config) {
 
                 el[privateProperty] = el.getAttribute(observeAttributesKeys[i]);
 
-                // If the attribute has no value we check if the property has it, if not we assign it an empty value
+            // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
 
                 if (config.properties[property].reflectDefault) {
+
                     value = el.hasOwnProperty(privateProperty) ? el[privateProperty] : "";
-                    el.setAttribute(observeAttributesKeys[i], value);
+
+                    // Only sets the attribute if the value is not of object type
+                    if (typeof value != "object") {
+                        el.setAttribute(observeAttributesKeys[i], value);
+                    } else {
+                        el.removeAttribute(observeAttributesKeys[i]);
+                    }
+
                 }
 
             }
@@ -4562,8 +4580,13 @@ vcomet.createPropDescriptor = function (el, config, key, value, reflect) {
     propDescriptor.set = function (value) {
         if (reflect) {
             // Trigger onAttributeChanged, note this will trigger also onPropertyChanged if needed
-            el.setAttribute(vcomet.util.camelToHyphenCase(key), value);
-
+            // Only sets the attribute if the value is not of object type
+            if (typeof value != "object") {
+                el.setAttribute(vcomet.util.camelToHyphenCase(key), value);
+            } else {
+                el.removeAttribute(vcomet.util.camelToHyphenCase(key));
+            }
+           
         } else {
             // Trigger onPropertyChanged
             vcomet.triggerAllCallbackEvents(el, config, "onPropertyChanged", [

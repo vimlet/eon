@@ -1,5 +1,5 @@
 <template>
-    <div class="vc-dialog-dialog vc-bg1 vc-fg1 vc-boxshadow1">
+    <div class="vc-dialog-dialog vc-bg1 vc-fg1 vc-boxshadow1 vc-defaultStyle">
         <div class="vc-dialog-heading vc-sect1 vc-unselectable">
             <div class="vc-dialog-headingButtons">
                 <i class="vc-dialog-minimize vc-fg1-hoverable vc-dialog-hidden vicon vicon-minimize"></i>
@@ -167,6 +167,14 @@
                 reflect: true
             },
             /*
+              @property {Boolean} allowScroll
+              @description Allow or denied scroll
+            */
+            allowScroll: {
+                value: true,
+                reflect: true
+            },
+            /*
              @property {Object} content 
              @description Reference to the content element
            */
@@ -215,6 +223,7 @@
             */
             createRefs: function () {
                 var el = this;
+
                 el._refs.dialog = el.template.querySelector(".vc-dialog-dialog");
                 el._refs.heading = el.template.querySelector(".vc-dialog-heading");
                 el._refs.footer = el.template.querySelector(".vc-dialog-footer");
@@ -228,6 +237,22 @@
                 el._refs.userContent = el.source.querySelector("[type='content']");
                 el._refs.userFooter = el.source.querySelector("[type='footer']");
             },
+
+            /*
+              @function (private) _handleContentScroll
+              @description Depending on the allowScroll property we append the user content to the custom scroll or not
+            */
+            handleContentScroll: function () {
+                var el = this;
+
+                if (vcomet.util.isTrue(el.allowScroll)) {
+                    el._refs.scroll.appendChild(el.content);
+                } else {
+                    el.content.style.overflow = "auto";
+                    el._refs.dialog.appendChild(el.content);
+                    el._refs.scroll.parentNode.removeChild(el._refs.scroll);
+                }
+            },
             /*
               @function (private) _setDefaultStyle
               @description Check if the default element style should be applied
@@ -235,10 +260,23 @@
             setDefaultStyle: function () {
                 var el = this;
                 // Check default style configuration
-                if(!vcomet.util.isTrue(el.defaultStyle)) {
+                if (!vcomet.util.isTrue(el.defaultStyle)) {
                     // Remove default style
+                    el._refs.dialog.classList.remove("vc-spaced-container");
+                    el._refs.dialog.classList.remove("vc-defaultStyle");
                     el._refs.userContent.classList.remove("vc-spaced-container");
-                    el._refs.userFooter.classList.remove("vc-spaced-container");
+                } else {
+                    // Spaced items container
+                    var spacedItemsContainer = document.createElement("div");
+                    var spacedFragment = document.createDocumentFragment();
+                    spacedItemsContainer.classList.add("vc-spaced-items-container");
+                    // Append content into the new spaced items container
+                    var nodes = [].slice.call(el._refs.userContent.childNodes);
+                    while (nodes.length) {
+                        spacedFragment.appendChild(nodes.shift());
+                    }
+                    spacedItemsContainer.appendChild(spacedFragment);
+                    el._refs.userContent.appendChild(spacedItemsContainer);
                 }
             },
             /*
@@ -275,6 +313,7 @@
                         el._refs.close.classList.add("vc-dialog-hidden");
                     }
 
+
                 } else {
                     el._refs.close.classList.add("vc-dialog-hidden");
                     el._refs.heading.classList.add("vc-dialog-hidden");
@@ -293,7 +332,6 @@
 
                 el._refs.userContent.type = "content";
                 el._refs.userContent.classList.add("vc-dialog-content", "vc-spaced-container");
-                el._refs.scroll.appendChild(el._refs.userContent);
 
                 el.content = el._refs.userContent;
             },
@@ -307,7 +345,7 @@
 
                 el.footer = el._refs.userFooter ? el._refs.userFooter : document.createElement("vc-section");
                 el.footer.type = "footer";
-                el.footer.classList.add("vc-dialog-footer", "vc-sect1", "vc-spaced-container", "vc-unselectable");
+                el.footer.classList.add("vc-dialog-footer", "vc-spaced-items-container", "vc-sect1", "vc-unselectable");
 
                 el._handleFooterAppend();
             },
@@ -1180,7 +1218,9 @@
                     el._registerInitialSize();
                     el._limitPosition();
 
-                    el._refs.scroll.update();
+                    if (vcomet.util.isTrue(el.allowScroll)) {
+                        el._refs.scroll.update();
+                    }
 
                     vcomet.triggerCallback("onOpened", el);
                 }
@@ -1247,6 +1287,8 @@
         onInit: function () {
             var el = this;
 
+            el._handleContentScroll();
+
             // ** Apply default items positioning style
             el._setDefaultStyle();
 
@@ -1269,7 +1311,7 @@
         },
 
         onWindowResize: function (e) {
-            
+
             this._verifyDeviceVersion();
             this._handleWindowResize(e);
         },

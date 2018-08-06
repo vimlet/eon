@@ -872,7 +872,7 @@
         mousedown = mousedownThrottled = throttled = false;
         var initialValue, moveValue, slideCounter, position, target, translatePixels;
         var index, slideLimitValue, minTranslValue, elementTranslateMiddle, slide;
-        var delay = el._isTrickyBrowser() ? 10 : 20;
+        var delay = el._isTrickyBrowser() ? 10 : 0;
         var axis = el.direction == "horizontal" ? "clientX" : "clientY";
         if (!el.externalSlide || el.externalSlide === "false") {
           // Start slide on mouse down event
@@ -896,7 +896,7 @@
           el._refs.wrapper.addEventListener("pointermove", function (e) {
             if (mousedown) {
               if(slideCounter > 1) {
-                if (!throttled) {
+                // if (!throttled) {
                   // Get y/z translate pixels
                   translatePixels = moveValue - e[axis];
                   // Process position with the new movement values
@@ -909,12 +909,12 @@
                   // Update initial move value
                   moveValue = e[axis];
                   // Throttle
-                  throttled = true;
+                  // throttled = true;
                   // Set a timeout to un-throttle
-                  setTimeout(function () {
-                    throttled = false;
-                  }, delay);
-                }
+                  // setTimeout(function () {
+                  //   throttled = false;
+                  // }, delay);
+                // }
               }
             }
           });
@@ -927,7 +927,7 @@
               el._refs.wrapper.style.transition = "transform .2s";
               mousedown = false;
               // Complete slide monitor
-              if (slideCounter < 100) {
+              if (slideCounter < 50) {
                 // Trigger complete slide
                 if (moveValue < initialValue) {
                   el.next();
@@ -1144,6 +1144,20 @@
         var browser = vcomet.util.getBrowser();
         return browser === "IE" || browser === "Edge" || browser === "Firefox" || /iPad/.test(navigator.platform);
       },
+      /*
+        @function (private) {Boolean} _keepInPlace
+        @description Called when the element is resized, keeps the current slide in its corresponding position
+      */
+      keepInPlace: function () {
+        var el = this;
+        // Get current slide index
+        var currentIndex = el.slides.indexOf(el.currentSlide);
+        // Get new y/z position
+        var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
+        var newPos = swiperHeight * (currentIndex);
+        // Translate element
+        el._translate(el._refs.wrapper, -newPos);
+      }
 
     },
     functions: {
@@ -1297,7 +1311,10 @@
         // Translate current slide to its new centered position
         el.currentSlide = !el.currentSlide.el ? el.slides[0] : el.currentSlide;
         currentIndex = el.slides.indexOf(el.currentSlide);
-        el.slideTo(currentIndex);
+        
+        // TODO: This was triggering slide change everytime the swiper was being resized
+        // el.slideTo(currentIndex);
+        el._keepInPlace();
 
         if (el.type == "gallery" && el.pagination != "hidden") {
           el.onPagingReady(function () {
