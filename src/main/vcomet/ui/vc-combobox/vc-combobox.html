@@ -337,6 +337,11 @@
 
                 var el = this;
 
+                var iOS = parseFloat(
+                    ('' + (/CPU.*OS ([0-9_]{1,5})|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent) || [0, ''])[1])
+                        .replace('undefined', '3_2').replace('_', '.').replace('_', '')
+                ) || false;
+
                 el._refs.overlay = document.createElement("div");
                 el._refs.overlay.classList.add("vc-combobox-overlay", "vc-bg1-modal");
                 el._refs.overlay.appendChild(el._refs.dropDown);
@@ -348,32 +353,46 @@
                         e.stopPropagation();
                     }
                 }, { passive: false });
+                
+                // This behavior is only supported on iOS 10 and beyond
+                if (iOS && iOS >= 10) {
 
-                // Prevents scrolling on mobile devices
-                window.addEventListener("touchstart", function (e) {
-                    if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device")) {
-                        if (!el._refs.dropDown.isOnPath) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            el._misc.modal.blur = true;
+                    // Prevents scrolling on mobile devices
+                    window.addEventListener("touchstart", function (e) {
+                        if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device")) {
+                            if (!el._refs.dropDown.isOnPath) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                el._misc.modal.blur = true;
+                            }
                         }
-                    }
-                }, { passive: false });
+                    }, { passive: false });
 
-                // On touch end it blurs the modal dropdown
-                window.addEventListener("touchend", function (e) {
-                    if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device") && el._misc.modal.blur) {
-                        el._misc.modal.blur = false;
-                        el.shrink();
-                    }
-                });
+                    // On touch end it blurs the modal dropdown
+                    window.addEventListener("touchend", function (e) {
+                        if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device") && el._misc.modal.blur) {
+                            el._misc.modal.blur = false;
+                            el.shrink();
+                        }
+                    });
 
-                // If the user scrolls the window scrollbar we hide the dropdown
-                window.addEventListener("scroll", function (e) {
-                    if (el._misc.modal.active && !el._refs.overlay.classList.contains("vc-combobox-device")) {
-                        el.shrink();
-                    }
-                });
+                    // If the user scrolls the window scrollbar we hide the dropdown
+                    window.addEventListener("scroll", function (e) {
+                        if (el._misc.modal.active && !el._refs.overlay.classList.contains("vc-combobox-device")) {
+                            el.shrink();
+                        }
+                    });
+
+                } else {
+
+                    // On touch end it blurs the modal dropdown
+                    window.addEventListener("touchend", function (e) {
+                        if (el._misc.modal.active && el._refs.overlay.classList.contains("vc-combobox-device") && !el._refs.dropDown.isOnPath) {
+                            el.shrink();
+                        }
+                    });
+
+                }
 
             },
             /*
@@ -484,7 +503,9 @@
 
                     el._misc.items[item.value] = item;
 
-                    item.onRender(function () {
+                    el._misc.items[item.value].style.cursor = "pointer";
+
+                    el._misc.items[item.value].onRender(function () {
 
                         var span = document.createElement("span");
 
@@ -579,7 +600,7 @@
                         if (!items[i].classList.contains("hidden")) {
                             items[i].classList.add("hidden");
                             items[i].dataset.matches = false;
-                            
+
                         }
 
                     } else {
