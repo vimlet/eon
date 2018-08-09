@@ -30,6 +30,17 @@
                 reflectDefault: true
             },
             /*
+                @property {String} ghost
+                @description 
+                Values: true, false
+                Default: false
+            */
+            ghost: {
+                value: false,
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
                 @property {Boolean}
                 @description Whether or not a state should be added to the browser history
             */
@@ -198,7 +209,7 @@
             isOnTop: function (rect) {
                 var el = this;
                 var limit = el.historyThreshold ? Math.abs(parseInt(el.historyThreshold)) : 0;
-                return (rect.top >= limit && rect.top <= limit + 40);
+                return (rect.top <= limit + 40);
             },
             /*
               @function (private) _isInBottom
@@ -218,11 +229,19 @@
             */
             isVisible: function (rect) {
                 var el = this;
-                return (rect.top >= 0 &&
-                    rect.left >= 0 &&
-                    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-                );
+                if(vcomet.util.isTrue(el.ghost)) {
+                    return ((rect.top >= 0 || rect.top < 0) &&
+                        rect.left >= 0 &&
+                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                    );
+                } else {
+                    return (rect.top >= 0 &&
+                        rect.left >= 0 &&
+                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                    );
+                }
             }
         },
         functions:{
