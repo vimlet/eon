@@ -49,11 +49,31 @@
                 reflect: true
             },
             /*
+                @property {String} ghost
+                @description 
+                Values: true, false
+                Default: false
+            */
+            ghost: {
+                value: false,
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
                 @property {Number} end 
                 @description 
                 Default: 0
             */
             end: {
+                value: 0,
+                reflect: true
+            },
+            /*
+                @property {Number} endInverted 
+                @description 
+                Default: 0
+            */
+            endInverted: {
                 value: 0,
                 reflect: true
             },
@@ -72,7 +92,7 @@
                 Default: 1000
             */
             duration: {
-                value: 1000,
+                value: 700,
                 reflect: true
             },
             /*
@@ -153,6 +173,8 @@
                 el._misc.posInvert = ~["top", "left"].indexOf(el.type) ? false : true;
                 // ** TODO 
                 el._misc.offsetProp = ~["top", "bottom"].indexOf(el.type) ? "offsetHeight" : "offsetWidth";
+                el._misc.direction = ~["top", "bottom"].indexOf(el.type) ? "vertical" : "horizontal";
+                el._misc.end = el._misc.direction == "horizontal" && el.endInverted ? parseInt(el.endInverted) : parseInt(el.end);
             },
             /*
                 @function (private) _setDefaultStyle
@@ -187,20 +209,19 @@
             */
             setStartPosition: function () {
                 var el = this;
-                el.end = !el.end ? 0 : parseInt(el.end);
                 // Check type
                 if(el.type === "bottom") {
-                    el._refs.wrapper.style.transform = "translate3d(0, " + (el.offsetHeight + el.end) + "px" + ", 0)";
-                    el._misc.startTranslate = (el.offsetHeight + el.end);
+                    el._refs.wrapper.style.transform = "translate3d(0, " + (el.offsetHeight + el._misc.end) + "px" + ", 0)";
+                    el._misc.startTranslate = (el.offsetHeight + el._misc.end);
                 } else if((el.type === "top")) {
-                    el._refs.wrapper.style.transform = "translate3d(0, " + -(el.offsetHeight + el.end) + "px" + ", 0)";
-                    el._misc.startTranslate = -(el.offsetHeight + el.end);
+                    el._refs.wrapper.style.transform = "translate3d(0, " + -(el.offsetHeight + el._misc.end) + "px" + ", 0)";
+                    el._misc.startTranslate = -(el.offsetHeight + el._misc.end);
                 } else if((el.type === "right")) {
-                    el._refs.wrapper.style.transform = "translate3d(" + el.offsetWidth + "px" + ", 0, 0)";
-                    el._misc.startTranslate = el.offsetHeight;
+                    el._refs.wrapper.style.transform = "translate3d(" + (el.offsetWidth + el._misc.end) + "px" + ", 0, 0)";
+                    el._misc.startTranslate = (el.offsetHeight + el._misc.end);
                 } else if((el.type === "left")) {
-                    el._refs.wrapper.style.transform = "translate3d(" + -el.offsetWidth + "px" + ", 0, 0)";
-                    el._misc.startTranslate = -el.offsetHeight;
+                    el._refs.wrapper.style.transform = "translate3d(" + -(el.offsetWidth + el._misc.end) + "px" + ", 0, 0)";
+                    el._misc.startTranslate = -(el.offsetHeight + el._misc.end);
                 } 
             },
             /*
@@ -209,6 +230,8 @@
             */
             setUpAnchor: function () {
                 var el = this;
+                //
+                el._refs.anchor.ghost = el.ghost;
                 // Make sure anchor has its callbacks created
                 el._refs.anchor.onCreated(function(){
                     el._refs.anchor.onVisible(function(){
@@ -250,17 +273,16 @@
             runAnimation: function(rate){
                 var el = this;
 
-                // ** TODO - Implement end customizable value 
-                // var end = el.end == 1 ? el[el._misc.offsetProp] : 0 ;
                 // Get translate current position
                 var currentTranslatePos = el._getCurrentTranslate();
-
+                
                 // Check if translate values sign change
-                var reached = el._misc.posInvert ? currentTranslatePos <= el.end : currentTranslatePos >= el.end;
+                var reached = el._misc.posInvert ? currentTranslatePos <= el._misc.end : currentTranslatePos >= el._misc.end;
                 
                 // Check if the animation has ended
                 if (rate >= 1 || reached) {
                     el._misc.invertDirection = false;
+                    el._refs.wrapper.style.opacity = 1;
                     window.cancelAnimationFrame(el._misc.animFunction);
                     vcomet.triggerCallback("onAnimationEnd", el, el);
                     return "cancel";
@@ -268,7 +290,7 @@
                     // Translate item
                     el._setTranslateValue((1 - rate) * (el._misc.startTranslate));
                     // Fade in item (make opacity increase with a little ease)
-                    el._refs.wrapper.style.opacity = rate > 0.95 ? 1 : 0.7 * rate;
+                    el._refs.wrapper.style.opacity = 1 * rate;
                 }
             },
             /*
@@ -292,7 +314,7 @@
                 var el = this;
                 //
                 if(!el._misc.posInvert) {
-                    value += el.end;
+                    value += el._misc.end;
                 }
                 //
                 if(el._misc.posProp == "top") {
@@ -309,7 +331,7 @@
                 var el = this;
                 // Wait until anchor has finished its life cycle
                 el._refs.anchor.onReady(function(){
-                    var scrollTop = el._refs.anchor._misc.scrollTop;
+                    var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
                     // Check if scroll has left behind the anchor offset position
                     if(el._refs.anchor.offsetPosition <= scrollTop) {
                         // Trigger anchor activation
@@ -375,7 +397,6 @@
                 el._setStartPosition();
                 // Increase proportionally the duration on partial animations
                 el._misc.endTime = +new Date() + el.duration;
-
             }
         }
     });
