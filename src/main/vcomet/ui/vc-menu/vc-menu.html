@@ -74,6 +74,8 @@
         el._refs.modalPages = {};
 
         el._refs.modalPath = [];
+        
+        el._refs.items = {};
         el._refs.modalItems = {};
 
       },
@@ -255,6 +257,7 @@
         var link, span;
 
         el._misc.tree[item.getAttribute("name")] = [];
+        el._refs.items[item.getAttribute("name")] = item;
         el._refs.modalItems[item.getAttribute("name")] = item.cloneNode(false);
 
         el._setupDropdown(item);
@@ -514,7 +517,11 @@
 
           if (el._refs.dropdowns[dropdown]) {
 
+            // Removes the dropdown from the menu
             el._refs.dropdowns[dropdown].parentNode.removeChild(el._refs.dropdowns[dropdown]);
+            // It also removes the class so that the items are openable again
+            el._refs.items[dropdown].classList.remove("vc-sect3");
+            
             vcomet.triggerCallback("onDropdownClose", el, el, [dropdown, el._refs.dropdowns[el._refs.dropdowns[dropdown]]]);
 
           }
