@@ -49,23 +49,31 @@
         value: {},
         reflect: false
       },
-      /*
-      @property (private) {Number} _infiniteScrollAdvance
-      @description Number of rows difference to load the next/previous page
-      */
-      infiniteScrollAdvance: {
-        value: 3,
-        reflect: false
-      }
     },
 
     properties: {
       /*
-      @property {String} paginationType
+      @property {Boolean} footer
+      @description Whether the footer will be displayed or not
+      */
+      footer: {
+        value: true,
+        reflect: true
+      },
+      /*
+      @property {String} pagination
       @description Defines the type of the page pagination
       */
-      paginationType: {
+      pagination: {
         value: "",
+        reflect: true
+      },
+      /*
+      @property {Boolean} entriesCount
+      @description Whether the footer will display the page entries or not
+      */
+      entriesCount: {
+        value: false,
         reflect: true
       },
       /*
@@ -194,7 +202,7 @@
         el._misc.columns = {};
         el._misc.range = {};
         el._misc.entriesCount = 0;
-
+        
         el._misc.resize = {};
         el._misc.resize.active = false;
         el._misc.resize.firstTime = true;
@@ -202,6 +210,8 @@
         el._misc.sourceFragment = document.createDocumentFragment();
         el._misc.sourceType = "";
 
+        el._misc.currentPage = 1;
+        el._misc.hasPagination = true;
         el._misc.isEditing = false;
 
       },
@@ -403,13 +413,7 @@
         var el = this;
 
         var start = 1;
-        var limit;
-
-        if (el.paginationType == "infinitescroll") {
-          limit = (parseInt(el._infiniteScrollAdvance) * 2) * parseInt(el.pageSize) + parseInt(el.pageSize);
-        } else {
-          limit = parseInt(el.pageSize);
-        }
+        var limit = parseInt(el.pageSize);
 
         var myCallback = function () {
           if (el._misc.pageSizeType == "all") {
@@ -417,10 +421,8 @@
           }
 
           el._handleStoreEntries("object", true, start, limit);
+          el._updatePages(1);
 
-          if (!(el.paginationType == "infinitescroll")) {
-            el._updatePages(1);
-          }
         };
 
         //Store calls
@@ -476,19 +478,60 @@
 
       },
       /*
+      @function (private) _setupFooter
+      @description Sets up the grid footer
+      */
+      setupFooter: function () {
+
+        var el = this;
+
+        if (!vcomet.util.isTrue(el.footer)) {
+
+          el._misc.hasEntriesCount = false;
+          el._misc.hasPagination = false;
+          
+          el._refs.footer.style.display = "none";
+          el._refs.entriesCount.style.display = "none";
+
+        } else {
+
+          el._misc.hasPagination = el.pagination == "none" ? false : true;
+          el._misc.hasEntriesCount = vcomet.util.isTrue(el.entriesCount) ? true : false;
+
+          if (!el._misc.hasEntriesCount) {
+            el._refs.entriesCount.style.display = "none";
+          }
+
+        }
+
+        el._setupPagination();
+
+      },
+      /*
       @function (private) _setupPagination
-      @description Sets up the page selector or the infinite scroll to navigate through the pages
+      @description Sets up the page selector to navigate through the pages
       */
       setupPagination: function () {
 
         var el = this;
 
-        if (el.paginationType == "strip") {
-          el._setupStripPageSelector();
-        } else if (el.paginationType == "input") {
-          el._setupInputPageSelector();
-        } else if (el.paginationType == "infinitescroll") {
-          el._setupInfiniteScroll();
+        // If it has pagination then it sets it up depending on the type specified by the user
+        if (el._misc.hasPagination) {
+
+          if (el.pagination == "input") {
+            el._setupInputPageSelector();
+          } else {
+            el._setupStripPageSelector();
+          }
+
+          el._setupNavigationButtons();
+
+          // Else just removes it from the element
+        } else {
+
+          var pageControls = el.querySelector(".vc-grid-pagControls");
+          pageControls.parentNode.removeChild(pageControls);
+
         }
 
       },
@@ -506,11 +549,9 @@
         stripPageSelector.classList.add("vc-grid-stripPageSelector");
 
         currentStripPage.id = "currentPage";
-        currentStripPage.dataset.page = 1;
-        currentStripPage.innerHTML = 1;
+        currentStripPage.dataset.page = el._misc.currentPage;
+        currentStripPage.innerHTML = el._misc.currentPage;
         currentStripPage.classList.add("vc-grid-currentPage", "vc-bg8", "vc-fg2", "vc-grid-stripPage", "vc-sect2-border-hoverable");
-
-        el._misc.currentPage = 1;
 
         stripPageSelector.appendChild(currentStripPage);
 
@@ -554,102 +595,13 @@
         separator.innerHTML = "/";
 
         totalPages.classList.add("totalPages", "vc-unselectable");
-        totalPages.innerHTML = 1;
-
-        el._misc.currentPage = 1;
+        totalPages.innerHTML = el._misc.currentPage;
 
         inputPageSelector.appendChild(pageInput);
         inputPageSelector.appendChild(separator);
         inputPageSelector.appendChild(totalPages);
 
         el._refs.pageSelector.appendChild(inputPageSelector);
-      },
-      /*
-      @function (private) _setupInfiniteScroll
-      @description Sets up the infinite scroll to load the rows while scrolling
-      */
-      setupInfiniteScroll: function () {
-
-        var el = this;
-
-        el.querySelector(".vc-grid-pagControls").style.display = "none";
-        el._misc.infiniteScroll = {};
-        el._misc.infiniteScroll.loadedPages = [];
-        el._misc.infiniteScroll.checkedPages = [];
-        el._misc.infiniteScroll.firstLoad = true;
-
-        el.vcometScroll.onScrolled(function (e) {
-
-          function isElementInViewport(el) {
-
-            var rect = el.getBoundingClientRect();
-
-            return (
-              rect.top >= 0 &&
-              rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
-            );
-          }
-
-          function isValidPage(page) {
-            if (el._misc.infiniteScroll.loadedPages.indexOf(parseInt(page)) == -1 && page > 0 && page <= el._getStoreDataLastPage(el)) {
-              return true;
-            } else {
-              return false;
-            }
-          }
-
-          function getPagesToload(page) {
-            var pagesToCheck = [];
-
-            for (var i = 1; i <= el._infiniteScrollAdvance; i++) {
-              if (isValidPage(parseInt(page - i))) {
-                pagesToCheck.push(page - i);
-              }
-              if (isValidPage(parseInt(page + i))) {
-                pagesToCheck.push(page + i);
-              }
-            }
-
-            if (isValidPage(parseInt(page))) {
-              pagesToCheck.push(page);
-            }
-
-            el._misc.infiniteScroll.checkedPages.push(page);
-            return pagesToCheck;
-          }
-
-          function loadPages(pagesToLoad) {
-            var start;
-            var limit;
-
-            for (var i = 0; i < pagesToLoad.length; i++) {
-              if (el._misc.infiniteScroll.loadedPages.indexOf(parseInt(pagesToLoad[i])) == -1) {
-                limit = parseInt(pagesToLoad[i]) * parseInt(el.pageSize);
-                start = limit - parseInt(el.pageSize) + 1;
-                el._misc.infiniteScroll.loadedPages.push(parseInt(pagesToLoad[i]));
-                el._handleStoreRange(start, limit, false);
-
-              }
-            }
-          }
-
-          if (el._misc.infiniteScroll.scrollTimeout != null) {
-            clearTimeout(el._misc.infiniteScroll.scrollTimeout);
-          }
-
-          el._misc.infiniteScroll.scrollTimeout = setTimeout(function () {
-
-            var keyRows = el._refs.rowsWrapper.querySelectorAll("[data-page-indication]");
-
-            for (var i = 0; i < keyRows.length; i++) {
-              if (isElementInViewport(keyRows[i]) && el._misc.infiniteScroll.checkedPages.indexOf(parseInt(keyRows[i].dataset.page)) == -1) {
-                var pagesToLoad = getPagesToload(parseInt(keyRows[i].dataset.pageIndication));
-                loadPages(pagesToLoad);
-              }
-            }
-          }, 200);
-
-        })
       },
       /*
       @function (private) _setupGridResizeHandler
@@ -763,152 +715,6 @@
         }
 
       },
-      /*
-      @function (private) _handleInfiniteScrollStoreEntries
-      @description Handles the store entries while in infinite scroll
-      @param {Object} storeData
-      @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
-      @param {Number} start
-      @param {Number} limit
-      */
-      handleInfiniteScrollStoreEntries: function (storeData, cleanCurrentRange, start, limit) {
-
-        var el = this;
-
-        var columnsKeys = Object.keys(el._misc.columns);
-        var rowsDocFragment = document.createDocumentFragment();
-        var entriesCount = Object.keys(storeData).length;
-        var scrollRequestedPage = parseInt(limit) / parseInt(el.pageSize);
-        var dataObject, row, cell;
-
-        //Clean actual range if requested and also set entriesCount to 0
-        if (cleanCurrentRange) {
-          el._refs.rowsWrapper.innerHTML = "";
-          el._resetEntriesCount();
-        }
-
-        var rowIndex = 0;
-
-        //Create row for each entry and append to the rowsDocFragment
-        for (var key in storeData) {
-          dataObject = storeData[key];
-
-          row = document.createElement("vc-row");
-          row.classList.add("vc-grid-entryRow", "vc-bg1-hoverable3", "vc-bg1-border2");
-          row.id = key;
-
-          if (el._misc.infiniteScroll.loadedPages.indexOf(Math.floor(rowIndex / parseInt(el.pageSize)) + 1) == -1) {
-            el._misc.infiniteScroll.loadedPages.push(Math.floor(rowIndex / parseInt(el.pageSize)) + 1);
-          }
-
-          if (el._misc.infiniteScroll.firstLoad || (el.store.data.__sorted && cleanCurrentRange)) {
-            row.dataset.pageIndication = Math.floor(rowIndex / parseInt(el.pageSize)) + 1;
-          } else {
-            row.dataset.pageIndication = scrollRequestedPage;
-          }
-
-          //For each column we have in the grid we will look for its value on the dataObject
-          // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
-          for (var i = 0; i < columnsKeys.length; i++) {
-            cell = document.createElement("vc-cell");
-
-            if (dataObject[columnsKeys[i]]) {
-              cell.setAttribute("value", dataObject[columnsKeys[i]]);
-              cell.setAttribute("column", columnsKeys[i]);
-            }
-            row.appendChild(cell);
-          }
-
-          row.style.minHeight = el.rowMinHeight + "px";
-
-          el._increaseEntriesCount();
-
-          rowIndex++;
-          rowsDocFragment.appendChild(row);
-        };
-
-        if (el._misc.infiniteScroll.firstLoad) {
-
-          var entriesPageCount = entriesCount / parseInt(el.pageSize);
-          var totalDummiesCount;
-          var fullPageDummieCount;
-          var lastPageDecimal;
-          var isLastPageFull;
-          var dummyPage;
-          var dummiesDocFragment;
-
-          el._misc.infiniteScroll.checkedPages.push(1);
-          el._misc.infiniteScroll.checkedPages.push(2);
-          el._misc.infiniteScroll.checkedPages.push(3);
-          el._misc.infiniteScroll.checkedPages.push(4);
-
-          totalDummiesCount = (parseInt(el.store.size) - parseInt(entriesCount)) / parseInt(el.pageSize);
-
-          dummiesDocFragment = el._buildDummies(totalDummiesCount, entriesPageCount);
-          rowsDocFragment.appendChild(dummiesDocFragment);
-
-          el._misc.infiniteScroll.firstLoad = false;
-          el._refs.rowsWrapper.appendChild(rowsDocFragment);
-
-        } else {
-
-          if (el.store.data.__sorted && cleanCurrentRange) {
-
-            var entriesPageCount = entriesCount / parseInt(el.pageSize);
-            var totalDummiesCount = (parseInt(el.store.size) - parseInt(entriesCount)) / parseInt(el.pageSize);
-            var dummiesDocFragment = el._buildDummies(totalDummiesCount, entriesPageCount);
-
-            rowsDocFragment.appendChild(dummiesDocFragment);
-            el._refs.rowsWrapper.appendChild(rowsDocFragment);
-
-          } else {
-
-            var correspondingDummyPage = el._refs.rowsWrapper.querySelector('.dummyPage[data-page-indication="' + scrollRequestedPage + '"]');
-            el._refs.rowsWrapper.insertBefore(rowsDocFragment, correspondingDummyPage);
-            correspondingDummyPage.style.minHeight = "0px";
-
-            setTimeout(function () {
-              el._refs.rowsWrapper.removeChild(correspondingDummyPage);
-            }, 0);
-
-          }
-        }
-
-      },
-      /*
-      @function (private) {object} _buildDummies
-      @description Creates and returns the dummies to fill the page
-      @param {Number} totalDummiesCount
-      @param {Number} entriesPageCount
-      */
-      buildDummies: function (totalDummiesCount, entriesPageCount) {
-
-        var el = this;
-        var dummiesDocFragment = document.createDocumentFragment();
-        var dummyPage;
-
-        lastPageDecimal = totalDummiesCount % 1;
-        isLastPageFull = lastPageDecimal != 0 ? false : true;
-        fullPageDummieCount = isLastPageFull ? parseInt(totalDummiesCount) : parseInt(totalDummiesCount - lastPageDecimal);
-
-        for (var i = 0; i < fullPageDummieCount; i++) {
-          dummyPage = document.createElement("div");
-          dummyPage.classList.add("dummyPage");
-          dummyPage.dataset.pageIndication = entriesPageCount + (i + 1);
-          dummyPage.style.minHeight = parseInt(el.rowMinHeight) * parseInt(el.pageSize) + "px";
-          dummiesDocFragment.appendChild(dummyPage);
-        }
-
-        if (!isLastPageFull) {
-          dummyPage = document.createElement("div");
-          dummyPage.classList.add("dummyPage");
-          dummyPage.dataset.pageIndication = el._getStoreDataLastPage();
-          dummyPage.style.minHeight = ((parseInt(el.rowMinHeight) * parseInt(el.pageSize)) * lastPageDecimal) + "px";
-          dummiesDocFragment.appendChild(dummyPage);
-        }
-
-        return dummiesDocFragment;
-      },
 
       //HANDLE FUNCTIONS
       /*
@@ -927,22 +733,13 @@
         dataSource = (el.store.type == "memory" && el._misc.pageSizeType != "all") ? el.store.rangeData : el.store.data;
         source = (responseType == "object") ? dataSource.asObject() : dataSource.asArray();
 
-        if (el.paginationType == "infinitescroll") {
+        el._misc.range.start = start ? start : el._misc.range.start;
+        el._misc.range.limit = limit ? limit : el._misc.range.limit;
 
-          el._handleInfiniteScrollStoreEntries(source, cleanCurrentRange, start, limit);
+        el._misc.range.limit = (el._misc.pageSizeType == "all") ? el.store.size : el._misc.range.limit;
 
-        } else {
-
-          el._misc.range.start = start ? start : el._misc.range.start;
-          el._misc.range.limit = limit ? limit : el._misc.range.limit;
-
-          el._misc.range.limit = (el._misc.pageSizeType == "all") ? el.store.size : el._misc.range.limit;
-
-
-          handleFunction = (responseType == "object") ? el._handleStoreEntriesAsObject : el._handleStoreEntriesAsArray;
-          handleFunction.apply(el, [source, cleanCurrentRange]);
-
-        }
+        handleFunction = (responseType == "object") ? el._handleStoreEntriesAsObject : el._handleStoreEntriesAsArray;
+        handleFunction.apply(el, [source, cleanCurrentRange]);
 
       },
       /*
@@ -955,7 +752,7 @@
 
         var el = this;
 
-        var cleanCurrentRange = (el.paginationType == "infinitescroll") ? false : true;
+        var cleanCurrentRange = true;
         var isDescending = sortType == "descending" ? true : false;
         var dataType = sortType != "none" ? "array" : "object";
 
@@ -983,44 +780,6 @@
         }
       },
       /*
-      @function (private) _handleStoreSort
-      @description Manages the redirection to another function depending on the situation
-      @param {String} key
-      @param {Boolean} isDescending
-      @param {Number} start
-      @param {Number} limit
-      */
-      handleInfiniteScrollStoreSort: function (header, columnKey, sortType, start, limit) {
-
-        var el = this;
-
-        var cleanCurrentRange = (el.paginationType == "infinitescroll") ? false : true;
-        var isDescending = sortType == "descending" ? true : false;
-
-        var sortCallback = function () {
-          el._handleStoreEntries("array", true, start, limit);
-        };
-
-        if (el.store.type == "rest") {
-
-          var paramsObj = vcomet.util.queryToObject(el.store.url);
-          paramsObj.start = start;
-          paramsObj.limit = limit;
-          el.store.url = el.store._rootUrl + "?" + vcomet.util.objectToQuery(paramsObj);
-          el.store.sortRemote(columnKey, isDescending, sortCallback);
-
-        } else {
-
-          el.store.sortList(columnKey, isDescending);
-
-          if (el._misc.pageSizeType !== "all") {
-            el.store.getRange(start, limit);
-          }
-
-          el._handleStoreEntries("array", true, start, limit);
-        }
-      },
-      /*
       @function (private) _handleStoreRange
       @description Manages the redirection to another function depending on the situation
       @param {Number} start
@@ -1031,10 +790,8 @@
 
         var el = this;
 
-        if (!el.paginationType == "infinitescroll") {
-          el._misc.range.start = start;
-          el._misc.range.limit = limit;
-        }
+        el._misc.range.start = start;
+        el._misc.range.limit = limit;
 
         if (el.store.type == "memory") {
 
@@ -1064,6 +821,7 @@
         var dataObject;
         var row;
         var cell;
+        var eventObject;
 
         if (cleanCurrentRange) {
           el._refs.rowsWrapper.innerHTML = "";
@@ -1099,10 +857,21 @@
           el._increaseEntriesCount();
 
           rowsDocFragment.appendChild(row);
+
+          // Creates the callback event object for the user
+          eventObject = {
+
+            data: dataObject,
+            row: row
+
+          };
+
+          vcomet.triggerCallback("onRowCreated", el, el, [eventObject]);
+
         };
 
         el._refs.rowsWrapper.appendChild(rowsDocFragment);
-
+        
         if (el._misc.pageSizeType == "auto") {
           el._handleRowsLayout(entriesCount)
         };
@@ -1161,6 +930,7 @@
           rowsDocFragment.appendChild(row);
         }
         el._refs.rowsWrapper.appendChild(rowsDocFragment);
+        
         if (el._misc.pageSizeType == "auto") {
           el._handleRowsLayout(entriesCount)
         };
@@ -1176,7 +946,7 @@
 
         var el = this;
         var cell = document.createElement("vc-cell");
-        var editableColumns;
+        var editableColumns, eventObject;
 
         if (dataObject[columnKey]) {
           cell.setAttribute("value", dataObject[columnKey]);
@@ -1244,6 +1014,17 @@
 
         }
 
+        // Creates the callback event object for the user
+        eventObject = {
+
+          data: dataObject,
+          column: columnKey,
+          cell: cell
+
+        };
+
+        vcomet.triggerCallback("onCellCreated", el, el, [eventObject]);
+
         return cell;
 
       },
@@ -1277,7 +1058,7 @@
 
         var el = this;
         var rowsCapacity = el._getRowsCapacity();
-
+        
         //We will only do stuff when the rowsCapacity is bigger than one.
         //One row will be the smallest number of rows possible, we will not allow pages with no rows
         if (rowsCapacity >= 1) {
@@ -1308,7 +1089,7 @@
 
             //If we have more capacity than actual rows displayed then we will fill the page with dummies
           } else if (rowsCapacity > totalPageRows) {
-
+            
             var dummyDocFragment = document.createDocumentFragment();
             var newDummiesCount = dummyRowsAmount - existingDummiesCount;
             var dummyRow;
@@ -1322,7 +1103,7 @@
             el._refs.rowsWrapper.appendChild(dummyDocFragment);
           }
 
-          //If ourpageSize is different from the actual amount of rows we can have we will handles
+          //If ourpageSize is different from the actual amount of rows we can have, we will handle
           //different calls to reload the page with the data corresponding to the page
           if (el.pageSize != rowsCapacity) {
             var currentPage = parseInt(el._misc.currentPage);
@@ -1333,8 +1114,6 @@
             newPage = currentPage > el._getStoreDataLastPage() ? el._getStoreDataLastPage() : currentPage;
 
             el._selectPage(newPage);
-
-            if (el.paginationType == "strip") el._createPagesForPagesStrip();
 
           }
         }
@@ -1514,7 +1293,7 @@
           var lastHeaderActualWidth = parseInt(el._misc.columns[lastHeader.column].rule.style.minWidth.split("px")[0]);
           el._misc.columns[lastHeader.column].rule.style.minWidth = lastHeaderActualWidth + remainingSpace + "px";
         }
-
+        
         if (el._misc.pageSizeType == "auto") {
           el._handleRowsLayout(el._misc.entriesCount);
         }
@@ -1654,18 +1433,7 @@
 
         var el = this;
 
-        if (el.paginationType == "infinitescroll") {
-
-          var loadedPages = el._misc.infiniteScroll.loadedPages;
-          var limit = loadedPages.length * parseInt(el.pageSize);
-
-          el._handleInfiniteScrollStoreSort(column, sortType, 1, limit);
-
-        } else {
-
-          el._handleStoreSort(column, sortType);
-
-        }
+        el._handleStoreSort(column, sortType);
 
       },
       /*
@@ -1891,11 +1659,11 @@
 
         var el = this;
 
-        if (el.paginationType == "strip") {
+        if (el.pagination == "strip") {
 
           el._updateStripPageSelector(page);
 
-        } else if (el.paginationType == "input") {
+        } else if (el.pagination == "input") {
 
           el._updateInputPageSelector(page);
         }
@@ -1975,10 +1743,15 @@
 
         el._misc.currentPage = page;
 
-        if (el.paginationType == "strip") el._createPagesForPagesStrip();
+        if (el._misc.hasPagination) {
 
-        el._updatePageSelector(page);
-        el._handleNavigability();
+          if (el.pagination == "strip") el._createPagesForPagesStrip();
+
+          el._updatePageSelector(page);
+          el._handleNavigability();
+
+        }
+
       },
       /*
       @function (private) _increaseEntriesCount
@@ -1987,7 +1760,7 @@
       increaseEntriesCount: function () {
 
         var el = this;
-
+        
         el._misc.entriesCount++;
         el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
       },
@@ -2009,7 +1782,7 @@
       resetEntriesCount: function () {
 
         var el = this;
-
+        
         el._misc.entriesCount = 0;
         el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
 
@@ -2036,8 +1809,33 @@
 
         var el = this;
         var rowsWrapperHeight = (parseInt(el._refs.rowsWrapper.offsetHeight) == 0) ? (el.offsetHeight - (el._refs.header.offsetHeight + el._refs.footer.offsetHeight)) : el.offsetHeight;
-
+        
         return Math.floor(rowsWrapperHeight / parseInt(el.rowMinHeight));
+      },
+      /*
+      @function (private) {Object}  _createPageEventObject
+      @description Returns an object with information about the current grid page
+      */
+      createPageEventObject: function () {
+
+        var el = this;
+
+        var eventObject = {
+
+          currentPage: parseInt(el._misc.currentPage),
+          totalPages: el._getStoreDataLastPage(),
+          currentEntries: el._misc.entriesCount,
+          totalEntries: parseInt(el.store.size),
+
+          currentRange: {
+            start: el._misc.range.start,
+            end: el._misc.range.limit
+          }
+
+        }
+
+        return eventObject;
+
       }
     },
 
@@ -2069,11 +1867,112 @@
 
           el.store.setData(data);
           el.store.getRange(1, el.pageSize);
-          el._handleStoreEntries("object", true, 1, el.pageSize);
+
+          // Here we will update the grid in different ways depending on the pageSizeType
+          if (el._misc.pageSizeType == "auto") {
+
+            var dataSource = (el.store.type == "memory" && el._misc.pageSizeType != "all") ? el.store.rangeData : el.store.data;
+            
+            el._handleRowsLayout(Object.keys(dataSource.asObject()).length);
+
+          } else {
+
+            el._selectPage(1);
+
+          };
 
         });
 
-      }
+      },
+      /*
+      @function (private) {Object}  _next
+      @description Navigates to the next grid page
+      */
+      next: function () {
+
+        var el = this;
+
+        var currentPage = parseInt(el._misc.currentPage);
+        var nextPage;
+
+        nextPage = currentPage + 1;
+        nextPage = nextPage > el._getStoreDataLastPage() ? el._getStoreDataLastPage() : nextPage;
+
+        el._selectPage(nextPage);
+
+        return el._createPageEventObject();
+
+      },
+      /*
+      @function (private) {Object}  _previous
+      @description Navigates to the previous grid page
+      */
+      previous: function () {
+
+        var el = this;
+
+        var currentPage = parseInt(el._misc.currentPage);
+        var previousPage;
+
+        previousPage = currentPage - 1;
+        previousPage = previousPage < 1 ? 1 : previousPage;
+
+        el._selectPage(previousPage);
+
+        return el._createPageEventObject();
+
+      },
+      /*
+      @function (private) {Object}  _first
+      @description Navigates to the first grid page
+      */
+      first: function () {
+
+        var el = this;
+
+        el._selectPage(1);
+
+        return el._createPageEventObject();
+
+      },
+      /*
+      @function (private) {Object}  _last
+      @description Navigates to the last grid page
+      */
+      last: function () {
+
+        var el = this;
+
+        el._selectPage(el._getStoreDataLastPage());
+
+        return el._createPageEventObject();
+
+      },
+      /*
+      @function (private) {Object}  _goTo
+      @param {Number} page
+      @description Navigates to the requested grid page
+      */
+      goTo: function (page) {
+
+        var el = this;
+
+        page = parseInt(page);
+
+        if (!isNaN(page)) {
+
+          page = page < 1 ? 1 : page;
+          page = page > el._getStoreDataLastPage() ? el._getStoreDataLastPage() : page;
+
+          el._selectPage(page);
+
+          return el._createPageEventObject();
+
+        }
+
+      },
+
+
 
     },
 
@@ -2085,6 +1984,8 @@
       el._generateSourceFragment();
       el._defineDataSourceType();
 
+      vcomet.createCallback("onCellCreated", el);
+      vcomet.createCallback("onRowCreated", el);
       vcomet.createCallback("onEdit", el);
 
     },
@@ -2105,14 +2006,14 @@
       el.classList.add("vc-bg1", "vc-boxshadow1");
 
       el._setupRefs();
-      el._setupNavigationButtons();
-      el._setupPagination();
 
       el._setupColumns();
       el._setupHeaders();
 
       el._setupPageSize();
       el._setupContent();
+
+      el._setupFooter();
 
       el._setupAutofit();
       el._setupGridResizeHandler();
