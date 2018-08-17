@@ -5,7 +5,7 @@
   </div>
 
   <div class="vc-grid-rows">
-    <vc-scroll prevent-render="false" arrowScrolls="false" type="auto" scrollsLength="auto" thickness="10" observers="true" rail-scrolls="false">
+    <vc-scroll thickness="10" rail-scrolls="false">
       <div class="vc-grid-wrapper">
       </div>
     </vc-scroll>
@@ -202,7 +202,7 @@
         el._misc.columns = {};
         el._misc.range = {};
         el._misc.entriesCount = 0;
-        
+
         el._misc.resize = {};
         el._misc.resize.active = false;
         el._misc.resize.firstTime = true;
@@ -223,11 +223,12 @@
 
         var el = this;
 
+        var columns = el.columns.substring(0, 1) == "[" ? eval(el.columns) : el.columns.replace(/\s/g, '').split(',');
+        var headers = el.headers.length > 0 && el.headers.substring(0, 1) == "[" ? eval(el.headers) : el.headers.replace(/\s/g, '').split(',');
         var layoutWidth = 0;
-        var columns = el.columns.replace(/\s/g, '').split(',');
-        var headers = el.headers.length > 0 ? el.headers.replace(/\s/g, '').split(',') : [];
         var newStyle = document.createElement("style");
-        var sheet, rulePosition, columnRule;
+
+        var sheet, rulePosition, columnRule, columnName, columnHeader;
 
         //If there are no headers specified or the amount of headers is not the same as columns,
         //then we equal the headers to the columns
@@ -238,17 +239,30 @@
 
         for (var i = 0; i < columns.length; i++) {
 
+          columnName = columns[i].constructor === Object ? columns[i].name : columns[i];
+          columnHeader = columns[i].constructor === Object && columns[i].header ? columns[i].header : headers[i];
+          columnContent = columns[i].constructor === Object && columns[i].content ? columns[i].content : false;
+          columnClass = columns[i].constructor === Object && columns[i].class ? columns[i].class : false;
+          columnMinWidth = columns[i].constructor === Object && columns[i].minWidth ? columns[i].minWidth : el.columnMinWidth;
+          columnEditable = columns[i].constructor === Object && columns[i].hasOwnProperty("editable") ? vcomet.util.isTrue(columns[i].editable) : (vcomet.util.isTrue(el.editable));
+          
+          // Layout related, creates the column rule
           rulePosition = sheet.cssRules.length;
-          sheet.insertRule("vc-grid[uid='" + el.uid + "'] vc-cell:nth-child(" + (i + 1) + ") {}", rulePosition);
+          sheet.insertRule("vc-grid[uid='" + el.uid + "'] vc-cell.vc-grid-" + columnName + "Column {}", rulePosition);
           columnRule = sheet.cssRules[rulePosition];
-          columnRule.style.minWidth = el.columnMinWidth + "px";
-          layoutWidth = layoutWidth + parseInt(el.columnMinWidth);
+          columnRule.style.minWidth = columnMinWidth + "px";
+          layoutWidth = layoutWidth + parseInt(columnMinWidth);
+          
+          // Saves all the column information
+          el._misc.columns[columnName] = {};
+          el._misc.columns[columnName]["name"] = columnName;
+          el._misc.columns[columnName]["header"] = columnHeader;
+          el._misc.columns[columnName]["content"] = columnContent;
+          el._misc.columns[columnName]["order"] = i;
+          el._misc.columns[columnName]["rule"] = columnRule;
+          el._misc.columns[columnName]["class"] = columnClass;
+          el._misc.columns[columnName]["editable"] = columnEditable;
 
-          el._misc.columns[columns[i]] = {}
-          el._misc.columns[columns[i]]["value"] = columns[i];
-          el._misc.columns[columns[i]]["header"] = headers[i];
-          el._misc.columns[columns[i]]["order"] = i;
-          el._misc.columns[columns[i]]["rule"] = columnRule;
         }
 
         el._refs.headersWrapper.style.minWidth = layoutWidth + "px";
@@ -277,13 +291,19 @@
         for (var i = 0; i < columnsKeys.length; i++) {
           headerCell = document.createElement("vc-cell");
 
+          if (el._misc.columns[columnsKeys[i]].class) {
+            headerCell.classList.add(el._misc.columns[columnsKeys[i]].class);
+          }
+
+          headerCell.classList.add("vc-grid-" + columnsKeys[i] + "Column");
+
           //Adding Attributes to the header
           headerCell.setAttribute("type", "header");
           headerCell.setAttribute("sort", "none");
           headerCell.setAttribute("fixed", "false")
-          headerCell.setAttribute("column", el._misc.columns[columnsKeys[i]].value);
+          headerCell.setAttribute("column", el._misc.columns[columnsKeys[i]].name);
           headerCell.setAttribute("order", el._misc.columns[columnsKeys[i]].order);
-          headerCell.setAttribute("value", el._misc.columns[columnsKeys[i]].header);
+          headerCell.content.innerHTML = el._misc.columns[columnsKeys[i]].header;
           headerCell.onclick = function (e) {
             el._sortEntries(e, this)
           };
@@ -489,7 +509,7 @@
 
           el._misc.hasEntriesCount = false;
           el._misc.hasPagination = false;
-          
+
           el._refs.footer.style.display = "none";
           el._refs.entriesCount.style.display = "none";
 
@@ -673,7 +693,7 @@
             cells = rows[j].querySelectorAll("vc-cell");
 
             for (var k = 0; k < cells.length; k++) {
-              data[cells[k].getAttribute("column")] = cells[k].getAttribute("value");
+              data[cells[k].getAttribute("column")] = cells[k].innerHTML;
             }
 
             storeData[j] = data;
@@ -871,7 +891,7 @@
         };
 
         el._refs.rowsWrapper.appendChild(rowsDocFragment);
-        
+
         if (el._misc.pageSizeType == "auto") {
           el._handleRowsLayout(entriesCount)
         };
@@ -930,7 +950,7 @@
           rowsDocFragment.appendChild(row);
         }
         el._refs.rowsWrapper.appendChild(rowsDocFragment);
-        
+
         if (el._misc.pageSizeType == "auto") {
           el._handleRowsLayout(entriesCount)
         };
@@ -948,70 +968,17 @@
         var cell = document.createElement("vc-cell");
         var editableColumns, eventObject;
 
-        if (dataObject[columnKey]) {
-          cell.setAttribute("value", dataObject[columnKey]);
+        if (el._misc.columns[columnKey].class) {
+          cell.classList.add(el._misc.columns[columnKey].class);
         }
 
+        cell.classList.add("vc-grid-" + columnKey + "Column");
         cell.setAttribute("column", columnKey);
         cell.dataset.entryId = dataObject[el.store.idProperty];
+        cell.content.innerHTML = dataObject[columnKey] ? dataObject[columnKey] : "";
 
-        if (vcomet.util.isTrue(el.editable)) {
-
-          editableColumns = el.columns.replace(/\s/g, '').split(',');
-
-        } else {
-
-          if (el.editable != "false" && el.editable != false) {
-            editableColumns = el.editable.replace(/\s/g, '').split(',');
-          }
-
-        }
-
-        if (editableColumns && editableColumns.indexOf(columnKey) > -1) {
-
-          cell.onReady(function () {
-
-            var cellContent = this.querySelector(".vc-grid-cellContent");
-
-            cellContent.setAttribute("contenteditable", "true");
-            cellContent.spellcheck = false;
-
-            // This is ment for mobile devices: When entering edit mode the keyboard will trigger grid resize, 
-            // setting this property to true will prevent resize from triggering in those situation
-            cellContent.addEventListener("focus", function (e) {
-              el._misc.isEditing = true;
-            });
-
-            // Keydown event that will be aware for the enter key, to blur the cell
-            cellContent.addEventListener("keydown", function (e) {
-
-              if (e.key.toLowerCase() == "enter") {
-                cellContent.blur();
-              }
-
-            });
-
-            // Blur event that will trigger the entry update
-            cellContent.addEventListener("blur", function (e) {
-
-              var cell = this.parentNode;
-              var entryId = cell.dataset.entryId;
-              var column = cell.getAttribute("column");
-
-              // We only want to update if the value has changed
-              if (cell.value != cellContent.textContent) {
-
-                cell.value = cellContent.textContent;
-                el._updateEntry(entryId, column, cellContent.textContent);
-
-              }
-
-              el._misc.isEditing = false;
-
-            });
-
-          });
-
+        if (el._misc.columns[columnKey].editable) {
+          el._assignEditableEvents(cell);
         }
 
         // Creates the callback event object for the user
@@ -1026,6 +993,53 @@
         vcomet.triggerCallback("onCellCreated", el, el, [eventObject]);
 
         return cell;
+
+      },
+      assignEditableEvents: function (cell) {
+
+        var el = this;
+
+        cell.onReady(function () {
+
+          cell.content.setAttribute("contenteditable", "true");
+          cell.content.spellcheck = false;
+
+          // This is ment for mobile devices: When entering edit mode the keyboard will trigger grid resize, 
+          // setting this property to true will prevent resize from triggering in those situation
+          cell.content.addEventListener("focus", function (e) {
+            el._misc.isEditing = true;
+          });
+
+          // Keydown event that will be aware for the enter key, to blur the cell
+          cell.content.addEventListener("keydown", function (e) {
+
+            if (e.key.toLowerCase() == "enter") {
+              cell.content.blur();
+            }
+
+          });
+
+          // Blur event that will trigger the entry update
+          cell.content.addEventListener("blur", function (e) {
+
+            var cell = this.parentNode;
+            var entryId = cell.dataset.entryId;
+            var column = cell.getAttribute("column");
+
+            // We only want to update if the value has changed
+            if (cell.value != cell.content.textContent) {
+
+              cell.value = cell.content.textContent;
+              el._updateEntry(entryId, column, cell.content.textContent);
+
+            }
+
+            el._misc.isEditing = false;
+
+          });
+
+        });
+
 
       },
       /*
@@ -1058,7 +1072,7 @@
 
         var el = this;
         var rowsCapacity = el._getRowsCapacity();
-        
+
         //We will only do stuff when the rowsCapacity is bigger than one.
         //One row will be the smallest number of rows possible, we will not allow pages with no rows
         if (rowsCapacity >= 1) {
@@ -1089,7 +1103,7 @@
 
             //If we have more capacity than actual rows displayed then we will fill the page with dummies
           } else if (rowsCapacity > totalPageRows) {
-            
+
             var dummyDocFragment = document.createDocumentFragment();
             var newDummiesCount = dummyRowsAmount - existingDummiesCount;
             var dummyRow;
@@ -1293,7 +1307,7 @@
           var lastHeaderActualWidth = parseInt(el._misc.columns[lastHeader.column].rule.style.minWidth.split("px")[0]);
           el._misc.columns[lastHeader.column].rule.style.minWidth = lastHeaderActualWidth + remainingSpace + "px";
         }
-        
+
         if (el._misc.pageSizeType == "auto") {
           el._handleRowsLayout(el._misc.entriesCount);
         }
@@ -1446,22 +1460,25 @@
         var el = this;
 
         var sortedHeaders = el._refs.headersWrapper.querySelectorAll('vc-cell[sort="descending"], vc-cell[sort="ascending"]');
-        var icon = "";
+        var upIcon = "vicon-chevron-up";
+        var downIcon = "vicon-chevron-down";
 
         if (sortType != "none") {
-          icon = "keyboard_arrow_" + (sortType == "descending" ? "down" : "up");
+          var icon = sortType == "descending" ? downIcon : upIcon;
         }
-
-        header.querySelector("i").innerHTML = icon;
-        header.setAttribute("sort", sortType);
 
         for (var i = 0; i < sortedHeaders.length; i++) {
-          if (!sortedHeaders[i].isEqualNode(header)) {
-            headerIcon = sortedHeaders[i].querySelector("i");
-            sortedHeaders[i].sort = "none";
-            headerIcon.innerHTML = "";
-          }
+          headerIcon = sortedHeaders[i].querySelector("i");
+          sortedHeaders[i].sort = "none";
+          headerIcon.classList.remove(upIcon);
+          headerIcon.classList.remove(downIcon);
         }
+
+        if (icon) {
+          header.querySelector("i").classList.add(icon);
+        }
+
+        header.setAttribute("sort", sortType);
 
       },
       /*
@@ -1760,7 +1777,7 @@
       increaseEntriesCount: function () {
 
         var el = this;
-        
+
         el._misc.entriesCount++;
         el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
       },
@@ -1782,7 +1799,7 @@
       resetEntriesCount: function () {
 
         var el = this;
-        
+
         el._misc.entriesCount = 0;
         el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
 
@@ -1809,7 +1826,7 @@
 
         var el = this;
         var rowsWrapperHeight = (parseInt(el._refs.rowsWrapper.offsetHeight) == 0) ? (el.offsetHeight - (el._refs.header.offsetHeight + el._refs.footer.offsetHeight)) : el.offsetHeight;
-        
+
         return Math.floor(rowsWrapperHeight / parseInt(el.rowMinHeight));
       },
       /*
@@ -1872,7 +1889,7 @@
           if (el._misc.pageSizeType == "auto") {
 
             var dataSource = (el.store.type == "memory" && el._misc.pageSizeType != "all") ? el.store.rangeData : el.store.data;
-            
+
             el._handleRowsLayout(Object.keys(dataSource.asObject()).length);
 
           } else {

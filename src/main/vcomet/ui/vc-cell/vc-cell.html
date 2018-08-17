@@ -1,4 +1,5 @@
 <template>
+  <div class="vc-grid-cellContent vc-bg1-outline"></div>
 </template>
 
 <script type="text/javascript">
@@ -28,6 +29,14 @@
       type: {
         value: "entry",
         reflect: true
+      },
+      /*
+      @property {string} content
+      @description Reference to the content node
+      */
+      content: {
+        value: "",
+        reflect: false
       }
     },
 
@@ -39,14 +48,6 @@
       generateContent: function() {
 
         var el = this;
-        var cellContent = document.createElement("div");
-
-        cellContent.classList.add("vc-grid-cellContent");
-        cellContent.classList.add("vc-bg1-outline");
-
-        if (el.value != undefined) {
-          cellContent.innerHTML = el.value;
-        }
 
         if (el.type == "header") {
 
@@ -54,33 +55,31 @@
 
           el.classList.add("vc-unselectable");
 
-          headerCellIcon.classList.add("material-icons");
+          headerCellIcon.classList.add("vicon");
           headerCellIcon.classList.add("vc-grid-sortIcon");
 
           if (document.documentMode) {
-            el._createCellContentStyleForIE(cellContent, headerCellIcon)
+            el._createHeaderStyleForIE(headerCellIcon)
           }
 
-          cellContent.appendChild(headerCellIcon);
+          el.appendChild(headerCellIcon);
         }
-
-        el.appendChild(cellContent);
 
       },
       /*
       @function createCellContentStyleForIE
       @description CSS changes for the content on IE
       */
-      createCellContentStyleForIE: function(cellContent, icon) {
+      createHeaderStyleForIE: function(icon) {
 
-        cellContent.style.position = "absolute";
-        cellContent.style.left = "0";
-        cellContent.style.top = "0";
-        cellContent.style.right = "0";
-        cellContent.style.bottom = "0";
-        cellContent.style.display = "flex";
-        cellContent.style.justifyContent = "center";
-        cellContent.style.alignItems = "center";
+        el.content.style.position = "absolute";
+        el.content.style.left = "0";
+        el.content.style.top = "0";
+        el.content.style.right = "0";
+        el.content.style.bottom = "0";
+        el.content.style.display = "flex";
+        el.content.style.justifyContent = "center";
+        el.content.style.alignItems = "center";
 
         icon.style.position = "absolute";
         icon.style.top = "0";
@@ -91,10 +90,14 @@
 
       }
     },
+
+    onCreated: function () {
+      this.content = this.template.querySelector(".vc-grid-cellContent")
+    },
+
     onRender: function() {
-
       this._generateContent();
-
     }
+
   });
 </script>
