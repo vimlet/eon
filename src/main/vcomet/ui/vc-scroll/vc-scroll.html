@@ -110,6 +110,11 @@
         el._misc.resize = {};
         el._misc.contentResize = {};
 
+        el._misc.smoothScroll = {};
+        el._misc.smoothScroll.vertical = {};
+        el._misc.smoothScroll.horizontal = {};
+        el._misc.smoothScroll.amount = 20;
+
       },
       /*
       @function (private) _setupRefs
@@ -119,14 +124,16 @@
         this._refs.container = this.parentNode;
       },
       /*
-      @function (private) _definePublicScrollProperties
-      @description Creates definitions for scrollTop/scrollLeft properties
+      @function (private) _definePublicProperties
+      @description Creates definitions for some public properties
       */
-      definePublicScrollProperties: function () {
+      definePublicProperties: function () {
 
         var el = this;
         var scrollTopDescriptor = {};
+        var scrollTopEndDescriptor = {};
         var scrollLeftDescriptor = {};
+        var scrollLeftEndDescriptor = {};
 
         // ScrollTop property descriptor
         scrollTopDescriptor.get = function () {
@@ -147,7 +154,7 @@
             scrollTop = value;
           }
 
-          el._performScroll(scrollTop, el.content.scrollLeft, smooth);
+          el._performVerticalSmoothScroll(scrollTop, smooth);
 
         };
 
@@ -170,13 +177,29 @@
             scrollLeft = value;
           }
 
-          el._performScroll(el.content.scrollTop, scrollLeft, smooth);
+          el._performHorizontalSmoothScroll(scrollLeft, smooth);
 
         };
 
-        // Defines scrollTop, scrollLeft properties to trigger our functions
+        // ScrollLeftEnd property descriptor
+        scrollLeftEndDescriptor.get = function () {
+          return el._getHorizontalScrollableSize();
+        };
+
+        scrollLeftEndDescriptor.set = function (value) {};
+
+        // ScrollTopEnd property descriptor
+        scrollTopEndDescriptor.get = function () {
+          return el._getVerticalScrollableSize();
+        };
+
+        scrollTopEndDescriptor.set = function (value) {};
+
+        // Defines our public properties
         Object.defineProperty(el, "scrollTop", scrollTopDescriptor);
         Object.defineProperty(el, "scrollLeft", scrollLeftDescriptor);
+        Object.defineProperty(el, "scrollTopEnd", scrollTopEndDescriptor);
+        Object.defineProperty(el, "scrollLeftEnd", scrollLeftEndDescriptor);
 
       },
       /*
@@ -681,6 +704,11 @@
           el._createVerticalScroll();
 
           //When left clicking on the scrollBar we will start the dragging event
+          el.addEventListener("wheel", function (e) {
+            el.classList.add("vc-scroll-smooth");
+          });
+
+          //When left clicking on the scrollBar we will start the dragging event
           el._refs.verticalBar.addEventListener("pointerdown", function (e) {
             el._handleVerticalDragStart(e);
           });
@@ -1007,7 +1035,7 @@
           clearInterval(el._misc.arrowScroll.interval);
           el._misc.arrowScroll.active = false;
           // Adds the smooth class
-          el.classList.add("vc-scroll-smooth");
+          // el.classList.add("vc-scroll-smooth");
         }
       },
       /*
@@ -1108,7 +1136,7 @@
           clearInterval(el._misc.railScroll.interval);
           el._misc.railScroll.active = false;
           // Adds the smooth class
-          el.classList.add("vc-scroll-smooth");
+          // el.classList.add("vc-scroll-smooth");
         }
       },
       /*
@@ -1298,7 +1326,7 @@
 
         el._misc.vertical.drag.active = false;
         // Adds the smooth class
-        el.classList.add("vc-scroll-smooth");
+        // el.classList.add("vc-scroll-smooth");
 
       },
       /*
@@ -1316,7 +1344,7 @@
 
         el._misc.horizontal.drag.active = false;
         // Adds the smooth class
-        el.classList.add("vc-scroll-smooth");
+        // el.classList.add("vc-scroll-smooth");
 
       },
       /*
@@ -1455,16 +1483,141 @@
         var top = !isNaN(parseInt(top)) ? parseInt(top) : el.content.scrollTop;
         var left = !isNaN(parseInt(left)) ? parseInt(left) : el.content.scrollLeft;
 
-        var classListFn = smooth ? "add" : "remove";
+        el.classList.remove("vc-scroll-smooth");
 
-        el.classList[classListFn]("vc-scroll-smooth");
+        if (smooth) {
 
-        if (el.content.scrollTo) {
-          el.content.scrollTo(left, top);
+          el._performVerticalSmoothScroll(top);
+          el._performHorizontalSmoothScroll(left);
+
         } else {
-          el.content.scrollTop = top;
-          el.content.scrollLeft = left;
+
+          // If the browsers supports scrollTo function then thats what will be used
+          if (el.content.scrollTo) {
+            el.content.scrollTo(left, top);
+          // Else we used scrollTop/scrollLeft properties
+          } else {
+            el.content.scrollTop = top;
+            el.content.scrollLeft = left;
+          }
+
         }
+
+      },
+      /*
+      @function (private) _performVerticalSmoothScroll
+      @description Scrolls to the given position smoothly
+      @param {Number} top
+      */
+      performVerticalSmoothScroll: function (top) {
+
+        var el = this;
+
+        var positive = top > el.content.scrollTop ? true : false;
+        var finished;
+        
+        // Removes the smooth scroll class
+        el.classList.remove("vc-scroll-smooth");
+        
+        // If there is a previous animation frame still runing we cancel it
+        cancelAnimationFrame(el._misc.smoothScroll.vertical.animationFrame);
+        
+        // Makes sure the top number does not exceeds neither the maximum nor the minimum scroll
+        top = top > el._getVerticalScrollableSize() ? el._getVerticalScrollableSize() : top;
+        top = top < 0 ? 0 : top;
+
+        // Creates the function that will scroll unitl it reached the desired position
+        el._misc.smoothScroll.vertical.fn = function () {
+
+          // If there is place for us to scroll
+          if ((positive && el.content.scrollTop < top) || (!positive && el.content.scrollTop > top)) {
+
+            // If its scrolling right and it hasn reach its destination
+            if ((positive && el.content.scrollTop < top)) {
+              // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
+              el.content.scrollTop = (top - el.content.scrollTop) > el._misc.smoothScroll.amount ? el.content.scrollTop + el._misc.smoothScroll.amount : top;
+            // If its scrolling left and it hasn reach its destination
+            } else if (!positive && el.content.scrollTop > top) {
+              // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
+              el.content.scrollTop = (el.content.scrollTop - top) > el._misc.smoothScroll.amount ? el.content.scrollTop - el._misc.smoothScroll.amount : 0;
+            }
+          
+            // Once it finishes sets the finished variable to true
+          } else {
+
+            finished = true;
+
+          }
+
+          // Keeps running the animation frame until it finishes
+          if (!finished) {
+            el._misc.smoothScroll.vertical.animationFrame = requestAnimationFrame(el._misc.smoothScroll.vertical.fn);
+          } else {
+            cancelAnimationFrame(el._misc.smoothScroll.vertical.animationFrame);
+          }
+
+        };
+
+        // Inits the requestAnimationFrame
+        el._misc.smoothScroll.vertical.animationFrame = window.requestAnimationFrame(el._misc.smoothScroll.vertical.fn);
+
+      },
+      /*
+      @function (private) _performHorizontalSmoothScroll
+      @description Scrolls to the given position smoothly
+      @param {Number} left
+      */
+      performHorizontalSmoothScroll: function (left) {
+
+        var el = this;
+
+        var positive = left > el.content.scrollLeft ? true : false;
+        var finished;
+        
+        // Removes the smooth scroll class
+        el.classList.remove("vc-scroll-smooth");
+        
+        // If there is a previous animation frame still runing we cancel it
+        cancelAnimationFrame(el._misc.smoothScroll.horizontal.animationFrame);
+        
+        // Makes sure the left number does not exceeds neither the maximum nor the minimum scroll
+        left = left > el._getHorizontalScrollableSize() ? el._getHorizontalScrollableSize() : left;
+        left = left < 0 ? 0 : left;
+
+        // Creates the function that will scroll unitl it reached the desired position
+        el._misc.smoothScroll.horizontal.fn = function () {
+
+          // If there is place for us to scroll
+          if ((positive && el.content.scrollLeft < left) || (!positive && el.content.scrollLeft > left)) {
+
+            // If its scrolling down and it hasn reach its destination
+            if ((positive && el.content.scrollLeft < left)) {
+              // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
+              el.content.scrollLeft = (left - el.content.scrollLeft) > el._misc.smoothScroll.amount ? el.content.scrollLeft + el._misc.smoothScroll.amount : left;
+              // If its scrolling up and it hasn reach its destination
+            } else if (!positive && el.content.scrollLeft > left) {
+              // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
+              el.content.scrollLeft = (el.content.scrollLeft - left) > el._misc.smoothScroll.amount ? el.content.scrollLeft - el._misc.smoothScroll.amount : 0;
+            }
+          
+            // Once it finishes sets the finished variable to true
+          } else {
+
+            finished = true;
+
+          }
+          
+          // Keeps running the animation frame until it finishes
+          if (!finished) {
+            el._misc.smoothScroll.horizontal.animationFrame = requestAnimationFrame(el._misc.smoothScroll.horizontal.fn);
+          } else {
+            cancelAnimationFrame(el._misc.smoothScroll.horizontal.animationFrame);
+          }
+
+        };
+
+        // Inits the requestAnimationFrame
+        el._misc.smoothScroll.horizontal.animationFrame = window.requestAnimationFrame(el._misc.smoothScroll.horizontal.fn);
 
       },
       /*
@@ -1559,7 +1712,7 @@
       el._appendContent();
       el._assignSize();
 
-      el._definePublicScrollProperties();
+      el._definePublicProperties();
       el._setupScrolling();
 
     },
