@@ -285,9 +285,9 @@
                 var el = this;
                 var value = isNaN(parseInt(el._refs.input.value)) ? "" : parseInt(el._refs.input.value);
                 var control = e.target.parentNode;
-
-
-                if (e.type == "click" && !vcomet.util.isTrue(el.readonly)) {
+                
+                // Added isOnPath condition, this solves issues when clicking between spinners
+                if (el._refs.spinner.isOnPath && e.type == "click" && !vcomet.util.isTrue(el.readonly)) {
                     (control.classList.contains("vc-spinner-controlDown")) ? value-- : null;
                     (control.classList.contains("vc-spinner-controlUp")) ? value++ : null;
 
@@ -309,7 +309,6 @@
                 var el = this;
                 var eventType = /iPad|iPhone/.test(navigator.platform) ? "touchstart" : "click";
                 vcomet.registerPathListener(el._refs.spinner);
-
 
                 document.addEventListener(eventType, function (e) {
                     if (el._refs.spinner.isOnPath && !el._refs.label.classList.contains("vc-spinner-focusLabel")) {

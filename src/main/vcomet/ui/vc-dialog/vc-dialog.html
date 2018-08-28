@@ -7,8 +7,7 @@
                 <i class="vc-dialog-close vc-fg1-hoverable vicon vicon-close"></i>
             </div>
         </div>
-        <vc-scroll arrowScrolls="true" thickness="10" fill-container="true" fit="true">
-        </vc-scroll>
+        <vc-scroll thickness="10" fill="false"></vc-scroll>
     </div>
 </template>
 
@@ -178,6 +177,13 @@
              @property {Object} content 
              @description Reference to the content element
            */
+            window: {
+                value: {}
+            },
+            /*
+             @property {Object} content 
+             @description Reference to the content element
+           */
             content: {
                 value: {}
             },
@@ -236,6 +242,9 @@
 
                 el._refs.userContent = el.source.querySelector("[type='content']");
                 el._refs.userFooter = el.source.querySelector("[type='footer']");
+
+                // Public window reference
+                el.window = el._refs.dialog;
             },
 
             /*
@@ -1217,10 +1226,6 @@
                     el._handleDialogSize();
                     el._registerInitialSize();
                     el._limitPosition();
-
-                    if (vcomet.util.isTrue(el.allowScroll)) {
-                        el._refs.scroll.update();
-                    }
 
                     vcomet.triggerCallback("onOpened", el);
                 }
