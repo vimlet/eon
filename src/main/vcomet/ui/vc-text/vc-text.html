@@ -258,7 +258,7 @@
                 var el = this;
 
                 var main = el.querySelector(".vc-text-main");
-                var vcometScroll = document.createElement("vc-scroll");
+                var scroll = document.createElement("vc-scroll");
                 var editableContainer = document.createElement("div");
                 var editable = document.createElement("div");
 
@@ -278,8 +278,8 @@
 
                 el._refs.editableArea = editable;
 
-                vcometScroll.setAttribute("thickness", "8");
-                vcometScroll.setAttribute("type", "vertical");
+                scroll.setAttribute("thickness", "8");
+                scroll.setAttribute("type", "vertical");
 
                 editable.classList.add("vc-text-editable");
                 editable.setAttribute("contenteditable", "true");
@@ -298,8 +298,8 @@
 
                 // Appends the new nodes
                 editableContainer.appendChild(editable);
-                vcometScroll.appendChild(editableContainer);
-                main.appendChild(vcometScroll);
+                scroll.appendChild(editableContainer);
+                main.appendChild(scroll);
 
             },
             /*
@@ -311,11 +311,6 @@
                 var el = this;
 
                 el._refs.editableArea.addEventListener("keydown", function (e) {
-
-                    if (!el._misc.area.isNative) {
-                        el._refresh();
-                        el._handleAutoScroll();
-                    }
 
                     // Checks if the key press corresponds to ENTER
                     if (e.keyCode == 13) {
@@ -330,20 +325,12 @@
 
                 // Updates everything needed for new inputs and prevents keyup from triggering
                 el._refs.editableArea.addEventListener("input", function (e) {
-                    if (!el._misc.area.isNative) {
-                        el._refresh();
-                        el._handleAutoScroll();
-                    }
                     el._misc.area.inputEventTriggered = true;
                 });
 
                 // As some browsers doesnt handle spaces and different keys with the input event we also created the keyup event, 
                 // which will only do stuff if the input event was not triggered
                 el._refs.editableArea.addEventListener("keyup", function (e) {
-                    if (el._misc.area.inputEventTriggered == false && !el._misc.area.isNative) {
-                        el._refresh();
-                        el._handleAutoScroll();
-                    }
                     el._misc.area.inputEventTriggered = false;
                 });
 
@@ -568,138 +555,6 @@
                 return this._getValueLength() > parseInt(this.maxLength);
             },
             /*
-            @function (private) _refresh
-            @description Depending on the browser it handles the height change in a different way
-            */
-            refresh: function () {
-
-                var el = this;
-
-                var hasDifferentVerticalSize = el._hasDifferentVerticalSize();
-                var hasDifferentHorizontalSize = el._hasDifferentHorizontalSize();
-
-                if (hasDifferentVerticalSize || hasDifferentHorizontalSize) {
-
-                    var browser = vcomet.util.getBrowser();
-
-                    if (browser != "Chrome" || browser != "Firefox") {
-
-                        var editable = el.querySelector(".vc-text-editable");
-                        var targetRange = el._getSelectionRange();
-                        var range = document.createRange();
-                        var selection = window.getSelection();
-                        var vcometScroll = el.querySelector("vc-scroll");
-                        var scrollParent = vcometScroll.parentNode;
-                        
-                        // In some situations window.getSelection() returns null at the start of the page, in those situations we do nothing
-                        if (targetRange) {
-
-                            var startContainer = targetRange.startContainer;
-                            var startOffset = targetRange.startOffset;
-
-                            selection.removeAllRanges();
-
-                            if (browser == "IE" || browser == "Safari") {
-
-                                var vcometScrollbar = vcometScroll.querySelector(".vc-scroll-verticalScroll");
-
-                                if (vcometScrollbar) {
-
-                                    vcometScroll.removeChild(vcometScrollbar);
-                                    vcometScroll._setupVerticalScroll();
-
-                                } else if (hasDifferentVerticalSize) {
-                                    vcometScroll._setupVerticalScroll();
-                                }
-
-                                editable.focus();
-
-                            } else {
-
-                                scrollParent.appendChild(vcometScroll);
-
-                                editable.focus();
-
-                                for (var i = 0; i < editable.children.length; i++) {
-
-                                    var div = editable.children[i];
-
-                                    if (div.children.length > 1) {
-
-                                        while (div.children.length > 0) {
-                                            editable.insertBefore(div.children[0], div);
-                                        }
-
-                                        div.parentNode.removeChild(div);
-
-                                    }
-
-                                }
-
-                            }
-
-                            range.setStart(startContainer, startOffset);
-                            range.collapse(true);
-
-                            selection.removeAllRanges();
-                            selection.addRange(range);
-
-                        }
-
-                    }
-
-                }
-
-            },
-            /*
-            @function (private) _handleAutoScroll
-            @description Called when typing, when the size has changed it manages the autoscrolling to keep the cursor visible
-            @param {Object} e [event]
-            */
-            handleAutoScroll: function (e) {
-
-                var el = this;
-
-                var hasDifferentVerticalSize = el._hasDifferentVerticalSize();
-                var hasDifferentHorizontalSize = el._hasDifferentHorizontalSize();
-
-                if (hasDifferentVerticalSize || hasDifferentHorizontalSize) {
-
-                    var vcometScroll = el.querySelector("vc-scroll");
-                    var editableRect = el.querySelector(".vc-text-editable").getBoundingClientRect();
-                    var selectionRect = el._getSelectionCoords();
-                    var errorRange = 5;
-                    var verticalPosition = null;
-                    var horizontalPosition = null;
-                    var onHorizontalLimit, onVerticalLimit;
-
-                    vcometScroll._handleScrollResize();
-
-                    el._misc.area.verticalSize = vcometScroll._getVerticalScrollLimit();
-                    el._misc.area.horizontalSize = vcometScroll._getHorizontalScrollLimit();
-
-                    // Vertical check
-                    if (hasDifferentVerticalSize) {
-
-                        onVerticalLimit = (selectionRect.bottom <= editableRect.bottom && selectionRect.bottom >= (editableRect.bottom - errorRange));
-                        verticalPosition = onVerticalLimit ? el._misc.area.verticalSize : (selectionRect.top - editableRect.top);
-
-                    }
-
-                    // Horizontal check
-                    if (hasDifferentHorizontalSize) {
-
-                        onHorizontalLimit = (selectionRect.left <= editableRect.right && selectionRect.right >= (editableRect.right - errorRange));
-                        horizontalPosition = onHorizontalLimit ? el._misc.area.horizontalSize : (selectionRect.left - editableRect.left);
-
-                    }
-
-                    vcometScroll.scrollTo(verticalPosition, horizontalPosition);
-
-                }
-
-            },
-            /*
             @function (private) {Object} _getSelectionCoords
             @description Returns an object with the absolute position of the cursor
             */
@@ -814,33 +669,6 @@
                 }
             },
             /*
-              @function (private) {Boolean} _hasDifferentVerticalSize
-              @description Checks if the size is different from the vertical scroll limit
-              */
-            hasDifferentVerticalSize: function () {
-
-                // var vcscroll = this.querySelector("vc-scroll");
-
-                // if (vcscroll) {
-                //     return this._misc.area.verticalSize != this.querySelector("vc-scroll")._getVerticalScrollLimit();
-                // }
-
-                return false;
-            },
-            /*
-            @function (private) {Boolean} _hasDifferentHorizontalSize
-            @description Checks if the size is different from the horizontal scroll limit
-            */
-            hasDifferentHorizontalSize: function () {
-                // var vcscroll = this.querySelector("vc-scroll");
-
-                // if (vcscroll) {
-                //     return this._misc.area.horizontalSize != this.querySelector("vc-scroll")._getHorizontalScrollLimit();
-                // }
-
-                return false;
-            },
-            /*
             @function (private) _updateCounter
             @description Updates the counter with the current characters count left for typing
             */
@@ -944,8 +772,6 @@
                         el._refs.editableArea.innerText = el.value;
 
                         el._updateCounter();
-                        el._refresh();
-                        el._handleAutoScroll();
                     }
 
                     el._misc.area.preventUpdate = false;
