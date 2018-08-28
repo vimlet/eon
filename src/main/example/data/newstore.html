@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <!-- Import VimletJS  -->
+  <title>VC-STORE</title>
+  <script src="/vcomet/vcomet.js"></script>
+
+  <!-- UI components -->
+  <script>
+    vcomet.import("/vcomet/data/vc-newstore/vc-newstore.html");
+  </script>
+
+  <!-- Example style -->
+  <link rel="stylesheet"
+      href="/example/data/css/style.css">
+  <link rel="stylesheet"
+      href="/example/data/css/store.css">
+
+  <!-- Custom data adapter -->
+  <!-- <script src="/vcomet/data/vc-newstore/JsonAdapter.js"></script> -->
+
+</head>
+
+<body>
+
+    <!-- vc-store dummy -->
+    <vc-newstore adapter="vcomet.data.JsonAdapter" adapter-url="/vcomet/data/vc-newstore/JsonAdapter.js" ></vc-newstore>
+    
+    <!-- vc-store usage -->
+    <script>
+      var el = document.querySelector("vc-newstore");
+      
+      el.onCreated(function(){
+        el.onLoaded(function(){
+          // READ ALL
+          el.adapter.read().build(function(error, result){
+            if(error) {
+              console.log(error);
+            } else {
+              console.log('>> READ ALL result', result);
+            }
+          });
+
+          // READ
+          el.adapter.read("1").build(function(error, result){
+            if(error) {
+              console.error("error", error);
+            } else {
+              console.log('>> READ result', result);
+            }
+          });
+
+          // CREATE
+          var entry = {id: "2", name: "Peter"};
+          // var entry = {name: "Peter"};
+          el.adapter.create(entry).build(function(error, result){
+            if(error) {
+              console.error("error", error);
+            } else {
+              console.log('>> CREATE result', result);
+            }
+          });
+          // CREATE OVERWRITE
+          var entry = {id: "2", name: "Jim Overwriter"};
+          // var entry = {name: "Peter"};
+          el.adapter.create(entry).build(function(error, result){
+            if(error) {
+              console.error("error", error);
+            } else {
+              console.log('>> CREATE result', result);
+            }
+          });
+
+          // el.adapter.read(null).limit(100).options({ overwrite: true }).validate("ContactSchema").build(function (error, result) {
+          //     console.log(result);
+          // });
+        });
+      });
+    </script>
+
+</body>
+</html>

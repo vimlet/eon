@@ -42,6 +42,40 @@
         value: "horizontal",
         reflect: true
       },
+
+      /*
+        @property {Boolean} auto
+        @description 
+      */
+      auto: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} autoType
+        @description 
+      */
+      autoType: {
+        value: "next",
+        reflect: true
+      },
+      /*
+        @property {Number} duration
+        @description 
+      */
+      duration: {
+        value: 1000,
+        reflect: true
+      },
+      /*
+        @property {Number} transition
+        @description 
+      */
+      transition: {
+        value: 200,
+        reflect: true
+      },
+
       /*
         @property {Boolean} externalSlide
         @description Denied slide by touching
@@ -195,11 +229,12 @@
       */
       getNumProperty: function (property, elm) {
         var el = elm ? elm : this;
-        if (Object.keys(el).length == 0) {
-          return 0;
-        } else {
+        // Don no why of this condition
+        // if (Object.keys(el).length == 0) {
+        //   return 0;
+        // } else {
           return parseFloat(getComputedStyle(el).getPropertyValue(property));
-        }
+        // }
       },
       /*
         @function (private) _buildWrapper
@@ -225,6 +260,7 @@
         fragment.appendChild(wrapper);
         // Get maximum slide value
         el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+        
       },
       /*
         @function (private) _buildPagination
@@ -344,7 +380,7 @@
         // Start slide on mouse down event
         pagingParent.addEventListener("pointerdown", function (e) {
           // ** Fix bad rendering while sliding bug on tricky browsers
-          paging.style.transition = el._isTrickyBrowser() ? "none" : "transform .2s";
+          paging.style.transition = el._isTrickyBrowser() ? "none" : "transform " + el.transition + "ms";
           // Prevent mouse down functionality on secondary mouse button is clicked
           if (e.button == 0) {
             if (e.target.classList.contains("vc-swiper-thumbnail")) {
@@ -381,7 +417,7 @@
           // Make sure a movement has been fired
           if (mousedown) {
             // ** Fix bad rendering while sliding bug on tricky browsers
-            paging.style.transition = "transform .2s";
+            paging.style.transition = "transform " + el.transition + "ms";
             mousedown = false;
             // Mouse position is different from initial position
             // The mousedown thumbnail target is different from mouseup ones
@@ -712,8 +748,13 @@
         slide.classList.add("vc-swiper-child");
         // Store swiper elements object
         slideObj.el = slide;
+        // Set auto animation
+        if(vcomet.util.isTrue(el.auto)) {
+          slide.style.transition = "width " + el.transition + "ms";
+        }
         // Set slide range values
         el.slides.push(el._updateSlideRange(slideObj, newSlideIndex));
+        
         return slideObj;
       },
       /*
@@ -819,7 +860,9 @@
         el.querySelector(".vc-swiper-screenBtn").style.opacity = 0;
         // Remove translate animation
         el._refs.wrapper.style.transition = "none";
-        el.pagingNode.style.transition = "none";
+        if(el.pagingNode.style) {
+          el.pagingNode.style.transition = "none";
+        }
         // Toggle full screen
         if (activated) {
           el._refs.parent.appendChild(el);
@@ -828,7 +871,9 @@
             el.classList.remove("vc-swiper-fullscreen");
           }, 30);
         } else {
-          el.pagingNode.style.opacity = 0;
+          if(el.pagingNode.style) {
+            el.pagingNode.style.opacity = 0;
+          }
           // Append swiper to the body
           document.body.appendChild(el);
           // Resize manually ** Fix no resize triggering
@@ -836,14 +881,18 @@
           // Wait for the thumbnail positioning before making the paging node visible
           setTimeout(function () {
             el.style.height = "100%";
-            el.pagingNode.style.opacity = 1;
+            if(el.pagingNode.style) {
+              el.pagingNode.style.opacity = 1;
+            }
             el.classList.add("vc-swiper-fullscreen");
           }, 30);
         }
         // Restore translate animation
         setTimeout(function () {
-          el._refs.wrapper.style.transition = "transform .2s";
-          el.pagingNode.style.transition = "transform .2s";
+          el._refs.wrapper.style.transition = "transform " + el.transition + "ms";
+          if(el.pagingNode.style) {
+            el.pagingNode.style.transition = "transform " + el.transition + "ms";
+          }
         }, 60);
       },
       /*
@@ -852,7 +901,7 @@
       */
       resizeFullScreenHandler: function (btn) {
         var el = this;
-        if (vcomet.util.isTrue(el.fullScreen)) {
+        if (vcomet.util.isTrue(el.fullScreen) && vcomet.util.isTrue(el.navigation)) {
           btn = !btn ? el.querySelector(".vc-swiper-screenBtn") : btn;
           btn.style.opacity = 0;
           var sizeProp = el.direction == "horizontal" ? "height" : "width";
@@ -887,7 +936,7 @@
             }, 1);
             if (mousedown) {
               // ** Fix bad rendering while sliding bug on tricky browsers
-              el._refs.wrapper.style.transition = el._isTrickyBrowser() ? "none" : "transform .2s";
+              el._refs.wrapper.style.transition = el._isTrickyBrowser() ? "none" : "transform " + el.transition + "ms";
               // Get x/y value
               initialValue = moveValue = e[axis];
             }
@@ -924,7 +973,7 @@
             clearInterval(el.slideTimeInterval);
             if (mousedown) {
               // ** Fix bad rendering while sliding bug on tricky browsers
-              el._refs.wrapper.style.transition = "transform .2s";
+              el._refs.wrapper.style.transition = "transform " + el.transition + "ms";
               mousedown = false;
               // Complete slide monitor
               if (slideCounter < 50) {
@@ -1157,18 +1206,69 @@
         var newPos = swiperHeight * (currentIndex);
         // Translate element
         el._translate(el._refs.wrapper, -newPos);
-      }
+      },
+      /*
+        @function (private) {Boolean} _initAuto
+        @description 
+      */
+      initAuto: function () {
+        var el = this;
 
+        if(vcomet.util.isTrue(el.auto)) {
+
+          // Get number of slides that fit into the wrapper size
+          el._misc.containingSlides = el._refs.wrapper[el._misc.sizeProperty] / el.slides[0].el[el._misc.sizeProperty];
+          el._misc.containingSlides = Math.round(el._misc.containingSlides);
+          
+          // Ge first and last shown
+          if(el.autoType == "prev") {
+            el._refs.lastVisible = el.currentSlide;
+            el._refs.firstVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
+            
+            // Trigger onSlideChange event
+            vcomet.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
+            // Init movement
+            setTimeout(function() {
+              el.prev();
+            }, el.duration);
+
+          } else {
+            el._refs.firstVisible = el.currentSlide;
+            el._refs.lastVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
+            
+            // Trigger onSlideChange event
+            vcomet.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
+            // Init movement
+            setTimeout(function() {
+              el.next();
+            }, el.duration);
+          }
+        }
+      },
+      /*
+        @function (private) {Boolean} _allInView
+        @description 
+      */
+      allInView: function () {
+        var el = this;
+          var slide = el.slides[el.slides.length - 1].el;
+          if(slide.getBoundingClientRect().left < el._refs.wrapper[el._misc.sizeProperty]) {
+            return true;
+          } else {
+            return false
+          }
+      }
     },
     functions: {
       /*
         @function next
         @description Slide to the next slide element
       */
-      next: function () {
+      next: function (cb) {
         var el = this;
+        
         // Current child has a next sibling
-        if (!el._isEdgeElement("start")) {
+        if (!vcomet.util.isTrue(el.auto) && !el._isEdgeElement("start")) {
           // Update current element
           var currentIndex = el.slides.indexOf(el.currentSlide);
           el.currentSlide = el.slides[currentIndex + 1];
@@ -1180,7 +1280,37 @@
           el._activateThumbnail(el.thumbnails[currentIndex + 1]);
           // Trigger onSlideChange event
           vcomet.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex + 1)]);
+        } else if (vcomet.util.isTrue(el.auto)) {
+          // Auto next functionality
+          el.nextAuto();
         }
+      },
+      /*
+        @function nextAuto
+        @description 
+      */
+      nextAuto: function () {
+        var el = this;
+        // Trigger onNextCalled event
+        vcomet.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
+
+          var slide = s3.slides[0];
+          slide.el.style.width = 0;
+
+          setTimeout(function() {
+            // Move element to the las of the queue
+            s3.slides.push(s3.slides.shift());
+            s3._refs.wrapper.appendChild(slide.el);
+            slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
+
+            // Update first and last shown
+            el._refs.firstVisible = el.slides[0];
+            el._refs.lastVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
+          }, el.transition);
+
+          setTimeout(function() {
+            el.next();
+          }, el.duration);
       },
       /*
         @function prev
@@ -1189,7 +1319,7 @@
       prev: function () {
         var el = this;
         // Current child has a next sibling
-        if (!el._isEdgeElement("end")) {
+        if (!vcomet.util.isTrue(el.auto) && !el._isEdgeElement("end")) {
           // Update current element
           var currentIndex = el.slides.indexOf(el.currentSlide);
           el.currentSlide = el.slides[currentIndex - 1];
@@ -1201,7 +1331,37 @@
           el._activateThumbnail(el.thumbnails[currentIndex - 1]);
           // Trigger onSlideChange event
           vcomet.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex - 1)]);
+        } else if (vcomet.util.isTrue(el.auto)) {
+          // Auto next functionality
+          el.prevAuto();
         }
+      },
+      /*
+        @function prevAuto
+        @description 
+      */
+      prevAuto: function () {
+        var el = this;
+        // Trigger onNextCalled event
+        vcomet.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
+
+          var slide = s3.slides[0];
+          slide.el.style.width = 0;
+
+          setTimeout(function() {
+            // Move element to the las of the queue
+            s3.slides.unshift(s3.slides.pop());
+            s3._refs.wrapper.appendChild(slide.el);
+            slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
+
+            // Update first and last shown
+            el._refs.lastVisible = el.slides[0];
+            el._refs.firstVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
+          }, el.transition);
+
+          setTimeout(function() {
+            el.prev();
+          }, el.duration);
       },
       /*
         @function slideTo
@@ -1250,16 +1410,22 @@
       vcomet.createCallback("onDragStarted", el);
       // 
       vcomet.createCallback("onDragStoped", el);
+      // 
+      vcomet.createCallback("onPrevCalled", el);
+      // 
+      vcomet.createCallback("onNextCalled", el);
+      // 
+      vcomet.createCallback("onSwipeEnd", el);
       // Create on paging ready event
       // ** Internally used for thumbnails translation calculation
       vcomet.createCallback("onPagingReady", el, "ready");
       // Event target path monitor
       vcomet.registerPathListener(el);
-      // ** Apply default items positioning style
-      el._setDefaultStyle();
     },
     onInit: function () {
       var el = this;
+      // ** Apply default items positioning style
+      el._setDefaultStyle();
       // Set default font color
       el.classList.add("vc-fg1");
       // Pointer events attribute required
@@ -1289,7 +1455,13 @@
       // Make sure slides are created before the initial slide translation
       setTimeout(function () {
         el.slideTo(el.initialSlide);
+        el._misc.loaded = true;
       }, 0);
+    },
+    onBubbleRender: function () {
+      var el = this;
+       // Set up auto functionality
+       el._initAuto();
     },
     onResize: function () {
       var el = this;
