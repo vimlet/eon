@@ -184,7 +184,7 @@
                 el._refs.scroll.thickness = 8;
                 el._refs.scroll.fill = false;
                 el._refs.scroll.autoGrowth = true;
-                
+
                 // If the dropdown has now scroll we do not want to close the overlay if the user attempts to scroll
                 // so we prevent scrolling events, otherwise just stops the propagations
                 el._refs.scroll.content.addEventListener("wheel", function (e) {
@@ -595,14 +595,28 @@
 
                 var el = this;
 
-                var items = el._refs.dropDown.querySelectorAll("vc-item");
-                var value = el._misc.modal.inputFocus ? el._refs.modalInput.value.toLowerCase() : el._refs.input.value.toLowerCase();
+                el._filterItems();
 
                 //Check if its already expanded, if its not then expand it
                 if (el._refs.dropDown.classList.contains("hidden")) {
                     el.expand();
                 }
 
+                el._value = "";
+                el.displayValue = "";
+
+            },
+            /*
+            @function (private) _filterItems
+            @description Loops through its items to filter the ones that match the value
+            */
+            filterItems: function () {
+
+                var el = this;
+
+                var items = el._refs.dropDown.querySelectorAll("vc-item");
+                var value = el._misc.modal.inputFocus ? el._refs.modalInput.value.toLowerCase() : el._refs.input.value.toLowerCase();
+                
                 //Loop to find matches and hide those that do not match
                 for (var i = 0; i < items.length; i++) {
 
@@ -637,9 +651,6 @@
 
                 }
 
-                el._value = "";
-                el.displayValue = "";
-
             },
             /*
             @function (private) _undoFilter
@@ -672,7 +683,7 @@
                 var el = this;
 
                 el._refs.scroll.content.appendChild(el._refs.matchingErrorItem);
-                el.classList.add("noMatches");
+                el.classList.add("vc-combobox-error");
 
             },
             /*
@@ -686,7 +697,7 @@
                 if (el._refs.matchingErrorItem.parentNode) {
 
                     el._refs.matchingErrorItem.parentNode.removeChild(el._refs.matchingErrorItem);
-                    el.classList.remove("noMatches");
+                    el.classList.remove("vc-combobox-error");
 
                 }
 
@@ -872,7 +883,7 @@
                 el._refs.input.value = item.displayValue;
 
                 vcomet.triggerCallback("onSelected", el, el, [item]);
-
+                
                 el.shrink();
 
             },
@@ -907,16 +918,24 @@
             shrink: function () {
 
                 var el = this;
+                
+                if (el.classList.contains("focus")) {
 
-                el._refs.dropDown.classList.add("hidden");
-                el._refs.underline.classList.remove("animate");
+                    el.classList.remove("focus")
 
-                if (el._refs.overlay.parentNode) {
-                    el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+                    el._refs.dropDown.classList.add("hidden");
+                    el._refs.underline.classList.remove("animate");
+
+                    if (el._refs.overlay.parentNode) {
+                        el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+                    }
+
+                    el._filterItems(); 
+
+                    el._misc.modal.active = false;
+                    el._misc.modal.inputFocus = false;
+
                 }
-
-                el._misc.modal.active = false;
-                el._misc.modal.inputFocus = false;
 
             },
             /*
