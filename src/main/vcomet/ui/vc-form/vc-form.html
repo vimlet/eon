@@ -134,23 +134,29 @@
 
       handleCheckbox: function (data, node) {
 
-        var checkboxProperty = data[node.name];
-        if (vcomet.util.isTrue(node.checked)) {
-          if (checkboxProperty) {
-            if (Object.prototype.toString.call(checkboxProperty) === "[object Array]") {
-              checkboxProperty.push(node.value);
-            } else {
-              data[node.name] = data[node.name] = "" ? [node.value] : [data[node.name], node.value];
-            }
+        var nameAlreadyExists = data.hasOwnProperty(node.name);
+        var nodeValue;
 
-          } else {
-            data[node.name] = node.value;
-          }
+        // First it gets the value that will be assign for this node
+        if (vcomet.util.isTrue(node.checked)) {
+          nodeValue = node.value != "" ? node.value : true
         } else {
-          if (!checkboxProperty) {
-            data[node.name] = "";
-          }
+          nodeValue = false;
         }
+
+        // Then it checks if there is already a node with the same name, if there is then it creates an array and pushes the new value
+        if (nameAlreadyExists) {
+
+          if (Object.prototype.toString.call(data[node.name]) === "[object Array]") {
+            data[node.name].push(nodeValue);
+          } else {
+            data[node.name] = [data[node.name], nodeValue];
+          }
+          // Else if there is no previous data assignation to the name we just assign it
+        } else {
+          data[node.name] = nodeValue;
+        }
+
       },
       /*
       @function (private) _setDefaultStyle
@@ -236,8 +242,8 @@
             if (node._formElement) {
               if (node.nodeName.toLowerCase() == "vc-checkbox" || node.nodeName.toLowerCase() == "vc-toggle") {
                 el._handleCheckbox(data, node);
-              } else if (node.nodeName.toLowerCase() == "vc-radio") {
-                data[node.name] = node.checked ? node.value : "";
+              } else if (node.nodeName.toLowerCase() == "vc-group") {
+                data[node.name] = node.value != "" ? node.value : false;
               } else {
                 data[node.name] = node.value;
               }
@@ -248,7 +254,21 @@
 
               // Handle radio
               if (node.type.toLowerCase() == "radio") {
-                data[node.name] = node.hasOwnProperty("checked") ? node.value : "";
+
+                if (!data.hasOwnProperty(node.name)) {
+
+                  if (node.hasOwnProperty("checked") || node.checked) {
+                    data[node.name] = node.value;
+                  } else {
+                    data[node.name] = false;
+                  }
+
+                } else if (node.hasOwnProperty("checked") || node.checked) {
+                  
+                  data[node.name] = node.value;
+
+                }
+
               }
 
               // Handle checkbox
@@ -306,7 +326,7 @@
               nodes = el.querySelectorAll("vc-radio");
 
               for (var i = 0; i < nodes.length; i++) {
-                nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || value == nodes[i].value) ? true : false;
+                nodes[i].checked = (value == nodes[i].value) ? true : false;
               }
 
               // else just assign the value to the node
