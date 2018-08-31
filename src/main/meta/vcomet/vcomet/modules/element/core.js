@@ -487,7 +487,8 @@ vcomet.transform = function (el, config) {
     if (!vcomet.registry.isTransformed(el)) {
 
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
-        var theme = vcomet.getElementTheme(el);
+        // We pass the config so that if the element has themed: "false" but the element has a theme specified by the user it turns it into "true"
+        var theme = vcomet.getElementTheme(el, config);
         var name = el.nodeName.toLowerCase();
 
         // Imports the template of the element
@@ -508,8 +509,9 @@ vcomet.transform = function (el, config) {
 
 };
 
-vcomet.getElementTheme = function (el) {
+vcomet.getElementTheme = function (el, config) {
 
+    var userSpecifiedTheme = el.hasAttribute("theme") || el.theme ? true : false;
     var theme = vcomet.theme;
 
     theme = document.body.dataset.theme ? document.body.dataset.theme : theme;
@@ -517,9 +519,12 @@ vcomet.getElementTheme = function (el) {
     theme = el.hasAttribute("theme") ? el.getAttribute("theme") : theme;
     theme = el.theme ? el.theme : theme;
 
-    if (!el.hasAttribute("theme")) {
-        el.setAttribute("theme", theme);
-    }
+    // If the user has specified a theme but the element is not themeable then we turn themed: "true" so
+    // that it can now import a theme
+    config.themed = userSpecifiedTheme && !config.themed ? true : config.themed;
+    
+    // Whether it has the attribute or not, we set it
+    el.setAttribute("theme", theme);
 
     return theme;
 }

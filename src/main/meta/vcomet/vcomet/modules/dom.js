@@ -155,7 +155,7 @@ document.$1 = document.$1 || vcomet.$1;
 
   // Register resize listener callback
   vcomet.createCallback("onResize", vcomet);
-
+  
   window.addEventListener("resize", function (event) {
     vcomet.triggerCallback("onResize", vcomet, null, [event]);
   });
