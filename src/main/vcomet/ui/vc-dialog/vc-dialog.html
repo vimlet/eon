@@ -480,6 +480,9 @@
                 // When the dialog changes its size dynamically it will center
                 vcomet.addResizeListener(el._refs.dialog, "dialog", function () {
                     if (el._refs.dialog.classList.contains("vc-dialog-visible") && el.multiposition == "centered" && !el._misc.resize.active && el._misc.previousWindowWidth == el._misc.newWindowWidth) {
+                        // If when opening the dialog for the first time it suffers resize event due to its content we update the initial size
+                        el._registerInitialSize();
+                        // Centers the dialog
                         el._center();
                     }
                 });
@@ -773,6 +776,9 @@
             maximize: function () {
                 var el = this;
 
+                // Since entering this function means a change in the dialog ,we no longer consider its the first time the the dialog is open
+                el._misc.firstOpen = false;
+
                 if (el.dataset.status != "minimized") {
                     el._savePreviousStatus();
                 }
@@ -804,6 +810,9 @@
             minimize: function () {
                 var el = this;
                 var minimizedBar = document.querySelector(".vc-dialog-minBar");
+                
+                // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
+                el._misc.firstOpen = false;
 
                 if (!minimizedBar) {
 
@@ -1061,7 +1070,7 @@
             registerInitialSize: function () {
                 var el = this;
 
-                if (!el._misc.initialWidth && !el._misc.initialHeight) {
+                if (el._misc.firstOpen) {
                     el._misc.initialWidth = el._refs.dialog.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetWidth;
                     el._misc.initialHeight = el._refs.dialog.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetHeight;
                 }
@@ -1239,6 +1248,9 @@
             close: function () {
                 var el = this;
 
+                // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
+                el._misc.firstOpen = false;
+
                 vcomet.triggerCallback("onClose", el);
 
                 el.appendChild(el._refs.dialog);
@@ -1282,6 +1294,8 @@
             el._misc.sizeControl = false;
             el._misc.previousWindowWidth = window.innerWidth;
             el._misc.newWindowWidth = window.innerWidth;
+
+            el._misc.firstOpen = true;
 
             el._addContent();
             el._addFooter();
