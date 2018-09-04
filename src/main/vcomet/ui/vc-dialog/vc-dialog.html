@@ -1,19 +1,18 @@
 <template>
-    <div class="vc-dialog-dialog vc-bg1 vc-fg1 vc-boxshadow1 vc-defaultStyle">
-        <div class="vc-dialog-heading vc-sect1 vc-unselectable">
-            <div class="vc-dialog-headingButtons">
-                <i class="vc-dialog-minimize vc-fg1-hoverable vc-dialog-hidden vicon vicon-minimize"></i>
-                <i class="vc-dialog-maximize vc-fg1-hoverable vc-dialog-hidden vicon vicon-maximize"></i>
-                <i class="vc-dialog-close vc-fg1-hoverable vicon vicon-close"></i>
-            </div>
+    <div class="vc-dialog-heading vc-sect1 vc-unselectable">
+        <div class="vc-dialog-headingButtons">
+            <i class="vc-dialog-minimize vc-fg1-hoverable vc-dialog-hidden vicon vicon-minimize"></i>
+            <i class="vc-dialog-maximize vc-fg1-hoverable vc-dialog-hidden vicon vicon-maximize"></i>
+            <i class="vc-dialog-close vc-fg1-hoverable vicon vicon-close"></i>
         </div>
-        <vc-scroll thickness="10" fill="false"></vc-scroll>
     </div>
+    <vc-scroll thickness="10" fill="false"></vc-scroll>
 </template>
 
 <script type="text/javascript">
     vcomet.element("vc-dialog", "vc-dialog.css", {
         dependencies: [
+            "../vc-overlay",
             "../vc-section",
             "../vc-scroll"
         ],
@@ -24,7 +23,8 @@
             */
             heading: {
                 value: "",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} closable 
@@ -34,7 +34,8 @@
             */
             closable: {
                 value: "true",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} blur 
@@ -44,7 +45,8 @@
             */
             blur: {
                 value: "false",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} modal 
@@ -54,7 +56,8 @@
             */
             modal: {
                 value: "false",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} drag 
@@ -64,7 +67,8 @@
             */
             drag: {
                 value: "false",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} resize 
@@ -74,7 +78,8 @@
             */
             resize: {
                 value: "false",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} maximize 
@@ -84,7 +89,8 @@
             */
             maximize: {
                 value: "false",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} minimize 
@@ -94,7 +100,8 @@
             */
             minimize: {
                 value: "false",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {String} multiposition 
@@ -104,7 +111,28 @@
             */
             multiposition: {
                 value: "centered",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {String} width 
+              @description Dialog width
+              Values can be: any of the width CSS values
+            */
+            width: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {String} height 
+              @description Dialog height
+              Values can be: any of the height CSS values
+            */
+            height: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {String} maxWidth 
@@ -114,7 +142,8 @@
             */
             maxWidth: {
                 value: "auto",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Number} maxHeight 
@@ -124,7 +153,8 @@
             */
             maxHeight: {
                 value: "500",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Number} minWidth 
@@ -134,7 +164,8 @@
             */
             minWidth: {
                 value: "250",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Number} minHeight 
@@ -144,7 +175,8 @@
             */
             minHeight: {
                 value: "200",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Number} scaleBreak 
@@ -154,7 +186,8 @@
             */
             scaleBreak: {
                 value: "20",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} hasFooter 
@@ -163,7 +196,8 @@
             */
             hasFooter: {
                 value: "false",
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
               @property {Boolean} allowScroll
@@ -171,7 +205,8 @@
             */
             allowScroll: {
                 value: true,
-                reflect: true
+                reflect: true,
+                reflectDefault: false
             },
             /*
              @property {Object} content 
@@ -230,7 +265,6 @@
             createRefs: function () {
                 var el = this;
 
-                el._refs.dialog = el.template.querySelector(".vc-dialog-dialog");
                 el._refs.heading = el.template.querySelector(".vc-dialog-heading");
                 el._refs.footer = el.template.querySelector(".vc-dialog-footer");
                 el._refs.buttonsFooter = el.template.querySelector(".vc-dialog-buttonsFooter");
@@ -243,8 +277,32 @@
                 el._refs.userContent = el.source.querySelector("[type='content']");
                 el._refs.userFooter = el.source.querySelector("[type='footer']");
 
+            },
+            
+            /*
+              @function (private) _createWindow
+              @description Creates the window node that will be visible for the user
+            */
+            createWindow: function () {
+
+                var el = this;
+
+                el._refs.dialog = el.generateOverlay();
+                el._refs.dialog.classList.add("vc-dialog-dialog", "vc-bg1", "vc-fg1", "vc-boxshadow1", "vc-defaultStyle");
+                el._refs.dialog.appendChild(el.template);
+
+                if (el.width != "") {
+                    el._refs.dialog.style.width = el.width;
+                }
+
+                if (el.height != "") {
+                    el._refs.dialog.style.height = el.height;
+                }
+
+
                 // Public window reference
                 el.window = el._refs.dialog;
+
             },
 
             /*
@@ -810,7 +868,7 @@
             minimize: function () {
                 var el = this;
                 var minimizedBar = document.querySelector(".vc-dialog-minBar");
-                
+
                 // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
                 el._misc.firstOpen = false;
 
@@ -1286,6 +1344,7 @@
             vcomet.createCallback("onClosed", el);
 
             el._createRefs();
+            el._createWindow();
 
             el._misc.drag = {};
             el._misc.resize = {};
@@ -1300,7 +1359,6 @@
             el._addContent();
             el._addFooter();
 
-            el._refs.dialog.rootNode = el;
         },
 
         onInit: function () {

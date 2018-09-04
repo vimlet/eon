@@ -4378,6 +4378,7 @@ vcomet.parse = function (el, config) {
     vcomet.importPrivate(el, config);
 
     vcomet.defineParentComponent(el);
+    vcomet.defineOverlayCreation(el);
 
     vcomet.triggerAllCallbackEvents(el, config, "onParsed");
     vcomet.registry.updateElementStatus(el, "parsed");
@@ -4396,6 +4397,36 @@ vcomet.defineParentComponent = function (el) {
     propDescriptor.set = function () { };
 
     Object.defineProperty(el, "parentComponent", propDescriptor);
+
+};
+
+vcomet.defineOverlayCreation = function (el) {
+
+    // Defines the function for the element
+    el.generateOverlay = function (overlay) {
+
+        // If an overlay is provided we will prepare that one, otherwise we just create a new one
+        overlay = overlay ? overlay : document.createElement("vc-overlay");
+
+        // The properties assignation takes place in the onRender callback since if we assign a theme to the overlay
+        // it will search a theme file for the overlay, and we just want to assign a theme so that the overlay can recieve
+        // the main theme classes
+        overlay.onRender(function () {
+
+            // Assigns properties for the overlay
+            overlay.owner = el;
+            overlay.type = el.nodeName.toLowerCase();
+            overlay.ownerId = vcomet.registry.getUidFull(el);
+
+            if (el.hasAttribute("theme")) {
+                overlay.setAttribute("theme", el.getAttribute("theme"));
+            }
+
+        })
+
+        return overlay;
+
+    };
 
 };
 
@@ -4489,7 +4520,7 @@ vcomet.createAttributesObserver = function (el, config) {
 
                 el[privateProperty] = el.getAttribute(observeAttributesKeys[i]);
 
-            // If the attribute has no value we check if the property has it, if not we assign it an empty value
+                // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
 
                 if (config.properties[property].reflectDefault) {
@@ -4586,7 +4617,7 @@ vcomet.createPropDescriptor = function (el, config, key, value, reflect) {
             } else {
                 el.removeAttribute(vcomet.util.camelToHyphenCase(key));
             }
-           
+
         } else {
             // Trigger onPropertyChanged
             vcomet.triggerAllCallbackEvents(el, config, "onPropertyChanged", [
@@ -4739,7 +4770,7 @@ vcomet.getElementTheme = function (el, config) {
     // If the user has specified a theme but the element is not themeable then we turn themed: "true" so
     // that it can now import a theme
     config.themed = userSpecifiedTheme && !config.themed ? true : config.themed;
-    
+
     // Whether it has the attribute or not, we set it
     el.setAttribute("theme", theme);
 
