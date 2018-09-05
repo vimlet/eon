@@ -150,7 +150,7 @@ vcomet.util.getBrowserScrollBarWidth = function () {
 
     document.body.appendChild(outer);
 
-    var widthNoScroll = outer.offsetWidth;
+    var widthNoScroll = outer.getBoundingClientRect().width;
     // force scrollbars
     outer.style.overflow = "scroll";
 
@@ -159,17 +159,25 @@ vcomet.util.getBrowserScrollBarWidth = function () {
     inner.style.width = "100%";
     outer.appendChild(inner);
 
-    var widthWithScroll = inner.offsetWidth;
+    var widthWithScroll = inner.getBoundingClientRect().width;
 
     // remove divs
     outer.parentNode.removeChild(outer);
 
+    // Creates a listener for the window resize to handle the zoom in/out of the browser that may affect the scroll bar width
+    if (!vcomet.__browserScrollBarWidthListener) {
+      window.addEventListener("resize", function () {
+        delete vcomet.__browserScrollBarWidth;
+      });
+    }
+
     vcomet.__browserScrollBarWidth = widthNoScroll - widthWithScroll;
+    vcomet.__browserScrollBarWidthListener = true;
 
   }
 
   return vcomet.__browserScrollBarWidth;
-  
+
 };
 
 vcomet.util.isTrue = function (a) {
@@ -205,28 +213,28 @@ vcomet.ajax = function (url, options, cb) {
     }
   };
 
-  if(options.params) { 
+  if (options.params) {
     var paramsKeys = Object.keys(options.params);
-    if(paramsKeys.length > 0) {      
+    if (paramsKeys.length > 0) {
       url += options.querySeparator + paramsKeys[0] + "=" + options.params[paramsKeys[0]];
       for (var i = 1; i < paramsKeys.length; i++) {
-        url += options.paramSeparator + paramsKeys[i] + "=" + options.params[paramsKeys[i]]; 
+        url += options.paramSeparator + paramsKeys[i] + "=" + options.params[paramsKeys[i]];
       }
     }
   }
 
-  if(options.async || options.user || options.password) {
+  if (options.async || options.user || options.password) {
     xhr.open(options.method, url, options.async, options.user, options.password);
   } else {
     xhr.open(options.method, url);
   }
-  
+
   if (options.contentType) {
     xhr.setRequestHeader("Content-Type", options.contentType);
   }
 
   if (options.headers) {
-    for(var header in options.headers) {
+    for (var header in options.headers) {
       xhr.setRequestHeader(header, options.headers[header]);
     }
   }

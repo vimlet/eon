@@ -108,6 +108,8 @@
         el._misc.pointerOut = true;
 
         el._misc.resize = {};
+        el._misc.resize.time = 500;
+
         el._misc.contentResize = {};
 
         el._misc.smoothScroll = {};
@@ -186,14 +188,14 @@
           return el._getHorizontalScrollableSize();
         };
 
-        scrollLeftEndDescriptor.set = function (value) {};
+        scrollLeftEndDescriptor.set = function (value) { };
 
         // ScrollTopEnd property descriptor
         scrollTopEndDescriptor.get = function () {
           return el._getVerticalScrollableSize();
         };
 
-        scrollTopEndDescriptor.set = function (value) {};
+        scrollTopEndDescriptor.set = function (value) { };
 
         // Defines our public properties
         Object.defineProperty(el, "scrollTop", scrollTopDescriptor);
@@ -442,6 +444,40 @@
 
         });
 
+        // This resize listener is meant to handle the window resize triggered when the user zooms in/out the browser and the 
+        // native scroll bar sizes may be affected
+        window.addEventListener("resize", function () {
+
+          // First of all clears any pending timeout
+          clearTimeout(el._misc.windowResizeTimeout);
+          
+          // Creates a new timeout that will be triggered if not cleared by another resize event
+          el._misc.windowResizeTimeout = setTimeout(function () {
+
+            // Gets the scroll bar width
+            var scrollBarSpace = vcomet.util.getBrowserScrollBarWidth();
+            
+            // Compares the saved width with the current one, if it is different then it updates the margins
+            if (el._misc.scrollBarSpace != scrollBarSpace) {
+
+              el._misc.scrollBarSpace = scrollBarSpace;
+
+              // If the user allows us to have vertical scrolling, we set our overflow and margin to hide the native one
+              if (el._isAllowedToHaveScroll("vertical")) {
+                el.content.style.marginRight = "-" + el._misc.scrollBarSpace + "px";
+              }
+
+              // If the user allows us to have horizontal scrolling, we set our overflow and margin to hide the native one
+              if (el._isAllowedToHaveScroll("horizontal")) {
+                el.content.style.marginBottom = "-" + el._misc.scrollBarSpace + "px";
+              }
+
+            }
+
+          }, el._misc.resize.time);
+
+        });
+
         el._createContentResizeWatcher();
 
       },
@@ -483,7 +519,7 @@
           // Waits a specified time to call requestAnimationFrame
           setTimeout(function () {
             el._misc.contentResize.watcher = requestAnimationFrame(el._misc.contentResize.watchFn);
-          }, 500);
+          }, el._misc.resize.time);
 
         };
 
@@ -1487,7 +1523,7 @@
           // If the browsers supports scrollTo function then thats what will be used
           if (el.content.scrollTo) {
             el.content.scrollTo(left, top);
-          // Else we used scrollTop/scrollLeft properties
+            // Else we used scrollTop/scrollLeft properties
           } else {
             el.content.scrollTop = top;
             el.content.scrollLeft = left;
@@ -1507,13 +1543,13 @@
 
         var positive = top > el.content.scrollTop ? true : false;
         var finished;
-        
+
         // Removes the smooth scroll class
         el.classList.remove("vc-scroll-smooth");
-        
+
         // If there is a previous animation frame still runing we cancel it
         cancelAnimationFrame(el._misc.smoothScroll.vertical.animationFrame);
-        
+
         // Makes sure the top number does not exceeds neither the maximum nor the minimum scroll
         top = top > el._getVerticalScrollableSize() ? el._getVerticalScrollableSize() : top;
         top = top < 0 ? 0 : top;
@@ -1528,12 +1564,12 @@
             if ((positive && el.content.scrollTop < top)) {
               // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
               el.content.scrollTop = (top - el.content.scrollTop) > el._misc.smoothScroll.amount ? el.content.scrollTop + el._misc.smoothScroll.amount : top;
-            // If its scrolling left and it hasn reach its destination
+              // If its scrolling left and it hasn reach its destination
             } else if (!positive && el.content.scrollTop > top) {
               // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
               el.content.scrollTop = (el.content.scrollTop - top) > el._misc.smoothScroll.amount ? el.content.scrollTop - el._misc.smoothScroll.amount : 0;
             }
-          
+
             // Once it finishes sets the finished variable to true
           } else {
 
@@ -1565,13 +1601,13 @@
 
         var positive = left > el.content.scrollLeft ? true : false;
         var finished;
-        
+
         // Removes the smooth scroll class
         el.classList.remove("vc-scroll-smooth");
-        
+
         // If there is a previous animation frame still runing we cancel it
         cancelAnimationFrame(el._misc.smoothScroll.horizontal.animationFrame);
-        
+
         // Makes sure the left number does not exceeds neither the maximum nor the minimum scroll
         left = left > el._getHorizontalScrollableSize() ? el._getHorizontalScrollableSize() : left;
         left = left < 0 ? 0 : left;
@@ -1591,14 +1627,14 @@
               // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
               el.content.scrollLeft = (el.content.scrollLeft - left) > el._misc.smoothScroll.amount ? el.content.scrollLeft - el._misc.smoothScroll.amount : 0;
             }
-          
+
             // Once it finishes sets the finished variable to true
           } else {
 
             finished = true;
 
           }
-          
+
           // Keeps running the animation frame until it finishes
           if (!finished) {
             el._misc.smoothScroll.horizontal.animationFrame = requestAnimationFrame(el._misc.smoothScroll.horizontal.fn);
