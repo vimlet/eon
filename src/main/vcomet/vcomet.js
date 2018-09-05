@@ -4379,6 +4379,7 @@ vcomet.parse = function (el, config) {
 
     vcomet.defineParentComponent(el);
     vcomet.defineOverlayCreation(el);
+    vcomet.definePlaceholderCreation(el);
 
     vcomet.triggerAllCallbackEvents(el, config, "onParsed");
     vcomet.registry.updateElementStatus(el, "parsed");
@@ -4403,7 +4404,7 @@ vcomet.defineParentComponent = function (el) {
 vcomet.defineOverlayCreation = function (el) {
 
     // Defines the function for the element
-    el.generateOverlay = function (overlay) {
+    el.generateOverlayNode = function (overlay) {
 
         // If an overlay is provided we will prepare that one, otherwise we just create a new one
         overlay = overlay ? overlay : document.createElement("vc-overlay");
@@ -4425,6 +4426,29 @@ vcomet.defineOverlayCreation = function (el) {
         })
 
         return overlay;
+
+    };
+
+};
+vcomet.definePlaceholderCreation = function (el) {
+
+    // Defines the function for the element
+    el.generatePlaceholderNode = function (placeholder) {
+
+        // If a placeholder is provided we will prepare that one, otherwise we just create a new one
+        placeholder = placeholder ? placeholder : document.createElement("vc-placeholder");
+
+        // The properties assignation takes place in the onRender callback since we want to make sure the owner has an uid for the ownerId property
+        placeholder.onRender(function () {
+
+            // Assigns properties for the overlay
+            placeholder.owner = el;
+            placeholder.type = el.nodeName.toLowerCase();
+            placeholder.ownerId = vcomet.registry.getUidFull(el);
+
+        })
+
+        return placeholder;
 
     };
 
