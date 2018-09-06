@@ -450,13 +450,13 @@
 
           // First of all clears any pending timeout
           clearTimeout(el._misc.windowResizeTimeout);
-          
+
           // Creates a new timeout that will be triggered if not cleared by another resize event
           el._misc.windowResizeTimeout = setTimeout(function () {
 
             // Gets the scroll bar width
             var scrollBarSpace = vcomet.util.getBrowserScrollBarWidth();
-            
+
             // Compares the saved width with the current one, if it is different then it updates the margins
             if (el._misc.scrollBarSpace != scrollBarSpace) {
 
@@ -580,8 +580,7 @@
 
                 // Update evertything horizontal scroll related
                 el._assignHorizontalScrollSize();
-                el._assignHorizontalScrollBarSize();
-                el._updateHorizontalScrollBarPosition();
+                el._updateHorizontalScrollBar();
 
               }
 
@@ -596,14 +595,15 @@
               el._refs.square.classList.remove("vc-scroll-active");
               // And update evertything horizontal scroll related
               el._assignHorizontalScrollSize();
-              el._assignHorizontalScrollBarSize();
-              el._updateHorizontalScrollBarPosition();
+              el._updateHorizontalScrollBar();
+
             }
 
           }
 
-          el._assignVerticalScrollBarSize();
-          el._updateVerticalScrollBarPosition();
+          el._updateVerticalScrollBar();
+          // TODO
+          // el._updateVerticalScrollStatus();
 
         }
 
@@ -653,8 +653,7 @@
 
                 // Update evertything vertical scroll related
                 el._assignVerticalScrollSize();
-                el._assignVerticalScrollBarSize();
-                el._updateVerticalScrollBarPosition();
+                el._updateVerticalScrollBar();
 
               }
 
@@ -669,14 +668,14 @@
               el._refs.square.classList.remove("vc-scroll-active");
               // And update evertything horizontal scroll related
               el._assignVerticalScrollSize();
-              el._assignVerticalScrollBarSize();
-              el._updateVerticalScrollBarPosition();
+              el._updateVerticalScrollBar();
             }
 
           }
 
-          el._assignHorizontalScrollBarSize();
-          el._updateHorizontalScrollBarPosition();
+          el._updateHorizontalScrollBar();
+          // TODO
+          // el._updateHorizontalScrollStatus();
 
         }
 
@@ -862,14 +861,13 @@
           if (!el._misc.square.created) {
             el._setupSquare();
             el._assignHorizontalScrollSize();
-            el._assignHorizontalScrollBarSize();
-            el._updateHorizontalScrollBarPosition();
+            el._updateHorizontalScrollBar();
           }
         }
 
         // Assigns the sizes for the scroll
         el._assignVerticalScrollSize();
-        el._assignVerticalScrollBarSize();
+        el._updateVerticalScrollBar();
 
       },
       /*
@@ -915,14 +913,13 @@
           if (!el._misc.square.created) {
             el._setupSquare();
             el._assignVerticalScrollSize();
-            el._assignVerticalScrollBarSize();
-            el._updateVerticalScrollBarPosition();
+            el._updateVerticalScrollBar();
           }
         }
 
         // Assigns the sizes for the scroll
         el._assignHorizontalScrollSize();
-        el._assignHorizontalScrollBarSize();
+        el._updateHorizontalScrollBar();
 
       },
       /*
@@ -1194,18 +1191,80 @@
         this._refs.horizontalScroll.style.width = (this._misc.square.created && this._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + this.thickness + "px)" : "100%";
       },
       /*
+      @function (private) _updateVerticalScrollStatus
+      @description Depending on the scroll bar size if its exceeds the rail limits it means there is no active scroll
+      */
+      updateVerticalScrollStatus: function () {
+
+        var el = this;
+
+        if (el._misc.vertical.created) {
+
+          if ((el._refs.verticalBar.getBoundingClientRect().height > el._refs.verticalRail.getBoundingClientRect().height) && !vcomet.util.isTrue(el.static)) {
+            el._refs.verticalScroll.classList.remove("vc-scroll-active");
+          } else {
+            el._refs.verticalScroll.classList.add("vc-scroll-active");
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _updateHorizontalScrollStatus
+      @description Depending on the scroll bar size if its exceeds the rail limits it means there is no active scroll
+      */
+      updateHorizontalScrollStatus: function () {
+
+        var el = this;
+
+        if (el._misc.horizontal.created) {
+
+          if ((el._refs.horizontalBar.getBoundingClientRect().width > el._refs.horizontalRail.getBoundingClientRect().width) && !vcomet.util.isTrue(el.static)) {
+            el._refs.horizontalScroll.classList.remove("vc-scroll-active");
+          } else {
+            el._refs.horizontalScroll.classList.add("vc-scroll-active");
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _updateVerticalScrollBar
+      @description Updates the vertical scroll bar
+      */
+      updateVerticalScrollBar: function () {
+
+        var el = this;
+
+        el._assignVerticalScrollBarSize();
+        el._updateVerticalScrollBarPosition();
+
+      },
+      /*
+       @function (private) _updateHorizontalScrollBar
+       @description Updates the horizontal scroll bar
+       */
+      updateHorizontalScrollBar: function () {
+
+        var el = this;
+
+        el._assignHorizontalScrollBarSize();
+        el._updateHorizontalScrollBarPosition();
+
+      },
+      /*
       @function (private) _assignVerticalScrollSize
       @description Handles the length of the vertical bar
       */
       assignVerticalScrollBarSize: function () {
-        this._refs.verticalBar.style.height = Math.ceil(parseFloat(this._refs.verticalRail.offsetHeight / (this.content.scrollHeight / this.content.offsetHeight))) + "px";
+        this._refs.verticalBar.style.height = Math.ceil(this._refs.verticalRail.getBoundingClientRect().height / (this.content.scrollHeight / this.content.getBoundingClientRect().height)) + "px";
       },
       /*
       @function (private) _assignVerticalScrollSize
       @description Handles the length of the horizontal bar
       */
       assignHorizontalScrollBarSize: function () {
-        this._refs.horizontalBar.style.width = Math.ceil(parseFloat(this._refs.horizontalRail.offsetWidth / (this.content.scrollWidth / this.content.offsetWidth))) + "px";
+        this._refs.horizontalBar.style.width = Math.ceil(this._refs.horizontalRail.getBoundingClientRect().width / (this.content.scrollWidth / this.content.getBoundingClientRect().width)) + "px";
       },
       /*
       @function (private) _updateVerticalBarPosition
@@ -1216,7 +1275,7 @@
 
         var scrollableSize = el._getVerticalScrollableSize();
         var scrollTopProportion = el.content.scrollTop / scrollableSize;
-        var proportionalScrollBarTop = scrollTopProportion * (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight);
+        var proportionalScrollBarTop = Math.ceil(scrollTopProportion * (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight));
 
         el._refs.verticalBar.style.transform = "translate3d( 0, " + proportionalScrollBarTop + "px, 0)";
 
@@ -1230,7 +1289,7 @@
 
         var scrollableSize = el._getHorizontalScrollableSize();
         var scrollLeftProportion = el.content.scrollLeft / scrollableSize;
-        var proportionalScrollBarLeft = scrollLeftProportion * (el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth);
+        var proportionalScrollBarLeft = Math.ceil(scrollLeftProportion * (el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth));
 
         el._refs.horizontalBar.style.transform = "translate3d(" + proportionalScrollBarLeft + "px, 0, 0)";
 
@@ -1283,24 +1342,25 @@
 
           var scrollableSize = el._getVerticalScrollableSize();
           var verticalRailRect = el._refs.verticalRail.getBoundingClientRect();
-          var bottomDragLimit = (verticalRailRect.top + verticalRailRect.height - el._refs.verticalBar.offsetHeight + parseFloat(el._misc.vertical.drag.start));
+          var verticalBarRect = el._refs.verticalBar.getBoundingClientRect();
+          var bottomDragLimit = (verticalRailRect.top + verticalRailRect.height - verticalBarRect.height + parseFloat(el._misc.vertical.drag.start));
           var scrollbarPosition, scrollbarProportion;
 
           //Show the scrollbars when dragging, event if the mouse is outside of the scroll container
           el._showScrollbars();
 
           //Only do stuff when the mouse position is bigger than the verticalRail start
-          if (e.clientY > verticalRailRect.top) {
+          if (e.clientY >= verticalRailRect.top && e.clientY <= (verticalRailRect.top + verticalRailRect.height)) {
 
             //We calculate the top position of the scrollBar
             scrollbarPosition = e.clientY - verticalRailRect.top - parseFloat(el._misc.vertical.drag.start);
 
             // If it exceeds either the superior or the inferior limit we update the value
             scrollbarPosition = scrollbarPosition < 0 ? 0 : scrollbarPosition;
-            scrollbarPosition = e.clientY > bottomDragLimit ? parseInt(el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight) : scrollbarPosition;
+            scrollbarPosition = e.clientY > bottomDragLimit ? verticalRailRect.height - verticalBarRect.height : scrollbarPosition;
 
             //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
-            scrollbarProportion = parseInt(scrollbarPosition) / (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight);
+            scrollbarProportion = scrollbarPosition / (verticalRailRect.height - verticalBarRect.height);
 
             // Scrolls to the corresponding position
             el._performScroll(scrollableSize * scrollbarProportion);
@@ -1324,7 +1384,8 @@
 
           var scrollableSize = el._getHorizontalScrollableSize();
           var horizontalRailRect = el._refs.horizontalRail.getBoundingClientRect();
-          var rightDragLimit = (horizontalRailRect.left + horizontalRailRect.width - el._refs.horizontalBar.offsetWidth + parseFloat(el._misc.horizontal.drag.start));
+          var horizontalBarRect = el._refs.horizontalBar.getBoundingClientRect();
+          var rightDragLimit = (horizontalRailRect.left + horizontalRailRect.width - horizontalBarRect.width + parseFloat(el._misc.horizontal.drag.start));
           var scrollbarPosition, scrollbarProportion;
 
           //Show the scrollbars when dragging, event if the mouse is outside of the scroll container
@@ -1338,10 +1399,10 @@
 
             // If it exceeds either the left or the right limit we update the value
             scrollbarPosition = scrollbarPosition < 0 ? 0 : scrollbarPosition;
-            scrollbarPosition = e.clientX > rightDragLimit ? parseInt(el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth) : scrollbarPosition;
+            scrollbarPosition = e.clientX > rightDragLimit ? horizontalRailRect.width - horizontalBarRect.width : scrollbarPosition;
 
             //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
-            scrollbarProportion = parseInt(scrollbarPosition) / (el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth);
+            scrollbarProportion = scrollbarPosition / (horizontalRailRect.width - horizontalBarRect.width);
 
             // Scrolls to the corresponding position
             el._performScroll(el.content.scrollTop, scrollableSize * scrollbarProportion);
@@ -1516,8 +1577,8 @@
         var el = this;
 
         // If no parameter is passed we take the current one
-        var top = !isNaN(parseInt(top)) ? parseInt(top) : el.content.scrollTop;
-        var left = !isNaN(parseInt(left)) ? parseInt(left) : el.content.scrollLeft;
+        var top = !isNaN(parseInt(top)) ? top : el.content.scrollTop;
+        var left = !isNaN(parseInt(left)) ? left : el.content.scrollLeft;
 
         el.classList.remove("vc-scroll-smooth");
 
