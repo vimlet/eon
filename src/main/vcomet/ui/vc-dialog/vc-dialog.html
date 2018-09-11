@@ -408,30 +408,6 @@
                 });
 
             },
-
-            /*
-              @function (private) _addBlurEvent
-              @description Adds listener that give blur functionality to dialog
-            */
-            addBlurEvent: function () {
-                var el = this;
-
-                if (vcomet.util.isTrue(el.blur)) {
-                    vcomet.registerPathListener(el);
-
-                    // This fixes click not being triggered on body on iPad
-                    if (/iPad|iPhone/.test(navigator.platform)) {
-                        document.body.style.cursor = "pointer";
-                    }
-
-                    document.body.addEventListener("pointerdown", function (e) {
-
-                        if (el.classList.contains("vc-dialog-visible") && el.isOnPath == false) {
-                            el.close();
-                        }
-                    }, false);
-                }
-            },
             /*
             @function (private) _addDragListeners
             @description Adds drag listeners
@@ -970,16 +946,38 @@
             */
             addOverlay: function () {
                 var el = this;
+                
+                // If there is no overlay created yet, we create/prepare it
+                if (!el._refs.overlay) {
 
-                if (vcomet.util.isTrue(el.modal)) {
+                    // Whether we have to add or remove the modal class
+                    var classListFn = vcomet.util.isTrue(el.modal) ? "add" : "remove";
+                    
+                    // Generates the overlay element and adds its classes
+                    el._refs.overlay = el.generateOverlayNode();
+                    el._refs.overlay.classList.add("vc-dialog-overlay");
+                    el._refs.overlay.classList[classListFn]("vc-bg1-modal");
+                    
+                    // If the dialog is blureable then we add an event listener to close the dialog on overlay touch
+                    if (vcomet.util.isTrue(el.blur)) {
 
-                    if (!el._refs.overlay) {
-                        el._refs.overlay = el.generateOverlayNode();
-                        el._refs.overlay.classList.add("vc-dialog-overlay", "vc-bg1-modal");
+                        el._refs.overlay.addEventListener("pointerdown", function (e) {
+
+                            // Hide the dialog only if its currently active
+                            if (el.classList.contains("vc-dialog-visible")) {
+                                el.close();
+                            }
+
+                        }, false);
+
                     }
 
-                    document.body.appendChild(el._refs.overlay);
                 }
+                
+                
+                // Appends the overlay
+                document.body.appendChild(el._refs.overlay);
+
             },
 
             /*
@@ -1251,7 +1249,7 @@
                 var el = this;
 
                 if (!el.classList.contains("vc-dialog-visible")) {
-                    
+
                     vcomet.triggerCallback("onOpen", el);
 
                     el._assignSize();
@@ -1289,7 +1287,7 @@
                 el._misc.firstOpen = false;
 
                 vcomet.triggerCallback("onClose", el);
-                
+
                 el._refs.placeholder.parentNode.insertBefore(el, el._refs.placeholder);
                 el._refs.placeholder.parentNode.removeChild(el._refs.placeholder);
 
@@ -1360,7 +1358,6 @@
             var el = this;
 
             el._addHeading();
-            el._addBlurEvent();
             el._addDragListeners();
             el._addResizes();
             el._addMaximize();
