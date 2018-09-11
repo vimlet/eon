@@ -1,10 +1,19 @@
-<template>
+<style>
+  .vc-group-label {
+    font-size: 15px;
+    height: 18px;
+    margin-bottom: 5px;
+    display: block;
+  }
+</style>
 
+<template>
+  <label class="vc-group-label"></label>
 </template>
 
 <script>
   vcomet.element("vc-group", null, {
-  
+
     properties: {
       /*
         @property {String} name 
@@ -30,6 +39,16 @@
         value: false
       },
 
+      /*
+        @property {String} label
+        @description Label for the element
+      */
+      label: {
+        value: "",
+        reflect: true,
+        reflectDefault: true
+      },
+
     },
 
     privateProperties: {
@@ -50,12 +69,30 @@
       }
     },
 
+    privateFunctions: {
+      /*
+        @function (private) _updateLabel
+        @description Updates the label node with the new label
+      */
+      updateLabel: function () {
+
+        var el = this;
+
+        if (el.label != "") {
+          el.querySelector(".vc-group-label").innerHTML = el.label;
+        }
+
+      },
+    },
+
     onRender: function () {
       var el = this;
       var sourceNodes = this.getSourceElements();
       var documentFragment = document.createDocumentFragment();
       var length = sourceNodes.length;
       var currentEl;
+
+      el._updateLabel();
 
       while (sourceNodes.length) {
         currentEl = sourceNodes.shift();
@@ -64,6 +101,17 @@
 
       el.appendChild(documentFragment);
 
+    },
+
+    onPropertyChanged: function (key, oldVal, newVal) {
+
+      switch (key) {
+        case "label":
+          this._updateLabel();
+          break;
+      }
+
     }
+
   });
 </script>
