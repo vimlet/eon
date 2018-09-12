@@ -393,6 +393,8 @@
             el.content.style.height = "calc(100% + " + el._misc.scrollBarSpace + "px)";
             el.content.style.width = "calc(100% + " + el._misc.scrollBarSpace + "px)";
 
+            el._misc.calculatedContentSize = true;
+
           }
 
           // Else if we do not want to fill
@@ -602,8 +604,6 @@
           }
 
           el._updateVerticalScrollBar();
-          // TODO
-          // el._updateVerticalScrollStatus();
 
         }
 
@@ -619,6 +619,7 @@
 
         // If the horizontal scroll is not event created
         if (!el._misc.horizontal.created) {
+          
           //  If we have horizontal scrollable conten
           if (hasHorizontalScroll) {
             // Then create it
@@ -630,6 +631,7 @@
           }
           // Else if it is already created
         } else {
+          
           //  If we have horizontal scrollable content
           if (hasHorizontalScroll) {
             // If the horizontal scroll currently active 
@@ -662,6 +664,7 @@
           } else {
             // Then deactive the scroll
             el._refs.horizontalScroll.classList.remove("vc-scroll-active");
+            
             // If the square is active
             if (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) {
               // Then deactivate it
@@ -674,8 +677,6 @@
           }
 
           el._updateHorizontalScrollBar();
-          // TODO
-          // el._updateHorizontalScrollStatus();
 
         }
 
@@ -1550,7 +1551,7 @@
 
         scrollable = el._isAllowedToHaveScroll("horizontal") ? scrollable + el._misc.scrollBarSpace : scrollable;
 
-        return scrollable;
+        return Math.floor(scrollable);
       },
       /*
       @function (private) {Number} _getHorizontalScrollableSize
@@ -1563,7 +1564,7 @@
 
         scrollable = el._isAllowedToHaveScroll("vertical") ? scrollable + el._misc.scrollBarSpace : scrollable;
 
-        return scrollable;
+        return Math.floor(scrollable);
       },
       /*
       @function (private) _performScroll
