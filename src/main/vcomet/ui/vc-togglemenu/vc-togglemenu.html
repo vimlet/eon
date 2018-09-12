@@ -105,7 +105,7 @@
             addItem: function (item) {
                 (item.value) ? this._setupSpan(item) : null;
                 item.classList.add("vc-togglemenu-item");
-                this._refs.content.vcometScroll.content.appendChild(item);
+                this._refs.scroll.content.appendChild(item);
             },
             /*
               @function removeItem 
@@ -113,7 +113,7 @@
               @param {Object} item [Node to removes from togglemenu] 
              */
             removeItem: function (item) {
-                this._refs.content.vcometScroll.content.removeChild(item);
+                this._refs.scroll.content.removeChild(item);
             },
             /*
               @function replaceItem 
@@ -127,7 +127,7 @@
                 }
 
                 newItem.classList.add("vc-togglemenu-item");
-                this._refs.content.vcometScroll.content.replaceChild(newItem, oldItem);
+                this._refs.scroll.content.replaceChild(newItem, oldItem);
             }
         },
 
@@ -141,12 +141,12 @@
                 // Check default style configuration
                 if (!vcomet.util.isTrue(el.defaultStyle)) {
                     // Remove default style
-                    el._refs.content.vcometScroll.content.classList.remove("vc-spaced-container");
+                    el._refs.scroll.content.classList.remove("vc-spaced-container");
                 } else {
                     // Wait for vc-scroll onReady to append elements in the new spaced wrapper element
-                    el._refs.content.vcometScroll.onReady(function () {
+                    el._refs.scroll.onReady(function () {
                         // Spaced items style
-                        el._refs.content.vcometScroll.content.classList.add("vc-spaced-container");
+                        el._refs.scroll.content.classList.add("vc-spaced-container");
                     });
                 }
             },
@@ -169,8 +169,8 @@
                 }
 
                 // Move documentFragment to shadowRoot
-                el._refs.content.vcometScroll.content.appendChild(itemsDocFragment);
-                el._refs.content.vcometScroll.update();
+                el._refs.scroll.content.appendChild(itemsDocFragment);
+                
             },
             /*
               @function (private) _setupSpan
@@ -220,7 +220,7 @@
                 var totalItemsHeight = 0;
 
                 if (el.occupy == "fit") {
-                    totalItemsHeight = el._refs.content.vcometScroll.content.scrollHeight;
+                    totalItemsHeight = el._refs.scroll.content.scrollHeight;
                     el._refs.content.style.height = totalItemsHeight + "px";
 
                 } else {
@@ -298,6 +298,7 @@
             el._refs.button = el.template.querySelector(".vc-togglemenu-button");
             el._refs.title = el.template.querySelector(".vc-togglemenu-title");
             el._refs.content = el.template.querySelector(".vc-togglemenu-content");
+            el._refs.scroll = el.template.querySelector("vc-scroll");
 
             vcomet.createCallback("onChange", this);
             vcomet.createCallback("onDisplay", this);
@@ -326,8 +327,8 @@
             // Resizes toggle content when adds or deletes elements
             // vcomet.addResizeListener(el._refs.content, el.tagName + el.uid, function () {
             //     var differentHeight = (parseInt(el._refs.content.style.height) != el._refs.content);
-            vcomet.addResizeListener(el._refs.content.vcometScroll.content, el.tagName + el.uid, function () {
-                var differentHeight = (parseInt(el._refs.content.style.height) != el._refs.content.vcometScroll.content.scrollHeight);
+            vcomet.addResizeListener(el._refs.scroll.content, el.tagName + el.uid, function () {
+                var differentHeight = (parseInt(el._refs.content.style.height) != el._refs.scroll.content.scrollHeight);
 
                 (el.autoAdjustHeight && differentHeight) ? el._setDisplayHeight() : null;
             });

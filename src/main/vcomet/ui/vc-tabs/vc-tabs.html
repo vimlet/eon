@@ -54,7 +54,7 @@
       @description Whether the user wants the tabs to be draggables or not
       */
       dragging: {
-        value: true,
+        value: false,
         reflect: true
       },
       /*
@@ -181,7 +181,7 @@
 
           el._misc.dragging = {};
           el._misc.dragging.source = {};
-          el._misc.dragging.target = {};
+          el._misc.dragging.target = undefined;
           el._misc.dragging.indicator = indicator;
 
           el.addEventListener('dragenter', function (e) {
@@ -352,10 +352,10 @@
         if (e.stopPropagation) {
           e.stopPropagation(); // Stops some browsers from redirecting.
         }
+        
+        if (el._misc.isDragging && el._misc.dragging.target) {
 
-        if (el._misc.isDragging) {
-
-          var targetOrder = this._misc.dragging.target.dataset.order;
+          var targetOrder = el._misc.dragging.target.dataset.order;
           var targetTab;
 
           targetOrder = el._misc.dragging.position === "left" ? parseInt(targetOrder) : parseInt(targetOrder) + 1;
@@ -364,12 +364,14 @@
           el._refs.tabsWrapper.insertBefore(this._misc.dragging.source, targetTab);
           el._misc.isDragging = false;
 
-          el._misc.dragging.dropArea.style.visibility = "hidden";
-          el._misc.dragging.indicator.style.visibility = "hidden";
-
           el._reorderTabs();
 
         }
+
+        el._misc.dragging.dropArea.style.visibility = "hidden";
+        el._misc.dragging.indicator.style.visibility = "hidden";
+
+        el._refs.tabsWrapper.appendChild(el._misc.dragging.dropArea);
 
         return false;
       },
@@ -388,7 +390,7 @@
         var tabs = el._refs.tabsWrapper.querySelectorAll(".vc-tabs-tab");
         var targetOrder, targetTab, targetTabRect, position, indicatorLeft;
 
-        el._misc.dragging.target = el._misc.dragging.target.nodeType ? el._misc.dragging.target : document.createElement("div");
+        el._misc.dragging.target = el._misc.dragging.target && el._misc.dragging.target.nodeType ? el._misc.dragging.target : document.createElement("div");
 
         targetOrder = Math.ceil((e.clientX - tabsLeft) / tabs[0].offsetWidth) - 1;
 
@@ -459,13 +461,28 @@
       /*
       @function (private) _wipeout
       @description Completely removes the tab from the dom and its panel
-      @param {Object} tab
+      @param {String} name
       */
-      wipeout: function (tab) {
+      wipeout: function (name) {
 
         var el = this;
+        var tab = el._misc.tabs[name];
 
         el._refs.stack.wipeout(tab.dataset.panel);
+        tab.parentNode.removeChild(tab);
+
+      },
+      /*
+      @function (private) _hide
+      @description Removes the tab from the DOM but saves it in our object so that it can be restored again
+      @param {String} name
+      */
+      hide: function (name) {
+
+        var el = this;
+        var tab = el._misc.tabs[name];
+
+        el._misc.hiddenTabs[name] = tab;
         tab.parentNode.removeChild(tab);
 
       },
@@ -585,7 +602,7 @@
       /*
       @function close
       @description Closes the requested tab and selects its sibling
-      @param {Object} tab
+      @param {String} name
       @param {Object} e
       */
       close: function (name, e) {
@@ -603,7 +620,7 @@
 
           var siblingTab = this._getSiblingTab(tab);
 
-          el._wipeout(tab);
+          el._wipeout(name);
 
           // If there are still tabs in the tabsContainer then select it
           if (siblingTab) {
@@ -612,12 +629,72 @@
 
         } else {
 
-          el._wipeout(tab);
+          el._wipeout(name);
 
         }
 
         el._reorderTabs();
         el._handleTabsScrollsStatus();
+      },
+      /*
+      @function hide
+      @description Hides the requested tab and selects its sibling
+      @param {String} name
+      @param {Object} e
+      */
+      hide: function (name, e) {
+
+        var el = this;
+        var tab = el._misc.tabs[name];
+
+        if (e) {
+          e.stopPropagation();
+        }
+
+        //If the tab we are closing is the one we have selected then we have to fin a sibling to selected once we removed the tab
+        //Else just remove the tab
+        if (tab.classList.contains("vc-tabs-selected")) {
+
+          var siblingTab = this._getSiblingTab(tab);
+
+          tab.classList.remove("vc-tabs-selected", "vc-sect3");
+
+          el._hide(name);
+
+          // If there are still tabs in the tabsContainer then select it
+          if (siblingTab) {
+            el._selectTab(siblingTab.dataset.panel);
+          }
+
+        } else {
+
+          el._hide(name);
+
+        }
+
+        el._reorderTabs();
+        el._handleTabsScrollsStatus();
+      },
+      /*
+      @function restore
+      @description Restores the requested tab
+      @param {String} name
+      @param {Object} e
+      */
+      restore: function (name) {
+
+        var el = this;
+
+        if (el._misc.hiddenTabs[name]) {
+
+          el._refs.tabsWrapper.appendChild(el._misc.hiddenTabs[name]);
+          delete el._misc.hiddenTabs[name];
+
+        }
+
+        el._reorderTabs();
+        el._handleTabsScrollsStatus();
+
       },
       /*
       @function scroll
@@ -675,6 +752,7 @@
 
       el._misc.tabs = {};
       el._misc.dragging = {};
+      el._misc.hiddenTabs = {};
 
       el._setupRefs();
 
