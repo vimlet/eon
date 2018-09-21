@@ -138,14 +138,12 @@
                         if(el.offsetParent && el._isInViewport()) {
                             // Store scroll container position
                             el._misc.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                            
                             if(!el._misc.reached) {
                                 el._misc.reached = true;
                                 vcomet.triggerCallback("onVisible", el, el);
                             }
-
-                            if(el.state != vcomet.history.current && !vcomet.history.cancelNavigation) {
-                                vcomet.triggerCallback("onActivated", el, el, [el.state]);
-                            }
+                            
                        } else {
                         // ** OPTIONAL
                         //    if(el._misc.reached) {
@@ -199,7 +197,9 @@
             isInMid: function (rect) {
                 var el = this;
                 var innerMidHeight = (window.innerHeight || document.documentElement.clientHeight) / 2;
-                return (rect.top >= (innerMidHeight - 40) && rect.top <= (innerMidHeight + 40));
+                innerMidHeight = el.historyThreshold ? innerMidHeight + Math.abs(parseInt(el.historyThreshold)) : innerMidHeight;
+                return (rect.top < innerMidHeight);
+                // return (rect.top >= (innerMidHeight - 40) && rect.top <= (innerMidHeight + 40));
             },
             /*
               @function (private) _isOnTop
@@ -219,7 +219,7 @@
             isInBottom: function (rect) {
                 var el = this;
                 var innerHeight = window.innerHeight || document.documentElement.clientHeight;
-                return (rect.bottom <= innerHeight && rect.bottom >= (innerHeight - 40));
+                return rect.bottom <= innerHeight;
             },
             /*
               @function (private) _isVisible
@@ -265,7 +265,7 @@
             vcomet.createCallback("onHidden", this);
             vcomet.createCallback("onActivated", this);
         },
-        onInit: function () {
+        onTransformed: function () {
             var el = this;
             el._monitorAnchorVisibility();
             el._positionResizeListener();
