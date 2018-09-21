@@ -51,6 +51,22 @@
                 reflect: true
             },
             /*
+                @property {Array}
+                @description
+            */
+            srcDevice: {
+                value: "",
+                reflect: true
+            },
+            /*
+                @property {Number}
+                @description
+            */
+            deviceWidth: {
+                value: 768,
+                reflect: true
+            },
+            /*
                 @property {Boolean}
                 @description
             */
@@ -89,7 +105,7 @@
                 Default: auto
             */
             preLoad: {
-                value: "auto",
+                value: "none",
                 reflect: true
             },
             /*
@@ -171,22 +187,27 @@
             */
             misc: {
                 value: {}
-            }   
+            }
         },
-        functions:{
-             /*  
-                @function play
-                @description 
-            */
-             play: function () {
+        functions: {
+            /*  
+               @function play
+               @description 
+           */
+            play: function () {
                 var el = this;
 
                 el._togglePlayIcon("paused");
+
+                // if(el._misc.paused) {
                 el._refs.video.play();
+                el._misc.paused = false;
+                // }
 
                 // Hide poster
                 el._refs.poster.style.display = "none";
                 el._misc.posterHidden = true;
+                el.setAttribute("paused", false);
             },
             /*  
                 @function pause
@@ -194,9 +215,16 @@
             */
             pause: function () {
                 var el = this;
+
                 // Show pause icon and pause native video
                 el._togglePlayIcon("play");
-                el._refs.video.pause();
+
+                if (!el._misc.paused) {
+                    el._refs.video.pause();
+                    el._misc.paused = true;
+                }
+
+                el.setAttribute("paused", true);
             },
             /*  
                 @function mute
@@ -227,6 +255,7 @@
             setUpHTMLVideo: function () {
                 var el = this;
                 var source, src, i, fitClass;
+
                 // Get HTML video reference
                 el._refs.video = el.querySelector("video");
                 // Set up video configuration
@@ -236,27 +265,45 @@
                 // Video fit class
                 fitClass = el.objectFit == "cover" ? "vc-video-cover" : "vc-video-fit";
                 el._refs.video.classList.add(fitClass);
+
+                // Loads device src or normal src  depending on the screen resolution
+                // If the device src was specified
+                if (window.innerWidth <= el.deviceWidth && el.srcDevice) {
+                    el._misc.srcTemp = el.srcDevice;
+                    el._misc.windowVersion = "device";
+                } else {
+                    el._misc.srcTemp = el.src;
+                    el._misc.windowVersion = "screen";
+                }
+
                 // Allow multiple sources
-                el.src = el.src.replace(/\s/g, '').split(",");
+                // el.src = el.src.replace(/\s/g, '').split(",");
+                el._misc.srcTemp = el._misc.srcTemp.replace(/\s/g, '').split(",");
                 el.type = el.type.replace(/\s/g, '').split(",");
                 // Append sources
-                for (i = 0; i < el.src.length; i++) {
+                for (i = 0; i < el._misc.srcTemp.length; i++) {
                     // Append correct source
                     if (el.type[i]) {
                         // Create source element
                         source = document.createElement("source");
-                        source.src = el.src[i];
+                        source.src = el._misc.srcTemp[i];
                         source.type = el.type[i];
                         el._refs.video.appendChild(source);
                     }
                 }
                 // Auto play video configuration
                 if (el.autoPlay) {
+                    // Remove poster play button and wrapper overlay
+                    el._refs.playBtn.style.display = "none";
+                    el._refs.wrapper.style.backgroundColor = "transparent";
                     // iOS devices autoplay configuration needed
+                    el._misc.paused = false;
                     el._refs.video.muted = true;
                     el._refs.video.playsinline = true;
                     el._refs.video.setAttribute("muted", "");
                     el._refs.video.setAttribute("playsinline", "");
+                } else {
+                    el._misc.paused = true;
                 }
                 // Check pre-load functionality (Not IE compatible)
                 el._refs.video.setAttribute("preload", el.preLoad);
@@ -295,8 +342,8 @@
                 var agent = window.navigator.userAgent;
                 var start = agent.indexOf("OS");
                 var iOSVersion = false;
-               
-                if((agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1) && start > -1){
+
+                if ((agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1) && start > -1) {
                     iOSVersion = window.Number(agent.substr(start + 3, 3).replace("_", "."));
                 }
                 // Hide poster
@@ -772,6 +819,29 @@
                     el._refs.volumeIcon.classList.add("vicon-volume-off");
                     el._refs.volumeIcon.classList.remove("vicon-volume-on");
                 }
+            },
+            //
+            changeVideoSrc: function (src) {
+                var el = this;
+                // var i;
+
+                el._misc.videoSources = el._refs.video.$("source");
+                // Allow multiple sources
+                el._misc.srcTemp = src.replace(/\s/g, '').split(",");
+
+                el._refs.video.pause();
+                // Append sources
+                for (i = 0; i < el._misc.srcTemp.length; i++) {
+                    // // Append correct source
+                    if (el.type[i]) {
+                        el._misc.videoSources[i].src = el._misc.srcTemp[i];
+                    }
+                }
+                
+                if (vcomet.util.isTrue(el.autoPlay)) {
+                    el._refs.video.load();
+                    el._refs.video.play();
+                }
             }
         },
         onCreated: function () {
@@ -780,12 +850,13 @@
             var vid = document.createElement("video");
             vid.classList.add("vc-video-video");
             el._refs.wrapper = el.template.querySelector(".vc-video-wrapper");
-            el.template.insertBefore(vid,  el._refs.wrapper);
-           
+            el.template.insertBefore(vid, el._refs.wrapper);
+
             // Quick access
             el._refs.poster = el.template.querySelector(".vc-video-poster");
             el._refs.controls = el.template.querySelector(".vc-video-controls");
             el._refs.play = el.template.querySelector(".vc-video-play");
+            el._refs.playBtn = el.template.querySelector(".vc-video-poster .vicon-circle-play");
             el._refs.playIcon = el.template.querySelector(".vc-video-play").children[0];
             el._refs.videoContainer = el.template.querySelector(".vc-video-volume-container");
             el._refs.volume = el.template.querySelector(".vc-video-volume");
@@ -834,8 +905,38 @@
                 el._timeLineListener();
             });
         },
-        onBubbleRender: function () {
+        onResize: function () {
+            var el = this;
 
+            // Monitor display video property
+            if (!el.offsetParent) {
+                if (!el._misc.paused) {
+                    el.pause();
+                }
+            } else if (vcomet.util.isTrue(el.autoPlay)) {
+                // Re-start auto play video on shown 
+                if (el._misc.paused) {
+                    el.play();
+                }
+            }
+        },
+
+        onWindowResize: function () {
+            var el = this;
+
+            // Change video src when the window reaches the device width
+            if (window.innerWidth <= el.deviceWidth && el._misc.windowVersion == "screen" && el.srcDevice) {
+                el._changeVideoSrc(el.srcDevice);
+                el._misc.windowVersion = "device";
+
+            } else if (window.innerWidth > el.deviceWidth && el._misc.windowVersion == "device") {
+                el._changeVideoSrc(el.src);
+                el._misc.windowVersion = "screen";
+            }
+
+        },
+
+        onBubbleRender: function () {
             var el = this;
             var promise;
             if (vcomet.util.isTrue(el.autoPlay)) {

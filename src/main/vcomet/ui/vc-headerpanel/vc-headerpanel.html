@@ -2,7 +2,7 @@
   <i class="vc-headerpanel-closeButton vc-fg1 vc-fg1-hoverable vicon vicon-close"></i>
   <div class="vc-headerpanel-header vc-fg1 vc-sect1"></div>
   <div class="vc-headerpanel-panel vc-bg1">
-    <vc-scroll wheel-scroll-amount="30"></vc-scroll>
+    <vc-scroll> </vc-scroll>
     <div class="vc-headerpanel-shadowDrop vc-boxshadow3"></div>
     <div class="vc-headerpanel-actionButton vc-sect1 vc-boxshadow2"></div>
   </div>
@@ -119,9 +119,9 @@
       */
       createRefs: function () {
           var el = this;
-          el._refs.header = el.querySelector(".vc-headerpanel-header");
-          el._refs.panel = el.querySelector(".vc-headerpanel-panel");
-          el._refs.content = el._refs.panel.vcometScroll.content;
+          el._refs.header = el.template.querySelector(".vc-headerpanel-header");
+          el._refs.panel = el.template.querySelector(".vc-headerpanel-panel");
+          el._refs.scroll = el.template.querySelector("vc-scroll");
       },
       /*
         @function (private) _importContent
@@ -138,7 +138,8 @@
           currentEl = children.shift();
           documentFragment.appendChild(currentEl);
         }
-        el._refs.content.appendChild(documentFragment);
+        
+        el._refs.scroll.content.appendChild(documentFragment);
       },
       /*
         @function (private) _setPanelStyle
@@ -259,23 +260,25 @@
           var isHeaderTall = false;
           // Remove or create scroll listener
           if (remove) {
-            vcomet.removeCallback("onScrolled", el._refs.panel.vcometScroll, growingHeaderListener);
+            vcomet.removeCallback("onScrolled", el._refs.scroll, growingHeaderListener);
           } else {
             // Scroll content listener
-            el._refs.panel.vcometScroll.onScrolled(growingHeaderListener);
+            el._refs.scroll.onScrolled(growingHeaderListener);
           }
           /**
            * Growing header listener
            * @return {[type]} [description]
            */
           function growingHeaderListener(obj) {
+            
             if (obj.trigger !== "resize") {
               var padding = window.getComputedStyle(el._refs.panel, null)
                 .getPropertyValue("padding").split("px")[0];
 
               var contentHeight = el._refs.panel.offsetHeight - (padding * 2);
-              var mainContentHeight = el._refs.content.scrollHeight - 50;
+              var mainContentHeight = el._refs.scroll.content.scrollHeight - 50;
               var scrollTop = Math.abs(obj.scrollTop);
+              
               if (!isHeaderTall && scrollTop > 0 && mainContentHeight > contentHeight) {
                 // Increase header height
                 el._refs.header.style.height = el.headerHeight;
@@ -301,15 +304,14 @@
       }
     },
     onCreated: function () {
+      var el = this;
+
       vcomet.createCallback("onLoad", this);
+      el._createRefs();
     },
     onInit: function () {
       var el = this;
       this.classList.add("vc-boxshadow1");
-    },
-    onTransformed: function () {
-      var el = this;
-      el._createRefs();
     },
     onBubbleRender: function () {
       var el = this;
