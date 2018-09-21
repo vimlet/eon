@@ -1,7 +1,24 @@
 <template></template>
 <script>
   vcomet.element("vc-form", "vc-form.css", {
+    privateProperties: {
+      /*
+      @property (private) {Object} _misc
+      @description Object with useful information
+      */
+      misc: {
+        value: {}
+      }
+    },
     properties: {
+      /*
+        @property {String} schema 
+        @description Path of the schema
+      */
+      schema: {
+        value: "",
+        reflect: true
+      },
       /*
         @property {String} querySeparator 
         @description Set query separator
@@ -220,7 +237,68 @@
           return true;
         }
         return false;
-      }
+      },
+      /*
+      @function (private) {Boolean} _setupSchema
+      @description XMLHttpRequest to the schema provided by the user
+      */
+      setupSchema: function () {
+
+        var el = this;
+
+        if (el.schema != "") {
+
+          if (!vcomet.validator.containsSchema(el.schema)) {
+            
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.onreadystatechange = function () {
+
+              if (this.readyState == 4 && this.status == 200) {
+
+                vcomet.validator.addSchema(el.schema, JSON.parse(xhttp.responseText))
+
+                vcomet.triggerCallback("onSchemaLoaded", el, null, []);
+
+              }
+
+            };
+
+            xhttp.open("GET", el.schema, true);
+            xhttp.send();
+
+          } else {
+
+            vcomet.triggerCallback("onSchemaLoaded", el, null, []);
+
+          }
+
+        }
+
+      },
+      /*
+      @function (private) {Boolean} _validate
+      @description Reads the schema and and the data object and compares/validates them
+      @param {Object} data
+      */
+      validate: function (data) {
+
+        var el = this;
+
+        if (el.schema && vcomet.validator.containsSchema(el.schema)) {
+          
+          el.onSchemaLoaded(function () {
+
+            data = data ? data : el.getData();
+
+            console.log(vcomet.validator.validate(data, el.schema));
+
+          });
+
+        }
+
+      },
+
     },
 
     functions: {
@@ -264,7 +342,7 @@
                   }
 
                 } else if (node.hasOwnProperty("checked") || node.checked) {
-                  
+
                   data[node.name] = node.value;
 
                 }
@@ -440,10 +518,12 @@
 
     onCreated: function () {
       vcomet.createCallback("onSubmit", this);
+      vcomet.createCallback("onSchemaLoaded", this, "ready");
     },
     onInit: function () {
       // ** Apply default items positioning style
       this._setDefaultStyle();
+      this._setupSchema();
     },
 
 

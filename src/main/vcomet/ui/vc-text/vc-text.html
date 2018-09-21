@@ -8,6 +8,8 @@
     <div class="vc-text-main vc-bg2 vc-fg2"></div>
 
     <span class="vc-text-underline"></span>
+    <!-- TODO -->
+    <!-- <label class="vc-text-description"></label> -->
 
 </template>
 
@@ -144,6 +146,24 @@
             disabled: {
                 value: false,
                 reflect: true
+            },
+            /*
+            @property {String} tooltip
+            @description Text to be shown for the element
+            */
+            tooltip: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {Boolean} invalid
+            @description Whether the element meets the requirements or not
+            */
+            invalid: {
+                value: false,
+                reflect: true,
+                reflectDefault: false
             }
         },
 
@@ -164,9 +184,12 @@
                 el._initValue();
 
                 el._setupTouchBlur();
+                el._setupDescription();
+
                 el._updateLabel();
                 el._updateDisabled();
                 el._updateReadOnly();
+                el._updateInvalid();
 
             },
             /*
@@ -426,6 +449,16 @@
 
             },
             /*
+            @function (private) {String} _setupTouchBlur
+            @description Creates the touch blur
+            */
+            setupDescription: function () {
+                // TODO
+                var el = this;
+
+
+            },
+            /*
             @function (private) {String} _saveAreaInnerHTML
             @description Triggered when typing, it saves the innerHTML of the area while the user has not exceeded the max length
             */
@@ -669,28 +702,6 @@
                 }
             },
             /*
-            @function (private) _showError
-            @description Shows error on the element
-            */
-            showError: function () {
-
-                var el = this;
-
-                el.classList.add("vc-text-error");
-
-            },
-            /*
-            @function (private) _hideError
-            @description Hides error on the element
-            */
-            hideError: function () {
-
-                var el = this;
-
-                el.classList.remove("vc-text-error");
-
-            },
-            /*
             @function (private) _updateCounter
             @description Updates the counter with the current characters count left for typing
             */
@@ -779,20 +790,16 @@
             /*
             @function (private) _updateValue
             @description Updates the value
-            @param {String} value 
             */
             updateValue: function () {
 
                 var el = this;
 
                 if (el.type == "area") {
-
                     // This is set to true when the value propertyChanged is triggered from the textarea change, 
                     // in those scenarios we dont want to update the area again
                     if (!el._misc.area.preventUpdate) {
-
                         el._refs.editableArea.innerText = el.value;
-
                         el._updateCounter();
                     }
 
@@ -803,6 +810,19 @@
                     el._refs.input.value = el.value;
 
                 }
+
+            },
+            /*
+            @function (private) _updateInvalid
+            @description Updates the invalid status
+            */
+            updateInvalid: function () {
+
+                var el = this;
+                var classListFn = vcomet.util.isTrue(el.invalid) ? "add" : "remove";
+
+                el.classList[classListFn]("vc-text-error");
+
 
             }
 
@@ -872,6 +892,9 @@
                     break;
                 case "value":
                     this._updateValue();
+                    break;
+                case "invalid":
+                    this._updateInvalid();
                     break;
             }
 
