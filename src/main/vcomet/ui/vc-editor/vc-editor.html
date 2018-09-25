@@ -1,4 +1,3 @@
-
 <template>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -14,11 +13,11 @@
         dependencies: [
             "../vc-loading"
         ],
-        
+
         properties: {
             value: {
                 value: "",
-                reflect: false
+        observe: true
             },
             language: {
                 value: "html",
@@ -42,12 +41,21 @@
         functions: {
             // @function setValue (public) @param value {string}
             setValue: function (value) {
-                this._refs.editor.setValue(value);
+                var el = this;
+                el.value = value;
+                el._refs.editor.setValue(value);
             },
             // @function getValue (public) {string}
             getValue: function () {
-                return this._refs.editor.getValue();
+                var el = this;
+                return el._refs.editor.getValue();
             },
+            // @function clear (public) [Empty editor]
+            clear: function () {
+                var el = this;
+                el.value = "";
+                el._refs.editor.setValue("");
+            }
         },
 
         privateFunctions: {
@@ -88,7 +96,8 @@
 
                     el._refs.editor.model.onDidChangeContent((event) => {
                         try {
-                            vcomet.triggerCallback("onchange", el, el, [el]);
+                            vcomet.triggerCallback("onchange", el, el, [el]);                            
+                            el.value = el._refs.editor.getValue();                            
                         } catch (e) {}
                     });
                 });
@@ -126,7 +135,14 @@
             el._misc.paddingOffset = 20;
         },
 
-        onRender: function () {}
+        onPropertyChanged: function (key, oldVal, newVal) {
+            switch (key) {
+                case "value":
+                    // console.log("oldVal",oldVal);
+                    // console.log("newVal",newVal);
+                    break;
+            }
+        }
 
 
     });
