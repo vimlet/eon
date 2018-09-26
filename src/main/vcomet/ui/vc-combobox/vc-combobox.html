@@ -19,6 +19,8 @@
 
     <div class="vc-combobox-dropdown vc-fg2 vc-sect1 vc-boxshadow2 hidden"></div>
 
+    <div class="vc-combobox-description"></div>
+
 </template>
 
 <script type="text/javascript">
@@ -149,6 +151,24 @@
             disabled: {
                 value: false,
                 reflect: true
+            },
+            /*
+            @property {String} tooltip
+            @description Text to be shown for the element
+            */
+            tooltip: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {Boolean} invalid
+            @description Whether the element meets the requirements or not
+            */
+            invalid: {
+                value: false,
+                reflect: true,
+                reflectDefault: false
             }
         },
 
@@ -170,6 +190,8 @@
 
                 el._refs.data = el.template.querySelector(".vc-combobox-data");
                 el._refs.label = el.template.querySelector(".vc-combobox-label");
+
+                el._refs.description = el.template.querySelector(".vc-combobox-description");
 
             },
             /*
@@ -303,6 +325,20 @@
 
                 el._misc.modal = {};
                 el._misc.items = {};
+                el._misc.descriptionText = "";
+
+            },
+            /*
+            @function (private) {String} _setupDescription
+            @description Creates the touch blur
+            */
+            setupDescription: function () {
+
+                var el = this;
+
+                if (el.tooltip != "") {
+                    el.updateDescription(el.tooltip);
+                }
 
             },
             /*
@@ -617,7 +653,7 @@
 
                 var items = el._refs.dropDown.querySelectorAll("vc-item");
                 var value = el._misc.modal.inputFocus ? el._refs.modalInput.value.toLowerCase() : el._refs.input.value.toLowerCase();
-                
+
                 //Loop to find matches and hide those that do not match
                 for (var i = 0; i < items.length; i++) {
 
@@ -684,7 +720,7 @@
                 var el = this;
 
                 el._refs.scroll.content.appendChild(el._refs.matchingErrorItem);
-                el.classList.add("vc-combobox-error");
+                el.invalid = true;
 
             },
             /*
@@ -698,7 +734,7 @@
                 if (el._refs.matchingErrorItem.parentNode) {
 
                     el._refs.matchingErrorItem.parentNode.removeChild(el._refs.matchingErrorItem);
-                    el.classList.remove("vc-combobox-error");
+                    el.invalid = false;
 
                 }
 
@@ -840,6 +876,18 @@
 
                 }
 
+            },
+            /*
+            @function (private) _updateInvalid
+            @description Updates the invalid status
+            */
+            updateInvalid: function () {
+
+                var el = this;
+                var classListFn = vcomet.util.isTrue(el.invalid) ? "add" : "remove";
+
+                el.classList[classListFn]("vc-combobox-error");
+
             }
 
         },
@@ -884,7 +932,7 @@
                 el._refs.input.value = item.displayValue;
 
                 vcomet.triggerCallback("onSelected", el, el, [item]);
-                
+
                 el.shrink();
 
             },
@@ -919,7 +967,7 @@
             shrink: function () {
 
                 var el = this;
-                
+
                 if (el.classList.contains("focus")) {
 
                     el.classList.remove("focus")
@@ -931,7 +979,7 @@
                         el._refs.overlay.parentNode.removeChild(el._refs.overlay);
                     }
 
-                    el._filterItems(); 
+                    el._filterItems();
 
                     el._misc.modal.active = false;
                     el._misc.modal.inputFocus = false;
@@ -960,6 +1008,27 @@
                     el.clear();
                 }
 
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the
+            */
+            updateDescription: function (text) {
+                this._misc.descriptionText = text;
+                this._refs.description.innerHTML = this._misc.descriptionText;
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the
+            */
+            resetDescription: function () {
+                
+                var el = this;
+                var description = el.tooltip != "" ? el.tooltip : "";
+
+                el._misc.descriptionText = description;
+                el._refs.description.innerHTML = description;
+
             }
 
         },
@@ -986,6 +1055,8 @@
             el._setupAnimations();
             el._setupTouchBlur();
             el._setupMatchingErrorItem();
+
+            el._setupDescription();
 
             el._updateLabel();
             el._updateDisabled();
@@ -1022,6 +1093,9 @@
                     break;
                 case "value":
                     this._updateValue();
+                    break;
+                case "invalid":
+                    this._updateInvalid();
                     break;
             }
 

@@ -14,11 +14,17 @@
         <div class="vc-slider-display">0</div>
     </div>
 
+    <div class="vc-slider-description"></div>
+
 </template>
 
 <script>
     vcomet.element("vc-slider", "vc-slider.css", {
+
+        themed: true,
+        
         properties: {
+
             /*
               @property {String} name 
               @description Slider name
@@ -142,6 +148,24 @@
             inline: {
                 value: true,
                 reflect: true
+            },
+            /*
+            @property {String} tooltip
+            @description Text to be shown for the element
+            */
+            tooltip: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {Boolean} invalid
+            @description Whether the element meets the requirements or not
+            */
+            invalid: {
+                value: false,
+                reflect: true,
+                reflectDefault: false
             }
         },
 
@@ -204,9 +228,45 @@
                     el.clear();
                 }
 
+            },
+
+            /*
+            @function updateDescription
+            @description Updates the description value for the element
+            */
+            updateDescription: function (text) {
+                this._misc.descriptionText = text;
+                this._refs.description.innerHTML = this._misc.descriptionText;
+            },
+            /*
+            @function resetDescription
+            @description Updates the description value for the element
+            */
+            resetDescription: function () {
+
+                var el = this;
+                var description = el.tooltip != "" ? el.tooltip : "";
+
+                el._misc.descriptionText = description;
+                el._refs.description.innerHTML = description;
+
             }
         },
         privateFunctions: {
+
+            /*
+            @function (private) {String} _setupDescription
+            @description Creates the touch blur
+            */
+            setupDescription: function () {
+
+                var el = this;
+
+                if (el.tooltip != "") {
+                    el.updateDescription(el.tooltip);
+                }
+
+            },
 
             /*
               @function (private) _setValue
@@ -238,6 +298,7 @@
                 el._refs.fill = el.template.querySelector(".vc-slider-fill");
                 el._refs.thumb = el.template.querySelector(".vc-slider-thumb");
                 el._refs.range = el.template.querySelector(".vc-slider-display");
+                el._refs.description = el.template.querySelector(".vc-slider-description");
             },
             /*
               @function (private) _updateSlider
@@ -266,7 +327,7 @@
             horizontalSlider: function () {
                 var el = this;
                 var trackSize = 100;
-                
+
                 el.style.width = (el.size) ? el.size : el.offsetWidth;
                 el._refs.fill.style.width = (el._misc.percentValue * trackSize) + "%";
                 el._refs.track.style.width = trackSize + "%"; /* adjust for border */
@@ -278,7 +339,7 @@
             */
             verticalSlider: function () {
                 var el = this;
-                
+
                 // If its the first the verticalSlider is called then we have
                 // to invert the width and height
                 if (el._misc.first) {
@@ -301,7 +362,7 @@
                     // Sets the property to place the slider in vertical for IE and Firefox browsers
                     (vcomet.util.getBrowser() == "Firefox" || vcomet.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
                 }
-                
+
             },
 
             /*
@@ -460,6 +521,19 @@
             },
 
             /*
+            @function (private) _updateInvalid
+            @description Updates the invalid status
+            */
+            updateInvalid: function () {
+
+                var el = this;
+                var classListFn = vcomet.util.isTrue(el.invalid) ? "add" : "remove";
+
+                el.classList[classListFn]("vc-slider-error");
+
+            },
+
+            /*
               @function (private) _updateCurrentValue
               @description Updates slider current value and trigger onChange callback
             */
@@ -508,6 +582,7 @@
             this._createRefs();
 
             this._misc.first = true;
+            this._misc.descriptionText = "";
         },
 
         onRender: function () {
@@ -528,7 +603,8 @@
             if (el.orientation == "horizontal" && el.displayAlign != "center") {
                 el.displayPosition = "";
             }
-
+            
+            el._setupDescription();
             el._updateDisabled();
             el._updateReadonly();
             el._updateVerticalHeight();
@@ -550,6 +626,9 @@
                 case "value":
                     this._setValue();
                     break;
+                case "invalid":
+                    this._updateInvalid();
+                break;
             }
         },
 

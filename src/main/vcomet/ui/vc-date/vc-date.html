@@ -55,6 +55,8 @@
 
   </div>
 
+  <div class="vc-date-description"></div>
+
 </template>
 
 <script>
@@ -63,8 +65,8 @@
     themed: true,
 
     dependencies: [
-            "../vc-overlay"
-        ],
+      "../vc-overlay"
+    ],
 
     privateProperties: {
       /*
@@ -263,6 +265,24 @@
       year: {
         value: "",
         reflect: true
+      },
+      /*
+      @property {String} tooltip
+      @description Text to be shown for the element
+      */
+      tooltip: {
+        value: "",
+        reflect: true,
+        reflectDefault: false
+      },
+      /*
+      @property {Boolean} invalid
+      @description Whether the element meets the requirements or not
+      */
+      invalid: {
+        value: false,
+        reflect: true,
+        reflectDefault: false
       }
     },
     privateFunctions: {
@@ -474,6 +494,8 @@
         el._misc.selector = {};
         el._misc.selector.range = {};
 
+        el._misc.descriptionText = "";
+
         el._misc.downTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
         el._misc.blurTrigger = vcomet.util.isTouchScreen() ? "touchend" : "click";
 
@@ -511,8 +533,23 @@
         el._refs.header = el._refs.calendar.querySelector(".vc-date-header");
         el._refs.body = el._refs.calendar.querySelector(".vc-date-body");
 
+        el._refs.description = el.template.querySelector(".vc-date-description");
+
         el._refs.previous = el._refs.calendar.querySelector(".vc-date-previous");
         el._refs.next = el._refs.calendar.querySelector(".vc-date-next");
+
+      },
+      /*
+      @function (private) {String} _setupDescription
+      @description Creates the touch blur
+      */
+      setupDescription: function () {
+
+        var el = this;
+
+        if (el.tooltip != "") {
+          el.updateDescription(el.tooltip);
+        }
 
       },
       /*
@@ -2841,6 +2878,28 @@
           el.clear();
         }
 
+      },
+
+      /*
+      @function updateDescription
+      @description Updates the description value for the element
+      */
+      updateDescription: function (text) {
+        this._misc.descriptionText = text;
+        this._refs.description.innerHTML = this._misc.descriptionText;
+      },
+      /*
+      @function resetDescription
+      @description Updates the description value for the element
+      */
+      resetDescription: function () {
+
+        var el = this;
+        var description = el.tooltip != "" ? el.tooltip : "";
+
+        el._misc.descriptionText = description;
+        el._refs.description.innerHTML = description;
+
       }
     },
     onCreated: function () {
@@ -2864,6 +2923,7 @@
       el._setupRefs();
       el._setupOverlay();
       el._setupType();
+      el._setupDescription();
 
     },
     onRender: function () {
@@ -2883,6 +2943,9 @@
           break;
         case "value":
           this._updateValue();
+          break;
+        case "invalid":
+          this._updateInvalid();
           break;
       }
 

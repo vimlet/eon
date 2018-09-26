@@ -249,7 +249,7 @@
         if (el.schema != "") {
 
           if (!vcomet.validator.containsSchema(el.schema)) {
-            
+
             var xhttp = new XMLHttpRequest();
 
             xhttp.onreadystatechange = function () {
@@ -286,12 +286,56 @@
         var el = this;
 
         if (el.schema && vcomet.validator.containsSchema(el.schema)) {
-          
+
           el.onSchemaLoaded(function () {
 
-            data = data ? data : el.getData();
+            var error;
 
-            console.log(vcomet.validator.validate(data, el.schema));
+            data = data ? data : el.getData();
+            error = vcomet.validator.validate(data, el.schema);
+
+            if (error) {
+              
+              var fields = Object.keys(data);
+              var field, element;
+
+              for (var i = 0; i < fields.length; i++) {
+
+                field = fields[i];
+                element = el.querySelector('[name="' + field + '"]');
+
+                if (element && element.vcomet && element.hasOwnProperty("invalid")) {
+
+                  if (error[field]) {
+
+                    var description = "";
+
+                    for (var j = 0; j < error[field].length; j++) {
+
+                      description = description != "" ? description + "\r\n" : description;
+                      description = description != "" ? description + error[field][j] : error[field][j];
+
+                    }
+
+                    element.updateDescription(description);
+                    element.invalid = true;
+
+                  } else {
+
+                    if (element.invalid) {
+
+                      element.resetDescription();
+                      element.invalid = false;
+                      
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }
 
           });
 

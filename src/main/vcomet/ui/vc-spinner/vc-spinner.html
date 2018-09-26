@@ -1,4 +1,5 @@
 <template>
+
     <div class="vc-spinner-group vc-fg2 vc-unselectable">
         <label class="vc-spinner-label"></label>
         <div class="vc-spinner-spinner vc-bg2">
@@ -16,6 +17,9 @@
         </div>
         <span class="vc-spinner-inputBar"></span>
     </div>
+
+    <div class="vc-spinner-description"></div>
+
 </template>
 
 <script>
@@ -120,6 +124,24 @@
             inline: {
                 value: true,
                 reflect: true
+            },
+            /*
+            @property {String} tooltip
+            @description Text to be shown for the element
+            */
+            tooltip: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {Boolean} invalid
+            @description Whether the element meets the requirements or not
+            */
+            invalid: {
+                value: false,
+                reflect: true,
+                reflectDefault: false
             }
         },
 
@@ -152,6 +174,13 @@
             */
             refs: {
                 value: {}
+            },
+            /*
+              @property (private) {Object} _misc
+              @description Object with useful information
+            */
+            misc: {
+                value: {}
             }
         },
         functions: {
@@ -175,7 +204,29 @@
                     el.clear();
                 }
 
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the
+            */
+            updateDescription: function (text) {
+                this._misc.descriptionText = text;
+                this._refs.description.innerHTML = this._misc.descriptionText;
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the
+            */
+            resetDescription: function () {
+                
+                var el = this;
+                var description = el.tooltip != "" ? el.tooltip : "";
+
+                el._misc.descriptionText = description;
+                el._refs.description.innerHTML = description;
+
             }
+
         },
         privateFunctions: {
             /*
@@ -191,6 +242,7 @@
                 el._refs.input = el.template.querySelector(".vc-spinner-input");
                 el._refs.label = el.template.querySelector(".vc-spinner-label");
                 el._refs.inputBar = el.template.querySelector(".vc-spinner-inputBar");
+                el._refs.description = el.template.querySelector(".vc-spinner-description");
 
             },
 
@@ -286,7 +338,7 @@
                 var el = this;
                 var value = isNaN(parseInt(el._refs.input.value)) ? "" : parseInt(el._refs.input.value);
                 var control = e.target.parentNode;
-                
+
                 // Added isOnPath condition, this solves issues when clicking between spinners
                 if (el._refs.spinner.isOnPath && e.type == "click" && !vcomet.util.isTrue(el.readonly)) {
                     (control.classList.contains("vc-spinner-controlDown")) ? value-- : null;
@@ -299,6 +351,33 @@
                 el.value = value;
                 el._refs.input.value = value;
                 el._refs.input.setAttribute("value", value);
+
+            },
+
+            /*
+            @function (private) {String} _setupDescription
+            @description Creates the touch blur
+            */
+            setupDescription: function () {
+
+                var el = this;
+
+                if (el.tooltip != "") {
+                    el.updateDescription(el.tooltip);
+                }
+
+            },
+
+            /*
+            @function (private) _updateInvalid
+            @description Updates the invalid status
+            */
+            updateInvalid: function () {
+
+                var el = this;
+                var classListFn = vcomet.util.isTrue(el.invalid) ? "add" : "remove";
+
+                el.classList[classListFn]("vc-spinner-error");
 
             },
 
@@ -421,7 +500,7 @@
             checkMin: function (value) {
                 var el = this;
                 var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : parseInt(value);
-              
+
                 return returnValue;
             },
 
@@ -433,7 +512,7 @@
             checkMax: function (value) {
                 var el = this;
                 var returnValue = (el.max && parseInt(value) > parseInt(el.max)) ? parseInt(el.max) : parseInt(value);
-        
+
                 return returnValue;
             }
         },
@@ -457,6 +536,8 @@
             el._updateReadonly();
             el._setFocusingListeners();
             el._setUpdateListeners();
+            el._setupDescription();
+            el._updateInvalid();
 
             // Sets the name of the input
             el._refs.input.setAttribute("name", el.name);
@@ -486,6 +567,9 @@
                     break;
                 case "value":
                     this._setValue(true);
+                    break;
+                case "invalid":
+                    this._updateInvalid();
                     break;
             }
         }

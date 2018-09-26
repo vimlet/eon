@@ -8,8 +8,8 @@
     <div class="vc-text-main vc-bg2 vc-fg2"></div>
 
     <span class="vc-text-underline"></span>
-    <!-- TODO -->
-    <!-- <label class="vc-text-description"></label> -->
+    
+    <div class="vc-text-description"></div>
 
 </template>
 
@@ -202,6 +202,7 @@
 
                 el._refs.data = el.querySelector(".vc-text-data");
                 el._refs.main = el.querySelector(".vc-text-main");
+                el._refs.description = el.querySelector(".vc-text-description");
 
             },
             /*
@@ -449,13 +450,16 @@
 
             },
             /*
-            @function (private) {String} _setupTouchBlur
+            @function (private) {String} _setupDescription
             @description Creates the touch blur
             */
             setupDescription: function () {
-                // TODO
+
                 var el = this;
 
+                if (el.tooltip != "") {
+                    el.updateDescription(el.tooltip);
+                }
 
             },
             /*
@@ -823,7 +827,6 @@
 
                 el.classList[classListFn]("vc-text-error");
 
-
             }
 
         },
@@ -850,6 +853,27 @@
                     el.clear();
                 }
 
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the element
+            */
+            updateDescription: function (text) {
+                this._misc.descriptionText = text;
+                this._refs.description.innerHTML = this._misc.descriptionText;
+            },
+            /*
+            @function resetDescription
+            @description Updates the description value for the element
+            */
+            resetDescription: function () {
+                
+                var el = this;
+                var description = el.tooltip != "" ? el.tooltip : "";
+
+                el._misc.descriptionText = description;
+                el._refs.description.innerHTML = description;
+
             }
         },
 
@@ -858,6 +882,8 @@
             var el = this;
 
             el._misc.initialText = this.source.textContent;
+            el._misc.descriptionText = "";
+
             el.value = el.value == "" && el._misc.initialText != "" ? el._misc.initialText : el.value;
 
             el._misc.area = {};

@@ -6214,6 +6214,7 @@ vcomet.validator.validate = function (data, schema) {
 
             vcomet.validator.validateRequiredField(property, schema, data, errorObj);
             vcomet.validator.validateStringField(property, schema, data, errorObj);
+            vcomet.validator.validateDateField(property, schema, data, errorObj);
             vcomet.validator.validateNumericField(property, schema, data, errorObj);
             vcomet.validator.validateArrayField(property, schema, data, errorObj);
             vcomet.validator.validateObjectField(property, schema, data, errorObj);
@@ -6252,7 +6253,7 @@ vcomet.validator.validateRequiredField = function (property, schema, data, error
 
     var isInvalid = ((!data[property] || data[property] == "") && isRequired);
     
-    // If if does not meat any of the requirements then it fills the error object with the proper information
+    // If if does not meet any of the requirements then it fills the error object with the proper information
     if (isInvalid) {
         vcomet.validator.fillErrorObj(property, "Required", errorObj);
     }
@@ -6279,7 +6280,25 @@ vcomet.validator.validateStringField = function (property, schema, data, errorOb
 
         var isInvalid = (hasPattern && !matchesPattern) || (hasMaxLength && exceedsMaxLength) || (hasMinLength && exceedsMinLength);
 
-        // If if does not meat any of the requirements then it fills the error object with the proper information
+        // If if does not meet any of the requirements then it fills the error object with the proper information
+        if (isInvalid) {
+            var errorMessage = propertySchema.errorMessage ? propertySchema.errorMessage : vcomet.validator.defaultErrorMessage;
+            vcomet.validator.fillErrorObj(property, errorMessage, errorObj);
+        }
+
+    }
+
+}
+
+vcomet.validator.validateDateField = function (property, schema, data, errorObj) {
+
+    var propertySchema = schema.properties[property];
+    
+    if (propertySchema.type == "date" && data.hasOwnProperty(property)) {
+
+        var isInvalid;
+        
+        // If if does not meet any of the requirements then it fills the error object with the proper information
         if (isInvalid) {
             var errorMessage = propertySchema.errorMessage ? propertySchema.errorMessage : vcomet.validator.defaultErrorMessage;
             vcomet.validator.fillErrorObj(property, errorMessage, errorObj);
@@ -6313,7 +6332,7 @@ vcomet.validator.validateNumericField = function (property, schema, data, errorO
 
         var isInvalid = (hasMultipleOf && !isMultipleOf) || (hasMaximum && (exceedsMaximum || exceedsExclusiveMaximum)) || (hasMinimum && (exceedsMinimum || exceedsExclusiveMinimum));
 
-        // If if does not meat any of the requirements then it fills the error object with the proper information
+        // If if does not meet any of the requirements then it fills the error object with the proper information
         if (isInvalid) {
             var errorMessage = propertySchema.errorMessage ? propertySchema.errorMessage : vcomet.validator.defaultErrorMessage;
             vcomet.validator.fillErrorObj(property, errorMessage, errorObj);
@@ -6341,7 +6360,7 @@ vcomet.validator.validateArrayField = function (property, schema, data, errorObj
 
         var isInvalid = (hasMinItems && exceedsMinItems) || (hasMaxItems && exceedsMaxItems);
 
-        // If if does not meat any of the requirements then it fills the error object with the proper information
+        // If if does not meet any of the requirements then it fills the error object with the proper information
         if (isInvalid) {
             var errorMessage = propertySchema.errorMessage ? propertySchema.errorMessage : vcomet.validator.defaultErrorMessage;
             vcomet.validator.fillErrorObj(property, errorMessage, errorObj);
