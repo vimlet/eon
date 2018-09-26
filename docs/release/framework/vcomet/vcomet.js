@@ -5377,7 +5377,7 @@ vcomet.time.getWeekDay = function (year, month, day) {
   return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(year, month, day).getDay()];
 };
 
-vcomet.time.firstWeekDay = function (locale, year, month, format) {
+vcomet.time.getFirstWeekDay = function (locale, year, month, format) {
   var dummyDate = new Date(year, month, 1);
   format = format ? format : "long";
   return dummyDate.toLocaleString(locale, {

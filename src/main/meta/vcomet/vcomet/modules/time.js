@@ -38,12 +38,29 @@ vcomet.time.getWeekDay = function (year, month, day) {
   return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(year, month, day).getDay()];
 };
 
-vcomet.time.firstWeekDay = function (locale, year, month, format) {
+vcomet.time.getFirstWeekDay = function (locale, year, month, format) {
   var dummyDate = new Date(year, month, 1);
   format = format ? format : "long";
   return dummyDate.toLocaleString(locale, {
     weekday: format
   });
+};
+
+vcomet.time.getFirstWeekMonday = function (locale, year, month, format) {
+  var monDay, monthDays;
+  var firstWeekDay = vcomet.time.getFirstWeekDay(locale, year, month, format);
+  var weekPosition = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].indexOf(firstWeekDay);
+  // Check first month reached
+  if(month == 0) {
+      month = 11;
+      year--;
+  } else {
+      month--;
+  }
+  // Get previous month days
+  monthDays = vcomet.time.getDaysInMonth(year, month);
+  monDay = (monthDays + 1) - weekPosition;
+  return monDay;
 };
 
 vcomet.time.getDateWithFormat = function (date, format, locale) {
