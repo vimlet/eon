@@ -853,20 +853,8 @@
       @description Takes the value format and saves its separator
       */
       setupSeparator: function () {
-
         var el = this;
-
-        var format = el.valueFormat;
-        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
-        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
-        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
-
-        format = format.replace(dayFormat, "");
-        format = format.replace(monthFormat, "");
-        format = format.replace(yearFormat, "");
-
-        el._misc.separator = format[0];
-
+        el._misc.separator = vcomet.time.getFormatSeparator(el.valueFormat);
       },
       /*
       @function (private) _setupToolbarMode
@@ -1149,9 +1137,9 @@
           el._refs.overlay.classList.remove("vc-date-device");
           el._refs.overlay.classList.remove("vc-bg1-modal");
 
-          el._refs.calendar.style.top = el.getBoundingClientRect().top + 1 + el.offsetHeight + "px";
-          el._refs.calendar.style.left = el.getBoundingClientRect().left + "px";
-          el._refs.calendar.style.width = el.offsetWidth + "px";
+          el._refs.calendar.style.top = el._refs.main.getBoundingClientRect().top + 1 + el._refs.main.offsetHeight + "px";
+          el._refs.calendar.style.left = el._refs.main.getBoundingClientRect().left + "px";
+          el._refs.calendar.style.width = el._refs.main.offsetWidth + "px";
           el._refs.calendar.style.height = "auto";
 
         }
@@ -1232,7 +1220,7 @@
         //If its valid we remove the error classes, and update everything according to the new date
         if (validDate) {
 
-          el._refs.underline.classList.remove("vc-date-error");
+          el.invalid = false;
 
           el._misc.current.day = parseInt(day);
           el._misc.current.month = parseInt(month) - 1;
@@ -1240,39 +1228,14 @@
 
           el._misc.preventUpdate = true;
 
-          el.value = el._generateOutputValue(obj);
+          el.value = vcomet.time.generateOutput(dateObj, el.valueFormat);
 
 
         } else {
 
-          el._refs.underline.classList.add("vc-date-error");
+          el.invalid = true;
 
         }
-
-      },
-      /*
-      @function (private) {Object} _getObjectFromDateString
-      @description Given a value with format this functions returns an object with day, month and year provided by the value
-      @param {String} value
-      */
-      getObjectFromDateString: function (value) {
-
-        var el = this;
-
-        var format = el.valueFormat;
-
-        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
-        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
-        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
-
-        var splittedValue = value.split(el._misc.separator);
-        var splittedFormat = el.valueFormat.split(el._misc.separator);
-
-        var dayIndex = splittedFormat.indexOf(dayFormat);
-        var monthIndex = splittedFormat.indexOf(monthFormat);
-        var yearIndex = splittedFormat.indexOf(yearFormat);
-
-        return { day: splittedValue[dayIndex], month: splittedValue[monthIndex], year: splittedValue[yearIndex] };
 
       },
       /*
@@ -1304,7 +1267,7 @@
 
         } else {
 
-          dateObj = el._getObjectFromDateString(el.value);
+          dateObj = vcomet.time.getDateObjectFromString(el.value, el.valueFormat);
 
         }
 
@@ -1324,53 +1287,10 @@
 
         dateObj = el._formatObj(dateObj);
 
-        el.value = el._generateOutputValue(dateObj, el.valueFormat);
+        el.value = vcomet.time.generateOutput(dateObj, el.valueFormat);
 
         el._updateValue();
 
-      },
-      /*
-      @function (private) {String} _generateOutputValue
-      @description We replace the format with the given data, in case the field's length is lower than its format then we add 0 as needed
-      @param {Object} obj
-      */
-      generateOutputValue: function (obj) {
-
-        var el = this;
-        var format = el.valueFormat;
-
-        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
-        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
-        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
-
-        if (obj.day) {
-
-          var day = obj.day;
-
-          day = el._format(day, dayFormat);
-          format = format.replace(dayFormat, day);
-
-        }
-
-        if (obj.month) {
-
-          var month = obj.month;
-
-          month = el._format(month, monthFormat);
-          format = format.replace(monthFormat, month);
-
-        }
-
-        if (obj.year) {
-
-          var year = obj.year;
-
-          year = el._format(year, yearFormat);
-          format = format.replace(yearFormat, year);
-
-        }
-
-        return format;
       },
       /*
       @function (private) {String} _format
@@ -2387,7 +2307,7 @@
 
           // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
           var dateObj = el._formatObj({ day: dayButton.getAttribute("day"), month: (parseInt(dayButton.getAttribute("month")) + 1), year: dayButton.getAttribute("year") });
-          var formattedValue = el._generateOutputValue(dateObj);
+          var formattedValue = vcomet.time.generateOutput(dateObj, el.valueFormat);
 
           el._misc.selected.day = parseInt(dayButton.getAttribute("day"));
           el._misc.selected.month = parseInt(dayButton.getAttribute("month"));
@@ -2424,7 +2344,7 @@
 
             // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
             var dateObj = el._formatObj({ day: undefined, month: (parseInt(monthButton.dataset.index) + 1), year: el._misc.current.year });
-            var formattedValue = el._generateOutputValue(dateObj);
+            var formattedValue = vcomet.time.generateOutput(dateObj, el.valueFormat);
 
             el._highlight(monthButton, el.querySelector(".vc-date-monthsGrid .vc-date-current"));
 
@@ -2470,7 +2390,7 @@
           } else {
 
             var dateObj = el._formatObj({ day: undefined, month: undefined, year: yearButton.dataset.year });
-            var formattedValue = el._generateOutputValue(dateObj);
+            var formattedValue = vcomet.time.generateOutput(dateObj, el.valueFormat);
 
             el._highlight(yearButton, el.querySelector(".vc-date-yearsGrid .vc-date-current"));
 
@@ -2608,11 +2528,11 @@
         };
       },
       /*
-          @function (private) {Object} _getNextByMonth
-          @description Gets the next month, the year is returned aswell in case the current month is December
-          @param {Number} year
-          @param {Number} month
-          */
+      @function (private) {Object} _getNextByMonth
+      @description Gets the next month, the year is returned aswell in case the current month is December
+      @param {Number} year
+      @param {Number} month
+      */
       getNextByMonth: function (year, month) {
 
         if (parseInt(month) + 1 > 11) {
@@ -2789,10 +2709,10 @@
 
       },
       /*
-            @function (private) _updateValue
-            @description Allows the user tu set a new value to the element
-            @param {Object} value
-            */
+      @function (private) _updateValue
+      @description Allows the user tu set a new value to the element
+      @param {Object} value
+      */
       updateValue: function () {
 
         var el = this;
@@ -2832,7 +2752,7 @@
 
           } else {
 
-            valueObj = el._getObjectFromDateString(el.value);
+            valueObj = vcomet.time.getDateObjectFromString(el.value, el.valueFormat);
 
           }
 
@@ -2855,6 +2775,20 @@
         el._misc.preventUpdate = false;
 
       },
+
+      /*
+      @function (private) _updateInvalid
+      @description Updates the invalid status
+      */
+      updateInvalid: function () {
+
+        var el = this;
+        var classListFn = vcomet.util.isTrue(el.invalid) ? "add" : "remove";
+
+        el.classList[classListFn]("vc-date-error");
+
+      }
+
     },
     functions: {
       /*

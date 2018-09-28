@@ -51,11 +51,11 @@ vcomet.time.getFirstWeekMonday = function (locale, year, month, format) {
   var firstWeekDay = vcomet.time.getFirstWeekDay(locale, year, month, format);
   var weekPosition = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].indexOf(firstWeekDay);
   // Check first month reached
-  if(month == 0) {
-      month = 11;
-      year--;
+  if (month == 0) {
+    month = 11;
+    year--;
   } else {
-      month--;
+    month--;
   }
   // Get previous month days
   monthDays = vcomet.time.getDaysInMonth(year, month);
@@ -108,6 +108,86 @@ vcomet.time.getDateWithFormat = function (date, format, locale) {
     format = format.replace(monthFormat, monthString);
   }
   return format;
+};
+
+vcomet.time.getFormatSeparator = function (format) {
+
+  var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+  var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+  var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+  format = format.replace(dayFormat, "");
+  format = format.replace(monthFormat, "");
+  format = format.replace(yearFormat, "");
+
+  return format[0];
+
+};
+
+vcomet.time.getDateObjectFromString = function (value, format) {
+
+  var el = this;
+
+  var separator = vcomet.time.getFormatSeparator(format);
+
+  var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+  var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+  var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+  var splittedValue = value.split(separator);
+  var splittedFormat = format.split(separator);
+
+  var dayIndex = splittedFormat.indexOf(dayFormat);
+  var monthIndex = splittedFormat.indexOf(monthFormat);
+  var yearIndex = splittedFormat.indexOf(yearFormat);
+
+  return { day: splittedValue[dayIndex], month: splittedValue[monthIndex], year: splittedValue[yearIndex] };
+
+};
+
+vcomet.time.generateOutput = function (dateObj, format) {
+
+  var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+  var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+  var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+  var formatFn = function (text, format) {
+
+    text = text ? text + "" : "";
+
+    if (text.length > 0 && text.length < format.length) {
+      for (var i = 0; i < (format.length - text.length); i++) {
+        text = "0" + text;
+      }
+    }
+
+    return text;
+
+  };
+
+  if (dateObj.day) {
+
+    var day = formatFn(dateObj.day, dayFormat);
+    format = format.replace(dayFormat, day);
+
+  }
+
+  if (dateObj.month) {
+
+    var month = formatFn(dateObj.month, monthFormat);
+    format = format.replace(monthFormat, month);
+
+  }
+
+  if (dateObj.year) {
+
+    var year = formatFn(dateObj.year, yearFormat);
+    format = format.replace(yearFormat, year);
+
+  }
+
+  return format;
+
 };
 
 vcomet.time.defaultLocale = {

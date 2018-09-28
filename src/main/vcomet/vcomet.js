@@ -5338,11 +5338,11 @@ vcomet.time.getFirstWeekMonday = function (locale, year, month, format) {
   var firstWeekDay = vcomet.time.getFirstWeekDay(locale, year, month, format);
   var weekPosition = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].indexOf(firstWeekDay);
   // Check first month reached
-  if(month == 0) {
-      month = 11;
-      year--;
+  if (month == 0) {
+    month = 11;
+    year--;
   } else {
-      month--;
+    month--;
   }
   // Get previous month days
   monthDays = vcomet.time.getDaysInMonth(year, month);
@@ -5395,6 +5395,86 @@ vcomet.time.getDateWithFormat = function (date, format, locale) {
     format = format.replace(monthFormat, monthString);
   }
   return format;
+};
+
+vcomet.time.getFormatSeparator = function (format) {
+
+  var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+  var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+  var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+  format = format.replace(dayFormat, "");
+  format = format.replace(monthFormat, "");
+  format = format.replace(yearFormat, "");
+
+  return format[0];
+
+};
+
+vcomet.time.getDateObjectFromString = function (value, format) {
+
+  var el = this;
+
+  var separator = vcomet.time.getFormatSeparator(format);
+
+  var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+  var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+  var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+  var splittedValue = value.split(separator);
+  var splittedFormat = format.split(separator);
+
+  var dayIndex = splittedFormat.indexOf(dayFormat);
+  var monthIndex = splittedFormat.indexOf(monthFormat);
+  var yearIndex = splittedFormat.indexOf(yearFormat);
+
+  return { day: splittedValue[dayIndex], month: splittedValue[monthIndex], year: splittedValue[yearIndex] };
+
+};
+
+vcomet.time.generateOutput = function (dateObj, format) {
+
+  var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+  var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+  var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+  var formatFn = function (text, format) {
+
+    text = text ? text + "" : "";
+
+    if (text.length > 0 && text.length < format.length) {
+      for (var i = 0; i < (format.length - text.length); i++) {
+        text = "0" + text;
+      }
+    }
+
+    return text;
+
+  };
+
+  if (dateObj.day) {
+
+    var day = formatFn(dateObj.day, dayFormat);
+    format = format.replace(dayFormat, day);
+
+  }
+
+  if (dateObj.month) {
+
+    var month = formatFn(dateObj.month, monthFormat);
+    format = format.replace(monthFormat, month);
+
+  }
+
+  if (dateObj.year) {
+
+    var year = formatFn(dateObj.year, yearFormat);
+    format = format.replace(yearFormat, year);
+
+  }
+
+  return format;
+
 };
 
 vcomet.time.defaultLocale = {
@@ -6248,11 +6328,11 @@ vcomet.validator.validate = function (data, schema) {
 }
 
 vcomet.validator.loopProperties = function (schema, callback) {
-    
+
     // We take the schema properties
     var properties = schema.properties;
     var fields = Object.keys(properties);
-    
+
     // And loop through them
     for (var i = 0; i < fields.length; i++) {
 
@@ -6269,7 +6349,7 @@ vcomet.validator.validateRequiredField = function (property, schema, data, error
     var isRequired = (schema.required && schema.required.indexOf(property) > -1) || vcomet.util.isTrue(propertySchema.required);
 
     var isInvalid = ((!data[property] || data[property] == "") && isRequired);
-    
+
     // If if does not meet any of the requirements then it fills the error object with the proper information
     if (isInvalid) {
         vcomet.validator.fillErrorObj(property, "Required", errorObj);
@@ -6280,9 +6360,9 @@ vcomet.validator.validateRequiredField = function (property, schema, data, error
 vcomet.validator.validateStringField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
-    
+
     if (propertySchema.type == "string" && data.hasOwnProperty(property)) {
-        
+
         // MaxLength
         var hasMaxLength = propertySchema.hasOwnProperty("maxLength") && (parseInt(propertySchema.maxLength) > 0);
         var exceedsMaxLength = data[property].length > parseInt(propertySchema.maxLength);
@@ -6310,11 +6390,68 @@ vcomet.validator.validateStringField = function (property, schema, data, errorOb
 vcomet.validator.validateDateField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
-    
+
     if (propertySchema.type == "date" && data.hasOwnProperty(property)) {
 
+        // Takes the format of the schema, if there is no format in the schema it takes a default format work with
+        var format = propertySchema.format ? propertySchema.format : "YYYY-MM-DD";
+
+        // Takes the data value
+        var value = data[property];
+        // Turns that value into an object with day,month and year properties
+        var valueObj = vcomet.time.getDateObjectFromString(value, format);
+        // Takes the object and applies the schema format to see if both values (the value and the schema value) are the same,
+        // that would mean if follows the same format
+        var schemaValue = vcomet.time.generateOutput(valueObj, format);
+
         var isInvalid;
-        
+
+        // If it does not follow the same format then it is no valid
+        if (value != schemaValue) {
+
+            isInvalid = true;
+
+        } else {
+
+            var year = valueObj.year != undefined ? valueObj.year : 0;
+            var month = valueObj.month != undefined ? (valueObj.month - 1) : 0;
+            var day = valueObj.day != undefined ? valueObj.day : 1;
+
+            // Turns the date into epoch so that we are able to compare dates
+            var epochDate = new Date(year, month, day).getTime();
+            var minEpochDate, maxEpochDate;
+
+            // Checks if there is a minimum specified in the schema
+            if (propertySchema.hasOwnProperty("minimum")) {
+
+                var minDateObj = vcomet.time.getDateObjectFromString(propertySchema.minimum, format);
+
+                var minYear = minDateObj.year != undefined ? minDateObj.year : 0;
+                var minMonth = minDateObj.month != undefined ? (minDateObj.month - 1) : 0;
+                var minDay = minDateObj.day != undefined ? minDateObj.day : 1;
+
+                minEpochDate = new Date(minYear, minMonth, minDay).getTime();
+                
+                isInvalid = epochDate < minEpochDate ? true : isInvalid;
+
+            }
+
+            // Checks if there is a maximum specified in the schema
+            if (propertySchema.hasOwnProperty("maximum")) {
+
+                var maxDateObj = vcomet.time.getDateObjectFromString(propertySchema.minimum, format);
+
+                var maxYear = maxDateObj.year != undefined ? maxDateObj.year : 0;
+                var maxMonth = maxDateObj.month != undefined ? (maxDateObj.month - 1) : 0;
+                var maxDay = maxDateObj.day != undefined ? maxDateObj.day : 1;
+
+                maxEpochDate = new Date(maxYear, maxMonth, maxDay).getTime();
+                isInvalid = epochDate > maxEpochDate ? true : isInvalid;
+
+            }
+
+        }
+
         // If if does not meet any of the requirements then it fills the error object with the proper information
         if (isInvalid) {
             var errorMessage = propertySchema.errorMessage ? propertySchema.errorMessage : vcomet.validator.defaultErrorMessage;
@@ -6339,15 +6476,13 @@ vcomet.validator.validateNumericField = function (property, schema, data, errorO
 
         // Maximum
         var hasMaximum = propertySchema.hasOwnProperty("maximum");
-        var exceedsMaximum = value >= propertySchema.maximum;
-        var exceedsExclusiveMaximum = propertySchema.exclusiveMaximum && (value > propertySchema.maximum);
-
+        var exceedsMaximum = propertySchema.exclusiveMaximum ? (value >= propertySchema.maximum) : (value > propertySchema.maximum);
+        
         // Minimum
         var hasMinimum = propertySchema.hasOwnProperty("minimum");
-        var exceedsMinimum = value <= propertySchema.minimum;
-        var exceedsExclusiveMinimum = propertySchema.exclusiveMinimum && (value < propertySchema.minimum);
+        var exceedsMinimum = propertySchema.exclusiveMinimum ? (value <= propertySchema.minimum) : (value < propertySchema.minimum);
 
-        var isInvalid = (hasMultipleOf && !isMultipleOf) || (hasMaximum && (exceedsMaximum || exceedsExclusiveMaximum)) || (hasMinimum && (exceedsMinimum || exceedsExclusiveMinimum));
+        var isInvalid = (hasMultipleOf && !isMultipleOf) || (hasMaximum && exceedsMaximum) || (hasMinimum && exceedsMinimum);
 
         // If if does not meet any of the requirements then it fills the error object with the proper information
         if (isInvalid) {
@@ -6390,9 +6525,9 @@ vcomet.validator.validateArrayField = function (property, schema, data, errorObj
 vcomet.validator.validateObjectField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
-    
+
     if (propertySchema.type == "object" && data.hasOwnProperty(property)) {
-        
+
         var propertyData = data[property];
         var nestedErrorObj = {};
 
