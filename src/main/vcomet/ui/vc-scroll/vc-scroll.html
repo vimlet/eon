@@ -619,7 +619,7 @@
 
         // If the horizontal scroll is not event created
         if (!el._misc.horizontal.created) {
-          
+
           //  If we have horizontal scrollable conten
           if (hasHorizontalScroll) {
             // Then create it
@@ -631,7 +631,7 @@
           }
           // Else if it is already created
         } else {
-          
+
           //  If we have horizontal scrollable content
           if (hasHorizontalScroll) {
             // If the horizontal scroll currently active 
@@ -664,7 +664,7 @@
           } else {
             // Then deactive the scroll
             el._refs.horizontalScroll.classList.remove("vc-scroll-active");
-            
+
             // If the square is active
             if (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) {
               // Then deactivate it
@@ -1547,9 +1547,12 @@
       getVerticalScrollableSize: function () {
 
         var el = this;
-        var scrollable = Math.ceil(el.content.scrollHeight) - Math.ceil(el.content.getBoundingClientRect().height);
+        var scrollable = 0;
 
-        scrollable = el._isAllowedToHaveScroll("horizontal") ? scrollable + el._misc.scrollBarSpace : scrollable;
+        if (Math.ceil(el.content.scrollHeight) != el.content.clientHeight) {
+          scrollable = Math.ceil(el.content.scrollHeight) - Math.ceil(el.content.getBoundingClientRect().height);
+          scrollable = el._isAllowedToHaveScroll("horizontal") ? scrollable + el._misc.scrollBarSpace : scrollable;
+        }
 
         return Math.floor(scrollable);
       },
@@ -1560,9 +1563,12 @@
       getHorizontalScrollableSize: function () {
 
         var el = this;
-        var scrollable = Math.ceil(el.content.scrollWidth) - Math.ceil(el.content.getBoundingClientRect().width);
+        var scrollable = 0;
 
-        scrollable = el._isAllowedToHaveScroll("vertical") ? scrollable + el._misc.scrollBarSpace : scrollable;
+        if (Math.ceil(el.content.scrollWidth) != el.content.clientWidth) {
+          scrollable = Math.ceil(el.content.scrollWidth) - Math.ceil(el.content.getBoundingClientRect().width)
+          scrollable = el._isAllowedToHaveScroll("vertical") ? scrollable + el._misc.scrollBarSpace : scrollable;
+        }
 
         return Math.floor(scrollable);
       },
