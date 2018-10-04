@@ -415,7 +415,7 @@
             addDragListeners: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.drag) && el.dataset.version == "desktop") {
+                if (vcomet.util.isTrue(el.drag) && !vcomet.util.isTrue(el.dataset.mobile)) {
                     var xPos = 0;
                     var yPos = 0; // Stores x & y coordinates of the mouse pointer
                     var xElem = 0;
@@ -486,15 +486,20 @@
 
                 // When the dialog changes its size dynamically it will center
                 vcomet.addResizeListener(el, "dialog", function () {
+                    
                     if (el.classList.contains("vc-dialog-visible") && el.multiposition == "centered" && !el._misc.resize.active && el._misc.previousWindowWidth == el._misc.newWindowWidth) {
                         // If when opening the dialog for the first time it suffers resize event due to its content we update the initial size
                         el._registerInitialSize();
-                        // Centers the dialog
-                        el._center();
+
+                        if (!el.classList.contains("vc-dialog-minimized")) {
+                            // Centers the dialog
+                            el._center();
+                        }
+
                     }
                 });
 
-                if (vcomet.util.isTrue(el.resize) && el.dataset.version == "desktop") {
+                if (vcomet.util.isTrue(el.resize) && !vcomet.util.isTrue(el.dataset.mobile)) {
                     var sideResizers = ["top", "right", "bottom", "left"];
                     var cornerResizers = ["topLeft", "topRight", "bottomLeft", "bottomRight"];
                     var sideResizersClasses = ["vc-dialog-topResizer", "vc-dialog-rightResizer", "vc-dialog-bottomResizer", "vc-dialog-leftResizer"];
@@ -565,6 +570,8 @@
             */
             handleSideResize: function (resizerName, e) {
                 var el = this;
+                var minWidth = parseInt(window.getComputedStyle(el, null).minWidth);
+                var minHeight = parseInt(window.getComputedStyle(el, null).minHeight);
                 var rightLimit = window.innerWidth - el._misc.windowPadding;
                 var bottomLimit = window.innerHeight - el._misc.windowPadding;
                 var newWidth, newHeight;
@@ -573,8 +580,7 @@
                     case "left":
                         newWidth = (el._misc.resize.startWidth + el._misc.resize.startX - e.clientX);
                         if (e.clientX >= el._misc.windowPadding) {
-                            newWidth = el._getAdjustedWidth(newWidth);
-                            if (newWidth != el.maxWidth && newWidth != el.minWidth) {
+                            if (newWidth >= minWidth) {
                                 el.style.left = e.clientX + "px";
                                 el.style.width = newWidth + "px";
                             }
@@ -584,7 +590,6 @@
                     case "right":
                         newWidth = (el._misc.resize.startWidth + e.clientX - el._misc.resize.startX);
                         if (e.clientX <= rightLimit) {
-                            newWidth = el._getAdjustedWidth(newWidth);
                             el.style.width = newWidth + "px";
                         }
                         break;
@@ -592,8 +597,7 @@
                     case "top":
                         newHeight = (el._misc.resize.startHeight + el._misc.resize.startY - e.clientY);
                         if (e.clientY >= el._misc.windowPadding) {
-                            newHeight = el._getAdjustedHeight(newHeight);
-                            if (newHeight != el.maxHeight && newHeight != el.minHeight) {
+                            if (newHeight >= minHeight) {
                                 el.style.top = e.clientY + "px";
                                 el.style.height = newHeight + "px";
                             }
@@ -603,7 +607,6 @@
                     case "bottom":
                         newHeight = (el._misc.resize.startHeight + e.clientY - el._misc.resize.startY);
                         if (e.clientY <= bottomLimit) {
-                            newHeight = el._getAdjustedHeight(newHeight);
                             el.style.height = newHeight + "px";
                         }
                         break;
@@ -621,6 +624,8 @@
             */
             handleCornerResize: function (resizerName, e) {
                 var el = this;
+                var minWidth = parseInt(window.getComputedStyle(el, null).minWidth);
+                var minHeight = parseInt(window.getComputedStyle(el, null).minHeight);
                 var rightLimit = window.innerWidth - el._misc.windowPadding;
                 var bottomLimit = window.innerHeight - el._misc.windowPadding;
 
@@ -632,15 +637,13 @@
                         newWidth = (el._misc.resize.startWidth + el._misc.resize.startX - e.clientX);
 
                         if (e.clientY >= el._misc.windowPadding && e.clientX >= el._misc.windowPadding) {
-                            newWidth = el._getAdjustedWidth(newWidth);
-                            newHeight = el._getAdjustedHeight(newHeight);
 
-                            if (newWidth != el.maxWidth && newWidth != el.minWidth) {
+                            if (newWidth >= minWidth) {
                                 el.style.left = e.clientX + "px";
                                 el.style.width = newWidth + "px";
                             }
-                            
-                            if (newHeight != el.maxHeight && newHeight != el.minHeight) {
+
+                            if (newHeight >= minHeight) {
                                 el.style.top = e.clientY + "px";
                                 el.style.height = newHeight + "px";
                             }
@@ -652,12 +655,10 @@
                         newWidth = (el._misc.resize.startWidth + e.clientX - el._misc.resize.startX);
 
                         if (e.clientY >= el._misc.windowPadding && e.clientX <= rightLimit) {
-                            newWidth = el._getAdjustedWidth(newWidth);
-                            newHeight = el._getAdjustedHeight(newHeight);
 
                             el.style.width = newWidth + "px";
 
-                            if (newHeight != el.maxHeight && newHeight != el.minHeight) {
+                            if (newHeight >= minHeight) {
                                 el.style.top = e.clientY + "px";
                                 el.style.height = newHeight + "px";
                             }
@@ -669,10 +670,8 @@
                         newHeight = (el._misc.resize.startHeight + e.clientY - el._misc.resize.startY);
 
                         if (e.clientX >= el._misc.windowPadding && e.clientY <= bottomLimit) {
-                            newWidth = el._getAdjustedWidth(newWidth);
-                            newHeight = el._getAdjustedHeight(newHeight);
 
-                            if (newWidth != el.maxWidth && newWidth != el.minWidth) {
+                            if (newWidth >= minWidth) {
                                 el.style.left = e.clientX + "px";
                                 el.style.width = newWidth + "px";
                             }
@@ -685,8 +684,6 @@
                         newHeight = (el._misc.resize.startHeight + e.clientY - el._misc.resize.startY);
 
                         if (e.clientX <= rightLimit && e.clientY <= bottomLimit) {
-                            newWidth = el._getAdjustedWidth(newWidth);
-                            newHeight = el._getAdjustedHeight(newHeight);
                             el.style.width = newWidth + "px";
                             el.style.height = newHeight + "px";
                         }
@@ -697,51 +694,13 @@
             },
 
             /*
-              @function (private) _getAdjustedWidth
-              @description Checks that the width of the dialog does not exceed its limit size.
-              @param {Number} width [Dialog width]
-            */
-            getAdjustedWidth: function (width) {
-                var el = this;
-
-                if (el.maxWidth != "auto") {
-                    width = width <= el.maxWidth ? width : el.maxWidth;
-                }
-
-                if (el.minWidth != "auto") {
-                    width = width >= el.minWidth ? width : el.minWidth;
-                }
-
-                return width;
-            },
-
-            /*
-              @function (private) _getAdjustedHeight
-              @description Checks that the height of the dialog does not exceed its limit size.
-              @param {Number} height [Dialog height]
-            */
-            getAdjustedHeight: function (height) {
-                var el = this;
-
-                if (el.maxHeight != "auto") {
-                    height = height <= el.maxHeight ? height : el.maxHeight;
-                }
-
-                if (el.minHeight != "auto") {
-                    height = height >= el.minHeight ? height : el.minHeight;
-                }
-
-                return height;
-            },
-
-            /*
               @function (private) _addMaximize
               @description Adds maximize button and its functionality.
             */
             addMaximize: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.maximize) && el.dataset.version == "desktop") {
+                if (vcomet.util.isTrue(el.maximize) && !vcomet.util.isTrue(el.dataset.mobile)) {
                     el._refs.maximizeButton.classList.remove("vc-dialog-hidden");
                     el._refs.heading.classList.remove("vc-dialog-hidden");
 
@@ -763,7 +722,7 @@
             addMinimize: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.minimize) && el.dataset.version == "desktop") {
+                if (vcomet.util.isTrue(el.minimize) && !vcomet.util.isTrue(el.dataset.mobile)) {
                     el._refs.minimizeButton.classList.remove("vc-dialog-hidden");
                     el._refs.heading.classList.remove("vc-dialog-hidden");
 
@@ -837,9 +796,9 @@
                     el._savePreviousStatus();
                 }
 
-                el.style.left = "0";
-                el.style.top = "0";
-                el.style.minHeight = "auto";
+                el.style.left = "0px";
+                el.style.top = "0px";
+
                 el.style.height = "auto";
                 el.style.width = "auto";
 
@@ -894,10 +853,6 @@
             restorePreviousStatus: function () {
                 var el = this;
 
-                el.style.minWidth = el.minWidth + "px";
-                el.style.minHeight = el.minHeight + "px";
-                el.style.maxWidth = el.maxWidth + "px";
-                el.style.maxHeight = el.maxHeight + "px";
                 el.style.width = el._misc.previousWidth + "px";
                 el.style.height = el._misc.previousHeight + "px";
                 el.style.left = el._misc.previousLeft + "px";
@@ -914,10 +869,10 @@
             */
             verifyDeviceVersion: function () {
                 var el = this;
-                el.dataset.version = (vcomet.util.isTouchScreen()) ? "device" : "desktop";
 
-                var mobileCondition = (window.innerWidth <= vcomet.mobileWidth || window.innerHeight <= vcomet.mobileWidth) && el.dataset.version == "device";
+                var mobileCondition = (window.innerWidth <= vcomet.mobileWidth || window.innerHeight <= vcomet.mobileWidth) && vcomet.util.isTouchScreen();
                 el.dataset.mobile = mobileCondition ? "true" : "false";
+
             },
 
             /*
@@ -928,10 +883,6 @@
                 var el = this;
 
                 if (el.dataset.mobile == "false") {
-                    el.style.maxWidth = (el.maxWidth == "auto") ? el.maxWidth : el.maxWidth + "px";
-                    el.style.maxHeight = (el.maxHeight == "auto") ? el.maxHeight : el.maxHeight + "px";
-                    el.style.minWidth = el.minWidth + "px";
-                    el.style.minHeight = el.minHeight + "px";
 
                     if (el._misc.initialWidth && el._misc.initialHeight) {
                         el.style.width = el._misc.initialWidth + "px";
@@ -947,18 +898,18 @@
             */
             addOverlay: function () {
                 var el = this;
-                
+
                 // If there is no overlay created yet, we create/prepare it
                 if (!el._refs.overlay) {
 
                     // Whether we have to add or remove the modal class
                     var classListFn = vcomet.util.isTrue(el.modal) ? "add" : "remove";
-                    
+
                     // Generates the overlay element and adds its classes
                     el._refs.overlay = el.generateOverlayNode();
                     el._refs.overlay.classList.add("vc-dialog-overlay");
                     el._refs.overlay.classList[classListFn]("vc-bg1-modal");
-                    
+
                     // If the dialog is blureable then we add an event listener to close the dialog on overlay touch
                     if (vcomet.util.isTrue(el.blur)) {
 
@@ -971,11 +922,15 @@
 
                         }, false);
 
+                    } else if (!vcomet.util.isTrue(el.modal)) {
+
+                        el._refs.overlay.style.pointerEvents = "none";
+
                     }
 
                 }
-                
-                
+
+
                 // Appends the overlay
                 document.body.appendChild(el._refs.overlay);
 
@@ -997,7 +952,7 @@
             setPosition: function () {
                 var el = this;
 
-                if (!vcomet.util.isTrue(el.modal) && el.multiposition == "scaled" && el.dataset.version == "desktop" && !el._isFirstScaled()) {
+                if (!vcomet.util.isTrue(el.modal) && el.multiposition == "scaled" && !vcomet.util.isTrue(el.dataset.mobile) && !el._isFirstScaled()) {
                     el._scale();
                 } else {
                     el._center();
@@ -1020,8 +975,8 @@
 
                     el.style.left = lastOpenedScaled.offsetLeft + parseInt(el.scaleBreak) + "px";
                     el.style.top = lastOpenedScaled.offsetTop + parseInt(el.scaleBreak) + "px";
-
-                    el._misc.scaled.order = lastOpenedScaled.rootNode._misc.scaled.order ? lastOpenedScaled.rootNode._misc.scaled.order : 0;
+                    
+                    el._misc.scaled.order = lastOpenedScaled._misc.scaled.order ? lastOpenedScaled._misc.scaled.order : 0;
                     el._misc.scaled.order = el._misc.scaled.order + 1;
 
                     el.classList.add("vc-dialog-scaled");

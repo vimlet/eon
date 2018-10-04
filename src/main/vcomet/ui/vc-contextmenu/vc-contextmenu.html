@@ -28,12 +28,12 @@
                 value: "",
                 reflect: true
             },
-             /*
-              @property {Boolean} defaultStyle 
-              @description 
-              Values: true, false
-              Default: true
-            */
+            /*
+             @property {Boolean} defaultStyle 
+             @description 
+             Values: true, false
+             Default: true
+           */
             defaultStyle: {
                 value: true,
                 reflect: true
@@ -99,14 +99,30 @@
             */
             setContextmenuEvent: function (triggerElement) {
                 var el = this;
+
+                el._setDesktopEvents(triggerElement)
+                el._setDeviceEvents(triggerElement);
+
+            },
+
+            /*
+              @function (private) {Object} _setDesktopEvents
+              @description Creates the desktop related events
+              @param {Object} triggerElement
+            */
+            setDesktopEvents: function (triggerElement) {
+
+                var el = this;
+
                 var posX;
                 var posY;
 
-                if (el._refs.wrapper.dataset.version == "desktop") {
+                triggerElement.addEventListener("contextmenu", contextmenuEvent);
 
-                    triggerElement.addEventListener("contextmenu", contextmenuEvent);
+                function contextmenuEvent(e) {
 
-                    function contextmenuEvent(e) {
+                    if (el._refs.wrapper.dataset.version == "desktop") {
+
                         posX = e.clientX;
                         posY = e.clientY;
 
@@ -115,46 +131,58 @@
                         var exceedsObject = el._exceedsWindow();
 
                         (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
-                    };
 
-                    el._contextmenuEvent = contextmenuEvent;
-                }
+                    }
+
+                };
+
+            },
+
+            /*
+              @function (private) {Object} _setDeviceEvents
+              @description Creates the device related events
+              @param {Object} triggerElement
+            */
+            setDeviceEvents: function (triggerElement) {
+
+                var el = this;
 
                 // Long touch event functionality
-                if (el._refs.wrapper.dataset.version == "device") {
-                    var onLongTouch;
-                    var timer, lockerTimer;
-                    var touchDuration = 800;
+                var onLongTouch;
+                var timer, lockerTimer;
+                var touchDuration = 800;
 
-                    function touchStart(event) {
-                        event.stopPropagation();
-                        event.preventDefault();
-                        timer = setTimeout(onLongTouch, touchDuration);
+                function touchStart(event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    timer = setTimeout(onLongTouch, touchDuration);
+                }
+
+                function touchEnd() {
+                    // Stops short touches from firing the event
+                    if (timer) {
+                        clearTimeout(timer);
                     }
 
-                    function touchEnd() {
-                        // Stops short touches from firing the event
-                        if (timer) {
-                            clearTimeout(timer);
-                        }
+                }
 
-                    }
-
-                    onLongTouch = function () {
+                onLongTouch = function () {
+                    if (el._refs.wrapper.dataset.version == "device") {
                         el.show();
                     }
-
-                    // Events for small devices
-                    if (navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i)) {
-                        triggerElement.addEventListener("touchstart", touchStart, false);
-                        triggerElement.addEventListener("touchend", touchEnd, false);
-
-                        // Events for small resized screens
-                    } else {
-                        triggerElement.addEventListener("pointerdown", touchStart, false);
-                        triggerElement.addEventListener("pointerup", touchEnd, false);
-                    }
                 }
+
+                // Events for small devices
+                if (navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i)) {
+                    triggerElement.addEventListener("touchstart", touchStart, false);
+                    triggerElement.addEventListener("touchend", touchEnd, false);
+
+                    // Events for small resized screens
+                } else {
+                    triggerElement.addEventListener("pointerdown", touchStart, false);
+                    triggerElement.addEventListener("pointerup", touchEnd, false);
+                }
+
             },
 
             /*
@@ -299,7 +327,8 @@
             verifyScreenResolution: function () {
                 var el = this;
 
-                el._refs.wrapper.dataset.version = (vcomet.util.isTouchScreen()) ? "device" : "desktop";
+                el._refs.wrapper.dataset.version = (window.innerWidth <= vcomet.tabletWidth) ? "device" : "desktop";
+
             },
 
 
@@ -313,17 +342,8 @@
 
                 for (var i = 0; i < triggerLength; i++) {
 
-                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el._refs.wrapper.dataset.version == "desktop") {
-                        el._triggerNode[i].setAttribute("oncontextmenu", "return false");
-                        el._triggerNode[i].removeEventListener("click", el._clickContextmenuEvent);
-                        el._setContextmenuEvent(el._triggerNode[i]);
-                    }
-
-                    if (el.name == el._triggerNode[i].getAttribute("vc-contextmenu") && el._refs.wrapper.dataset.version !== "desktop") {
-                        el._triggerNode[i].removeAttribute("oncontextmenu");
-                        el._triggerNode[i].removeEventListener("contextmenu", el._contextmenuEvent);
-                        el._setContextmenuEvent(el._triggerNode[i]);
-                    }
+                    el._triggerNode[i].setAttribute("oncontextmenu", "return false");
+                    el._setContextmenuEvent(el._triggerNode[i]);
 
                 }
             },
@@ -358,7 +378,7 @@
                 // Contextmenu opened by a click event for the responsive functionality
                 if (typeof posX == "undefined" && typeof posY == "undefined") {
                     el._refs.wrapper.classList.add("vc-contextmenu-wrapper-visible", "vc-bg1-modal");
-                    
+
                     document.body.appendChild(el._refs.wrapper);
                     el._setResponsiveClose();
 
