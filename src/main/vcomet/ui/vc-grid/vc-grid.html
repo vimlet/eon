@@ -245,14 +245,14 @@
           columnClass = columns[i].constructor === Object && columns[i].class ? columns[i].class : false;
           columnMinWidth = columns[i].constructor === Object && columns[i].minWidth ? columns[i].minWidth : el.columnMinWidth;
           columnEditable = columns[i].constructor === Object && columns[i].hasOwnProperty("editable") ? vcomet.util.isTrue(columns[i].editable) : (vcomet.util.isTrue(el.editable));
-          
+
           // Layout related, creates the column rule
           rulePosition = sheet.cssRules.length;
           sheet.insertRule("vc-grid[uid='" + el.uid + "'] vc-cell.vc-grid-" + columnName + "Column {}", rulePosition);
           columnRule = sheet.cssRules[rulePosition];
           columnRule.style.minWidth = columnMinWidth + "px";
           layoutWidth = layoutWidth + parseInt(columnMinWidth);
-          
+
           // Saves all the column information
           el._misc.columns[columnName] = {};
           el._misc.columns[columnName]["name"] = columnName;
@@ -1237,14 +1237,10 @@
         columnRule.style.minWidth = finalWidth + "px";
 
         newHeaderMinWidth = parseInt(newHeaderMinWidth) + parseInt(finalWidth);
-
-        if (newHeaderMinWidth > contentWidth) {
-          el._refs.headersWrapper.style.minWidth = newHeaderMinWidth + "px";
-          el._refs.rowsWrapper.style.minWidth = newHeaderMinWidth + "px";
-        } else {
-          el._refs.headersWrapper.style.minWidth = contentWidth + "px";
-          el._refs.rowsWrapper.style.minWidth = newHeaderMinWidth + "px";
-        }
+          
+        // Solves wrong header size when smaller resizing
+        el._refs.headersWrapper.style.minWidth = newHeaderMinWidth + "px";
+        el._refs.rowsWrapper.style.minWidth = newHeaderMinWidth + "px";
 
         var headersWrapperWidth = el._refs.headersWrapper.offsetWidth;
 
@@ -1259,7 +1255,7 @@
           }
 
           el._misc.columns[sibling.column].rule.style.minWidth = parseInt(sibling.offsetWidth) + parseInt(remainingSpace) + "px";
-          
+
         }
 
       },
