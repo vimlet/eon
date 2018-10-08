@@ -550,7 +550,7 @@ vcomet.transform = function (el, config) {
         vcomet.appendElementTemplate(el);
 
         // Registers the main theme of this theme if its not yet registered
-        vcomet.registerMainTheme(theme);
+        vcomet.importMainTheme(theme);
 
         // If the element has not yet registered its theme it will proceed on importing it
         vcomet.importElementTheme(config, name, theme);
@@ -583,43 +583,6 @@ vcomet.getElementTheme = function (el, config) {
 
     return theme;
 }
-
-vcomet.registerMainTheme = function (theme) {
-
-    if (!vcomet.registry.isThemeRegistered("main", theme)) {
-
-        var documentHead = document.querySelector("head");
-        var mainLink = document.createElement("link");
-
-        vcomet.registry.registerTheme("main", theme);
-
-        mainLink.setAttribute("rel", "stylesheet");
-        mainLink.setAttribute("href", vcomet.basePath + "/theme/" + theme + "/main.css");
-
-        documentHead.appendChild(mainLink);
-
-    }
-
-};
-
-vcomet.importElementTheme = function (config, name, theme) {
-
-    if (theme && config.themed && !vcomet.registry.isThemeRegistered(name, theme)) {
-
-        var importedDocumentHead = document.querySelector("head");
-
-        vcomet.registry.registerTheme(name, theme);
-
-        var elementLink = document.createElement("link");
-        elementLink.setAttribute("rel", "stylesheet");
-        elementLink.setAttribute(
-            "href",
-            vcomet.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css"
-        );
-        importedDocumentHead.appendChild(elementLink);
-
-    }
-};
 
 vcomet.slot = function (el) {
 
@@ -893,6 +856,3 @@ vcomet.registerResizeListeners = function (el, config) {
     });
 
 };
-
-// Here we will register the main theme, the one declared by the user or our default one, its done here since this is the moment where this function exists
-vcomet.registerMainTheme(vcomet.theme);
