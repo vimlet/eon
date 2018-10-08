@@ -39,3 +39,21 @@ function toggleMenu(forceAction) {
     }
 
 }
+
+function initializePlayground(sectionsClass, pgClass) {
+    // PROBABLY NECESSARY DUE TO VC-PANEL SCRIPTS MANAGEMENT (to be removed...)
+    setTimeout(function () {
+        // Initialize playground
+        var sections = document.querySelector(sectionsClass).content.children;
+        var pg = document.querySelector(pgClass);
+        pg.onReady(function () {
+            var pgObj = {
+                head: sections[0].innerHTML,
+                body: sections[1].innerHTML,
+                js: sections[2].innerHTML,
+                css: sections[3].innerHTML
+            };
+            pg.setData(pgObj);
+        });
+    }, 0);
+}

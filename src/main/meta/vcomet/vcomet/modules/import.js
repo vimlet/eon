@@ -133,12 +133,19 @@ vcomet.insertImport = function (href) {
 
                             // Handles the dependencies and returns a boolean for whether there are pendings imports or not
                             var hasPendingImports = vcomet.handleDependencies();
-                            
+
                             // If there are no more dependencies to handle trigger onImportsReady
                             if (!hasPendingImports && !vcomet.imports.ready && vcomet.imports.count == vcomet.imports.total && vcomet.imports.total == Object.keys(vcomet.imports.config).length) {
+
                                 vcomet.imports.ready = true;
 
+                                // Here we will register the main theme, the one declared by the user or our default one
+                                vcomet.importMainTheme(vcomet.theme);
+                                // Reads the themeSchema and imports the requested files
+                                vcomet.importSchemaThemes();
+
                                 vcomet.triggerCallback('onImportsReady', vcomet);
+
                             } else {
                                 vcomet.__onScriptsReady__triggered = false;
                             }
@@ -189,6 +196,84 @@ vcomet.handleDependencies = function () {
 vcomet.handleTemplateInterpolation = function (name) {
     if (vcomet.imports.config[name].interpolation) {
         vcomet.interpolation.prepare(vcomet.imports.templates[name]);
+    }
+};
+
+// Imports specific componentes themesif specified
+vcomet.importSchemaThemes = function () {
+
+    if (vcomet.themeSchema) {
+
+        var themes = Object.keys(vcomet.themeSchema);
+        var documentHead = document.querySelector("head");
+        var theme, themeElements, themeLink;
+
+        // For each theme
+        for (var i = 0; i < themes.length; i++) {
+
+            theme = themes[i];
+            themeElements = vcomet.themeSchema[theme];
+
+            // Imports the main theme file
+            vcomet.importMainTheme(theme);
+
+            // Loops through the elements
+            for (var j = 0; j < themeElements.length; j++) {
+
+                vcomet.registry.registerTheme(themeElements[j], theme);
+
+                themeLink = document.createElement("link");
+                themeLink.setAttribute("rel", "stylesheet");
+                themeLink.setAttribute(
+                    "href",
+                    vcomet.basePath + "/theme/" + theme + "/" + themeElements[j].toLowerCase() + ".css"
+                );
+
+                documentHead.appendChild(themeLink);
+
+            }
+
+        }
+
+    }
+
+};
+
+vcomet.importMainTheme = function (theme) {
+
+    if (theme && !vcomet.registry.isThemeRegistered("main", theme)) {
+
+        var documentHead = document.querySelector("head");
+        var mainLink = document.createElement("link");
+
+        vcomet.registry.registerTheme("main", theme);
+
+        mainLink.setAttribute("rel", "stylesheet");
+        mainLink.setAttribute("href", vcomet.basePath + "/theme/" + theme + "/main.css");
+
+        documentHead.appendChild(mainLink);
+
+    }
+
+};
+
+vcomet.importElementTheme = function (config, name, theme) {
+
+    if (theme && config.themed && !vcomet.registry.isThemeRegistered(name, theme)) {
+
+        var importedDocumentHead = document.querySelector("head");
+
+        vcomet.registry.registerTheme(name, theme);
+
+        var elementLink = document.createElement("link");
+        elementLink.setAttribute("rel", "stylesheet");
+        elementLink.setAttribute(
+            "href",
+            vcomet.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css"
+        );
+
+        importedDocumentHead.appendChild(elementLink);
+
     }
 };
 
@@ -243,7 +328,7 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
                 script = document.createElement("script");
                 script.innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML;
                 elementScripts[elementScriptsKeys[j]] = script;
-                
+
                 // // Here we take the current script text and add our code to remove the script once its finished
                 elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML;
                 elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML +
