@@ -1,119 +1,85 @@
 <script type="text/javascript">
-    vcomet.element("vc-newstore", "", {
-      themed: false,
-      privateProperties: {
-          /*
-            @property {String} module 
-            @description 
-        */
-        module: {
-            value: ""
-        }
+  vcomet.element("vc-newstore", "", {
+    themed: false,
+    privateProperties: {
+      /*
+          @property {String} _misc 
+          @description 
+      */
+      _misc: {
+        value: ""
       },
-      properties: {
-        /*
-            @property {String} type 
-            @description Store type
-            Values: memory, rest
-            Default: memory
-        */
-        type: {
-            value: "",
-            reflect: true
-        },
-       /*
-          @property {String} adapter
-          @description
-        */
-        adapter: {
-          value: "",
-          reflect: true
-        },
-       /*
-          @property {String} adapterUrl
-          @description
-        */
-        adapterUrl: {
-          value: "",
-          reflect: true
-        },
-        /*
-            @property {Object} rootData 
-            @description Native store data
-        */
-        rootData: {
-            value: {},
-            reflect: false
-        },
-      },
-      functions: {},
-      privateFunctions: {
-        /*
-            @property {Object} _createCallbacks
-            @description 
-        */
-        createCallbacks: function () {
-            // Create store on source change event callback
-            vcomet.createCallback("onLoaded", el, "ready");
-        },
-        /*
-            @property {Object} _importAdapter 
-            @description 
-        */
-        importAdapter: function (cb) {
-            var el = this;
-            // Check if a custom adapter is passed
-            if(el.adapter) {
-                // Make sure adapter exists
-                el._checkAdapter(function(error, data){
-                    if(error) { 
-                        // Import adapter file
-                        vcomet.amd.require([el.adapterUrl], function () {
-                            try {
-                                el.adapter = eval(el.adapter)({});
-                            } catch (error) {
-                                console.log(error);
-                                // Handle not found error
-                                console.error("vc-newstore - ", el.adapter, "does not exists");
-                            }
-                            // Trigger user callback once store modules have been loaded
-                            vcomet.triggerCallback("onLoaded", el, el, [el]);
-                        });
-                    }
-                });
-            } else {
-                // Import default adapter
-                el.adapter = vcomet.data.Adapter({}, vcomet.data.QueryObject);
-                // Trigger user callback once store modules have been loaded
-                vcomet.triggerCallback("onLoaded", el, el, [el]);
-            }
-        },
-        /*
-            @property {Object} _checkAdapter 
-            @description 
-        */
-        checkAdapter: function (cb) {
-            var el = this;
-            try {
-                // Check adapter js object
-                el.adapter = eval(el.adapter)({});
-                cb(null, el.adapter);
-            } catch (error) {
-                cb(error);
-            }
-        }
-      },
-      onCreated: function () {
-        var el = this;
-
-        el._createCallbacks();
-
-        // Set first url assigned value as the store root url
-        // el._rootUrl = el.url;
-
-        // Set up the store adapter
-        el._importAdapter();
-        
+      /*
+          @property {String} _refs 
+          @description 
+      */
+      _refs: {
+        value: ""
       }
-    });
-  </script>
+    },
+    properties: {
+      /*
+          @property {String} data 
+          @description
+      */
+      data: {
+        value: ""
+      }
+    },
+    functions: {
+    },
+    privateFunctions: {
+      /*
+          @function _createCallbacks
+          @description 
+      */
+      createCallbacks: function () {
+        var el = this;
+        vcomet.createCallback("onLoaded", el);
+        vcomet.createCallback("onDataLoaded", el);
+      },
+      /*
+          @function _cloneFunctions
+          @description 
+      */
+      cloneFunctions: function (adapter) {
+        var el = this;  
+        // Clone adapter data object
+        Object.assign(el, adapter);
+        // Get BaseAdapter prototype functions
+        Object.assign(el, adapter.constructor.prototype);
+        //
+        el.data = adapter._memory.data;
+      },
+      /*
+          @function _importVPA
+          @description 
+      */
+      importVPA: function () {
+        var el = this;
+        //
+        window.define = vcomet.amd.define;
+        window.require = vcomet.amd.require;
+        // ** TODO - Make paths relative
+        vcomet.amd.require([
+          vcomet.basePath + "/data/vc-newstore/vpa-amd.js"
+        ], function (vpa) {
+          //
+          vpa.use(vcomet.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
+            // Clone adapter functions
+            el._cloneFunctions(adapter());
+            // Trigger user callback once VPA has been loaded
+            vcomet.triggerCallback("onLoaded", el, el, [el]);
+          });
+        });
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      // Create element events callbacks
+      el._createCallbacks();
+      // Import vpa js
+      el._importVPA();
+    }
+  });
+</script>
