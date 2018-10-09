@@ -3,6 +3,7 @@ vpa.declareAdapter("MemoryAdapter", function (config) {
     memory.data = {}; // Where data will be stored
     var memoryKeys = []; // Memory keys to keep creation order
     var counter = 0;
+
     // @function create (private) [Create a new entry to the memory object with given data] @param query
     function create(query) {
         return new Promise(function (resolve, reject) {
@@ -18,7 +19,9 @@ vpa.declareAdapter("MemoryAdapter", function (config) {
                 }
                 var validated = validate(query);
                 if (validated) {
+                    console.log('id', id, memory.data, "validated", validated);
                     memory.data[id] = validated;
+                    console.log('memory.data[id]', memory.data[id]);
                     // Remove key if exist to keep order while overwritting
                     if (memoryKeys.indexOf(id) >= 0) {
                         memoryKeys.splice(memoryKeys.indexOf(id), 1);
