@@ -6198,9 +6198,11 @@ vcomet.store = function(){
     var el = this;
     this.data;
   
-    importVPA();
     createCallbacks();
-    
+
+    // TODO - TO BE REMOVED
+    importVPA();
+
     /*
         @function _createCallbacks
         @description 
@@ -6210,6 +6212,7 @@ vcomet.store = function(){
       vcomet.createCallback("onDataLoaded", el);
     }
     /*
+        ** TO BE REMOVED
         @function _importVPA
         @description 
     */
@@ -6225,6 +6228,8 @@ vcomet.store = function(){
         vpa.use(vcomet.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
           // Clone adapter functions
           cloneFunctions(adapter());
+          //
+          createDataDescriptor();
           // Trigger user callback once VPA has been loaded
           vcomet.triggerCallback("onLoaded", el, el, [el]);
         });
@@ -6242,6 +6247,34 @@ vcomet.store = function(){
         // Make memory data accessible
         el.data = el._memory.data;
     };
+
+    // TODO - store.data on propertyChanged listener
+    function createDataDescriptor(){
+        // Define property descriptor with custom get and set
+        Object.defineProperty(
+            el,
+            "data",
+            vcomet.createPropDescriptor(el, null, "data", el.data, false)
+        );
+    }
+
+}
+
+
+vcomet.endpoint = function(){
+  var el = this;
+
+  createCallbacks();
+  /*
+    @function _createCallbacks
+    @description 
+  */
+   function createCallbacks () {
+    vcomet.createCallback("onLoaded", el, "ready");
+  }
+
+  vcomet.triggerCallback("onLoaded", el, el, [el]);
+
 }
 
 
