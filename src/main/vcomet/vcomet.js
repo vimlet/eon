@@ -6194,70 +6194,66 @@ vcomet.history.getURLInformation = function () {
 };
 
 
-vcomet.store = function(){
+vcomet.store = function () {
     var el = this;
     this.data;
-  
+
     createCallbacks();
 
-    // TODO - TO BE REMOVED
-    importVPA();
+    //
+    importAdapter();
 
     /*
         @function _createCallbacks
         @description 
     */
-    function createCallbacks () {
-      vcomet.createCallback("onLoaded", el);
-      vcomet.createCallback("onDataLoaded", el);
+    function createCallbacks() {
+        vcomet.createCallback("onLoaded", el);
+        vcomet.createCallback("onDataLoaded", el);
     }
     /*
         ** TO BE REMOVED
         @function _importVPA
         @description 
     */
-    function importVPA(){
-      //
-      window.define = vcomet.amd.define;
-      window.require = vcomet.amd.require;
-      // ** TODO - Make paths relative
-      vcomet.amd.require([
-        vcomet.basePath + "/data/vc-newstore/vpa-amd.js"
-      ], function (vpa) {
+    function importAdapter() {
         //
-        vpa.use(vcomet.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
-          // Clone adapter functions
-          cloneFunctions(adapter());
-          //
-          createDataDescriptor();
-          // Trigger user callback once VPA has been loaded
-          vcomet.triggerCallback("onLoaded", el, el, [el]);
+        vcomet.vpa.use(vcomet.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
+            // Clone adapter functions
+            cloneFunctions(adapter());
+            //
+            createDataDescriptor();
+            // Trigger user callback once VPA has been loaded
+            vcomet.triggerCallback("onLoaded", el, el, [el]);
         });
-      });
     };
     /*
         @function _cloneFunctions
         @description 
     */
-    function cloneFunctions (adapter) { 
+    function cloneFunctions(adapter) {
         // Clone adapter data object
         Object.assign(el, adapter);
         // Get BaseAdapter prototype functions
         Object.assign(el, adapter.constructor.prototype);
-        // Make memory data accessible
-        el.data = el._memory.data;
     };
-
     // TODO - store.data on propertyChanged listener
-    function createDataDescriptor(){
+    function createDataDescriptor() {
         // Define property descriptor with custom get and set
         Object.defineProperty(
             el,
             "data",
-            vcomet.createPropDescriptor(el, null, "data", el.data, false)
+            {
+                get: function () {
+                    return el._memory.data;
+                },
+                set: function (value) {
+                    // Update property value
+                    el._memory.data = value;
+                }
+            }
         );
     }
-
 }
 
 
@@ -6556,6 +6552,167 @@ vcomet.validator.fillErrorObj = function (property, errorMessage, errorObj) {
 
 
   
+    // ############################################################################################
+// VPA JS
+// ############################################################################################
+
+// Creates a namespace for vpa.js
+vcomet.vpa = vcomet.vpa || {};
+
+(function () {
+  
+  var define = vcomet.amd.define;
+  var require = vcomet.amd.require;
+
+  // Import vpa.js file
+  // ------------------------------------------------------------------------------------
+    // USE ONLY WITH AMD!
+
+// Add vpa to global scope to support script src imports
+var scope = typeof global != "undefined" ? global : window;
+// scope["vpa"] = scope["vpa"] || {};
+
+var vpa = {};
+
+scope["module"] = scope["module"] || undefined;
+
+// Module type detection flags
+vpa.isCommonJS = false;
+vpa.isAMD = false;
+// Detect CommonJS/AMD
+if (typeof module != "undefined" && typeof module.exports != "undefined") {
+    vpa.isCommonJS = true;
+}
+// Base implementation
+(function () {
+    var self = this;
+    if (vpa.isCommonJS) {
+        module.exports = vpa;
+    }
+    self.use = function (a, cb) {
+        if (vpa.isCommonJS) {
+            var adapter;
+            if (typeof a == "string") {
+                adapter = module.parent.require("./" + a);
+            }
+            else {
+                adapter = a;
+            }
+            module.exports = adapter;
+            cb(adapter);
+        }
+        else {
+            // Assume amd when "use" is called from the browser
+            vpa.require([a], function (adapter) {
+                cb(adapter);
+            });
+        }
+    };
+    // CommonJS, AMD and Global declarations
+    self.declareAdapter = function (name, adapter, ext_module) {
+        (function () {
+            // CommonJS
+            if (vpa.isCommonJS) {
+                ext_module.exports = adapter;
+            }
+            // AMD
+            if (vpa.isAMD) {
+                vpa.define(function () {
+                    return adapter;
+                });
+            }
+            // Global
+            vpa[name] = adapter;
+        })();
+    };
+    // Base Query and Adapter Objects
+    self.createBaseQuery = function (adapterData) {
+        var BaseQuery = /** @class */ (function () {
+            function BaseQuery() {
+                this.query = adapterData || {};
+            }
+            BaseQuery.prototype.options = function (o) {
+                this.query.options = o;
+                return this;
+            };
+            BaseQuery.prototype.limit = function (start, amount) {
+                this.query.limitStart = start;
+                this.query.limitAmount = amount;
+                return this;
+            };
+            BaseQuery.prototype.validate = function (schema) {
+                this.query.validate = schema;
+                return this;
+            };
+            BaseQuery.prototype.sort = function (field, rule) {
+                this.query.sortField = field;
+                this.query.sortRule = rule;
+                return this;
+            };
+            BaseQuery.prototype.view = function (v) {
+                this.query.view = v;
+                return this;
+            };
+            BaseQuery.prototype.result = function (cb) {
+                throw "Not implemented, please override result function";
+            };
+            return BaseQuery;
+        }());
+        return new BaseQuery();
+    };
+    self.createBaseAdapter = function (queryHandler) {
+        var BaseAdapter = /** @class */ (function () {
+            function BaseAdapter() {
+            }
+            BaseAdapter.prototype.create = function (data) {
+                return queryHandler({
+                    action: "create",
+                    data: data
+                });
+            };
+            BaseAdapter.prototype.read = function (id) {
+                return queryHandler({
+                    action: "read",
+                    id: id
+                });
+            };
+            BaseAdapter.prototype.update = function (id, data) {
+                return queryHandler({
+                    action: "update",
+                    id: id,
+                    data: data
+                });
+            };
+            BaseAdapter.prototype.delete = function (id) {
+                return queryHandler({
+                    action: "delete",
+                    id: id
+                });
+            };
+            return BaseAdapter;
+        }());
+        return new BaseAdapter();
+    };
+}).apply(vpa);
+
+
+// This prevent errors when calling define out of a require
+// since there's no proper AMD detection shim, we'll assume 
+// AMD when vpa.use is called under the browser
+vpa.isAMD = true;
+
+// Allow custom AMD lib
+vpa.define = vpa.define || define;
+vpa.require = vpa.require || require;
+
+// vpa.define(function () {
+//   return vpa;
+// });  // ------------------------------------------------------------------------------------
+
+  vcomet.vpa = vpa;
+
+}).apply({});
+
 
 }.apply(vcomet));
   

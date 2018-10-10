@@ -1,4 +1,4 @@
-vpa.declareAdapter("MemoryAdapter", function (config) {
+vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
     var memory = {}; // Memory itself
     memory.data = {}; // Where data will be stored
     var memoryKeys = []; // Memory keys to keep creation order
@@ -13,16 +13,16 @@ vpa.declareAdapter("MemoryAdapter", function (config) {
                     id = query.data.id;
                 }
                 else {
+                    // ** Check if some data has already been inserted
+                    counter = Object.keys(memory.data).length ? Object.keys(memory.data).length + 1 : 0;
                     id = counter;
                     query.data.id = "" + id;
                     counter++;
                 }
                 var validated = validate(query);
                 if (validated) {
-                    console.log('id', id, memory.data, "validated", validated);
                     memory.data[id] = validated;
-                    console.log('memory.data[id]', memory.data[id]);
-                    // Remove key if exist to keep order while overwritting
+                    // Remove key if exist to keep order while overwriting
                     if (memoryKeys.indexOf(id) >= 0) {
                         memoryKeys.splice(memoryKeys.indexOf(id), 1);
                     }
@@ -173,7 +173,7 @@ vpa.declareAdapter("MemoryAdapter", function (config) {
         return merged;
     };
     var queryHandler = function (adapterData) {
-        var baseQuery = vpa.createBaseQuery(adapterData);
+        var baseQuery = vcomet.vpa.createBaseQuery(adapterData);
         baseQuery.result = function (cb) {
             var query = baseQuery.query;
             var result;
@@ -219,7 +219,7 @@ vpa.declareAdapter("MemoryAdapter", function (config) {
         };
         return baseQuery;
     };
-    var baseAdapter = vpa.createBaseAdapter(queryHandler);
+    var baseAdapter = vcomet.vpa.createBaseAdapter(queryHandler);
     baseAdapter._memory = memory;
     return baseAdapter;
 }, module);
