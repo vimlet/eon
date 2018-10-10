@@ -1,28 +1,34 @@
 
-vcomet.store = function () {
+vcomet.store = function (url) {
     var el = this;
-    this.data;
-
+    /* Resources representation */
+    this.data = {};
+    
+    // Create useful callbacks
     createCallbacks();
 
-    //
+    // Import Memory Adapter
     importAdapter();
 
+    /* 
+        ##########
+        Private Functions
+        ##########
+    */
     /*
         @function _createCallbacks
         @description 
     */
     function createCallbacks() {
-        vcomet.createCallback("onLoaded", el);
-        vcomet.createCallback("onDataLoaded", el);
+        vcomet.createCallback("onLoaded", el, "ready");
     }
     /*
         ** TO BE REMOVED
-        @function _importVPA
+        @function importAdapter
         @description 
     */
     function importAdapter() {
-        //
+        // Import vpa memory adapter
         vcomet.vpa.use(vcomet.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
             // Clone adapter functions
             cloneFunctions(adapter());
@@ -33,7 +39,7 @@ vcomet.store = function () {
         });
     };
     /*
-        @function _cloneFunctions
+        @function (private) _cloneFunctions
         @description 
     */
     function cloneFunctions(adapter) {
@@ -42,7 +48,10 @@ vcomet.store = function () {
         // Get BaseAdapter prototype functions
         Object.assign(el, adapter.constructor.prototype);
     };
-    // TODO - store.data on propertyChanged listener
+    /*
+        @function (private) _cloneFunctions
+        @description 
+    */
     function createDataDescriptor() {
         // Define property descriptor with custom get and set
         Object.defineProperty(
@@ -55,6 +64,8 @@ vcomet.store = function () {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
+                    // Update size
+                    el.size = Object.keys(el._memory.data).length;
                 }
             }
         );

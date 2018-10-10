@@ -6194,30 +6194,36 @@ vcomet.history.getURLInformation = function () {
 };
 
 
-vcomet.store = function () {
+vcomet.store = function (url) {
     var el = this;
-    this.data;
-
+    /* Resources representation */
+    this.data = {};
+    
+    // Create useful callbacks
     createCallbacks();
 
-    //
+    // Import Memory Adapter
     importAdapter();
 
+    /* 
+        ##########
+        Private Functions
+        ##########
+    */
     /*
         @function _createCallbacks
         @description 
     */
     function createCallbacks() {
-        vcomet.createCallback("onLoaded", el);
-        vcomet.createCallback("onDataLoaded", el);
+        vcomet.createCallback("onLoaded", el, "ready");
     }
     /*
         ** TO BE REMOVED
-        @function _importVPA
+        @function importAdapter
         @description 
     */
     function importAdapter() {
-        //
+        // Import vpa memory adapter
         vcomet.vpa.use(vcomet.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
             // Clone adapter functions
             cloneFunctions(adapter());
@@ -6228,7 +6234,7 @@ vcomet.store = function () {
         });
     };
     /*
-        @function _cloneFunctions
+        @function (private) _cloneFunctions
         @description 
     */
     function cloneFunctions(adapter) {
@@ -6237,7 +6243,10 @@ vcomet.store = function () {
         // Get BaseAdapter prototype functions
         Object.assign(el, adapter.constructor.prototype);
     };
-    // TODO - store.data on propertyChanged listener
+    /*
+        @function (private) _cloneFunctions
+        @description 
+    */
     function createDataDescriptor() {
         // Define property descriptor with custom get and set
         Object.defineProperty(
@@ -6250,6 +6259,8 @@ vcomet.store = function () {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
+                    // Update size
+                    el.size = Object.keys(el._memory.data).length;
                 }
             }
         );
@@ -6257,19 +6268,71 @@ vcomet.store = function () {
 }
 
 
-vcomet.endpoint = function(){
+vcomet.endpoint = function(type){
   var el = this;
+  /**/
+  this.type = type;
+  /* Resources url */
+  this.url = "";
 
+  //
   createCallbacks();
+
+  /* 
+      ##########
+      Functions
+      ##########
+  */
+  //-- REST API --
+  /*
+    @function get
+    @description Read data resource // Read all data resources
+  */
+  this.get = type =="rest" ? function(id, cb) {
+    // Check resource id and set url
+    this.url += id ? "/" + id : "";
+    // Set up request
+    var options = {
+      method: "GET"
+    };
+    // Send request
+    vcomet.ajax(this.url, options, cb);
+  } : "";
+  /*
+    @function put
+    @description Overwrite data resource // create if not exists
+  */
+  this.put = type =="rest" ? function(id, data) {
+    
+  } : "";
+  /*
+    @function post
+    @description Create data resource
+  */
+  this.post = type =="rest" ? function(data) {
+    
+  } : "";
+  /*
+    @function delete
+    @description Delete data resource
+  */
+  this.delete = type =="rest" ? function(id) {
+    
+  } : "";
+
+  //-- GraphQL HTTP API --
+  //-- GraphQL Web sockets API --
+
   /*
     @function _createCallbacks
     @description 
   */
-   function createCallbacks () {
+  function createCallbacks () {
     vcomet.createCallback("onLoaded", el, "ready");
   }
-
+  // ** TEMP
   vcomet.triggerCallback("onLoaded", el, el, [el]);
+  
 
 }
 

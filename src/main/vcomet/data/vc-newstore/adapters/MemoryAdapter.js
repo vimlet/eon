@@ -52,6 +52,7 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
             else {
                 var start = query.limitStart || 0;
                 var end = (query.limitAmount + query.limitStart) || memoryKeys.length;
+                end = end > memory.keys.length ? memory.keys.length : end;
                 var result = [];
                 for (var i = start; i < end; i++) {
                     result.push(memory.data[memoryKeys[i]]);
