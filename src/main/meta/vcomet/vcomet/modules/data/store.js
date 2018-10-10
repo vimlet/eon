@@ -42,7 +42,6 @@ vcomet.store = function () {
         // Get BaseAdapter prototype functions
         Object.assign(el, adapter.constructor.prototype);
     };
-
     // TODO - store.data on propertyChanged listener
     function createDataDescriptor() {
         // Define property descriptor with custom get and set
@@ -60,5 +59,4 @@ vcomet.store = function () {
             }
         );
     }
-
 }
