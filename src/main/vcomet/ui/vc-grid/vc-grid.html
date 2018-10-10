@@ -239,7 +239,7 @@
                     headerCell.setAttribute("order", el._misc.columns[columnsKeys[i]].order);
                     headerCell.content.innerHTML = el._misc.columns[columnsKeys[i]].header;
                     headerCell.onclick = function (e) {
-                        el._sortEntries(e, this)
+                        el._sort(e, this)
                     };
 
                     docFragment.appendChild(headerCell);
@@ -339,19 +339,19 @@
 
                 if (parseInt(el.pageSize)) {
 
-                    el._misc.pageSizeType = "fixed";
+                    el._misc.pagingType = "fixed";
                     el._misc.pageSize = parseInt(el.pageSize);
 
                 } else {
 
                     if (!el.pageSize || el.pageSize == "auto") {
 
-                        el._misc.pageSizeType = "auto";
+                        el._misc.pagingType = "auto";
                         el._misc.pageSize = el._getRowsCapacity();
 
                     } else if (el.pageSize == "all") {
 
-                        el._misc.pageSizeType = "all";
+                        el._misc.pagingType = "all";
                         el._misc.pageSize = 0;
 
                     }
@@ -367,29 +367,34 @@
 
                 var el = this;
 
-                var myCallback = function () {
+                // var myCallback = function () {
 
-                    el._misc.pageSize = el._misc.pageSizeType == "all" ? el.store.size : el._misc.pageSize;
+                //     el._misc.pageSize = el._misc.pagingType == "all" ? el.store.size : el._misc.pageSize;
 
-                    var start = 1;
-                    var limit = parseInt(el._misc.pageSize);
+                //     var start = 1;
+                //     var limit = parseInt(el._misc.pageSize);
 
-                    el._handleStoreEntries("object", true, start, limit);
-                    el._updatePagination(1);
+                //     el._handleEntries("object", true, start, limit);
+                //     el._updatePagination(1);
 
-                };
+                // };
 
                 //Store calls
                 el.store.onLoaded(function () {
 
+                    var start = 1;
+                    var limit = parseInt(el._misc.pageSize);
                     var rowsData = el._generateSourceRowsData();
-
+                    
                     if (rowsData && Object.keys(rowsData).length > 0) {
+                        console.log('rowsData', rowsData);
                         el.store.data = rowsData;
                     }
 
-                    el.store.listRemote(myCallback);
-                    el.store.onSourceChanged(myCallback);
+                    el._misc.pageSize = el._misc.pagingType == "all" ? el.store.size : el._misc.pageSize;
+
+                    el._handleEntries("object", true, start, limit);
+                    el._updatePagination(1);
 
                 });
 
@@ -405,8 +410,9 @@
                 var el = this;
 
                 var storeData = {};
+                
                 var rows = el._misc.sourceFragment.querySelectorAll("vc-row");
-
+                
                 if (rows.length > 0) {
 
                     var columns = el.columns.replace(/\s/g, '').split(',');
@@ -439,6 +445,342 @@
 
                 return storeData;
 
+            },
+            //HANDLE FUNCTIONS
+            /*
+            @function (private) _handleEntries
+            @description Manages the redirection to another function depending on the situation
+            @param {String} responseType
+            @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
+            @param {Number} start
+            @param {Number} limit
+            */
+            handleEntries: function (responseType, cleanCurrentRange, start, limit) {
+
+                var el = this;
+                var handleFunction, dataSource, source;
+
+                // dataSource = (el.store.type == "memory" && el._misc.pagingType != "all") ? el.store.rangeData : el.store.data;
+                // source = (responseType == "object") ? dataSource.asObject() : dataSource.asArray();
+                source = el.store.data;
+                
+                el._misc.range.start = start ? start : el._misc.range.start;
+                el._misc.range.limit = limit ? limit : el._misc.range.limit;
+
+                el._misc.range.limit = (el._misc.pagingType == "all") ? el.store.size : el._misc.range.limit;
+
+                handleFunction = (responseType == "object") ? el._handleObjectEntries : el._handleArrayEntries;
+                handleFunction.apply(el, [source, cleanCurrentRange]);
+
+            },
+            /*
+            @function (private) _handleObjectEntries
+            @description Handles the store data that is returned as an object
+            @param {Object} storeData
+            @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
+            */
+            handleObjectEntries: function (storeData, cleanCurrentRange) {
+
+                var el = this;
+                console.log('storeData', storeData);
+                var columnsKeys = Object.keys(el._misc.columns);
+                var rowsDocFragment = document.createDocumentFragment();
+                var entriesCount = Object.keys(storeData).length;
+                var dataObject;
+                var row;
+                var cell;
+                var eventObject;
+
+                if (cleanCurrentRange) {
+                    el._refs.rowsWrapper.innerHTML = "";
+                    el._resetEntriesCount();
+                }
+
+                //for each dataObject in the storeData we create a Row
+                for (var key in storeData) {
+                    dataObject = storeData[key];
+
+                    row = document.createElement("vc-row");
+                    row.classList.add("vc-grid-entryRow", "vc-bg1-hoverable3", "vc-bg1-border2");
+                    row.dataset.entryId = dataObject[el.store.idProperty];
+
+                    //For each column we have in the grid we will look for its value on the dataObject
+                    // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
+                    for (var i = 0; i < columnsKeys.length; i++) {
+
+                        cell = el._createCell(columnsKeys[i], dataObject, storeData);
+                        row.appendChild(cell);
+
+                    }
+
+                    if (el.autofit == "true" || el.autofit == true) {
+
+                        row.classList.add("vc-grid-autofit");
+
+                    } else {
+
+                        row.style.minHeight = el.rowMinHeight + "px";
+                    }
+
+                    el._increaseEntriesCount();
+
+                    rowsDocFragment.appendChild(row);
+
+                    // Creates the callback event object for the user
+                    eventObject = {
+
+                        data: dataObject,
+                        row: row
+
+                    };
+
+                    vcomet.triggerCallback("onRowCreated", el, el, [eventObject]);
+
+                };
+
+                el._refs.rowsWrapper.appendChild(rowsDocFragment);
+
+                if (el._misc.pagingType == "auto") {
+                    el._handleRowsLayout(entriesCount)
+                };
+            },
+            /*
+            @function (private) _handleArrayEntries
+            @description Handles the store data that is returned as an array
+            @param {Array} storeData
+            @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
+            */
+            handleArrayEntries: function (storeData, cleanCurrentRange) {
+
+                var el = this;
+
+                var columnsKeys = Object.keys(el._misc.columns);
+                var rowsDocFragment = document.createDocumentFragment();
+                var entriesCount = storeData.length;
+                var dataObject;
+                var row;
+                var cell;
+
+                if (cleanCurrentRange) {
+                    el._refs.rowsWrapper.innerHTML = "";
+                }
+
+                el._resetEntriesCount();
+
+                //for each dataObject in the storeData we create a Row
+                for (var i = 0; i < entriesCount; i++) {
+                    dataObject = storeData[i];
+
+                    row = document.createElement("vc-row");
+                    row.classList.add("vc-grid-entryRow", "vc-bg1-hoverable3", "vc-bg1-border2");
+                    row.dataset.entryId = dataObject[el.store.idProperty];
+
+                    //For each column we have in the grid we will look for its value on the dataObject
+                    // and create a cell, this way if a dataObject doesn't have a columnKey it will still have the cell but it will be an empty one
+                    for (var j = 0; j < columnsKeys.length; j++) {
+
+                        cell = el._createCell(columnsKeys[j], dataObject, storeData);
+                        row.appendChild(cell);
+
+                    }
+
+                    if (el.autofit == "true" || el.autofit == true) {
+
+                        row.classList.add("vc-grid-autofit");
+
+                    } else {
+
+                        row.style.minHeight = el.rowMinHeight + "px";
+                    }
+
+                    el._increaseEntriesCount();
+
+                    rowsDocFragment.appendChild(row);
+                }
+                el._refs.rowsWrapper.appendChild(rowsDocFragment);
+
+                if (el._misc.pagingType == "auto") {
+                    el._handleRowsLayout(entriesCount)
+                };
+            },
+            /*
+            @function (private) _handleRowsLayout
+            @description Handles everything autofit rows related, the paginations, its sizes...
+            @param {Number} entriesCount
+            */
+            handleRowsLayout: function (entriesCount) {
+
+                var el = this;
+                var rowsCapacity = el._getRowsCapacity();
+
+                //We will only do stuff when the rowsCapacity is bigger than one.
+                //One row will be the smallest number of rows possible, we will not allow pages with no rows
+                if (rowsCapacity >= 1) {
+
+                    var existingDummiesCount = el.querySelectorAll(".vc-grid-dummyRow").length;
+                    var totalPageRows = existingDummiesCount + entriesCount;
+                    var dummyRowsAmount = rowsCapacity - entriesCount;
+
+                    //If there are more rows than the capacity that we have we will remove an amount of rows
+                    //until we match our capacity, the removal starts from the last one
+                    if (rowsCapacity < totalPageRows) {
+
+                        var rowsAmountDifference = totalPageRows - rowsCapacity;
+                        var rows = el._refs.rowsWrapper.querySelectorAll(".vc-grid-entryRow, .vc-grid-dummyRow");
+                        var rowsLength = rows.length;
+                        var lastRowIndex;
+
+                        for (var i = rowsAmountDifference; i > 0; i--) {
+                            lastRowIndex = rowsLength - 1;
+
+                            if (rows[lastRowIndex].classList.contains("vc-grid-entryRow")) {
+                                el._decreaseEntriesCount();
+                            }
+
+                            el._refs.rowsWrapper.removeChild(el._refs.rowsWrapper.querySelectorAll(".vc-grid-entryRow, .vc-grid-dummyRow")[lastRowIndex]);
+                            rowsLength--;
+                        }
+
+                        //If we have more capacity than actual rows displayed then we will fill the page with dummies
+                    } else if (rowsCapacity > totalPageRows) {
+
+                        var dummyDocFragment = document.createDocumentFragment();
+                        var newDummiesCount = dummyRowsAmount - existingDummiesCount;
+                        var dummyRow;
+
+                        for (var i = 0; i < newDummiesCount; i++) {
+                            dummyRow = document.createElement("div");
+                            dummyRow.classList.add("vc-grid-autofit", "vc-grid-dummyRow");
+                            dummyDocFragment.appendChild(dummyRow);
+                        }
+
+                        el._refs.rowsWrapper.appendChild(dummyDocFragment);
+                    }
+
+                    //If ourpageSize is different from the actual amount of rows we can have, we will handle
+                    //different calls to reload the page with the data corresponding to the page
+                    if (el.pageSize != rowsCapacity) {
+                        var currentPage = parseInt(el._misc.currentPage);
+                        var newPage;
+
+                        el.pageSize = rowsCapacity;
+
+                        newPage = currentPage > el._getStoreDataLastPage() ? el._getStoreDataLastPage() : currentPage;
+
+                        el._selectPage(newPage);
+
+                    }
+                }
+            },
+            /*
+            @function (private) _getStoreDataLastPage
+            @description Gets the current last page depending on the store size
+            */
+            getStoreDataLastPage: function () {
+
+                var el = this;
+
+                if (el._misc.pageSizeType == "all" && typeof el.store.size == "undefined") {
+                    return 1;
+                }
+
+                return Math.ceil(parseInt(el.store.size) / parseInt(el._misc.pageSize));
+            },
+            /*
+            @function (private) _selectPage
+            @description Selects a page
+            @param {Number} selectedPage
+            @param {Boolean} isSelected
+            */
+            selectPage: function (selectedPage, isSelected) {
+
+                if (isSelected == false || isSelected == "false" || typeof isSelected == "undefined") {
+
+                    var el = this;
+
+                    var pageSize = parseInt(el.pageSize);
+                    var rangeLimit = (parseInt(selectedPage) * pageSize);
+                    var rangeStart = rangeLimit - pageSize + 1;
+
+                    el._handleRange(rangeStart, rangeLimit, true);
+                    el._updatePages(selectedPage);
+
+                }
+
+            },
+            /*
+            @function (private) _handleRange
+            @description Manages the redirection to another function depending on the situation
+            @param {Number} start
+            @param {Number} limit
+            @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
+            */
+            handleRange: function (start, limit, cleanCurrentRange) {
+
+                var el = this;
+
+                el._misc.range.start = start;
+                el._misc.range.limit = limit;
+
+                // el.store.read(Objeto con informacion para el rango);
+                // el._handleStoreEntries(el.store.data.__sorted ? "array" : "object", cleanCurrentRange, start, limit);
+
+            },
+            /*
+             @function (private) _sort
+             @description Redirects the sort call depending on the situation, it also toggles the icon
+             @param {Object} e [event]
+             @param {Object} header
+             */
+            sort: function (e, header) {
+
+                if (e.target != header.querySelector(".vc-grid-resizeIndicator")) {
+
+                    var el = this;
+
+                    var sortType = el._getSortTypeForHeader(header);
+
+                    el._handleHeadersChange(header, sortType);
+                    el._handleSort(header.column, sortType);
+
+                }
+            },
+            /*
+            @function (private) _handleSort
+            @description Manages the redirection to another function depending on the situation
+            @param {String} columnKey
+            @param {Boolean} isDescending
+            */
+            handleSort: function (columnKey, sortType) {
+
+                var el = this;
+
+                var cleanCurrentRange = true;
+                var isDescending = sortType == "descending" ? true : false;
+                var dataType = sortType != "none" ? "array" : "object";
+
+                var sortCallback = function () {
+                    el._handleStoreEntries("array", cleanCurrentRange);
+                };
+
+                if (el.store.type == "rest") {
+
+                    el.store.sortRemote(columnKey, isDescending, sortCallback);
+
+                } else {
+
+                    el.store.sortList(columnKey, isDescending);
+
+                    if (el._misc.pageSizeType !== "all") {
+                        // If we want the data raw, we send true as the third parameter
+                        el.store.getRange(el._misc.range.start, el._misc.range.limit, sortType == "none" ? true : false);
+
+                    }
+
+                    // Here we call the handleStoreEntries function, after requesting sort and range
+                    el._handleStoreEntries(dataType, cleanCurrentRange);
+
+                }
             },
             /*
             @function (private) _generateSourceFragment
@@ -490,6 +832,40 @@
                 var rowsWrapperHeight = (parseInt(el._refs.rowsWrapper.offsetHeight) == 0) ? (el.offsetHeight - (el._refs.header.offsetHeight + el._refs.footer.offsetHeight)) : el.offsetHeight;
 
                 return Math.floor(rowsWrapperHeight / parseInt(el.rowMinHeight));
+            },
+            /*
+            @function (private) _increaseEntriesCount
+            @description Increases the entries count
+            */
+            increaseEntriesCount: function () {
+
+                var el = this;
+
+                el._misc.entriesCount++;
+                el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
+            },
+            /*
+            @function (private) _decreaseEntriesCount
+            @description Decrease the entries count
+            */
+            decreaseEntriesCount: function () {
+
+                var el = this;
+
+                el._misc.entriesCount--;
+                el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
+            },
+            /*
+            @function (private) _resetEntriesCount
+            @description Resets the count of the entries
+            */
+            resetEntriesCount: function () {
+
+                var el = this;
+
+                el._misc.entriesCount = 0;
+                el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
+
             },
         },
 
