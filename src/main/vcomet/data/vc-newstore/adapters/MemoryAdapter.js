@@ -22,7 +22,7 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
                 var validated = validate(query);
                 if (validated) {
                     memory.data[id] = validated;
-                    // Remove key if exist to keep order while overwritting
+                    // Remove key if exist to keep order while overwriting
                     if (memoryKeys.indexOf(id) >= 0) {
                         memoryKeys.splice(memoryKeys.indexOf(id), 1);
                     }
