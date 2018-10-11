@@ -6268,7 +6268,7 @@ vcomet.store = function (url) {
 }
 
 
-vcomet.endpoint = function(type){
+vcomet.endpoint = function (type) {
   var el = this;
   /**/
   this.type = type;
@@ -6276,7 +6276,7 @@ vcomet.endpoint = function(type){
   this.composedUrl = "";
   /* Resources url */
   this.url = "";
-  
+
   //
   createCallbacks();
 
@@ -6290,7 +6290,7 @@ vcomet.endpoint = function(type){
     @function get
     @description Read data resource // Read all data resources
   */
-  this.get = type =="rest" ? function(id, cb) {
+  this.get = type == "rest" ? function (id, cb) {
     // Check resource id and set url
     this.composedUrl = this.url;
     this.composedUrl += id ? "/" + id : "";
@@ -6305,11 +6305,11 @@ vcomet.endpoint = function(type){
     @function put
     @description Overwrite data resource // create if not exists
   */
-  this.put = type =="rest" ? function(id, data, cb) {
+  this.put = type == "rest" ? function (id, data, cb) {
     // Check resource id and set url
     this.composedUrl = this.url;
     this.composedUrl += id ? "/" + id : "";
-    if(id) {
+    if (id) {
       // Set up request
       var options = {
         method: "PUT",
@@ -6325,29 +6325,29 @@ vcomet.endpoint = function(type){
     @function post
     @description Create data resource
   */
-  this.post = type =="rest" ? function(data, cb) {
-     // Check resource id and set url
-     if(data) {
-       // Set up request
-       var options = {
-         method: "POST",
-         payload: data
-       };
-       // Send request
-       vcomet.ajax(this.url, options, cb);
-     } else {
-       console.error('No resource data found');
-     }
+  this.post = type == "rest" ? function (data, cb) {
+    // Check resource id and set url
+    if (data) {
+      // Set up request
+      var options = {
+        method: "POST",
+        payload: data
+      };
+      // Send request
+      vcomet.ajax(this.url, options, cb);
+    } else {
+      console.error('No resource data found');
+    }
   } : "";
   /*
     @function delete
     @description Delete data resource
   */
-  this.delete = type =="rest" ? function(id, cb) {
+  this.delete = type == "rest" ? function (id, cb) {
     // Check resource id and set url
     this.composedUrl = this.url;
     this.composedUrl += id ? "/" + id : "";
-    if(id) {
+    if (id) {
       // Set up request
       var options = {
         method: "DELETE"
@@ -6361,36 +6361,84 @@ vcomet.endpoint = function(type){
 
   //-- GraphQL HTTP API --
   /*
-    @function delete
+    @function send
+    @description
+  */
+  this.send = type == "graphHTTP" ? function (queryString, cb) {
+    if (queryString) {
+      // Set up request
+      var options = {
+        method: "GET",
+        payload: "query:" + queryString
+      };
+      // Send request
+      vcomet.ajax(this.rootURL, options, cb);
+    }
+  } : "";
+  /*
+    @function query
+    @description
+  */
+  this.query = type == "graphHTTP" ? function (queryString, cb) {
+    //
+    if (queryString) {
+      // Set up request
+      var options = {
+        method: "GET",
+        payload: "query:" + queryString
+      };
+      // Send request
+      vcomet.ajax(this.rootURL, options, cb);
+    }
+  } : "";
+  /*
+    @function query
     @description Delete data resource
   */
- this.send = type =="rest" ? function(id, cb) {
-  // Check resource id and set url
-  this.composedUrl = this.url;
-  this.composedUrl += id ? "/" + id : "";
-  if(id) {
-    // Set up request
-    var options = {
-      method: "DELETE"
-    };
-    // Send request
-    vcomet.ajax(this.composedUrl, options, cb);
-  } else {
-    console.error('No resource id found');
-  }
-} : "";
+  this.mutation = type == "graphHTTP" ? function (queryString, cb) {
+    //
+    if (queryString) {
+      // Set up request
+      var options = {
+        method: "POST",
+        payload: "mutation:" + queryString
+      };
+      // Send request
+      vcomet.ajax(this.rootURL, options, cb);
+    }
+  } : "";
   //-- GraphQL Web sockets API --
-
+  /*
+     @function send
+     @description
+   */
+  this.send = type == "graphSockets" ? function (queryString, cb) {
+    
+  } : "";
+  /*
+     @function query
+     @description
+   */
+  this.query = type == "graphSockets" ? function (queryString, cb) {
+    
+  } : "";
+  /*
+     @function mutation
+     @description
+   */
+  this.mutation = type == "graphSockets" ? function (queryString, cb) {
+    
+  } : "";
   /*
     @function _createCallbacks
     @description 
   */
-  function createCallbacks () {
+  function createCallbacks() {
     vcomet.createCallback("onLoaded", el, "ready");
   }
   // ** TEMP
   vcomet.triggerCallback("onLoaded", el, el, [el]);
-  
+
 
 }
 
