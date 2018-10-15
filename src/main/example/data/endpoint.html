@@ -17,35 +17,63 @@
 
   <!-- vc-store usage -->
   <script>
-    
+
     // ## REST
     // Create endpoint
-    var endpoint = new vcomet.endpoint("rest");
+    var endpoint = new vcomet.endpoint("rest", "https://jsonplaceholder.typicode.com/todos");
     // Get request
-    endpoint.get("1", function(success, data){
-      console.log('get data', data);
+    endpoint.get("1", function (success, data) {
+      console.log('### REST get data', data);
     });
     // Put request
-    endpoint.put("1", {}, function(success, data){
-      console.log('put data', data);
+    endpoint.put("1", {}, function (success, data) {
+      console.log('### REST put data', data);
     });
+    endpoint.url = "https://jsonplaceholder.typicode.com/posts";
     // Post request
-    endpoint.post({}, function(success, data){
-      console.log('push data', data);
+    endpoint.post({}, function (success, data) {
+      console.log('### REST push data', data);
     });
     // Delete request
-    endpoint.delete("1", function(success, data){
-      console.log('delete data', data);
+    endpoint.delete("1", function (success, data) {
+      console.log('### REST delete data', data);
     });
+
     // ## GraphQL HTTP based
     // Create endpoint
-    var endpointHTTP = new vcomet.endpoint("graphHTTP");
-    // TODO
+    var endpointHTTP = new vcomet.endpoint("graphHTTP", "https://jsonplaceholder.typicode.com/todos");
+    // Send calls query internally
+    endpointHTTP.send("{Hero {name}}", function (success, data) {
+      console.log('::: HTTP send', data);
+    });
+    // Query call appends the 'query' prefix to the query string 
+    endpointHTTP.query("{Hero {name}}", function (success, data) {
+      console.log('::: HTTP query', data);
+    });
+    // Mutation call appends the 'mutation' prefix to the query string 
+    endpointHTTP.mutation("{'Hero': 'Jedi', age: '22'}", function (success, data) {
+      console.log('::: HTTP mutation', data);
+    });
 
     // ## GraphQL Web Sockets based
     // Create endpoint
-    var endpointSockets = new vcomet.endpoint("graphSockets");
-    // TODO
+    var endpointSockets = new vcomet.endpoint("graphSockets", "wss://echo.websocket.org");
+    // Make sure the asynchronous connection has been opened
+    endpointSockets.socket.onopen = function (event) {
+      // Query call appends the 'query' prefix to the query string 
+      endpointSockets.send("{Hero {name}}", function (success, data) {
+        console.log('..... socket send', data);
+      });
+      // Send calls query internally
+      endpointSockets.query("{Hero {name}}", function (success, data) {
+        console.log('..... socket query', data);
+      });
+      // Mutation call appends the 'mutation' prefix to the query string 
+      endpointSockets.mutation("{'Hero': 'Jedi', age: '22'}", function (success, data) {
+        console.log('..... socket mutation', data);
+      });
+    };
+
   </script>
 </body>
 

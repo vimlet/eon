@@ -6268,38 +6268,39 @@ vcomet.store = function (url) {
 }
 
 
-vcomet.endpoint = function (type) {
+vcomet.endpoint = function (type, url) {
   var el = this;
-  /**/
+  /* Endpoint standard type */
   this.type = type;
   /* Resources root url */
-  this.composedUrl = "";
+  this.composedURL = "";
   /* Resources url */
-  this.url = "";
-
-  //
-  createCallbacks();
+  this.url = url;
+  /* GraphQL Web Sockets based use only */
+  this.socket = type == "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
 
   /* 
       ##########
       Functions
       ##########
   */
-  //-- REST API --
+
+  // -- REST API --
+
   /*
     @function get
     @description Read data resource // Read all data resources
   */
   this.get = type == "rest" ? function (id, cb) {
     // Check resource id and set url
-    this.composedUrl = this.url;
-    this.composedUrl += id ? "/" + id : "";
+    el.composedUrl = el.url;
+    el.composedUrl += id ? "/" + id : "";
     // Set up request
     var options = {
       method: "GET"
     };
     // Send request
-    vcomet.ajax(this.composedUrl, options, cb);
+    vcomet.ajax(el.composedUrl, options, cb);
   } : "";
   /*
     @function put
@@ -6307,8 +6308,8 @@ vcomet.endpoint = function (type) {
   */
   this.put = type == "rest" ? function (id, data, cb) {
     // Check resource id and set url
-    this.composedUrl = this.url;
-    this.composedUrl += id ? "/" + id : "";
+    el.composedUrl = el.url;
+    el.composedUrl += id ? "/" + id : "";
     if (id) {
       // Set up request
       var options = {
@@ -6316,7 +6317,7 @@ vcomet.endpoint = function (type) {
         payload: data
       };
       // Send request
-      vcomet.ajax(this.composedUrl, options, cb);
+      vcomet.ajax(el.composedUrl, options, cb);
     } else {
       console.error('No resource id found');
     }
@@ -6334,7 +6335,7 @@ vcomet.endpoint = function (type) {
         payload: data
       };
       // Send request
-      vcomet.ajax(this.url, options, cb);
+      vcomet.ajax(el.url, options, cb);
     } else {
       console.error('No resource data found');
     }
@@ -6345,26 +6346,64 @@ vcomet.endpoint = function (type) {
   */
   this.delete = type == "rest" ? function (id, cb) {
     // Check resource id and set url
-    this.composedUrl = this.url;
-    this.composedUrl += id ? "/" + id : "";
+    el.composedUrl = el.url;
+    el.composedUrl += id ? "/" + id : "";
     if (id) {
       // Set up request
       var options = {
         method: "DELETE"
       };
       // Send request
-      vcomet.ajax(this.composedUrl, options, cb);
+      vcomet.ajax(el.composedUrl, options, cb);
     } else {
       console.error('No resource id found');
     }
   } : "";
 
-  //-- GraphQL HTTP API --
+  // -- GraphQL --
+
   /*
     @function send
-    @description
+    @description Query data source
   */
-  this.send = type == "graphHTTP" ? function (queryString, cb) {
+  this.send = function (queryString, cb) {
+    el.query(queryString, cb);
+  };
+  /*
+    @function query
+    @description Query data source
+  */
+  this.query = function (queryString, cb) {
+    if (el.type == "graphHTTP") {
+      graphHTTPQuery(queryString, cb);
+    } else if (el.type == "graphSockets") {
+      graphSocketsQuery(queryString, "query", cb);
+    }
+  };
+  /*
+    @function mutation
+    @description Update data source
+   */
+  this.mutation = function (queryString, cb) {
+    // Check graphQL protocol based on
+    if (el.type == "graphHTTP") {
+      graphHTTPMutation(queryString, cb);
+    } else if (el.type == "graphSockets") {
+      graphSocketsQuery(queryString, "mutation", cb);
+    }
+  };
+
+  /* 
+      #################
+      Private Functions
+      #################
+  */
+
+  // -- GraphQL HTTP API --
+  
+  // Query call HTTP based
+  function graphHTTPQuery(queryString, cb) {
+    // Validate query string 
     if (queryString) {
       // Set up request
       var options = {
@@ -6372,31 +6411,12 @@ vcomet.endpoint = function (type) {
         payload: "query:" + queryString
       };
       // Send request
-      vcomet.ajax(this.rootURL, options, cb);
+      vcomet.ajax(el.url, options, cb);
     }
-  } : "";
-  /*
-    @function query
-    @description
-  */
-  this.query = type == "graphHTTP" ? function (queryString, cb) {
-    //
-    if (queryString) {
-      // Set up request
-      var options = {
-        method: "GET",
-        payload: "query:" + queryString
-      };
-      // Send request
-      vcomet.ajax(this.rootURL, options, cb);
-    }
-  } : "";
-  /*
-    @function query
-    @description Delete data resource
-  */
-  this.mutation = type == "graphHTTP" ? function (queryString, cb) {
-    //
+  }
+  // Mutation call HTTP based
+  function graphHTTPMutation(queryString, cb) {
+    // Validate mutation string 
     if (queryString) {
       // Set up request
       var options = {
@@ -6404,42 +6424,21 @@ vcomet.endpoint = function (type) {
         payload: "mutation:" + queryString
       };
       // Send request
-      vcomet.ajax(this.rootURL, options, cb);
+      vcomet.ajax(el.url, options, cb);
     }
-  } : "";
-  //-- GraphQL Web sockets API --
-  /*
-     @function send
-     @description
-   */
-  this.send = type == "graphSockets" ? function (queryString, cb) {
-    
-  } : "";
-  /*
-     @function query
-     @description
-   */
-  this.query = type == "graphSockets" ? function (queryString, cb) {
-    
-  } : "";
-  /*
-     @function mutation
-     @description
-   */
-  this.mutation = type == "graphSockets" ? function (queryString, cb) {
-    
-  } : "";
-  /*
-    @function _createCallbacks
-    @description 
-  */
-  function createCallbacks() {
-    vcomet.createCallback("onLoaded", el, "ready");
   }
-  // ** TEMP
-  vcomet.triggerCallback("onLoaded", el, el, [el]);
+   
+  // -- GraphQL Web sockets API --
 
-
+  // Query call Web sockets based
+  function graphSocketsQuery(queryString, action, cb) {
+    // Server response listener
+    el.socket.onmessage = function (event) {
+      // TODO Handle response messages
+      cb(true, event.data);
+    };
+    el.socket.send(action + ":" + queryString);
+  }
 }
 
 
