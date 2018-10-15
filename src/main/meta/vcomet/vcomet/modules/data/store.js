@@ -4,16 +4,15 @@ vcomet.store = function () {
     this.data;
 
     createCallbacks();
-
     //
     importAdapter();
-
     /*
         @function _createCallbacks
         @description 
     */
     function createCallbacks() {
-        vcomet.createCallback("onLoaded", el);
+       
+        vcomet.createCallback("onLoaded", el, "ready");
         vcomet.createCallback("onDataLoaded", el);
     }
     /*
@@ -23,6 +22,7 @@ vcomet.store = function () {
     */
     function importAdapter() {
         //
+       
         vcomet.vpa.use(vcomet.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
             // Clone adapter functions
             cloneFunctions(adapter());
@@ -55,6 +55,7 @@ vcomet.store = function () {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
+                    el._memory.keys = Object.keys(value);
                 }
             }
         );

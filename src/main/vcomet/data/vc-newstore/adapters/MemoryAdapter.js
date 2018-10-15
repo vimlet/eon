@@ -1,7 +1,7 @@
 vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
     var memory = {}; // Memory itself
     memory.data = {}; // Where data will be stored
-    var memoryKeys = []; // Memory keys to keep creation order
+    memory.keys = []; // Memory keys to keep creation order
     var counter = 0;
 
     // @function create (private) [Create a new entry to the memory object with given data] @param query
@@ -23,10 +23,10 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
                 if (validated) {
                     memory.data[id] = validated;
                     // Remove key if exist to keep order while overwriting
-                    if (memoryKeys.indexOf(id) >= 0) {
-                        memoryKeys.splice(memoryKeys.indexOf(id), 1);
+                    if (memory.keys.indexOf(id) >= 0) {
+                        memory.keys.splice(memory.keys.indexOf(id), 1);
                     }
-                    memoryKeys.push("" + id);
+                    memory.keys.push("" + id);
                     resolve(JSON.parse(JSON.stringify(validated)));
                 }
                 else {
@@ -51,14 +51,17 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
             }
             else {
                 var start = query.limitStart || 0;
-                var end = (query.limitAmount + query.limitStart) || memoryKeys.length;
+                var end = (query.limitAmount + query.limitStart) || memory.keys.length;
+                
+                end = end > memory.keys.length ? memory.keys.length : end;
+
                 var result = [];
                 for (var i = start; i < end; i++) {
-                    result.push(memory.data[memoryKeys[i]]);
+                    result.push(memory.data[memory.keys[i]]);
                 }
                 if (query.sortField) {
                     var asc = 1;
-                    if (query.sortRule && (query.sortRule == "descendant" || query.sortRule == "desc")) {
+                    if (query.sortRule && ~["descending","desc"].indexOf(query.sortRule)) {
                         asc = -1;
                     }
                     result = sortArray(result, query.sortField, asc);
@@ -104,8 +107,8 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
                     var result = JSON.parse(JSON.stringify(memory.data[query.id]));
                     delete memory.data[query.id];
                     // Remove key if exist to keep order while overwritting
-                    if (memoryKeys.indexOf(query.id) >= 0) {
-                        memoryKeys.splice(memoryKeys.indexOf(query.id), 1);
+                    if (memory.keys.indexOf(query.id) >= 0) {
+                        memory.keys.splice(memory.keys.indexOf(query.id), 1);
                     }
                     resolve(result);
                 }
@@ -115,7 +118,7 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
             }
             else {
                 var result = JSON.parse(JSON.stringify(memory));
-                memoryKeys = [];
+                memory.keys = [];
                 // Safe clear object and its copy baseAdapter._memory
                 for (var key in memory.data) {
                     delete memory.data[key];
