@@ -50,15 +50,7 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
                 }
             }
             else {
-                var start = query.limitStart || 0;
-                var end = (query.limitAmount + query.limitStart) || memory.keys.length;
-                
-                end = end > memory.keys.length ? memory.keys.length : end;
-
-                var result = [];
-                for (var i = start; i < end; i++) {
-                    result.push(memory.data[memory.keys[i]]);
-                }
+                // ** Modified - Sort data before get range
                 if (query.sortField) {
                     var asc = 1;
                     if (query.sortRule && ~["descending","desc"].indexOf(query.sortRule)) {
@@ -66,6 +58,15 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
                     }
                     result = sortArray(result, query.sortField, asc);
                 }
+
+                var start = query.limitStart || 0;
+                var end = (query.limitAmount + query.limitStart) || memoryKeys.length;
+                end = end > memory.keys.length ? memory.keys.length : end;
+                var result = [];
+                for (var i = start; i < end; i++) {
+                    result.push(memory.data[memoryKeys[i]]);
+                }
+                
                 resolve(JSON.parse(JSON.stringify(result)));
             }
         });

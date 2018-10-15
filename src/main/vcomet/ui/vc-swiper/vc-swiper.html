@@ -40,7 +40,8 @@
       */
       direction: {
         value: "horizontal",
-        reflect: true
+        reflect: true,
+        reflectDefault: true
       },
 
       /*
@@ -250,6 +251,7 @@
         el._refs.wrapper = wrapper;
         // Get axis
         if (el.direction == "horizontal") {
+          el.classList.add("vc-swiper-horizontal");
           el._misc.sizeProperty = "offsetWidth";
           el._misc.styleSizeProperty = "width";
         } else {
@@ -745,7 +747,8 @@
         // Create slide element
         var slideObj = {};
         var newSlideIndex = el.slides.length;
-        slide.classList.add("vc-swiper-child");
+        slide.classList.add("vc-swiper-child", "vc-unselectable");
+        slide.setAttribute("draggable", false);
         // Store swiper elements object
         slideObj.el = slide;
         // Set auto animation
@@ -927,7 +930,7 @@
           // Start slide on mouse down event
           el._refs.wrapper.addEventListener("pointerdown", function (e) {
             // Fix pointerup stacked bug
-            e.preventDefault();
+            // e.preventDefault();
             // Check slide policy
             mousedown = el._allowSlide(e.button, e.target);
             // Slide complete trigger interval
@@ -1010,6 +1013,7 @@
                 }
               }
             }
+            mousedown = false;
             slideCounter = 0;
             vcomet.triggerCallback("onDragStoped", el, el);
           });

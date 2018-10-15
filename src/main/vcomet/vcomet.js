@@ -6194,30 +6194,36 @@ vcomet.history.getURLInformation = function () {
 };
 
 
-vcomet.store = function () {
+vcomet.store = function (url) {
     var el = this;
-    this.data;
-
+    /* Resources representation */
+    this.data = {};
+    
+    // Create useful callbacks
     createCallbacks();
-    //
+
+    // Import Memory Adapter
     importAdapter();
+
+    /* 
+        ##########
+        Private Functions
+        ##########
+    */
     /*
         @function _createCallbacks
         @description 
     */
     function createCallbacks() {
-       
         vcomet.createCallback("onLoaded", el, "ready");
-        vcomet.createCallback("onDataLoaded", el);
     }
     /*
         ** TO BE REMOVED
-        @function _importVPA
+        @function importAdapter
         @description 
     */
     function importAdapter() {
-        //
-       
+        // Import vpa memory adapter
         vcomet.vpa.use(vcomet.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
             // Clone adapter functions
             cloneFunctions(adapter());
@@ -6228,7 +6234,7 @@ vcomet.store = function () {
         });
     };
     /*
-        @function _cloneFunctions
+        @function (private) _cloneFunctions
         @description 
     */
     function cloneFunctions(adapter) {
@@ -6237,7 +6243,10 @@ vcomet.store = function () {
         // Get BaseAdapter prototype functions
         Object.assign(el, adapter.constructor.prototype);
     };
-    // TODO - store.data on propertyChanged listener
+    /*
+        @function (private) _cloneFunctions
+        @description 
+    */
     function createDataDescriptor() {
         // Define property descriptor with custom get and set
         Object.defineProperty(
@@ -6250,7 +6259,12 @@ vcomet.store = function () {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
+<<<<<<< HEAD
                     el._memory.keys = Object.keys(value);
+=======
+                    // Update size
+                    el.size = Object.keys(el._memory.data).length;
+>>>>>>> ad7e142c88576d11f6195699c5e2725572c28010
                 }
             }
         );
@@ -6258,20 +6272,177 @@ vcomet.store = function () {
 }
 
 
-vcomet.endpoint = function(){
+vcomet.endpoint = function (type, url) {
   var el = this;
+  /* Endpoint standard type */
+  this.type = type;
+  /* Resources root url */
+  this.composedURL = "";
+  /* Resources url */
+  this.url = url;
+  /* GraphQL Web Sockets based use only */
+  this.socket = type == "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
 
-  createCallbacks();
-  /*
-    @function _createCallbacks
-    @description 
+  /* 
+      ##########
+      Functions
+      ##########
   */
-   function createCallbacks () {
-    vcomet.createCallback("onLoaded", el, "ready");
+
+  // -- REST API --
+
+  /*
+    @function get
+    @description Read data resource // Read all data resources
+  */
+  this.get = type == "rest" ? function (id, cb) {
+    // Check resource id and set url
+    el.composedUrl = el.url;
+    el.composedUrl += id ? "/" + id : "";
+    // Set up request
+    var options = {
+      method: "GET"
+    };
+    // Send request
+    vcomet.ajax(el.composedUrl, options, cb);
+  } : "";
+  /*
+    @function put
+    @description Overwrite data resource // create if not exists
+  */
+  this.put = type == "rest" ? function (id, data, cb) {
+    // Check resource id and set url
+    el.composedUrl = el.url;
+    el.composedUrl += id ? "/" + id : "";
+    if (id) {
+      // Set up request
+      var options = {
+        method: "PUT",
+        payload: data
+      };
+      // Send request
+      vcomet.ajax(el.composedUrl, options, cb);
+    } else {
+      console.error('No resource id found');
+    }
+  } : "";
+  /*
+    @function post
+    @description Create data resource
+  */
+  this.post = type == "rest" ? function (data, cb) {
+    // Check resource id and set url
+    if (data) {
+      // Set up request
+      var options = {
+        method: "POST",
+        payload: data
+      };
+      // Send request
+      vcomet.ajax(el.url, options, cb);
+    } else {
+      console.error('No resource data found');
+    }
+  } : "";
+  /*
+    @function delete
+    @description Delete data resource
+  */
+  this.delete = type == "rest" ? function (id, cb) {
+    // Check resource id and set url
+    el.composedUrl = el.url;
+    el.composedUrl += id ? "/" + id : "";
+    if (id) {
+      // Set up request
+      var options = {
+        method: "DELETE"
+      };
+      // Send request
+      vcomet.ajax(el.composedUrl, options, cb);
+    } else {
+      console.error('No resource id found');
+    }
+  } : "";
+
+  // -- GraphQL --
+
+  /*
+    @function send
+    @description Query data source
+  */
+  this.send = function (queryString, cb) {
+    el.query(queryString, cb);
+  };
+  /*
+    @function query
+    @description Query data source
+  */
+  this.query = function (queryString, cb) {
+    if (el.type == "graphHTTP") {
+      graphHTTPQuery(queryString, cb);
+    } else if (el.type == "graphSockets") {
+      graphSocketsQuery(queryString, "query", cb);
+    }
+  };
+  /*
+    @function mutation
+    @description Update data source
+   */
+  this.mutation = function (queryString, cb) {
+    // Check graphQL protocol based on
+    if (el.type == "graphHTTP") {
+      graphHTTPMutation(queryString, cb);
+    } else if (el.type == "graphSockets") {
+      graphSocketsQuery(queryString, "mutation", cb);
+    }
+  };
+
+  /* 
+      #################
+      Private Functions
+      #################
+  */
+
+  // -- GraphQL HTTP API --
+  
+  // Query call HTTP based
+  function graphHTTPQuery(queryString, cb) {
+    // Validate query string 
+    if (queryString) {
+      // Set up request
+      var options = {
+        method: "GET",
+        payload: "query:" + queryString
+      };
+      // Send request
+      vcomet.ajax(el.url, options, cb);
+    }
   }
+  // Mutation call HTTP based
+  function graphHTTPMutation(queryString, cb) {
+    // Validate mutation string 
+    if (queryString) {
+      // Set up request
+      var options = {
+        method: "POST",
+        payload: "mutation:" + queryString
+      };
+      // Send request
+      vcomet.ajax(el.url, options, cb);
+    }
+  }
+   
+  // -- GraphQL Web sockets API --
 
-  vcomet.triggerCallback("onLoaded", el, el, [el]);
-
+  // Query call Web sockets based
+  function graphSocketsQuery(queryString, action, cb) {
+    // Server response listener
+    el.socket.onmessage = function (event) {
+      // TODO Handle response messages
+      cb(true, event.data);
+    };
+    el.socket.send(action + ":" + queryString);
+  }
 }
 
 
