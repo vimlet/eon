@@ -6194,7 +6194,7 @@ vcomet.history.getURLInformation = function () {
 };
 
 
-vcomet.store = function (url) {
+vcomet.store = function () {
     var el = this;
     /* Resources representation */
     this.data = {};
@@ -6377,7 +6377,7 @@ vcomet.endpoint = function (type, url) {
     if (el.type == "graphHTTP") {
       graphHTTPQuery(queryString, cb);
     } else if (el.type == "graphSockets") {
-      graphSocketsQuery(queryString, "query", cb);
+      graphSocketsSubscription(queryString, cb);
     }
   };
   /*
@@ -6388,8 +6388,6 @@ vcomet.endpoint = function (type, url) {
     // Check graphQL protocol based on
     if (el.type == "graphHTTP") {
       graphHTTPMutation(queryString, cb);
-    } else if (el.type == "graphSockets") {
-      graphSocketsQuery(queryString, "mutation", cb);
     }
   };
 
@@ -6400,7 +6398,7 @@ vcomet.endpoint = function (type, url) {
   */
 
   // -- GraphQL HTTP API --
-  
+
   // Query call HTTP based
   function graphHTTPQuery(queryString, cb) {
     // Validate query string 
@@ -6431,13 +6429,13 @@ vcomet.endpoint = function (type, url) {
   // -- GraphQL Web sockets API --
 
   // Query call Web sockets based
-  function graphSocketsQuery(queryString, action, cb) {
+  function graphSocketsSubscription(queryString, cb) {
     // Server response listener
     el.socket.onmessage = function (event) {
       // TODO Handle response messages
       cb(true, event.data);
     };
-    el.socket.send(action + ":" + queryString);
+    el.socket.send("subscription:" + queryString);
   }
 }
 
