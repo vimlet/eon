@@ -64,8 +64,12 @@ vcomet.store = function () {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
+<<<<<<< HEAD
+                    el._memory.keys = Object.keys(value);
+=======
                     // Update size
                     el.size = Object.keys(el._memory.data).length;
+>>>>>>> ad7e142c88576d11f6195699c5e2725572c28010
                 }
             }
         );
