@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>VC-PANEL</title>
+
+        <!-- Import vcomet js  -->
+        <script src="/vcomet/vcomet.js"></script>
+
+        <!-- Example style -->
+        <link rel="stylesheet" href="/example/ui/css/style.css">
+        <link rel="stylesheet" href="/example/ui/css/panel.css">
+
+        <script>
+            vcomet.import("/vcomet/ui/vc-panel");
+            vcomet.import("/vcomet/ui/vc-button");
+        </script>
+
+    </head>
+    <body>
+        <div class="container main">
+            
+            <div class="card">
+                <h1>PANEL</h1>
+
+                <vc-panel id="declPanel" allow-scroll="false" fit="true" class="panel">
+                    <div class="content" style="background-color: #519a51;">
+                        I'm a declarative div!
+                    </div>
+                </vc-panel>
+            </div>
+            <div class="card">
+                <h1>AJAX PANEL</h1>
+
+                <vc-panel id="panelAjax" default-style="false" allow-scroll="false" href="util/panel/panelHrefTest.html" class="panel">
+                </vc-panel>
+            </div>
+            <div class="card">
+                <h1>LAZY RENDERING</h1>
+
+                <vc-button value="Render lazy" onclick="renderLazy()"></vc-button>
+
+                <vc-panel id="lazyContentPanel" allow-scroll="false" class="panel">
+                    <template>
+                        <div class="content" style="background-color: #3b78b7;">
+                            I'm an on demand rendered div!
+                        </div>
+                        <script defer>
+                            if(vcomet.util.getBrowser() === "IE") {
+                                console.log("Example log - * IE executes scripts inside templates too");
+                            }
+                            console.log("Example log - Blue panel content rendered on demand")
+                        </script>
+                    </template>
+                </vc-panel>
+            </div>
+            <div class="card">
+                <h1>LAZY REMOTE LOADED</h1>
+                
+                <vc-button value="Import lazy" onclick="importRemote()"></vc-button>
+
+                <vc-panel id="lazyRemotePanel" class="panel" allow-scroll="false" href="util/panel/panelHrefLazyTest.html" lazy-load="true">
+                </vc-panel>
+
+            </div>
+            <script>
+                var panel = document.querySelector("vc-panel");
+                var panelAjax = document.querySelector("#panelAjax");
+
+                vcomet.onReady(function(){
+                    // Programmatic example
+                    // var cont = document.querySelector("#lazyRemotePanel");
+                    // var lazyPanel = document.createElement("vc-panel");
+                    // // lazyPanel.href="util/panel/panelHrefLazyTest.html";
+                    // cont.appendChild(lazyPanel);
+                    // lazyPanel.content.appendChild(document.createElement("div"));
+
+                    // Make sure panel has its event callbacks initialized
+                    panelAjax.onCreated(function () {
+                        panelAjax.onLoad(function () {
+                            // panelAjax.render();
+                        });
+                    });
+                });
+
+
+                setTimeout(function () {
+                    panelAjax.onReady(function () {
+                        // Refresh with another source content
+                        panelAjax.href = "util/panel/panelHrefTest1.html";
+                        //
+                        panelAjax.onLoad(function(){
+                            // panelAjax.render();
+                        });
+                        panelAjax.refresh();
+                        panelAjax.onLoad(function () {
+                            panelAjax.render(0);
+                            document.querySelector("#red").style.width = "100%";
+                            setTimeout(function () {
+                                document.querySelector(".square").style.width = "50%";
+                            }, 500);
+                        });
+                    });
+                }, 2500);
+
+                function renderLazy() {
+                    document.querySelector("#lazyContentPanel").render();
+                }
+                function importRemote() {
+                    document.querySelector("#lazyRemotePanel").importContent();
+                }
+            </script>
+        </div>
+    </body>
+</html>

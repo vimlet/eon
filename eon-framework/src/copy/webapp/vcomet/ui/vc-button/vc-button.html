@@ -1,0 +1,240 @@
+<template>
+    <div class="vc-button-button vc-bg2-border vc-bg2-hoverable vc-fg2 vc-fg2-hoverable vc-unselectable"></div>
+  </template>
+  
+  <!-- <script data-src="vc-button.js"></script> -->
+  
+  <script>
+    vcomet.element("vc-button", "vc-button.css", {
+      themed: false,
+      properties: {
+        /*
+          @property {String} label 
+          @description Button text
+        */
+        label: {
+          value: "",
+          reflect: true
+        },
+        /*
+          @property {String} value 
+          @description Button text
+        */
+        value: {
+          value: "",
+          reflect: true
+        },
+        /*
+          @property {Boolean} disabled 
+          @description Button deactivation
+          Values can be: true o false
+          Default: false
+        */
+        disabled: {
+          value: false,
+          reflect: true
+        },
+        /*
+          @property {String} type 
+          @description Only indicate for submit buttons
+          Values can be: submit or valueless
+          Default: valueless
+        */
+        type: {
+          value: "",
+          reflect: true
+        },
+        /*
+         @property {Boolean} inline 
+         @description Space that occupy the button inside parent container.
+         By default, its size adapts to its content
+         Values can be: true or false
+         Default: true
+       */
+        inline: {
+          value: true,
+          reflect: true,
+          reflectDefault: true
+        },
+        /*
+          @property {String} icon 
+          @description Button icon
+        */
+        icon: {
+          value: "",
+          reflect: true
+        },
+        /*
+          @property {String} iconPosition 
+          @description Button icon position with respect text
+          Values can be: left or right
+          Default: left
+        */
+        iconPosition: {
+          value: "left",
+          reflect: true
+        },
+        vicon: {
+          value: "",
+          reflect: true
+        }
+      },
+  
+      functions: {
+        /*
+          @function setOnClick
+          @description Set onclick attribute
+          @param {String} functionality [Button onclick functionality]
+        */
+        setOnClick: function (functionality) {
+  
+          this.setAttribute("onclick", functionality);
+        },
+  
+      },
+  
+      privateFunctions: {
+        /*
+          @function (private) _setLabel
+          @description Set new button text
+          @param {String} newVal [New button text]
+        */
+        setLabel: function () {
+          var el = this;
+          var button = el.querySelector(".vc-button-button");
+          var buttonText = document.createElement("div");
+  
+          var label = el.label || (el.label && el.value) ? el.label : el.value;
+  
+          if (label) {
+            // First time the button text is added
+            if (!el.hasAttribute("text")) {
+  
+              buttonText.innerHTML = label;
+              button.appendChild(buttonText);
+              buttonText.classList.add("vc-button-buttonText");
+  
+              // When the button text is dynamically changed
+            } else {
+              var oldText = button.querySelector(".vc-button-buttonText");
+  
+              if (!oldText) {
+                buttonText.innerHTML = label;
+                button.appendChild(buttonText);
+                buttonText.classList.add("vc-button-buttonText");
+  
+              } else {
+                buttonText.innerHTML = label;
+                var newText = buttonText;
+                newText.classList.add("vc-button-buttonText");
+                button.replaceChild(newText, oldText);
+              }
+  
+            }
+  
+          }
+  
+          // When the button has no text is added an attribute
+          // so if the button has icon it will be placed centered
+          (!label) ? el.setAttribute("text", "false"): el.setAttribute("text", "true");
+        },
+        /*
+          @function (private) _setupIcon
+          @description Set new button icon
+          @param {String} newVal [New button icon]
+        */
+        setupIcon: function () {
+          var el = this;
+  
+          if (el.vicon) {
+  
+            var button = el.querySelector(".vc-button-button");
+            var vicon = document.createElement("i");
+            vicon.classList.add("vicon", el.vicon);
+              button.appendChild(vicon);
+              
+          } else if (el.icon) {
+            var button = el.querySelector(".vc-button-button");
+            var iconAttribute = el.icon;
+            var icon;
+  
+            // When change the icon dynamically is necessary delete old icon
+            if (button.classList.contains("vc-button-addedIcon")) {
+              var oldIcon = el.querySelector(".vc-button-buttonIcon");
+  
+              button.removeChild(oldIcon);
+            }
+  
+            if (iconAttribute.indexOf("</i>") !== -1) {
+              var tempDiv = document.createElement("div");
+  
+              tempDiv.innerHTML = iconAttribute;
+              icon = tempDiv.querySelector("i");
+              icon.classList.add("vc-button-buttonIcon");
+  
+            } else {
+              icon = document.createElement("div");
+              icon.style.backgroundImage = "url('" + iconAttribute + "')";
+              icon.classList.add("vc-button-buttonIcon");
+            }
+  
+            button.appendChild(icon);
+            button.classList.add("vc-button-addedIcon");
+          }
+        },
+  
+        /*
+          @function (private) _updateDisabled
+          @description Update disabled status
+          @param {String} newVal [New value of disabled]
+        */
+        updateDisabled: function () {
+          var button = this.querySelector(".vc-button-button");
+  
+          if (!vcomet.util.isTrue(this.disabled)) {
+            button.removeAttribute("disabled");
+            button.classList.remove("vc-fg2-disabled");
+            this.style.pointerEvents = "auto";
+  
+          } else {
+  
+            button.setAttribute("disabled", "true");
+            button.classList.add("vc-fg2-disabled");
+            this.style.pointerEvents = "none";
+  
+          }
+        }
+      },
+  
+      onRender: function () {
+        var el = this;
+        var button = el.querySelector(".vc-button-button");
+  
+        el._setLabel();
+        el._updateDisabled();
+        el._setupIcon(el.icon);
+        // When the button is a type form submit
+        (el.type) ? button.setAttribute("type", el.type): null;
+        
+        el.setAttribute("icon-position", el.iconPosition);
+  
+      },
+  
+      onPropertyChanged: function (attrName, oldVal, newVal) {
+        switch (attrName) {
+          case "disabled":
+            this._updateDisabled();
+            break;
+          case "icon":
+            this._setupIcon();
+            break;
+          case "label":
+            this._setLabel();
+            break;
+          case "value":
+            this._setLabel();
+            break;
+        }
+      }
+    });
+  </script>

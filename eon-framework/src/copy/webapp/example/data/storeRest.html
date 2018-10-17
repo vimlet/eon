@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <!-- Import VimletJS  -->
+  <title>VC-STORE</title>
+  <script src="/vcomet/vcomet.js"></script>
+
+  <!-- UI components -->
+  <script>
+    vcomet.import("/vcomet/data/vc-store/vc-store.html");
+  </script>
+
+  <!-- Example style -->
+  <link rel="stylesheet"
+    href="/example/data/css/style.css">
+  <link rel="stylesheet"
+    href="/example/data/css/store.css">
+
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="card">
+      <h1>REST</h1>
+
+      <div class="row">
+
+        <button onclick="getRemote()">
+          GET
+        </button>
+        <button onclick="createRemote()">
+          CREATE
+        </button>
+        <button onclick="updateRemote()">
+          UPDATE
+        </button>
+        <button onclick="replaceRemote()">
+          REPLACE
+        </button>
+        <button onclick="removeRemote()">
+          REMOVE
+        </button>
+
+      </div>
+      <vc-store id="restStore" type="rest" url="/users">
+      </vc-store>
+      <div class="twoRows">
+        <div class="twoColumns" style="margin-bottom: 6px;">
+
+          <div class="example twoRows">
+            <h4 class="title">REQUEST</h4>
+            <h5 class="title">ID</h5>
+            <input class="subCard input" value="0" style="margin-bottom: 10px;" id="restId" />
+            <h5 class="title">JSON</h5>
+            <textarea class="flexStretch subCard" style="font-family: monospace;" contentEditable="true" id="restJson"></textarea>
+          </div>
+          <div class="example">
+            <h4 class="title">DATA</h4>
+            <pre class="flexStretch" id="restData"></pre>
+          </div>
+
+        </div>
+        <div style="padding: 5px">
+          <div class="example twoRows">
+            <h4 class="title">RESULT</h4>
+            <h5 id="restRequestType" class="subTitle"></h5>
+            <pre id="restResult" class="flexStretch"></pre>
+          </div>
+        </div>
+        <div class="row">
+          <button onclick="listRemote()">
+            LIST
+          </button>
+          <button onclick="filterRemote()">
+            FILTER
+          </button>
+          <button onclick="rangeRemote()">
+            RANGE
+          </button>
+          <button onclick="sortRemote()">
+            SORT
+          </button>
+        </div>
+        <vc-store id="restSecondaryStore" type="rest" url="util/store/data.json">
+        </vc-store>
+        <div class="twoRows">
+          <div class="twoColumns" style="margin-bottom: 6px;">
+
+            <div class="example twoRows">
+              <h4 class="title">REQUEST</h4>
+              <h5 class="title">KEY</h5>
+              <input class="subCard input" style="margin-bottom: 10px;" id="restKeys" />
+              <h5 class="title">DESCENDING</h5>
+              <div class="">
+                <input type="checkbox" class="subCard input" style="margin-bottom: 10px;" id="restDescending" />
+              </div>
+              <h5 class="title">START</h5>
+              <input class="subCard input" style="margin-bottom: 10px;" id="restStart" />
+              <h5 class="title">LIMIT</h5>
+              <input class="subCard input" style="margin-bottom: 10px;" id="restLimit" />
+            </div>
+            <div class="example">
+              <h4 class="title">DATA</h4>
+              <pre class="flexStretch" id="restListData"></pre>
+            </div>
+
+          </div>
+          <div style="padding: 5px">
+            <div class="example twoRows">
+              <h4 class="title">RESULT</h4>
+              <h5 id="restListRequestType" class="subTitle"></h5>
+              <pre id="restListResult" class="flexStretch"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+    /*
+
+     IMPORTANT:
+      - If store data is changed you have to restart the server to reset data
+    
+    */
+    
+      var store = document.querySelector("#restStore")
+      var secndStore = document.querySelector("#restSecondaryStore")
+      var restListData = document.querySelector("#restListData")
+      var restListRequestType = document.querySelector("#restListRequestType")
+      var restListResult = document.querySelector("#restListResult")
+      var restKeys = document.querySelector("#restKeys")
+      var restDescending = document.querySelector("#restDescending")
+      var restStart = document.querySelector("#restStart")
+      var restLimit = document.querySelector("#restLimit")
+
+      var restData = document.querySelector("#restData")
+      var restRequestType = document.querySelector("#restRequestType")
+      var restId = document.querySelector("#restId")
+      var restJson = document.querySelector("#restJson")
+      var restResult = document.querySelector("#restResult")
+
+      store.onCreated(function () {
+        store.onLoaded(function () {
+          store.fetch(function (data) {
+            restData.innerHTML = JSON.stringify(store.data.asArray(), null, 2);
+          });
+          secndStore.listRemote(function (data) {
+            restListData.innerHTML = JSON.stringify(secndStore.data.asArray(), null, 2);
+          });
+        });
+      });
+
+      // -- REST --
+      function getRemote() {
+        var id = !restId.value ? "0" : restId.value;
+        restRequestType.innerHTML = "Get request";
+        store.getRemote(id, function (item) {
+          restResult.innerHTML = JSON.stringify(item, null, 2);
+        });
+      }
+
+      function createRemote() {
+        var item = restJson.value;
+        try {
+          item = JSON.parse(item);
+          restRequestType.innerHTML = "Create request";
+          store.createRemote(item, function () {
+            restResult.innerHTML = JSON.stringify(store.data.asObject(), null, 2);
+          });
+          refreshData(restData, objectToArray(store.data.asObject()));
+        } catch (err) {
+          console.warn("Example warning: Invalid json format")
+        }
+      }
+
+      function updateRemote() {
+        var item = restJson.value;
+        var id = !restId.value ? "0" : restId.value;
+        try {
+          item = JSON.parse(item);
+          restRequestType.innerHTML = "Update request";
+          store.updateRemote(id, item, function () {
+            restResult.innerHTML = JSON.stringify(store.data.asObject(), null, 2);
+          });
+          refreshData(restData, objectToArray(store.data.asObject()));
+        } catch (err) {
+          console.warn("Example warning: Invalid json format")
+        }
+      }
+
+      function replaceRemote() {
+        var item = restJson.value;
+        var id = !restId.value ? "0" : restId.value;
+        try {
+          item = JSON.parse(item);
+          restRequestType.innerHTML = "Replace request";
+          store.replaceRemote(id, item, function () {
+            restResult.innerHTML = JSON.stringify(store.data.asObject(), null, 2);
+          });
+          refreshData(restData, objectToArray(store.data.asObject()));
+        } catch (err) {
+          console.warn("Example warning: Invalid json format")
+        }
+      }
+
+      function removeRemote() {
+        var id = !restId.value ? "0" : restId.value;
+        restRequestType.innerHTML = "Remove request";
+        store.removeRemote(id, function () {
+          restResult.innerHTML = JSON.stringify(store.data.asObject(), null, 2);
+        });
+        refreshData(restData, objectToArray(store.data.asObject()));
+      }
+
+      function listRemote() {
+        var attrb;
+        try {
+          attrb = !restKeys.value ? undefined : eval(restKeys.value);
+        } catch (err) {
+          console.warn("Example warning: Invalid keys array format")
+        }
+        restListRequestType.innerHTML = "List request";
+        store.listRemote(function () {
+          restListResult.innerHTML = JSON.stringify(store.data.asObject(), null, 2);
+        }, attrb);
+      }
+
+      function filterRemote() {
+        var filterObj;
+        try {
+          filterObj = !restKeys.value ? undefined : JSON.parse(restKeys.value);
+        } catch (err) {
+          console.warn("Example warning: Invalid filter keys object format")
+        }
+        restListRequestType.innerHTML = "Filter request";
+        store.filterRemote(filterObj, function () {
+          restListResult.innerHTML = JSON.stringify(store.data.asObject(), null, 2);
+        });
+      }
+
+      function rangeRemote() {
+        var start = restStart.value;
+        var limit = restLimit.value;
+        restListRequestType.innerHTML = "Range request";
+        store.getRangeRemote(start, limit, function () {
+          restListResult.innerHTML = JSON.stringify(store.data.asObject(), null, 2);
+        });
+      }
+
+      function sortRemote() {
+        var key = restKeys.value;
+        var desc = restDescending.checked;
+        restListRequestType.innerHTML = "Sort request";
+        store.sortRemote(key, desc, function () {
+          restListResult.innerHTML = JSON.stringify(store.data.asArray(), null, 2);
+        });
+      }
+
+      function refreshData(el, data) {
+        el.innerHTML = JSON.stringify(data, null, 2);
+      }
+
+      function objectToArray(data) {
+        var object = data.constructor === Object ? data : JSON.parse(data);
+        var array = [];
+        for (var key in object) {
+          array.push(object[key]);
+        }
+        return array;
+      }
+    </script>
+
+  </div>
+
+</body>
+
+</html>
