@@ -86,8 +86,8 @@ document.head.appendChild(eon.style);
 
 // Hides initial elements
 eon.style.sheet.insertRule(".eon-until-rendered { opacity: 0; }", 0);
-// Hide vc-script
-eon.style.sheet.insertRule("vc-script { display: none; }", 0);
+// Hide eon-script
+eon.style.sheet.insertRule("eon-script { display: none; }", 0);
 
 // ############################################################################################
 // RESPONSIVE
@@ -4061,7 +4061,7 @@ eon.interpolation.prepare = function (template) {
   if(!vimlet.meta.sandbox) {
     vimlet.meta.sandbox = {
       "bind": function(s) {
-        this.echo('<vc-variable bind="' + s + '"></vc-variable>');
+        this.echo('<eon-variable bind="' + s + '"></eon-variable>');
       }
     };
   }
@@ -4084,7 +4084,7 @@ eon.interpolation.prepare = function (template) {
 
 // Handles all the initial state of the data and variable elements
 eon.interpolation.handleInterpolationVariables = function (el, config) {
-  var variables = el.template.querySelectorAll("vc-variable");
+  var variables = el.template.querySelectorAll("eon-variable");
   var currentVariable;
   var bindString;
   var bindValue;
@@ -4147,7 +4147,7 @@ eon.interpolation.interpolate = function (el, obj, interpolations, bind) {
 
         // Looks for the variables matching the binding
         interpolations[key] = el.template.querySelectorAll(
-          'vc-variable[bind="' + variableBind + '"]'
+          'eon-variable[bind="' + variableBind + '"]'
         );
 
         // For each variable found previously sets its value
@@ -5236,8 +5236,8 @@ eon.declare = function (name, baseElement) {
                 // Updates the references for the source nodes
                 eon.updateSourceCallbacks(el);
                 
-                // Moves source-template elements to vc-template-clone elements by slot attribute query selector string
-                // Unslotted source-template elements will be appended to vc-clone root
+                // Moves source-template elements to eon-template-clone elements by slot attribute query selector string
+                // Unslotted source-template elements will be appended to eon-clone root
                 // Note dynamic things that should be slotted must be added onCreated
                 eon.slot(el);
 

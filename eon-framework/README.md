@@ -71,7 +71,7 @@ You have to import the components that you wish to use in your head too.
 <head>
     <script>
         eon.import([
-            "eon/ui/vc-button.html"
+            "eon/ui/eon-button.html"
         ]);
     </script>
 </head>
@@ -81,7 +81,7 @@ Now it can be use anywhere in the body as any other html element.
 
 ```html
 <body>
-    <vc-button label="Click Me!"><vc-button>
+    <eon-button label="Click Me!"><eon-button>
 </body>
 ```
 
@@ -89,7 +89,7 @@ To use it programmatically due to its asynchronous nature you need to wait for e
 
 ```javascript
 eon.onReady(function () {
-    document.querySelector("vc-button").label = "Hello World";
+    document.querySelector("eon-button").label = "Hello World";
 });
 ```
 

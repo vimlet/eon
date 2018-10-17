@@ -2,28 +2,28 @@
 
 ## Introduction
 
-The slide element is designed to work inside a [vc-swiper](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSwiper.md) as the main structure item, so appended on any other element will do nothing different from a standard HTML element. 
+The slide element is designed to work inside a [eon-swiper](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSwiper.md) as the main structure item, so appended on any other element will do nothing different from a standard HTML element. 
 
 ## Declarative usage
 
-Declare the vc-slide as any other HTML element:
+Declare the eon-slide as any other HTML element:
 
 ``` [html]
-<vc-swiper>
-  <vc-slide>
+<eon-swiper>
+  <eon-slide>
       <h1> title </h1>
       <div> content </div>
-  </vc-slide>
-</vc-swiper>
+  </eon-slide>
+</eon-swiper>
 ```
 
 ## Programmatic usage
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-slide
-  var slide = document.createElement("vc-slide");
-  var swiper = document.createElement("vc-swiper");
+  // Create eon-slide
+  var slide = document.createElement("eon-slide");
+  var swiper = document.createElement("eon-swiper");
 
   // Create some content
   var content = document.createElement("div");
@@ -39,8 +39,8 @@ eon.ready(function () {
 ### Image gallery slide
 
 ``` [html]
-<vc-swiper type="gallery">
-  <vc-slide image ="remote/source/image.png"></vc-slide>
-  <vc-slide image ="remote/source/image2.png"></vc-slide>
-</vc-swiper>
+<eon-swiper type="gallery">
+  <eon-slide image ="remote/source/image.png"></eon-slide>
+  <eon-slide image ="remote/source/image2.png"></eon-slide>
+</eon-swiper>
 ```

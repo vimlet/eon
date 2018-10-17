@@ -4,7 +4,7 @@
  */
 function machineSearch() {
   // Filter machines listener
-  document.querySelector("vc-searchbar").onSearch(function(filters) {
+  document.querySelector("eon-searchbar").onSearch(function(filters) {
     var name = filters.name;
     var items = document.querySelector(".machineContainer").eonScroll.content
       .children;

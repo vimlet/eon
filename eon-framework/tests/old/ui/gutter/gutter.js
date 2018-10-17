@@ -68,13 +68,13 @@ function checkGutterBuild () {
 }
 
 function createGutter () {
-    var programGutter = document.createElement("vc-gutter");
+    var programGutter = document.createElement("eon-gutter");
     // Create gutter
     programGutter.setAttribute("type", "vertical");
     programGutter.setAttribute("collapsible", true);
     // Declare sections
-    var section = document.createElement("vc-section");
-    var section2 = document.createElement("vc-section");
+    var section = document.createElement("eon-section");
+    var section2 = document.createElement("eon-section");
     // Append some colored divs
     for (var i = 0; i < 4; i++) {
         div = document.createElement("div");

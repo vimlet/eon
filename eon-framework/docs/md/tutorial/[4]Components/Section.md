@@ -2,18 +2,18 @@
 
 ## Introduction
 
-The section element is designed to work inside a [vc-dialog](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FDialog.md) and [vc-gutter](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FGutter.md). 
+The section element is designed to work inside a [eon-dialog](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FDialog.md) and [eon-gutter](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FGutter.md). 
 
 ## Declarative usage
 
-Declare the vc-section as any other HTML element:
+Declare the eon-section as any other HTML element:
 
 ``` [html]
-<vc-gutter>
+<eon-gutter>
     <!-- Sections -->
-    <vc-section> section </vc-section>
-    <vc-section> section </vc-section>
-</vc-gutter>
+    <eon-section> section </eon-section>
+    <eon-section> section </eon-section>
+</eon-gutter>
 ```
 
 ## Programmatic usage
@@ -21,12 +21,12 @@ Declare the vc-section as any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-gutter
-  var gutter = document.createElement("vc-gutter");
+  // Create eon-gutter
+  var gutter = document.createElement("eon-gutter");
 
   // Create some sections
-  var section = document.createElement("vc-section");
-  var section2 = document.createElement("vc-section");
+  var section = document.createElement("eon-section");
+  var section2 = document.createElement("eon-section");
   gutter.appendChild(section);  
   gutter.appendChild(section2);  
 

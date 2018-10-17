@@ -3,42 +3,42 @@
 ## Introduction
 This component is the typical menu that opens when do right click on an element, opening the options that can be done on the element.
 
-To use it import vc-contextmenu in the head of the HTML document:
+To use it import eon-contextmenu in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-contextmenu.html");
+    eon.import("/eon/ui/eon-contextmenu.html");
   </script>
 <head>
 ```
 
 ## Declarative usage
-The vc-contextmenu created declaratively is composed by vc-item to add the different options. The attribute `value` of vc-item is equivalent to the name of the option.
+The eon-contextmenu created declaratively is composed by eon-item to add the different options. The attribute `value` of eon-item is equivalent to the name of the option.
 
-To indicate that an element will have a vc-contextmenu associated with it, the attribute `vc-contextmenu` must be added with the name of vc-contextmenu.
+To indicate that an element will have a eon-contextmenu associated with it, the attribute `eon-contextmenu` must be added with the name of eon-contextmenu.
 
 ``` [html]
-<vc-contextmenu name="myContextmenu">
-  <vc-item value="Copy" icon='<i class="material-icons">content_copy</i>'></vc-item>
-  <vc-item value="Cut" icon='<i class="material-icons">content_cut</i>'></vc-item>
-</vc-contextmenu>
+<eon-contextmenu name="myContextmenu">
+  <eon-item value="Copy" icon='<i class="material-icons">content_copy</i>'></eon-item>
+  <eon-item value="Cut" icon='<i class="material-icons">content_cut</i>'></eon-item>
+</eon-contextmenu>
 
 <!-- Trigger element-->
-<vc-button value="Right click" vc-contextmenu="myContextmenu"></vc-button>
+<eon-button value="Right click" eon-contextmenu="myContextmenu"></eon-button>
 ```
 
 ## Programmatic usage
-To create vc-contextmenu programmatically also uses vc-item to add the options, and it will be added to the vc-contextmenu using.
+To create eon-contextmenu programmatically also uses eon-item to add the options, and it will be added to the eon-contextmenu using.
 
 ``` [javascript]
 eon.onReady(function () {
-  // Create vc-contextmenu
-  var myContextmenu = document.createElement("vc-contextmenu");
-  // Create vc-item
-  var item1 = document.createElement("vc-item");
-  var item2 = document.createElement("vc-item");
+  // Create eon-contextmenu
+  var myContextmenu = document.createElement("eon-contextmenu");
+  // Create eon-item
+  var item1 = document.createElement("eon-item");
+  var item2 = document.createElement("eon-item");
 
-  // Set property and append vc-contextmenu
+  // Set property and append eon-contextmenu
   myContextmenu.name = "myContextmenu";
   document.querySelector("body").appendChild(myContextmenu);
 
@@ -50,28 +50,28 @@ eon.onReady(function () {
   item2.value = "Cut";
   item2.icon = '<i class="material-icons">content_cut</i>';
 
-  // Add items to vc-contextmenu
+  // Add items to eon-contextmenu
   myContextmenu.addItem(item1);
   myContextmenu.addItem(item2);
 });
 ```
 The trigger element:
 ``` [html]
-<vc-button value="Right click" vc-contextmenu="myContextmenu"></vc-button>
+<eon-button value="Right click" eon-contextmenu="myContextmenu"></eon-button>
 ```
 
 ## Examples
 
 ### Changes dynamically 
-Declare the initial vc-contextmenu:
+Declare the initial eon-contextmenu:
 ``` [html]
-<vc-contextmenu id="myContextmenu" name="myContextmenu">
-  <vc-item id="item2" value="Cut" icon='<i class="material-icons">content_cut</i>'></vc-item>
+<eon-contextmenu id="myContextmenu" name="myContextmenu">
+  <eon-item id="item2" value="Cut" icon='<i class="material-icons">content_cut</i>'></eon-item>
   <!-- When do clik to this element some changes will be made-->
-  <vc-item id="item1" value="Copy" icon='<i class="material-icons">content_copy</i>' onclick="updateContent()"></vc-item>
-</vc-contextmenu>
+  <eon-item id="item1" value="Copy" icon='<i class="material-icons">content_copy</i>' onclick="updateContent()"></eon-item>
+</eon-contextmenu>
 
-<vc-button value="Right click" vc-contextmenu="myContextmenu"></vc-button>
+<eon-button value="Right click" eon-contextmenu="myContextmenu"></eon-button>
 ```
 
 Add the dynamic functionality:
@@ -80,8 +80,8 @@ function updateContent() {
   var myContextmenu = document.queryselector("#myConextmenu");
   var item1  = myContextmenu.querySelector("#item1");
   var item2 = myContextmenu.querySelector("#item2");
-  // Create a new vc-item
-  var item3 = document.createElement("vc-item");
+  // Create a new eon-item
+  var item3 = document.createElement("eon-item");
 
   item3.value = "Dynamic";
   item3.icon = '<i class="material-icons">star</i>';

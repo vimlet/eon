@@ -36,7 +36,7 @@ In order to be able to use eon components, first they must be imported, since th
 <title>Page Title</title>
 
 <script>
-  eon.import("eon/ui/vc-button.html");
+  eon.import("eon/ui/eon-button.html");
 </script>
 
 ...
@@ -52,9 +52,9 @@ Although the import function can be called multiple times its recommend to follo
 
 <script>
   eon.import([
-    "eon/ui/vc-button.html", 
-    "eon/ui/vc-dialog.html", 
-    "eon/ui/vc-text.html"
+    "eon/ui/eon-button.html", 
+    "eon/ui/eon-dialog.html", 
+    "eon/ui/eon-text.html"
     ]);
 </script>
 
@@ -69,7 +69,7 @@ To use eon components declaratively simply use their name tag as any other regul
 <body>
 ...
 
-  <vc-button></vc-button>
+  <eon-button></eon-button>
 
 ...
 ```
@@ -82,7 +82,7 @@ The programmatic approach is preferred when eon components need to be added or m
 
 ```[html]
 <script>
-  var button = document.createElement("vc-button");
+  var button = document.createElement("eon-button");
   document.body.appendChild(button);
 </script>
 ```
@@ -91,7 +91,7 @@ Since imports are asynchronous eon components properties and functions are decla
 
 ```[html]
 <script>
-  var button = document.createElement("vc-button");
+  var button = document.createElement("eon-button");
   document.body.appendChild(button);
 
   button.onCreated(function(){
@@ -349,33 +349,33 @@ Many eon elements can act like containers for other elements and some of this el
 Placing things on a specific place might be easy programmatically through JavaScript but things get messy quickly when we try to do the same declaratively.
 Slotting aims to provide a simple solution to place any element inside its eon container through the attribute `slot` and CSS selectors.
 
-For example, imagine we had simple container element named 'vc-container':
+For example, imagine we had simple container element named 'eon-container':
 
 ```[html]
 <template>
-  <div class="vc-container-parent"></div>
+  <div class="eon-container-parent"></div>
 </template>
 
 <script>
-eon.element("vc-container");
+eon.element("eon-container");
 </script>
 ```
 
 Once imported, in order to use it, we could do this:
 
 ```[html]
-<vc-container>
+<eon-container>
   <span>Hello</span>
-</vc-container>
+</eon-container>
 ```
 
-This would display the element vc-container with a direct child span.
-Now lets say we want to place it inside the div with the class vc-container-parent instead. We can do so simply by using the `slot` attribute and a simple css selector.
+This would display the element eon-container with a direct child span.
+Now lets say we want to place it inside the div with the class eon-container-parent instead. We can do so simply by using the `slot` attribute and a simple css selector.
 
 ```[html]
-<vc-container>
-  <span slot=".vc-container-parent">Hello</span>
-</vc-container>
+<eon-container>
+  <span slot=".eon-container-parent">Hello</span>
+</eon-container>
 ```
 
 eon takes care of the element placement so you can stay focus on other important aspects of your application.

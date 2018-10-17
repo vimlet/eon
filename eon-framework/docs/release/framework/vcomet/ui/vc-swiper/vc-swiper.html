@@ -1,8 +1,8 @@
 <script>
-  //@header A container made to swipe vc-slide elements
-  eon.element("vc-swiper", "vc-swiper.css", {
+  //@header A container made to swipe eon-slide elements
+  eon.element("eon-swiper", "eon-swiper.css", {
     dependencies: [
-      "../vc-slide"
+      "../eon-slide"
     ],
     privateProperties: {
       /*
@@ -155,7 +155,7 @@
         el._refs.parent = el.parentNode;
         // Check swiper type
         if(el.type == "gallery"){
-          el.classList.add("vc-swiper-gallery");
+          el.classList.add("eon-swiper-gallery");
         }
         // Set initial displayed slide
         el.initialSlide = !el.initialSlide ? 0 : parseInt(el.initialSlide);
@@ -183,14 +183,14 @@
         el.slides = [];
         // Create swiper wrapper container
         var wrapper = document.createElement("div");
-        wrapper.classList.add("vc-swiper-wrapper");
+        wrapper.classList.add("eon-swiper-wrapper");
         el._refs.wrapper = wrapper;
         // Get axis
         if(el.direction == "horizontal"){
           el._misc.sizeProperty = "offsetWidth";
           el._misc.styleSizeProperty = "width";
         }else{
-          el.classList.add("vc-swiper-vertical");
+          el.classList.add("eon-swiper-vertical");
           el._misc.sizeProperty = "offsetHeight";
           el._misc.styleSizeProperty = "height";
         }
@@ -211,7 +211,7 @@
           el._refs.styleSheet = {};
           // Create swiper pagination container
           var pagination = document.createElement("div");
-          pagination.classList.add("vc-swiper-pagination");
+          pagination.classList.add("eon-swiper-pagination");
           el.pagingNode = pagination;
           // Build gallery pagination container
           el._buildGalleryPagination(pagination);
@@ -229,7 +229,7 @@
           var pagingFragment = document.createDocumentFragment();
           // Create swiper wrapper container
           var pagingWrapper = document.createElement("div");
-          pagingWrapper.classList.add("vc-swiper-paginationWrapper");
+          pagingWrapper.classList.add("eon-swiper-paginationWrapper");
           // Append paging wrapper as the new paging node
           pagingFragment.appendChild(pagingWrapper);
           pagingNode.appendChild(pagingFragment);
@@ -246,7 +246,7 @@
           }else if(el.pagination){
             // Make pagination static
             el.style.flexDirection = el.direction == "horizontal" ? "column": "row";
-            pagingNode.classList.add("vc-swiper-paginationStatic");
+            pagingNode.classList.add("eon-swiper-paginationStatic");
           }
         }
       },
@@ -260,11 +260,11 @@
         if(eon.util.isTrue(el.navigation)){
           // Create navigation next button
           var nextBtn = document.createElement("i");
-          nextBtn.className = " material-icons vc-swiper-navBtn vc-fg1-hoverable vc-bg1-modal2-hoverable vc-swiper-next vc-unselectable"
+          nextBtn.className = " material-icons eon-swiper-navBtn eon-fg1-hoverable eon-bg1-modal2-hoverable eon-swiper-next eon-unselectable"
           nextBtn.innerHTML = el.direction == "horizontal" ? "keyboard_arrow_right" : "keyboard_arrow_down"
           // Create navigation back button
           var backBtn = document.createElement("i");
-          backBtn.className = " material-icons vc-swiper-navBtn vc-fg1-hoverable vc-bg1-modal2-hoverable vc-swiper-back vc-unselectable"
+          backBtn.className = " material-icons eon-swiper-navBtn eon-fg1-hoverable eon-bg1-modal2-hoverable eon-swiper-back eon-unselectable"
           backBtn.innerHTML = el.direction == "horizontal" ? "keyboard_arrow_left" : "keyboard_arrow_up"
           // Get swiper type size properties
           var sizeValue = el.direction == "horizontal"
@@ -315,7 +315,7 @@
           paging.style.transition = el._isTrickyBrowser() ? "none" : "transform .2s";
           // Prevent mouse down functionality on secondary mouse button is clicked
           if(e.button == 0){
-            if(e.target.classList.contains("vc-swiper-thumbnail")){
+            if(e.target.classList.contains("eon-swiper-thumbnail")){
               thumbnailClicked = e.target;
             }
             mousedown = true;
@@ -372,7 +372,7 @@
         // Create pagination hidden control div
         var control = document.createElement("div");
         var fragment = document.createDocumentFragment();
-        control.classList.add("vc-swiper-paginationHideControl");
+        control.classList.add("eon-swiper-paginationHideControl");
         // Get translate property for this swiper direction
         var prop = el.direction == "horizontal" ? "bottom" : "right";
         var hideSizeProp = el._misc.sizeProperty == "offsetWidth" ? "offsetHeight" : "offsetWidth";
@@ -489,8 +489,8 @@
       /*
         @function (private) _createThumbnail
         @description Create and configure a new thumbnail
-        @param {Object} slide [vc-slide element]
-        @param {Object} slideObj [vc-swiper slide object reference ]
+        @param {Object} slide [eon-slide element]
+        @param {Object} slideObj [eon-swiper slide object reference ]
       */
       createThumbnail: function(slide, slideObj){
         var el = this;
@@ -498,7 +498,7 @@
           // Create thumbnail span element
           var thumbnail = document.createElement("span");
           var thumbnailStored = thumbnail;
-          thumbnail.classList.add("vc-swiper-thumbnail", "vc-unselectable", "vc-bg0");
+          thumbnail.classList.add("eon-swiper-thumbnail", "eon-unselectable", "eon-bg0");
           // Add thumbnail node
           var thumbnailFragment = document.createDocumentFragment();
           thumbnailFragment.appendChild(thumbnail);
@@ -541,14 +541,14 @@
           var invertSize = el._getNumProperty(invertSizeProp, thumbnail);
           var size = invertSize + (invertSize / 3);
           // Set up css rule
-          var typeRuleName = el.direction == "vertical" ? ".vc-swiper-vertical": "";
-          var staticRuleName = 'vc-swiper.vc-swiper-gallery'+ typeRuleName + ' .vc-swiper-thumbnail';
-          var clss = staticRuleName + ".vc-swiper-thumbnailSize{" + el._misc.styleSizeProperty + ":" + size + "px;}";
+          var typeRuleName = el.direction == "vertical" ? ".eon-swiper-vertical": "";
+          var staticRuleName = 'eon-swiper.eon-swiper-gallery'+ typeRuleName + ' .eon-swiper-thumbnail';
+          var clss = staticRuleName + ".eon-swiper-thumbnailSize{" + el._misc.styleSizeProperty + ":" + size + "px;}";
           // Insert and save rule
           eon.style.sheet.insertRule(clss, 0);
           el._refs.styleSheet["thumbnail"] = eon.style.sheet.cssRules[0];
         }
-        thumbnail.classList.add("vc-swiper-thumbnailSize");
+        thumbnail.classList.add("eon-swiper-thumbnailSize");
       },
       /*
         @function (private) _updateThumbnailsSize
@@ -598,10 +598,10 @@
         if(target){
           try {
             // Active style
-            target.classList.add("vc-swiper-thumbnailActive");
+            target.classList.add("eon-swiper-thumbnailActive");
           } catch (e) {
             // Active style
-            target.el.classList.add("vc-swiper-thumbnailActive");
+            target.el.classList.add("eon-swiper-thumbnailActive");
             // Get translate position
             var min = target.range[0];
             // Translate paging wrapper to thumbnail centered position
@@ -617,8 +617,8 @@
           var thumbnail = el.thumbnails[i].el || el.thumbnails[i];
           // If thumbnail is active change inactive class
           if(i != el.thumbnails.indexOf(target)
-          && thumbnail.classList.contains("vc-swiper-thumbnailActive")){
-            thumbnail.classList.remove("vc-swiper-thumbnailActive")
+          && thumbnail.classList.contains("eon-swiper-thumbnailActive")){
+            thumbnail.classList.remove("eon-swiper-thumbnailActive")
           }
         }
       },
@@ -660,7 +660,7 @@
         if(el.type == "gallery" && slide.image){
           var path = slide.image;
           // Add swiper image style
-          thumbnail.classList.add("vc-swiper-image");
+          thumbnail.classList.add("eon-swiper-image");
           thumbnail.style.backgroundImage = "url(" + path + ")";
         }
       },
@@ -675,7 +675,7 @@
         // Create slide element
         var slideObj = {};
         var newSlideIndex = el.slides.length;
-        slide.classList.add("vc-swiper-child");
+        slide.classList.add("eon-swiper-child");
         // Store swiper elements object
         slideObj.el = slide;
         // Set slide range values
@@ -763,7 +763,7 @@
         var btn = document.createElement("div");
         var sizeProp = el.direction == "horizontal" ? "offsetWidth" : "offsetHeight";
       
-        btn.className = "material-icons vc-swiper-screenBtn vc-bg2-hoverable-modal vc-fg1-hoverable vc-unselectable"
+        btn.className = "material-icons eon-swiper-screenBtn eon-bg2-hoverable-modal eon-fg1-hoverable eon-unselectable"
         btn.innerHTML = "crop_free";
         // Set screen button initial size
         el._resizeFullScreenHandler(btn);
@@ -782,8 +782,8 @@
       toggleFullScreen: function(){
         var el = this;
         // *WARNING* Be careful, position fixed elements do not work properly inside parent with any form of transform property
-        var activated = el.classList.contains("vc-swiper-fullscreen") ? true : false;
-        el.querySelector(".vc-swiper-screenBtn").style.opacity = 0;
+        var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
+        el.querySelector(".eon-swiper-screenBtn").style.opacity = 0;
         // Remove translate animation
         el._refs.wrapper.style.transition = "none";
         el.pagingNode.style.transition = "none";
@@ -792,7 +792,7 @@
           el._refs.parent.appendChild(el);
           // Wait until swiper is re-appended
           setTimeout(function() {
-            el.classList.remove("vc-swiper-fullscreen");
+            el.classList.remove("eon-swiper-fullscreen");
           }, 30);
         } else {
           el.pagingNode.style.opacity = 0;
@@ -804,7 +804,7 @@
           setTimeout(function() {
             el.style.height = "100%";
             el.pagingNode.style.opacity = 1;
-            el.classList.add("vc-swiper-fullscreen");
+            el.classList.add("eon-swiper-fullscreen");
           }, 30);
         }
         // Restore translate animation
@@ -820,7 +820,7 @@
       resizeFullScreenHandler: function(btn){
         var el = this;
         if (eon.util.isTrue(el.fullScreen)) {
-          btn = !btn ? el.querySelector(".vc-swiper-screenBtn") : btn;
+          btn = !btn ? el.querySelector(".eon-swiper-screenBtn") : btn;
           btn.style.opacity = 0;
           var sizeProp = el.direction == "horizontal" ? "height" : "width";
           var scrBtnSizeProp = sizeProp == "height" ? "offsetWidth" : "offsetHeight";
@@ -962,10 +962,10 @@
         var sibling = !slide ? el.currentSlide.el.nextSibling : slide.el.nextSibling;
         // Get the current swiper element
         if(position == "start"){
-          return (sibling && sibling.tagName === "VC-SLIDE")? false: true;
+          return (sibling && sibling.tagName === "eon-SLIDE")? false: true;
         }else{
           sibling = !slide ? el.currentSlide.el.previousSibling : slide.el.previousSibling;
-          return (sibling && sibling.tagName === "VC-SLIDE") ? false: true;
+          return (sibling && sibling.tagName === "eon-SLIDE") ? false: true;
         }
       },
       /*
@@ -1032,8 +1032,8 @@
         var allow = false;
         // Check slide excluded nodes array
         if(btn == 0 && (sliderNode != el.pagingNode
-          && !sliderNode.classList.contains("vc-swiper-thumbnail")
-          && !sliderNode.classList.contains("vc-swiper-pagination"))){
+          && !sliderNode.classList.contains("eon-swiper-thumbnail")
+          && !sliderNode.classList.contains("eon-swiper-pagination"))){
           allow = true;
           // Loop through nodes excluded from triggering drawer displaying
           for (var i = 0; i < el.excludedSliders.length; i++) {

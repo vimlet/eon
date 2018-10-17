@@ -1,13 +1,13 @@
 # Checkbox
 
 ## Introduction
-The vc-checkbox is a form component very easy to use. It can be used inside a vc-form component or inside an HTML form.
+The eon-checkbox is a form component very easy to use. It can be used inside a eon-form component or inside an HTML form.
 
-To use it import vc-check in the head of the HTML document:
+To use it import eon-check in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-checkbox.html");
+    eon.import("/eon/ui/eon-checkbox.html");
   </script>
 <head>
 ```
@@ -15,21 +15,21 @@ To use it import vc-check in the head of the HTML document:
 
 ## Declarative usage
 ``` [html]
-<vc-checkbox label="Checkbox 1" name="options" value="myCheckbox1"></vc-checkbox>
+<eon-checkbox label="Checkbox 1" name="options" value="myCheckbox1"></eon-checkbox>
 <!-- Initially checkbox checked -->
-<vc-checkbox label="Checkbox 2" name="options" value="myCheckbox2" checked="true"></vc-checkbox>
+<eon-checkbox label="Checkbox 2" name="options" value="myCheckbox2" checked="true"></eon-checkbox>
 <!-- Checkbox disabled -->
-<vc-checkbox label="Checkbox 3" name="options" value="myCheckbox3" disabled="true"></vc-checkbox>
+<eon-checkbox label="Checkbox 3" name="options" value="myCheckbox3" disabled="true"></eon-checkbox>
 ```
 
 
 ## Programmatic usage
 ``` [javascript]
 eon.onReady(function () {
-  // Create vc-checkbox
-  var myCheckbox1 = document.createElement("vc-checkbox");
-  var myCheckbox2 = document.createElement("vc-checkbox");
-  var myCheckbox3 = document.createElement("vc-checkbox");
+  // Create eon-checkbox
+  var myCheckbox1 = document.createElement("eon-checkbox");
+  var myCheckbox2 = document.createElement("eon-checkbox");
+  var myCheckbox3 = document.createElement("eon-checkbox");
 
   // Set properties of myCheckbox1
   myCheckbox1.label = "Checkbox 1";
@@ -48,7 +48,7 @@ eon.onReady(function () {
   myCheckbox3.value = "myCheckbox3";
   myCheckbox3.disabled = "true";
 
-  // Append all vc-checkbox
+  // Append all eon-checkbox
   document.querySelector(".main").appendChild(myCheckbox1);
   document.querySelector(".main").appendChild(myCheckbox2);
   document.querySelector(".main").appendChild(myCheckbox3);
@@ -58,12 +58,12 @@ eon.onReady(function () {
 ## Examples
 
 ### Enable and check dynamically
-In this example one of the vc-checkbox is disabled and other is checked, but after a second the disabled and unchecked checkbox will be enabled and checked.
+In this example one of the eon-checkbox is disabled and other is checked, but after a second the disabled and unchecked checkbox will be enabled and checked.
 ``` [html]
 <!-- Initially checkbox checked -->
-<vc-checkbox label="Checkbox 1" name="options" value="myCheckbox1" checked="true"></vc-checkbox>
+<eon-checkbox label="Checkbox 1" name="options" value="myCheckbox1" checked="true"></eon-checkbox>
 <!-- Initially checkbox disabled -->
-<vc-checkbox id="myCheckbox2" label="Checkbox 2" name="options" value="myCheckbox2" disabled="true"></vc-checkbox>
+<eon-checkbox id="myCheckbox2" label="Checkbox 2" name="options" value="myCheckbox2" disabled="true"></eon-checkbox>
 ```
 
 ``` [javascript]

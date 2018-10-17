@@ -6,13 +6,13 @@ This element is a combination of the well known slider and image gallery compone
 
 ## Declarative usage
 
-Swiper needs the collaboration of another eon element to work correctly, the [vc-slide](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSlide.md) element:
+Swiper needs the collaboration of another eon element to work correctly, the [eon-slide](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSlide.md) element:
 
 ``` [html]
 <head>
   <script>
-    // Imports vc-swiper element and its dependencies (vc-slide)
-    eon.import("/eon/ui/vc-swiper.html");
+    // Imports eon-swiper element and its dependencies (eon-slide)
+    eon.import("/eon/ui/eon-swiper.html");
   </script>
 <head>
 ```
@@ -20,11 +20,11 @@ Swiper needs the collaboration of another eon element to work correctly, the [vc
 Declare swiper the same way you declare any other HTML element:
 
 ``` [html]
-<vc-swiper>
+<eon-swiper>
     <!-- My slides -->
-    <vc-slide> Any content </vc-slide>
-    <vc-slide> Any content </vc-slide>
-</vc-swiper>
+    <eon-slide> Any content </eon-slide>
+    <eon-slide> Any content </eon-slide>
+</eon-swiper>
 ```
 
 ## Programmatic usage
@@ -32,12 +32,12 @@ Declare swiper the same way you declare any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-swiper
-  var swiper = document.createElement("vc-swiper");
+  // Create eon-swiper
+  var swiper = document.createElement("eon-swiper");
 
   // Create some slides
-  var slide1 = document.createElement("vc-slide");
-  var slide2 = document.createElement("vc-slide");
+  var slide1 = document.createElement("eon-slide");
+  var slide2 = document.createElement("eon-slide");
   swiper.appendChild(slide1);  
   swiper.appendChild(slide2);  
 
@@ -51,42 +51,42 @@ eon.ready(function () {
 ### View slider
 
 ``` [html]
-<vc-swiper direction="vertical">
+<eon-swiper direction="vertical">
     <!-- My slides -->
-    <vc-slide> view 1 </vc-slide>
-    <vc-slide> view 2 </vc-slide>
-</vc-swiper>
+    <eon-slide> view 1 </eon-slide>
+    <eon-slide> view 2 </eon-slide>
+</eon-swiper>
 ```
 
 ### Image gallery
 
 ``` [html]
-<vc-swiper type="gallery">
+<eon-swiper type="gallery">
     <!-- My slides -->
-    <vc-slide image="remote/source/image.png"> image 1 </vc-slide>
-    <vc-slide image="remote/source/image2.png"> image 2 </vc-slide>
-</vc-swiper>
+    <eon-slide image="remote/source/image.png"> image 1 </eon-slide>
+    <eon-slide image="remote/source/image2.png"> image 2 </eon-slide>
+</eon-swiper>
 ```
 
 ### Nested swipers
 
 ``` [html]
-<vc-swiper external-slide="true">
+<eon-swiper external-slide="true">
     <!-- Main view -->
-    <vc-slide> 
+    <eon-slide> 
       <h1> Swiper gallery </h1>
       <!-- Gallery -->
-      <vc-swiper id="gallery" type="gallery" direction="vertical">
-        <vc-slide image="remote/source/image.png"> </vc-slide>
-        <vc-slide image="remote/source/image2.png"> </vc-slide>
-      </vc-swiper>
-    </vc-slide>
+      <eon-swiper id="gallery" type="gallery" direction="vertical">
+        <eon-slide image="remote/source/image.png"> </eon-slide>
+        <eon-slide image="remote/source/image2.png"> </eon-slide>
+      </eon-swiper>
+    </eon-slide>
     <!-- Secondary view -->
-    <vc-slide>
+    <eon-slide>
       <div> content </div>
       <div> content 2 </div>
-    </vc-slide>
-</vc-swiper>
+    </eon-slide>
+</eon-swiper>
 ```
 
 ### TODO - Lazy loading

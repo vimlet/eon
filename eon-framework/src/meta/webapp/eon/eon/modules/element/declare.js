@@ -69,8 +69,8 @@ eon.declare = function (name, baseElement) {
                 // Updates the references for the source nodes
                 eon.updateSourceCallbacks(el);
                 
-                // Moves source-template elements to vc-template-clone elements by slot attribute query selector string
-                // Unslotted source-template elements will be appended to vc-clone root
+                // Moves source-template elements to eon-template-clone elements by slot attribute query selector string
+                // Unslotted source-template elements will be appended to eon-clone root
                 // Note dynamic things that should be slotted must be added onCreated
                 eon.slot(el);
 

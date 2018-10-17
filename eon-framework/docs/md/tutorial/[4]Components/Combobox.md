@@ -3,11 +3,11 @@
 ## Introduction
 The combobox element is a component meant for selecting an option between the given ones.
 
-For its use, it is necessary to import `vc-combobox` in the head of the HTML document:
+For its use, it is necessary to import `eon-combobox` in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-combobox.html");
+    eon.import("/eon/ui/eon-combobox.html");
   </script>
 <head>
 ```
@@ -15,11 +15,11 @@ For its use, it is necessary to import `vc-combobox` in the head of the HTML doc
 ## Declarative usage
 
 ``` [html]
-    <vc-combobox name="myCombobox" placeholder="Pick a color">
-        <vc-item value="r" display-value="Red"></vc-item>
-        <vc-item value="p" display-value="Pink"></vc-item>
-        <vc-item value="pu" display-value="Purple"></vc-item>
-    </vc-combobox>
+    <eon-combobox name="myCombobox" placeholder="Pick a color">
+        <eon-item value="r" display-value="Red"></eon-item>
+        <eon-item value="p" display-value="Pink"></eon-item>
+        <eon-item value="pu" display-value="Purple"></eon-item>
+    </eon-combobox>
 ```
 
 ## Programmatic usage
@@ -27,10 +27,10 @@ For its use, it is necessary to import `vc-combobox` in the head of the HTML doc
 ``` [javascript]
     eon.onReady(function () {
 
-            // Create vc-combobox and the items we want
-            var myCombobox = document.createElement("vc-combobox");
-            var item1 = document.createElement('vc-item');
-            var item2 = document.createElement('vc-item');
+            // Create eon-combobox and the items we want
+            var myCombobox = document.createElement("eon-combobox");
+            var item1 = document.createElement('eon-item');
+            var item2 = document.createElement('eon-item');
             
             // Specify its attributes/properties at convenience
             myCombobox.name = "myText";
@@ -57,7 +57,7 @@ For its use, it is necessary to import `vc-combobox` in the head of the HTML doc
 
 ### Working with a remote data source
 
-You might want to create your dropdown and its items based on a data source, this can be done if you include a `vc-store` inside the combobox referencing your data source, for this example we will take our data from our colors.json, that looks like this:
+You might want to create your dropdown and its items based on a data source, this can be done if you include a `eon-store` inside the combobox referencing your data source, for this example we will take our data from our colors.json, that looks like this:
 
 ``` [js]
     [
@@ -76,14 +76,14 @@ You might want to create your dropdown and its items based on a data source, thi
 ]
 ```
 
-Then we create a vc-store referencing our json:
+Then we create a eon-store referencing our json:
 
 
 ``` [html]
-    <vc-combobox name="myCombobox" display-property="colorName" placeholder="Pick a color">
-        <vc-store type="memory" id-property="colorCode" url="colors.json">
-        </vc-store>
-    </vc-combobox>
+    <eon-combobox name="myCombobox" display-property="colorName" placeholder="Pick a color">
+        <eon-store type="memory" id-property="colorCode" url="colors.json">
+        </eon-store>
+    </eon-combobox>
 ```
 
 ### Filtering
@@ -91,9 +91,9 @@ Then we create a vc-store referencing our json:
 Enables the user to type in the input so that the options provided by the dropdown are filtered, this is usefull when there are large amounts of options, like countries for instance.
 
 ``` [html]
-    <vc-combobox name="myCombobox" placeholder="Pick a color" filter="true">
-        <vc-item value="r" display-value="Red"></vc-item>
-        <vc-item value="p" display-value="Pink"></vc-item>
-        <vc-item value="pu" display-value="Purple"></vc-item>
-    </vc-combobox>
+    <eon-combobox name="myCombobox" placeholder="Pick a color" filter="true">
+        <eon-item value="r" display-value="Red"></eon-item>
+        <eon-item value="p" display-value="Pink"></eon-item>
+        <eon-item value="pu" display-value="Purple"></eon-item>
+    </eon-combobox>
 ```

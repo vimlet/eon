@@ -1,34 +1,34 @@
 # Group
 
 ## Introduction
-This form component is meant to contain different vc-radio components. Only one of them will be selectable.
+This form component is meant to contain different eon-radio components. Only one of them will be selectable.
 
-To use it import vc-group in the head of the HTML document:
+To use it import eon-group in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-group.html");
+    eon.import("/eon/ui/eon-group.html");
   </script>
 <head>
 ```
 
 ## Declarative usage
 ``` [html]
-<vc-group name="myGroup">
-  <vc-radio label="Radio 1" value="myRadio1"></vc-radio>
-  <vc-radio label="Radio 2" value="myRadio2"></vc-radio>
-</vc-group>
+<eon-group name="myGroup">
+  <eon-radio label="Radio 1" value="myRadio1"></eon-radio>
+  <eon-radio label="Radio 2" value="myRadio2"></eon-radio>
+</eon-group>
 ```
 
 ## Programmatic usage
 ``` [javascript]
 eon.onReady(function () {
-  // Create vc-group and vc-radio 
-  var myGroup = document.createElement("vc-group");
-  var myRadio1 = document.createElement("vc-radio");
-  var myRadio2 = document.createElement("vc-radio");
+  // Create eon-group and eon-radio 
+  var myGroup = document.createElement("eon-group");
+  var myRadio1 = document.createElement("eon-radio");
+  var myRadio2 = document.createElement("eon-radio");
 
-  // Set property and append vc-group
+  // Set property and append eon-group
   myGroup.name = "myGroup";
   document.querySelector(".example").appendChild(myGroup);
 
@@ -40,7 +40,7 @@ eon.onReady(function () {
   myRadio2.label = "Radio 2";
   myRadio2.value = "myRadio2";
 
-  // Append all vc-checkbox
+  // Append all eon-checkbox
   myGroup.appendChild(myRadio1);
   myGroup.appendChild(myRadio2);
 });

@@ -2,15 +2,15 @@
 In this tutorial we are going to make a simple To-Do List to teach you about some of the most basic components eon offers, and to show you how easy it is getting used to them.
 
 ## Import components
-To create the To-Do List we are going to use 4 components only:  `vc-text`, `vc-button`, `vc-checkbox` and `vc-scroll`. The first thing do is import them into the html file:
+To create the To-Do List we are going to use 4 components only:  `eon-text`, `eon-button`, `eon-checkbox` and `eon-scroll`. The first thing do is import them into the html file:
 
 ```[html]
 <script>
     eon.import([
-        "eon/ui/vc-text.html",
-        "eon/ui/vc-button.html",
-        "eon/ui/vc-checkbox.html",
-        "eon/ui/vc-scroll.html"
+        "eon/ui/eon-text.html",
+        "eon/ui/eon-button.html",
+        "eon/ui/eon-checkbox.html",
+        "eon/ui/eon-scroll.html"
     ]);
 </script>
 ```
@@ -27,18 +27,18 @@ Since we need to import multiple components we are passing an `Array` with their
                 <span class="title">To-Do list</span>
 
                 <!-- Scroll component that will allow us to scroll through our list -->
-                <vc-scroll thickness="5" fillContainer="false">
+                <eon-scroll thickness="5" fillContainer="false">
                     <!-- It will contain the elements to the list that are added. -->
                     <div class="listContainer"></div>
-                </vc-scroll>
+                </eon-scroll>
 
                 <!-- Sending data section container-->
                 <div class="setNewContainer">
                     <!-- Component to input the text we want to add into the list -->
-                    <vc-text class="addItem" name="addItem" type="text" placeholder="New Item"></vc-text>
+                    <eon-text class="addItem" name="addItem" type="text" placeholder="New Item"></eon-text>
                     
                     <!-- Button to add the text to the list. In the onclick we name the function to add the text. -->
-                    <vc-button class="addButton" value="Add" expand="inline" onclick="addItem();"></vc-button>
+                    <eon-button class="addButton" value="Add" expand="inline" onclick="addItem();"></eon-button>
                 </div>
             </div>
     </div>
@@ -52,17 +52,17 @@ If you take a closer look you might find some `attributes` you have never seen b
  ## Dynamic components
  Once the static components are declared, we establish dynamic functionality in order to add the list items.
 
- The button for adding the new item will trigger the `addItem()` function, which will store the vc-text input value and send it to the `setValue()` function.
+ The button for adding the new item will trigger the `addItem()` function, which will store the eon-text input value and send it to the `setValue()` function.
 ``` [javascript]
 function addItem() {
-    var textbox = document.querySelector("vc-text");
+    var textbox = document.querySelector("eon-text");
     var textboxValue = textbox.value;
 
     if (textboxValue != "") {
         // Call function to set the new list item
         setItem(textboxValue);
 
-        // Reestablishes the vc-text value
+        // Reestablishes the eon-text value
         textbox.setValue("");
         textbox.value = "";
     }
@@ -77,11 +77,11 @@ the functionalities are loaded in the document.
 function setItem(newItem) {
     eon.onReady(function () {
         // We create a checkbox that will be the item in the list 
-        var newCheckbox = document.createElement("vc-checkbox");
+        var newCheckbox = document.createElement("eon-checkbox");
         // We add a button to edit the item
-        var newEdit = document.createElement("vc-button");
+        var newEdit = document.createElement("eon-button");
         // We add a button to delete the item from the list
-        var newDelete = document.createElement("vc-button");
+        var newDelete = document.createElement("eon-button");
         // newItemContainer is the node that will be contain the item
         var newItemContainer = document.createElement("div");
         var listContainer = document.querySelector(".listContainer");
@@ -134,8 +134,8 @@ function editItem(item) {
     if (!item.querySelector(".editContainer")) {
         eon.onReady(function () {
             // We create a new input text to sent the new item value
-            var newItemEdit = document.createElement("vc-text");
-            var newSave = document.createElement("vc-button");
+            var newItemEdit = document.createElement("eon-text");
+            var newSave = document.createElement("eon-button");
             // This node will contain the edit view of the item 
             var editContainer = document.createElement("div");
 

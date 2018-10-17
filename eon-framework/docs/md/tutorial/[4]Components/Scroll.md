@@ -3,11 +3,11 @@
 ## Introduction
 This component allows the user to scroll through its content, it has a large variety of options to fit all kind of user needs.
 
-For its use, it is necessary to import vc-scroll in the head of the HTML document:
+For its use, it is necessary to import eon-scroll in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-scroll.html");
+    eon.import("/eon/ui/eon-scroll.html");
   </script>
 <head>
 ```
@@ -15,9 +15,9 @@ For its use, it is necessary to import vc-scroll in the head of the HTML documen
 ## Declarative usage
 
 ``` [html]
-    <vc-scroll>
+    <eon-scroll>
         <div id="myContent"></div>
-    </vc-scroll>
+    </eon-scroll>
 ```
 
 ## Programmatic usage
@@ -25,14 +25,14 @@ For its use, it is necessary to import vc-scroll in the head of the HTML documen
 ``` [javascript]
     eon.onReady(function () {
 
-      // Create vc-scroll element
-      var myScroll = document.createElement("vc-scroll");
+      // Create eon-scroll element
+      var myScroll = document.createElement("eon-scroll");
       // Create the content you want to be scrollable
       var myContent = document.createElement("div");
 
-      // Append your content to the vc-scroll content
+      // Append your content to the eon-scroll content
       myScroll.content.appendChild(myContent);
-      // Append the vc-scroll to the desired container
+      // Append the eon-scroll to the desired container
       document.body.appendChild(myScroll);
 
     });
@@ -46,9 +46,9 @@ By default the scroll will attempt to have the same size as its container , the 
 
 ``` [html]
     <div id="myContainer" class="mySize"> 
-        <vc-scroll>
+        <eon-scroll>
             <div id="myContent"></div>
-        </vc-scroll>
+        </eon-scroll>
     </div>
 ```
 
@@ -57,7 +57,7 @@ By default the scroll will attempt to have the same size as its container , the 
 For the scroll to have a custom size it is recommended (besides of giving the scroll the desired size) to set the "fill-contaner" attribute to "false" to ignore its container. In this example we will also set the vertical scrollbars as static and activate the arrows and rail scrolling.
 
 ``` [html]
-    <vc-scroll class="mySize" fill-container="false" static="vertical" arrow-scrolls="true" rail-scrolls="true">
+    <eon-scroll class="mySize" fill-container="false" static="vertical" arrow-scrolls="true" rail-scrolls="true">
         <div id="myContent"></div>
-    </vc-scroll>
+    </eon-scroll>
 ```

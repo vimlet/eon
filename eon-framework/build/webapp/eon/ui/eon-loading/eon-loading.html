@@ -1,0 +1,69 @@
+
+<template>
+    <div id="eon-loading-content"></div>
+</template>
+
+<script>
+    eon.element("eon-loading", "eon-loading.css", {
+
+        properties: {
+            // @property animation (public) [Animation to show]
+            animation: {
+                value: "dots",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            }
+        },
+
+        functions: {
+            // @function show (public) [Shows animation]
+            show: function () {
+                var el = this;
+                el.setAttribute("style", "display:block;");
+            },
+            // @function hide (public) [Hides animation]
+            hide: function () {
+                var el = this;
+                el.setAttribute("style", "display:none;");
+            }
+        },
+
+        privateFunctions: {
+            // @function setDots (private) [Set up dots animation]
+            setDots: function () {
+                var fragment = document.createDocumentFragment();
+                for (var i = 0; i < 3; i++) {
+                    var dot = document.createElement("div");
+                    dot.classList.add("eon-loading-loading-dots--dot");
+                    fragment.appendChild(dot);
+                }
+                return fragment;
+            }
+        },
+
+        onCreated: function () {},
+
+        onReady: function () {
+            var el = this;
+            el._refs.content = el.querySelector("#eon-loading-content");
+            switch (el.animation) {
+                case "dots":
+                    el._refs.content.appendChild(el._setDots());
+                    break;
+
+                default:
+                    el._refs.content.appendChild(el._setDots());
+                    break;
+            }
+        },
+
+        onRender: function () {}
+
+
+    });
+</script>

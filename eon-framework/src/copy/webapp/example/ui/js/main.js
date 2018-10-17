@@ -40,7 +40,7 @@ function loadContent(id, url) {
       window.innerWidth <= eon.tabletWidth ||
       window.innerWidth <= eon.mobileWidth
     ) {
-      document.querySelector("vc-drawer").close();
+      document.querySelector("eon-drawer").close();
     }
 
     // updateColor(id, colors[id]);
@@ -76,7 +76,7 @@ function hideLoaded() {
 
 // Loading Mask related functions
 function showLoadingMask() {
-  var loadingMask = document.querySelector("vc-loadingmask");
+  var loadingMask = document.querySelector("eon-loadingmask");
 
   loadingMask.onReady(function() {
     loadingMask.showMask();
@@ -84,7 +84,7 @@ function showLoadingMask() {
 }
 
 function hideLoadingMask() {
-  var loadingMask = document.querySelector("vc-loadingmask");
+  var loadingMask = document.querySelector("eon-loadingmask");
 
   loadingMask.onReady(function() {
     loadingMask.hideMask();

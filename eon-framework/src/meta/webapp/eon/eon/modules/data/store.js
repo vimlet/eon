@@ -29,7 +29,7 @@ eon.store = function () {
     */
     function importAdapter() {
         // Import vpa memory adapter
-        eon.vpa.use(eon.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
+        eon.vpa.use(eon.basePath + "/data/eon-newstore/adapters/MemoryAdapter.js", function (adapter) {
             // Clone adapter functions
             cloneFunctions(adapter());
             //

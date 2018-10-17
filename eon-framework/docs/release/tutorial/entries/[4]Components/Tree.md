@@ -6,24 +6,24 @@ The eon tree element is the best ally to represent hierarchical data, it is base
 
 ## Declarative usage 
 
-The tree element functionality depends on the [vc-treenode](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FTreenode.md) element as structural element, so it is imported while vc-tree does.
+The tree element functionality depends on the [eon-treenode](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FTreenode.md) element as structural element, so it is imported while eon-tree does.
 
 ``` [html]
 <head>
   <script>
-    // Imports vc-swiper element and its dependencies (vc-treenode)
-    eon.import("/eon/ui/vc-tree.html");
+    // Imports eon-swiper element and its dependencies (eon-treenode)
+    eon.import("/eon/ui/eon-tree.html");
   </script>
 <head>
 ```
 Declare tree the same way you declare any other HTML element:
 
 ``` [html]
-<vc-tree>
+<eon-tree>
     <!-- Tree nodes -->
-    <vc-treenode> node </vc-treenode>
-    <vc-treenode> node </vc-treenode>
-</vc-tree>
+    <eon-treenode> node </eon-treenode>
+    <eon-treenode> node </eon-treenode>
+</eon-tree>
 ```
 
 ## Programmatic usage
@@ -31,12 +31,12 @@ Declare tree the same way you declare any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-tree
-  var tree = document.createElement("vc-tree");
+  // Create eon-tree
+  var tree = document.createElement("eon-tree");
 
   // Create some nodes
-  var treenode = document.createElement("vc-treenode");
-  var treenode2 = document.createElement("vc-treenode");
+  var treenode = document.createElement("eon-treenode");
+  var treenode2 = document.createElement("eon-treenode");
   tree.appendChild(treenode);
   tree.appendChild(treenode2);
 
@@ -50,12 +50,12 @@ eon.ready(function () {
 
 ### Store based tree
 
-The tree element can be connected to a [vc-store](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FStore.md) to be built with remote data:
+The tree element can be connected to a [eon-store](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FStore.md) to be built with remote data:
 
 ``` [html]
-<vc-tree>
-    <vc-store url="remote/source/treeData.json"></vc-store>
-</vc-tree>
+<eon-tree>
+    <eon-store url="remote/source/treeData.json"></eon-store>
+</eon-tree>
 ```
 
 It does not need any other configuration to work and whenever a change is made on the tree it is reflected on the store data in a invisible way for the user.

@@ -1,23 +1,23 @@
 <style>
-    vc-doc-table {
+    eon-doc-table {
         display: flex;
         flex-direction: column;
     }
 
-    #vc-doc-table-content {
+    #eon-doc-table-content {
         display: flex;
         flex-direction: row;
         height: auto;
         border-left: 1px solid #c7c7c7;
     }
 
-    .vc-doc-table-column {
+    .eon-doc-table-column {
         height: auto;
         position: relative;
         min-width: 100px;
     }
 
-    .vc-doc-table-resizer {
+    .eon-doc-table-resizer {
         width: 15px;
         height: 100%;
         cursor: col-resize;
@@ -27,7 +27,7 @@
         z-index: 100;
     }
 
-    .vc-doc-table-title {
+    .eon-doc-table-title {
         background-color: #c7c7c7;
         position: relative;
         text-align: center;
@@ -35,7 +35,7 @@
         color: #6b6b6b;
     }
 
-    .vc-doc-table-cell {
+    .eon-doc-table-cell {
         padding: 5px;
         border-right: 1px solid #c7c7c7;
         border-bottom: 1px solid #c7c7c7;
@@ -43,7 +43,7 @@
         word-wrap: break-word;
     }
 
-    .vc-doc-table-cell-clickable {
+    .eon-doc-table-cell-clickable {
         color: #0c34ce;
         cursor: pointer;
     }
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-    eon.element("vc-doc-table", null, {
+    eon.element("eon-doc-table", null, {
 
         privateProperties: {
             refs: { // References for quick access
@@ -102,7 +102,7 @@
                 var cRow = [];
                 for (var columnI = 0; columnI < row.data.length; columnI++) {
                     var cell = document.createElement("div");
-                    cell.classList.add("vc-doc-table-cell");
+                    cell.classList.add("eon-doc-table-cell");
                     var rowIndex = "row-" + el._misc.rowCount;
                     cell.classList.add(rowIndex);
                     if (row.id && columnI === 0) {
@@ -110,13 +110,13 @@
                     }
                     cell.innerHTML = row.data[columnI].value;
                     if (row.data[columnI].onclick) {
-                        cell.classList.add("vc-doc-table-cell-clickable");
+                        cell.classList.add("eon-doc-table-cell-clickable");
                         cell.setAttribute("onclick", row.data[columnI].onclick);
                     }
                     if (row.data[columnI].color) {
                         cell.style.color = row.data[columnI].color;
                     }
-                    var columnIndex = "vc-doc-table-column-" + columnI;
+                    var columnIndex = "eon-doc-table-column-" + columnI;
                     this._refs.table.querySelector("." + columnIndex).appendChild(cell);
                     cRow.push(cell);
                 }
@@ -127,7 +127,7 @@
             // @function cleanTable (public) [Remove all table cells but keep headers]
             cleanTable: function () { 
                 var el = this;
-                var cells = this._refs.table.querySelectorAll(".vc-doc-table-cell");
+                var cells = this._refs.table.querySelectorAll(".eon-doc-table-cell");
                 cells.forEach(function (cell) {
                     cell.parentElement.removeChild(cell);
                 });
@@ -190,7 +190,7 @@
             },
             // @function setupQuickAccess (private) 
             setupQuickAccess: function () {
-                this._refs.table = this.querySelector("#vc-doc-table-content");
+                this._refs.table = this.querySelector("#eon-doc-table-content");
             },
             // @function setColumns (private) 
             setColumns: function () { // Set columns with their drawers
@@ -198,14 +198,14 @@
                 el._columns = []; 
                 for (var titleI = 0; titleI < this.headTitles.length; titleI++) {
                     var column = document.createElement("div");
-                    column.classList.add("vc-doc-table-column");
-                    var columnIndex = "vc-doc-table-column-" + titleI;
+                    column.classList.add("eon-doc-table-column");
+                    var columnIndex = "eon-doc-table-column-" + titleI;
                     column.classList.add(columnIndex);
                     column.setAttribute("columnId", titleI);
                     column.setAttribute("style", "width:" + el._misc.columnInitialWidth[titleI]);
                     if (titleI < this.headTitles.length - 1) {
                         var resizer = document.createElement("div");
-                        resizer.classList.add("vc-doc-table-resizer");
+                        resizer.classList.add("eon-doc-table-resizer");
                         resizer.setAttribute("draggable", true);
                         resizer.addEventListener("mousedown", function (e) {
                             el._resize.columnDiv = this.parentElement;
@@ -230,9 +230,9 @@
             setHeader: function () {
                 for (var titleI = 0; titleI < this.headTitles.length; titleI++) {
                     var title = document.createElement("div");
-                    title.classList.add("vc-doc-table-title");
+                    title.classList.add("eon-doc-table-title");
                     title.innerHTML = this.headTitles[titleI];
-                    var columnIndex = "vc-doc-table-column-" + titleI;
+                    var columnIndex = "eon-doc-table-column-" + titleI;
                     this._refs.table.querySelector("." + columnIndex).appendChild(title);
                 }
                 this._setData();
@@ -304,14 +304,14 @@
         },
 
         onRender: function () {
-            // Check if there are any vc-row inside the table, keep them as data and remove them
+            // Check if there are any eon-row inside the table, keep them as data and remove them
             var el = this;
-            var rows = this.querySelectorAll("vc-row");
+            var rows = this.querySelectorAll("eon-row");
 
             el._rowsData = [];
 
             rows.forEach(function (row) {
-                var columns = row.querySelectorAll("vc-cell");
+                var columns = row.querySelectorAll("eon-cell");
                 var columnData = {};
                 if (row.id) {
                     columnData.id = row.id;
@@ -328,7 +328,7 @@
             // Empty table and generate table parent div
             this.innerHTML = "";
             var table = document.createElement("div");
-            table.id = "vc-doc-table-content";
+            table.id = "eon-doc-table-content";
             this.appendChild(table);
                 setTimeout(function () {
                 eon.triggerCallback("ondrawn", el, el, [el]);

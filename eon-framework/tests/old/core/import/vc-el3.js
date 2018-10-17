@@ -1,5 +1,5 @@
-eon.element("vc-el3", "vc-el3.css", {
+eon.element("eon-el3", "eon-el3.css", {
     dependencies: [
-        "vc-el4.html"
+        "eon-el4.html"
     ]
 });

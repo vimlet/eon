@@ -9,17 +9,17 @@ function setUpSearch(selector) {
 function loadeonExamples() {
     var anchor, activePanel, groupId;
     // Configure tree
-    var treeScroll = refs.tree.querySelector("vc-scroll");
+    var treeScroll = refs.tree.querySelector("eon-scroll");
     treeScroll.thickness = "10";
 
     // Load eon element example
     refs.tree.onNodeSelected(function (node) {
         // Go to group file
-        groupId = node._refs.parentNode.tagName == "VC-TREENODE" ? node._refs.parentNode.id : node.id;
+        groupId = node._refs.parentNode.tagName == "eon-TREENODE" ? node._refs.parentNode.id : node.id;
         refs.view.swapToPanel(groupId);
         // Get active panel
         activePanel = refs.view.getActivePanel();
-        var panelScroll = activePanel.$1("vc-scroll");
+        var panelScroll = activePanel.$1("eon-scroll");
         // Get node related anchor
         anchor = activePanel.querySelector("[state=" + node.id + "]");
         if (anchor) {
@@ -41,7 +41,7 @@ function toggleMenu(forceAction) {
 }
 
 function initializePlayground(sectionsClass, pgClass) {
-    // PROBABLY NECESSARY DUE TO VC-PANEL SCRIPTS MANAGEMENT (to be removed...)
+    // PROBABLY NECESSARY DUE TO eon-PANEL SCRIPTS MANAGEMENT (to be removed...)
     setTimeout(function () {
         // Initialize playground
         var sections = document.querySelector(sectionsClass).content.children;

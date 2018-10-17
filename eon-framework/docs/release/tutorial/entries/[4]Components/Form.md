@@ -3,61 +3,61 @@
 ## Introduction
 This component deals with the data management of the different form elements.
 
-To use it import vc-form in the head of the HTML document:
+To use it import eon-form in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-form.html");
+    eon.import("/eon/ui/eon-form.html");
   </script>
 <head>
 ```
 
 ## Declarative usage
-Create a vc-form declaratively is as simple as creating a native HTML form.
+Create a eon-form declaratively is as simple as creating a native HTML form.
 
 ``` [html]
-<vc-form action="#" method="get">
-  <vc-text name="userName" type="text" placeholder="Name" label="User name"></vc-text>
-  <vc-checkbox label="Checkbox" name="checkbox" value="test"></vc-checkbox>
-  <vc-button type="submit" value="Submit" > </vc-button>
-</vc-form>
+<eon-form action="#" method="get">
+  <eon-text name="userName" type="text" placeholder="Name" label="User name"></eon-text>
+  <eon-checkbox label="Checkbox" name="checkbox" value="test"></eon-checkbox>
+  <eon-button type="submit" value="Submit" > </eon-button>
+</eon-form>
 ```
 
-It is also possible to use native HTML with vc-form:
+It is also possible to use native HTML with eon-form:
 ``` [html]
-<vc-form action="#" method="get">
+<eon-form action="#" method="get">
   <input type="text" name="textboxHtml">
   <input type="checkbox" value="test" name="checkboxHtml">Test
   <button type="submit">Submit</button>
-</vc-form>
+</eon-form>
 ```
 
 ## Programmatic usage
-Create a vc-form programmatically is also very simple.
-To send the data vc-form uses `submitForm()` method.
+Create a eon-form programmatically is also very simple.
+To send the data eon-form uses `submitForm()` method.
 
 ``` [javascript]
 eon.onReady(function () {
-  var myForm = document.createElement("vc-form");
-  var myCheckbox = document.createElement("vc-checkbox");
-  var myButton = document.createElement("vc-button");
+  var myForm = document.createElement("eon-form");
+  var myCheckbox = document.createElement("eon-checkbox");
+  var myButton = document.createElement("eon-button");
 
-  // Set properties of vc-form
+  // Set properties of eon-form
   myForm.action = "#";
   myForm.method = "get";
 
-  // Set properties of vc-checkbox
+  // Set properties of eon-checkbox
   myCheckbox.label = "Checkbox";
   myCheckbox.name = "checkbox";
   myCheckbox.value = "test";
 
-  // Set properties of vc-buttom
+  // Set properties of eon-buttom
   myButton.value = "Submit";
   myButton.type = "submit";
 
-  // Append vc-form where necessary
+  // Append eon-form where necessary
   document.querySelector(".main").appendChild(myForm);
-  // Append form components into vc-form
+  // Append form components into eon-form
   myForm.appendChild(myCheckbox);
   myForm.appendChild(myButton);
 });

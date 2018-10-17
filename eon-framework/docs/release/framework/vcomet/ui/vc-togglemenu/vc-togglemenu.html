@@ -1,21 +1,21 @@
 <template>
 
-    <div class="vc-togglemenu-button vc-sect1 vc-bg1-border vc-bg1-hoverable vc-unselectable">
-        <div class="vc-togglemenu-title"></div>
-        <i class="vc-togglemenu-arrow vicon vicon-chevron-down"></i>
+    <div class="eon-togglemenu-button eon-sect1 eon-bg1-border eon-bg1-hoverable eon-unselectable">
+        <div class="eon-togglemenu-title"></div>
+        <i class="eon-togglemenu-arrow vicon vicon-chevron-down"></i>
     </div>
 
-    <div class="vc-togglemenu-content vc-bg1-border vc-bg1 vc-unselectable">
-        <vc-scroll arrowScrolls="true"></vc-scroll>
+    <div class="eon-togglemenu-content eon-bg1-border eon-bg1 eon-unselectable">
+        <eon-scroll arrowScrolls="true"></eon-scroll>
     </div>
 
 </template>
 
 <script type="text/javascript">
-    eon.element("vc-togglemenu", "vc-togglemenu.css", {
+    eon.element("eon-togglemenu", "eon-togglemenu.css", {
         dependencies: [
-            "../vc-item",
-            "../vc-scroll"
+            "../eon-item",
+            "../eon-scroll"
         ],
 
         properties: {
@@ -75,7 +75,7 @@
               @param {String} newVal [new togglemenu button text value]
             */
             setHeading: function (newVal) {
-                var title = this.querySelector(".vc-togglemenu-title");
+                var title = this.querySelector(".eon-togglemenu-title");
                 title.innerHTML = newVal;
                 this.heading = newVal;
                 eon.triggerCallback("onChange", this);
@@ -87,7 +87,7 @@
             */
             addItem: function (item) {
                 (item.value) ? this._setupSpan(item) : null;
-                item.classList.add("vc-togglemenu-item");
+                item.classList.add("eon-togglemenu-item");
                 this._content.eonScroll.content.appendChild(item);
             },
             /*
@@ -105,11 +105,11 @@
               @param {Object} oldItem [Node to be replaced]
              */
             replaceItem: function (newItem, oldItem) {
-                if (newItem.value && !newItem.querySelector(".vc-togglemenu-itemSpan")) {
+                if (newItem.value && !newItem.querySelector(".eon-togglemenu-itemSpan")) {
                     this._setupSpan(newItem);
                 }
 
-                newItem.classList.add("vc-togglemenu-item");
+                newItem.classList.add("eon-togglemenu-item");
                 this._content.eonScroll.content.replaceChild(newItem, oldItem);
             }
         },
@@ -128,7 +128,7 @@
 
                 while (sourceNodes.length) {
                     item = sourceNodes.shift();
-                    item.classList.add("vc-togglemenu-item");
+                    item.classList.add("eon-togglemenu-item");
                     (item.value) ? this._setupSpan(item) : null;
                     itemsDocFragment.appendChild(item);
                 }
@@ -146,7 +146,7 @@
             setupSpan: function (item) {
                 var itemSpan = document.createElement("span");
                 itemSpan.innerHTML = item.value;
-                itemSpan.classList.add("vc-togglemenu-itemSpan");
+                itemSpan.classList.add("eon-togglemenu-itemSpan");
                 item.appendChild(itemSpan);
             },
 
@@ -219,8 +219,8 @@
                     el.autoAdjustHeight = true;
 
                 } else {
-                    el._content.classList.remove("vc-togglemenu-display");
-                    el._button.classList.remove("vc-togglemenu-buttonActive");
+                    el._content.classList.remove("eon-togglemenu-display");
+                    el._button.classList.remove("eon-togglemenu-buttonActive");
                     el.autoAdjustHeight = false;
                     el._content.style.height = 0;
                 }
@@ -233,25 +233,25 @@
             */
             displayTogglemenu: function () {
                 var el = this;
-                var icon = this.querySelector(".vc-togglemenu-arrow");
+                var icon = this.querySelector(".eon-togglemenu-arrow");
 
-                el._content.classList.add("vc-togglemenu-transition");
+                el._content.classList.add("eon-togglemenu-transition");
 
-                if (el._content.classList.contains("vc-togglemenu-display")) {
+                if (el._content.classList.contains("eon-togglemenu-display")) {
                     el._firstUndisplay = (el._firstUndisplay == "false") ? "true" : el._firstUndisplay;
                     el._content.style.height = (el._firstUndisplay == "false") ? this._content.offsetHeight + "px" : null;
                     el._content.style.height = 0;
-                    el._button.classList.add("vc-bg1-hoverable");
-                    el._content.classList.remove("vc-togglemenu-display");
-                    el._button.classList.remove("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
+                    el._button.classList.add("eon-bg1-hoverable");
+                    el._content.classList.remove("eon-togglemenu-display");
+                    el._button.classList.remove("eon-togglemenu-buttonActive", "eon-sect1-hoverable");
                     eon.triggerCallback("onUndisplay", this);
                     el.autoAdjustHeight = false;
                     el._content.style.height = 0;
 
                 } else {
-                    el._content.classList.add("vc-togglemenu-display");
-                    el._button.classList.remove("vc-bg1-hoverable");
-                    el._button.classList.add("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
+                    el._content.classList.add("eon-togglemenu-display");
+                    el._button.classList.remove("eon-bg1-hoverable");
+                    el._button.classList.add("eon-togglemenu-buttonActive", "eon-sect1-hoverable");
                     eon.triggerCallback("onDisplay", this);
                     el._setDisplayHeight();
 
@@ -261,9 +261,9 @@
 
         onCreated: function () {
             var el = this;
-            el._button = el.template.querySelector(".vc-togglemenu-button");
-            el._title = el.template.querySelector(".vc-togglemenu-title");
-            el._content = el.template.querySelector(".vc-togglemenu-content");
+            el._button = el.template.querySelector(".eon-togglemenu-button");
+            el._title = el.template.querySelector(".eon-togglemenu-title");
+            el._content = el.template.querySelector(".eon-togglemenu-content");
 
             eon.createCallback("onChange", this);
             eon.createCallback("onDisplay", this);
@@ -300,10 +300,10 @@
         },
 
         onWindowResize: function (event) {
-            this._content.classList.remove("vc-togglemenu-transition");
+            this._content.classList.remove("eon-togglemenu-transition");
             this._setMeasurements();
 
-            if (this._content.classList.contains("vc-togglemenu-display")) {
+            if (this._content.classList.contains("eon-togglemenu-display")) {
                 this._setDisplayHeight();
             }
         },

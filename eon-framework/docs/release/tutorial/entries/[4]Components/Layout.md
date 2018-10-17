@@ -2,27 +2,27 @@
 
 ## Introduction
 
-The vc-layout element works as a CSS 'flex' wrapper providing an easy way of displaying visual elements.
+The eon-layout element works as a CSS 'flex' wrapper providing an easy way of displaying visual elements.
 
 ## Declarative usage
 
-As well as the items inside a flex container includes style properties for adjusting their position themselves, the layout element works with the [vc-item](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FItem.md) element which includes similar positioning properties.
+As well as the items inside a flex container includes style properties for adjusting their position themselves, the layout element works with the [eon-item](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FItem.md) element which includes similar positioning properties.
 
 ``` [html]
 <head>
   <script>
-    // Imports vc-layout element and its dependencies (vc-item)
-    eon.import("/eon/ui/vc-layout.html");
+    // Imports eon-layout element and its dependencies (eon-item)
+    eon.import("/eon/ui/eon-layout.html");
   </script>
 <head>
 ```
 Declare layout as any other HTML element:
 
 ``` [html]
-<vc-layout>
-  <vc-item></vc-item>
-  <vc-item></vc-item>
-</vc-layout>
+<eon-layout>
+  <eon-item></eon-item>
+  <eon-item></eon-item>
+</eon-layout>
 ```
 
 ## Programmatic usage
@@ -30,12 +30,12 @@ Declare layout as any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-layout
-  var layout = document.createElement("vc-layout");
+  // Create eon-layout
+  var layout = document.createElement("eon-layout");
 
   // Create some items
-  var item = document.createElement("vc-item");
-  var item2 = document.createElement("vc-item");
+  var item = document.createElement("eon-item");
+  var item2 = document.createElement("eon-item");
   layout.appendChild(item);  
   layout.appendChild(item2);  
 

@@ -4,10 +4,10 @@ function addElement() {
   var el;
 
   if (swap) {
-    el = document.createElement("vc-test1");
+    el = document.createElement("eon-test1");
     swap = false;
   } else {
-    el = document.createElement("vc-test2");
+    el = document.createElement("eon-test2");
     swap = true;
   }
 
@@ -18,16 +18,16 @@ function addNestedElement() {
   var el, child;
 
   if (swap) {
-    el = document.createElement("vc-test1");
-    child = document.createElement("vc-test2");
-    child2 = document.createElement("vc-test3");
+    el = document.createElement("eon-test1");
+    child = document.createElement("eon-test2");
+    child2 = document.createElement("eon-test3");
     child.appendChild(child2);
 
     swap = false;
   } else {
-    el = document.createElement("vc-test2");
-    child = document.createElement("vc-test1");
-    child2 = document.createElement("vc-test3");
+    el = document.createElement("eon-test2");
+    child = document.createElement("eon-test1");
+    child2 = document.createElement("eon-test3");
     child.appendChild(child2);
 
     swap = true;
@@ -63,7 +63,7 @@ function moveElement() {
 }
 
 function changeObservedProperty() {
-  var el = document.querySelector("#observedExample vc-test1");
+  var el = document.querySelector("#observedExample eon-test1");
 
   el.onPropertyChanged(function(key, oldVal, newVal) {
     console.log("Property: " + [key, oldVal, newVal]);
@@ -79,7 +79,7 @@ function changeObservedProperty() {
 }
 
 function changeReflectProperty() {
-  var el = document.querySelector("#reflectExample vc-test1");
+  var el = document.querySelector("#reflectExample eon-test1");
 
   el.onPropertyChanged(function(key, oldVal, newVal) {
     console.log("Property: " + [key, oldVal, newVal]);
@@ -95,7 +95,7 @@ function changeReflectProperty() {
 }
 
 function changeReflectAttribute() {
-  var el = document.querySelector("#reflectExample vc-test1");
+  var el = document.querySelector("#reflectExample eon-test1");
 
   console.dir(el);
 

@@ -3,60 +3,60 @@ eon.tests = eon.tests || {};
 eon.tests.core = eon.tests.core || {
     importsExpected: [
         {
-            "name": "vc-el1",
+            "name": "eon-el1",
             "dependencies": []
         },
         {
-            "name": "vc-el2",
+            "name": "eon-el2",
             "dependencies": [
-                "vc-el3",
-                "vc-el1"
+                "eon-el3",
+                "eon-el1"
             ]
         },
         {
-            "name": "vc-el3",
+            "name": "eon-el3",
             "dependencies": [
-                "vc-el4"
+                "eon-el4"
             ]
         },
         {
-            "name": "vc-el4",
+            "name": "eon-el4",
             "dependencies": []
         }
     ],
 
     importsTemplatesExpected: [
         {
-            "name": "vc-el1",
+            "name": "eon-el1",
             "template": ""
         },
         {
-            "name": "vc-el2",
-            "template": "<div class=\"vc-el2-div\"></div>"
+            "name": "eon-el2",
+            "template": "<div class=\"eon-el2-div\"></div>"
         },
         {
-            "name": "vc-el3",
-            "template": "<div class=\"vc-el3-div\"></div>"
+            "name": "eon-el3",
+            "template": "<div class=\"eon-el3-div\"></div>"
         },
         {
-            "name": "vc-el4"
+            "name": "eon-el4"
         }
     ],
     importsStylesExpected: [
         {
-            "name": "vc-el1",
+            "name": "eon-el1",
             "height": 6
         },
         {
-            "name": "vc-el2",
+            "name": "eon-el2",
             "height": 4
         },
         {
-            "name": "vc-el3",
+            "name": "eon-el3",
             "height": 3
         },
         {
-            "name": "vc-el4",
+            "name": "eon-el4",
             "height": 1
         }
     ]

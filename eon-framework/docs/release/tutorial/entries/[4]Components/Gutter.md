@@ -6,13 +6,13 @@ The gutter element is a container with the ability to separate its content in tw
 
 ## Declarative usage 
 
-Gutter use the [vc-section](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSection.md) element to represent its content sections:
+Gutter use the [eon-section](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSection.md) element to represent its content sections:
 
 ``` [html]
 <head>
   <script>
-    // Imports vc-gutter element and its dependencies (vc-section)
-    eon.import("/eon/ui/vc-gutter.html");
+    // Imports eon-gutter element and its dependencies (eon-section)
+    eon.import("/eon/ui/eon-gutter.html");
   </script>
 <head>
 ```
@@ -20,11 +20,11 @@ Gutter use the [vc-section](/vimlet/VimletComet/master/docs/release/index.html#!
 Declare gutter the same way you declare any other HTML element:
 
 ``` [html]
-<vc-gutter>
+<eon-gutter>
     <!-- Sections -->
-    <vc-section> section </vc-section>
-    <vc-section> section </vc-section>
-</vc-gutter>
+    <eon-section> section </eon-section>
+    <eon-section> section </eon-section>
+</eon-gutter>
 ```
 
 ## Programmatic usage
@@ -32,12 +32,12 @@ Declare gutter the same way you declare any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-gutter
-  var gutter = document.createElement("vc-gutter");
+  // Create eon-gutter
+  var gutter = document.createElement("eon-gutter");
 
   // Create some sections
-  var section = document.createElement("vc-section");
-  var section2 = document.createElement("vc-section");
+  var section = document.createElement("eon-section");
+  var section2 = document.createElement("eon-section");
   gutter.appendChild(section);  
   gutter.appendChild(section2);  
 
@@ -52,16 +52,16 @@ eon.ready(function () {
 
 ``` [html]
 <!-- Horizontal gutter -->
-<vc-gutter collapsible="true" splitterSize="10">
-    <vc-section>
+<eon-gutter collapsible="true" splitterSize="10">
+    <eon-section>
         <div> content </div>
         <div> content </div>
-    </vc-section>
-    <vc-section>
+    </eon-section>
+    <eon-section>
         <div> content 2</div>
         <div> content 2</div>
-    </vc-section>
-</vc-gutter>
+    </eon-section>
+</eon-gutter>
 ```
 Gutter sections can be collapsible for a dynamic and flexible behaviour. On the contrary, the gutter provides other properties like `allowDrag` to build a static content layout. 
 
@@ -69,23 +69,23 @@ Gutter sections can be collapsible for a dynamic and flexible behaviour. On the 
 
 ``` [html]
 <!-- Horizontal gutter -->
-<vc-gutter collapsible="true">
-    <vc-section>
+<eon-gutter collapsible="true">
+    <eon-section>
         <!-- Vertical gutter -->
-        <vc-gutter type="vertical">
-            <vc-section>
+        <eon-gutter type="vertical">
+            <eon-section>
                 <div> content </div>
-            </vc-section>
-            <vc-section>
+            </eon-section>
+            <eon-section>
                 <div> content 2</div>
-            </vc-section>
-        </vc-gutter>
-    </vc-section>
-    <vc-section>
+            </eon-section>
+        </eon-gutter>
+    </eon-section>
+    <eon-section>
         <div> content 3</div>
         <div> content 3</div>
-    </vc-section>
-</vc-gutter>
+    </eon-section>
+</eon-gutter>
 ```
 
-Nothing prevents you from declaring nested vc-gutter elements without losing customization.
+Nothing prevents you from declaring nested eon-gutter elements without losing customization.

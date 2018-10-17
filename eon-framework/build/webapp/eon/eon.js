@@ -86,8 +86,8 @@ document.head.appendChild(eon.style);
 
 // Hides initial elements
 eon.style.sheet.insertRule(".eon-until-rendered { opacity: 0; }", 0);
-// Hide vc-script
-eon.style.sheet.insertRule("vc-script { display: none; }", 0);
+// Hide eon-script
+eon.style.sheet.insertRule("eon-script { display: none; }", 0);
 
 // ############################################################################################
 // RESPONSIVE
@@ -3991,7 +3991,7 @@ eon.interpolation.prepare = function (template) {
   if(!vimlet.meta.sandbox) {
     vimlet.meta.sandbox = {
       "bind": function(s) {
-        this.echo('<vc-variable bind="' + s + '"></vc-variable>');
+        this.echo('<eon-variable bind="' + s + '"></eon-variable>');
       }
     };
   }
@@ -4014,7 +4014,7 @@ eon.interpolation.prepare = function (template) {
 
 // Handles all the initial state of the data and variable elements
 eon.interpolation.handleInterpolationVariables = function (el, config) {
-  var variables = el.template.querySelectorAll("vc-variable");
+  var variables = el.template.querySelectorAll("eon-variable");
   var currentVariable;
   var bindString;
   var bindValue;
@@ -4077,7 +4077,7 @@ eon.interpolation.interpolate = function (el, obj, interpolations, bind) {
 
         // Looks for the variables matching the binding
         interpolations[key] = el.template.querySelectorAll(
-          'vc-variable[bind="' + variableBind + '"]'
+          'eon-variable[bind="' + variableBind + '"]'
         );
 
         // For each variable found previously sets its value
@@ -4492,7 +4492,7 @@ eon.defineOverlayCreation = function (el) {
     el.generateOverlayNode = function (overlay) {
 
         // If an overlay is provided we will prepare that one, otherwise we just create a new one
-        overlay = overlay ? overlay : document.createElement("vc-overlay");
+        overlay = overlay ? overlay : document.createElement("eon-overlay");
 
         // The properties assignation takes place in the onRender callback since if we assign a theme to the overlay
         // it will search a theme file for the overlay, and we just want to assign a theme so that the overlay can recieve
@@ -4521,7 +4521,7 @@ eon.definePlaceholderCreation = function (el) {
     el.generatePlaceholderNode = function (placeholder) {
 
         // If a placeholder is provided we will prepare that one, otherwise we just create a new one
-        placeholder = placeholder ? placeholder : document.createElement("vc-placeholder");
+        placeholder = placeholder ? placeholder : document.createElement("eon-placeholder");
 
         // The properties assignation takes place in the onRender callback since we want to make sure the owner has an uid for the ownerId property
         placeholder.onRender(function () {
@@ -5229,8 +5229,8 @@ eon.declare = function (name, baseElement) {
                 // Updates the references for the source nodes
                 eon.updateSourceCallbacks(el);
                 
-                // Moves source-template elements to vc-template-clone elements by slot attribute query selector string
-                // Unslotted source-template elements will be appended to vc-clone root
+                // Moves source-template elements to eon-template-clone elements by slot attribute query selector string
+                // Unslotted source-template elements will be appended to eon-clone root
                 // Note dynamic things that should be slotted must be added onCreated
                 eon.slot(el);
 
@@ -6224,7 +6224,7 @@ eon.store = function () {
     */
     function importAdapter() {
         // Import vpa memory adapter
-        eon.vpa.use(eon.basePath + "/data/vc-newstore/adapters/MemoryAdapter.js", function (adapter) {
+        eon.vpa.use(eon.basePath + "/data/eon-newstore/adapters/MemoryAdapter.js", function (adapter) {
             // Clone adapter functions
             cloneFunctions(adapter());
             //

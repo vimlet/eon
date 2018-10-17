@@ -9,7 +9,7 @@ The loader element is a useful mask for your application processes and page load
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-loader.html");
+    eon.import("/eon/ui/eon-loader.html");
   </script>
 <head>
 ```
@@ -17,7 +17,7 @@ The loader element is a useful mask for your application processes and page load
 Declare loader the same way you declare any other HTML element:
 
 ``` [html]
-<vc-loader></vc-loader>
+<eon-loader></eon-loader>
 ```
 
 ## Programmatic usage
@@ -25,8 +25,8 @@ Declare loader the same way you declare any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-headerpanel
-  var loader = document.createElement("vc-loader");  
+  // Create eon-headerpanel
+  var loader = document.createElement("eon-loader");  
 
   // Append wherever you need it
   document.querySelector("body").appendChild(loader);
@@ -41,14 +41,14 @@ eon.ready(function () {
 ### Page loading simulator bar
 
 ``` [html]
-<vc-loader duration="1000" effect="linear"></vc-loader>
+<eon-loader duration="1000" effect="linear"></eon-loader>
 ```
 
 ``` [javascript]
 eon.ready(function () {
 
-  // Get vc-loader
-  var loader = document.querySelector("vc-loader");  
+  // Get eon-loader
+  var loader = document.querySelector("eon-loader");  
 
   // Move forward loadFirst page loading state
   loader.aniamte(.20);
@@ -78,14 +78,14 @@ Despite there are two types of loader, the only difference between them is on th
 This example shows an application specific process progress which normally is represented with a progress indicator to keep the user noticed.
 
 ``` [html]
-<vc-loader type="progress" duration="1000" effect="ease"></vc-loader>
+<eon-loader type="progress" duration="1000" effect="ease"></eon-loader>
 ```
 
 ``` [javascript]
 eon.ready(function () {
 
-  // Get vc-loader
-  var progressBar = document.querySelector("vc-loader");  
+  // Get eon-loader
+  var progressBar = document.querySelector("eon-loader");  
 
   // Advance progress
   progressBar.animate(1, 2000);

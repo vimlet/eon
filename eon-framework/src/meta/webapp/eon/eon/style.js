@@ -11,8 +11,8 @@ document.head.appendChild(eon.style);
 
 // Hides initial elements
 eon.style.sheet.insertRule(".eon-until-rendered { opacity: 0; }", 0);
-// Hide vc-script
-eon.style.sheet.insertRule("vc-script { display: none; }", 0);
+// Hide eon-script
+eon.style.sheet.insertRule("eon-script { display: none; }", 0);
 
 // ############################################################################################
 // RESPONSIVE

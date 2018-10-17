@@ -49,7 +49,7 @@ For now, we will use a simple button component as an example, but you can read m
 <head>
     <script>
         eon.import([
-            "eon/ui/vc-button.html"
+            "eon/ui/eon-button.html"
         ]);
     </script>
 </head>
@@ -59,7 +59,7 @@ Once a component is imported it can be used as any other html element.
 
 ```[html]
 <body>
-    <vc-button value="Click Me!"><vc-button>
+    <eon-button value="Click Me!"><eon-button>
 </body>
 ``` 
 
@@ -68,7 +68,7 @@ Due to the super fast asynchronous nature of eon, in order to use it programmati
 
 ```[javascript]
 eon.onReady(function () {
-    var el = document.querySelector("vc-button");
+    var el = document.querySelector("eon-button");
     el.value = "Hello World";
 });
 ```

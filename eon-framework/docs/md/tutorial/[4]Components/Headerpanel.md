@@ -9,7 +9,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-headerpanel.html");
+    eon.import("/eon/ui/eon-headerpanel.html");
   </script>
 <head>
 ```
@@ -17,10 +17,10 @@ The Headerpanel element works as a simple container but provides a bunch of prop
 Declare headerpanel the same way you declare any other HTML element:
 
 ``` [html]
-<vc-headerpanel>
+<eon-headerpanel>
     <!-- Content -->
     <div> Any content </div>
-</vc-headerpanel>
+</eon-headerpanel>
 ```
 
 ## Programmatic usage
@@ -28,8 +28,8 @@ Declare headerpanel the same way you declare any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-headerpanel
-  var headerpanel = document.createElement("vc-headerpanel");
+  // Create eon-headerpanel
+  var headerpanel = document.createElement("eon-headerpanel");
 
   // Create some content
   var content = document.createElement("div");
@@ -45,18 +45,18 @@ eon.ready(function () {
 ### Growing header
 
 ``` [html]
-<vc-headerpanel header="grow" header-content="Growing header">
+<eon-headerpanel header="grow" header-content="Growing header">
     <div> content </div>
     <div> content </div>
-</vc-headerpanel>
+</eon-headerpanel>
 ```
 
 ### Complex card layout
 
 ``` [html]
- <vc-headerpanel type="shadowed" header="grow" header-class="whiteHeader" close-button="true" action-button="actionFunction()" header-tall-height="130px"
+ <eon-headerpanel type="shadowed" header="grow" header-class="whiteHeader" close-button="true" action-button="actionFunction()" header-tall-height="130px"
  header-content="Card">
     <div> content </div>
     <div> content </div>
-</vc-headerpanel>
+</eon-headerpanel>
 ```

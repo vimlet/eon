@@ -1,34 +1,34 @@
 # Radio
 
 ## Introduction
-Selectable form component that depends on vc-group.
+Selectable form component that depends on eon-group.
 
-If this component was to be used alone it would be needed to import it. But if it would be used among other vc-radio components inside a vc-group it won't be necessary to import this components as vc-group will take care of that.
+If this component was to be used alone it would be needed to import it. But if it would be used among other eon-radio components inside a eon-group it won't be necessary to import this components as eon-group will take care of that.
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-radio.html");
+    eon.import("/eon/ui/eon-radio.html");
   </script>
 <head>
 ```
 
 ## Declarative usage
 ``` [html]
-<vc-group name="myGroup">
-  <vc-radio label="Radio 1" value="myRadio1"></vc-radio>
-  <vc-radio label="Radio 2" value="myRadio2"></vc-radio>
-</vc-group>
+<eon-group name="myGroup">
+  <eon-radio label="Radio 1" value="myRadio1"></eon-radio>
+  <eon-radio label="Radio 2" value="myRadio2"></eon-radio>
+</eon-group>
 ```
 
 ## Programmatic usage
 ``` [javascript]
 eon.onReady(function () {
-  // Create vc-group and vc-radio 
-  var myGroup = document.createElement("vc-group");
-  var myRadio1 = document.createElement("vc-radio");
-  var myRadio2 = document.createElement("vc-radio");
+  // Create eon-group and eon-radio 
+  var myGroup = document.createElement("eon-group");
+  var myRadio1 = document.createElement("eon-radio");
+  var myRadio2 = document.createElement("eon-radio");
 
-  // Set property and append vc-group
+  // Set property and append eon-group
   myGroup.name = "myGroup";
   document.querySelector(".example").appendChild(myGroup);
 
@@ -40,7 +40,7 @@ eon.onReady(function () {
   myRadio2.label = "Radio 2";
   myRadio2.value = "myRadio2";
 
-  // Append all vc-checkbox
+  // Append all eon-checkbox
   myGroup.appendChild(myRadio1);
   myGroup.appendChild(myRadio2);
 });
@@ -49,14 +49,14 @@ eon.onReady(function () {
 ## Examples
 
 ### Enable and check dynamically
-In this example one of the vc-radio is disabled and other is checked, but after a second the disabled and unchecked radio will be enable and checked.
+In this example one of the eon-radio is disabled and other is checked, but after a second the disabled and unchecked radio will be enable and checked.
 ``` [html]
-<vc-group name="myGroup">
+<eon-group name="myGroup">
   <!-- Initially radio checked -->
-  <vc-radio label="Radio 1" value="myRadio1" check="true"></vc-radio>
+  <eon-radio label="Radio 1" value="myRadio1" check="true"></eon-radio>
   <!-- Initially radio disabled -->
-  <vc-radio id="myRadio2" label="Radio 2" value="myRadio2" disabled="true"></vc-radio>
-</vc-group>
+  <eon-radio id="myRadio2" label="Radio 2" value="myRadio2" disabled="true"></eon-radio>
+</eon-group>
 ```
 
 ``` [javascript]

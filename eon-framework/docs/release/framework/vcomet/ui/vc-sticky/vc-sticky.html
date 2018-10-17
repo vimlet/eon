@@ -1,7 +1,7 @@
 <script>
-  eon.element("vc-sticky", "vc-sticky.css", {
+  eon.element("eon-sticky", "eon-sticky.css", {
     dependencies: [
-      "../vc-scroll"
+      "../eon-scroll"
     ],
     privateProperties: {
       /*
@@ -71,7 +71,7 @@
       },
       /*
         @property {String} vcScroll
-        @description vc-scroll element query selector
+        @description eon-scroll element query selector
       */
       vcScroll: {
         value: "",
@@ -97,7 +97,7 @@
         var wrapperFragment = document.createDocumentFragment();
         var wrapper = document.createElement("div");
         el.wrapper = wrapper;
-        wrapper.classList.add("vc-sticky-stickyWrapper");
+        wrapper.classList.add("eon-sticky-stickyWrapper");
    
         // Copy size property from parent
         wrapper.style.width = el.side == "top" || el.side == "bottom" ? "100%" : el.offsetWidth + "px";
@@ -201,7 +201,7 @@
       animationMonitor: function (scrollMisc) {
         var el = this;
         if (el.animPosition) {
-          // Parent is the document body element or vc-scroll if sticky is currently relative positioned
+          // Parent is the document body element or eon-scroll if sticky is currently relative positioned
           var parent = el.vcScroll && ~["static", "relative"].indexOf(window.getComputedStyle(el.wrapper).position) ? el.vcScroll : document.documentElement;
           var scrollValue = scrollMisc && scrollMisc[el._misc.scrollProp] ? scrollMisc[el._misc.scrollProp] : parent[el._misc.scrollProp];
           el.wrapper.style.transition = "all .2s";
@@ -242,12 +242,12 @@
       */
       setFixContainer: function () {
         var el = this;
-        // Sticky inside vc-scroll container
+        // Sticky inside eon-scroll container
         el.vcScroll = el.vcScroll ? document.querySelector(el.vcScroll) : false;
         // Sticky fix container
         el.fixContainer = !el.fixContainer ? document.body : document.querySelector(el.fixContainer);
         el.fixContainer = !el.fixContainer ? document.body : el.fixContainer;
-        el.vcScroll = el.fixContainer.tagName.toLowerCase() == "vc-scroll" ? el.fixContainer : el.vcScroll;
+        el.vcScroll = el.fixContainer.tagName.toLowerCase() == "eon-scroll" ? el.fixContainer : el.vcScroll;
       },
       /*
         @function (private) _scrollSticky
@@ -340,7 +340,7 @@
     },
     onPropertyChanged: function (attrName, oldVal, newVal) {
       var el = this;
-      // Monitor wrapper fixed displaying with vc-scroll integration
+      // Monitor wrapper fixed displaying with eon-scroll integration
       if (attrName == "_viewPosition" && el.vcScroll) {
         el.wrapper.style.display = newVal == -el.spacing ? "none" : "flex";
       }

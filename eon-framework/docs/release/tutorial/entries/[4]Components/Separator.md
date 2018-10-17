@@ -9,7 +9,7 @@ This is a basic layout element that works as a content separator.
 Declare separator the same way you declare any other HTML element:
 
 ``` [html]
-<vc-separator></vc-separator>
+<eon-separator></eon-separator>
 ```
 
 ## Programmatic usage
@@ -17,8 +17,8 @@ Declare separator the same way you declare any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-separator
-  var separator = document.createElement("vc-separator");
+  // Create eon-separator
+  var separator = document.createElement("eon-separator");
 
   // Append wherever you need it
   document.querySelector("anyElement").appendChild(separator);
@@ -38,14 +38,14 @@ The separator is intended to be declared inside the node below which you want it
   <div class="content">
     Full bleed separator
     <!-- SEPARATOR -->
-    <vc-separator></vc-separator>
+    <eon-separator></eon-separator>
     <!-- ::::::: -->
   </div>
 
   <div class="content">
     Mid position separator
     <!-- SEPARATOR -->
-    <vc-separator type="mid" border="3" length="50%"></vc-separator>
+    <eon-separator type="mid" border="3" length="50%"></eon-separator>
     <!-- ::::::: -->
   </div>
 

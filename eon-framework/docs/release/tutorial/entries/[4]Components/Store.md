@@ -9,7 +9,7 @@ The store is a non visual element created to provide and manipulate data from a 
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/data/vc-store/vc-store.html");
+    eon.import("/eon/data/eon-store/eon-store.html");
   </script>
 <head>
 ```
@@ -17,15 +17,15 @@ The store is a non visual element created to provide and manipulate data from a 
 The store can be declared as any other HTML element, but if it is used for managing other eon elements data, these manage it themselves when they detect a inner store element. This case is described on the examples section.
 
 ``` [html]
-<vc-store></vc-store>
+<eon-store></eon-store>
 ```
 
 ## Programmatic usage
 
 ``` js
 eon.ready(function () {
-  // Create vc-store
-  var store = document.createElement("vc-store");
+  // Create eon-store
+  var store = document.createElement("eon-store");
 
   // Append wherever you need it
   document.querySelector("body").appendChild(store);
@@ -36,12 +36,12 @@ eon.ready(function () {
 
 ### eon grid with store integration 
 
-Here is the code needed to implement a **vc-grid** element working with remote data retrieved by a rest store:
+Here is the code needed to implement a **eon-grid** element working with remote data retrieved by a rest store:
 
 ``` [html]
-<vc-grid rows-per-page="auto" columns="name, lastname" headers="Name, Last name">
-    <vc-store type="rest" url="rest/some/remote/source/contacts.json"></vc-store>
-</vc-grid>
+<eon-grid rows-per-page="auto" columns="name, lastname" headers="Name, Last name">
+    <eon-store type="rest" url="rest/some/remote/source/contacts.json"></eon-store>
+</eon-grid>
 ```
 
 This example proves that is a good option to take advantage of the eon elements composition to make your application development easier. 

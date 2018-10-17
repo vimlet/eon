@@ -190,7 +190,7 @@ eon.defineOverlayCreation = function (el) {
     el.generateOverlayNode = function (overlay) {
 
         // If an overlay is provided we will prepare that one, otherwise we just create a new one
-        overlay = overlay ? overlay : document.createElement("vc-overlay");
+        overlay = overlay ? overlay : document.createElement("eon-overlay");
 
         // The properties assignation takes place in the onRender callback since if we assign a theme to the overlay
         // it will search a theme file for the overlay, and we just want to assign a theme so that the overlay can recieve
@@ -219,7 +219,7 @@ eon.definePlaceholderCreation = function (el) {
     el.generatePlaceholderNode = function (placeholder) {
 
         // If a placeholder is provided we will prepare that one, otherwise we just create a new one
-        placeholder = placeholder ? placeholder : document.createElement("vc-placeholder");
+        placeholder = placeholder ? placeholder : document.createElement("eon-placeholder");
 
         // The properties assignation takes place in the onRender callback since we want to make sure the owner has an uid for the ownerId property
         placeholder.onRender(function () {

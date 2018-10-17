@@ -11,17 +11,17 @@ By default the drawer is designed to be relative to the HTML body element, and p
 ``` [html]
 <head>
   <script>
-    eon.import("/eon/ui/vc-drawer.html");
+    eon.import("/eon/ui/eon-drawer.html");
   </script>
 <head>
 ```
-Declare the vc-drawer as any other HTML element:
+Declare the eon-drawer as any other HTML element:
 
 ``` [html]
-<vc-drawer>
+<eon-drawer>
     <h1> My drawer </h1>
     <div> Item </div>
-</vc-drawer>
+</eon-drawer>
 ```
 
 ## Programmatic usage
@@ -29,8 +29,8 @@ Declare the vc-drawer as any other HTML element:
 ``` [javascript]
 eon.ready(function () {
 
-  // Create vc-drawer
-  var myDrawer = document.createElement("vc-drawer");
+  // Create eon-drawer
+  var myDrawer = document.createElement("eon-drawer");
 
   // Create some content
   var title = document.createElement("h1");
@@ -52,10 +52,10 @@ eon.ready(function () {
 The displaying behaviour is completely customizable but the drawer has a smooth displaying in the first place:
 
 ``` [html]
-<vc-drawer drag="false" closable="false">
+<eon-drawer drag="false" closable="false">
     <h1> My static menu </h1>
     <div> Item </div>
-</vc-drawer>
+</eon-drawer>
 ```
 
 ### Multiple drawers
@@ -64,18 +64,18 @@ Since the drawer can be displayed at any body position there are no reason to
 integrate only one drawer element at the same time if the situation requires it:
 
 ``` [html]
-<vc-drawer type="top">
+<eon-drawer type="top">
     <h1> My top menu </h1>
     <div> item 1 </div>
-</vc-drawer>
-<vc-drawer type="right" hide="true">
+</eon-drawer>
+<eon-drawer type="right" hide="true">
     <h1> My hidden right menu </h1>
     <div> item 2 </div>
-</vc-drawer>
-<vc-drawer type="bottom">
+</eon-drawer>
+<eon-drawer type="bottom">
     <h1> My bottom menu </h1>
     <div> item 3 </div>
-</vc-drawer>
+</eon-drawer>
 ```
 
 **Notice that right and bottom side drawers, as a consequence of the HTML standard behavior, force parent to scroll the content when they are hidden.**
