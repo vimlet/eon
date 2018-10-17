@@ -1,5 +1,5 @@
-var vcomet;
-(function(vcomet) {
+var eon;
+(function(eon) {
   var StoreRest;
   (function(StoreRest) {
     /**
@@ -33,7 +33,7 @@ var vcomet;
       var sortParam = (descending ? "+" : "-") + key;
       var sortObj = {};
       sortObj[store.sortParam] = sortParam;
-      store.url = vcomet.util.replaceParam(store.url, sortObj);
+      store.url = eon.util.replaceParam(store.url, sortObj);
       // Get request
       StoreRest.restXhr(store, store.url, "onSortRemote", true);
     }
@@ -50,7 +50,7 @@ var vcomet;
       var filterObj = {};
       filterObj[store.filterParam] =
         typeof keys !== "string" ? JSON.stringify(keys) : keys;
-        store.url = vcomet.util.replaceParam(store.url, filterObj);
+        store.url = eon.util.replaceParam(store.url, filterObj);
       // Get request
       StoreRest.restXhr(store, store.url, "onFilterRemote");
     }
@@ -69,7 +69,7 @@ var vcomet;
     function getRangeRemote(start, limit, store) {
       // TODO - Check connection and work on local data if disconnected
       // Replace previous range params from url
-      store.url = vcomet.util.replaceParam(store.url, {
+      store.url = eon.util.replaceParam(store.url, {
         start: start,
         limit: limit
       });
@@ -88,7 +88,7 @@ var vcomet;
       // Replace previous list params from url
       var listObj = {};
       listObj[store.listParam] = JSON.stringify(attrs);
-      store.url = vcomet.util.replaceParam(store.url, {
+      store.url = eon.util.replaceParam(store.url, {
         list: JSON.stringify(attrs)
       });
       // Get request
@@ -121,7 +121,7 @@ var vcomet;
             // TODO - Find a way of refresh local data
             // store.data[item[store.idProperty]] = item;
             // Trigger user callback once data has been retrieved
-            vcomet.triggerCallback("onGetRemote", store, store, [item]);
+            eon.triggerCallback("onGetRemote", store, store, [item]);
           }
         }
       };
@@ -153,11 +153,11 @@ var vcomet;
             // Set response item to be returned
             item = JSON.parse(xhr.response);
             // Refresh local data object
-            vcomet.StoreMemory.create(item, store);
+            eon.StoreMemory.create(item, store);
             // Trigger user callback once data has been retrieved
-            vcomet.triggerCallback("onCreateRemote", store, store, [item]);
+            eon.triggerCallback("onCreateRemote", store, store, [item]);
             // Trigger onSourceChanged event
-            vcomet.triggerCallback("onSourceChanged", store);
+            eon.triggerCallback("onSourceChanged", store);
           }
         }
       };
@@ -190,16 +190,16 @@ var vcomet;
               // Set response item to be returned
               item = JSON.parse(xhr.response);
               // Refresh local data object
-              vcomet.StoreMemory.replace(id, item, store);
+              eon.StoreMemory.replace(id, item, store);
               // Trigger user callback once data has been retrieved
-              vcomet.triggerCallback("onReplaceRemote", store, store, [item]);
+              eon.triggerCallback("onReplaceRemote", store, store, [item]);
               // Trigger onSourceChanged event
-              vcomet.triggerCallback("onSourceChanged", store);
+              eon.triggerCallback("onSourceChanged", store);
             }
           }
         };
       } else {
-        vcomet.error.log(
+        eon.error.log(
           "store",
           "Cannot send replace request without an id or item object"
         );
@@ -233,18 +233,18 @@ var vcomet;
               // Set response item to be returned
               item = JSON.parse(xhr.response);
               // Refresh local data object
-              vcomet.StoreMemory.update(id, item, store);
+              eon.StoreMemory.update(id, item, store);
               // Trigger user callback once data has been retrieved
-              vcomet.triggerCallback("onUpdateRemote", store, store, [item]);
+              eon.triggerCallback("onUpdateRemote", store, store, [item]);
               // Trigger onSourceChanged event
-              vcomet.triggerCallback("onSourceChanged", store);
+              eon.triggerCallback("onSourceChanged", store);
             }
           }
         };
         // Execute request with post payload data
         store.onLoaded(function(){xhr.send(JSON.stringify(item))});
       } else {
-        vcomet.error.log(
+        eon.error.log(
           "store",
           "Cannot send update request without an id or item object"
         );
@@ -275,16 +275,16 @@ var vcomet;
               // Set response item to be returned
               item = JSON.parse(xhr.response);
               // Refresh local data object
-              vcomet.StoreMemory.remove(id, store);
+              eon.StoreMemory.remove(id, store);
               // Trigger user callback once data has been retrieved
-              vcomet.triggerCallback("onRemoveRemote", store, store, [item]);
+              eon.triggerCallback("onRemoveRemote", store, store, [item]);
               // Trigger onSourceChanged event
-              vcomet.triggerCallback("onSourceChanged", store);
+              eon.triggerCallback("onSourceChanged", store);
             }
           }
         };
       } else {
-        vcomet.error.log(
+        eon.error.log(
           "store",
           "Cannot send remove request without an id parameter"
         );
@@ -323,14 +323,14 @@ var vcomet;
             // Set up store
             store._setUpData(xhr.response);
             // Process store data filters and lists
-            vcomet.StoreMemory.processData(store);
+            eon.StoreMemory.processData(store);
             // Set data as sorted
             store.data.__sorted = sortRequest;
             // Update store data items length
             store.size = xhr.getResponseHeader("Total");
             // Trigger user callback once data has been retrieved
-            vcomet.triggerCallback(eventName, store, store, [store.rootData]);
-            vcomet.createCallback("onSourceChanged", store, store, [store.rootData]);
+            eon.triggerCallback(eventName, store, store, [store.rootData]);
+            eon.createCallback("onSourceChanged", store, store, [store.rootData]);
           }
         }
       };
@@ -338,5 +338,5 @@ var vcomet;
       store.onLoaded(function(){xhr.send()});
     }
     StoreRest.restXhr = restXhr;
-  })((StoreRest = vcomet.StoreRest || (vcomet.StoreRest = {})));
-})(vcomet || (vcomet = {}));
+  })((StoreRest = eon.StoreRest || (eon.StoreRest = {})));
+})(eon || (eon = {}));

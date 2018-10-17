@@ -9,7 +9,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-headerpanel.html");
+    eon.import("/eon/ui/vc-headerpanel.html");
   </script>
 <head>
 ```
@@ -26,7 +26,7 @@ Declare headerpanel the same way you declare any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-headerpanel
   var headerpanel = document.createElement("vc-headerpanel");

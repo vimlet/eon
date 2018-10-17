@@ -9,7 +9,7 @@ The loader element is a useful mask for your application processes and page load
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-loader.html");
+    eon.import("/eon/ui/vc-loader.html");
   </script>
 <head>
 ```
@@ -23,7 +23,7 @@ Declare loader the same way you declare any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-headerpanel
   var loader = document.createElement("vc-loader");  
@@ -45,7 +45,7 @@ vcomet.ready(function () {
 ```
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Get vc-loader
   var loader = document.querySelector("vc-loader");  
@@ -82,7 +82,7 @@ This example shows an application specific process progress which normally is re
 ```
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Get vc-loader
   var progressBar = document.querySelector("vc-loader");  

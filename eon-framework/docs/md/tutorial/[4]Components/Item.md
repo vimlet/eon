@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The vc-item element is intended to be used as a piece of the vComet elements below.
+The vc-item element is intended to be used as a piece of the eon elements below.
 
 - [vc-appmenu](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FAppmenu.md)
 - **vc-combobox**
@@ -25,7 +25,7 @@ Declare vc-item as any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-layout
   var layout = document.createElement("vc-layout");

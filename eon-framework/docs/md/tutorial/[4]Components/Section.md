@@ -19,7 +19,7 @@ Declare the vc-section as any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-gutter
   var gutter = document.createElement("vc-gutter");

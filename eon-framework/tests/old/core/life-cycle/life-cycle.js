@@ -1,6 +1,6 @@
-var vcomet = vcomet || {};
-vcomet.tests = vcomet.tests || {};
-vcomet.tests.core = vcomet.tests.core || {
+var eon = eon || {};
+eon.tests = eon.tests || {};
+eon.tests.core = eon.tests.core || {
   configBefore: [],
   configBeforeExpected: [
     "config-before1:onCreated",
@@ -69,38 +69,38 @@ function isArrayEqual(a1, a2) {
 
 function loadExpected() {
   // Expected life-cycle visualization
-  document.querySelector("#configBeforeExpected").value = JSON.stringify(vcomet.tests.core.configBeforeExpected, null, 2);
-  document.querySelector("#configAfterExpected").value = JSON.stringify(vcomet.tests.core.configAfterExpected, null, 2);
-  document.querySelector("#elementBeforeExpected").value = JSON.stringify(vcomet.tests.core.elementBeforeExpected, null, 2);
-  document.querySelector("#elementAfterExpected").value = JSON.stringify(vcomet.tests.core.elementAfterExpected, null, 2);
+  document.querySelector("#configBeforeExpected").value = JSON.stringify(eon.tests.core.configBeforeExpected, null, 2);
+  document.querySelector("#configAfterExpected").value = JSON.stringify(eon.tests.core.configAfterExpected, null, 2);
+  document.querySelector("#elementBeforeExpected").value = JSON.stringify(eon.tests.core.elementBeforeExpected, null, 2);
+  document.querySelector("#elementAfterExpected").value = JSON.stringify(eon.tests.core.elementAfterExpected, null, 2);
 }
 
 function createElementRegistrable(name, registry) {
 
-  var el = vcomet.createElement(name, {
+  var el = eon.createElement(name, {
 
     onCreated: function () {
-      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onCreated");
+      eon.tests.core[registry].push(this.tagName.toLowerCase() + ":onCreated");
     },
   
     onInit: function () {
-      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onInit");
+      eon.tests.core[registry].push(this.tagName.toLowerCase() + ":onInit");
     },
   
     onTransformed: function () {
-      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onTransformed");
+      eon.tests.core[registry].push(this.tagName.toLowerCase() + ":onTransformed");
     },
   
     onRender: function () {
-      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onRender");
+      eon.tests.core[registry].push(this.tagName.toLowerCase() + ":onRender");
     },
   
     onBubbleRender: function () {
-      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onBubbleRender");
+      eon.tests.core[registry].push(this.tagName.toLowerCase() + ":onBubbleRender");
     },
   
     onReady: function () {
-      vcomet.tests.core[registry].push(this.tagName.toLowerCase() + ":onReady");
+      eon.tests.core[registry].push(this.tagName.toLowerCase() + ":onReady");
     }
 
   });

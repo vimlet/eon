@@ -12,7 +12,7 @@ As well as the items inside a flex container includes style properties for adjus
 <head>
   <script>
     // Imports vc-layout element and its dependencies (vc-item)
-    vcomet.import("/vcomet/ui/vc-layout.html");
+    eon.import("/eon/ui/vc-layout.html");
   </script>
 <head>
 ```
@@ -28,7 +28,7 @@ Declare layout as any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-layout
   var layout = document.createElement("vc-layout");

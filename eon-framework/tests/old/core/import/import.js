@@ -1,6 +1,6 @@
-var vcomet = vcomet || {};
-vcomet.tests = vcomet.tests || {};
-vcomet.tests.core = vcomet.tests.core || {
+var eon = eon || {};
+eon.tests = eon.tests || {};
+eon.tests.core = eon.tests.core || {
     importsExpected: [
         {
             "name": "vc-el1",
@@ -63,14 +63,14 @@ vcomet.tests.core = vcomet.tests.core || {
 }
 
 function loadExpected() {
-    document.querySelector("#importsExpected").value = JSON.stringify(vcomet.tests.core.importsExpected, null, 2);
-    document.querySelector("#importsTemplatesExpected").value = JSON.stringify(vcomet.tests.core.importsTemplatesExpected, null, 2);
-    document.querySelector("#importsStylesExpected").value = JSON.stringify(vcomet.tests.core.importsStylesExpected, null, 2);
+    document.querySelector("#importsExpected").value = JSON.stringify(eon.tests.core.importsExpected, null, 2);
+    document.querySelector("#importsTemplatesExpected").value = JSON.stringify(eon.tests.core.importsTemplatesExpected, null, 2);
+    document.querySelector("#importsStylesExpected").value = JSON.stringify(eon.tests.core.importsStylesExpected, null, 2);
 }
 
 function loadCurrent() {
 
-    vcomet.onReady(function () {
+    eon.onReady(function () {
 
         fillCurrentImports();
         fillTemplates();
@@ -85,7 +85,7 @@ function loadCurrent() {
 function fillCurrentImports() {
 
     var imports = [];
-    var imported = Object.keys(vcomet.imports.config);
+    var imported = Object.keys(eon.imports.config);
     var dependencies;
 
     for (var i = 0; i < imported.length; i++) {
@@ -94,9 +94,9 @@ function fillCurrentImports() {
         imports[i].name = imported[i];
         imports[i].dependencies = [];
 
-        if (vcomet.imports.config[imported[i]].dependencies) {
+        if (eon.imports.config[imported[i]].dependencies) {
 
-            dependencies = vcomet.imports.config[imported[i]].dependencies;
+            dependencies = eon.imports.config[imported[i]].dependencies;
 
             for (var j = 0; j < dependencies.length; j++) {
                 imports[i].dependencies.push(dependencies[j].replace(".html", "").toLowerCase());
@@ -106,7 +106,7 @@ function fillCurrentImports() {
 
     }
 
-    vcomet.tests.core.importsCurrent = imports;
+    eon.tests.core.importsCurrent = imports;
     document.querySelector("#importsCurrent").value = JSON.stringify(imports, null, 2);
 
 }
@@ -114,7 +114,7 @@ function fillCurrentImports() {
 function fillTemplates() {
 
     var templates = [];
-    var importedTemplates = Object.keys(vcomet.imports.templates);
+    var importedTemplates = Object.keys(eon.imports.templates);
     var tempDiv;
 
     for (var i = 0; i < importedTemplates.length; i++) {
@@ -122,17 +122,17 @@ function fillTemplates() {
         templates.push({});
         templates[i].name = importedTemplates[i];
 
-        if (vcomet.imports.templates[importedTemplates[i]]) {
+        if (eon.imports.templates[importedTemplates[i]]) {
 
             tempDiv = document.createElement("div");
-            tempDiv.appendChild(vcomet.imports.templates[importedTemplates[i]].cloneNode(true).content);
+            tempDiv.appendChild(eon.imports.templates[importedTemplates[i]].cloneNode(true).content);
 
             templates[i].template = tempDiv.innerHTML;
         }
 
     }
 
-    vcomet.tests.core.importsTemplatesCurrent = templates;
+    eon.tests.core.importsTemplatesCurrent = templates;
     document.querySelector("#importsTemplatesCurrent").value = JSON.stringify(templates, null, 2);
 
 }
@@ -140,7 +140,7 @@ function fillTemplates() {
 function fillStyles() {
 
     var styles = [];
-    var imported = Object.keys(vcomet.imports.config);
+    var imported = Object.keys(eon.imports.config);
     var tempDiv, element;
 
     for (var i = 0; i < imported.length; i++) {
@@ -158,16 +158,16 @@ function fillStyles() {
 
     }
 
-    vcomet.tests.core.importsStylesCurrent = styles;
+    eon.tests.core.importsStylesCurrent = styles;
     document.querySelector("#importsStylesCurrent").value = JSON.stringify(styles, null, 2);
 
 }
 
 function getResult() {
 
-    var equalImports = isArrayEqual(vcomet.tests.core.importsExpected, vcomet.tests.core.importsCurrent);
-    var equalImportsTemplates = isArrayEqual(vcomet.tests.core.importsTemplatesExpected, vcomet.tests.core.importsTemplatesCurrent);
-    var equalImportsStyles = isArrayEqual(vcomet.tests.core.importsStylesExpected, vcomet.tests.core.importsStylesCurrent);
+    var equalImports = isArrayEqual(eon.tests.core.importsExpected, eon.tests.core.importsCurrent);
+    var equalImportsTemplates = isArrayEqual(eon.tests.core.importsTemplatesExpected, eon.tests.core.importsTemplatesCurrent);
+    var equalImportsStyles = isArrayEqual(eon.tests.core.importsStylesExpected, eon.tests.core.importsStylesCurrent);
 
     return (equalImports && equalImportsTemplates && equalImportsStyles);
 

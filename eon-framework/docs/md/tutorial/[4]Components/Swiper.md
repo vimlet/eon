@@ -6,13 +6,13 @@ This element is a combination of the well known slider and image gallery compone
 
 ## Declarative usage
 
-Swiper needs the collaboration of another vComet element to work correctly, the [vc-slide](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSlide.md) element:
+Swiper needs the collaboration of another eon element to work correctly, the [vc-slide](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSlide.md) element:
 
 ``` [html]
 <head>
   <script>
     // Imports vc-swiper element and its dependencies (vc-slide)
-    vcomet.import("/vcomet/ui/vc-swiper.html");
+    eon.import("/eon/ui/vc-swiper.html");
   </script>
 <head>
 ```
@@ -30,7 +30,7 @@ Declare swiper the same way you declare any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-swiper
   var swiper = document.createElement("vc-swiper");

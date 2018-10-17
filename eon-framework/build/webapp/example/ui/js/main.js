@@ -37,8 +37,8 @@ function loadContent(id, url) {
     var el = document.querySelector("#" + id);
 
     if (
-      window.innerWidth <= vcomet.tabletWidth ||
-      window.innerWidth <= vcomet.mobileWidth
+      window.innerWidth <= eon.tabletWidth ||
+      window.innerWidth <= eon.mobileWidth
     ) {
       document.querySelector("vc-drawer").close();
     }

@@ -7,7 +7,7 @@ For its use, it is necessary to import `vc-combobox` in the head of the HTML doc
 ``` [html]
 <head>
   <script>
-    vcomet.import("/vcomet/ui/vc-combobox.html");
+    eon.import("/eon/ui/vc-combobox.html");
   </script>
 <head>
 ```
@@ -25,7 +25,7 @@ For its use, it is necessary to import `vc-combobox` in the head of the HTML doc
 ## Programmatic usage
 
 ``` [javascript]
-    vcomet.onReady(function () {
+    eon.onReady(function () {
 
             // Create vc-combobox and the items we want
             var myCombobox = document.createElement("vc-combobox");

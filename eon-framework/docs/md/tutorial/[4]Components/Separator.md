@@ -15,7 +15,7 @@ Declare separator the same way you declare any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-separator
   var separator = document.createElement("vc-separator");

@@ -7,7 +7,7 @@ To use it import vc-contextmenu in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-contextmenu.html");
+    eon.import("/eon/ui/vc-contextmenu.html");
   </script>
 <head>
 ```
@@ -31,7 +31,7 @@ To indicate that an element will have a vc-contextmenu associated with it, the a
 To create vc-contextmenu programmatically also uses vc-item to add the options, and it will be added to the vc-contextmenu using.
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-contextmenu
   var myContextmenu = document.createElement("vc-contextmenu");
   // Create vc-item

@@ -1,8 +1,8 @@
 [Components]<>
 
-## What are vComet components?
+## What are eon components?
 
-vComet components are the individual parts of what your application is composed of, providing both functionality and visuals. With vComet components you can develop an application by composing it of small parts that can be built one at a time, this foments a encapsulated and reusable architecture.
+eon components are the individual parts of what your application is composed of, providing both functionality and visuals. With eon components you can develop an application by composing it of small parts that can be built one at a time, this foments a encapsulated and reusable architecture.
 
 ## What can I build with them?
 
@@ -15,7 +15,7 @@ About anything indeed, but most of them fall in one of this three categories, fu
 - Mixed components - this are by far the most common scenario, where you would like to provide a tied relation between behaviour logic and visual elements.
 An example could be a dialog.
 
-Please note this are conceptual definitions, all components are handled in the same way by vComet.
+Please note this are conceptual definitions, all components are handled in the same way by eon.
 
 ## Advantages of composition
 
@@ -23,11 +23,11 @@ By splitting a complex problem such as an application in small parts or componen
 
 [Usage]<>
 
-vComet imported components can be added **declarative** using html tags or **programmatically** creating and appending elements to the DOM with javascript.
+eon imported components can be added **declarative** using html tags or **programmatically** creating and appending elements to the DOM with javascript.
 
 ## Import
 
-In order to be able to use vComet components, first they must be imported, since this operation is fully asynchronous its recommend to declare component imports on the `head` section. You may access the a wide library of components under the `ui` directory or any other custom element in a directory of your choice.
+In order to be able to use eon components, first they must be imported, since this operation is fully asynchronous its recommend to declare component imports on the `head` section. You may access the a wide library of components under the `ui` directory or any other custom element in a directory of your choice.
 
 ```[html]
 <!DOCTYPE html>
@@ -36,7 +36,7 @@ In order to be able to use vComet components, first they must be imported, since
 <title>Page Title</title>
 
 <script>
-  vcomet.import("vcomet/ui/vc-button.html");
+  eon.import("eon/ui/vc-button.html");
 </script>
 
 ...
@@ -51,10 +51,10 @@ Although the import function can be called multiple times its recommend to follo
 <title>Page Title</title>
 
 <script>
-  vcomet.import([
-    "vcomet/ui/vc-button.html", 
-    "vcomet/ui/vc-dialog.html", 
-    "vcomet/ui/vc-text.html"
+  eon.import([
+    "eon/ui/vc-button.html", 
+    "eon/ui/vc-dialog.html", 
+    "eon/ui/vc-text.html"
     ]);
 </script>
 
@@ -63,7 +63,7 @@ Although the import function can be called multiple times its recommend to follo
 
 ## Declarative
 
-To use vComet components declaratively simply use their name tag as any other regular html element eg. `<div>, <span>, etc...`
+To use eon components declaratively simply use their name tag as any other regular html element eg. `<div>, <span>, etc...`
 
 ```[html]
 <body>
@@ -78,7 +78,7 @@ To use vComet components declaratively simply use their name tag as any other re
 
 ## Programmatically
 
-The programmatic approach is preferred when vComet components need to be added or modified on the fly, to achieve this simply create them using the vanilla DOM API.
+The programmatic approach is preferred when eon components need to be added or modified on the fly, to achieve this simply create them using the vanilla DOM API.
 
 ```[html]
 <script>
@@ -87,7 +87,7 @@ The programmatic approach is preferred when vComet components need to be added o
 </script>
 ```
 
-Since imports are asynchronous vComet components properties and functions are declare dynamically and in order to ensure they are accessible we need use a `onCreated` callback.
+Since imports are asynchronous eon components properties and functions are declare dynamically and in order to ensure they are accessible we need use a `onCreated` callback.
 
 ```[html]
 <script>
@@ -103,8 +103,8 @@ Since imports are asynchronous vComet components properties and functions are de
 
 [Creation]<>
 
-Creating your own custom vComet components is a piece of cake!
-vComet comes with a full set of well tested and flexible components that will cover most of your needs, but you can easily create your own components too.
+Creating your own custom eon components is a piece of cake!
+eon comes with a full set of well tested and flexible components that will cover most of your needs, but you can easily create your own components too.
 
 
 ## Basic structure
@@ -119,15 +119,15 @@ ui-custom/my-element.html
 
 ```[html]
 <template>
-  Hello vComet!
+  Hello eon!
 </template>
 ```
 
-3. Add `<script>` tag, this is where we will register the behaviour of our element by calling vcomet.element function.
+3. Add `<script>` tag, this is where we will register the behaviour of our element by calling eon.element function.
 
 ```[html]
 <script>
-  vcomet.element("my-element");
+  eon.element("my-element");
 </script>
 ```
 
@@ -152,25 +152,25 @@ The resultant file `ui-custom/my-element.html` will look something like this:
 </style>
 
 <template>
-  Hello vComet!
+  Hello eon!
 </template>
 
 <script>
-  vcomet.element("my-element");
+  eon.element("my-element");
 </script>
 
 ```
 
-Now you can use your custom vComet component importing in a declaratively or programmatically way.
+Now you can use your custom eon component importing in a declaratively or programmatically way.
 
 ## Advanced config
 
-Now we mastered the basics of vComet component creation, we can play with components configuration.
-When declaring a new component through `vcomet.element` function you can pass a config object as a second parameter, where properties and functions can be declared and callbacks to element life-cycle can be use to add additional behaviour.
+Now we mastered the basics of eon component creation, we can play with components configuration.
+When declaring a new component through `eon.element` function you can pass a config object as a second parameter, where properties and functions can be declared and callbacks to element life-cycle can be use to add additional behaviour.
 
 ```[html]
 <script>
-  vcomet.element("my-element", null, {
+  eon.element("my-element", null, {
 
     properties: {
       customProperty: "I'm a custom property"
@@ -193,7 +193,7 @@ When declaring a new component through `vcomet.element` function you can pass a 
 
 [Life-cycle]<>
 
-vComet components pass through a series of events that determine their life-cycle. Understanding this events is crucial for an optimal performance implementation. 
+eon components pass through a series of events that determine their life-cycle. Understanding this events is crucial for an optimal performance implementation. 
 
 ## Sequential events
 
@@ -231,7 +231,7 @@ Recurrent events might be triggered more than once:
 
 [Interpolation]<>
 
-vComet template engine makes usage of interpolation in order to provide a powerful and handy way of data binding and scripting.
+eon template engine makes usage of interpolation in order to provide a powerful and handy way of data binding and scripting.
 This allows components to display changeable data in the right place without having to manually update each value. It also provides logic driven content such as conditional or loop based content, in fact it so powerful that any javascript logic can be written inside the interpolation tags and it will be executed in a safe sandboxed environment.
 
 
@@ -252,7 +252,7 @@ hello-world.html
 </template>
 
 <script>
-vcomet.element("hello-world", null, {
+eon.element("hello-world", null, {
   interpolation: true;
   data: {
       name: "World";
@@ -287,7 +287,7 @@ the same code could be written like so without the shorthand:
 </template>
 ```
 
-This is possible because vComet template engine treats interpolated code as plain javascript, but provides handy functions like bind(data) and echo(string) as well as its respective shorthands which speeds daily development.
+This is possible because eon template engine treats interpolated code as plain javascript, but provides handy functions like bind(data) and echo(string) as well as its respective shorthands which speeds daily development.
 
 ## Understanding echo "="
 
@@ -315,7 +315,7 @@ Hello I'm a text!
 
 ## Scripting
 
-Since vComet template engine treats interpolated code as plain sanboxed javascript you can exploit it to your own advantage and create logic based content.
+Since eon template engine treats interpolated code as plain sanboxed javascript you can exploit it to your own advantage and create logic based content.
 
 ```[html]
 <template>  
@@ -345,9 +345,9 @@ Its also important to note interpolated code will render only once per element t
 
 [Slotting]<>
 
-Many vComet elements can act like containers for other elements and some of this elements need to be placed on a specific part of its container structure.
+Many eon elements can act like containers for other elements and some of this elements need to be placed on a specific part of its container structure.
 Placing things on a specific place might be easy programmatically through JavaScript but things get messy quickly when we try to do the same declaratively.
-Slotting aims to provide a simple solution to place any element inside its vComet container through the attribute `slot` and CSS selectors.
+Slotting aims to provide a simple solution to place any element inside its eon container through the attribute `slot` and CSS selectors.
 
 For example, imagine we had simple container element named 'vc-container':
 
@@ -357,7 +357,7 @@ For example, imagine we had simple container element named 'vc-container':
 </template>
 
 <script>
-vcomet.element("vc-container");
+eon.element("vc-container");
 </script>
 ```
 
@@ -378,7 +378,7 @@ Now lets say we want to place it inside the div with the class vc-container-pare
 </vc-container>
 ```
 
-vComet takes care of the element placement so you can stay focus on other important aspects of your application.
+eon takes care of the element placement so you can stay focus on other important aspects of your application.
 
 [Theming]<>
 

@@ -7,7 +7,7 @@ To use it import vc-button in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-button.html");
+    eon.import("/eon/ui/vc-button.html");
   </script>
 <head>
 ```
@@ -22,7 +22,7 @@ Create a vc-button as any other HTML element. The attribute `label` is equivalen
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-button
   var myButton = document.createElement("vc-button");
 

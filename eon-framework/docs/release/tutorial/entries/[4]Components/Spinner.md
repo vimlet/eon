@@ -7,7 +7,7 @@ To use it import vc-spinner in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-spinner.html");
+    eon.import("/eon/ui/vc-spinner.html");
   </script>
 <head>
 ```
@@ -20,7 +20,7 @@ To use it import vc-spinner in the head of the HTML document:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-spinner
   var mySpinner = document.createElement("vc-spinner");
 
@@ -45,7 +45,7 @@ In this example, the vc-spinner is contained within a vc-form and is disabled, a
 ```
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   var mySpinner = document.createElement("vc-spinner");
 
   setTimeout(function () {

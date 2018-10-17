@@ -17,7 +17,7 @@
 </template>
 
 <script>
-    vcomet.element("vc-slider", "vc-slider.css", {
+    eon.element("vc-slider", "vc-slider.css", {
         properties: {
             /*
               @property {String} name 
@@ -186,7 +186,7 @@
                 el._refs.slider.value = el.value;
                 el._currentValue = el.value;
                 el._updateSlider(true);
-                vcomet.triggerCallback("onChange", el);
+                eon.triggerCallback("onChange", el);
 
             },
             /*
@@ -256,14 +256,14 @@
                     el.style.width = "auto";
 
                     // Sets height of slider depending on the properties inline and size 
-                    if (vcomet.util.isTrue(el.inline)) {
+                    if (eon.util.isTrue(el.inline)) {
                         el.style.height = el.size == "" ? "auto" : el.size;
                     } else {
                         el.style.height = el.size;
                     }
 
                     // Sets the property to place the slider in vertical for IE and Firefox browsers
-                    (vcomet.util.getBrowser() == "Firefox" || vcomet.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
+                    (eon.util.getBrowser() == "Firefox" || eon.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
                 }
             },
 
@@ -278,7 +278,7 @@
                 el._thumbEvent = startThumb;
 
                 function startThumb(e) {
-                    if (!vcomet.util.isTrue(el.readonly)) {
+                    if (!eon.util.isTrue(el.readonly)) {
                         el._startY = e.clientY;
                         document.addEventListener("pointermove", moveThumb, false);
                         document.addEventListener("pointerup", function stopThumb(e) {
@@ -355,8 +355,8 @@
                 // On IE, Safari and IOS devices not work event "input"
                 // So is necessary a click event
                 el._refs.slider.addEventListener("click", function (e) {
-                    if (!vcomet.util.isTrue(el.readonly)) {
-                        if (vcomet.util.getBrowser() == "IE" || vcomet.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
+                    if (!eon.util.isTrue(el.readonly)) {
+                        if (eon.util.getBrowser() == "IE" || eon.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
                             // On iOS devices and IE clicking on the input does not update its status
                             // Is is necessary  to do it programmatically
                             el._interactionSlider(e);
@@ -369,7 +369,7 @@
                 }, false);
 
                 el._refs.slider.addEventListener("input", function (e) {
-                    if (!vcomet.util.isTrue(el.readonly)) {
+                    if (!eon.util.isTrue(el.readonly)) {
                         el._updateSlider();
                         el._updateCurrentValue();
                     }
@@ -383,7 +383,7 @@
             updateDisabled: function () {
                 var el = this;
 
-                if (!vcomet.util.isTrue(el.disabled)) {
+                if (!eon.util.isTrue(el.disabled)) {
                     el._refs.slider.removeAttribute("disabled");
                     el._refs.shell.classList.remove("vc-slider-disabled");
                     el._refs.fill.classList.remove("vc-bg5-disabled");
@@ -414,7 +414,7 @@
             updateReadonly: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.readonly)) {
+                if (eon.util.isTrue(el.readonly)) {
                     el._refs.slider.setAttribute("readonly", "true");
                 } else {
                     el._refs.slider.removeAttribute("readonly");
@@ -428,7 +428,7 @@
             */
             updateCurrentValue: function () {
                 var el = this;
-                (el.value !== el._currentValue) ? vcomet.triggerCallback("onChange", el) : null;
+                (el.value !== el._currentValue) ? eon.triggerCallback("onChange", el) : null;
                 el._currentValue = (el.value !== el._currentValue) ? el.value : el._currentValue;
             },
 
@@ -440,7 +440,7 @@
                 var el = this;
 
                 // Small devices view
-                if (window.innerWidth <= vcomet.tabletWidth) {
+                if (window.innerWidth <= eon.tabletWidth) {
                     el.setAttribute("version", "tablet");
 
                     // Desktop view
@@ -467,7 +467,7 @@
         },
 
         onCreated: function () {
-            vcomet.createCallback("onChange", this);
+            eon.createCallback("onChange", this);
             this._createRefs();
 
             this._misc.first = true;

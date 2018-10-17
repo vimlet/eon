@@ -12,7 +12,7 @@ Gutter use the [vc-section](/vimlet/VimletComet/master/docs/release/index.html#!
 <head>
   <script>
     // Imports vc-gutter element and its dependencies (vc-section)
-    vcomet.import("/vcomet/ui/vc-gutter.html");
+    eon.import("/eon/ui/vc-gutter.html");
   </script>
 <head>
 ```
@@ -30,7 +30,7 @@ Declare gutter the same way you declare any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-gutter
   var gutter = document.createElement("vc-gutter");

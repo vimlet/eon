@@ -113,13 +113,13 @@ function changeReflectAttribute() {
 }
 
 function toggleAdapterDebug(checkbox) {
-  vcomet.debug.adapterEvents = checkbox.checked;
+  eon.debug.adapterEvents = checkbox.checked;
 }
 
 function toggleConfigDebug(checkbox) {
-  vcomet.debug.configEvents = checkbox.checked;
+  eon.debug.configEvents = checkbox.checked;
 }
 
 function toggleElementDebug(checkbox) {
-  vcomet.debug.elementEvents = checkbox.checked;
+  eon.debug.elementEvents = checkbox.checked;
 }

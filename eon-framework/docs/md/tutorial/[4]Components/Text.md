@@ -7,7 +7,7 @@ For its use, it is necessary to import vc-text in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vcomet.import("/vcomet/ui/vc-text.html");
+    eon.import("/eon/ui/vc-text.html");
   </script>
 <head>
 ```
@@ -21,7 +21,7 @@ For its use, it is necessary to import vc-text in the head of the HTML document:
 ## Programmatic usage
 
 ``` [javascript]
-    vcomet.onReady(function () {
+    eon.onReady(function () {
 
             // Create vc-text
             var myText = document.createElement("vc-text");

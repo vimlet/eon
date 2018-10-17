@@ -7,7 +7,7 @@ To use it import vc-toggle in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-toggle.html");
+    eon.import("/eon/ui/vc-toggle.html");
   </script>
 <head>
 ```
@@ -20,7 +20,7 @@ To use it import vc-toggle in the head of the HTML document:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
     // Create vc-toggle
     var myToggle = document.createElement("vc-toggle");
 
@@ -43,7 +43,7 @@ In this example the vc-toggle is disabled, but after a second it will be enabled
 ```
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
     var myToggle = document.querySelector("vc-toggle");
 
     setTimeout(function () {

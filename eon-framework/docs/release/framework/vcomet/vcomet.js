@@ -1,50 +1,50 @@
-var vcomet = vcomet || {};
+var eon = eon || {};
 
 (function () {
-    var vcomet = this;
+    var eon = this;
 
     // NOTE: template import order matters!    
     // ############################################################################################
 // DEBUG
 // ############################################################################################
 
-vcomet.debug = vcomet.debug || {};
+eon.debug = eon.debug || {};
 
-vcomet.debug.polyfill = vcomet.debug.polyfill || false;
+eon.debug.polyfill = eon.debug.polyfill || false;
 
-vcomet.warn = vcomet.warn || {};
+eon.warn = eon.warn || {};
 
-vcomet.error = vcomet.error || {};
+eon.error = eon.error || {};
 
-vcomet.debug.log = function(condition, message) {
-  if (vcomet.debug[condition]) {
+eon.debug.log = function(condition, message) {
+  if (eon.debug[condition]) {
     console.log(condition + ": " + message);
   }
 };
 
-vcomet.warn.log = function(condition, message) {
-  if (vcomet.warn[condition]) {
+eon.warn.log = function(condition, message) {
+  if (eon.warn[condition]) {
     console.warn(condition + ": " + message);
   }
 };
 
-vcomet.error.log = function(condition, message) {
-  if (vcomet.error[condition]) {
+eon.error.log = function(condition, message) {
+  if (eon.error[condition]) {
     console.error(condition + ": " + message);
   }
 };
 
-vcomet.debug.adapterEvents = vcomet.debug.adapterEvents || false;
-vcomet.debug.configEvents = vcomet.debug.configEvents || false;
-vcomet.debug.elementEvents = vcomet.debug.elementEvents || false;
+eon.debug.adapterEvents = eon.debug.adapterEvents || false;
+eon.debug.configEvents = eon.debug.configEvents || false;
+eon.debug.elementEvents = eon.debug.elementEvents || false;
 
-vcomet.warn.store = vcomet.warn.store || true;
-vcomet.error.store = vcomet.error.store || true;
+eon.warn.store = eon.warn.store || true;
+eon.error.store = eon.error.store || true;
     
     // ############################################################################################
 // BASE
 // ############################################################################################
-vcomet.getCurrentScript = function() {
+eon.getCurrentScript = function() {
     if (document.currentScript) {
       return document.currentScript.src;
     } else {
@@ -53,8 +53,8 @@ vcomet.getCurrentScript = function() {
     }
   };
   
-  vcomet.__setBase = function() {
-    var path = vcomet.getCurrentScript().replace("/vcomet.js", "");
+  eon.__setBase = function() {
+    var path = eon.getCurrentScript().replace("/eon.js", "");
     path = path.replace(/.*:\/\//g, "");
     path = path.split("/");
     path = path.slice(1, path.length);
@@ -65,12 +65,12 @@ vcomet.getCurrentScript = function() {
       basePath += path[i];
     }
   
-    vcomet.basePath = basePath;
+    eon.basePath = basePath;
   };
   
   // Attempt to find basePath if not set
-  if (!vcomet.basePath) {
-    vcomet.__setBase();
+  if (!eon.basePath) {
+    eon.__setBase();
   }
       
     // ############################################################################################
@@ -78,27 +78,27 @@ vcomet.getCurrentScript = function() {
 // ############################################################################################
 
 // Creates a style node and saves the reference
-vcomet.style = document.createElement("style");
-vcomet.rules = {};
+eon.style = document.createElement("style");
+eon.rules = {};
 
 // Appends the style to the head
-document.head.appendChild(vcomet.style);
+document.head.appendChild(eon.style);
 
 // Hides initial elements
-vcomet.style.sheet.insertRule(".vcomet-until-rendered { opacity: 0; }", 0);
+eon.style.sheet.insertRule(".eon-until-rendered { opacity: 0; }", 0);
 // Hide vc-script
-vcomet.style.sheet.insertRule("vc-script { display: none; }", 0);
+eon.style.sheet.insertRule("vc-script { display: none; }", 0);
 
 // ############################################################################################
 // RESPONSIVE
 // ############################################################################################
 
-vcomet.mobileWidth = 450;
-vcomet.tabletWidth = 800;
+eon.mobileWidth = 450;
+eon.tabletWidth = 800;
 
-vcomet.addViewportMeta = vcomet.addViewportMeta || true;
+eon.addViewportMeta = eon.addViewportMeta || true;
 
-if (vcomet.addViewportMeta) {
+if (eon.addViewportMeta) {
     document.write(
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     );
@@ -107,59 +107,59 @@ if (vcomet.addViewportMeta) {
 // ############################################################################################
 // DEFAULT THEME
 // ############################################################################################
-if (!vcomet.theme) {
-    vcomet.theme = "noire";
+if (!eon.theme) {
+    eon.theme = "noire";
 }    
     // ############################################################################################
 // POLYFILL DETECTION
 // ############################################################################################
 
-vcomet.injectPolyfill = function (url) {
+eon.injectPolyfill = function (url) {
   document.write('<script type="text/javascript" src="' + url + '"></script>');
 };
 
-vcomet.needCustomElementsPolyfill = function () {
+eon.needCustomElementsPolyfill = function () {
   var __customElements = window.hasOwnProperty("customElements");
-  if (vcomet.debug.polyfill) {
+  if (eon.debug.polyfill) {
     console.log("Polyfill custom-elements", !__customElements);
   }
   return !__customElements;
 };
 
-vcomet.needTemplatePolyfill = function () {
+eon.needTemplatePolyfill = function () {
   var __template = "content" in document.createElement("template") === true;
-  if (vcomet.debug.polyfill) {
+  if (eon.debug.polyfill) {
     console.log("Polyfill template", !__template);
   }
   return !__template;
 };
 
-vcomet.needCSSScopePolyfill = function () {
+eon.needCSSScopePolyfill = function () {
   var needPolyfill = false;
   try {
     doc.querySelector(":scope body");
   } catch (err) {
     needPolyfill = true;
   }
-  if (vcomet.debug.polyfill) {
+  if (eon.debug.polyfill) {
     console.log("Polyfill CSS Scope", needPolyfill);
   }
   return needPolyfill;
 };
 
-vcomet.needObjectAssignPolyfill = function () {
+eon.needObjectAssignPolyfill = function () {
   var needPolyfill = !Object.assign;
-  if (vcomet.debug.polyfill) {
+  if (eon.debug.polyfill) {
     console.log("Polyfill Object Assign", needPolyfill);
   }
   return needPolyfill;
 };
 
-vcomet.needLocalStringPolyfill = function () {
+eon.needLocalStringPolyfill = function () {
   return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
 }
 
-vcomet.needClassListAddPolyfill = function () {
+eon.needClassListAddPolyfill = function () {
   var div = document.createElement("div");
   div.classList.add("class1", "class2");
 
@@ -171,38 +171,38 @@ vcomet.needClassListAddPolyfill = function () {
 // ############################################################################################
 
 // Custom Elements - https://github.com/webcomponents/custom-elements
-if (vcomet.needCustomElementsPolyfill()) {
-  vcomet.injectPolyfill(vcomet.basePath + "/polyfill/custom-elements/custom-elements.min.js");
+if (eon.needCustomElementsPolyfill()) {
+  eon.injectPolyfill(eon.basePath + "/polyfill/custom-elements/custom-elements.min.js");
 }
 
 // Template - https://github.com/webcomponents/template
-if (vcomet.needTemplatePolyfill()) {
-  vcomet.injectPolyfill(vcomet.basePath + "/polyfill/template/template.js");
+if (eon.needTemplatePolyfill()) {
+  eon.injectPolyfill(eon.basePath + "/polyfill/template/template.js");
 }
 
 // CSS :scope
-if (vcomet.needCSSScopePolyfill()) {
-  vcomet.injectPolyfill(vcomet.basePath + "/polyfill/css/scope.js");
+if (eon.needCSSScopePolyfill()) {
+  eon.injectPolyfill(eon.basePath + "/polyfill/css/scope.js");
 }
 
 // Object.assign
-if (vcomet.needObjectAssignPolyfill()) {
-  vcomet.injectPolyfill(vcomet.basePath + "/polyfill/object/assign.js");
+if (eon.needObjectAssignPolyfill()) {
+  eon.injectPolyfill(eon.basePath + "/polyfill/object/assign.js");
 }
 
 // Pointer events (Must run always)
-vcomet.injectPolyfill(vcomet.basePath + "/polyfill/pointer-events/pep.js");
+eon.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
 
 // Date locale polyfill
-if (vcomet.needLocalStringPolyfill()) {
+if (eon.needLocalStringPolyfill()) {
   
   (function (proxied) {
     Date.prototype.toLocaleString = function (locale, options) {
 
       if (options.month && Object.keys(options).length == 1) {
-        return vcomet.time.defaultLocale.months[options.month][this.getMonth()];
+        return eon.time.defaultLocale.months[options.month][this.getMonth()];
       } else if (options.weekday && Object.keys(options).length == 1) {
-        return vcomet.time.defaultLocale.weekdays[options.weekday][this.getDay()];
+        return eon.time.defaultLocale.weekdays[options.weekday][this.getDay()];
       }
 
       return proxied.apply(this, arguments);
@@ -211,7 +211,7 @@ if (vcomet.needLocalStringPolyfill()) {
 
 }
 //
-if (vcomet.needClassListAddPolyfill()) {
+if (eon.needClassListAddPolyfill()) {
   
   (function (proxied) {
 
@@ -256,7 +256,7 @@ if (vcomet.needClassListAddPolyfill()) {
 // ############################################################################################
 
 // Creates a namespace for requirejs
-vcomet.amd = vcomet.amd || {};
+eon.amd = eon.amd || {};
 
 (function () {
   // Import requirejs file
@@ -2586,7 +2586,7 @@ vcomet.amd = vcomet.amd || {};
   this.require = require;
   this.define = define;
 
-}.apply(vcomet.amd));
+}.apply(eon.amd));
     
     // MODE: INTERPRETER
 // - client (browser)
@@ -2992,9 +2992,9 @@ vimlet.meta = vimlet.meta || {};
 // CORE MODULES
 // ############################################################################################
 
-vcomet.object = vcomet.object || {};
+eon.object = eon.object || {};
 
-vcomet.object.assignToPath = function(obj, path, value) {
+eon.object.assignToPath = function(obj, path, value) {
   var pathArray = path.split(".");
   var target = obj;
 
@@ -3009,7 +3009,7 @@ vcomet.object.assignToPath = function(obj, path, value) {
   target[pathArray[pathArray.length - 1]] = value;
 };
 
-vcomet.object.readFromPath = function(obj, path) {
+eon.object.readFromPath = function(obj, path) {
   var pathArray = path.split(".");
   var target = obj;
 
@@ -3028,7 +3028,7 @@ vcomet.object.readFromPath = function(obj, path) {
 //  always: (default)     Call stored functions always when triggered.
 //  once:                Call stored functions once when triggered.
 //  ready:              Call stored functions when triggered and force future functions to run immediately.
-vcomet.createCallback = function (callback, obj, type) {
+eon.createCallback = function (callback, obj, type) {
   // Set callback type
   if (!obj["__" + callback + "__type"]) {
     // Set always as the default type when undefined
@@ -3070,7 +3070,7 @@ vcomet.createCallback = function (callback, obj, type) {
   }
 };
 
-vcomet.triggerCallback = function (callback, obj, scope, args) {
+eon.triggerCallback = function (callback, obj, scope, args) {
 
   // Check if callback exsists
   if (obj["__" + callback]) {
@@ -3112,7 +3112,7 @@ vcomet.triggerCallback = function (callback, obj, scope, args) {
   }
 };
 
-vcomet.removeCallback = function (callback, obj, fn) {
+eon.removeCallback = function (callback, obj, fn) {
   var callbacksArray = obj["__" + callback];
 
   for (var i = 0; i < callbacksArray.length; i++) {
@@ -3124,9 +3124,9 @@ vcomet.removeCallback = function (callback, obj, fn) {
 
 
 
-vcomet.dom = vcomet.dom || {};
+eon.dom = eon.dom || {};
 
-// vcomet custom selector function
+// eon custom selector function
 // prototype $ and $1 should not conflict with other frameworks API 
 
 HTMLElement.prototype.$ = function (query) {
@@ -3144,7 +3144,7 @@ HTMLElement.prototype.getEnclosingComponent = function () {
   
   while (parentNode) {
 
-    if (parentNode.vcomet) {
+    if (parentNode.eon) {
 
       enclosingComponent = parentNode;
       parentNode = undefined;
@@ -3162,26 +3162,26 @@ HTMLElement.prototype.getEnclosingComponent = function () {
 
 };
 
-// vcomet definitions will always be available
-vcomet.$ = function (query) {
+// eon definitions will always be available
+eon.$ = function (query) {
   return query.indexOf("#", 0) === 0 ? document.querySelector(query) : document.querySelectorAll(query);
 };
 
-vcomet.$1 = function (query) {
+eon.$1 = function (query) {
   return document.querySelector(query);
 };
 
 // window & document definitions will use any other framework $ and $1 if found
-window.$ = window.$ || vcomet.$;
-window.$1 = window.$1 || vcomet.$1;
-document.$ = document.$ || vcomet.$;
-document.$1 = document.$1 || vcomet.$1;
+window.$ = window.$ || eon.$;
+window.$1 = window.$1 || eon.$1;
+document.$ = document.$ || eon.$;
+document.$1 = document.$1 || eon.$1;
 
-// TODO: MOVE THIS EXCEPT DOMREADY TO VCOMET.DOM
+// TODO: MOVE THIS EXCEPT DOMREADY TO eon.DOM
 (function () {
   var self = this;
 
-  // vcomet.domReady (Doesn't wait for customElements)
+  // eon.domReady (Doesn't wait for customElements)
   (function (funcName, baseObj) {
     "use strict";
     // The public function name defaults to window.docReady
@@ -3271,7 +3271,7 @@ document.$1 = document.$1 || vcomet.$1;
     ) {
       el = el.parentNode;
 
-      if (el.vcomet) {
+      if (el.eon) {
         return el;
       }
     }
@@ -3280,21 +3280,21 @@ document.$1 = document.$1 || vcomet.$1;
   };
 
   // Register resize listener callback
-  vcomet.createCallback("onResize", vcomet);
+  eon.createCallback("onResize", eon);
 
   window.addEventListener("resize", function (event) {
-    vcomet.triggerCallback("onResize", vcomet, null, [event]);
+    eon.triggerCallback("onResize", eon, null, [event]);
   });
 
   // Register global focus
-  vcomet.domReady(function () {
+  eon.domReady(function () {
     document.body.addEventListener(
       "focus",
       function (e) {
-        vcomet.triggerCallback("onFocus", vcomet, e.target, e);
+        eon.triggerCallback("onFocus", eon, e.target, e);
 
         if (e.target.onFocus) {
-          vcomet.triggerCallback("onFocus", e.target, e.target, e);
+          eon.triggerCallback("onFocus", e.target, e.target, e);
         }
       },
       true
@@ -3305,10 +3305,10 @@ document.$1 = document.$1 || vcomet.$1;
     document.body.addEventListener(
       "blur",
       function (e) {
-        vcomet.triggerCallback("onBlur", vcomet, e.target, e);
+        eon.triggerCallback("onBlur", eon, e.target, e);
 
         if (e.target.onBlur) {
-          vcomet.triggerCallback("onBlur", e.target, e.target, e);
+          eon.triggerCallback("onBlur", e.target, e.target, e);
         }
       },
       true
@@ -3324,7 +3324,7 @@ document.$1 = document.$1 || vcomet.$1;
    * @param {[type]} el     [description]
    * @param {[type]} parent [description]
    */
-  vcomet.dom.offsetRight = function (el, parent) {
+  eon.dom.offsetRight = function (el, parent) {
     // Get parent the element is relative to
     parent = !parent ? document.documentElement || document.body : parent;
     var docWidth = parent.offsetWidth;
@@ -3341,7 +3341,7 @@ document.$1 = document.$1 || vcomet.$1;
    * @param {[type]} el     [description]
    * @param {[type]} parent [description]
    */
-  vcomet.dom.offsetBottom = function (el, parent) {
+  eon.dom.offsetBottom = function (el, parent) {
     // Get parent the element is relative to
     parent = !parent ? document.documentElement || document.body : parent;
     var docHeight = parent.offsetHeight;
@@ -3358,7 +3358,7 @@ document.$1 = document.$1 || vcomet.$1;
    * @param  {[type]}  axis [description]
    * @return {Boolean}      [description]
    */
-  vcomet.dom.getTransformAxis = function (el, axis) {
+  eon.dom.getTransformAxis = function (el, axis) {
     var value;
     // Get element transform property
     var transform = el.style.transform;
@@ -3384,7 +3384,7 @@ document.$1 = document.$1 || vcomet.$1;
    * @param  {[type]} distance [description]
    * @return {[type]}          [description]
    */
-  vcomet.dom.translate = function (el, axis, value) {
+  eon.dom.translate = function (el, axis, value) {
     // Set the new node translate position
     switch (axis.toLowerCase()) {
       case "x":
@@ -3437,7 +3437,7 @@ document.$1 = document.$1 || vcomet.$1;
     }, true);
 
   };
-}.apply(vcomet));
+}.apply(eon));
 
 
 // ############################################################################################
@@ -3445,60 +3445,60 @@ document.$1 = document.$1 || vcomet.$1;
 // ############################################################################################
 
 // Create imports reade callback
-vcomet.createCallback("onImportsReady", vcomet, "ready");
-vcomet.createCallback("onScriptsReady", vcomet, "ready");
+eon.createCallback("onImportsReady", eon, "ready");
+eon.createCallback("onScriptsReady", eon, "ready");
 
 // Imports the requested custom element file, admits arrays and strings
-vcomet.import = function (param) {
+eon.import = function (param) {
 
     if (param.constructor === Array) {
 
         for (var i = 0; i < param.length; i++) {
-            vcomet.insertImport(param[i]);
+            eon.insertImport(param[i]);
         }
 
     } else if (param.constructor === String) {
 
-        vcomet.insertImport(param);
+        eon.insertImport(param);
 
     }
 
 };
 
-vcomet.insertImport = function (href) {
+eon.insertImport = function (href) {
 
     var elementName;
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
 
-    vcomet.imports = vcomet.imports || {
+    eon.imports = eon.imports || {
         count: 0,
         total: 0,
         ready: false
     };
 
-    vcomet.imports.style = vcomet.imports.style || "";
+    eon.imports.style = eon.imports.style || "";
 
-    vcomet.imports.scripts = vcomet.imports.scripts || {};
-    vcomet.imports.links = vcomet.imports.links || {};
-    vcomet.imports.templates = vcomet.imports.templates || {};
-    vcomet.imports.paths = vcomet.imports.paths || {};
-    vcomet.imports.config = vcomet.imports.config || {};
+    eon.imports.scripts = eon.imports.scripts || {};
+    eon.imports.links = eon.imports.links || {};
+    eon.imports.templates = eon.imports.templates || {};
+    eon.imports.paths = eon.imports.paths || {};
+    eon.imports.config = eon.imports.config || {};
 
-    if (!(elementName in vcomet.imports.templates)) {
+    if (!(elementName in eon.imports.templates)) {
 
         // Increment total
-        vcomet.imports.total++;
+        eon.imports.total++;
 
         // Avoid duplicated imports while waiting XMLHttpRequest callback.
-        vcomet.imports.templates[elementName] = null;
+        eon.imports.templates[elementName] = null;
 
         // Saves the paths of the imported elements
-        vcomet.imports.paths[elementName] = href.substring(0, href.length - href.match(/[^\/]*$/g)[0].length);
+        eon.imports.paths[elementName] = href.substring(0, href.length - href.match(/[^\/]*$/g)[0].length);
 
         // Declare element
-        vcomet.declare(elementName);
+        eon.declare(elementName);
 
         var xhttp = new XMLHttpRequest();
 
@@ -3506,14 +3506,14 @@ vcomet.insertImport = function (href) {
 
             if (this.readyState == 4 && this.status == 200) {
 
-                var importFragment = vcomet.fragmentFromString(this.responseText);
+                var importFragment = eon.fragmentFromString(this.responseText);
                 var i;
 
                 // Store combined styles
                 var styles = importFragment.querySelectorAll("style");
 
                 for (i = 0; i < styles.length; i++) {
-                    vcomet.imports.style += styles[i].innerHTML;
+                    eon.imports.style += styles[i].innerHTML;
                 }
 
                 // Store scripts
@@ -3521,17 +3521,17 @@ vcomet.insertImport = function (href) {
 
                 if (scripts.length > 0) {
 
-                    vcomet.imports.scripts[elementName] = {};
+                    eon.imports.scripts[elementName] = {};
 
                     for (i = 0; i < scripts.length; i++) {
 
 
                         if (scripts[i].getAttribute("data-src")) {
-                            scripts[i].src = vcomet.imports.paths[elementName] + scripts[i].getAttribute("data-src");
+                            scripts[i].src = eon.imports.paths[elementName] + scripts[i].getAttribute("data-src");
                             scripts[i].removeAttribute("data-src");
                         }
 
-                        vcomet.imports.scripts[elementName][i] = scripts[i];
+                        eon.imports.scripts[elementName][i] = scripts[i];
 
                     }
 
@@ -3542,10 +3542,10 @@ vcomet.insertImport = function (href) {
 
                 if (links.length > 0) {
 
-                    vcomet.imports.links[elementName] = {};
+                    eon.imports.links[elementName] = {};
 
                     for (i = 0; i < links.length; i++) {
-                        vcomet.imports.links[elementName][i] = links[i];
+                        eon.imports.links[elementName][i] = links[i];
                     }
 
                 }
@@ -3554,35 +3554,35 @@ vcomet.insertImport = function (href) {
                 var template = importFragment.querySelector("template");
 
                 if (template) {
-                    vcomet.imports.templates[elementName] = template;
+                    eon.imports.templates[elementName] = template;
                 }
 
                 // Wait unity domReady to ensure all imports are done and total value is accurate
-                vcomet.domReady(function () {
+                eon.domReady(function () {
 
-                    vcomet.imports.count++;
+                    eon.imports.count++;
 
-                    if (!vcomet.imports.ready && vcomet.imports.count == vcomet.imports.total) {
+                    if (!eon.imports.ready && eon.imports.count == eon.imports.total) {
 
                         // Appends all elements combined style
-                        vcomet.handleStyleAppend();
+                        eon.handleStyleAppend();
                         // Appends the imported links
-                        vcomet.handleLinksAppend();
+                        eon.handleLinksAppend();
                         // Appends the imported scripts
-                        vcomet.handleScriptsAppend();
+                        eon.handleScriptsAppend();
                         // When all the scripts are properly appended and ready then we import dependencies and see if we have finished all the imports
-                        vcomet.onScriptsReady(function () {
+                        eon.onScriptsReady(function () {
 
                             // Handles the dependencies and returns a boolean for whether there are pendings imports or not
-                            var hasPendingImports = vcomet.handleDependencies();
+                            var hasPendingImports = eon.handleDependencies();
                             
                             // If there are no more dependencies to handle trigger onImportsReady
-                            if (!hasPendingImports && !vcomet.imports.ready && vcomet.imports.count == vcomet.imports.total && vcomet.imports.total == Object.keys(vcomet.imports.config).length) {
-                                vcomet.imports.ready = true;
+                            if (!hasPendingImports && !eon.imports.ready && eon.imports.count == eon.imports.total && eon.imports.total == Object.keys(eon.imports.config).length) {
+                                eon.imports.ready = true;
 
-                                vcomet.triggerCallback('onImportsReady', vcomet);
+                                eon.triggerCallback('onImportsReady', eon);
                             } else {
-                                vcomet.__onScriptsReady__triggered = false;
+                                eon.__onScriptsReady__triggered = false;
                             }
 
                         });
@@ -3601,10 +3601,10 @@ vcomet.insertImport = function (href) {
 
 };
 
-vcomet.handleDependencies = function () {
+eon.handleDependencies = function () {
 
     // Automated dependencies and interpolation
-    var elementNames = Object.keys(vcomet.imports.config);
+    var elementNames = Object.keys(eon.imports.config);
     var hasPendingImports = false;
     var hasDependencies;
 
@@ -3612,14 +3612,14 @@ vcomet.handleDependencies = function () {
     for (var i = 0; i < elementNames.length; i++) {
 
         // Handle dependencies
-        hasDependencies = vcomet.handleConfigDependencies(elementNames[i]);
+        hasDependencies = eon.handleConfigDependencies(elementNames[i]);
 
         if (hasDependencies) {
             hasPendingImports = true;
         }
 
         // Handle interpolation
-        vcomet.handleTemplateInterpolation(elementNames[i]);
+        eon.handleTemplateInterpolation(elementNames[i]);
     }
 
     return hasPendingImports;
@@ -3628,23 +3628,23 @@ vcomet.handleDependencies = function () {
 
 
 // Handle template interpolation
-vcomet.handleTemplateInterpolation = function (name) {
-    if (vcomet.imports.config[name].interpolation) {
-        vcomet.interpolation.prepare(vcomet.imports.templates[name]);
+eon.handleTemplateInterpolation = function (name) {
+    if (eon.imports.config[name].interpolation) {
+        eon.interpolation.prepare(eon.imports.templates[name]);
     }
 };
 
-vcomet.handleStyleAppend = function () {
+eon.handleStyleAppend = function () {
 
-    if (vcomet.imports.style != "") {
+    if (eon.imports.style != "") {
 
         var combinedStyle = document.createElement("style");
 
-        combinedStyle.setAttribute("data-vcomet", "element-styles")
-        combinedStyle.innerHTML = vcomet.imports.style;
+        combinedStyle.setAttribute("data-eon", "element-styles")
+        combinedStyle.innerHTML = eon.imports.style;
 
         // Resets style to avoid css rules style replication
-        vcomet.imports.style = "";
+        eon.imports.style = "";
 
         document.head.appendChild(combinedStyle);
 
@@ -3652,16 +3652,16 @@ vcomet.handleStyleAppend = function () {
 
 };
 
-vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
+eon.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
-    var elementNames = Object.keys(vcomet.imports.scripts);
+    var elementNames = Object.keys(eon.imports.scripts);
     var resume = !isNaN(elementIndex - 1) && !isNaN(scriptIndex - 1) ? true : false;
     var elementScriptsKeys, elementScripts, script;
 
     // If it has to resume a previous scripts append we start from that index
     for (var i = resume ? elementIndex : 0; i < elementNames.length; i++) {
 
-        elementScripts = vcomet.imports.scripts[elementNames[i]];
+        elementScripts = eon.imports.scripts[elementNames[i]];
         elementScriptsKeys = Object.keys(elementScripts);
 
         // If it has to resume a previous scripts append we start from that index
@@ -3672,8 +3672,8 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
             if (elementScripts[elementScriptsKeys[j]].src) {
 
                 // If the script has a src then we import it via require
-                vcomet.amd.require([elementScripts[elementScriptsKeys[j]].src], function () {
-                    vcomet.handleScriptsAppend(i, j + 1);
+                eon.amd.require([elementScripts[elementScriptsKeys[j]].src], function () {
+                    eon.handleScriptsAppend(i, j + 1);
                 });
 
                 // Since we have to wait for the require to resumen our loops we break all the function execution
@@ -3689,8 +3689,8 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
                 // // Here we take the current script text and add our code to remove the script once its finished
                 elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML;
                 elementScripts[elementScriptsKeys[j]].innerHTML = elementScripts[elementScriptsKeys[j]].innerHTML +
-                    "var elementNames = Object.keys(vcomet.imports.scripts);" +
-                    "var elementScripts = vcomet.imports.scripts[elementNames[" + i + "]];" +
+                    "var elementNames = Object.keys(eon.imports.scripts);" +
+                    "var elementScripts = eon.imports.scripts[elementNames[" + i + "]];" +
                     "var scriptKey = Object.keys(elementScripts)[" + j + "];" +
                     "elementScripts[scriptKey].parentNode.removeChild(elementScripts[scriptKey]);";
 
@@ -3703,18 +3703,18 @@ vcomet.handleScriptsAppend = function (elementIndex, scriptIndex) {
     }
 
     // Since we are finished looping all the current element scripts we reset our scripts object to avoid looping through them again in case more elements are being imported after
-    vcomet.imports.scripts = {};
+    eon.imports.scripts = {};
 
     var scriptsReadyScript = document.createElement("script");
 
     scriptsReadyScript.setAttribute("scriptsready-script", "");
-    scriptsReadyScript.innerHTML = "vcomet.triggerCallback('onScriptsReady', vcomet); vcomet.removeScriptsReadyScripts();";
+    scriptsReadyScript.innerHTML = "eon.triggerCallback('onScriptsReady', eon); eon.removeScriptsReadyScripts();";
 
     document.head.appendChild(scriptsReadyScript);
 
 };
 
-vcomet.removeScriptsReadyScripts = function () {
+eon.removeScriptsReadyScripts = function () {
     var el = this;
     var scriptReadyScripts = document.head.querySelectorAll("script[scriptsready-script]");
 
@@ -3723,15 +3723,15 @@ vcomet.removeScriptsReadyScripts = function () {
     }
 };
 
-vcomet.handleLinksAppend = function () {
+eon.handleLinksAppend = function () {
 
-    var elementNames = Object.keys(vcomet.imports.links);
+    var elementNames = Object.keys(eon.imports.links);
     var elementLinksKeys, elementLinks, link;
 
     for (var i = 0; i < elementNames.length; i++) {
 
-        elementLinksKeys = Object.keys(vcomet.imports.links[elementNames[i]]);
-        elementLinks = vcomet.imports.links[elementNames[i]];
+        elementLinksKeys = Object.keys(eon.imports.links[elementNames[i]]);
+        elementLinks = eon.imports.links[elementNames[i]];
 
         for (var j = 0; j < elementLinksKeys.length; j++) {
 
@@ -3739,7 +3739,7 @@ vcomet.handleLinksAppend = function () {
 
             if (link.getAttribute("data-href")) {
 
-                link.href = vcomet.imports.paths[elementNames[i]] + link.getAttribute("data-href");
+                link.href = eon.imports.paths[elementNames[i]] + link.getAttribute("data-href");
                 link.removeAttribute("data-href");
 
             }
@@ -3753,9 +3753,9 @@ vcomet.handleLinksAppend = function () {
 };
 
 // Handle config dependencies
-vcomet.handleConfigDependencies = function (name) {
+eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
-    var elementConfig = vcomet.imports.config[name];
+    var elementConfig = eon.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
 
     // Loop through dependencies path and import new ones
@@ -3763,11 +3763,11 @@ vcomet.handleConfigDependencies = function (name) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
             dependencyName = elementConfig.dependencies[j].match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase();
             dependencyPath = elementConfig.dependencies[j];
-            if (!(dependencyName in vcomet.imports.templates)) {
+            if (!(dependencyName in eon.imports.templates)) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
-                dependencyFile = vcomet.imports.paths[name] + dependencyPath;
-                vcomet.import(dependencyFile);
+                dependencyFile = eon.imports.paths[name] + dependencyPath;
+                eon.import(dependencyFile);
             }
         }
     }
@@ -3776,24 +3776,24 @@ vcomet.handleConfigDependencies = function (name) {
 }
 
 // If there are no imports in the document we will trigger onImportsReady event immediately
-vcomet.domReady(function () {
-    if (!vcomet.imports || (vcomet.imports && vcomet.imports.total == 0)) {
-        vcomet.triggerCallback("onImportsReady", vcomet);
+eon.domReady(function () {
+    if (!eon.imports || (eon.imports && eon.imports.total == 0)) {
+        eon.triggerCallback("onImportsReady", eon);
     }
 });
 
-vcomet.registry = vcomet.registry || {};
+eon.registry = eon.registry || {};
 
-vcomet.registry.transformedQueue = [];
-vcomet.registry.renderQueue = [];
-vcomet.registry.bubbleRenderQueue = [];
-vcomet.registry.readyQueue = [];
+eon.registry.transformedQueue = [];
+eon.registry.renderQueue = [];
+eon.registry.bubbleRenderQueue = [];
+eon.registry.readyQueue = [];
 
-vcomet.registry.elementThemes = {};
-vcomet.registry.elementCounters = {};
-vcomet.registry.elementRegistry = {};
+eon.registry.elementThemes = {};
+eon.registry.elementCounters = {};
+eon.registry.elementRegistry = {};
 
-vcomet.registry.elementStatus = {
+eon.registry.elementStatus = {
   declared: [],
   created: [],
   attached: {}, // Object is used to avoid duplication
@@ -3804,31 +3804,31 @@ vcomet.registry.elementStatus = {
   ready: []
 };
 
-// Register vcomet ready callback
-vcomet.createCallback("onReady", vcomet, "ready");
+// Register eon ready callback
+eon.createCallback("onReady", eon, "ready");
 
 // Register element
-vcomet.registry.registerElement = function (el) {
+eon.registry.registerElement = function (el) {
   var name = el.tagName.toLowerCase();
   var uid = el.uid ? el.uid : el.getAttribute("uid");
   var uidFull;
 
   if (!uid) {
 
-    if (!vcomet.registry.elementCounters[name]) {
-      vcomet.registry.elementCounters[name] = 0;
+    if (!eon.registry.elementCounters[name]) {
+      eon.registry.elementCounters[name] = 0;
     }
 
     // Assign uid
-    vcomet.registry.elementCounters[name]++;
-    uid = vcomet.registry.elementCounters[name];
+    eon.registry.elementCounters[name]++;
+    uid = eon.registry.elementCounters[name];
     el.setAttribute("uid", uid);
     el.uid = uid;
 
     uidFull = name + "-" + uid;
 
     // Track element status
-    vcomet.registry.elementRegistry[uidFull] = {
+    eon.registry.elementRegistry[uidFull] = {
       el: el,
       status: "created"
     };
@@ -3842,81 +3842,81 @@ vcomet.registry.registerElement = function (el) {
     el.uid = uid;
 
     // Updates the reference for the element
-    vcomet.registry.elementRegistry[uidFull].el = el;
+    eon.registry.elementRegistry[uidFull].el = el;
   }
 
-  el.vcomet = true;
+  el.eon = true;
 
   return uidFull;
 };
 
-vcomet.registry.triggerTransformed = function (index) {
-  vcomet.registry.transformedQueue[index].fn.apply(vcomet.registry.transformedQueue[index].el);
+eon.registry.triggerTransformed = function (index) {
+  eon.registry.transformedQueue[index].fn.apply(eon.registry.transformedQueue[index].el);
 };
 
-vcomet.registry.addToTransformedQueue = function (el, elementDoc, fn) {
+eon.registry.addToTransformedQueue = function (el, elementDoc, fn) {
   var script = document.createElement("script");
   var index;
 
-  vcomet.registry.transformedQueue.push({
+  eon.registry.transformedQueue.push({
     el: el,
     fn: fn
   });
 
-  index = vcomet.registry.transformedQueue.length - 1;
+  index = eon.registry.transformedQueue.length - 1;
 
   script.innerHTML =
-    "setTimeout(function(){setTimeout(function(){vcomet.registry.triggerTransformed(" +
+    "setTimeout(function(){setTimeout(function(){eon.registry.triggerTransformed(" +
     index +
     ");}, 0);}, 0);";
 
-  vcomet.registry.transformedQueue[index][script] = script;
+  eon.registry.transformedQueue[index][script] = script;
 
   elementDoc.querySelector("head").appendChild(script);
 };
 
-vcomet.registry.addToRenderQueue = function (el, fn) {
-  vcomet.registry.renderQueue.push({
+eon.registry.addToRenderQueue = function (el, fn) {
+  eon.registry.renderQueue.push({
     el: el,
     fn: fn
   });
 };
 
-vcomet.registry.addToBubbleRenderQueue = function (el, fn) {
-  vcomet.registry.bubbleRenderQueue.push({
+eon.registry.addToBubbleRenderQueue = function (el, fn) {
+  eon.registry.bubbleRenderQueue.push({
     el: el,
     fn: fn
   });
 };
 
-vcomet.registry.addToReadyQueue = function (el, fn) {
-  vcomet.registry.readyQueue.push({
+eon.registry.addToReadyQueue = function (el, fn) {
+  eon.registry.readyQueue.push({
     el: el,
     fn: fn
   });
 };
 
-vcomet.registry.triggerRenders = function () {
+eon.registry.triggerRenders = function () {
 
-  if (Object.keys(vcomet.registry.elementStatus.attached).length == vcomet.registry.elementStatus.transformed.length) {
+  if (Object.keys(eon.registry.elementStatus.attached).length == eon.registry.elementStatus.transformed.length) {
     
-    vcomet.registry.triggerRenderCallbacks();
-    vcomet.registry.triggerBubbleRenderCallbacks();
-    vcomet.registry.triggerReadyCallbacks();
+    eon.registry.triggerRenderCallbacks();
+    eon.registry.triggerBubbleRenderCallbacks();
+    eon.registry.triggerReadyCallbacks();
 
     // Trigger global onReady
-    vcomet.onImportsReady(function () {
-      vcomet.triggerCallback("onReady", vcomet);
+    eon.onImportsReady(function () {
+      eon.triggerCallback("onReady", eon);
     });
 
   }
 
 };
 
-vcomet.registry.triggerRenderCallbacks = function () {
+eon.registry.triggerRenderCallbacks = function () {
   // Clone queue and clear
-  var auxQueue = vcomet.registry.renderQueue.slice();
-  vcomet.registry.renderQueue = [];
+  var auxQueue = eon.registry.renderQueue.slice();
+  eon.registry.renderQueue = [];
 
   // Trigger queue
   for (var i = 0; i < auxQueue.length; i++) {
@@ -3924,10 +3924,10 @@ vcomet.registry.triggerRenderCallbacks = function () {
   }
 };
 
-vcomet.registry.triggerBubbleRenderCallbacks = function () {
+eon.registry.triggerBubbleRenderCallbacks = function () {
   // Clone queue and clear
-  var auxQueue = vcomet.registry.bubbleRenderQueue.slice();
-  vcomet.registry.bubbleRenderQueue = [];
+  var auxQueue = eon.registry.bubbleRenderQueue.slice();
+  eon.registry.bubbleRenderQueue = [];
 
   // Trigger queue
   for (var i = auxQueue.length - 1; i >= 0; i--) {
@@ -3935,10 +3935,10 @@ vcomet.registry.triggerBubbleRenderCallbacks = function () {
   }
 };
 
-vcomet.registry.triggerReadyCallbacks = function () {
+eon.registry.triggerReadyCallbacks = function () {
   // Clone queue and clear
-  var auxQueue = vcomet.registry.readyQueue.slice();
-  vcomet.registry.readyQueue = [];
+  var auxQueue = eon.registry.readyQueue.slice();
+  eon.registry.readyQueue = [];
 
   // Trigger queue
   for (var i = 0; i < auxQueue.length; i++) {
@@ -3946,21 +3946,21 @@ vcomet.registry.triggerReadyCallbacks = function () {
   }
 };
 
-vcomet.registry.registerTheme = function (tagName, theme) {
-  if (!vcomet.registry.elementThemes[theme]) {
-    vcomet.registry.elementThemes[theme] = {};
+eon.registry.registerTheme = function (tagName, theme) {
+  if (!eon.registry.elementThemes[theme]) {
+    eon.registry.elementThemes[theme] = {};
   }
 
-  vcomet.registry.elementThemes[theme][tagName] = true;
+  eon.registry.elementThemes[theme][tagName] = true;
 };
 
-vcomet.registry.isThemeRegistered = function (tagName, theme) {
-  return !vcomet.registry.elementThemes[theme]
+eon.registry.isThemeRegistered = function (tagName, theme) {
+  return !eon.registry.elementThemes[theme]
     ? false
-    : vcomet.registry.elementThemes[theme][tagName];
+    : eon.registry.elementThemes[theme][tagName];
 };
 
-vcomet.registry.getUidFull = function (el) {
+eon.registry.getUidFull = function (el) {
   var uid = el.uid ? el.uid : el.getAttribute("uid");
   var fullUid;
 
@@ -3971,90 +3971,90 @@ vcomet.registry.getUidFull = function (el) {
   return fullUid;
 };
 
-vcomet.registry.updateElementStatus = function (el, status) {
+eon.registry.updateElementStatus = function (el, status) {
 
   if (status != "parsed") {
 
-    var uidFull = vcomet.registry.getUidFull(el);
+    var uidFull = eon.registry.getUidFull(el);
 
     if (status == "attached") {
 
-      vcomet.registry.elementStatus[status][uidFull] = el;
+      eon.registry.elementStatus[status][uidFull] = el;
 
-      if (vcomet.registry.elementStatus.ready.length != Object.keys(vcomet.registry.elementStatus.attached).length) {
-        vcomet["__onReady__triggered"] = false;
+      if (eon.registry.elementStatus.ready.length != Object.keys(eon.registry.elementStatus.attached).length) {
+        eon["__onReady__triggered"] = false;
       }
 
     } else if (status != "detached") {
 
-      vcomet.registry.elementStatus[status].push(el);
+      eon.registry.elementStatus[status].push(el);
       
     }
 
     if (status != "created" && status != "declared") {
-      vcomet.registry.elementRegistry[uidFull][status] = true;
+      eon.registry.elementRegistry[uidFull][status] = true;
     }
 
   }
 
 };
 
-vcomet.registry.isAttached = function (el) {
+eon.registry.isAttached = function (el) {
   return (
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)] &&
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)].attached
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)].attached
   );
 };
 
-vcomet.registry.isImported = function (el) {
+eon.registry.isImported = function (el) {
   return (
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)] &&
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)].imported
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)].imported
   );
 };
 
-vcomet.registry.isTransformed = function (el) {
+eon.registry.isTransformed = function (el) {
   return (
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)] &&
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)].transformed
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)].transformed
   );
 };
 
-vcomet.registry.isRendered = function (el) {
+eon.registry.isRendered = function (el) {
   return (
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)] &&
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)].rendered
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)].rendered
   );
 };
 
-vcomet.registry.isBubbleRendered = function (el) {
+eon.registry.isBubbleRendered = function (el) {
   return (
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)] &&
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)].bubbleRendered
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)].bubbleRendered
   );
 };
 
-vcomet.registry.isReady = function (el) {
+eon.registry.isReady = function (el) {
   return (
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)] &&
-    vcomet.registry.elementRegistry[vcomet.registry.getUidFull(el)].ready
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
+    eon.registry.elementRegistry[eon.registry.getUidFull(el)].ready
   );
 };
 
 // Trigger global onReady
-vcomet.onImportsReady(function () {
+eon.onImportsReady(function () {
 
-  if (vcomet.registry.elementStatus.declared.length == 0) {
-    vcomet.triggerCallback("onReady", vcomet);
+  if (eon.registry.elementStatus.declared.length == 0) {
+    eon.triggerCallback("onReady", eon);
   }
 
 });
 
-vcomet.interpolation = vcomet.interpolation || {};
-vcomet.interpolation.tags = ["{{", "}}", "="];
+eon.interpolation = eon.interpolation || {};
+eon.interpolation.tags = ["{{", "}}", "="];
 
 // Replaces all the echo/script for its corresponding elements and prepares them
-vcomet.interpolation.prepare = function (template) {
+eon.interpolation.prepare = function (template) {
 
 
   // Extend vimlet.meta
@@ -4074,7 +4074,7 @@ vcomet.interpolation.prepare = function (template) {
   }
 
 
-  vimlet.meta.tags = vcomet.interpolation.tags;
+  vimlet.meta.tags = eon.interpolation.tags;
   vimlet.meta.parse(window, template.innerHTML, null, function(result){
     template.innerHTML = result;
   });
@@ -4083,7 +4083,7 @@ vcomet.interpolation.prepare = function (template) {
 };
 
 // Handles all the initial state of the data and variable elements
-vcomet.interpolation.handleInterpolationVariables = function (el, config) {
+eon.interpolation.handleInterpolationVariables = function (el, config) {
   var variables = el.template.querySelectorAll("vc-variable");
   var currentVariable;
   var bindString;
@@ -4095,39 +4095,39 @@ vcomet.interpolation.handleInterpolationVariables = function (el, config) {
   for (var i = 0; i < variables.length; i++) {
     currentVariable = variables[i];
     bindString = "data." + currentVariable.getAttribute("bind");
-    bindValue = vcomet.object.readFromPath(el, bindString);
+    bindValue = eon.object.readFromPath(el, bindString);
 
     bindValue = typeof bindValue == "undefined" ? "" : bindValue;
 
-    vcomet.object.assignToPath(el, bindString, bindValue);
+    eon.object.assignToPath(el, bindString, bindValue);
   }
 
-  vcomet.interpolation.setupDataChangeCallback(el, config);
-  vcomet.interpolation.setupDataPropDescriptors(el, config);
-  vcomet.interpolation.interpolate(el, el.data, el.__interpolations);
+  eon.interpolation.setupDataChangeCallback(el, config);
+  eon.interpolation.setupDataPropDescriptors(el, config);
+  eon.interpolation.interpolate(el, el.data, el.__interpolations);
 };
 
 // Creates the private onDataChanged callback to handle the public one
-vcomet.interpolation.setupDataChangeCallback = function (el, config) {
+eon.interpolation.setupDataChangeCallback = function (el, config) {
   // If the private callback doesnt exist creates it
   if (!el._onDataChanged) {
-    vcomet.createCallback("_onDataChanged", el);
+    eon.createCallback("_onDataChanged", el);
   }
 
   // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
   el._onDataChanged(function (keyPath, oldVal, newVal) {
 
     if (keyPath == "data") {
-      vcomet.interpolation.replaceData(el, oldVal, newVal, config);
+      eon.interpolation.replaceData(el, oldVal, newVal, config);
     } else {
-      vcomet.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, config);
+      eon.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, config);
     }
 
   });
 }
 
 // Takes all the properties from data, finds its variable and sets its value
-vcomet.interpolation.interpolate = function (el, obj, interpolations, bind) {
+eon.interpolation.interpolate = function (el, obj, interpolations, bind) {
   var key, i, variableBind, variable;
   
   for (key in obj) {
@@ -4139,7 +4139,7 @@ vcomet.interpolation.interpolate = function (el, obj, interpolations, bind) {
         bind = bind ? bind + "." + key : key;
         interpolations[key] = {};
 
-        vcomet.interpolation.interpolate(el, obj[key], interpolations[key], bind);
+        eon.interpolation.interpolate(el, obj[key], interpolations[key], bind);
 
       } else {
 
@@ -4161,7 +4161,7 @@ vcomet.interpolation.interpolate = function (el, obj, interpolations, bind) {
 }
 
 // Handles the value change of the variable element and triggers onDataChanged
-vcomet.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVal, config) {
+eon.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVal, config) {
   var interpolations = el.__interpolations;
   var pathArray = keyPath.split(".");
   var interpolationPath;
@@ -4172,7 +4172,7 @@ vcomet.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVa
   // Sets the path back together withouth data
   interpolationPath = pathArray.join(".");
   // Takes the variable elements for the path
-  variablesToChange = vcomet.object.readFromPath(el.__interpolations, interpolationPath);
+  variablesToChange = eon.object.readFromPath(el.__interpolations, interpolationPath);
 
   // If it has variable elements changes its value 
   if (variablesToChange) {
@@ -4181,25 +4181,25 @@ vcomet.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVa
     }
   }
   
-  vcomet.triggerAllCallbackEvents(el, config, "onDataChanged", [interpolationPath, oldVal, newVal]);
+  eon.triggerAllCallbackEvents(el, config, "onDataChanged", [interpolationPath, oldVal, newVal]);
 }
 
 // Handles the situation when the whole data has been changed for another object
-vcomet.interpolation.replaceData = function (el, oldData, newData, config) {
+eon.interpolation.replaceData = function (el, oldData, newData, config) {
   var checked = {};
   
-  vcomet.triggerAllCallbackEvents(el, config, "onDataChanged", ["data", oldData, newData]);
+  eon.triggerAllCallbackEvents(el, config, "onDataChanged", ["data", oldData, newData]);
 
   // Checks differences between the old and the new data
-  checked = vcomet.interpolation.backwardDataDiffing(el, "data", oldData, newData, checked, config);
+  checked = eon.interpolation.backwardDataDiffing(el, "data", oldData, newData, checked, config);
 
   // Checks differences between the new and the old data, escaping the already checked ones
-  vcomet.interpolation.forwardDataDiffing(el, "data", newData, checked, config);
-  vcomet.interpolation.createObjectPropDescriptors(el, newData, "data", config);
+  eon.interpolation.forwardDataDiffing(el, "data", newData, checked, config);
+  eon.interpolation.createObjectPropDescriptors(el, newData, "data", config);
 }
 
 // Compares the old data with the new one and triggers the changes
-vcomet.interpolation.backwardDataDiffing = function (el, keyPath, oldData, newData, checked, config) {
+eon.interpolation.backwardDataDiffing = function (el, keyPath, oldData, newData, checked, config) {
   var newVal;
   // Loops through the oldData
   for (var key in oldData) {
@@ -4207,12 +4207,12 @@ vcomet.interpolation.backwardDataDiffing = function (el, keyPath, oldData, newDa
     if (key.indexOf("__") == -1) {
       // If the property is an object, we enter this function again for that object
       if (oldData[key].constructor === Object) {
-        checked[key] = vcomet.interpolation.backwardDataDiffing(el, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config);
+        checked[key] = eon.interpolation.backwardDataDiffing(el, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config);
       } else {
         // If there is no such property on the new Data we set it as an empty string
         newVal = newData ? newData[key] : "";
         // Handles the variable change
-        vcomet.interpolation.handleVariableChange(el, keyPath + "." + key, oldData[key], newVal, config);
+        eon.interpolation.handleVariableChange(el, keyPath + "." + key, oldData[key], newVal, config);
 
         if (newData && newData.hasOwnProperty(key)) {
           checked[key] = newData[key];
@@ -4225,7 +4225,7 @@ vcomet.interpolation.backwardDataDiffing = function (el, keyPath, oldData, newDa
 }
 
 // Compares the data with the already checked object
-vcomet.interpolation.forwardDataDiffing = function (el, keyPath, data, checked, config) {
+eon.interpolation.forwardDataDiffing = function (el, keyPath, data, checked, config) {
   var oldVal;
   // Loops through data
   for (var key in data) {
@@ -4233,12 +4233,12 @@ vcomet.interpolation.forwardDataDiffing = function (el, keyPath, data, checked, 
     if (key.indexOf("__") == -1) {
       // If the property is an object, we enter this function again for that object
       if (data[key].constructor === Object) {
-        vcomet.interpolation.forwardDataDiffing(el, keyPath + "." + key, data[key], checked ? checked[key] : checked, config);
+        eon.interpolation.forwardDataDiffing(el, keyPath + "." + key, data[key], checked ? checked[key] : checked, config);
       } else {
         oldVal = checked ? checked[key] : "";
         // To only trigger variable change for properties that are not already checked/triggered
         if ((checked && !checked[key]) || !checked) {
-          vcomet.interpolation.handleVariableChange(el, keyPath + "." + key, oldVal, data[key], config);
+          eon.interpolation.handleVariableChange(el, keyPath + "." + key, oldVal, data[key], config);
         }
       }
     }
@@ -4246,7 +4246,7 @@ vcomet.interpolation.forwardDataDiffing = function (el, keyPath, data, checked, 
 }
 
 // Creates the descriptor for the data object itself and for all its properties
-vcomet.interpolation.setupDataPropDescriptors = function (el, config) {
+eon.interpolation.setupDataPropDescriptors = function (el, config) {
   // Also creates a propDescriptor for the base object property
   el.__data = el.data;
 
@@ -4254,15 +4254,15 @@ vcomet.interpolation.setupDataPropDescriptors = function (el, config) {
   Object.defineProperty(
     el,
     "data",
-    vcomet.interpolation.createPropDescriptor(el, el, "data", "", el.data, config)
+    eon.interpolation.createPropDescriptor(el, el, "data", "", el.data, config)
   );
 
   // Loops through all the keys of the object
-  vcomet.interpolation.createObjectPropDescriptors(el, el.data, "data", config);
+  eon.interpolation.createObjectPropDescriptors(el, el.data, "data", config);
 }
 
 // Simple property descriptor creation that in case its changed it will trigger our internal callback
-vcomet.interpolation.createPropDescriptor = function (callbackOwner, keyOwnerObj, key, keyPath, value, config) {
+eon.interpolation.createPropDescriptor = function (callbackOwner, keyOwnerObj, key, keyPath, value, config) {
   var propDescriptor = {};
 
   // Update property value
@@ -4275,7 +4275,7 @@ vcomet.interpolation.createPropDescriptor = function (callbackOwner, keyOwnerObj
 
   propDescriptor.set = function (value) {
     // Trigger onDataChanged
-    vcomet.triggerCallback("_onDataChanged", callbackOwner, callbackOwner, [keyPath + key, keyOwnerObj["__" + key], value]);
+    eon.triggerCallback("_onDataChanged", callbackOwner, callbackOwner, [keyPath + key, keyOwnerObj["__" + key], value]);
 
     // Update property value
     keyOwnerObj["__" + key] = value;
@@ -4285,7 +4285,7 @@ vcomet.interpolation.createPropDescriptor = function (callbackOwner, keyOwnerObj
 }
 
 // When the property we want to observer is an object we create its descriptor and ones for its properties
-vcomet.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, config) {
+eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, config) {
   var value;
 
   keyPath = keyPath + ".";
@@ -4300,19 +4300,19 @@ vcomet.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, c
       Object.defineProperty(
         obj,
         key,
-        vcomet.interpolation.createPropDescriptor(el, obj, key, keyPath, value, config)
+        eon.interpolation.createPropDescriptor(el, obj, key, keyPath, value, config)
       );
 
       // If the value is an Object then we update the keyPath and create the propDescriptors
       if (value && value.constructor === Object) {
         keyPath = keyPath + key;
-        vcomet.interpolation.createObjectPropDescriptors(el, value, keyPath, config);
+        eon.interpolation.createObjectPropDescriptors(el, value, keyPath, config);
       }
     }
   }
 }
 
-vcomet.constructClass = function (baseElement) {
+eon.constructClass = function (baseElement) {
   // Class adpater
   var classAdapter = function () {
     // WARNING! Reflect.construct returned value will fail to return element when browser has native
@@ -4327,7 +4327,7 @@ vcomet.constructClass = function (baseElement) {
       el = baseElement.call(classAdapter); // ES alternative
     }
     // Trigger onCreated callback
-    vcomet.triggerCallback("onCreated", classAdapter, el);
+    eon.triggerCallback("onCreated", classAdapter, el);
     return el;
   };
 
@@ -4337,19 +4337,19 @@ vcomet.constructClass = function (baseElement) {
   Object.setPrototypeOf(classAdapter.__proto__, baseElement.__proto__);
 
   // Create callbacks
-  vcomet.createCallback("onCreated", classAdapter);
-  vcomet.createCallback("onAttached", classAdapter);
-  vcomet.createCallback("onDetached", classAdapter);
-  vcomet.createCallback("onAttributeChanged", classAdapter);
+  eon.createCallback("onCreated", classAdapter);
+  eon.createCallback("onAttached", classAdapter);
+  eon.createCallback("onDetached", classAdapter);
+  eon.createCallback("onAttributeChanged", classAdapter);
 
   // Trigger callbacks
   classAdapter.prototype.connectedCallback = function () {
     var el = this;
-    vcomet.triggerCallback("onAttached", classAdapter, el);
+    eon.triggerCallback("onAttached", classAdapter, el);
   };
   classAdapter.prototype.disconnectedCallback = function () {
     var el = this;
-    vcomet.triggerCallback("onDetached", classAdapter, el);
+    eon.triggerCallback("onDetached", classAdapter, el);
   };
   classAdapter.prototype.attributeChangedCallback = function (
     attrName,
@@ -4357,8 +4357,8 @@ vcomet.constructClass = function (baseElement) {
     newVal
   ) {
     var el = this;
-    el["__" + vcomet.util.hyphenToCamelCase(attrName)] = newVal;
-    vcomet.triggerCallback("onAttributeChanged", classAdapter, el, [
+    el["__" + eon.util.hyphenToCamelCase(attrName)] = newVal;
+    eon.triggerCallback("onAttributeChanged", classAdapter, el, [
       attrName,
       oldVal,
       newVal
@@ -4371,7 +4371,7 @@ vcomet.constructClass = function (baseElement) {
   return classAdapter;
 };
 
-vcomet.element = function (name, stylePath, config) {
+eon.element = function (name, stylePath, config) {
     
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
@@ -4382,7 +4382,7 @@ vcomet.element = function (name, stylePath, config) {
         var link = document.createElement("link");
 
         link.setAttribute("rel", "stylesheet");
-        link.setAttribute("href", vcomet.imports.paths[name.toLowerCase()] + stylePath);
+        link.setAttribute("href", eon.imports.paths[name.toLowerCase()] + stylePath);
 
         document.head.appendChild(link);
 
@@ -4390,15 +4390,15 @@ vcomet.element = function (name, stylePath, config) {
 
     if (config.constructor === Object) {
 
-        vcomet.imports.config[name.toLowerCase()] = config;
-        vcomet.triggerCallback('onScriptsReady', vcomet);
+        eon.imports.config[name.toLowerCase()] = config;
+        eon.triggerCallback('onScriptsReady', eon);
 
     } else if (config) {
 
-        vcomet.amd.require([vcomet.imports.paths[name.toLowerCase()] + config], function (config) {
+        eon.amd.require([eon.imports.paths[name.toLowerCase()] + config], function (config) {
 
-            vcomet.imports.config[name.toLowerCase()] = config;
-            vcomet.triggerCallback('onScriptsReady', vcomet);
+            eon.imports.config[name.toLowerCase()] = config;
+            eon.triggerCallback('onScriptsReady', eon);
 
         });
 
@@ -4406,13 +4406,13 @@ vcomet.element = function (name, stylePath, config) {
 
 };
 
-vcomet.define = function (config) {
-    vcomet.amd.define(function () {
+eon.define = function (config) {
+    eon.amd.define(function () {
         return config;
     });
 };
 
-vcomet.createElement = function (name, config) {
+eon.createElement = function (name, config) {
 
     var el = document.createElement(name);
 
@@ -4452,28 +4452,28 @@ vcomet.createElement = function (name, config) {
 
 };
 
-vcomet.hideElement = function (el) {
-    el.classList.add("vcomet-until-rendered");
+eon.hideElement = function (el) {
+    el.classList.add("eon-until-rendered");
 };
 
-vcomet.unhideElement = function (el) {
-    el.classList.remove("vcomet-until-rendered");
+eon.unhideElement = function (el) {
+    el.classList.remove("eon-until-rendered");
 };
 
-vcomet.declareCallbacks = function (el) {
+eon.declareCallbacks = function (el) {
     // Creates the callback needed for the element
-    vcomet.createCallback("onCreated", el, "ready");
-    vcomet.createCallback("onInit", el, "ready");
-    vcomet.createCallback("onTransformed", el, "ready");
-    vcomet.createCallback("onRender", el, "ready");
-    vcomet.createCallback("onBubbleRender", el, "ready");
-    vcomet.createCallback("onReady", el, "ready");
-    vcomet.createCallback("onPropertyChanged", el);
-    vcomet.createCallback("onAttributeChanged", el);
-    vcomet.createCallback("onDataChanged", el);
+    eon.createCallback("onCreated", el, "ready");
+    eon.createCallback("onInit", el, "ready");
+    eon.createCallback("onTransformed", el, "ready");
+    eon.createCallback("onRender", el, "ready");
+    eon.createCallback("onBubbleRender", el, "ready");
+    eon.createCallback("onReady", el, "ready");
+    eon.createCallback("onPropertyChanged", el);
+    eon.createCallback("onAttributeChanged", el);
+    eon.createCallback("onDataChanged", el);
 };
 
-vcomet.generateSourceFragment = function (el) {
+eon.generateSourceFragment = function (el) {
 
     el.source = document.createDocumentFragment();
 
@@ -4511,41 +4511,41 @@ vcomet.generateSourceFragment = function (el) {
 
 };
 
-vcomet.prepareElement = function (el, callback) {
+eon.prepareElement = function (el, callback) {
 
     // Mark element as first attach
     el.isFirstAttach = true;
 
     // Runs the callback provided when all imports are ready
-    vcomet.onImportsReady(function () {
+    eon.onImportsReady(function () {
         callback();
     });
 
 };
 
-vcomet.parse = function (el, config) {
+eon.parse = function (el, config) {
     // Creates object properties for the element with data about the properties/attributes to be observed
-    vcomet.collectObserveData(el, config);
+    eon.collectObserveData(el, config);
 
     // Imports Data and Public/Private properties and functions
-    vcomet.importData(el, config);
-    vcomet.importPublic(el, config);
-    vcomet.importPrivate(el, config);
+    eon.importData(el, config);
+    eon.importPublic(el, config);
+    eon.importPrivate(el, config);
 
-    vcomet.triggerAllCallbackEvents(el, config, "onParsed");
-    vcomet.registry.updateElementStatus(el, "parsed");
+    eon.triggerAllCallbackEvents(el, config, "onParsed");
+    eon.registry.updateElementStatus(el, "parsed");
 
 };
 
-vcomet.collectObserveData = function (el, config) {
+eon.collectObserveData = function (el, config) {
 
     el.__observeProperties = {};
     el.__observeAttributes = {};
     el.__reflectProperties = {};
 
     // Assigns each index of the array to the object
-    vcomet.addObserveFromArray(el.__observeProperties, config.observeProperties);
-    vcomet.addObserveFromArray(el.__observeAttributes, config.observeAttributes);
+    eon.addObserveFromArray(el.__observeProperties, config.observeProperties);
+    eon.addObserveFromArray(el.__observeAttributes, config.observeAttributes);
 
     // Reads properties object to add them to the observe object if needed
     if (config.properties) {
@@ -4560,7 +4560,7 @@ vcomet.collectObserveData = function (el, config) {
 
             // Add reflect to observeAttributes
             if (config.properties[propertiesKeys[i]].reflect) {
-                el.__observeAttributes[vcomet.util.camelToHyphenCase(propertiesKeys[i])] = true;
+                el.__observeAttributes[eon.util.camelToHyphenCase(propertiesKeys[i])] = true;
                 el.__reflectProperties[propertiesKeys[i]] = true;
             }
         }
@@ -4579,7 +4579,7 @@ vcomet.collectObserveData = function (el, config) {
 
             // Add reflect to observeAttributes
             if (config.privateProperties[privatePropertiesKeys[i]].reflect) {
-                el.__observeAttributes[vcomet.util.camelToHyphenCase(privatePropertiesKeys[i])] = true;
+                el.__observeAttributes[eon.util.camelToHyphenCase(privatePropertiesKeys[i])] = true;
                 el.__reflectProperties["_" + privatePropertiesKeys[i]] = true;
             }
         }
@@ -4587,7 +4587,7 @@ vcomet.collectObserveData = function (el, config) {
 
 };
 
-vcomet.addObserveFromArray = function (observeObj, observeArray) {
+eon.addObserveFromArray = function (observeObj, observeArray) {
 
     observeArray = observeArray ? observeArray : [];
 
@@ -4597,7 +4597,7 @@ vcomet.addObserveFromArray = function (observeObj, observeArray) {
 
 };
 
-vcomet.createAttributesObserver = function (el, config) {
+eon.createAttributesObserver = function (el, config) {
 
     var observeAttributesKeys = Object.keys(el.__observeAttributes);
 
@@ -4609,7 +4609,7 @@ vcomet.createAttributesObserver = function (el, config) {
         // For each observe attribute if check which value should be assign to it
         for (var i = 0; i < observeAttributesKeys.length; i++) {
 
-            propertyName = "__" + vcomet.util.hyphenToCamelCase(observeAttributesKeys[i]);
+            propertyName = "__" + eon.util.hyphenToCamelCase(observeAttributesKeys[i]);
 
             // If the attribute already has a value we assign this value to its corresponding property
             if (el.getAttribute(observeAttributesKeys[i])) {
@@ -4637,17 +4637,17 @@ vcomet.createAttributesObserver = function (el, config) {
         // Callback to be triggered when the user calls to setAttribute
         var setAttributeCallback = function (attrName, oldVal, newVal) {
 
-            var property = vcomet.util.hyphenToCamelCase(attrName);
+            var property = eon.util.hyphenToCamelCase(attrName);
 
             // The onAttributeChanged callback is triggered whether its observed or as a reflection of a property
             if (el.__observeAttributes[attrName] || el.__reflectProperties[property]) {
-                vcomet.triggerAllCallbackEvents(el, config, "onAttributeChanged", [attrName, oldVal, newVal]);
+                eon.triggerAllCallbackEvents(el, config, "onAttributeChanged", [attrName, oldVal, newVal]);
             }
 
             // The onPropertyChanged callback is triggered when the attribute has changed and its reflect by a property
             if (el.__reflectProperties[property]) {
                 el["__" + property] = newVal;
-                vcomet.triggerAllCallbackEvents(el, config, "onPropertyChanged", [property, oldVal, newVal]);
+                eon.triggerAllCallbackEvents(el, config, "onPropertyChanged", [property, oldVal, newVal]);
             }
 
         };
@@ -4656,7 +4656,7 @@ vcomet.createAttributesObserver = function (el, config) {
 
 };
 
-vcomet.handleProperty = function (el, config, reflectProperties, observeProperties, property) {
+eon.handleProperty = function (el, config, reflectProperties, observeProperties, property) {
 
     var key = property.key;
     var value = property.value;
@@ -4681,13 +4681,13 @@ vcomet.handleProperty = function (el, config, reflectProperties, observeProperti
         Object.defineProperty(
             el,
             key,
-            vcomet.createPropDescriptor(el, config, key, value, reflect)
+            eon.createPropDescriptor(el, config, key, value, reflect)
         );
         el["__" + key] = value;
     }
 };
 
-vcomet.createPropDescriptor = function (el, config, key, value, reflect) {
+eon.createPropDescriptor = function (el, config, key, value, reflect) {
     var propDescriptor = {};
     // Redirect get and set to __key
     propDescriptor.get = function () {
@@ -4697,11 +4697,11 @@ vcomet.createPropDescriptor = function (el, config, key, value, reflect) {
     propDescriptor.set = function (value) {
         if (reflect) {
             // Trigger onAttributeChanged, note this will trigger also onPropertyChanged if needed
-            el.setAttribute(vcomet.util.camelToHyphenCase(key), value);
+            el.setAttribute(eon.util.camelToHyphenCase(key), value);
 
         } else {
             // Trigger onPropertyChanged
-            vcomet.triggerAllCallbackEvents(el, config, "onPropertyChanged", [
+            eon.triggerAllCallbackEvents(el, config, "onPropertyChanged", [
                 key,
                 el["__" + key],
                 value
@@ -4715,7 +4715,7 @@ vcomet.createPropDescriptor = function (el, config, key, value, reflect) {
     return propDescriptor;
 };
 
-vcomet.importData = function (el, config) {
+eon.importData = function (el, config) {
 
     el.data = {};
 
@@ -4724,16 +4724,16 @@ vcomet.importData = function (el, config) {
     }
 
 }
-vcomet.importPublic = function (el, config) {
+eon.importPublic = function (el, config) {
 
     if (config.properties) {
         var keys = Object.keys(config.properties);
         var attributeKey;
         
         for (var i = 0; i < keys.length; i++) {
-            attributeKey = vcomet.util.camelToHyphenCase(keys[i]);
+            attributeKey = eon.util.camelToHyphenCase(keys[i]);
             // If the element has one of the reflected attributes we send that value as the value of the property
-            vcomet.handleProperty(el, config, el.__reflectProperties, el.__observeProperties, {
+            eon.handleProperty(el, config, el.__reflectProperties, el.__observeProperties, {
                 key: keys[i],
                 value: el.hasAttribute(attributeKey) ? el.getAttribute(attributeKey) : config.properties[keys[i]]
             });
@@ -4750,13 +4750,13 @@ vcomet.importPublic = function (el, config) {
 
 };
 
-vcomet.importPrivate = function (el, config) {
+eon.importPrivate = function (el, config) {
 
     if (config.privateProperties) {
         var keys = Object.keys(config.privateProperties);
 
         for (var i = 0; i < keys.length; i++) {
-            vcomet.handleProperty(el, config, el.__reflectProperties, el.__observeProperties, {
+            eon.handleProperty(el, config, el.__reflectProperties, el.__observeProperties, {
                 key: "_" + keys[i],
                 value: config.privateProperties[keys[i]]
             });
@@ -4773,9 +4773,9 @@ vcomet.importPrivate = function (el, config) {
 
 };
 
-vcomet.importTemplateClasses = function (el) {
+eon.importTemplateClasses = function (el) {
 
-    var template = vcomet.imports.templates[el.tagName.toLowerCase()];
+    var template = eon.imports.templates[el.tagName.toLowerCase()];
 
     if (template && template.classList.length != 0) {
 
@@ -4791,55 +4791,55 @@ vcomet.importTemplateClasses = function (el) {
 
 };
 
-vcomet.triggerAllCallbackEvents = function (el, config, callback, params) {
+eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 
-    vcomet.debug.log("triggerAllCallbackEvents", callback);
+    eon.debug.log("triggerAllCallbackEvents", callback);
 
     // This "if" is created for the porpuse of not allowing onPropertyChanged and onAttributeChanged
     // to be triggered once the element is render, this is so we dont have to use el.onRender() inside this callback to not crash
-    if (!((callback == "onPropertyChanged" || callback == "onAttributeChanged") && vcomet.registry.isRendered(el) != true)) {
+    if (!((callback == "onPropertyChanged" || callback == "onAttributeChanged") && eon.registry.isRendered(el) != true)) {
 
         if (config[callback]) {
             config[callback].apply(el, params);
         }
 
-        vcomet.debug.log("elementEvents", callback);
-        vcomet.triggerCallback(callback, el, el, params);
+        eon.debug.log("elementEvents", callback);
+        eon.triggerCallback(callback, el, el, params);
 
     }
 
 };
 
-// vcomet.transform = function (name, config, el, elementDoc, template) {
-vcomet.transform = function (el, config) {
+// eon.transform = function (name, config, el, elementDoc, template) {
+eon.transform = function (el, config) {
 
-    if (!vcomet.registry.isTransformed(el)) {
+    if (!eon.registry.isTransformed(el)) {
 
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
-        var theme = vcomet.getElementTheme(el);
+        var theme = eon.getElementTheme(el);
         var name = el.nodeName.toLowerCase();
 
         // Imports the template of the element
-        vcomet.appendElementTemplate(el);
+        eon.appendElementTemplate(el);
 
         // Registers the main theme of this theme if its not yet registered
-        vcomet.registerMainTheme(theme);
+        eon.registerMainTheme(theme);
 
         // If the element has not yet registered its theme it will proceed on importing it
-        vcomet.importElementTheme(config, name, theme);
+        eon.importElementTheme(config, name, theme);
 
         // Adds the element to the transformQueue
         setTimeout(function () {
-            vcomet.triggerTransformed(el, config);
+            eon.triggerTransformed(el, config);
         }, 0);
 
     }
 
 };
 
-vcomet.getElementTheme = function (el) {
+eon.getElementTheme = function (el) {
 
-    var theme = vcomet.theme;
+    var theme = eon.theme;
 
     theme = document.body.dataset.theme ? document.body.dataset.theme : theme;
     theme = document.body.hasAttribute("theme") ? document.body.getAttribute("theme") : theme;
@@ -4853,17 +4853,17 @@ vcomet.getElementTheme = function (el) {
     return theme;
 }
 
-vcomet.registerMainTheme = function (theme) {
+eon.registerMainTheme = function (theme) {
 
-    if (!vcomet.registry.isThemeRegistered("main", theme)) {
+    if (!eon.registry.isThemeRegistered("main", theme)) {
 
         var documentHead = document.querySelector("head");
         var mainLink = document.createElement("link");
 
-        vcomet.registry.registerTheme("main", theme);
+        eon.registry.registerTheme("main", theme);
 
         mainLink.setAttribute("rel", "stylesheet");
-        mainLink.setAttribute("href", vcomet.basePath + "/theme/" + theme + "/main.css");
+        mainLink.setAttribute("href", eon.basePath + "/theme/" + theme + "/main.css");
 
         documentHead.appendChild(mainLink);
 
@@ -4871,26 +4871,26 @@ vcomet.registerMainTheme = function (theme) {
 
 };
 
-vcomet.importElementTheme = function (config, name, theme) {
+eon.importElementTheme = function (config, name, theme) {
 
-    if (theme && config.themed && !vcomet.registry.isThemeRegistered(name, theme)) {
+    if (theme && config.themed && !eon.registry.isThemeRegistered(name, theme)) {
 
         var importedDocumentHead = document.querySelector("head");
 
-        vcomet.registry.registerTheme(name, theme);
+        eon.registry.registerTheme(name, theme);
 
         var elementLink = document.createElement("link");
         elementLink.setAttribute("rel", "stylesheet");
         elementLink.setAttribute(
             "href",
-            vcomet.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css"
+            eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css"
         );
         importedDocumentHead.appendChild(elementLink);
 
     }
 };
 
-vcomet.slot = function (el) {
+eon.slot = function (el) {
 
     var sourceNodes = el.getSourceNodes();
     var slotAttribute;
@@ -4947,17 +4947,17 @@ vcomet.slot = function (el) {
 
 };
 
-vcomet.fragmentFromString = function (str) {
+eon.fragmentFromString = function (str) {
     // Test createContextualFragment support
-    if (!("__supportsContextualFragment" in vcomet)) {
+    if (!("__supportsContextualFragment" in eon)) {
         try {
             document.createRange().createContextualFragment("test");
-            vcomet.__supportsContextualFragment = true;
+            eon.__supportsContextualFragment = true;
         } catch (error) {
-            vcomet.__supportsContextualFragment = false;
+            eon.__supportsContextualFragment = false;
         }
     }
-    if (vcomet.__supportsContextualFragment) {
+    if (eon.__supportsContextualFragment) {
         return document.createRange().createContextualFragment(str);
     } else {
         var temp = document.createElement("template");
@@ -4966,9 +4966,9 @@ vcomet.fragmentFromString = function (str) {
     }
 };
 
-vcomet.generateElementTemplate = function (el) {
+eon.generateElementTemplate = function (el) {
     var name = el.nodeName.toLowerCase();
-    var template = vcomet.imports.templates[name];
+    var template = eon.imports.templates[name];
     var clone = document.createElement("template");
 
     // All the content related checks are made to improve compatibility with browsers that do not support template
@@ -4977,13 +4977,13 @@ vcomet.generateElementTemplate = function (el) {
     if (template) {
 
         if (!template.content) {
-            template.content = vcomet.fragmentFromString(template.innerHTML);
+            template.content = eon.fragmentFromString(template.innerHTML);
         }
 
         clone = template.cloneNode(true);
 
         if (!clone.content) {
-            clone.content = vcomet.fragmentFromString(clone.innerHTML);
+            clone.content = eon.fragmentFromString(clone.innerHTML);
         }
 
     }
@@ -4991,12 +4991,12 @@ vcomet.generateElementTemplate = function (el) {
     el.template = clone.content;
 };
 
-vcomet.appendElementTemplate = function (el) {
+eon.appendElementTemplate = function (el) {
     el.appendChild(el.template);
     delete el.template;
 };
 
-vcomet.initSourceCallbacks = function (el) {
+eon.initSourceCallbacks = function (el) {
     // Creates the getSourceElements function even if it has no source elements
     el.getSourceNodes = function () {
         return Array.prototype.slice.call(el.source.childNodes);
@@ -5019,7 +5019,7 @@ vcomet.initSourceCallbacks = function (el) {
 
 };
 
-vcomet.updateSourceCallbacks = function (el) {
+eon.updateSourceCallbacks = function (el) {
 
     var sourceNodes = el.source.childNodes;
 
@@ -5050,96 +5050,96 @@ vcomet.updateSourceCallbacks = function (el) {
 
 }
 
-vcomet.triggerTransformed = function (el, config) {
+eon.triggerTransformed = function (el, config) {
 
-    vcomet.domReady(function () {
+    eon.domReady(function () {
 
         // Triggered when it has imported the template, it doesnt care of the state
         // of the other elements
-        vcomet.registry.updateElementStatus(el, "transformed");
-        vcomet.triggerAllCallbackEvents(el, config, "onTransformed");
+        eon.registry.updateElementStatus(el, "transformed");
+        eon.triggerAllCallbackEvents(el, config, "onTransformed");
 
         // Triggered when all registered elements are transformed,
         // the execution is descendant, parent -> child
-        vcomet.registry.addToRenderQueue(el, function () {
-            vcomet.triggerAllCallbackEvents(el, config, "onRender");
-            vcomet.registry.updateElementStatus(el, "rendered");
+        eon.registry.addToRenderQueue(el, function () {
+            eon.triggerAllCallbackEvents(el, config, "onRender");
+            eon.registry.updateElementStatus(el, "rendered");
         });
 
         // Triggered when all registered elements are transformed,
         // the execution is ascendant, parent <- child
-        vcomet.registry.addToBubbleRenderQueue(el, function () {
-            vcomet.triggerAllCallbackEvents(el, config, "onBubbleRender");
-            vcomet.registry.updateElementStatus(el, "bubbleRendered");
+        eon.registry.addToBubbleRenderQueue(el, function () {
+            eon.triggerAllCallbackEvents(el, config, "onBubbleRender");
+            eon.registry.updateElementStatus(el, "bubbleRendered");
         });
 
         // This callback is meant only for the users,
         // so that they can hook when the component finished rendering
-        vcomet.registry.addToReadyQueue(el, function () {
-            vcomet.triggerAllCallbackEvents(el, config, "onReady");
-            vcomet.registry.updateElementStatus(el, "ready");
+        eon.registry.addToReadyQueue(el, function () {
+            eon.triggerAllCallbackEvents(el, config, "onReady");
+            eon.registry.updateElementStatus(el, "ready");
         });
 
         // Timeout forces triggerRender to wait child onTransformed
         // When render and bubbleRender are finished, it triggers onReady
         setTimeout(function () {
-            vcomet.registry.triggerRenders();
+            eon.registry.triggerRenders();
         }, 0);
 
     });
 
 };
 
-vcomet.initializeDisplay = function (el, config) {
+eon.initializeDisplay = function (el, config) {
 
     var name = el.nodeName.toLowerCase();
     var display = config.display ? config.display : "block";
     var ruleIndex;
 
-    if (!vcomet.rules[name]) {
+    if (!eon.rules[name]) {
 
-        ruleIndex = vcomet.style.sheet.insertRule(name + " { display: " + display + "; }", 0);
-        vcomet.rules[name] = vcomet.style.sheet.cssRules[ruleIndex];
+        ruleIndex = eon.style.sheet.insertRule(name + " { display: " + display + "; }", 0);
+        eon.rules[name] = eon.style.sheet.cssRules[ruleIndex];
 
     }
 
     // Remove opacity 0 rule
     el.onBubbleRender(function () {
-        vcomet.unhideElement(this);
+        eon.unhideElement(this);
     });
 
 };
 
-vcomet.registerResizeListeners = function (el, config) {
+eon.registerResizeListeners = function (el, config) {
 
     // If it has onResize callback on its config we create the onResize callback
     if (config.onResize) {
 
         el.onReady(function () {
 
-            vcomet.createCallback("onResize", el);
+            eon.createCallback("onResize", el);
 
-            vcomet.addResizeListener(el, el.nodeName.toLowerCase(), function () {
-                vcomet.triggerAllCallbackEvents(el, config, "onResize", []);
+            eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
+                eon.triggerAllCallbackEvents(el, config, "onResize", []);
             });
 
         });
 
     } else {
 
-        // Else all vcomet elements will have this pseudo onResize callback, this callback will create
+        // Else all eon elements will have this pseudo onResize callback, this callback will create
         // the real resize callback once its called for the first time
         el.onResize = function (callback) {
             // Once the pseudo callback has been called we set it to null so that it can create the real one
             el.onResize = null;
 
-            vcomet.createCallback("onResize", el);
+            eon.createCallback("onResize", el);
 
             // Once the element is ready, it will add the listener
             el.onReady(function () {
 
-                vcomet.addResizeListener(el, el.nodeName.toLowerCase(), function () {
-                    vcomet.triggerAllCallbackEvents(el, config, "onResize", []);
+                eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
+                    eon.triggerAllCallbackEvents(el, config, "onResize", []);
                 });
 
                 el.onResize(callback);
@@ -5153,10 +5153,10 @@ vcomet.registerResizeListeners = function (el, config) {
     // Once the element is ready, it will add the listener
     el.onReady(function () {
 
-        vcomet.createCallback("onWindowResize", el);
+        eon.createCallback("onWindowResize", el);
 
-        vcomet.onResize(function () {
-            vcomet.triggerAllCallbackEvents(el, config, "onWindowResize", []);
+        eon.onResize(function () {
+            eon.triggerAllCallbackEvents(el, config, "onWindowResize", []);
         }, el);
 
     });
@@ -5164,45 +5164,45 @@ vcomet.registerResizeListeners = function (el, config) {
 };
 
 // Here we will register the main theme, the one declared by the user or our default one, its done here since this is the moment where this function exists
-vcomet.registerMainTheme(vcomet.theme);
-vcomet.declare = function (name, baseElement) {
+eon.registerMainTheme(eon.theme);
+eon.declare = function (name, baseElement) {
 
     // Specifies HTML element interface
     var baseElement = baseElement ? baseElement : HTMLElement;
 
     // Constructs the element class
-    var elementClass = vcomet.constructClass(baseElement);
+    var elementClass = eon.constructClass(baseElement);
 
     // Element constructor: Important! never modify element attributes or children here
     elementClass.onCreated(function () {
 
         var el = this;
         
-        vcomet.declareCallbacks(el);
+        eon.declareCallbacks(el);
 
-        vcomet.generateSourceFragment(el);
+        eon.generateSourceFragment(el);
 
-        vcomet.initSourceCallbacks(el); 
+        eon.initSourceCallbacks(el); 
 
-        vcomet.prepareElement(el, function () {
+        eon.prepareElement(el, function () {
             
-            var config = vcomet.imports.config[el.nodeName.toLowerCase()];
+            var config = eon.imports.config[el.nodeName.toLowerCase()];
 
-            // Adds vcomet element default config properties and functions 
-            vcomet.parse(el, config);
+            // Adds eon element default config properties and functions 
+            eon.parse(el, config);
 
             // Generates an instance of the element template and assigns it as a property of the element so we can easily access from anywhere
-            vcomet.generateElementTemplate(el);
+            eon.generateElementTemplate(el);
 
             // Sets a css rule with the provided display by the config, if no display is provided it will have display block by default
-            vcomet.initializeDisplay(el, config);
+            eon.initializeDisplay(el, config);
             
-            vcomet.triggerAllCallbackEvents(el, config, "onCreated");
-            vcomet.registry.updateElementStatus(el, "created");
+            eon.triggerAllCallbackEvents(el, config, "onCreated");
+            eon.registry.updateElementStatus(el, "created");
             
         });
         
-        vcomet.registry.updateElementStatus(el, "declared");
+        eon.registry.updateElementStatus(el, "declared");
 
     });
 
@@ -5212,16 +5212,16 @@ vcomet.declare = function (name, baseElement) {
 
         el.onCreated(function () {
 
-            var config = vcomet.imports.config[el.nodeName.toLowerCase()];
+            var config = eon.imports.config[el.nodeName.toLowerCase()];
 
             // TODO: should also provide attribute check
             if (el.isFirstAttach) {
                 
                 el.isFirstAttach = false;
 
-                vcomet.importTemplateClasses(el);
+                eon.importTemplateClasses(el);
 
-                vcomet.hideElement(el);
+                eon.hideElement(el);
 
                 // If it has an observer for the declaration of the element we disconnect it as we will no longer need it
                 if (el.__onCreatedObserver) {
@@ -5229,36 +5229,36 @@ vcomet.declare = function (name, baseElement) {
                 }
 
                 // Registers the element and generates uid
-                vcomet.registry.registerElement(el);
+                eon.registry.registerElement(el);
 
-                vcomet.createAttributesObserver(el, config);
+                eon.createAttributesObserver(el, config);
 
                 // Updates the references for the source nodes
-                vcomet.updateSourceCallbacks(el);
+                eon.updateSourceCallbacks(el);
                 
                 // Moves source-template elements to vc-template-clone elements by slot attribute query selector string
                 // Unslotted source-template elements will be appended to vc-clone root
                 // Note dynamic things that should be slotted must be added onCreated
-                vcomet.slot(el);
+                eon.slot(el);
 
                 // Callback for the first time that the element has been attached, no template imported, only created and parsed
-                vcomet.triggerAllCallbackEvents(el, config, "onInit");
+                eon.triggerAllCallbackEvents(el, config, "onInit");
 
                 // Interpolation data bind
-                vcomet.interpolation.handleInterpolationVariables(el, config);
+                eon.interpolation.handleInterpolationVariables(el, config);
 
                 // Creates the on resize callbacks handler for the element
-                vcomet.registerResizeListeners(el, config);
+                eon.registerResizeListeners(el, config);
 
                 // Begins the transformation process
-                vcomet.transform(el, config);
+                eon.transform(el, config);
 
             }
 
-            vcomet.triggerAllCallbackEvents(el, config, "onAttached");
+            eon.triggerAllCallbackEvents(el, config, "onAttached");
 
-            vcomet.registry.updateElementStatus(el, "attached");
-            vcomet.debug.log("adapterEvents", "onAttached");
+            eon.registry.updateElementStatus(el, "attached");
+            eon.debug.log("adapterEvents", "onAttached");
 
         });
 
@@ -5276,7 +5276,7 @@ vcomet.declare = function (name, baseElement) {
 
 };
 
-vcomet.createPropertyObserver = function (property, obj, callback, pollingRate) {
+eon.createPropertyObserver = function (property, obj, callback, pollingRate) {
   if (typeof pollingRate == "undefined") {
     pollingRate = 300;
   }
@@ -5326,7 +5326,7 @@ vcomet.createPropertyObserver = function (property, obj, callback, pollingRate) 
   }
 };
 
-vcomet.removePropertyObserver = function (property, obj) {
+eon.removePropertyObserver = function (property, obj) {
   if (obj.propertyObservers && obj.propertyObservers[property]) {
     // Clear interval
     window.clearInterval(obj.propertyObservers[property].observer);
@@ -5337,32 +5337,32 @@ vcomet.removePropertyObserver = function (property, obj) {
 
 
 
-vcomet.time = vcomet.time || {};
+eon.time = eon.time || {};
 
-vcomet.time.isLeapYear = function (year) {
+eon.time.isLeapYear = function (year) {
   return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 };
 
-vcomet.time.getDaysInMonth = function (year, month) {
-  return [31, vcomet.time.isLeapYear(parseInt(year)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][parseInt(month)];
+eon.time.getDaysInMonth = function (year, month) {
+  return [31, eon.time.isLeapYear(parseInt(year)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][parseInt(month)];
 };
 
-vcomet.time.getMonthNames = function (locale, format) {
+eon.time.getMonthNames = function (locale, format) {
   var monthNames = [];
   format = format ? format : "long";
   for (var i = 0; i <= 11; i++) {
-    monthNames.push(vcomet.time.getMonthName(locale, i, format));
+    monthNames.push(eon.time.getMonthName(locale, i, format));
   }
   return monthNames;
 };
 
-vcomet.time.getMonthName = function (locale, month, format) {
+eon.time.getMonthName = function (locale, month, format) {
   var dummyDate = new Date(2000, month, 15);
   format = format ? format : "long";
   return dummyDate.toLocaleString(locale, { month: format });
 };
 
-vcomet.time.getWeekDays = function (locale, format) {
+eon.time.getWeekDays = function (locale, format) {
   var dayNames = [];
   var dummyDate;
   format = format ? format : "long";
@@ -5373,11 +5373,11 @@ vcomet.time.getWeekDays = function (locale, format) {
   return dayNames;
 };
 
-vcomet.time.getWeekDay = function (year, month, day) {
+eon.time.getWeekDay = function (year, month, day) {
   return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(year, month, day).getDay()];
 };
 
-vcomet.time.getFirstWeekDay = function (locale, year, month, format) {
+eon.time.getFirstWeekDay = function (locale, year, month, format) {
   var dummyDate = new Date(year, month, 1);
   format = format ? format : "long";
   return dummyDate.toLocaleString(locale, {
@@ -5385,7 +5385,7 @@ vcomet.time.getFirstWeekDay = function (locale, year, month, format) {
   });
 };
 
-vcomet.time.getDateWithFormat = function (date, format, locale) {
+eon.time.getDateWithFormat = function (date, format, locale) {
   var dayFormat = format.match(/[d|D]{1,2}/)
     ? format.match(/[d|D]{1,2}/)[0]
     : undefined;
@@ -5432,7 +5432,7 @@ vcomet.time.getDateWithFormat = function (date, format, locale) {
   return format;
 };
 
-vcomet.time.defaultLocale = {
+eon.time.defaultLocale = {
 
   months: {
 
@@ -5485,7 +5485,7 @@ vcomet.time.defaultLocale = {
      * @param  {Function} callback     [description]
      * @return {[type]}            [description]
      */
-  vcomet.addResizeListener = function(element, key, fn) {
+  eon.addResizeListener = function(element, key, fn) {
     //
     var isIE = navigator.userAgent.match(/Trident/) && document.documentMode;
     //
@@ -5524,7 +5524,7 @@ vcomet.time.defaultLocale = {
      * @param  {Function} callback     [description]
      * @return {[type]}            [description]
      */
-  vcomet.removeResizeListener = function(element, key) {
+  eon.removeResizeListener = function(element, key) {
     // Remove callback from element callback array
     delete element.__resizeListeners[key];
     // If no callback exists detach resize event
@@ -5572,13 +5572,13 @@ vcomet.time.defaultLocale = {
   }
 
 
-vcomet.util = vcomet.util || {};
+eon.util = eon.util || {};
 /**
  * Set first string character to upper case
  * @param  {[type]} str [description]
  * @return {[type]}     [description]
  */
-vcomet.util.firstToUpperCase = function (str) {
+eon.util.firstToUpperCase = function (str) {
   return str.substring(0, 1).toUpperCase() + str.substring(1);
 }
 /**
@@ -5586,7 +5586,7 @@ vcomet.util.firstToUpperCase = function (str) {
  * @param  {[type]} str [description]
  * @return {[type]}     [description]
  */
-vcomet.util.firstToLowerCase = function (str) {
+eon.util.firstToLowerCase = function (str) {
   var first = str.substring(0, 1);
   var low = str.substring(0, 1).toLowerCase();
   return low + str.substring(1, str.length);
@@ -5596,7 +5596,7 @@ vcomet.util.firstToLowerCase = function (str) {
  * @param  {[type]} str [description]
  * @return {[type]}     [description]
  */
-vcomet.util.camelToHyphenCase = function (str) {
+eon.util.camelToHyphenCase = function (str) {
   return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 };
 /**
@@ -5604,7 +5604,7 @@ vcomet.util.camelToHyphenCase = function (str) {
  * @param  {[type]} str [description]
  * @return {[type]}     [description]
  */
-vcomet.util.hyphenToCamelCase = function (str) {
+eon.util.hyphenToCamelCase = function (str) {
   return str.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
 };
 /**
@@ -5612,7 +5612,7 @@ vcomet.util.hyphenToCamelCase = function (str) {
  * @param  {[type]} url [description]
  * @return {[type]}     [description]
  */
-vcomet.util.queryToObject = function (url) {
+eon.util.queryToObject = function (url) {
   var obj = {};
   // Get query params substring from url
   var paramsStr = url.split("?")[1];
@@ -5633,7 +5633,7 @@ vcomet.util.queryToObject = function (url) {
  * @param  {[type]} obj [description]
  * @return {[type]}      [description]
  */
-vcomet.util.objectToQuery = function (obj) {
+eon.util.objectToQuery = function (obj) {
   var queryStr = "";
   var keyIndex = 0;
   for (var key in obj) {
@@ -5655,7 +5655,7 @@ vcomet.util.objectToQuery = function (obj) {
  * @param  {[type]} paramsObj [description]
  * @return {[type]}      [description]
  */
-vcomet.util.replaceParam = function (url, paramsObj) {
+eon.util.replaceParam = function (url, paramsObj) {
   // Convert url params into a manipulable object
   var queryObj = this.queryToObject(url);
   // Replace or add query param
@@ -5674,7 +5674,7 @@ vcomet.util.replaceParam = function (url, paramsObj) {
  * @param  {[type]} paramsObj [description]
  * @return {[type]}      [description]
  */
-vcomet.util.getBrowser = function () {
+eon.util.getBrowser = function () {
   var browserName;
   // Internet Explorer 6-11
   if (document.documentMode) {
@@ -5707,66 +5707,66 @@ vcomet.util.getBrowser = function () {
   return browserName;
 };
 
-vcomet.util.isTrue = function(a) {
+eon.util.isTrue = function(a) {
 	return a == true || a == "true";
 };
 
-vcomet.util.isTouchScreen = function () {
+eon.util.isTouchScreen = function () {
   return "ontouchstart" in window;
 };
 
 
-vcomet.history = vcomet.history || {};
+eon.history = eon.history || {};
 
-vcomet.history.location = {};
+eon.history.location = {};
 
-vcomet.history.location.origin = window.location.origin;
-vcomet.history.location.href = window.location.href;
-vcomet.history.location.state = window.location.hash || window.location.pathname.split("/")[1];
-vcomet.history.location.params = vcomet.util.queryToObject(window.location.href);
-vcomet.history.current = window.location.pathname.substring(1);
-vcomet.history.states = {};
-vcomet.history.cancelNavigation = false;
+eon.history.location.origin = window.location.origin;
+eon.history.location.href = window.location.href;
+eon.history.location.state = window.location.hash || window.location.pathname.split("/")[1];
+eon.history.location.params = eon.util.queryToObject(window.location.href);
+eon.history.current = window.location.pathname.substring(1);
+eon.history.states = {};
+eon.history.cancelNavigation = false;
 
-vcomet.history.push = function (obj, url, title) {
-  if (!vcomet.history.cancelNavigation) {
+eon.history.push = function (obj, url, title) {
+  if (!eon.history.cancelNavigation) {
     history.pushState(obj, url, title);
-    vcomet.history.getURLInformation();
-    vcomet.history.states[vcomet.history.current] = url;
+    eon.history.getURLInformation();
+    eon.history.states[eon.history.current] = url;
   }
 };
-vcomet.history.replace = function (obj, url, title) {
-  if (!vcomet.history.cancelNavigation) {
+eon.history.replace = function (obj, url, title) {
+  if (!eon.history.cancelNavigation) {
     history.replaceState(obj, url, title);
-    delete vcomet.history.states[vcomet.history.current];
-    vcomet.history.getURLInformation();
-    vcomet.history.states[vcomet.history.current] = url;
+    delete eon.history.states[eon.history.current];
+    eon.history.getURLInformation();
+    eon.history.states[eon.history.current] = url;
   }
 };
 
 // Create on URL hash changed callback
-vcomet.createCallback("onHashChanged", vcomet.history);
+eon.createCallback("onHashChanged", eon.history);
 
 // Wrap window on pop state event
 window.onpopstate = function () {
-  vcomet.history.getURLInformation();
-  vcomet.triggerCallback("onHashChanged", vcomet.history, vcomet.history, [vcomet.history]);
+  eon.history.getURLInformation();
+  eon.triggerCallback("onHashChanged", eon.history, eon.history, [eon.history]);
 };
 
 /*
   @function getURLInformation
   @description Save window location object information
 */
-vcomet.history.getURLInformation = function () {
-  vcomet.history.location.origin = window.location.origin;
-  vcomet.history.location.state = window.location.history || window.location.pathname.substring(1);
-  vcomet.history.location.params = vcomet.util.queryToObject(window.location.href);
-  vcomet.history.current = window.location.hash ? window.location.pathname.substring(1) + window.location.hash
+eon.history.getURLInformation = function () {
+  eon.history.location.origin = window.location.origin;
+  eon.history.location.state = window.location.history || window.location.pathname.substring(1);
+  eon.history.location.params = eon.util.queryToObject(window.location.href);
+  eon.history.current = window.location.hash ? window.location.pathname.substring(1) + window.location.hash
     : window.location.pathname.substring(1);
 };
   
 
-}.apply(vcomet));
+}.apply(eon));
   
 
 

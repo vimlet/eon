@@ -1,5 +1,5 @@
 <script>
-  vcomet.element("vc-panel", "vc-panel.css", {
+  eon.element("vc-panel", "vc-panel.css", {
     dependencies: [
       "../vc-scroll"
     ],
@@ -117,7 +117,7 @@
         // Get panel elements
         var documentFragment = document.createDocumentFragment();
         // Check href property
-        if (el.href && !vcomet.util.isTrue(el.lazyLoad)) {
+        if (el.href && !eon.util.isTrue(el.lazyLoad)) {
           // Request content file
           el.importContent(documentFragment);
         } else if (!el.href) {
@@ -137,7 +137,7 @@
         var el = this;
         var nodes, scripts, script, scriptKey;
         // ** IE do not support 'children' property
-        if (vcomet.util.getBrowser() === "IE") {
+        if (eon.util.getBrowser() === "IE") {
           // Avoid empty element template on programmatic cases
           nodes = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
           // From node list to js array
@@ -178,7 +178,7 @@
         var fragment = document.createDocumentFragment();
         var i;
         var t = 0;
-        var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
+        var reAppend = el.href || eon.util.isTrue(el.allowScroll);
         // Get first generation template children
         while (nodes.length) {
           // Build nodes structure
@@ -201,7 +201,7 @@
         }
         // Wait until the element is ready
         el.onReady(function () {
-          vcomet.triggerCallback("onLoad", el, el, []);
+          eon.triggerCallback("onLoad", el, el, []);
         });
 
       },
@@ -282,8 +282,8 @@
           }
         }
         // Update scroll
-        if(vcomet.util.isTrue(el.allowScroll)) {
-          el.vcometScroll.onReady(function(){
+        if(eon.util.isTrue(el.allowScroll)) {
+          el.eonScroll.onReady(function(){
             this.update();
           })
         }
@@ -309,7 +309,7 @@
             // Response status successfully completed - status 200
             if (this.status !== 200) { return };
             // Allow execute imported html scripts
-            fragment = vcomet.fragmentFromString(xhr.responseText);
+            fragment = eon.fragmentFromString(xhr.responseText);
             // Extract script nodes that belong to template elements for deferring their execution
             var nodes = el._deferScripts(fragment);
             el._appendContent(nodes);
@@ -335,8 +335,8 @@
     onCreated: function () {
       var el = this;
       // Create content related callbacks
-      vcomet.createCallback("onLoad", this);
-      vcomet.createCallback("onContent", this);
+      eon.createCallback("onLoad", this);
+      eon.createCallback("onContent", this);
     },
     onInit: function () {
       var el = this;
@@ -344,7 +344,7 @@
       el._refs.scripts = {};
       el._misc = {};
       // Get body container
-      if (vcomet.util.isTrue(el.allowScroll)) {
+      if (eon.util.isTrue(el.allowScroll)) {
         el._refs.wrapper = document.createElement("vc-scroll");
         // Configure scroll
         el._setUpScroll();
@@ -352,7 +352,7 @@
         el._refs.wrapper = el;
       }
       // Get body container
-      el.content = vcomet.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
+      el.content = eon.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
     },
     onTransformed: function () {
       var el = this;

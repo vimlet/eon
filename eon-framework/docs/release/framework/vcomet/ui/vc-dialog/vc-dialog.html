@@ -13,7 +13,7 @@
 </template>
 
 <script type="text/javascript">
-    vcomet.element("vc-dialog", "vc-dialog.css", {
+    eon.element("vc-dialog", "vc-dialog.css", {
         dependencies: [
             "../vc-section",
             "../vc-scroll"
@@ -226,11 +226,11 @@
             */
             addHeading: function () {
                 var el = this;
-                vcomet.registerPathListener(el._refs.close);
+                eon.registerPathListener(el._refs.close);
 
                 // If the user specified a heading title or he did not but he set closable to true
                 // we want to enable the header with the closable button
-                if (el.heading != "" || el.heading == "" && vcomet.util.isTrue(el.closable)) {
+                if (el.heading != "" || el.heading == "" && eon.util.isTrue(el.closable)) {
                     el._refs.heading.classList.remove("vc-dialog-hidden");
 
                     if (el._refs.dialog.querySelector(".vc-dialog-title")) {
@@ -245,7 +245,7 @@
                     }
 
                     // If closable is enabled then we add its event listener to close the dialog
-                    if (vcomet.util.isTrue(el.closable)) {
+                    if (eon.util.isTrue(el.closable)) {
                         el._refs.close.addEventListener("click", function () {
                             el.close();
                         });
@@ -300,7 +300,7 @@
                 var el = this;
 
                 el.onInit(function () {
-                    if (vcomet.util.isTrue(el.hasFooter)) {
+                    if (eon.util.isTrue(el.hasFooter)) {
                         el._refs.dialog.appendChild(el.footer);
                     } else {
                         if (el.footer.parentNode && el.footer.parentNode.isEqualNode(el._refs.dialog)) {
@@ -318,8 +318,8 @@
             addBlurEvent: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.blur)) {
-                    vcomet.registerPathListener(el._refs.dialog);
+                if (eon.util.isTrue(el.blur)) {
+                    eon.registerPathListener(el._refs.dialog);
 
                     // This fixes click not being triggered on body on iPad
                     if (/iPad|iPhone/.test(navigator.platform)) {
@@ -341,7 +341,7 @@
             addDragListeners: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.drag) && el._refs.dialog.dataset.version == "desktop") {
+                if (eon.util.isTrue(el.drag) && el._refs.dialog.dataset.version == "desktop") {
                     var xPos = 0;
                     var yPos = 0; // Stores x & y coordinates of the mouse pointer
                     var xElem = 0;
@@ -411,13 +411,13 @@
                 var el = this;
 
                 // When the dialog changes its size dynamically it will center
-                vcomet.addResizeListener(el._refs.dialog, "dialog", function () {
+                eon.addResizeListener(el._refs.dialog, "dialog", function () {
                     if (el._refs.dialog.classList.contains("vc-dialog-visible") && el.multiposition == "centered" && !el._misc.resize.active && el._misc.previousWindowWidth == el._misc.newWindowWidth) {
                         el._center();
                     }
                 });
 
-                if (vcomet.util.isTrue(el.resize) && el._refs.dialog.dataset.version == "desktop") {
+                if (eon.util.isTrue(el.resize) && el._refs.dialog.dataset.version == "desktop") {
                     var sideResizers = ["top", "right", "bottom", "left"];
                     var cornerResizers = ["topLeft", "topRight", "bottomLeft", "bottomRight"];
                     var sideResizersClasses = ["vc-dialog-topResizer", "vc-dialog-rightResizer", "vc-dialog-bottomResizer", "vc-dialog-leftResizer"];
@@ -663,7 +663,7 @@
             addMaximize: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.maximize) && el._refs.dialog.dataset.version == "desktop") {
+                if (eon.util.isTrue(el.maximize) && el._refs.dialog.dataset.version == "desktop") {
                     el._refs.maximizeButton.classList.remove("vc-dialog-hidden");
                     el._refs.heading.classList.remove("vc-dialog-hidden");
 
@@ -685,7 +685,7 @@
             addMinimize: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.minimize) && el._refs.dialog.dataset.version == "desktop") {
+                if (eon.util.isTrue(el.minimize) && el._refs.dialog.dataset.version == "desktop") {
                     el._refs.minimizeButton.classList.remove("vc-dialog-hidden");
                     el._refs.heading.classList.remove("vc-dialog-hidden");
 
@@ -745,7 +745,7 @@
                     document.body.appendChild(minimizedBar);
                 }
 
-                if (vcomet.util.isTrue(el.modal) && el._refs.overlay.parentNode) {
+                if (eon.util.isTrue(el.modal) && el._refs.overlay.parentNode) {
                     el._refs.overlay.parentNode.removeChild(el._refs.overlay);
                 }
 
@@ -830,9 +830,9 @@
             */
             verifyDeviceVersion: function () {
                 var el = this;
-                el._refs.dialog.dataset.version = (vcomet.util.isTouchScreen()) ? "device" : "desktop";
+                el._refs.dialog.dataset.version = (eon.util.isTouchScreen()) ? "device" : "desktop";
 
-                var mobileCondition = (window.innerWidth <= vcomet.mobileWidth || window.innerHeight <= vcomet.mobileWidth) && el._refs.dialog.dataset.version == "device";
+                var mobileCondition = (window.innerWidth <= eon.mobileWidth || window.innerHeight <= eon.mobileWidth) && el._refs.dialog.dataset.version == "device";
                 el._refs.dialog.dataset.mobile = mobileCondition ? "true" : "false";
             },
 
@@ -864,7 +864,7 @@
             addOverlay: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.modal)) {
+                if (eon.util.isTrue(el.modal)) {
 
                     if (!el._refs.overlay) {
                         el._refs.overlay = document.createElement("div");
@@ -891,7 +891,7 @@
             setPosition: function () {
                 var el = this;
 
-                if (!vcomet.util.isTrue(el.modal) && el.multiposition == "scaled" && el._refs.dialog.dataset.version == "desktop" && !el._isFirstScaled()) {
+                if (!eon.util.isTrue(el.modal) && el.multiposition == "scaled" && el._refs.dialog.dataset.version == "desktop" && !el._isFirstScaled()) {
                     el._scale();
                 } else {
                     el._center();
@@ -1001,7 +1001,7 @@
 
                 // Prevents the scroll from exceeding the dialog since 
                 // the dialog has no default size to limit the scroll on IE 
-                if (vcomet.util.getBrowser() == "IE") {
+                if (eon.util.getBrowser() == "IE") {
                     el._refs.dialog.style.width = el._refs.dialog.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetWidth + "px";
                     el._refs.dialog.style.height = el._refs.dialog.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el._refs.dialog.offsetHeight + "px";
                 }
@@ -1144,7 +1144,7 @@
                 var el = this;
 
                 if (!el._refs.dialog.classList.contains("vc-dialog-visible")) {
-                    vcomet.triggerCallback("onOpen", el);
+                    eon.triggerCallback("onOpen", el);
                     el._assignSize();
                     el._addOverlay();
                     el._setPosition();
@@ -1164,7 +1164,7 @@
 
                     el._refs.scroll.update();
 
-                    vcomet.triggerCallback("onOpened", el);
+                    eon.triggerCallback("onOpened", el);
                 }
 
             },
@@ -1176,7 +1176,7 @@
             close: function () {
                 var el = this;
 
-                vcomet.triggerCallback("onClose", el);
+                eon.triggerCallback("onClose", el);
 
                 el.appendChild(el._refs.dialog);
                 el._refs.dialog.classList.remove("vc-dialog-visible");
@@ -1196,7 +1196,7 @@
                 }
 
                 el.dataset.status = "";
-                vcomet.triggerCallback("onClosed", el);
+                eon.triggerCallback("onClosed", el);
             },
 
         },
@@ -1205,10 +1205,10 @@
             var el = this;
 
             // Create callbacks
-            vcomet.createCallback("onOpen", el);
-            vcomet.createCallback("onOpened", el);
-            vcomet.createCallback("onClose", el);
-            vcomet.createCallback("onClosed", el);
+            eon.createCallback("onOpen", el);
+            eon.createCallback("onOpened", el);
+            eon.createCallback("onClose", el);
+            eon.createCallback("onClosed", el);
 
             el._createRefs();
             el._misc.drag = {};
@@ -1229,7 +1229,7 @@
             var el = this;
 
             el.dataset.status = "";
-            el.multiposition = el.multiposition == "scaled" && vcomet.util.isTrue(el.modal) ? "centered" : el.multiposition;
+            el.multiposition = el.multiposition == "scaled" && eon.util.isTrue(el.modal) ? "centered" : el.multiposition;
             el.hasFooter = el._refs.userFooter ? true : el.hasFooter;
 
             el._verifyDeviceVersion();

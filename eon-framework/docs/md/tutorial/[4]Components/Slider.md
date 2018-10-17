@@ -7,7 +7,7 @@ To use it import vc-slider in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-slider.html");
+    eon.import("/eon/ui/vc-slider.html");
   </script>
 <head>
 ```
@@ -21,7 +21,7 @@ To declare a basic vc-slider it is only necessary to indicate the `name` because
 ## Programmatic usage
 Programmatically, as it happens declaratively, it is only necessary to indicate the `name` and append the vc-slider to the part of the document where it is necessary.
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-slider
   var mySlider = document.createElement("vc-slider");
 
@@ -49,7 +49,7 @@ In this example, the vc-slider is contained within a vc-form and is disabled, an
 ```
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   var mySlider = document.querySelector("#mySlider");
 
   setTimeout(function () {

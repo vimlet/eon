@@ -7,7 +7,7 @@ If this component was to be used alone it would be needed to import it. But if i
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-radio.html");
+    eon.import("/eon/ui/vc-radio.html");
   </script>
 <head>
 ```
@@ -22,7 +22,7 @@ If this component was to be used alone it would be needed to import it. But if i
 
 ## Programmatic usage
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-group and vc-radio 
   var myGroup = document.createElement("vc-group");
   var myRadio1 = document.createElement("vc-radio");
@@ -60,7 +60,7 @@ In this example one of the vc-radio is disabled and other is checked, but after 
 ```
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   var myRadio2 = document.querySelector("#myRadio2");
 
   setTimeout(function () {

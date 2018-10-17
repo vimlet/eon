@@ -12,7 +12,7 @@
 </template>
 
 <script type="text/javascript">
-    vcomet.element("vc-togglemenu", "vc-togglemenu.css", {
+    eon.element("vc-togglemenu", "vc-togglemenu.css", {
         dependencies: [
             "../vc-item",
             "../vc-scroll"
@@ -78,7 +78,7 @@
                 var title = this.querySelector(".vc-togglemenu-title");
                 title.innerHTML = newVal;
                 this.heading = newVal;
-                vcomet.triggerCallback("onChange", this);
+                eon.triggerCallback("onChange", this);
             },
             /*
               @function addItem
@@ -88,7 +88,7 @@
             addItem: function (item) {
                 (item.value) ? this._setupSpan(item) : null;
                 item.classList.add("vc-togglemenu-item");
-                this._content.vcometScroll.content.appendChild(item);
+                this._content.eonScroll.content.appendChild(item);
             },
             /*
               @function removeItem 
@@ -96,7 +96,7 @@
               @param {Object} item [Node to removes from togglemenu] 
              */
             removeItem: function (item) {
-                this._content.vcometScroll.content.removeChild(item);
+                this._content.eonScroll.content.removeChild(item);
             },
             /*
               @function replaceItem 
@@ -110,7 +110,7 @@
                 }
 
                 newItem.classList.add("vc-togglemenu-item");
-                this._content.vcometScroll.content.replaceChild(newItem, oldItem);
+                this._content.eonScroll.content.replaceChild(newItem, oldItem);
             }
         },
 
@@ -134,8 +134,8 @@
                 }
 
                 // Move documentFragment to shadowRoot
-                el._content.vcometScroll.content.appendChild(itemsDocFragment);
-                el._content.vcometScroll.update();
+                el._content.eonScroll.content.appendChild(itemsDocFragment);
+                el._content.eonScroll.update();
 
             },
             /*
@@ -186,7 +186,7 @@
                 var totalItemsHeight = 0;
 
                 if (el.occupy == "fit") {
-                    totalItemsHeight = el._content.vcometScroll.content.scrollHeight;
+                    totalItemsHeight = el._content.eonScroll.content.scrollHeight;
                     el._content.style.height = totalItemsHeight + "px";
 
                 } else {
@@ -214,7 +214,7 @@
             updateDisplay: function () {
                 var el = this;
 
-                if (vcomet.util.isTrue(el.displayed)) {
+                if (eon.util.isTrue(el.displayed)) {
                     this._displayTogglemenu();
                     el.autoAdjustHeight = true;
 
@@ -244,7 +244,7 @@
                     el._button.classList.add("vc-bg1-hoverable");
                     el._content.classList.remove("vc-togglemenu-display");
                     el._button.classList.remove("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
-                    vcomet.triggerCallback("onUndisplay", this);
+                    eon.triggerCallback("onUndisplay", this);
                     el.autoAdjustHeight = false;
                     el._content.style.height = 0;
 
@@ -252,7 +252,7 @@
                     el._content.classList.add("vc-togglemenu-display");
                     el._button.classList.remove("vc-bg1-hoverable");
                     el._button.classList.add("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
-                    vcomet.triggerCallback("onDisplay", this);
+                    eon.triggerCallback("onDisplay", this);
                     el._setDisplayHeight();
 
                 }
@@ -265,9 +265,9 @@
             el._title = el.template.querySelector(".vc-togglemenu-title");
             el._content = el.template.querySelector(".vc-togglemenu-content");
 
-            vcomet.createCallback("onChange", this);
-            vcomet.createCallback("onDisplay", this);
-            vcomet.createCallback("onUndisplay", this);
+            eon.createCallback("onChange", this);
+            eon.createCallback("onDisplay", this);
+            eon.createCallback("onUndisplay", this);
         },
 
         onInit: function () {
@@ -289,10 +289,10 @@
             }, false);
 
             // Resizes toggle content when adds or deletes elements
-            // vcomet.addResizeListener(el._content, el.tagName + el.uid, function () {
+            // eon.addResizeListener(el._content, el.tagName + el.uid, function () {
             //     var differentHeight = (parseInt(el._content.style.height) != el._content);
-            vcomet.addResizeListener(el._content.vcometScroll.content, el.tagName + el.uid, function () {
-                var differentHeight = (parseInt(el._content.style.height) != el._content.vcometScroll.content.scrollHeight);
+            eon.addResizeListener(el._content.eonScroll.content, el.tagName + el.uid, function () {
+                var differentHeight = (parseInt(el._content.style.height) != el._content.eonScroll.content.scrollHeight);
 
                 (el.autoAdjustHeight && differentHeight) ? el._setDisplayHeight() : null;
             });

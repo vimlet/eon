@@ -47,12 +47,12 @@ function verifyResolution() {
 
   // Tablet view
   if (
-    window.innerWidth <= vcomet.tabletWidth &&
-    window.innerWidth > vcomet.mobileWidth
+    window.innerWidth <= eon.tabletWidth &&
+    window.innerWidth > eon.mobileWidth
   ) {
     noticesSmallDevice(notices);
     // Mobile view
-  } else if (window.innerWidth <= vcomet.mobileWidth) {
+  } else if (window.innerWidth <= eon.mobileWidth) {
     noticesSmallDevice(notices);
     // Desktop view
   } else {

@@ -6,13 +6,13 @@ function setUpSearch(selector) {
     });
 }
 
-function loadVCometExamples() {
+function loadeonExamples() {
     var anchor, activePanel, groupId;
     // Configure tree
     var treeScroll = refs.tree.querySelector("vc-scroll");
     treeScroll.thickness = "10";
 
-    // Load vComet element example
+    // Load eon element example
     refs.tree.onNodeSelected(function (node) {
         // Go to group file
         groupId = node._refs.parentNode.tagName == "VC-TREENODE" ? node._refs.parentNode.id : node.id;

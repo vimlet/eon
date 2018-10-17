@@ -7,7 +7,7 @@ To use it import vc-togglemenu in the head of the HTML document:
 ``` [html]
 <head>
     <script>
-        vComet.import("/vComet/ui/vc-togglemenu.html");
+        eon.import("/eon/ui/vc-togglemenu.html");
     </script>
 <head>
 ```
@@ -21,7 +21,7 @@ By default, vc-togglemenu is displayed downwards occupying the remaining space o
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
     // Create vc-togglemenu
     var myTogglemenu = document.createElement("vc-togglemenu");
     // Create vc-item

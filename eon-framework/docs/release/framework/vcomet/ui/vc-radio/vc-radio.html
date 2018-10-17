@@ -8,7 +8,7 @@
 </template>
 
 <script>
-  vcomet.element("vc-radio", "vc-radio.css", {
+  eon.element("vc-radio", "vc-radio.css", {
     themed: true,
     properties: {
       /*
@@ -100,7 +100,7 @@
         el._refs.input.setAttribute("id", el.value);
         el._refs.label.setAttribute("for", el.value);
 
-        vcomet.triggerCallback("onChange", this);
+        eon.triggerCallback("onChange", this);
       },
       /*
         @function (private) _updateDisabled
@@ -109,7 +109,7 @@
       updateDisabled: function () {
 
         // Radio disabled
-        if (!vcomet.util.isTrue(this.disabled)) {
+        if (!eon.util.isTrue(this.disabled)) {
 
           this._refs.input.disabled = false;
           this._refs.input.classList.remove("vc-radio-disabledRadio", "vc-radio-checkedDisabledRadio");
@@ -130,7 +130,7 @@
       updateReadonly: function () {
         var el = this;
 
-        if (vcomet.util.isTrue(el.readonly)) {
+        if (eon.util.isTrue(el.readonly)) {
           el._refs.input.setAttribute("readonly", "true");
         } else {
           el._refs.input.removeAttribute("readonly");
@@ -145,7 +145,7 @@
       updateCheck: function () {
         if (this.parentNode.tagName.toLowerCase() == "vc-group") {
           var radioGroupHost = this.parentNode;
-          var previousChecked = vcomet.Radio.checkedRadios[radioGroupHost.name];
+          var previousChecked = eon.Radio.checkedRadios[radioGroupHost.name];
           var previousSpan;
           // Uncheck previousRadio
           if (previousChecked) {
@@ -156,14 +156,14 @@
             previousChecked.setAttribute("checked", "false");
             previousChecked._refs.input.classList.remove("vc-radio-checkRadio");
             previousSpan.classList.remove("vc-radio-checked");
-            vcomet.createCallback("onUncheck", this);
+            eon.createCallback("onUncheck", this);
   
           }
 
           radioGroupHost.value = this.value;
           radioGroupHost._checked = true;
-          radioGroupHost._disabled = vcomet.util.isTrue(this.disabled) ? true : false;
-          vcomet.Radio.checkedRadios[radioGroupHost.name] = this;
+          radioGroupHost._disabled = eon.util.isTrue(this.disabled) ? true : false;
+          eon.Radio.checkedRadios[radioGroupHost.name] = this;
         }
 
         // Check new Radio
@@ -171,7 +171,7 @@
         this.checked = true;
         this._refs.input.classList.add("vc-radio-checkRadio");
         this._refs.span.classList.add("vc-radio-checked");
-        vcomet.triggerCallback("onCheck", this);
+        eon.triggerCallback("onCheck", this);
 
       },
 
@@ -181,7 +181,7 @@
       */
       setCheck: function () {
 
-        if (vcomet.util.isTrue(this.checked)) {
+        if (eon.util.isTrue(this.checked)) {
           this._refs.input.checked = true;
           this._updateCheck();
         }
@@ -204,13 +204,13 @@
     },
 
     onCreated: function () {
-      vcomet.Radio = vcomet.Radio || {
+      eon.Radio = eon.Radio || {
         checkedRadios: {}
       };
 
-      vcomet.createCallback("onChange", this);
-      vcomet.createCallback("onCheck", this);
-      vcomet.createCallback("onUncheck", this);
+      eon.createCallback("onChange", this);
+      eon.createCallback("onCheck", this);
+      eon.createCallback("onUncheck", this);
 
       this._createRefs();
     },
@@ -236,7 +236,7 @@
 
       // Checking a radio option
       el._refs.label.addEventListener("click", function (e) {
-        ((!vcomet.util.isTrue(el.disabled) && !vcomet.util.isTrue(el.readonly)) || el.disabled == null) ? el._updateCheck() : null;
+        ((!eon.util.isTrue(el.disabled) && !eon.util.isTrue(el.readonly)) || el.disabled == null) ? el._updateCheck() : null;
 
       }, false);
     },

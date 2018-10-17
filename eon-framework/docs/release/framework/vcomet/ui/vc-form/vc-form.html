@@ -1,6 +1,6 @@
 <template></template>
 <script>
-  vcomet.element("vc-form", null, {
+  eon.element("vc-form", null, {
     properties: {
       /*
         @property {String} action 
@@ -150,13 +150,13 @@
         // This method doesn't work at Firefox and Edge
         // childPrototype = Object.getPrototypeOf(formChildNode).toString();
         // Case html form elements on Firefox and Edge (??? Safari and IE)
-        // And html form elements and vcomet form elements on Chrome and Opera
+        // And html form elements and eon form elements on Chrome and Opera
         if (formChildNode.__proto__.toString().indexOf("HTMLInputElement") !== -1
           || formChildNode.__proto__.toString().indexOf("HTMLSelectElement") !== -1
           || formChildNode.__proto__.toString().indexOf("HTMLTextAreaElement") !== -1
         ) {
           return formChildNode.__proto__.toString();
-          // Case vcomet form element on Firefox and Edge
+          // Case eon form element on Firefox and Edge
         } else if (formChildNode.__proto__.__proto__.toString().indexOf("HTMLInputElement") !== -1) {
           return formChildNode.__proto__.__proto__.toString();
         } else {
@@ -185,7 +185,7 @@
         // Checkbox elements
         if (inputType == "checkbox" || formChildNode._formelement == "checkbox") {
 
-          if (vcomet.util.isTrue(formChildNode.checked) && !vcomet.util.isTrue(formChildNode.disabled)) {
+          if (eon.util.isTrue(formChildNode.checked) && !eon.util.isTrue(formChildNode.disabled)) {
             // console.log('formChildNode', formChildNode);
             elementValue = formChildNode.value;
 
@@ -210,7 +210,7 @@
           // Radio button elements
         } else if (inputType == "radio" || formChildNode._formelement == "radio") {
 
-          if (vcomet.util.isTrue(formChildNode._checked) && !vcomet.util.isTrue(formChildNode._disabled)) {
+          if (eon.util.isTrue(formChildNode._checked) && !eon.util.isTrue(formChildNode._disabled)) {
 
             elementValue = formChildNode.value;
             // Adding name and value of element at the submit object
@@ -221,7 +221,7 @@
           // Slider elements
         } else if (inputType == "range" || formChildNode._formelement == "slider") {
 
-          if (!vcomet.util.isTrue(formChildNode.disabled)) {
+          if (!eon.util.isTrue(formChildNode.disabled)) {
             elementName = formChildNode.name;
             elementValue = formChildNode.value;
             // Adding name and value of element at the submit object
@@ -231,7 +231,7 @@
           // Vimlet textbox, textarea and others html elements
         } else {
           elementValue = formChildNode.value;
-          if (!vcomet.util.isTrue(formChildNode.disabled)) {
+          if (!eon.util.isTrue(formChildNode.disabled)) {
             // Control if the input has no value
             if (elementValue !== "" && typeof elementValue != "undefined") {
               // Adding name and value of element at the submit object
@@ -292,7 +292,7 @@
 
             if (xhr.status === 200) {
               console.log('Status ' + xhr.statusText + '\n' + action + param);
-              vcomet.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
+              eon.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
             } else {
               console.log('Request failed.  Returned status of ' + xhr.status);
             }
@@ -309,7 +309,7 @@
           xhr.onload = function () {
 
             if (xhr.readyState == 4 && xhr.status == 200) {
-              vcomet.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
+              eon.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
               // console.log(xhr.responseText);
             } else {
               console.log('Request failed.  Returned status of ' + xhr.status);
@@ -320,14 +320,14 @@
           xhr.send(param);
 
         } else {
-          vcomet.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
+          eon.triggerCallback("onSubmit", el, null, [action, method, formData, param]);
         }
 
       }
     },
 
     onCreated: function () {
-      vcomet.createCallback("onSubmit", this);
+      eon.createCallback("onSubmit", this);
     },
 
 

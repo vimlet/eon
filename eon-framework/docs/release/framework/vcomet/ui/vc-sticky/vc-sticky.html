@@ -1,5 +1,5 @@
 <script>
-  vcomet.element("vc-sticky", "vc-sticky.css", {
+  eon.element("vc-sticky", "vc-sticky.css", {
     dependencies: [
       "../vc-scroll"
     ],
@@ -151,7 +151,7 @@
         var position = window.getComputedStyle(el.wrapper).position;
         var limitValue = el.side == "right" ? body.offsetWidth : body.offsetHeight;
         // **Right value is not an exact number on IE
-        // el._misc.viewPosition = vcomet.util.getBrowser() === "IE" ? parseInt(Math.floor(el.wrapper.getBoundingClientRect()[el.side])) : el._misc.viewPosition;
+        // el._misc.viewPosition = eon.util.getBrowser() === "IE" ? parseInt(Math.floor(el.wrapper.getBoundingClientRect()[el.side])) : el._misc.viewPosition;
         el._misc.viewPosition += parseInt(el.spacing);
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition > limitValue && ~["static", "relative"].indexOf(position)) {
@@ -191,7 +191,7 @@
           el.wrapper.style.position = "relative";
           el.wrapper.style[el.side] = "auto";
         }
-        vcomet.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
+        eon.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
       },
       /*
         @function (private) _animationMonitor
@@ -225,13 +225,13 @@
         var prop = el.offsetTop;
         switch (el.side) {
           case "right":
-            prop = vcomet.dom.offsetRight(el);
+            prop = eon.dom.offsetRight(el);
             break;
           case "left":
             prop = el.offsetLeft;
             break;
           case "bottom":
-            prop = vcomet.dom.offsetBottom(el);
+            prop = eon.dom.offsetBottom(el);
             break;
         }
         return prop;
@@ -261,7 +261,7 @@
         // Check sticky position
         el._refs.setPositionFn = function (arg) {
           // Only apply throttled on desktop devices (Higher scroll call number)
-          if (!throttled || vcomet.util.isTouchScreen()) {
+          if (!throttled || eon.util.isTouchScreen()) {
             // Get the element top offset value and style top value
             el._misc.viewPosition = el.getBoundingClientRect()[el.side];
             value = Math.abs(el._getOffsetProp());
@@ -307,7 +307,7 @@
     },
     onCreated: function () {
       var el = this;
-      vcomet.createCallback("onPositionChanged", el);
+      eon.createCallback("onPositionChanged", el);
       // Store sticky information
       el._misc.scrollProp = el.side == "top" || el.side == "bottom" ? "scrollTop" : "scrollLeft";
     },

@@ -19,7 +19,7 @@ Declare the vc-treenode the same way you declare any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-tree
   var tree = document.createElement("vc-tree");

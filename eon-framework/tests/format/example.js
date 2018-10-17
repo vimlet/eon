@@ -22,16 +22,16 @@ commons.run.exec("npm", ["run", "meta"], projectRoot, null, function (error) {
 function release(cb) {
   console.log("### RELEASE " + packageObject.version + " ###");
   // Remove old directory
-  var rootPath = path.join("release/vcomet-" + packageObject.version);
+  var rootPath = path.join("release/eon-" + packageObject.version);
 
   rimraf(rootPath, function () {
-    glob("src/main/vcomet/**/*", null, function (error, files) {
+    glob("src/main/eon/**/*", null, function (error, files) {
       if (error) {
         console.log(error);
       } else {
         files.forEach(function (file) {
           var src = file;
-          var dest = path.join("release/vcomet-" + packageObject.version, file.substring("src/main/vcomet".length));
+          var dest = path.join("release/eon-" + packageObject.version, file.substring("src/main/eon".length));
 
           if (fs.lstatSync(src).isFile()) {
             console.log("Copy: " + src + " => " + dest);
@@ -48,11 +48,11 @@ function release(cb) {
 
 function releaseMin(cb) {
   console.log("### RELEASE-MIN " + packageObject.version + " ###");
-  var rootPath = path.join("release/vcomet-" + packageObject.version + "-min");
+  var rootPath = path.join("release/eon-" + packageObject.version + "-min");
 
   // Remove old directory
   rimraf(rootPath, function () {
-    glob("src/main/vcomet/**/*", null, function (error, files) {
+    glob("src/main/eon/**/*", null, function (error, files) {
       if (error) {
         console.log(error.message);
       }
@@ -64,7 +64,7 @@ function releaseMin(cb) {
 
       files.forEach(function (file) {
         var src = file;
-        var dest = path.join("release/vcomet-" + packageObject.version + "-min", file.substring("src/main/vcomet".length));
+        var dest = path.join("release/eon-" + packageObject.version + "-min", file.substring("src/main/eon".length));
 
         if (fs.lstatSync(src).isFile()) {
           var extension = path.extname(src).toLowerCase();

@@ -7,7 +7,7 @@ To use it import vc-loadingmask in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-loadingmask.html");
+    eon.import("/eon/ui/vc-loadingmask.html");
   </script>
 <head>
 ```
@@ -23,7 +23,7 @@ It is also very simple to create a vc-loadingmask programmatically.
 
 It can be indicated that the vc-loadingmask is not shown when it is created and displayed when necessary using the method `show`.
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-loadingmask
   var myLoadingmask = document.createElement("vc-loadingmask");
   // Append vc-loadingmask

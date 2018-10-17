@@ -7,7 +7,7 @@ To use it import vc-group in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-group.html");
+    eon.import("/eon/ui/vc-group.html");
   </script>
 <head>
 ```
@@ -22,7 +22,7 @@ To use it import vc-group in the head of the HTML document:
 
 ## Programmatic usage
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-group and vc-radio 
   var myGroup = document.createElement("vc-group");
   var myRadio1 = document.createElement("vc-radio");

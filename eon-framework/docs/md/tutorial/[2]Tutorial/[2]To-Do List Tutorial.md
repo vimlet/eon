@@ -1,16 +1,16 @@
 # Using Components
-In this tutorial we are going to make a simple To-Do List to teach you about some of the most basic components vComet offers, and to show you how easy it is getting used to them.
+In this tutorial we are going to make a simple To-Do List to teach you about some of the most basic components eon offers, and to show you how easy it is getting used to them.
 
 ## Import components
 To create the To-Do List we are going to use 4 components only:  `vc-text`, `vc-button`, `vc-checkbox` and `vc-scroll`. The first thing do is import them into the html file:
 
 ```[html]
 <script>
-    vcomet.import([
-        "vcomet/ui/vc-text.html",
-        "vcomet/ui/vc-button.html",
-        "vcomet/ui/vc-checkbox.html",
-        "vcomet/ui/vc-scroll.html"
+    eon.import([
+        "eon/ui/vc-text.html",
+        "eon/ui/vc-button.html",
+        "eon/ui/vc-checkbox.html",
+        "eon/ui/vc-scroll.html"
     ]);
 </script>
 ```
@@ -18,7 +18,7 @@ To create the To-Do List we are going to use 4 components only:  `vc-text`, `vc-
 Since we need to import multiple components we are passing an `Array` with their paths, but you can also pass a single `String` path if you only want to import one.
 
  ## Declare components
- We are going to declare components that will be loaded with the document, that is, those that are not created by the user interaction. In order To-Do this, we are going to use HTML tags, but with vComet nomenclature.
+ We are going to declare components that will be loaded with the document, that is, those that are not created by the user interaction. In order To-Do this, we are going to use HTML tags, but with eon nomenclature.
 
 ```[html]
 <div class="main">
@@ -71,11 +71,11 @@ function addItem() {
 ```
 
 With this function we dinamically create the required components that will shape the list item. 
-To use vComet programmatically we will do it inside the `onReady` event, ensure that all 
+To use eon programmatically we will do it inside the `onReady` event, ensure that all 
 the functionalities are loaded in the document.
 ``` [javascript]
 function setItem(newItem) {
-    vcomet.onReady(function () {
+    eon.onReady(function () {
         // We create a checkbox that will be the item in the list 
         var newCheckbox = document.createElement("vc-checkbox");
         // We add a button to edit the item
@@ -117,7 +117,7 @@ function setItem(newItem) {
         newItemContainer.appendChild(defaultContainer);
 
         // Register newItemContainer node to be aware if it is on the click path by giving `isOnPath` property
-        vcomet.registerPathListener(newItemContainer);
+        eon.registerPathListener(newItemContainer);
     });
 }
 ```
@@ -132,7 +132,7 @@ function editItem(item) {
 
     // Editing node does not exist yet
     if (!item.querySelector(".editContainer")) {
-        vcomet.onReady(function () {
+        eon.onReady(function () {
             // We create a new input text to sent the new item value
             var newItemEdit = document.createElement("vc-text");
             var newSave = document.createElement("vc-button");

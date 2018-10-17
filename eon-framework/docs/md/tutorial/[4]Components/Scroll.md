@@ -7,7 +7,7 @@ For its use, it is necessary to import vc-scroll in the head of the HTML documen
 ``` [html]
 <head>
   <script>
-    vcomet.import("/vcomet/ui/vc-scroll.html");
+    eon.import("/eon/ui/vc-scroll.html");
   </script>
 <head>
 ```
@@ -23,7 +23,7 @@ For its use, it is necessary to import vc-scroll in the head of the HTML documen
 ## Programmatic usage
 
 ``` [javascript]
-    vcomet.onReady(function () {
+    eon.onReady(function () {
 
       // Create vc-scroll element
       var myScroll = document.createElement("vc-scroll");

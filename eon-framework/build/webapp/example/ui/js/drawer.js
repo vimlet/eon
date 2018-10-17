@@ -6,7 +6,7 @@ function machineSearch() {
   // Filter machines listener
   document.querySelector("vc-searchbar").onSearch(function(filters) {
     var name = filters.name;
-    var items = document.querySelector(".machineContainer").vcometScroll.content
+    var items = document.querySelector(".machineContainer").eonScroll.content
       .children;
     for (var i = 0; i < items.length; i++) {
       if (
@@ -32,7 +32,7 @@ function drawerResizeListener() {
 
   //TODO
   drawer.onReady(function() {
-    vcomet.drawerExcludedNodes.push(document.querySelector("#mapId"));
+    eon.drawerExcludedNodes.push(document.querySelector("#mapId"));
   });
   drawer.onResize(function() {
     checkDevice();
@@ -47,12 +47,12 @@ function checkDevice() {
   var drawer = document.querySelector("#drawer");
   // Tablet view
   if (
-    window.innerWidth <= vcomet.tabletWidth &&
-    window.innerWidth > vcomet.mobileWidth
+    window.innerWidth <= eon.tabletWidth &&
+    window.innerWidth > eon.mobileWidth
   ) {
     drawerTablet(drawer);
     // Mobile view
-  } else if (window.innerWidth <= vcomet.mobileWidth) {
+  } else if (window.innerWidth <= eon.mobileWidth) {
     drawerMobile(drawer);
     // Desktop view
   } else {

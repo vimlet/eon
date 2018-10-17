@@ -7,7 +7,7 @@ To use it is necessary to import vc-appmenu in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-appmenu.html");
+    eon.import("/eon/ui/vc-appmenu.html");
   </script>
 <head>
 ```
@@ -25,7 +25,7 @@ The vc-appmenu created declaratively is composed by vc-item to add the different
 To create vc-appmenu programmatically also uses vc-item to add the apps, and it will be added to the vc-appmenu using `addItem` method.
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-appmenu
   var myAppmenu = document.createElement("vc-appmenu");
   // Create vc-item 
@@ -54,7 +54,7 @@ vcomet.onReady(function () {
 ```
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   var myAppmenu = document.querySelector("#myAppmenu");
   var firstItem = document.querySelector("#item1");
   var secondItem = document.createElement("vc-item");

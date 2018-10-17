@@ -11,7 +11,7 @@ By default the drawer is designed to be relative to the HTML body element, and p
 ``` [html]
 <head>
   <script>
-    vcomet.import("/vcomet/ui/vc-drawer.html");
+    eon.import("/eon/ui/vc-drawer.html");
   </script>
 <head>
 ```
@@ -27,7 +27,7 @@ Declare the vc-drawer as any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-drawer
   var myDrawer = document.createElement("vc-drawer");

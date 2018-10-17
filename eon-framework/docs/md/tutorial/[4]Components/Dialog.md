@@ -2,14 +2,14 @@
 
 ## Introduction
 
-The emerging component vc-dialog can contain text and other vComet components or HTML components.
+The emerging component vc-dialog can contain text and other eon components or HTML components.
 The basic dialog consists of a container, but it is possible to add header and footer, which will contain the close button.
 
 To use it import vc-dialog in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-dialog.html");
+    eon.import("/eon/ui/vc-dialog.html");
   </script>
 <head>
 ```
@@ -39,7 +39,7 @@ To indicate that the vc-section will contain the content of the dialog it is nec
 Unlike vc-dialog created declaratively, programmatic vc-dialog does not need vc-section. To interact with the content and the footer only need to use the object `content` and `footer`.
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-dialog
   var myDialog = document.createElement("vc-dialog");
   var myContent = document.createElement("span");
@@ -122,7 +122,7 @@ In this example first creates the dialog declaratively and then programmatically
 ```
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   var myDialog = document.querySelector("#myDialog");
   var newContent = document.createElement("span");
   var newButton = document.createElement("vc-button");

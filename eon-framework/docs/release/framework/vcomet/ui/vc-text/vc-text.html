@@ -12,7 +12,7 @@
 </template>
 
 <script>
-    vcomet.element("vc-text", "vc-text.css", {
+    eon.element("vc-text", "vc-text.css", {
         themed: true,
         dependencies: [
             "../vc-scroll"
@@ -190,7 +190,7 @@
 
                 var el = this;
 
-                el._misc.area.isNative = vcomet.util.isTouchScreen();
+                el._misc.area.isNative = eon.util.isTouchScreen();
 
                 if (!el._misc.area.isNative) {
                     el._setupAsCustomArea();
@@ -245,7 +245,7 @@
                 var el = this;
 
                 var main = el.querySelector(".vc-text-main");
-                var vcometScroll = document.createElement("vc-scroll");
+                var eonScroll = document.createElement("vc-scroll");
                 var editableContainer = document.createElement("div");
                 var editable = document.createElement("div");
 
@@ -266,13 +266,13 @@
 
                 el._refs.editableArea = editable;
 
-                vcometScroll.setAttribute("thickness", "8");
+                eonScroll.setAttribute("thickness", "8");
 
                 editable.classList.add("vc-text-editable");
                 editable.setAttribute("contenteditable", "true");
                 editable.setAttribute("placeholder", el.placeholder);
 
-                vcomet.registerPathListener(editable);
+                eon.registerPathListener(editable);
 
                 main.addEventListener("click", function () {
 
@@ -285,8 +285,8 @@
 
                 // Appends the new nodes
                 editableContainer.appendChild(editable);
-                vcometScroll.appendChild(editableContainer);
-                main.appendChild(vcometScroll);
+                eonScroll.appendChild(editableContainer);
+                main.appendChild(eonScroll);
 
             },
             /*
@@ -306,7 +306,7 @@
 
                     // Checks if the key press corresponds to ENTER
                     if (e.keyCode == 13) {
-                        vcomet.triggerCallback("onEnter", el)
+                        eon.triggerCallback("onEnter", el)
                     }
 
                     setTimeout(function () {
@@ -335,7 +335,7 @@
                 });
 
                 el._refs.editableArea.addEventListener("focus", function () {
-                    if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+                    if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
                     }
                 });
@@ -369,7 +369,7 @@
 
                     // Checks if the key press corresponds to ENTER
                     if (e.keyCode == 13) {
-                        vcomet.triggerCallback("onEnter", el)
+                        eon.triggerCallback("onEnter", el)
                     }
 
                 });
@@ -381,7 +381,7 @@
                 });
 
                 input.addEventListener("focus", function (e) {
-                    if (!vcomet.util.isTrue(el.readonly) && !vcomet.util.isTrue(el.disabled)) {
+                    if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
                     }
                 });
@@ -444,7 +444,7 @@
 
                 var el = this;
 
-                vcomet.registerPathListener(el);
+                eon.registerPathListener(el);
 
                 document.addEventListener("touchstart", function () {
                     if (!el.isOnPath) {
@@ -496,7 +496,7 @@
 
                 var value;
 
-                if (vcomet.util.getBrowser() == "IE" && this.type == "area") {
+                if (eon.util.getBrowser() == "IE" && this.type == "area") {
 
                     // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
                     value = this._refs.editableArea.innerHTML
@@ -523,7 +523,7 @@
                 var el = this;
                 var value, valueLength;
 
-                if (vcomet.util.getBrowser() == "IE" && this.type == "area") {
+                if (eon.util.getBrowser() == "IE" && this.type == "area") {
 
                     // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
                     valueLength = el._refs.editableArea.innerHTML
@@ -562,7 +562,7 @@
 
                 if (hasDifferentVerticalSize || hasDifferentHorizontalSize) {
 
-                    var browser = vcomet.util.getBrowser();
+                    var browser = eon.util.getBrowser();
 
                     if (browser != "Chrome" || browser != "Firefox") {
 
@@ -570,8 +570,8 @@
                         var targetRange = el._getSelectionRange();
                         var range = document.createRange();
                         var selection = window.getSelection();
-                        var vcometScroll = el.querySelector("vc-scroll");
-                        var scrollParent = vcometScroll.parentNode;
+                        var eonScroll = el.querySelector("vc-scroll");
+                        var scrollParent = eonScroll.parentNode;
 
                         var startContainer = targetRange.startContainer;
                         var startOffset = targetRange.startOffset;
@@ -580,22 +580,22 @@
 
                         if (browser == "IE" || browser == "Safari") {
 
-                            var vcometScrollbar = vcometScroll.querySelector(".vc-scroll-verticalScroll");
+                            var eonScrollbar = eonScroll.querySelector(".vc-scroll-verticalScroll");
 
-                            if (vcometScrollbar) {
+                            if (eonScrollbar) {
 
-                                vcometScroll.removeChild(vcometScrollbar);
-                                vcometScroll._setupVerticalScroll();
+                                eonScroll.removeChild(eonScrollbar);
+                                eonScroll._setupVerticalScroll();
 
                             } else if (hasDifferentVerticalSize) {
-                                vcometScroll._setupVerticalScroll();
+                                eonScroll._setupVerticalScroll();
                             }
 
                             editable.focus();
 
                         } else {
 
-                            scrollParent.appendChild(vcometScroll);
+                            scrollParent.appendChild(eonScroll);
 
                             editable.focus();
 
@@ -642,7 +642,7 @@
 
                 if (hasDifferentVerticalSize || hasDifferentHorizontalSize) {
 
-                    var vcometScroll = el.querySelector("vc-scroll");
+                    var eonScroll = el.querySelector("vc-scroll");
                     var editableRect = el.querySelector(".vc-text-editable").getBoundingClientRect();
                     var selectionRect = el._getSelectionCoords();
                     var errorRange = 5;
@@ -650,10 +650,10 @@
                     var horizontalPosition = null;
                     var onHorizontalLimit, onVerticalLimit;
 
-                    vcometScroll._handleScrollResize();
+                    eonScroll._handleScrollResize();
 
-                    el._misc.area.verticalSize = vcometScroll._getVerticalScrollLimit();
-                    el._misc.area.horizontalSize = vcometScroll._getHorizontalScrollLimit();
+                    el._misc.area.verticalSize = eonScroll._getVerticalScrollLimit();
+                    el._misc.area.horizontalSize = eonScroll._getHorizontalScrollLimit();
 
                     // Vertical check
                     if (hasDifferentVerticalSize) {
@@ -671,7 +671,7 @@
 
                     }
 
-                    vcometScroll.scrollTo(verticalPosition, horizontalPosition);
+                    eonScroll.scrollTo(verticalPosition, horizontalPosition);
 
                 }
 
@@ -839,7 +839,7 @@
                 var el = this;
                 var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
 
-                if (!vcomet.util.isTrue(el.disabled)) {
+                if (!eon.util.isTrue(el.disabled)) {
 
                     typingNode.classList.add("vc-fg2");
                     typingNode.classList.remove("vc-fg2-disabled");
@@ -871,7 +871,7 @@
                 var el = this;
                 var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
 
-                if (vcomet.util.isTrue(el.readonly)) {
+                if (eon.util.isTrue(el.readonly)) {
 
                     if (el.type != "area" || el._misc.area.isNative) {
                         typingNode.setAttribute("readonly", "true");
@@ -938,7 +938,7 @@
 
             el.source.textContent = "";
 
-            vcomet.createCallback("onEnter", this);
+            eon.createCallback("onEnter", this);
 
         },
 

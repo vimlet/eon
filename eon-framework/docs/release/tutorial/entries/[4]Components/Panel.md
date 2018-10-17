@@ -8,12 +8,12 @@ A vc-panel can be placed inside any other layout container and, in the mean time
 
 ## Declarative usage 
 
-First of all we import vc-panel on our HTML head section. In this example we are using the vComet import util:
+First of all we import vc-panel on our HTML head section. In this example we are using the eon import util:
 
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-panel.html");
+    eon.import("/eon/ui/vc-panel.html");
   </script>
 <head>
 ```
@@ -27,7 +27,7 @@ Declare panel as any other HTML element:
 ```
 ## Programmatic usage
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-panel
   var myPanel = document.createElement("vc-panel");
@@ -89,7 +89,7 @@ All the elements not surrounded by the template tag will render normally.
 We render the lazy content whenever we need it:
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
     var panel = document.querySelector("vc-panel");
 

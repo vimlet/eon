@@ -29,7 +29,7 @@
         </div>
     </template>
     <script>
-        vcomet.element("vc-video", "vc-video.css", {
+        eon.element("vc-video", "vc-video.css", {
             dependencies: [
                 "../vc-slider"
             ],
@@ -260,7 +260,7 @@
                     // Video custom style
                     el.style.backgroundColor = el.background;
                     // Controls event path monitor 
-                    vcomet.registerPathListener(el._refs.controls);
+                    eon.registerPathListener(el._refs.controls);
                     // Auto play configuration
                     el._autoPlaySetUp();
                     // Poster configuration
@@ -288,7 +288,7 @@
                         iOSVersion = window.Number(agent.substr(start + 3, 3).replace("_", "."));
                     }
                     // Hide poster
-                    if (vcomet.util.isTrue(el.autoPlay) && (!iOSVersion || (iOSVersion >= 10))) {
+                    if (eon.util.isTrue(el.autoPlay) && (!iOSVersion || (iOSVersion >= 10))) {
                         el._refs.poster.style.display = "none";
                         el._misc.posterHidden = true;
                         // Toggle video play icon
@@ -300,7 +300,7 @@
                 controlsSetUp: function () {
                     var el = this;
                     // Show video controls displaying
-                    if (vcomet.util.isTrue(el.controls)) {
+                    if (eon.util.isTrue(el.controls)) {
                         el._refs.controls.style.display = "flex";
                     }
                 },
@@ -322,7 +322,7 @@
                     // Toggle play on video wrapper click
                     el._refs.wrapper.addEventListener("pointerdown", function (e) {
                         if (!el._refs.controls.isOnPath && e.button == 0 && el._misc.posterHidden == true
-                            && el._misc.controlsHided == false && vcomet.util.isTrue(el.touchPlaying)) {
+                            && el._misc.controlsHided == false && eon.util.isTrue(el.touchPlaying)) {
                             el._togglePlay();
                         }
                     });
@@ -331,9 +331,9 @@
                 keyboardControl: function () {
                     var el = this;
                     // Toggle video playing using keyboards
-                    if (vcomet.util.isTrue(el.touchPlaying)) {
+                    if (eon.util.isTrue(el.touchPlaying)) {
                         el.addEventListener("keydown", function (e) {
-                            if (e.keyCode == 32 && vcomet.util.isTrue(el.touchPlaying)) {
+                            if (e.keyCode == 32 && eon.util.isTrue(el.touchPlaying)) {
                                 el._togglePlay();
                             }
                         });
@@ -620,7 +620,7 @@
                         el._refs.playIcon.classList.add("vicon-play");
                         el._refs.playIcon.classList.remove("vicon-pause");
                         // Check loop functionality
-                        if (!vcomet.util.isTrue(el.loop)) {
+                        if (!eon.util.isTrue(el.loop)) {
                             // Show poster
                             poster.style.display = "flex";
                             poster.style.backgroundImage = "url(" + el.poster + ")";
@@ -792,7 +792,7 @@
                 // PEP support
                 el.setAttribute("touch-action", "none");
                 //
-                el._misc.touch = vcomet.util.isTouchScreen();
+                el._misc.touch = eon.util.isTouchScreen();
             },
             onTransformed: function () {
                 var el = this;
@@ -829,23 +829,23 @@
     
                 var el = this;
                 var promise;
-                if (vcomet.util.isTrue(el.autoPlay)) {
+                if (eon.util.isTrue(el.autoPlay)) {
                     if (/iPad|iPhone/.test(navigator.platform)) {
                         // Automatic playback failed, Fallback! set gif to imitate video
                         el.autoPlayAllowed = false;
-                        vcomet.triggerCallback("onPlayTested", el, el);
+                        eon.triggerCallback("onPlayTested", el, el);
                     } else {
                         promise = el._refs.video.play();
                         // ** IE play function does not retrieve a promise
                         if (promise) {
                             promise.then(function () {
                                 // Automatic playback started!
-                                vcomet.triggerCallback("onPlayTested", el, el);
+                                eon.triggerCallback("onPlayTested", el, el);
                             }).catch(function (error) {
                                 // Automatic playback failed, Fallback! set gif to imitate video
                                 el._refs.video.poster = el.fallbackGif ? el.fallbackGif : el._refs.video.poster;
                                 el.autoPlayAllowed = false;
-                                vcomet.triggerCallback("onPlayTested", el, el);
+                                eon.triggerCallback("onPlayTested", el, el);
                             });
                         }
                     }

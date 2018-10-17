@@ -7,7 +7,7 @@ To use it import vc-form in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-form.html");
+    eon.import("/eon/ui/vc-form.html");
   </script>
 <head>
 ```
@@ -37,7 +37,7 @@ Create a vc-form programmatically is also very simple.
 To send the data vc-form uses `submitForm()` method.
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   var myForm = document.createElement("vc-form");
   var myCheckbox = document.createElement("vc-checkbox");
   var myButton = document.createElement("vc-button");

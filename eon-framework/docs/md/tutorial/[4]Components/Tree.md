@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The vComet tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that covers this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
+The eon tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that covers this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
 
 ## Declarative usage 
 
@@ -12,7 +12,7 @@ The tree element functionality depends on the [vc-treenode](/vimlet/VimletComet/
 <head>
   <script>
     // Imports vc-swiper element and its dependencies (vc-treenode)
-    vcomet.import("/vcomet/ui/vc-tree.html");
+    eon.import("/eon/ui/vc-tree.html");
   </script>
 <head>
 ```
@@ -29,7 +29,7 @@ Declare tree the same way you declare any other HTML element:
 ## Programmatic usage
 
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-tree
   var tree = document.createElement("vc-tree");

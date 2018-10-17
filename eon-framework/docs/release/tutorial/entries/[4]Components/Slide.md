@@ -19,7 +19,7 @@ Declare the vc-slide as any other HTML element:
 
 ## Programmatic usage
 ``` [javascript]
-vcomet.ready(function () {
+eon.ready(function () {
 
   // Create vc-slide
   var slide = document.createElement("vc-slide");

@@ -7,7 +7,7 @@ To use it import vc-check in the head of the HTML document:
 ``` [html]
 <head>
   <script>
-    vComet.import("/vComet/ui/vc-checkbox.html");
+    eon.import("/eon/ui/vc-checkbox.html");
   </script>
 <head>
 ```
@@ -25,7 +25,7 @@ To use it import vc-check in the head of the HTML document:
 
 ## Programmatic usage
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   // Create vc-checkbox
   var myCheckbox1 = document.createElement("vc-checkbox");
   var myCheckbox2 = document.createElement("vc-checkbox");
@@ -67,7 +67,7 @@ In this example one of the vc-checkbox is disabled and other is checked, but aft
 ```
 
 ``` [javascript]
-vcomet.onReady(function () {
+eon.onReady(function () {
   var myCheckbox2 = document.querySelector("#myCheckbox2");
 
   setTimeout(function () {

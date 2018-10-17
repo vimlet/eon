@@ -1,6 +1,6 @@
 <script type="text/javascript">
 //@header A hierarchical data representation
-vcomet.element("vc-tree", "vc-tree.css", {
+eon.element("vc-tree", "vc-tree.css", {
     dependencies: [
       "../vc-treenode"
     ],
@@ -104,7 +104,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
           lastNode = el._build(data);
           // Trigger on tree data ready after tree nodes processing
           lastNode.onRender(function () {
-            vcomet.triggerCallback("onDataReady", el, el, [el.nodes]);
+            eon.triggerCallback("onDataReady", el, el, [el.nodes]);
           });
         }
       },
@@ -183,7 +183,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         node.type = !type ? "directory" : type;
         node.extension = !extension ? "" : extension;
         // Trigger node created callback
-        vcomet.triggerCallback("onNodeCreate", el, el, [node]);
+        eon.triggerCallback("onNodeCreate", el, el, [node]);
         // Prevent node creation default
         if (!el.__onNodeCreate[0]) {
           el.create(node);
@@ -200,7 +200,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Deselect previous selected node
         if (el.selectedNode) {
           el.selectedNode.selected = false;
-          vcomet.triggerCallback("onNodeUnselected", el, el, [el.selectedNode]);
+          eon.triggerCallback("onNodeUnselected", el, el, [el.selectedNode]);
         }
         if (el.markedNode) {
           el.markedNode.marked = false;
@@ -208,7 +208,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Select node
         el.selectedNode = node;
         node.selected = true;
-        vcomet.triggerCallback("onNodeSelected", el, el, [node]);
+        eon.triggerCallback("onNodeSelected", el, el, [node]);
       },
       /*
         @function markNode
@@ -220,7 +220,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Deselect previous selected node
         if (el.markedNode) {
           el.markedNode.marked = false;
-          vcomet.triggerCallback("onNodeUnmarked", el, el, [el.markedNode]);
+          eon.triggerCallback("onNodeUnmarked", el, el, [el.markedNode]);
         }
         if (el.selectedNode) {
           el.selectedNode.selected = false;
@@ -228,7 +228,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Select node
         el.markedNode = node;
         node.marked = true;
-        vcomet.triggerCallback("onNodeMarked", el, el, [node]);
+        eon.triggerCallback("onNodeMarked", el, el, [node]);
       },
       /*
         @function create
@@ -263,7 +263,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         var el = this;
         var node = typeof path === "string" ? el.nodes[path] : path;
         // Trigger node drop callback
-        vcomet.triggerCallback("onNodeRemove", el, el, [node]);
+        eon.triggerCallback("onNodeRemove", el, el, [node]);
         // Prevent node create default
         if (!el.__onNodeRemove[0]) {
           el.remove(node);
@@ -305,7 +305,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         var el = this;
         var node = typeof dragNode === "string" ? el.nodes[dragNode] : dragNode;
         // Trigger node drop callback
-        vcomet.triggerCallback("onNodeMove", el, el, [node, dropNode]);
+        eon.triggerCallback("onNodeMove", el, el, [node, dropNode]);
         // Prevent node create default
         if (!el.__onNodeMove[0]) {
           el.move(dragNode, dropNode, callback, errCallback);
@@ -427,7 +427,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
         // Check if other nodes are pending to be appended
         // This means that only the first node in this cycle will create the new onReady callback
         if (!el._misc.pendingNodes) {
-          vcomet.onReady(function(){
+          eon.onReady(function(){
             var tree = el._refs.tree;
             var nodes = tree.children;
             var fragment = document.createDocumentFragment();
@@ -551,7 +551,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
 
           setTimeout(function () {
             el._sortNodes();
-            vcomet.triggerCallback("onNodeCreated", el, el, [nodeEl]);
+            eon.triggerCallback("onNodeCreated", el, el, [nodeEl]);
           }, 100);
         }
       },
@@ -578,7 +578,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
           delete el._misc.srcNodesPaths[node.path];
           delete el.nodes[node.path];
 
-          vcomet.triggerCallback("onNodeRemoved", el, el, [node]);
+          eon.triggerCallback("onNodeRemoved", el, el, [node]);
         }
       },
       /*
@@ -602,7 +602,7 @@ vcomet.element("vc-tree", "vc-tree.css", {
           } else {
             el._moveFile(dragNode, dropNode);
           }
-          vcomet.triggerCallback("onNodeMoved", el, el, [dragNode]);
+          eon.triggerCallback("onNodeMoved", el, el, [dragNode]);
           // Call success callback
           if (callback) {
             callback();
@@ -687,18 +687,18 @@ vcomet.element("vc-tree", "vc-tree.css", {
     onCreated: function () {
       var el = this;
       // Util element event callbacks
-      vcomet.createCallback("onDataReady", el);
-      vcomet.createCallback("onNodeSelected", el);
-      vcomet.createCallback("onNodeUnselected", el);
-      vcomet.createCallback("onNodeMarked", el);
-      vcomet.createCallback("onNodeUnmarked", el);
-      vcomet.createCallback("onNodeRightClicked", el);
-      vcomet.createCallback("onNodeCreate", el);
-      vcomet.createCallback("onNodeCreated", el);
-      vcomet.createCallback("onNodeRemove", el);
-      vcomet.createCallback("onNodeRemoved", el);
-      vcomet.createCallback("onNodeMove", el);
-      vcomet.createCallback("onNodeMoved", el);
+      eon.createCallback("onDataReady", el);
+      eon.createCallback("onNodeSelected", el);
+      eon.createCallback("onNodeUnselected", el);
+      eon.createCallback("onNodeMarked", el);
+      eon.createCallback("onNodeUnmarked", el);
+      eon.createCallback("onNodeRightClicked", el);
+      eon.createCallback("onNodeCreate", el);
+      eon.createCallback("onNodeCreated", el);
+      eon.createCallback("onNodeRemove", el);
+      eon.createCallback("onNodeRemoved", el);
+      eon.createCallback("onNodeMove", el);
+      eon.createCallback("onNodeMoved", el);
 
       var tree = document.createElement('div');
       // Tree container quick access
