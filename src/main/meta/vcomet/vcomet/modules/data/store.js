@@ -1,5 +1,5 @@
 
-vcomet.store = function (url) {
+vcomet.store = function () {
     var el = this;
     /* Resources representation */
     this.data = {};
