@@ -208,7 +208,7 @@ vcomet.defineOverlayCreation = function (el) {
 
         })
 
-        return overlay;
+        return overlay; 
 
     };
 

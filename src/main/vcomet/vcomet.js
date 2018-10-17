@@ -4510,7 +4510,7 @@ vcomet.defineOverlayCreation = function (el) {
 
         })
 
-        return overlay;
+        return overlay; 
 
     };
 
@@ -6259,12 +6259,7 @@ vcomet.store = function (url) {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
-<<<<<<< HEAD
                     el._memory.keys = Object.keys(value);
-=======
-                    // Update size
-                    el.size = Object.keys(el._memory.data).length;
->>>>>>> ad7e142c88576d11f6195699c5e2725572c28010
                 }
             }
         );
@@ -6294,7 +6289,7 @@ vcomet.endpoint = function (type, url) {
   /*
     @function get
     @description Read data resource // Read all data resources
-  */
+  */ 
   this.get = type == "rest" ? function (id, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;

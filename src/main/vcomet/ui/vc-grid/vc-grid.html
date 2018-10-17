@@ -142,11 +142,19 @@
                 reflect: true
             },
             /*
-            @property {String} idField
+            @property {String} keyProperty
             @description Property that sets the id for the entries
             */
-            idField: {
+            keyProperty: {
                 value: "id",
+                reflect: true
+            },
+            /*
+            @property {String} keyProperty
+            @description Property that sets the id for the entries
+            */
+            treeProperty: {
+                value: "children",
                 reflect: true
             },
             /*
@@ -394,6 +402,7 @@
                     limit = parseInt(el._misc.pageSize);
 
                     el.store.read().limit(start, limit).result(function (error, data) {
+                        console.log('data', data);
                         el._handleEntries(data, true, start, limit);
                         el._updatePagination(1);
                     });
@@ -594,35 +603,51 @@
                 var rows = el._misc.sourceFragment.querySelectorAll("vc-row");
                 var storeData = {};
 
-                if (rows.length > 0) {
+                // el._misc.tempData = {};
 
-                    var columns = el.columns.replace(/\s/g, '').split(',');
-                    var dataModel = {};
-                    var cells;
+                // if (rows.length > 0) {
 
-                    // We create a data model based on the columns specified in the grid, this is done so that in case there is an entry missing one of the column values
-                    // we will be able to fill it with an empty one
-                    for (var i = 0; i < columns.length; i++) {
-                        dataModel[columns[i]] = "";
-                    }
+                //     var columns = el.columns.replace(/\s/g, '').split(',');
+                //     var dataModel = {};
+                //     var fillRowData;
 
-                    // For each row we loop through its cells and fill its data object
-                    for (var j = 0; j < rows.length; j++) {
+                //     // We create a data model based on the columns specified in the grid, this is done so that in case there is an entry missing one of the column values
+                //     // we will be able to fill it with an empty one
+                //     for (var i = 0; i < columns.length; i++) {
+                //         dataModel[columns[i]] = "";
+                //     }
 
-                        data = Object.assign({}, dataModel);
-                        data.id = j;
+                //     fillRowData = function (row, isChild) {
 
-                        cells = rows[j].querySelectorAll("vc-cell");
+                //         var data;
 
-                        for (var k = 0; k < cells.length; k++) {
-                            data[cells[k].getAttribute("column")] = cells[k].innerHTML;
-                        }
+                //         data = Object.assign({}, dataModel);
+                //         data.id = Object.keys(storeData).length;
 
-                        storeData[j] = data;
+                //         storeData[data.id] = data;
 
-                    }
+                //         row.entryId = data.id;
 
-                }
+                //         for (var m = 0; m < row.children.length; m++) {
+
+                //             if (row.children[m].tagName.toLowerCase() == "vc-cell") {
+
+                //                 data[row.children[m].getAttribute("column")] = row.children[m].innerHTML;
+
+                //             } else if (row.children[m].tagName.toLowerCase() == "vc-row") {
+
+                //                 el._misc.tempData[data.id] = el._misc.tempData[data.id] ? el._misc.tempData[data.id].push(row.children[m]) : [row.children[m]];
+                //                 fillRowData(row.children[m], true);
+
+                //             }
+
+                //         }
+
+                //     };
+
+                // }
+
+                // console.log('storeData', storeData);
 
                 return storeData;
 
@@ -680,7 +705,7 @@
 
                     row = document.createElement("vc-row");
                     row.classList.add("vc-grid-entryRow", "vc-bg1-hoverable3", "vc-bg1-border2");
-                    row.dataset.entryId = dataObject[el.idField];
+                    row.dataset.entryId = dataObject[el.keyProperty];
 
                     //For each column we have in the grid we will look for its value on the dataObject
                     // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
@@ -751,7 +776,7 @@
 
                     row = document.createElement("vc-row");
                     row.classList.add("vc-grid-entryRow", "vc-bg1-hoverable3", "vc-bg1-border2");
-                    row.dataset.entryId = dataObject[el.idField];
+                    row.dataset.entryId = dataObject[el.keyProperty];
 
                     //For each column we have in the grid we will look for its value on the dataObject
                     // and create a cell, this way if a dataObject doesn't have a columnKey it will still have the cell but it will be an empty one
@@ -801,7 +826,7 @@
 
                 cell.classList.add("vc-grid-" + columnKey + "Column");
                 cell.setAttribute("column", columnKey);
-                cell.dataset.entryId = dataObject[el.idField];
+                cell.dataset.entryId = dataObject[el.keyProperty];
                 cell.content.innerHTML = dataObject[columnKey] ? dataObject[columnKey] : "";
 
                 if (el._misc.columns[columnKey].editable) {
@@ -1187,6 +1212,7 @@
                         el._misc.pageSize = rowsCapacity;
 
                         newPage = currentPage > el._getLastAvailablePage() ? el._getLastAvailablePage() : currentPage;
+                        newPage = newPage <= 0 ? 1 : newPage;
 
                         el._selectPage(newPage);
 

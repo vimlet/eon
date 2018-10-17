@@ -21,7 +21,7 @@ vcomet.endpoint = function (type, url) {
   /*
     @function get
     @description Read data resource // Read all data resources
-  */
+  */ 
   this.get = type == "rest" ? function (id, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;

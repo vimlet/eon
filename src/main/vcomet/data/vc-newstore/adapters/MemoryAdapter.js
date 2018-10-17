@@ -60,11 +60,11 @@ vcomet.vpa.declareAdapter("MemoryAdapter", function (config) {
                 }
 
                 var start = query.limitStart || 0;
-                var end = (query.limitAmount + query.limitStart) || memoryKeys.length;
+                var end = (query.limitAmount + query.limitStart) || memory.keys.length;
                 end = end > memory.keys.length ? memory.keys.length : end;
                 var result = [];
                 for (var i = start; i < end; i++) {
-                    result.push(memory.data[memoryKeys[i]]);
+                    result.push(memory.data[memory.keys[i]]);
                 }
                 
                 resolve(JSON.parse(JSON.stringify(result)));
