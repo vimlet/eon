@@ -21,7 +21,7 @@ eon.endpoint = function (type, url) {
   /*
     @function get
     @description Read data resource // Read all data resources
-  */ 
+  */
   this.get = type == "rest" ? function (id, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;
@@ -105,21 +105,22 @@ eon.endpoint = function (type, url) {
     @description Query data source
   */
   this.query = function (queryString, cb) {
-    if (el.type == "graphHTTP") {
-      graphHTTPQuery(queryString, cb);
-    } else if (el.type == "graphSockets") {
-      graphSocketsSubscription(queryString, cb);
-    }
+    graphHTTPQuery(queryString, cb);
   };
   /*
     @function mutation
     @description Update data source
    */
   this.mutation = function (queryString, cb) {
+    graphHTTPMutation(queryString, cb);
+  };
+  /*
+    @function subscribe
+    @description Subscribe
+   */
+  this.subscribe = function (queryString, cb) {
     // Check graphQL protocol based on
-    if (el.type == "graphHTTP") {
-      graphHTTPMutation(queryString, cb);
-    }
+    graphSocketsSubscription(queryString, cb);
   };
 
   /* 
@@ -156,7 +157,7 @@ eon.endpoint = function (type, url) {
       eon.ajax(el.url, options, cb);
     }
   }
-   
+
   // -- GraphQL Web sockets API --
 
   // Query call Web sockets based

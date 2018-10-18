@@ -64,7 +64,6 @@ eon.store = function () {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
-                    el._memory.keys = Object.keys(value);
                 }
             }
         );
