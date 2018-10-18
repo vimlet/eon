@@ -5,13 +5,8 @@
   <meta charset="utf-8">
 
   <!-- Import VimletJS  -->
-  <title>eon-STORE</title>
+  <title>VC-STORE</title>
   <script src="/eon/eon.js"></script>
-
-  <!-- UI components -->
-  <script>
-    eon.import("/eon/data/eon-endpoint/eon-endpoint.html");
-  </script>
 
   <!-- Example style -->
   <link rel="stylesheet" href="/example/data/css/style.css">
@@ -21,52 +16,55 @@
 
 <body>
 
-  <!-- eon-store usage -->
+  <!-- vc-store usage -->
   <script>
 
     // Store object
     var store = new eon.store();
-    var endpoint = new eon.endpoint();
 
     store.onLoaded(function () {
-      // -- MEMORY -- 
-      store.data = {
-        1: {
-          name: "Cain",
-          last: "Aman"
-        },
-        2: {
-          name: "Samuel",
-          last: "Milano"
-        }
-      }
+      // Set data
+      store.data = new Map([["2", {
+        name: "Cain",
+        last: "Aman"
+      }], ["1", {
+        name: "Samuel",
+        last: "Milano"
+      }]]);
+
+      console.log('map', store.data);
+
+      // ** Read entry
+      store.read("1").result(function (success, data) {
+        console.log('read 1', data);
+      });
+
+      // ** Read all
+      store.read().sort("name", "ascending").result(function (success, data) {
+        console.log('read all', data);
+      });
+
       // ** Create
       store.create({
-        name: "Alain",
-        last: "Petre"
-      }).result(function (error, data) {});
-
-      // ** Delete
-      store.delete("1").result(function (error, data) {});
+        id: "3",
+        name: "Anais",
+        last: "Toro"
+      }).result(function (success, data) {
+        console.log('read', data);
+      });
 
       // ** Update
       store.update("3", {
         name: "Alain",
         last: "Petre",
         age: 14
-      }).result(function (error, data) {});
+      }).result(function (error, data) { });
 
-      // ** read
-      store.read("3").result(function (error, data) {
-        console.log('read', data);
+      // ** Delete
+      store.delete().result(function (error, data) {
+        console.log('delete', data);
       });
 
-      console.log('store data', store.data, store.size);
-      // ** MEMORY
-    });
-
-    endpoint.onLoaded(function () {
-      // console.log('endpoint loaded', endpoint);
     });
 
   </script>

@@ -1,6 +1,6 @@
 eon.vpa.declareAdapter("MemoryAdapter", function (config) {
     var memory = {}; // Memory itself
-    memory.data = {}; // Where data will be stored
+    memory.data = new Map(); // Where data will be stored
     memory.keys = []; // Memory keys to keep creation order
     var counter = 0;
 
@@ -14,20 +14,15 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
                 }
                 else {
                     // ** Check if some data has already been inserted
-                    counter = Object.keys(memory.data).length ? Object.keys(memory.data).length + 1 : 0;
+                    counter = memory.data.size() ? memory.data.size() + 1 : 0;
                     id = counter;
                     query.data.id = "" + id;
                     counter++;
                 }
                 var validated = validate(query);
                 if (validated) {
-                    memory.data[id] = validated;
-                    // Remove key if exist to keep order while overwriting
-                    if (memory.keys.indexOf(id) >= 0) {
-                        memory.keys.splice(memory.keys.indexOf(id), 1);
-                    }
-                    memory.keys.push("" + id);
-                    resolve(JSON.parse(JSON.stringify(validated)));
+                    memory.data.set(id, validated);
+                    resolve(validated);
                 }
                 else {
                     reject(new Error("Validation error"));
@@ -41,47 +36,57 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
     // @function read (private) [Read from memory or list if no id given] @param query
     function read(query) {
         return new Promise(function (resolve, reject) {
+            // Check id value
             if (query.id) {
-                if (memory.data[query.id]) {
-                    resolve(JSON.parse(JSON.stringify(memory.data[query.id])));
-                }
-                else {
+                if (memory.data.get(query.id)) {
+                    resolve(memory.data.get(query.id));
+                } else {
                     reject(new Error("Not found"));
                 }
-            }
-            else {
-                // ** Modified - Sort data before get range
+            } else {
+                var keys;
+                var result = new Map();
+                // Sort data before get range
                 if (query.sortField) {
                     var asc = 1;
-                    if (query.sortRule && ~["descending","desc"].indexOf(query.sortRule)) {
+                    if (query.sortRule && ~["descending", "desc"].indexOf(query.sortRule)) {
                         asc = -1;
                     }
-                    result = sortArray(result, query.sortField, asc);
+                    keys = sortArray(memory.data, query.sortField, asc);
                 }
-
+                // Check ranges
                 var start = query.limitStart || 0;
-                var end = (query.limitAmount + query.limitStart) || memory.keys.length;
-                end = end > memory.keys.length ? memory.keys.length : end;
-                var result = [];
-                for (var i = start; i < end; i++) {
-                    result.push(memory.data[memory.keys[i]]);
+                var end = (query.limitAmount + query.limitStart) || memory.data.size;
+                end = end > memory.data.size ? memory.data.size : end;
+                if (!keys) {
+                    // Store map keys
+                    memory.data.forEach(function (value, key, map) {
+                        keys.push(key);
+                    });
                 }
-                
-                resolve(JSON.parse(JSON.stringify(result)));
+                // Build sorted map
+                for (var i = start; i < end; i++) {
+                    result.set(keys[i], memory.data.get(keys[i]));
+                }
+                resolve(result);
             }
         });
     }
     // @function update (private) [Update an existing entry from memory] @param query
     function update(query) {
         return new Promise(function (resolve, reject) {
+            // Check null values
             if (query.id) {
                 if (query.data) {
-                    if (memory.data[query.id]) {
-                        query.data = deepMerge(memory.data[query.id], query.data);
+                    // Check update target
+                    if (memory.data.get(query.id)) {
+                        // Merge current and new data
+                        query.data = deepMerge(memory.data.get(query.id), query.data);
                         var validated = validate(query);
                         if (validated) {
-                            memory.data[query.id] = validated;
-                            resolve(JSON.parse(JSON.stringify(validated)));
+                            // Set new validated data entry
+                            memory.data.set(query.id, validated);
+                            resolve(validated);
                         }
                         else {
                             reject(new Error("Validation error"));
@@ -103,14 +108,12 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
     // @function delete (private) [Delete from memory] @param query
     function remove(query) {
         return new Promise(function (resolve, reject) {
+            // Check null values
             if (query.id) {
-                if (memory.data[query.id]) {
-                    var result = JSON.parse(JSON.stringify(memory.data[query.id]));
-                    delete memory.data[query.id];
-                    // Remove key if exist to keep order while overwritting
-                    if (memory.keys.indexOf(query.id) >= 0) {
-                        memory.keys.splice(memory.keys.indexOf(query.id), 1);
-                    }
+                // Check remove target
+                if (memory.data.get(query.id)) {
+                    var result = memory.data.get(query.id);
+                    memory.data.delete(query.id);
                     resolve(result);
                 }
                 else {
@@ -118,31 +121,42 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
                 }
             }
             else {
-                var result = JSON.parse(JSON.stringify(memory));
+                // Remove all entries
+                var result = memory;
                 memory.keys = [];
                 // Safe clear object and its copy baseAdapter._memory
-                for (var key in memory.data) {
-                    delete memory.data[key];
-                }
+                memory.data.forEach(function (value, key, map) {
+                    memory.data.delete(key);
+                });
                 resolve(result);
             }
         });
     }
     // @function sortArray (private) [Sort an array of objects] @param array @param key @param asc (number) [1 if ascendant, -1 if descendant]
-    function sortArray(array, key, asc) {
+    function sortArray(data, key, asc) {
+        // ** IMPROVE
+        var array = [];
+        // Store map keys
+        data.forEach(function (value, key, map) {
+            array.push(key);
+        });
+        // Check ascending value
         asc = asc || 1;
+        // Sort comparing function
         function compare(a, b) {
-            if (a[key] < b[key]) {
+            if (a < b) {
                 return -1 * asc;
             }
-            else if (a[key] > b[key]) {
+            else if (a > b) {
                 return 1 * asc;
             }
             else {
                 return 0;
             }
         }
-        return array.sort(compare);
+        // Sort map keys
+        array.sort(compare);
+        return array;
     }
     // @function validate(private) [Not implemented yet] @param query
     function validate(query) {

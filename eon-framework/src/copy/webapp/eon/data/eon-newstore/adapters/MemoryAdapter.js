@@ -22,11 +22,6 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
                 var validated = validate(query);
                 if (validated) {
                     memory.data.set(id, validated);
-                    // ** Remove key if exist to keep order while overwriting
-                    // if (memory.keys.indexOf(id) >= 0) {
-                    //     memory.keys.splice(memory.keys.indexOf(id), 1);
-                    // }
-                    // memory.keys.push("" + id);
                     resolve(validated);
                 }
                 else {
