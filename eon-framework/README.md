@@ -1,7 +1,7 @@
 
 <p align="center">
 <a href="https://vimlet.com/eon">
-<img src="https://vimlet.com/resources/img/eon-h-flat.png" height="150"></img>
+<img src="https://vimlet.com/resources/img/eon-h-flat.png" height="100"></img>
 </a>
 </p>
 
