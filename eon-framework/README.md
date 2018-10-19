@@ -1,20 +1,9 @@
 
 <p align="center">
 <a href="https://vimlet.com/eon">
-<img width="450" src="logo.png"></img>
+<img src="https://vimlet.com/resources/img/eon-h-flat.png" height="150"></img>
 </a>
 </p>
-
-[//]: # (badges)
-
-<p align='center'>
-<a href='https://github.com/vimlet/eon/blob/master/LICENSE'><img src='https://vimlet.com/vimlet/eon/master/eon-framework/docs/readme/1530868538617/license.svg?raw=true' title='License' alt='license'></a>
-<a href='https://vimlet.com/downloads'><img src='https://vimlet.com/vimlet/eon/master/eon-framework/docs/readme/1530868538617/build.svg?raw=true' title='Build' alt='build'></a>
-<img src='https://vimlet.com/vimlet/eon/master/eon-framework/docs/readme/1530868538617/semver.svg?raw=true' title='Semver' alt='semver'>
-<a href='https://vimlet.com/vimlet/eon/master/eon-framework/docs/release/index.html'><img src='https://vimlet.com/vimlet/eon/master/eon-framework/docs/readme/1530868538617/docs.svg?raw=true' title='Docs' alt='docs'></a>
-</p>
-
-[//]: # (badges)
 
 
 <p align="center">
