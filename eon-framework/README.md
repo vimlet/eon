@@ -97,5 +97,5 @@ Keep reading the full [documentation](https://vimlet.com/vimlet/eon/master/eon-f
 
 ## License
 
-eon is released under MIT License. See [LICENSE](https://github.com/vimlet/eon/blob/master/LICENSE) for details.
+eon is released under MIT License. See [LICENSE](https://github.com/vimlet/eon/blob/master/eon-framework/LICENSE) for details.
 
