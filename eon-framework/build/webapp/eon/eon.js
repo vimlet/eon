@@ -6144,6 +6144,34 @@ eon.ajax = function (url, options, cb) {
   xhr.send(options.payload);
 };
 
+/**
+ * 
+ * @param  {[type]}  [description]
+ */
+eon.util.arrayToMap = function (array) {
+  var map = new Map();
+
+  for (var i = 0; i < array.length; i++) {
+    map.set(i, array[i]);
+  }
+
+  return map;
+};
+
+/**
+ * 
+ * @param  {[type]}  [description]
+ */
+eon.util.objectToMap = function (object) {
+  var map = new Map();
+
+  for(var key in object){
+    map.set(key, object[i]);
+  }
+
+  return map;
+};
+
 eon.history = eon.history || {};
 
 eon.history.location = {};
