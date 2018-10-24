@@ -169,6 +169,14 @@
                 value: false,
                 reflect: true,
                 reflectDefault: false
+            },
+            /*
+            @property {Boolean} ** New store: store
+            @description 
+            */
+            store: {
+                value: false,
+                reflect: true
             }
         },
 
@@ -185,7 +193,9 @@
                 el._refs.input = el.template.querySelector("input");
                 el._refs.dropDown = el.template.querySelector(".eon-combobox-dropdown");
                 el._refs.dropDownButton = el.template.querySelector(".eon-combobox-dropButton");
-                el._refs.store = el.source.querySelector("eon-store");
+                // ** New store
+                el.store = eon.util.isTrue(el.store) ? new eon.store() : "";
+                // el._refs.store = el.source.querySelector("eon-store");
                 el._refs.underline = el.template.querySelector(".eon-combobox-underline");
 
                 el._refs.data = el.template.querySelector(".eon-combobox-data");
@@ -452,21 +462,35 @@
 
                 var el = this;
 
-                if (el._refs.store) {
+                // ** New store
 
-                    el._refs.store.onCreated(function () {
+                if (el.store) {
 
-                        el._refs.store.onLoaded(function () {
+                    // el._refs.store.onCreated(function () {
 
-                            el._refs.store.listRemote(function () {
-                                el._setupStoreItems(el);
-                            });
+                    //     el._refs.store.onLoaded(function () {
 
-                            el._refs.store.onSourceChanged(function () {
-                                el._setupStoreItems(el);
-                            });
+                    //         el._refs.store.listRemote(function () {
+                    //             el._setupStoreItems(el);
+                    //         });
 
+                    //         el._refs.store.onSourceChanged(function () {
+                    //             el._setupStoreItems(el);
+                    //         });
+
+                    //     });
+
+                    // });
+
+                    el.store.onLoaded(function () {
+
+                        // Update items on data changed
+                        el.store.onDataChanged(function () {
+                            console.log('UPDATE');
+                            el._setupStoreItems(el);
                         });
+
+                        el._setupStoreItems(el);
 
                     });
 
@@ -537,18 +561,19 @@
 
                 var dropdown = el._refs.dropDown;
                 var itemsDocFragment = document.createDocumentFragment();
-                var displayProperty = (el.displayProperty != "") ? el.displayProperty : el._refs.store.idProperty;
-                var storeData = el._refs.store.data.asObject();
+                var displayProperty = (el.displayProperty != "") ? el.displayProperty : el.store.idProperty;
+                // ** New store
+                var storeData = el.store.data;
+                // ** var storeData = el._refs.store.data.asObject();
                 var item;
-
-                for (var key in storeData) {
-
+                // ** New store
+                storeData.forEach(function (value, key, map) {
                     item = document.createElement("eon-item");
 
                     item.classList.add("eon-bg1-hoverable", "eon-fg1-hoverable");
                     item.dataset.matches = true;
-                    item.value = storeData[key][el._refs.store.idProperty];
-                    item.displayValue = storeData[key][displayProperty];
+                    item.value = storeData.get(key)[el.store.idProperty];
+                    item.displayValue = storeData.get(key)[displayProperty];
 
                     el._misc.items[item.value] = item;
 
@@ -564,8 +589,34 @@
                     });
 
                     itemsDocFragment.appendChild(item);
+                });
+                
+                // ** 
+                // for (var key in storeData) {
 
-                }
+                //     item = document.createElement("eon-item");
+
+                //     item.classList.add("eon-bg1-hoverable", "eon-fg1-hoverable");
+                //     item.dataset.matches = true;
+                //     item.value = storeData[key][el._refs.store.idProperty];
+                //     item.displayValue = storeData[key][displayProperty];
+
+                //     el._misc.items[item.value] = item;
+
+                //     el._misc.items[item.value].style.cursor = "pointer";
+
+                //     el._misc.items[item.value].onRender(function () {
+
+                //         var span = document.createElement("span");
+
+                //         span.innerHTML = this.displayValue;
+                //         this.appendChild(span);
+                //         this.addEventListener("click", function () { el.select(this) });
+                //     });
+
+                //     itemsDocFragment.appendChild(item);
+
+                // }
 
                 el._refs.scroll.content.appendChild(itemsDocFragment);
 
@@ -896,7 +947,7 @@
         functions: {
             /*
             @function addItem
-            @description Adding a new option item programmaticaly
+            @description Adding a new option item programmatically
             @param {object} item 
             */
             addItem: function (item) {
@@ -1023,7 +1074,7 @@
             @description Updates the description value for the
             */
             resetDescription: function () {
-                
+
                 var el = this;
                 var description = el.tooltip != "" ? el.tooltip : "";
 

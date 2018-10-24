@@ -34,7 +34,7 @@ eon.element("eon-tree", "eon-tree.css", {
       },
       /*
         @property {Object} store
-        @description eon-store element reference
+        @description
       */
       store: {
         value: {},
@@ -98,10 +98,10 @@ eon.element("eon-tree", "eon-tree.css", {
       */
       buildStoreTree: function () {
         var el = this;
+        console.log('el', el.store);
         if (el.store) {
-          var data = el.store.data.asObject();
           // Build tree
-          lastNode = el._build(data);
+          lastNode = el._build(el.store.data);
           // Trigger on tree data ready after tree nodes processing
           lastNode.onRender(function () {
             eon.triggerCallback("onDataReady", el, el, [el.nodes]);
@@ -347,26 +347,30 @@ eon.element("eon-tree", "eon-tree.css", {
         var el = this;
         // Create declarative or store based tree
         if (el.store) {
-          el._setupStore();
+          // Update tree on data changed
+          el.store.onDataChanged(function () {
+              // Build tree from store data
+              el.buildStoreTree();
+          });
         }
       },
       /*
         @function (private) _setupStore
         @description Set up store integration
       */
-      setupStore: function () {
-        var el = this;
-        // Make sure the store has been initialized
-        el.store.onCreated(function () {
-          el.store.onLoaded(function (store) {
-            // Get store data
-            store.fetch(function () {
-              // Build tree from store data
-              el.buildStoreTree();
-            });
-          });
-        });
-      },
+      // setupStore: function () {
+      //   var el = this;
+      //   // Make sure the store has been initialized
+      //   el.store.onCreated(function () {
+      //     el.store.onLoaded(function (store) {
+      //       // Get store data
+      //       store.fetch(function () {
+      //         // Build tree from store data
+      //         el.buildStoreTree();
+      //       });
+      //     });
+      //   });
+      // },
       /*
         @function (private) _build
         @description Build tree nodes
@@ -378,14 +382,24 @@ eon.element("eon-tree", "eon-tree.css", {
         var tree = el._refs.tree;
         var treeNode, node, parent;
         // Loop through nodes
-        for (var index in data) {
-          node = data[index];
+        // ** New store
+        data.forEach(function (value, key, map) {
+          node = data.get(key);
+          console.log('node', node);
           // Create tree node
           treeNode = document.createElement("eon-treenode");
           el._copyProperties(node, treeNode);
           // Append tree node
           tree.appendChild(treeNode);
-        }
+        });
+        // for (var index in data) {
+          // node = data[index];
+          // Create tree node
+          // treeNode = document.createElement("eon-treenode");
+          // el._copyProperties(node, treeNode);
+          // Append tree node
+          // tree.appendChild(treeNode);
+        // }
         // Return the last node for events purposes
         return treeNode;
       },
@@ -728,7 +742,9 @@ eon.element("eon-tree", "eon-tree.css", {
       };
       tree.classList.add("eon-tree-tree");
       // Data store quick access
-      el.store = el.source.querySelector("eon-store");
+      // ** New store
+      el.store = eon.util.isTrue(el.store) ? new eon.store() : "";
+      // el._refs.store = el.source.querySelector("eon-store");
     },
     onInit: function () {
       var el = this;

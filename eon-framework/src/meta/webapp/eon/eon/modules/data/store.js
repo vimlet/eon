@@ -21,6 +21,7 @@ eon.store = function () {
     */
     function createCallbacks() {
         eon.createCallback("onLoaded", el, "ready");
+        eon.createCallback("onDataChanged", el);
     }
     /*
         ** TO BE REMOVED
@@ -28,9 +29,8 @@ eon.store = function () {
         @description 
     */
     function importAdapter() {
-        console.log('IMPORT ADAPTER');
         // Import vpa memory adapter
-        eon.vpa.use(eon.basePath + "/data/eon-newstore/adapters/MemoryAdapter.js", function (adapter) {
+       eon.amd.require([eon.basePath + "/data/eon-newstore/adapters/MemoryAdapter.js"], function (adapter) {
             // Clone adapter functions
             cloneFunctions(adapter());
             //
@@ -65,6 +65,8 @@ eon.store = function () {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
+                    // Fire data changed event
+                    eon.triggerCallback("onDataChanged", el, el, [el.data]);
                 }
             }
         );

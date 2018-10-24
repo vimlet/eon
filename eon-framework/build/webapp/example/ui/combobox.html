@@ -103,9 +103,14 @@
                         <eon-item value="grey" display-value="Grey"></eon-item>
                     </eon-combobox>
 
-                    <eon-combobox default="FR" inline="false" name="comboTest2" display-property="name" placeholder="Store">
+                    <!-- <eon-combobox default="FR" inline="false" name="comboTest2" display-property="name" placeholder="Store">
                         <eon-store id="storeTest" type="memory" id-property="CC" keys="{region: 'EU'}" url="util/combobox/data.json">
                         </eon-store>
+                    </eon-combobox> -->
+
+                    <!-- ** New store -->
+                    <eon-combobox id="store-combo" store="true" default="FR" inline="false" name="comboTest2" display-property="name" placeholder="Store">
+                        
                     </eon-combobox>
 
                 </div>
@@ -120,6 +125,18 @@
 
     <script type="text/javascript">
         eon.onReady(function () {
+
+            var storeCombo = document.querySelector("#store-combo");
+
+            // ** New store
+            var endpoint = new eon.endpoint("rest", "util/combobox/data.json");
+          
+            // Get request
+            endpoint.get("", function (success, data) {
+                // Update store data & combo items
+                storeCombo.store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
+                console.log(":::: MAP", storeCombo.store.data);
+            });    
 
             var selector = document.createElement('eon-combobox');
 

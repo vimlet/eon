@@ -6166,7 +6166,8 @@ eon.util.objectToMap = function (object) {
   var map = new Map();
 
   for(var key in object){
-    map.set(key, object[i]);
+    console.log('key', key, object[key]);
+    map.set(key, object[key]);
   }
 
   return map;
@@ -6244,6 +6245,7 @@ eon.store = function () {
     */
     function createCallbacks() {
         eon.createCallback("onLoaded", el, "ready");
+        eon.createCallback("onDataChanged", el);
     }
     /*
         ** TO BE REMOVED
@@ -6252,7 +6254,7 @@ eon.store = function () {
     */
     function importAdapter() {
         // Import vpa memory adapter
-        eon.vpa.use(eon.basePath + "/data/eon-newstore/adapters/MemoryAdapter.js", function (adapter) {
+       eon.amd.require([eon.basePath + "/data/eon-newstore/adapters/MemoryAdapter.js"], function (adapter) {
             // Clone adapter functions
             cloneFunctions(adapter());
             //
@@ -6287,6 +6289,8 @@ eon.store = function () {
                 set: function (value) {
                     // Update property value
                     el._memory.data = value;
+                    // Fire data changed event
+                    eon.triggerCallback("onDataChanged", el, el, [el.data]);
                 }
             }
         );
@@ -6757,67 +6761,49 @@ eon.vpa = eon.vpa || {};
   var define = eon.amd.define;
   var require = eon.amd.require;
 
+  var vpa = {};
+  vpa.useAmd = true;
+  vpa.declareLocal = true;
+
   // Import vpa.js file
   // ------------------------------------------------------------------------------------
-    // USE ONLY WITH AMD!
+    // USE ONLY WITH SCRIPT SRC!
 
-// Add vpa to global scope to support script src imports
+// Support module in any environment
 var scope = typeof global != "undefined" ? global : window;
-// scope["vpa"] = scope["vpa"] || {};
-
-var vpa = {};
-
 scope["module"] = scope["module"] || undefined;
 
-// Module type detection flags
-vpa.isCommonJS = false;
-vpa.isAMD = false;
-// Detect CommonJS/AMD
-if (typeof module != "undefined" && typeof module.exports != "undefined") {
-    vpa.isCommonJS = true;
+// Global vpa declaration
+scope.vpa = scope.vpa || {};
+
+vpa.declareLocal = vpa.hasOwnProperty("declareLocal") ? vpa.declareLocal : true;
+vpa.declareGlobal = vpa.hasOwnProperty("declareGlobal") ? vpa.declareGlobal : true;
+
+vpa.useAmd = vpa.hasOwnProperty("useAmd") ? vpa.useAmd : false;
+vpa.allowAmdRequire = vpa.hasOwnProperty("allowAmdRequire") ? vpa.allowAmdRequire : false;
+
+if (vpa.useAmd || vpa.allowAmdRequire) {
+  vpa.define = vpa.define || define;
+  vpa.require = vpa.require || require;
+  vpa.useAmd = true; // Force AMD when any related option is used
 }
+
+vpa.declareAdapter = function (name, adapter, ext_module) {
+  (function () {
+    if (vpa.declareLocal && vpa.useAmd) {
+        vpa.define(function () {
+          return adapter;
+        });      
+    }
+    if (vpa.declareGlobal) {
+      vpa[name] = adapter;
+    }
+  })();
+};
+
 // Base implementation
 (function () {
     var self = this;
-    if (vpa.isCommonJS) {
-        module.exports = vpa;
-    }
-    self.use = function (a, cb) {
-        if (vpa.isCommonJS) {
-            var adapter;
-            if (typeof a == "string") {
-                adapter = module.parent.require("./" + a);
-            }
-            else {
-                adapter = a;
-            }
-            module.exports = adapter;
-            cb(adapter);
-        }
-        else {
-            // Assume amd when "use" is called from the browser
-            vpa.require([a], function (adapter) {
-                cb(adapter);
-            });
-        }
-    };
-    // CommonJS, AMD and Global declarations
-    self.declareAdapter = function (name, adapter, ext_module) {
-        (function () {
-            // CommonJS
-            if (vpa.isCommonJS) {
-                ext_module.exports = adapter;
-            }
-            // AMD
-            if (vpa.isAMD) {
-                vpa.define(function () {
-                    return adapter;
-                });
-            }
-            // Global
-            vpa[name] = adapter;
-        })();
-    };
     // Base Query and Adapter Objects
     self.createBaseQuery = function (adapterData) {
         var BaseQuery = /** @class */ (function () {
@@ -6889,18 +6875,12 @@ if (typeof module != "undefined" && typeof module.exports != "undefined") {
 }).apply(vpa);
 
 
-// This prevent errors when calling define out of a require
-// since there's no proper AMD detection shim, we'll assume 
-// AMD when vpa.use is called under the browser
-vpa.isAMD = true;
-
-// Allow custom AMD lib
-vpa.define = vpa.define || define;
-vpa.require = vpa.require || require;
-
-// vpa.define(function () {
-//   return vpa;
-// });  // ------------------------------------------------------------------------------------
+// Allow vpa require
+if (vpa.allowAmdRequire) {
+  vpa.define(function () {
+    return vpa;
+  });
+}  // ------------------------------------------------------------------------------------
 
   eon.vpa = vpa;
 
