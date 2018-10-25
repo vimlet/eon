@@ -264,7 +264,6 @@ eon.util.objectToMap = function (object) {
   var map = new Map();
 
   for(var key in object){
-    console.log('key', key, object[key]);
     map.set(key, object[key]);
   }
 

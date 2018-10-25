@@ -1,7 +1,6 @@
 eon.vpa.declareAdapter("MemoryAdapter", function (config) {
     var memory = {}; // Memory itself
     memory.data = new Map(); // Where data will be stored
-    memory.keys = []; // Memory keys to keep creation order
     var counter = 0;
 
     // @function create (private) [Create a new entry to the memory object with given data] @param query
@@ -14,7 +13,7 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
                 }
                 else {
                     // ** Check if some data has already been inserted
-                    counter = memory.data.size() ? memory.data.size() + 1 : 0;
+                    counter = memory.data.size ? memory.data.size + 1 : 0;
                     id = counter;
                     query.data.id = "" + id;
                     counter++;
@@ -123,7 +122,6 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
             else {
                 // Remove all entries
                 var result = memory;
-                memory.keys = [];
                 // Safe clear object and its copy baseAdapter._memory
                 memory.data.forEach(function (value, key, map) {
                     memory.data.delete(key);

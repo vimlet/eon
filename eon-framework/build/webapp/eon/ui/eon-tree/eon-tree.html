@@ -98,7 +98,6 @@ eon.element("eon-tree", "eon-tree.css", {
       */
       buildStoreTree: function () {
         var el = this;
-        console.log('el', el.store);
         if (el.store) {
           // Build tree
           lastNode = el._build(el.store.data);
@@ -182,13 +181,14 @@ eon.element("eon-tree", "eon-tree.css", {
         node.path = path;
         node.type = !type ? "directory" : type;
         node.extension = !extension ? "" : extension;
-        // Trigger node created callback
+        // Trigger node create callback
         eon.triggerCallback("onNodeCreate", el, el, [node]);
         // Prevent node creation default
         if (!el.__onNodeCreate[0]) {
           el.create(node);
         }
-        el._misc.srcNodesPaths.path = {};
+        // ** Remove
+        // el._misc.srcNodesPaths.path = {};
       },
       /*
         @function selectNode
@@ -239,20 +239,17 @@ eon.element("eon-tree", "eon-tree.css", {
         var el = this;
         // Check tree store
         if (el.store) {
-          // Memory store
-          if (el.store.type === "memory") {
-            el.store.create(node);
-            el._createLocal(node);
-            // Rest store
-          } else if (el.store.type === "rest") {
-            el.store.createRemote(node, function () {
+          // Make sure store has loaded
+          el.store.onLoaded(function(){
+            // Create store entry and tree node
+            el.store.create(node).result(function(error, data){
               el._createLocal(node);
             });
-          }
+          });
         } else {
+          // Create tree node
           el._createLocal(node);
         }
-
       },
       /*
         @function removeNode
@@ -268,7 +265,6 @@ eon.element("eon-tree", "eon-tree.css", {
         if (!el.__onNodeRemove[0]) {
           el.remove(node);
         }
-
       },
       /*
         @function remove
@@ -279,16 +275,13 @@ eon.element("eon-tree", "eon-tree.css", {
         var el = this;
         // Check tree store
         if (el.store) {
-          // Memory store
-          if (el.store.type === "memory") {
-            el.store.remove(node.path);
-            el._removeLocal(node);
-            // Rest store
-          } else if (el.store.type === "rest") {
-            el.store.removeRemote(node.path, function () {
+          // Make sure store has loaded
+          el.store.onLoaded(function(){
+            // Remove store entry and tree node
+            el.store.delete(node.path).result(function(error, data){
               el._removeLocal(node);
             });
-          }
+          });
         } else {
           el._removeLocal(node);
         }
@@ -323,16 +316,27 @@ eon.element("eon-tree", "eon-tree.css", {
         var el = this;
         // Check tree store
         if (el.store && el.store.type === "memory") {
-          // Memory store
-          el.store.remove(dragNode.path);
-          el._moveLocal(dragNode, dropNode, callback, errCallback);
-          var nodeObj = {
-            path: dragNode.path,
-            type: dragNode.type,
-            name: dragNode.name,
-            parent: dragNode.parent
-          };
-          el.store.create(nodeObj);
+          // Make sure store has loaded
+          el.store.onLoaded(function(){
+            // Remove store entry and tree node
+            el.store.delete(dragNode.path).result(function(error, data){
+              el._removeLocal(dragNode);
+            });
+          });
+          // Make sure store has loaded
+          el.store.onLoaded(function(){
+            // Create store entry and tree node
+            var nodeObj = {
+              path: dragNode.path,
+              type: dragNode.type,
+              name: dragNode.name,
+              parent: dragNode.parent
+            };
+            el.store.create(node).result(function(error, data){
+              // Move dragNode after store updates
+              el._moveLocal(dragNode, dropNode, callback, errCallback);
+            });
+          });
         } else {
           el._moveLocal(dragNode, dropNode, callback, errCallback);
         }
@@ -385,7 +389,6 @@ eon.element("eon-tree", "eon-tree.css", {
         // ** New store
         data.forEach(function (value, key, map) {
           node = data.get(key);
-          console.log('node', node);
           // Create tree node
           treeNode = document.createElement("eon-treenode");
           el._copyProperties(node, treeNode);

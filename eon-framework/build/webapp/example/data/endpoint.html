@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <!-- Import VimletJS  -->
+  <title>eon ENDPOINT</title>
+  <script src="/eon/eon.js"></script>
+
+  <!-- Example style -->
+  <link rel="stylesheet" href="/example/data/css/style.css">
+
+</head>
+
+<body>
+
+  <!-- eon-store usage -->
+  <script>
+
+    // ## REST
+    // Create endpoint
+    var endpoint = new eon.endpoint("rest", "");
+    // Get request
+    endpoint.get("1", function (success, data) {
+      console.log('### REST get data', data);
+    });
+    // Put request
+    endpoint.put("1", {}, function (success, data) {
+      console.log('### REST put data', data);
+    });
+    endpoint.url = "https://jsonplaceholder.typicode.com/posts";
+    // Post request
+    endpoint.post({}, function (success, data) {
+      console.log('### REST push data', data);
+    });
+    // Delete request
+    endpoint.delete("1", function (success, data) {
+      console.log('### REST delete data', data);
+    });
+
+    // ## GraphQL HTTP based
+    // Create endpoint
+    var endpointHTTP = new eon.endpoint("graphHTTP", "https://jsonplaceholder.typicode.com/todos");
+    // Send calls query internally
+    endpointHTTP.send("{Hero {name}}", function (success, data) {
+      console.log('::: HTTP send', data);
+    });
+    // Query call appends the 'query' prefix to the query string 
+    endpointHTTP.query("{Hero {name}}", function (success, data) {
+      console.log('::: HTTP query', data);
+    });
+    // Mutation call appends the 'mutation' prefix to the query string 
+    endpointHTTP.mutation("{'Hero': 'Jedi', age: '22'}", function (success, data) {
+      console.log('::: HTTP mutation', data);
+    });
+
+    // ## GraphQL Web Sockets based
+    // Create endpoint
+    var endpointSockets = new eon.endpoint("graphSockets", "wss://echo.websocket.org");
+    // Make sure the asynchronous connection has been opened
+    endpointSockets.socket.onopen = function (event) {
+      // Subscription call appends the 'subscription' prefix to the query string 
+      endpointSockets.subscribe("{'Hero': 'Jedi', age: '22'}", function (success, data) {
+        console.log('..... socket subscription', data);
+      });
+    };
+
+  </script>
+</body>
+
+</html>

@@ -61,7 +61,7 @@
 
       <!-- <div id="progrmContainer" class="example"> -->
 
-        <eon-tree id="store-tree" store="true">
+        <eon-tree id="store-tree" store="true" drag="true">
           
         </eon-tree>
 
@@ -71,23 +71,66 @@
   </div>
   
   <script type="text/javascript">
-    eon.onReady(function(){
 
       var storeTree = document.querySelector("#store-tree");
+      
+      storeTree.onTransformed(function(){
 
-      // ** New store
-      var endpoint = new eon.endpoint("rest", "util/tree/data.json");
+        // ** New store
+        var endpoint = new eon.endpoint("rest", "util/tree/data.json");
 
-      // Get request
-      endpoint.get("", function (success, data) {
-          // Update store data & tree items
-          storeTree.store.data = eon.util.objectToMap(JSON.parse(data.responseText));
-          // storeTree._refs.store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
-          console.log(":::: MAP", storeTree.store.data);
-      });    
+        // Get request
+        endpoint.get("", function (success, data) {
+            // Update store data & tree items
+            storeTree.store.data = eon.util.objectToMap(JSON.parse(data.responseText));
+        });   
 
-      var dTree = document.querySelector("#declarativeTree");
-      var sTree = document.querySelector("#storeTree");
+        storeTree.onDataReady(function(){
+          // eon.onReady(function(){
+          
+          // -- CREATE
+          // :: events
+          // Check store valid entry creation before manifest tree changes
+          storeTree.onNodeCreate(function(node){
+            console.log('Node create', node);
+            // Memory tree, call tree function that creates store entry
+            storeTree.create(node);
+          });
+          storeTree.onNodeCreated(function(nodeEl){
+            console.log('Node created!', nodeEl);
+            // :: Remove node!
+            storeTree.removeNode(newNode.path);
+          });
+
+          var newNode = document.createElement("eon-treenode");
+          newNode.setAttribute("name", "dir6");
+          newNode.path = "Juan";
+          newNode.parent = "";
+          // Create node
+          storeTree.createNode(newNode.path);
+
+          // -- REMOVE
+          // :: events
+          // Check store valid entry deletion before manifest tree changes
+          storeTree.onNodeRemove(function(node){
+            console.log('Node remove', node);
+            // Memory tree, call tree function that removes the store entry
+            storeTree.remove(node);
+          });
+          storeTree.onNodeRemoved(function(nodeEl){
+            console.log('Node removed!', nodeEl);
+          });
+         
+          // -- MOVE
+          // :: events
+          storeTree.onNodeMoved(function(nodeEl){
+            console.log('Node removed!', nodeEl);
+          });
+          // -------------------------------
+
+
+          var dTree = document.querySelector("#declarativeTree");
+          var sTree = document.querySelector("#storeTree");
       
       // INTERPOLATION TEST
       // setTimeout(function() {
@@ -117,21 +160,23 @@
         // tree.appendChild(fragment);
         // progrmContainer.appendChild(tree);
         
-        dTree.onReady(function(){
-            var newNode = document.createElement("eon-treenode");
-            newNode.setAttribute("name", "dir6");
-            newNode.path = "Juan";
-            newNode.parent = "";
+        // dTree.onReady(function(){
+            // var newNode = document.createElement("eon-treenode");
+            // newNode.setAttribute("name", "dir6");
+            // newNode.path = "Juan";
+            // newNode.parent = "";
           // dTree.createNode(newNode.path);
-          setTimeout(function() {
+          // setTimeout(function() {
             // dTree.refresh();
             // dTree.markNode(dTree.nodes["dir2"]);
             //   setTimeout(function() {
                 // dTree.refresh("dir");
                 // dTree.markNode(dTree.nodes["dir"]);
             // }, 1000);
-          }, 1000);
+          // }, 1000);
        
+        // });
+      // });
         });
       });
   </script>
