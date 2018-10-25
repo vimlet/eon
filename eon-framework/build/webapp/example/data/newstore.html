@@ -12,94 +12,177 @@
   <link rel="stylesheet" href="/example/data/css/style.css">
   <link rel="stylesheet" href="/example/data/css/store.css">
 
+
+  <!-- UI components -->
+  <script>
+    eon.import([
+      "/eon/ui/eon-text",
+      "/eon/ui/eon-scroll"
+    ]);
+  </script>
+
 </head>
 
 <body>
 
-  <!-- eon store usage -->
-  <script>
+  <div class="container">
+    <div class="card">
+      <h1>MEMORY</h1>
 
-    // Store object
-    var store = new eon.store();
+      <div class="row">
 
-    store.onLoaded(function () {
+        <button onclick="get()">
+          READ
+        </button>
+        <button onclick="create()">
+          CREATE
+        </button>
+        <button onclick="update()">
+          UPDATE
+        </button>
+        <button onclick="deletion()">
+          DELETE
+        </button>
 
-      // Map source
-      // var dataMap = new Map([["2", {
-      //   name: "Cain",
-      //   last: "Aman"
-      // }], ["1", {
-      //   name: "Samuel",
-      //   last: "Milano"
-      // }]]);
+      </div>
+      <div class="twoRows">
+        <div class="twoColumns" style="margin-bottom: 6px;">
 
-      // Array source
-      var dataArray = [{
-        id: "1",
-        name: "Rich"
-      }, {
-        id: "2",
-        name: "Tami"
-      }]
-      // Object source
-      var dataObject = {
-        1: {
-          id: "1",
-          name: "Rich"
-        },
-        2: {
-          id: "2",
-          name: "Tami"
+          <div class="example twoRows">
+            <h4 class="title">REQUEST</h4>
+            <h5 class="title">ID</h5>
+            <eon-text class="subCard input" inline="false" style="margin-bottom: 10px;" id="id">
+            </eon-text>
+            <h5 class="title">JSON</h5>
+            <eon-text class="subCard" style="font-family: monospace;" inline="false" type="area" id="json" area-height="200">
+            </eon-text>
+          </div>
+          <div class="example">
+            <h4 class="title">DATA</h4>
+            <pre class="flexStretch" id="data"></pre>
+          </div>
+
+        </div>
+        <div style="padding: 5px">
+          <div class="example twoRows">
+            <h4 class="title">RESULT</h4>
+            <h5 id="requestType" class="subTitle"></h5>
+            <pre id="result" class="flexStretch"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- eon store usage -->
+    <script>
+
+      // Fields
+      var entryId = document.querySelector("#id");
+      var jsonField = document.querySelector("#json");
+      var dataField = document.querySelector("#data");
+      var requestType = document.querySelector("#requestType");
+      var resultField = document.querySelector("#result");
+
+      // Store object
+      var store = new eon.store();
+
+      // Get example data json
+      var endpoint = new eon.endpoint("rest", "util/store/data.json");
+      endpoint.get("", function (error, data) {
+        store.onLoaded(function () {
+          // Set store data
+          store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
+          // Fill data field
+          dataField.innerHTML = data.responseText;
+        });
+      });
+
+      // -- MEMORY EXAMPLE API --
+      // :: READ
+      function get() {
+        var result;
+        // Remove spaces
+        entryId.value = entryId.value.replace(/\s/g, '');
+        // Get entry id
+        var id = !entryId.value ? null : entryId.value;
+        requestType.innerHTML = "Get request";
+        // Store read
+        store.read(id).result(function (error, data) {
+          if (error) { console.error(error); return false; }
+
+          result = data;
+          if (data instanceof Map) {
+            result = eon.util.mapToObject(data);
+          }
+          resultField.innerHTML = JSON.stringify(result, null, 2);
+        });
+      }
+      // :: CREATE
+      function create() {
+        var item = jsonField.value;
+        try {
+          item = JSON.parse(item);
+          requestType.innerHTML = "Create request";
+          // Store create
+          store.create(item).result(function (error, data) {
+            if (error) { console.error(error); return false; }
+
+            resultField.innerHTML = JSON.stringify(data, null, 2);
+            // Refresh data field
+            refreshData(dataField, eon.util.mapToObject(store.data));
+          });
+        } catch (err) {
+          console.warn("Example warning: Invalid json format")
         }
       }
+      // :: UPDATE
+      function update() {
+        var item = jsonField.value;
+        // Remove spaces
+        entryId.value = entryId.value.replace(/\s/g, '');
+        // Get entry id
+        var id = !entryId.value ? null : entryId.value;
+        try {
+          item = JSON.parse(item);
+          requestType.innerHTML = "Update request";
+          // Store update
+          store.update(id, item).result(function (error, data) {
+            if (error) { console.error(error); return false; }
 
-      store.data = eon.util.arrayToMap(dataArray);
-      console.log('----', store.data);
+            resultField.innerHTML = JSON.stringify(data, null, 2);
+            // Refresh data field
+            refreshData(dataField, eon.util.mapToObject(store.data));
+          });
+        } catch (err) {
+          console.warn("Example warning: Invalid json format")
+        }
+      }
+      // :: DELETE
+      function deletion() {
+        // Remove spaces
+        entryId.value = entryId.value.replace(/\s/g, '');
+        // Get entry id
+        var id = !entryId.value ? null : entryId.value;
+        requestType.innerHTML = "Remove request";
+        // Store update
+        store.delete(id).result(function (error, data) {
+          if (error) { console.error(error); return false; }
 
-      store.data = eon.util.objectToMap(dataObject);
-      console.log('----', store.data);
+          resultField.innerHTML = JSON.stringify(data, null, 2);
+          // Refresh data field
+          refreshData(dataField, eon.util.mapToObject(store.data));
+        });
+      }
 
-      console.log('::::::::::::::::::::::::::::::::::::::::');
-      console.log('::::::::::::::::::::::::::::::::::::::::');
-      console.log('::::::::::::::::::::::::::::::::::::::::');
-      console.log('::::::::::::::::::::::::::::::::::::::::');
-      console.log('::::::::::::::::::::::::::::::::::::::::');
+      /*
+      * Update data field
+      */
+      function refreshData(el, data) {
+        el.innerHTML = JSON.stringify(data, null, 2);
+      }
 
-
-      // ** Read entry
-      store.read("1").result(function (error, data) {
-        console.log('read 1', error, data);
-      });
-
-      // ** Read all
-      store.read().sort("name", "ascending").result(function (error, data) {
-        console.log('read all', error, data);
-      });
-
-      // ** Create
-      store.create({
-        id: "3",
-        name: "Anais",
-        last: "Toro"
-      }).result(function (error, data) {
-        console.log('read', error, data);
-      });
-
-      // ** Update
-      store.update("3", {
-        name: "Alain",
-        last: "Petre",
-        age: 14
-      }).result(function (error, data) { });
-
-      // ** Delete
-      store.delete().result(function (error, data) {
-        console.log('delete', error, data);
-      });
-
-    });
-
-  </script>
+    </script>
 </body>
 
 </html>

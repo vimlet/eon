@@ -6152,7 +6152,7 @@ eon.util.arrayToMap = function (array) {
   var map = new Map();
 
   for (var i = 0; i < array.length; i++) {
-    map.set(i, array[i]);
+    map.set(i.toString(), array[i]);
   }
 
   return map;
@@ -6170,6 +6170,19 @@ eon.util.objectToMap = function (object) {
   }
 
   return map;
+};
+/**
+ * Get Map Js Object representation
+ * @param  {[type]}  [description]
+ */
+eon.util.mapToObject = function (map) {
+  var obj = Object.create(null);
+  for (var [k, v] of map) {
+    // We don’t escape the key '__proto__'
+    // which can cause problems on older engines
+    obj[k] = v;
+  }
+  return obj;
 };
 
 eon.history = eon.history || {};

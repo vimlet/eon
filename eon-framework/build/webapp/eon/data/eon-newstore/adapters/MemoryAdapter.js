@@ -38,6 +38,7 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
             // Check id value
             if (query.id) {
                 if (memory.data.get(query.id)) {
+                    console.log('memory.data.get(query.id)',memory.data.get(query.id));
                     resolve(memory.data.get(query.id));
                 } else {
                     reject(new Error("Not found"));
@@ -57,7 +58,9 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
                 var start = query.limitStart || 0;
                 var end = (query.limitAmount + query.limitStart) || memory.data.size;
                 end = end > memory.data.size ? memory.data.size : end;
+                
                 if (!keys) {
+                    keys = [];
                     // Store map keys
                     memory.data.forEach(function (value, key, map) {
                         keys.push(key);
