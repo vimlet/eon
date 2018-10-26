@@ -17,6 +17,7 @@
   <script>
     eon.import([
       "/eon/ui/eon-text",
+      "/eon/ui/eon-checkbox",
       "/eon/ui/eon-scroll"
     ]);
   </script>
@@ -50,11 +51,11 @@
 
           <div class="example twoRows">
             <h4 class="title">REQUEST</h4>
-            <h5 class="title">ID</h5>
-            <eon-text class="subCard input" inline="false" style="margin-bottom: 10px;" id="id">
+            <eon-text class="subCard input" inline="false" label="ID" 
+                      style="margin-bottom: 10px;" id="id">
             </eon-text>
-            <h5 class="title">JSON</h5>
-            <eon-text class="subCard" style="font-family: monospace;" inline="false" type="area" id="json" area-height="200">
+            <eon-text class="subCard" style="font-family: monospace;" label="JSON" 
+                      inline="false" type="area" id="json" area-height="200">
             </eon-text>
           </div>
           <div class="example">
@@ -71,6 +72,54 @@
           </div>
         </div>
       </div>
+
+      <div class="row">
+
+        <button onclick="range()">
+          RANGE
+        </button>
+        <button onclick="sort()">
+          SORT
+        </button>
+        <button onclick="rangeSorted()">
+          RANGE SORTED
+        </button>
+
+      </div>
+
+      <div class="twoRows">
+        <div class="twoColumns" style="margin-bottom: 6px;">
+
+          <div class="example twoRows">
+            <h4 class="title">REQUEST</h4>
+            <eon-text class="subCard input" inline="false" style="margin-bottom: 10px;" 
+                      id="keyField" label="Key">
+            </eon-text>
+            <eon-checkbox class="subCard input" style="margin-bottom: 10px; width: 19px; margin-bottom: 15px;"
+                          id="descField" label="Descending">
+            </eon-checkbox>
+            <eon-text class="subCard" style="margin-bottom: 10px;" inline="false" 
+                      id="startField" label="Start">
+            </eon-text>
+            <eon-text class="subCard" style="margin-bottom: 10px;" inline="false" 
+                      id="limitField" label="Limit">
+            </eon-text>
+          </div>
+          <div class="example">
+            <h4 class="title">DATA</h4>
+            <pre class="flexStretch" id="advData"></pre>
+          </div>
+
+        </div>
+        <div style="padding: 5px">
+          <div class="example twoRows">
+            <h4 class="title">RESULT</h4>
+            <h5 id="advRequestType" class="subTitle"></h5>
+            <pre id="advResult" class="flexStretch"></pre>
+          </div>
+        </div>
+      </div>
+
     </div>
 
 
@@ -83,6 +132,19 @@
       var dataField = document.querySelector("#data");
       var requestType = document.querySelector("#requestType");
       var resultField = document.querySelector("#result");
+      // Advanced fields
+      var keyField = document.querySelector("#keyField");
+      var descField = document.querySelector("#descField");
+      var startField = document.querySelector("#startField");
+      var limitField = document.querySelector("#limitField");
+      var advData = document.querySelector("#advData");
+      var advRequestType = document.querySelector("#advRequestType");
+      var advResult = document.querySelector("#advResult");
+      
+      // ** Remove weird spaces from eon-text elements
+      eon.onReady(function(){
+        removeTextsSpaces();
+      });
 
       // Store object
       var store = new eon.store();
@@ -95,6 +157,7 @@
           store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
           // Fill data field
           dataField.innerHTML = data.responseText;
+          advData.innerHTML = data.responseText;
         });
       });
 
@@ -175,11 +238,112 @@
         });
       }
 
+      // :: RANGE
+      function range() {
+        // Remove spaces
+        startField.value = startField.value.replace(/\s/g, '');
+        limitField.value = limitField.value.replace(/\s/g, '');
+        // Get range values
+        var start = parseInt(startField.value);
+        var limit = parseInt(limitField.value);
+        var result;
+        advRequestType.innerHTML = "Range request";
+        // Store read by range
+        store.read().limit(start, limit).result(function (error, data) {
+          if (error) { console.error(error); return false; }
+
+          result = data;
+          if (data instanceof Map) {
+            result = mapToArray(data);
+            // Show empty object if no entry exists
+            result = !result[0] ? {} : result;
+          }
+          advResult.innerHTML = JSON.stringify(result, null, 2);
+        });
+      }
+
+      // :: SORT
+      function sort() {
+        // Remove spaces
+        keyField.value = keyField.value.replace(/\s/g, '');
+        descField.value = entryId.value.replace(/\s/g, '');
+        // Get sort key and rule
+        var key = keyField.value;
+        var desc = descField.checked ? "descending" : "ascending";
+        var result;
+        advRequestType.innerHTML = "Sort request";
+        // Store sort
+        store.read().sort(key, desc).result(function (error, data) {
+          if (error) { console.error(error); return false; }
+
+          result = data;
+          if (data instanceof Map) {
+            result = mapToArray(data);
+            // Show empty object if no entry exists
+            result = !result[0] ? {} : result;
+          }
+          advResult.innerHTML = JSON.stringify(result, null, 2);
+        });
+      }
+      // :: RANGE SORTED
+      function rangeSorted() {
+        // Remove spaces
+        keyField.value = keyField.value.replace(/\s/g, '');
+        descField.value = entryId.value.replace(/\s/g, '');
+        startField.value = startField.value.replace(/\s/g, '');
+        limitField.value = limitField.value.replace(/\s/g, '');
+        // Get range values
+        var key = keyField.value;
+        var desc = descField.checked ? "descending" : "ascending";
+        var start = parseInt(startField.value);
+        var limit = parseInt(limitField.value);
+        var result;
+        advRequestType.innerHTML = "Range sorted request";
+        // Store range sorted
+        store.read().sort(key, desc).limit(start, limit).result(function (error, data) {
+          if (error) { console.error(error); return false; }
+
+          result = data;
+          if (data instanceof Map) {
+            result = mapToArray(data);
+            // Show empty object if no entry exists
+            result = !result[0] ? {} : result;
+          }
+          advResult.innerHTML = JSON.stringify(result, null, 2);
+        });
+      }
+
+      /*
+      * Map to array
+      */
+      function mapToArray(map) {
+        var array = [];
+
+        map.forEach(function (value, key, map) {
+          array.push(map.get(key));
+        });
+
+        return array;
+      }
       /*
       * Update data field
       */
       function refreshData(el, data) {
         el.innerHTML = JSON.stringify(data, null, 2);
+      }
+      /*
+      * Remove eon-text value spaces
+      */
+      function removeTextsSpaces() {
+        var text;
+        texts = document.querySelectorAll("eon-text");
+
+        for (var i = 0; i < texts.length; i++) {
+          text = texts[i];
+          if (text.value){
+            texts[i].value = texts[i].value.replace(/\s/g, '');
+          }
+        }
       }
 
     </script>
