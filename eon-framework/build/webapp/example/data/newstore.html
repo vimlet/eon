@@ -60,7 +60,9 @@
           </div>
           <div class="example">
             <h4 class="title">DATA</h4>
-            <pre class="flexStretch" id="data"></pre>
+            <eon-scroll class="flexStretch" thickness="8">
+              <pre id="data"></pre>
+            </eon-scroll>
           </div>
 
         </div>
@@ -68,7 +70,9 @@
           <div class="example twoRows">
             <h4 class="title">RESULT</h4>
             <h5 id="requestType" class="subTitle"></h5>
-            <pre id="result" class="flexStretch"></pre>
+            <eon-scroll class="flexStretch resultClass" thickness="8">
+              <pre id="result"></pre>
+            </eon-scroll>
           </div>
         </div>
       </div>
@@ -107,7 +111,9 @@
           </div>
           <div class="example">
             <h4 class="title">DATA</h4>
-            <pre class="flexStretch" id="advData"></pre>
+            <eon-scroll class="flexStretch" fill="true" thickness="8">
+              <pre id="advData"></pre>
+            </eon-scroll>
           </div>
 
         </div>
@@ -115,7 +121,9 @@
           <div class="example twoRows">
             <h4 class="title">RESULT</h4>
             <h5 id="advRequestType" class="subTitle"></h5>
-            <pre id="advResult" class="flexStretch"></pre>
+            <eon-scroll class="flexStretch resultClass" fill="true" thickness="8">
+              <pre id="advResult"></pre>
+            </eon-scroll>
           </div>
         </div>
       </div>
@@ -126,38 +134,45 @@
     <!-- eon store usage -->
     <script>
 
-      // Fields
-      var entryId = document.querySelector("#id");
-      var jsonField = document.querySelector("#json");
-      var dataField = document.querySelector("#data");
-      var requestType = document.querySelector("#requestType");
-      var resultField = document.querySelector("#result");
-      // Advanced fields
-      var keyField = document.querySelector("#keyField");
-      var descField = document.querySelector("#descField");
-      var startField = document.querySelector("#startField");
-      var limitField = document.querySelector("#limitField");
-      var advData = document.querySelector("#advData");
-      var advRequestType = document.querySelector("#advRequestType");
-      var advResult = document.querySelector("#advResult");
-      
-      // ** Remove weird spaces from eon-text elements
+      // References
+      var entryId, jsonField, dataField, requestType, resultField, keyField, descField,
+      startField, limitField, advData, advRequestType, advResult, store;
+
+      // Wait for eon 
       eon.onReady(function(){
+        // Fields
+        entryId = document.querySelector("#id");
+        jsonField = document.querySelector("#json");
+        dataField = document.querySelector("#data");
+        requestType = document.querySelector("#requestType");
+        resultField = document.querySelector("#result");
+        resultScroll = document.querySelector(".resultClass");
+        // Advanced fields
+        keyField = document.querySelector("#keyField");
+        descField = document.querySelector("#descField");
+        startField = document.querySelector("#startField");
+        limitField = document.querySelector("#limitField");
+        advData = document.querySelector("#advData");
+        advRequestType = document.querySelector("#advRequestType");
+        advResult = document.querySelector("#advResult");
+        advResultScroll = document.querySelectorAll(".resultClass")[1];
+
+        //** Remove weird spaces from eon-text elements
         removeTextsSpaces();
-      });
 
-      // Store object
-      var store = new eon.store();
-
-      // Get example data json
-      var endpoint = new eon.endpoint("rest", "util/store/data.json");
-      endpoint.get("", function (error, data) {
-        store.onLoaded(function () {
-          // Set store data
-          store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
-          // Fill data field
-          dataField.innerHTML = data.responseText;
-          advData.innerHTML = data.responseText;
+        // Store object
+        store = new eon.store();
+  
+        // Get example data json
+        var endpoint = new eon.endpoint("rest", "util/store/data.json");
+        endpoint.get("", function (error, data) {
+          store.onLoaded(function () {
+            // Set store data
+            store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
+            // Fill data field
+            dataField.innerHTML = data.responseText;
+            advData.innerHTML = data.responseText;
+          });
         });
       });
 
@@ -179,6 +194,7 @@
             result = eon.util.mapToObject(data);
           }
           resultField.innerHTML = JSON.stringify(result, null, 2);
+          resizeResult(resultScroll);
         });
       }
       // :: CREATE
@@ -194,6 +210,7 @@
             resultField.innerHTML = JSON.stringify(data, null, 2);
             // Refresh data field
             refreshData(dataField, eon.util.mapToObject(store.data));
+            resizeResult(resultScroll);
           });
         } catch (err) {
           console.warn("Example warning: Invalid json format")
@@ -216,6 +233,7 @@
             resultField.innerHTML = JSON.stringify(data, null, 2);
             // Refresh data field
             refreshData(dataField, eon.util.mapToObject(store.data));
+            resizeResult(resultScroll);
           });
         } catch (err) {
           console.warn("Example warning: Invalid json format")
@@ -235,6 +253,7 @@
           resultField.innerHTML = JSON.stringify(data, null, 2);
           // Refresh data field
           refreshData(dataField, eon.util.mapToObject(store.data));
+          resizeResult(resultScroll);
         });
       }
 
@@ -259,6 +278,7 @@
             result = !result[0] ? {} : result;
           }
           advResult.innerHTML = JSON.stringify(result, null, 2);
+          resizeResult(advResultScroll);
         });
       }
 
@@ -283,6 +303,7 @@
             result = !result[0] ? {} : result;
           }
           advResult.innerHTML = JSON.stringify(result, null, 2);
+          resizeResult(advResultScroll);
         });
       }
       // :: RANGE SORTED
@@ -310,6 +331,7 @@
             result = !result[0] ? {} : result;
           }
           advResult.innerHTML = JSON.stringify(result, null, 2);
+          resizeResult(advResultScroll);
         });
       }
 
@@ -344,6 +366,12 @@
             texts[i].value = texts[i].value.replace(/\s/g, '');
           }
         }
+      }
+      /*
+      * Increase result scroll field height
+      */
+      function resizeResult(field) {
+        field.classList.add("resultScroll");
       }
 
     </script>
