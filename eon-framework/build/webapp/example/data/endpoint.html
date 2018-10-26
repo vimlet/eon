@@ -10,61 +10,168 @@
 
   <!-- Example style -->
   <link rel="stylesheet" href="/example/data/css/style.css">
+  <link rel="stylesheet" href="/example/data/css/store.css">
 
+  <!-- UI components -->
+  <script>
+    eon.import([
+      "/eon/ui/eon-text",
+      "/eon/ui/eon-checkbox",
+      "/eon/ui/eon-scroll"
+    ]);
+  </script>
+  <style>
+    .twoRows {
+      width: 100%;
+    }
+    .result {
+      font-size: 17px;
+    }
+    .status {
+      border-radius: 20px;
+      display: inline-block;
+      height: 10px;
+      width: 10px;
+      margin-right: 3px;
+    }
+    .status-ok {
+      background-color: green;
+    }
+    .status-error {
+      background-color: red;
+    }
+  </style>
 </head>
 
 <body>
 
+  <div class="container">
+    <div class="card">
+
+      <h1>REST</h1>
+
+      <div class="row">
+        <button onclick="get()">
+          GET
+        </button>
+        <button onclick="create()">
+          POST
+        </button>
+        <button onclick="update()">
+          PUT
+        </button>
+        <button onclick="deletion()">
+          DELETE
+        </button>
+      </div>
+
+      <div class="twoRows">
+        <div class="twoColumns" style="margin-bottom: 6px;">
+          <div class="example twoRows">
+            <h4 class="title">REQUEST</h4>
+            <eon-scroll class="flexStretch resultClass" thickness="8">
+              <div id="request" class="result"></div>
+            </eon-scroll>
+          </div>
+        </div>
+      </div>
+
+      <div class="twoRows">
+        <div class="twoColumns" style="margin-bottom: 6px;">
+          <div class="example twoRows">
+            <h4 class="title">RESPONSE</h4>
+            <eon-scroll class="flexStretch resultClass" thickness="8">
+              <pre id="response" class="result"></pre>
+            </eon-scroll>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
   <!-- eon-store usage -->
   <script>
 
+    var requestField, responseField;
+
+    eon.onReady(function(){
+      // Fields
+      requestField = document.querySelector("#request");
+      responseField = document.querySelector("#response");
+
+    });
+
+
+    // -- REST API --
+    // Create endpoint
+    var endpoint = new eon.endpoint("rest", "http://ip.jsontest.com/");
+    var statusClass = "status-ok" ;
+
+    // :: READ
+    function get() {
+      // Get request
+      endpoint.get("1", function (success, data) {
+        console.log('### REST get data', data);
+        status-ok
+
+        requestField.innerHTML = "Request URL: " + data.url + "<br>" +
+                                 "Request method: " + data.method + "<br>" +
+                                 "Status code: <span class='status'></span>" + data.status;
+        responseField.innerHTML = data.responseText
+      });
+    }
+
+
+
     // ## REST
     // Create endpoint
-    var endpoint = new eon.endpoint("rest", "");
-    // Get request
-    endpoint.get("1", function (success, data) {
-      console.log('### REST get data', data);
-    });
-    // Put request
-    endpoint.put("1", {}, function (success, data) {
-      console.log('### REST put data', data);
-    });
-    endpoint.url = "https://jsonplaceholder.typicode.com/posts";
-    // Post request
-    endpoint.post({}, function (success, data) {
-      console.log('### REST push data', data);
-    });
-    // Delete request
-    endpoint.delete("1", function (success, data) {
-      console.log('### REST delete data', data);
-    });
+    // var endpoint = new eon.endpoint("rest", "");
+    // // Get request
+    // endpoint.get("1", function (success, data) {
+    //   console.log('### REST get data', data);
+    // });
+    // // Put request
+    // endpoint.put("1", {}, function (success, data) {
+    //   console.log('### REST put data', data);
+    // });
+    // endpoint.url = "https://jsonplaceholder.typicode.com/posts";
+    // // Post request
+    // endpoint.post({}, function (success, data) {
+    //   console.log('### REST push data', data);
+    // });
+    // // Delete request
+    // endpoint.delete("1", function (success, data) {
+    //   console.log('### REST delete data', data);
+    // });
 
-    // ## GraphQL HTTP based
-    // Create endpoint
-    var endpointHTTP = new eon.endpoint("graphHTTP", "https://jsonplaceholder.typicode.com/todos");
-    // Send calls query internally
-    endpointHTTP.send("{Hero {name}}", function (success, data) {
-      console.log('::: HTTP send', data);
-    });
-    // Query call appends the 'query' prefix to the query string 
-    endpointHTTP.query("{Hero {name}}", function (success, data) {
-      console.log('::: HTTP query', data);
-    });
-    // Mutation call appends the 'mutation' prefix to the query string 
-    endpointHTTP.mutation("{'Hero': 'Jedi', age: '22'}", function (success, data) {
-      console.log('::: HTTP mutation', data);
-    });
+    // // ## GraphQL HTTP based
+    // // Create endpoint
+    // var endpointHTTP = new eon.endpoint("graphHTTP", "https://jsonplaceholder.typicode.com/todos");
+    // // Send calls query internally
+    // endpointHTTP.send("{Hero {name}}", function (success, data) {
+    //   console.log('::: HTTP send', data);
+    // });
+    // // Query call appends the 'query' prefix to the query string 
+    // endpointHTTP.query("{Hero {name}}", function (success, data) {
+    //   console.log('::: HTTP query', data);
+    // });
+    // // Mutation call appends the 'mutation' prefix to the query string 
+    // endpointHTTP.mutation("{'Hero': 'Jedi', age: '22'}", function (success, data) {
+    //   console.log('::: HTTP mutation', data);
+    // });
 
-    // ## GraphQL Web Sockets based
-    // Create endpoint
-    var endpointSockets = new eon.endpoint("graphSockets", "wss://echo.websocket.org");
-    // Make sure the asynchronous connection has been opened
-    endpointSockets.socket.onopen = function (event) {
-      // Subscription call appends the 'subscription' prefix to the query string 
-      endpointSockets.subscribe("{'Hero': 'Jedi', age: '22'}", function (success, data) {
-        console.log('..... socket subscription', data);
-      });
-    };
+    // // ## GraphQL Web Sockets based
+    // // Create endpoint
+    // var endpointSockets = new eon.endpoint("graphSockets", "wss://echo.websocket.org");
+    // // Make sure the asynchronous connection has been opened
+    // endpointSockets.socket.onopen = function (event) {
+    //   // Subscription call appends the 'subscription' prefix to the query string 
+    //   endpointSockets.subscribe("{'Hero': 'Jedi', age: '22'}", function (success, data) {
+    //     console.log('..... socket subscription', data);
+    //   });
+    // };
 
   </script>
 </body>
