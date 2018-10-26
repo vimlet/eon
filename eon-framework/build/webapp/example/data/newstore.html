@@ -51,11 +51,10 @@
 
           <div class="example twoRows">
             <h4 class="title">REQUEST</h4>
-            <eon-text class="subCard input" inline="false" label="ID" 
-                      style="margin-bottom: 10px;" id="id">
+            <eon-text class="subCard input" inline="false" label="ID" style="margin-bottom: 10px;" id="id">
             </eon-text>
-            <eon-text class="subCard" style="font-family: monospace;" label="JSON" 
-                      inline="false" type="area" id="json" area-height="200">
+            <eon-text class="subCard" style="font-family: monospace;" label="JSON" inline="false" type="area" id="json"
+              area-height="200">
             </eon-text>
           </div>
           <div class="example">
@@ -96,17 +95,14 @@
 
           <div class="example twoRows">
             <h4 class="title">REQUEST</h4>
-            <eon-text class="subCard input" inline="false" style="margin-bottom: 10px;" 
-                      id="keyField" label="Key">
+            <eon-text class="subCard input" inline="false" style="margin-bottom: 10px;" id="keyField" label="Key">
             </eon-text>
-            <eon-checkbox class="subCard input" style="margin-bottom: 10px; width: 19px; margin-bottom: 15px;"
-                          id="descField" label="Descending">
+            <eon-checkbox class="subCard input" style="margin-bottom: 10px; width: 19px; margin-bottom: 15px;" id="descField"
+              label="Descending">
             </eon-checkbox>
-            <eon-text class="subCard" style="margin-bottom: 10px;" inline="false" 
-                      id="startField" label="Start">
+            <eon-text class="subCard" style="margin-bottom: 10px;" inline="false" id="startField" label="Start">
             </eon-text>
-            <eon-text class="subCard" style="margin-bottom: 10px;" inline="false" 
-                      id="limitField" label="Limit">
+            <eon-text class="subCard" style="margin-bottom: 10px;" inline="false" id="limitField" label="Limit">
             </eon-text>
           </div>
           <div class="example">
@@ -136,10 +132,10 @@
 
       // References
       var entryId, jsonField, dataField, requestType, resultField, keyField, descField,
-      startField, limitField, advData, advRequestType, advResult, store;
+        startField, limitField, advData, advRequestType, advResult, store;
 
       // Wait for eon 
-      eon.onReady(function(){
+      eon.onReady(function () {
         // Fields
         entryId = document.querySelector("#id");
         jsonField = document.querySelector("#json");
@@ -162,13 +158,25 @@
 
         // Store object
         store = new eon.store();
-  
+        advStore = new eon.store();
+
         // Get example data json
         var endpoint = new eon.endpoint("rest", "util/store/data.json");
         endpoint.get("", function (error, data) {
           store.onLoaded(function () {
             // Set store data
             store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
+            // Fill data field
+            dataField.innerHTML = data.responseText;
+            advData.innerHTML = data.responseText;
+          });
+        });
+        // Get data for the advanced example
+        var advEndpoint = new eon.endpoint("rest", "util/store/data.json");
+        advEndpoint.get("", function (error, data) {
+          advStore.onLoaded(function () {
+            // Set store data
+            advStore.data = eon.util.arrayToMap(JSON.parse(data.responseText));
             // Fill data field
             dataField.innerHTML = data.responseText;
             advData.innerHTML = data.responseText;
@@ -268,7 +276,7 @@
         var result;
         advRequestType.innerHTML = "Range request";
         // Store read by range
-        store.read().limit(start, limit).result(function (error, data) {
+        advStore.read().limit(start, limit).result(function (error, data) {
           if (error) { console.error(error); return false; }
 
           result = data;
@@ -293,7 +301,7 @@
         var result;
         advRequestType.innerHTML = "Sort request";
         // Store sort
-        store.read().sort(key, desc).result(function (error, data) {
+        advStore.read().sort(key, desc).result(function (error, data) {
           if (error) { console.error(error); return false; }
 
           result = data;
@@ -321,7 +329,7 @@
         var result;
         advRequestType.innerHTML = "Range sorted request";
         // Store range sorted
-        store.read().sort(key, desc).limit(start, limit).result(function (error, data) {
+        advStore.read().sort(key, desc).limit(start, limit).result(function (error, data) {
           if (error) { console.error(error); return false; }
 
           result = data;
@@ -362,7 +370,7 @@
 
         for (var i = 0; i < texts.length; i++) {
           text = texts[i];
-          if (text.value){
+          if (text.value) {
             texts[i].value = texts[i].value.replace(/\s/g, '');
           }
         }
