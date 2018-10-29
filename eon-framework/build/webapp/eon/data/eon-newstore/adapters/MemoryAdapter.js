@@ -68,7 +68,12 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
                 }
                 // Build sorted map
                 for (var i = start; i < end; i++) {
-                    result.set(keys[i], memory.data.get(keys[i]));
+                    // Check keys sorted 
+                    if(query.sortField) {
+                        result.set(keys[i].key, memory.data.get(keys[i].key));
+                    } else {
+                        result.set(keys[i], memory.data.get(keys[i]));
+                    }
                 }
                 resolve(result);
             }
@@ -134,21 +139,24 @@ eon.vpa.declareAdapter("MemoryAdapter", function (config) {
         });
     }
     // @function sortArray (private) [Sort an array of objects] @param array @param key @param asc (number) [1 if ascendant, -1 if descendant]
-    function sortArray(data, key, asc) {
+    function sortArray(data, field, asc) {
         // ** IMPROVE
         var array = [];
         // Store map keys
         data.forEach(function (value, key, map) {
-            array.push(key);
+            array.push({
+                key: key,
+                field: data.get(key)[field]
+            });
         });
         // Check ascending value
         asc = asc || 1;
         // Sort comparing function
         function compare(a, b) {
-            if (a < b) {
+            if (a.field < b.field) {
                 return -1 * asc;
             }
-            else if (a > b) {
+            else if (a.field > b.field) {
                 return 1 * asc;
             }
             else {

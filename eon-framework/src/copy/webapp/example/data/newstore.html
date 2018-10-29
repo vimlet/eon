@@ -17,6 +17,7 @@
   <script>
     eon.import([
       "/eon/ui/eon-text",
+      "/eon/ui/eon-checkbox",
       "/eon/ui/eon-scroll"
     ]);
   </script>
@@ -27,7 +28,7 @@
 
   <div class="container">
     <div class="card">
-      <h1>MEMORY</h1>
+      <h1>STORE</h1>
 
       <div class="row">
 
@@ -50,16 +51,17 @@
 
           <div class="example twoRows">
             <h4 class="title">REQUEST</h4>
-            <h5 class="title">ID</h5>
-            <eon-text class="subCard input" inline="false" style="margin-bottom: 10px;" id="id">
+            <eon-text class="subCard input" inline="false" label="ID" style="margin-bottom: 10px;" id="id">
             </eon-text>
-            <h5 class="title">JSON</h5>
-            <eon-text class="subCard" style="font-family: monospace;" inline="false" type="area" id="json" area-height="200">
+            <eon-text class="subCard" style="font-family: monospace;" label="JSON" inline="false" type="area" id="json"
+              area-height="200">
             </eon-text>
           </div>
           <div class="example">
             <h4 class="title">DATA</h4>
-            <pre class="flexStretch" id="data"></pre>
+            <eon-scroll class="flexStretch" thickness="8">
+              <pre id="data"></pre>
+            </eon-scroll>
           </div>
 
         </div>
@@ -67,38 +69,122 @@
           <div class="example twoRows">
             <h4 class="title">RESULT</h4>
             <h5 id="requestType" class="subTitle"></h5>
-            <pre id="result" class="flexStretch"></pre>
+            <eon-scroll class="flexStretch resultClass" thickness="8">
+              <pre id="result"></pre>
+            </eon-scroll>
           </div>
         </div>
       </div>
+
+      <div class="row">
+
+        <button onclick="range()">
+          RANGE
+        </button>
+        <button onclick="sort()">
+          SORT
+        </button>
+        <button onclick="rangeSorted()">
+          RANGE SORTED
+        </button>
+
+      </div>
+
+      <div class="twoRows">
+        <div class="twoColumns" style="margin-bottom: 6px;">
+
+          <div class="example twoRows">
+            <h4 class="title">REQUEST</h4>
+            <eon-text class="subCard input" inline="false" style="margin-bottom: 10px;" id="keyField" label="Key">
+            </eon-text>
+            <eon-checkbox class="subCard input" style="margin-bottom: 10px; width: 19px; margin-bottom: 15px;" id="descField"
+              label="Descending">
+            </eon-checkbox>
+            <eon-text class="subCard" style="margin-bottom: 10px;" inline="false" id="startField" label="Start">
+            </eon-text>
+            <eon-text class="subCard" style="margin-bottom: 10px;" inline="false" id="limitField" label="Limit">
+            </eon-text>
+          </div>
+          <div class="example">
+            <h4 class="title">DATA</h4>
+            <eon-scroll class="flexStretch" fill="true" thickness="8">
+              <pre id="advData"></pre>
+            </eon-scroll>
+          </div>
+
+        </div>
+        <div style="padding: 5px">
+          <div class="example twoRows">
+            <h4 class="title">RESULT</h4>
+            <h5 id="advRequestType" class="subTitle"></h5>
+            <eon-scroll class="flexStretch resultClass" fill="true" thickness="8">
+              <pre id="advResult"></pre>
+            </eon-scroll>
+          </div>
+        </div>
+      </div>
+
     </div>
 
 
     <!-- eon store usage -->
     <script>
 
-      // Fields
-      var entryId = document.querySelector("#id");
-      var jsonField = document.querySelector("#json");
-      var dataField = document.querySelector("#data");
-      var requestType = document.querySelector("#requestType");
-      var resultField = document.querySelector("#result");
+      // References
+      var entryId, jsonField, dataField, requestType, resultField, keyField, descField,
+        startField, limitField, advData, advRequestType, advResult, store;
 
-      // Store object
-      var store = new eon.store();
+      // Wait for eon 
+      eon.onReady(function () {
+        // Fields
+        entryId = document.querySelector("#id");
+        jsonField = document.querySelector("#json");
+        dataField = document.querySelector("#data");
+        requestType = document.querySelector("#requestType");
+        resultField = document.querySelector("#result");
+        resultScroll = document.querySelector(".resultClass");
+        // Advanced fields
+        keyField = document.querySelector("#keyField");
+        descField = document.querySelector("#descField");
+        startField = document.querySelector("#startField");
+        limitField = document.querySelector("#limitField");
+        advData = document.querySelector("#advData");
+        advRequestType = document.querySelector("#advRequestType");
+        advResult = document.querySelector("#advResult");
+        advResultScroll = document.querySelectorAll(".resultClass")[1];
 
-      // Get example data json
-      var endpoint = new eon.endpoint("rest", "util/store/data.json");
-      endpoint.get("", function (error, data) {
-        store.onLoaded(function () {
-          // Set store data
-          store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
-          // Fill data field
-          dataField.innerHTML = data.responseText;
+        //** Remove weird spaces from eon-text elements
+        removeTextsSpaces();
+
+        // Store object
+        store = new eon.store();
+        advStore = new eon.store();
+
+        // Get example data json
+        var endpoint = new eon.endpoint("rest", "util/store/data.json");
+        endpoint.get("", function (error, data) {
+          store.onLoaded(function () {
+            // Set store data
+            store.data = eon.util.arrayToMap(JSON.parse(data.responseText));
+            // Fill data field
+            dataField.innerHTML = data.responseText;
+            advData.innerHTML = data.responseText;
+          });
+        });
+        // Get data for the advanced example
+        var advEndpoint = new eon.endpoint("rest", "util/store/data.json");
+        advEndpoint.get("", function (error, data) {
+          advStore.onLoaded(function () {
+            // Set store data
+            advStore.data = eon.util.arrayToMap(JSON.parse(data.responseText));
+            // Fill data field
+            dataField.innerHTML = data.responseText;
+            advData.innerHTML = data.responseText;
+          });
         });
       });
 
-      // -- MEMORY EXAMPLE API --
+      // -- STORE --
       // :: READ
       function get() {
         var result;
@@ -116,6 +202,7 @@
             result = eon.util.mapToObject(data);
           }
           resultField.innerHTML = JSON.stringify(result, null, 2);
+          resizeResult(resultScroll);
         });
       }
       // :: CREATE
@@ -131,6 +218,7 @@
             resultField.innerHTML = JSON.stringify(data, null, 2);
             // Refresh data field
             refreshData(dataField, eon.util.mapToObject(store.data));
+            resizeResult(resultScroll);
           });
         } catch (err) {
           console.warn("Example warning: Invalid json format")
@@ -153,6 +241,7 @@
             resultField.innerHTML = JSON.stringify(data, null, 2);
             // Refresh data field
             refreshData(dataField, eon.util.mapToObject(store.data));
+            resizeResult(resultScroll);
           });
         } catch (err) {
           console.warn("Example warning: Invalid json format")
@@ -172,14 +261,125 @@
           resultField.innerHTML = JSON.stringify(data, null, 2);
           // Refresh data field
           refreshData(dataField, eon.util.mapToObject(store.data));
+          resizeResult(resultScroll);
         });
       }
 
+      // :: RANGE
+      function range() {
+        // Remove spaces
+        startField.value = startField.value.replace(/\s/g, '');
+        limitField.value = limitField.value.replace(/\s/g, '');
+        // Get range values
+        var start = parseInt(startField.value);
+        var limit = parseInt(limitField.value);
+        var result;
+        advRequestType.innerHTML = "Range request";
+        // Store read by range
+        advStore.read().limit(start, limit).result(function (error, data) {
+          if (error) { console.error(error); return false; }
+
+          result = data;
+          if (data instanceof Map) {
+            result = mapToArray(data);
+            // Show empty object if no entry exists
+            result = !result[0] ? {} : result;
+          }
+          advResult.innerHTML = JSON.stringify(result, null, 2);
+          resizeResult(advResultScroll);
+        });
+      }
+
+      // :: SORT
+      function sort() {
+        // Remove spaces
+        keyField.value = keyField.value.replace(/\s/g, '');
+        descField.value = entryId.value.replace(/\s/g, '');
+        // Get sort key and rule
+        var key = keyField.value;
+        var desc = descField.checked ? "descending" : "ascending";
+        var result;
+        advRequestType.innerHTML = "Sort request";
+        // Store sort
+        advStore.read().sort(key, desc).result(function (error, data) {
+          if (error) { console.error(error); return false; }
+
+          result = data;
+          if (data instanceof Map) {
+            result = mapToArray(data);
+            // Show empty object if no entry exists
+            result = !result[0] ? {} : result;
+          }
+          advResult.innerHTML = JSON.stringify(result, null, 2);
+          resizeResult(advResultScroll);
+        });
+      }
+      // :: RANGE SORTED
+      function rangeSorted() {
+        // Remove spaces
+        keyField.value = keyField.value.replace(/\s/g, '');
+        descField.value = entryId.value.replace(/\s/g, '');
+        startField.value = startField.value.replace(/\s/g, '');
+        limitField.value = limitField.value.replace(/\s/g, '');
+        // Get range values
+        var key = keyField.value;
+        var desc = descField.checked ? "descending" : "ascending";
+        var start = parseInt(startField.value);
+        var limit = parseInt(limitField.value);
+        var result;
+        advRequestType.innerHTML = "Range sorted request";
+        // Store range sorted
+        advStore.read().sort(key, desc).limit(start, limit).result(function (error, data) {
+          if (error) { console.error(error); return false; }
+
+          result = data;
+          if (data instanceof Map) {
+            result = mapToArray(data);
+            // Show empty object if no entry exists
+            result = !result[0] ? {} : result;
+          }
+          advResult.innerHTML = JSON.stringify(result, null, 2);
+          resizeResult(advResultScroll);
+        });
+      }
+
+      /*
+      * Map to array
+      */
+      function mapToArray(map) {
+        var array = [];
+
+        map.forEach(function (value, key, map) {
+          array.push(map.get(key));
+        });
+
+        return array;
+      }
       /*
       * Update data field
       */
       function refreshData(el, data) {
         el.innerHTML = JSON.stringify(data, null, 2);
+      }
+      /*
+      * Remove eon-text value spaces
+      */
+      function removeTextsSpaces() {
+        var text;
+        texts = document.querySelectorAll("eon-text");
+
+        for (var i = 0; i < texts.length; i++) {
+          text = texts[i];
+          if (text.value) {
+            texts[i].value = texts[i].value.replace(/\s/g, '');
+          }
+        }
+      }
+      /*
+      * Increase result scroll field height
+      */
+      function resizeResult(field) {
+        field.classList.add("resultScroll");
       }
 
     </script>
