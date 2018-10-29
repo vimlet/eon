@@ -601,9 +601,11 @@
                 var el = this;
 
                 var rows = el._misc.sourceFragment.querySelectorAll("eon-row");
-                var storeData = {};
-
-                el._misc.tempData = {};
+                var dataMap = new Map();
+                var counter = 0;
+                
+                // Map source
+                
 
                 if (rows.length > 0) {
 
@@ -619,14 +621,9 @@
 
                     fillRowData = function (row, isChild) {
 
-                        var data;
+                        var data = Object.assign({}, dataModel);
 
-                        data = Object.assign({}, dataModel);
-                        data.id = Object.keys(storeData).length;
-
-                        storeData[data.id] = data;
-
-                        row.entryId = data.id;
+                        counter++;
 
                         for (var m = 0; m < row.children.length; m++) {
 
@@ -636,20 +633,38 @@
 
                             } else if (row.children[m].tagName.toLowerCase() == "eon-row") {
 
-                                el._misc.tempData[data.id] = el._misc.tempData[data.id] ? el._misc.tempData[data.id].push(row.children[m]) : [row.children[m]];
-                                fillRowData(row.children[m], true);
+                                var childData;
+
+                                row.children[m].entryId = counter;
+
+                                childData = fillRowData(row.children[m], true);
+                                childData.id = row.children[m].entryId;
+
+                                data.children = data.children ? data.children : [];
+                                data.children.push(childData);
 
                             }
 
                         }
 
+                        return data;
+
                     };
+
+                    for (var k = 0; k < rows.length; k++) {
+                        
+                        rows[k].entryId = counter;
+
+                        dataMap.set(rows[k].entryId, fillRowData(rows[k]));
+                        dataMap.set(rows[k].entryId, dataMap.get(rows[k].entryId));
+
+                    }
 
                 }
 
-                console.log('storeData', storeData);
+                console.log('dataMap', dataMap);
 
-                return storeData;
+                return dataMap;
 
             },
             //HANDLE FUNCTIONS
