@@ -15,7 +15,7 @@
         <div class="eon-label-inputWrapper">
             <input class="eon-label-input eon-fg2"></input>
         </div>
-        <div class="eon-label-button vicon vicon-ok"></div>
+        <div class="eon-label-button vicon vicon-floppy"></div>
     </div>
     
   </div>
@@ -26,6 +26,8 @@
 
 <script type="text/javascript">
   eon.element("eon-label", "eon-label.css", {
+
+    themed: true,
 
     privateProperties: {
       /*
@@ -66,6 +68,14 @@
         reflectDefault: true
       },
       /*
+      @property {Number} blurSave
+      @description Whether the changes will be saved on the input blur
+      */
+      blurSave: {
+        value: false,
+        reflect: true
+      },
+      /*
       @property {Number} fontSize
       @description Font size specified by the user
       */
@@ -84,7 +94,6 @@
     },
 
     privateFunctions: {
-
       /*
       @function (private) _setupRefs
       @description Creates references for relevant nodes
@@ -108,7 +117,10 @@
         el._refs.saveButton = el.querySelector(".eon-label-edit .eon-label-button");
 
       },
-
+      /*
+      @function (private) _setupLabel
+      @description Sets a label if provided by the user
+      */
       setupLabel: function () {
         
         var el = this;
@@ -118,7 +130,10 @@
         }
 
       },
-
+      /*
+      @function (private) _setupFontSize
+      @description Sets a font size if provided by the user
+      */
       setupFontSize: function () {
         
         var el = this;
@@ -129,7 +144,10 @@
         }
 
       },
-
+      /*
+      @function (private) _setupInput
+      @description Creates the input focus/blur events
+      */
       setupInput: function () {
         
         var el = this;
@@ -139,11 +157,20 @@
         });
 
         el._refs.input.addEventListener("blur", function () {
-          el.classList.remove("vc-label-focus");
+
+          el.classList.remove("eon-label-focus");
+
+          if (eon.util.isTrue(el.blurSave)) {
+            el._finishEditing();
+          }
+
         });
 
       },
-
+      /*
+      @function (private) _setupInput
+      @description Creates the input focus/blur events
+      */
       setupEditing: function () {
 
         var el = this;
@@ -157,24 +184,28 @@
         });
 
       },
-
+      /*
+      @function (private) _startEditing
+      @description Enables the user editing
+      */
       startEditing: function () {
 
         var el = this;
-
-        // el.dataset.editing = true;
         
         el._refs.input.value = el._refs.value.innerText;
-        el._refs.input.focus();
 
         el._refs.main.classList.add("eon-label-editing", "eon-bg2");
 
         setTimeout(function () {
+          el._refs.input.focus();
           el.classList.add("eon-label-focus");
         }, 0);
 
       },
-
+      /*
+      @function (private) _finishEditing
+      @description Finishes the user editing
+      */
       finishEditing: function () {
 
         var el = this;
@@ -182,12 +213,17 @@
         el._refs.value.innerHTML = el._refs.input.value;
 
         el._refs.input.blur();
-        el._refs.main.classList.remove("eon-label-editing", "eon-bg2", "vc-label-focus");
+
+        el._refs.main.classList.remove("eon-label-editing", "eon-bg2");
+        el.classList.remove("eon-label-focus");
 
         el._updateValue(el._refs.input.value);
 
       },
-
+      /*
+      @function (private) _updateValue
+      @description Finishes the user editing
+      */
       updateValue: function (value) {
        
         var el = this;
@@ -203,11 +239,7 @@
 
     },
 
-    functions: {
-
-
-
-    },
+    functions: {},
 
     onRender: function () {
 
