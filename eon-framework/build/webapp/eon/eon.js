@@ -2815,8 +2815,7 @@ vimlet.meta = vimlet.meta || {};
     
 // ############################################################################################
 // CORE MODULES
-// ############################################################################################
-
+// ###########################################################################################// ** First line not read by meta
 eon.object = eon.object || {};
 
 eon.object.assignToPath = function(obj, path, value) {
@@ -3317,6 +3316,9 @@ eon.insertImport = function (href) {
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
 
+    // Cache
+    eon.cache.add(href, { name: elementName });
+
     eon.imports = eon.imports || {
         count: 0,
         total: 0,
@@ -3350,99 +3352,7 @@ eon.insertImport = function (href) {
         xhttp.onreadystatechange = function () {
 
             if (this.readyState == 4 && this.status == 200) {
-
-                var importFragment = eon.fragmentFromString(this.responseText);
-                var i;
-
-                // Store combined styles
-                var styles = importFragment.querySelectorAll("style");
-
-                for (i = 0; i < styles.length; i++) {
-                    eon.imports.style += styles[i].innerHTML;
-                }
-
-                // Store scripts
-                var scripts = importFragment.querySelectorAll("script");
-
-                if (scripts.length > 0) {
-
-                    eon.imports.scripts[elementName] = {};
-
-                    for (i = 0; i < scripts.length; i++) {
-
-
-                        if (scripts[i].getAttribute("data-src")) {
-                            scripts[i].src = eon.imports.paths[elementName] + scripts[i].getAttribute("data-src");
-                            scripts[i].removeAttribute("data-src");
-                        }
-
-                        eon.imports.scripts[elementName][i] = scripts[i];
-
-                    }
-
-                }
-
-                // Store links
-                var links = importFragment.querySelectorAll("link");
-
-                if (links.length > 0) {
-
-                    eon.imports.links[elementName] = {};
-
-                    for (i = 0; i < links.length; i++) {
-                        eon.imports.links[elementName][i] = links[i];
-                    }
-
-                }
-
-                // Store template
-                var template = importFragment.querySelector("template");
-
-                if (template) {
-                    eon.imports.templates[elementName] = template;
-                }
-
-                // Wait unity domReady to ensure all imports are done and total value is accurate
-                eon.domReady(function () {
-
-                    eon.imports.count++;
-
-                    if (!eon.imports.ready && eon.imports.count == eon.imports.total) {
-
-                        // Appends all elements combined style
-                        eon.handleStyleAppend();
-                        // Appends the imported links
-                        eon.handleLinksAppend();
-                        // Appends the imported scripts
-                        eon.handleScriptsAppend();
-                        // When all the scripts are properly appended and ready then we import dependencies and see if we have finished all the imports
-                        eon.onScriptsReady(function () {
-
-                            // Handles the dependencies and returns a boolean for whether there are pendings imports or not
-                            var hasPendingImports = eon.handleDependencies();
-
-                            // If there are no more dependencies to handle trigger onImportsReady
-                            if (!hasPendingImports && !eon.imports.ready && eon.imports.count == eon.imports.total && eon.imports.total == Object.keys(eon.imports.config).length) {
-
-                                eon.imports.ready = true;
-
-                                // Here we will register the main theme, the one declared by the user or our default one
-                                eon.importMainTheme(eon.theme);
-                                // Reads the themeSchema and imports the requested files
-                                eon.importSchemaThemes();
-
-                                eon.triggerCallback('onImportsReady', eon);
-
-                            } else {
-                                eon.__onScriptsReady__triggered = false;
-                            }
-
-                        });
-
-                    }
-
-                });
-
+                eon.insertFragment(elementName, this.responseText);
             }
         };
 
@@ -3451,6 +3361,101 @@ eon.insertImport = function (href) {
 
     }
 
+};
+
+eon.insertFragment = function (elementName, content) {
+    
+    var importFragment = eon.fragmentFromString(content);
+
+    var i;
+
+    // Store combined styles
+    var styles = importFragment.querySelectorAll("style");
+
+    for (i = 0; i < styles.length; i++) {
+        eon.imports.style += styles[i].innerHTML;
+    }
+
+    // Store scripts
+    var scripts = importFragment.querySelectorAll("script");
+
+    if (scripts.length > 0) {
+
+        eon.imports.scripts[elementName] = {};
+
+        for (i = 0; i < scripts.length; i++) {
+
+            if (scripts[i].getAttribute("data-src")) {
+                scripts[i].src = eon.imports.paths[elementName] + scripts[i].getAttribute("data-src");
+                scripts[i].removeAttribute("data-src");
+            }
+
+            eon.imports.scripts[elementName][i] = scripts[i];
+
+        }
+
+    }
+
+    // Store links
+    var links = importFragment.querySelectorAll("link");
+
+    if (links.length > 0) {
+
+        eon.imports.links[elementName] = {};
+
+        for (i = 0; i < links.length; i++) {
+            eon.imports.links[elementName][i] = links[i];
+        }
+
+    }
+
+    // Store template
+    var template = importFragment.querySelector("template");
+
+    if (template) {
+        eon.imports.templates[elementName] = template;
+    }
+
+    // Wait unity domReady to ensure all imports are done and total value is accurate
+    eon.domReady(function () {
+
+        eon.imports.count++;
+        
+        if (!eon.imports.ready && eon.imports.count == eon.imports.total) {
+
+            // Appends all elements combined style
+            eon.handleStyleAppend();
+            // Appends the imported links
+            eon.handleLinksAppend();
+            // Appends the imported scripts
+            eon.handleScriptsAppend();
+            // When all the scripts are properly appended and ready then we import dependencies and see if we have finished all the imports
+            eon.onScriptsReady(function () {
+
+                // Handles the dependencies and returns a boolean for whether there are pending imports or not
+                var hasPendingImports = eon.handleDependencies();
+
+                // If there are no more dependencies to handle trigger onImportsReady
+                if (!hasPendingImports && !eon.imports.ready && eon.imports.count == eon.imports.total && eon.imports.total == Object.keys(eon.imports.config).length) {
+
+                    eon.imports.ready = true;
+
+                    // Here we will register the main theme, the one declared by the user or our default one
+                    eon.importMainTheme(eon.theme);
+                    // Reads the themeSchema and imports the requested files
+                    eon.importSchemaThemes();
+
+                    eon.triggerCallback('onImportsReady', eon);
+
+                } else {
+                    eon.__onScriptsReady__triggered = false;
+                }
+
+            });
+
+        }
+
+    });
 };
 
 eon.handleDependencies = function () {
@@ -3493,7 +3498,7 @@ eon.importSchemaThemes = function () {
 
         var themes = Object.keys(eon.themeSchema);
         var documentHead = document.querySelector("head");
-        var theme, themeElements, themeLink;
+        var theme, themeElements, themeLink, themePath;
 
         // For each theme
         for (var i = 0; i < themes.length; i++) {
@@ -3508,13 +3513,14 @@ eon.importSchemaThemes = function () {
             for (var j = 0; j < themeElements.length; j++) {
 
                 eon.registry.registerTheme(themeElements[j], theme);
+                themePath = eon.basePath + "/theme/" + theme + "/" + themeElements[j].toLowerCase() + ".css";
 
                 themeLink = document.createElement("link");
                 themeLink.setAttribute("rel", "stylesheet");
-                themeLink.setAttribute(
-                    "href",
-                    eon.basePath + "/theme/" + theme + "/" + themeElements[j].toLowerCase() + ".css"
-                );
+                themeLink.setAttribute("href", themePath);
+
+                // Cache
+                eon.cache.add(themePath, { name: themeElements[j].toLowerCase() });
 
                 documentHead.appendChild(themeLink);
 
@@ -3532,11 +3538,15 @@ eon.importMainTheme = function (theme) {
 
         var documentHead = document.querySelector("head");
         var mainLink = document.createElement("link");
+        var themePath = eon.basePath + "/theme/" + theme + "/main.css";
 
         eon.registry.registerTheme("main", theme);
 
         mainLink.setAttribute("rel", "stylesheet");
-        mainLink.setAttribute("href", eon.basePath + "/theme/" + theme + "/main.css");
+        mainLink.setAttribute("href", themePath);
+
+        // Cache
+        eon.cache.add(themePath);
 
         documentHead.appendChild(mainLink);
 
@@ -3549,15 +3559,16 @@ eon.importElementTheme = function (config, name, theme) {
     if (theme && config.themed && !eon.registry.isThemeRegistered(name, theme)) {
 
         var importedDocumentHead = document.querySelector("head");
+        var elementLink = document.createElement("link");
+        var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
 
         eon.registry.registerTheme(name, theme);
 
-        var elementLink = document.createElement("link");
         elementLink.setAttribute("rel", "stylesheet");
-        elementLink.setAttribute(
-            "href",
-            eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css"
-        );
+        elementLink.setAttribute("href", themePath);
+
+        // Cache
+        eon.cache.add(themePath, { name: name });
 
         importedDocumentHead.appendChild(elementLink);
 
@@ -4300,9 +4311,8 @@ eon.constructClass = function (baseElement) {
   // };
   return classAdapter;
 };
-
 eon.element = function (name, stylePath, config) {
-
+    
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
 
@@ -4310,9 +4320,14 @@ eon.element = function (name, stylePath, config) {
     if (stylePath != "") {
 
         var link = document.createElement("link");
+        
+        stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
 
         link.setAttribute("rel", "stylesheet");
-        link.setAttribute("href", eon.imports.paths[name.toLowerCase()] + stylePath);
+        link.setAttribute("href", stylePath);
+
+        // Cache
+        eon.cache.add(stylePath, {name: name});
 
         document.head.appendChild(link);
 
@@ -6188,6 +6203,7 @@ eon.util.mapToObject = function (map) {
  * :::::::::::::::::::::
  * Progressive Web App
  * :::::::::::::::::::::
+ * 
  * > Home screen access - manifest.json
  * > Offline mode - service-worker.js
  * 
@@ -6202,30 +6218,78 @@ eon.util.mapToObject = function (map) {
  * 
  */
 
-eon.pwa = eon.pwa || {};
+eon.cache = eon.cache || {};
 
-eon.pwa.debug = true;
-eon.pwa.filesToCache = [];
+eon.cache.config = eon.cache.config || {};
 
-/**
- * 
- * @return {[type]}     [description]
- */
-eon.pwa.initWorker = function (cacheName, filesToCache) {
-  // Register service worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-      .register(eon.basePath + '/data/pwa/service-worker.js')
-      .then(function (e) {
-        if(eon.pwa.debug) {
-          console.log('Service Worker Registered');
-        }
-        // Cache attributes
-        eon.pwa.CACHE = cacheName;
-        eon.pwa.filesToCache = filesToCache;
+ // Check if eon has any cache strategy
+ if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
+  // Check service worker existence
+  (function (proxied) {
+    ServiceWorkerContainer.prototype.register = function () {
 
+      this._registered = true;
+
+      return proxied.apply(this, arguments);
+    };
+  })(ServiceWorkerContainer.prototype.register);
+
+  eon.onReady(function () {
+    // Check service worker existence
+    if(!navigator.serviceWorker._registered) {
+
+      // Register eon service worker
+      navigator.serviceWorker
+        .register(eon.basePath + '/data/eon-cache/service-worker.js')
+        .then(function () {
+          console.log('[ServiceWorker] Registered');
       });
-  } 
+
+    }
+  });
+}
+
+eon.cache.open = function (cb) {
+
+  eon.cache.config.name = eon.cache.config.name || "eon-cache";
+
+  // Check browser cache storage existence
+  if ('caches' in window) {
+
+    // Create cache
+    caches.open(eon.cache.config.name).then(function (cache) {
+      // Cache config
+      cb(null, cache);
+    });
+
+  }
+}
+
+eon.cache.add = function (request, options, cb) {
+  var config = eon.cache.config;
+
+  // Conditions
+  var excluded = config.exclude && (options && config.exclude.indexOf(options.name) > -1);
+  var requestAll = config.requests && config.requests.indexOf("*") > -1;
+  var included = requestAll || !options || (options && config.requests && config.requests.indexOf(options.name) > -1);
+
+  // Check cache config
+  if (!excluded && included) {
+    // Check eon-cache reference existence
+    if (!eon.cache.ref) {
+      eon.cache.open(function (error, cache) {
+        eon.cache.ref = eon.cache.ref || cache;
+        // Check if the file has been cached already
+        cache.match(request).then(function (cached) {
+          if(!cached) {
+            cache.add(request).then(function () {    
+              if (cb) { cb(null, request) }
+            });
+          }
+        });
+      });
+    }
+  }
 }
 
 eon.history = eon.history || {};

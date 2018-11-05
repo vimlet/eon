@@ -1,5 +1,5 @@
 <script>
-    eon.element("eon-anchor", "", {
+    vcomet.element("vc-anchor", "", {
         privateProperties: {
             /*
                 @property (private) {Object} _misc 
@@ -49,18 +49,18 @@
                 reflect: true
             },
             /*
-                @property {String} eon-scroll element query selector
-                @description eon-scroll element query selector
+                @property {String} vc-scroll element query selector
+                @description vc-scroll element query selector
             */
             vcScroll: {
                 value: "",
                 reflect: true
             },
             /*
-                @property {String} historyThreshold
+                @property {String} offsetActive
                 @description
             */
-            historyThreshold: {
+            offsetActive: {
                 value: 0,
                 reflect: true
             },
@@ -90,38 +90,16 @@
                 var prop = el.offsetTop;
                 switch (el.side) {
                     case "right":
-                        prop = eon.dom.offsetRight(el);
+                        prop = vcomet.dom.offsetRight(el);
                         break;
                     case "left":
                         prop = el.offsetLeft;
                         break;
                     case "bottom":
-                        prop = eon.dom.offsetBottom(el);
+                        prop = vcomet.dom.offsetBottom(el);
                         break;
                 }
-                 return prop;
-            },
-            /*
-              @property (private) positionResizeListener
-              @description 
-            */
-            positionResizeListener: function () {
-                var el = this;
-                // Trigger anchor resize event only if it is needed
-                var throttled = false;
-                var delay = 15;
-                window.addEventListener('resize', function (e) {
-                    if (!throttled) {
-                        // Update offset position
-                        el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
-                    }
-                    // Throttle
-                    throttled = true;
-                    // Set a timeout to un-throttle
-                    setTimeout(function () {
-                        throttled = false;
-                    }, delay);
-                });
+                return prop;
             },
             /*
               @function (private) _monitorAnchorVisibility
@@ -135,22 +113,35 @@
 
                 el._misc.activeAnchorFn = function () {
                     if (!throttled) {
-                        if(el.offsetParent && el._isInViewport()) {
+                        // ** To be improved
+                        var prevReachedValue = el._misc.marginReached;
+                        if (el.offsetParent && el._isInViewport()) {
+
+                            // ** TODO
+                            if (el._misc.marginReached && !prevReachedValue) {
+                                // ** Should be onVisible
+                                vcomet.triggerCallback("onReached", el, el);
+                            }
+                            prevReachedValue = el._misc.marginReached;
+
                             // Store scroll container position
                             el._misc.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-                         
-                            if(!el._misc.reached) {
+
+                            if (!el._misc.reached) {
                                 el._misc.reached = true;
-                                eon.triggerCallback("onVisible", el, el);
+                                vcomet.triggerCallback("onVisible", el, el);
+
+                            } else if (!el._misc.activated) {
+                                el._misc.activated = true;
+                                vcomet.triggerCallback("onActivated", el, el);
                             }
-                            
-                       } else {
-                        // ** OPTIONAL
-                        //    if(el._misc.reached) {
-                        //         el._misc.reached = false;
-                        //         eon.triggerCallback("onHidden", el, el);
-                        //    }
-                       }
+
+                        } else if (el._misc.activated) {
+                            el._misc.activated = false;
+                            // ** OPTIONAL
+                            vcomet.triggerCallback("onDeactivated", el, el);
+
+                        }
                     }
                     // Throttle
                     throttled = true;
@@ -175,6 +166,7 @@
             isInViewport: function () {
                 var el = this;
                 var rect = el.getBoundingClientRect();
+
                 // Is on the top of the viewport
                 if (el.type == "top") {
                     return el._isOnTop(rect);
@@ -197,7 +189,7 @@
             isInMid: function (rect) {
                 var el = this;
                 var innerMidHeight = (window.innerHeight || document.documentElement.clientHeight) / 2;
-                innerMidHeight = el.historyThreshold ? innnerMidHeight + Math.abs(parseInt(el.historyThreshold)) : innerMidHeight;
+                innerMidHeight = el.offsetActive ? innerMidHeight + Math.abs(parseInt(el.offsetActive)) : innerMidHeight;
                 return (rect.top < innerMidHeight);
                 // return (rect.top >= (innerMidHeight - 40) && rect.top <= (innerMidHeight + 40));
             },
@@ -208,9 +200,13 @@
             */
             isOnTop: function (rect) {
                 var el = this;
-                // var limit = el.historyThreshold ? Math.abs(parseInt(el.historyThreshold)) : 0;
-
-                return (rect.top <= 40);
+                // var limit = el.offsetActive ? Math.abs(parseInt(el.offsetActive)) : 0;
+                if (rect.top <= (40 + el.offsetActive) && rect.top >= 0) {
+                    el._misc.marginReached = true;
+                } else {
+                    el._misc.marginReached = false;
+                }
+                return (rect.top <= (40 + el.offsetActive));
             },
             /*
               @function (private) _isInBottom
@@ -230,7 +226,7 @@
             */
             isVisible: function (rect) {
                 var el = this;
-                if(eon.util.isTrue(el.ghost)) {
+                if (vcomet.util.isTrue(el.ghost)) {
                     return ((rect.top >= 0 || rect.top < 0) &&
                         rect.left >= 0 &&
                         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
@@ -245,7 +241,7 @@
                 }
             }
         },
-        functions:{
+        functions: {
             /*
               @function refresh
               @description 
@@ -262,22 +258,23 @@
             }
         },
         onCreated: function () {
-            eon.createCallback("onVisible", this);
-            eon.createCallback("onHidden", this);
-            eon.createCallback("onActivated", this);
+            vcomet.createCallback("onVisible", this);
+            vcomet.createCallback("onReached", this);
+            vcomet.createCallback("onActivated", this);
+            vcomet.createCallback("onDeactivated", this);
         },
         onTransformed: function () {
             var el = this;
+            // ** Move to function
+            el.offsetActive = parseInt(el.offsetActive);
             el._monitorAnchorVisibility();
-            el._positionResizeListener();
         },
         onRender: function () {
             var el = this;
             // Store scroll container position
             el._misc.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-          
             el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
-            
+
             // Check anchor visibility
             el._misc.activeAnchorFn();
 
@@ -287,6 +284,22 @@
             //         el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
             //     });
             // }
+        },
+        onResize: function () {
+            var el = this;
+            // Trigger anchor resize event only if it is needed
+            var throttled = false;
+            var delay = 15;
+            if (!throttled) {
+                // Update offset position
+                el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
+            }
+            // Throttle
+            throttled = true;
+            // Set a timeout to un-throttle
+            setTimeout(function () {
+                throttled = false;
+            }, delay);
         }
     });
 </script>

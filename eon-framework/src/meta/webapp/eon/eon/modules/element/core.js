@@ -1,6 +1,5 @@
-
 eon.element = function (name, stylePath, config) {
-
+    
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
 
@@ -8,9 +7,14 @@ eon.element = function (name, stylePath, config) {
     if (stylePath != "") {
 
         var link = document.createElement("link");
+        
+        stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
 
         link.setAttribute("rel", "stylesheet");
-        link.setAttribute("href", eon.imports.paths[name.toLowerCase()] + stylePath);
+        link.setAttribute("href", stylePath);
+
+        // Cache
+        eon.cache.add(stylePath, {name: name});
 
         document.head.appendChild(link);
 

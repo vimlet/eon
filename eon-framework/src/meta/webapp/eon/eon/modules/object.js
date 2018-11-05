@@ -1,3 +1,4 @@
+// ** First line not read by meta
 eon.object = eon.object || {};
 
 eon.object.assignToPath = function(obj, path, value) {
