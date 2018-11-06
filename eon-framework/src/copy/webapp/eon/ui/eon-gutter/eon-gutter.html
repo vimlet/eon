@@ -44,6 +44,31 @@
         reflect: true
       },
       /*
+        @property {String} collapsibleEdge
+        @description 
+        Default: false
+      */
+      collapsibleEdge: {
+        value: "start",
+        reflect: true
+      },
+      /*
+        @property {String} sectionHeight
+        @description 
+      */
+      sectionHeight: {
+        value: "50%",
+        reflect: true
+      },
+      /*
+        @property {String} sectionWidth
+        @description 
+      */
+      sectionWidth: {
+        value: "50%",
+        reflect: true
+      },
+      /*
         @property {Number} min
         @description Minimum size the first section can be decreased to
         Default: 0
@@ -102,12 +127,21 @@
           // Update before collapse values
           el._sectionResize(oldGutterSize, oldSectionSize);
         }
+      },
+      /*  
+        @function collapse
+        @description
+      */
+      collapse: function(end) {
+        var el = this;
+        // Toggle collapse to the specific edge
+        el._toggleCollapse(end);
       }
     },
     privateFunctions: {
       /*
         @function (private) _setUpGutter
-        @description Apply gutter styling and user customizable behaviour
+        @description Apply gutter styling and user customizable behavior
       */
       setUpGutter: function() {
         var el = this;
@@ -129,8 +163,7 @@
         }
         // ** Force gutter to fit its parent (no style applied yet)
         el.style[el._misc.sizeProp] = "100%";
-        el._misc.size = el[el._misc.sizeOffProp];     
-        
+        el._misc.size = el[el._misc.sizeOffProp];  
       },
       /*
         @function (private) _setUpSection
@@ -138,7 +171,7 @@
       */
       setUpSection: function() {
         var el = this;
-        var sectionSize;
+        var sectionSize, percent, initialSizeProp;
         var children = el.getSourceElements();
         //
         el._refs.section = children[0];
@@ -146,8 +179,17 @@
         //
         el._refs.section.classList.add("eon-gutter-section");
         el._refs.secSection.classList.add("eon-gutter-section", "eon-gutter-secondary");
-        //
-        sectionSize = (el._misc.size / 2) - (el.splitterSize / 2);
+        initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
+        // Get initial size from config. Check size value type (Percentage or Number)
+        percent = el[initialSizeProp].split("%").length > 1 ? el[initialSizeProp].split("%")[0] : false;
+        if(percent) {
+          sectionSize = (parseFloat(percent) * el._misc.size) / 100;
+        } else {
+          sectionSize = parseFloat(el[initialSizeProp]);
+        }
+
+        sectionSize -= (el.splitterSize / 2);
+
         el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";  
         el._misc.gutterResizePercent = 50;  
       },
@@ -188,7 +230,8 @@
           // Create icon
           el._refs.collapseIcon = document.createElement("i");
           el._refs.collapseIcon.classList.add("eon-unselectable", "eon-gutter-splitterCollapseIcon");
-          el._rotateCollapseIcon();
+          var rotate = el.collapsibleEdge === "start" ? false : true;
+          el._rotateCollapseIcon(rotate);
 
           el._refs.clickable.appendChild(el._refs.collapseIcon);
           el._refs.clickable.appendChild(el._refs.clickableZone);
@@ -236,17 +279,21 @@
         @function (private) _toggleCollapse
         @description Collapse or expand gutter section
       */
-      toggleCollapse: function() {
+      toggleCollapse: function(end) {
         var el = this;
+        var rotateIcon, size;
         if(!el._misc.collapsed){
           // Set collapse animation style
           el._toggleCollapseAnimation();
           // Store new no collapsed values
           el._misc.sizeBeforeCollapse = el._refs.section[el._misc.sizeOffProp];
           // Collapse
-          el._refs.section.style[el._misc.sizeProp] = 0;
+          size = el.collapsibleEdge === "start" ? 0 : el[el._misc.sizeOffProp] + "px";
+          
+          el._refs.section.style[el._misc.sizeProp] = !end ? size : el[el._misc.sizeOffProp] + "px";
           // Rotate arrow icon
-          el._rotateCollapseIcon(true);
+          rotateIcon = end || el.collapsibleEdge === "end" ? false : true;
+          el._rotateCollapseIcon(rotateIcon);
           el._misc.collapsed = true;
           // Stop animation
           el._toggleCollapseAnimation(true);
@@ -255,7 +302,8 @@
           el._toggleCollapseAnimation();
           el._refs.section.style[el._misc.sizeProp] = (el._misc.sizeBeforeCollapse) + "px";
           // Rotate arrow icon
-          el._rotateCollapseIcon();
+          rotateIcon = el.collapsibleEdge === "end" ? true : false;
+          el._rotateCollapseIcon(rotateIcon);
           el._misc.collapsed = false;
           // Stop animation
           el._toggleCollapseAnimation(true);
