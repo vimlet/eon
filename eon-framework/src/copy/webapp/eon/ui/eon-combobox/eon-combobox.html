@@ -193,9 +193,7 @@
                 el._refs.input = el.template.querySelector("input");
                 el._refs.dropDown = el.template.querySelector(".eon-combobox-dropdown");
                 el._refs.dropDownButton = el.template.querySelector(".eon-combobox-dropButton");
-                // ** New store
-                el.store = eon.util.isTrue(el.store) ? new eon.store() : "";
-                // el._refs.store = el.source.querySelector("eon-store");
+
                 el._refs.underline = el.template.querySelector(".eon-combobox-underline");
 
                 el._refs.data = el.template.querySelector(".eon-combobox-data");
@@ -263,6 +261,18 @@
                     modalInputWrapper.appendChild(el._refs.modalInput);
                     el._refs.dropDown.insertBefore(modalInputWrapper, el._refs.dropDown.childNodes[0]);
                 }
+
+            },
+            /*
+            @function _setupType
+            @description Depending on user specifications we will prepare the element
+            */
+            setupStore: function () {
+
+                var el = this;
+
+                // ** New store
+                el.store = eon.util.isTrue(el.store) ? new eon.store() : "";
 
             },
             /*
@@ -466,27 +476,10 @@
 
                 if (el.store) {
 
-                    // el._refs.store.onCreated(function () {
-
-                    //     el._refs.store.onLoaded(function () {
-
-                    //         el._refs.store.listRemote(function () {
-                    //             el._setupStoreItems(el);
-                    //         });
-
-                    //         el._refs.store.onSourceChanged(function () {
-                    //             el._setupStoreItems(el);
-                    //         });
-
-                    //     });
-
-                    // });
-
                     el.store.onLoaded(function () {
 
                         // Update items on data changed
                         el.store.onDataChanged(function () {
-                            console.log('UPDATE');
                             el._setupStoreItems(el);
                         });
 
@@ -590,33 +583,6 @@
 
                     itemsDocFragment.appendChild(item);
                 });
-                
-                // ** 
-                // for (var key in storeData) {
-
-                //     item = document.createElement("eon-item");
-
-                //     item.classList.add("eon-bg1-hoverable", "eon-fg1-hoverable");
-                //     item.dataset.matches = true;
-                //     item.value = storeData[key][el._refs.store.idProperty];
-                //     item.displayValue = storeData[key][displayProperty];
-
-                //     el._misc.items[item.value] = item;
-
-                //     el._misc.items[item.value].style.cursor = "pointer";
-
-                //     el._misc.items[item.value].onRender(function () {
-
-                //         var span = document.createElement("span");
-
-                //         span.innerHTML = this.displayValue;
-                //         this.appendChild(span);
-                //         this.addEventListener("click", function () { el.select(this) });
-                //     });
-
-                //     itemsDocFragment.appendChild(item);
-
-                // }
 
                 el._refs.scroll.content.appendChild(itemsDocFragment);
 
@@ -1102,6 +1068,8 @@
             var el = this;
 
             var declarativePlaceholder = el.getAttribute("placeholder");
+
+            el._setupStore();
 
             el._setupTriggers();
             el._setupAnimations();
