@@ -238,7 +238,6 @@ eon.ajax = function (url, options, cb) {
       xhr.setRequestHeader(header, options.headers[header]);
     }
   }
-
   xhr.send(options.payload);
 };
 

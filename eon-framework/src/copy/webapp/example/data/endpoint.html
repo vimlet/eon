@@ -24,9 +24,11 @@
     .twoRows {
       width: 100%;
     }
+
     .result {
       font-size: 17px;
     }
+
     .status {
       border-radius: 20px;
       display: inline-block;
@@ -34,9 +36,11 @@
       width: 10px;
       margin-right: 3px;
     }
+
     .status-ok {
       background-color: green;
     }
+
     .status-error {
       background-color: red;
     }
@@ -54,10 +58,10 @@
         <button onclick="get()">
           GET
         </button>
-        <button onclick="create()">
+        <button onclick="post()">
           POST
         </button>
-        <button onclick="update()">
+        <button onclick="put()">
           PUT
         </button>
         <button onclick="deletion()">
@@ -87,6 +91,45 @@
         </div>
       </div>
 
+      <h1>Graph QL</h1>
+
+      <div class="row">
+        <button onclick="send()">
+          SEND
+        </button>
+        <button onclick="query()">
+          QUERY
+        </button>
+        <button onclick="mutation()">
+          MUTATION
+        </button>
+        <button onclick="subscribe()">
+          SUBSCRIBE
+        </button>
+      </div>
+
+      <div class="twoRows">
+        <div class="twoColumns" style="margin-bottom: 6px;">
+          <div class="example twoRows">
+            <h4 class="title">REQUEST</h4>
+            <eon-scroll class="flexStretch resultClass" thickness="8">
+              <div id="graphRequest" class="result"></div>
+            </eon-scroll>
+          </div>
+        </div>
+      </div>
+
+      <div class="twoRows">
+        <div class="twoColumns" style="margin-bottom: 6px;">
+          <div class="example twoRows">
+            <h4 class="title">RESPONSE</h4>
+            <eon-scroll class="flexStretch resultClass" thickness="8">
+              <pre id="graphResponse" class="result"></pre>
+            </eon-scroll>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -96,82 +139,154 @@
 
     var requestField, responseField;
 
-    eon.onReady(function(){
+    eon.onReady(function () {
       // Fields
       requestField = document.querySelector("#request");
       responseField = document.querySelector("#response");
 
+      requestGraphField = document.querySelector("#graphRequest");
+      responseGraphField = document.querySelector("#graphResponse");
     });
 
 
     // -- REST API --
     // Create endpoint
-    var endpoint = new eon.endpoint("rest", "http://ip.jsontest.com/");
-    var statusClass = "status-ok" ;
+    var endpoint = new eon.endpoint("rest", "https://reqres.in/api/users");
+    var statusClass = "status-ok";
 
     // :: READ
     function get() {
       // Get request
-      endpoint.get("1", function (success, data) {
+      endpoint.get("", function (success, data) {
         console.log('### REST get data', data);
 
+        // Check status
+        statusClass = data.status >= 200 && data.status < 300 ? "status-ok" : "status-error";
         requestField.innerHTML = "Request URL: " + data.url + "<br>" +
-                                 "Request method: " + data.method + "<br>" +
-                                 "Status code: <span class='status " + statusClass + "'></span>" + data.status;
+          "Request method: " + data.method + "<br>";
+        // Display response
+        responseField.innerHTML = "Status code: <span class='status " + statusClass + "'></span>" + data.status + "<br>" +
+          "Body: " + data.responseText;
+      });
+    }
+    // :: POST
+    function post() {
+      var payload = { name: "Samuel", employed: false };
+      // Post request
+      endpoint.post(payload, function (success, data) {
+        console.log('### REST post data', data);
 
-        responseField.innerHTML = data.responseText;
+        // Check status
+        statusClass = data.status >= 200 && data.status < 300 ? "status-ok" : "status-error";
+        requestField.innerHTML = "Request URL: " + data.url + "<br>" +
+          "Request method: " + data.method + "<br>" +
+          "Payload: " + JSON.stringify(payload, null, 2);
+        // Display response
+        responseField.innerHTML = "Status code: <span class='status " + statusClass + "'></span>" + data.status + "<br>" +
+          "Body: " + data.responseText;
+      });
+    }
+    // :: PUT
+    function put() {
+      var payload = { name: "Samuel", employed: true };
+      // Put request
+      endpoint.put("1", payload, function (success, data) {
+        console.log('### REST put data', data);
+        // Check status
+        statusClass = data.status >= 200 && data.status < 300 ? "status-ok" : "status-error";
+        requestField.innerHTML = "Request URL: " + data.url + "<br>" +
+          "Request method: " + data.method + "<br>" +
+          "Payload: " + JSON.stringify(payload, null, 2);
+        // Display response
+        responseField.innerHTML = "Status code: <span class='status " + statusClass + "'></span>" + data.status + "<br>" +
+          "Body: " + data.responseText;
+      });
+    }
+    // :: DELETE
+    function deletion() {
+      // Delete request
+      endpoint.delete("1", function (success, data) {
+        console.log('### REST delete data', data);
+        // Check status
+        statusClass = data.status >= 200 && data.status < 300 ? "status-ok" : "status-error";
+        requestField.innerHTML = "Request URL: " + data.url + "<br>" +
+          "Request method: " + data.method + "<br>";
+        // Display response
+        responseField.innerHTML = "Status code: <span class='status " + statusClass + "'></span>" + data.status + "<br>" +
+          "Body: " + JSON.stringify({ name: "Samuel", employed: true }, null);
       });
     }
 
-
-
-    // ## REST
+    // -- GRAPHQL HTTP BASED --
     // Create endpoint
-    // var endpoint = new eon.endpoint("rest", "");
-    // // Get request
-    // endpoint.get("1", function (success, data) {
-    //   console.log('### REST get data', data);
-    // });
-    // // Put request
-    // endpoint.put("1", {}, function (success, data) {
-    //   console.log('### REST put data', data);
-    // });
-    // endpoint.url = "https://jsonplaceholder.typicode.com/posts";
-    // // Post request
-    // endpoint.post({}, function (success, data) {
-    //   console.log('### REST push data', data);
-    // });
-    // // Delete request
-    // endpoint.delete("1", function (success, data) {
-    //   console.log('### REST delete data', data);
-    // });
+    var endpointHTTP = new eon.endpoint("graphHTTP", "https://1jzxrj179.lp.gql.zone/graphql");
 
-    // // ## GraphQL HTTP based
-    // // Create endpoint
-    // var endpointHTTP = new eon.endpoint("graphHTTP", "https://jsonplaceholder.typicode.com/todos");
-    // // Send calls query internally
-    // endpointHTTP.send("{Hero {name}}", function (success, data) {
-    //   console.log('::: HTTP send', data);
-    // });
-    // // Query call appends the 'query' prefix to the query string 
-    // endpointHTTP.query("{Hero {name}}", function (success, data) {
-    //   console.log('::: HTTP query', data);
-    // });
-    // // Mutation call appends the 'mutation' prefix to the query string 
-    // endpointHTTP.mutation("{'Hero': 'Jedi', age: '22'}", function (success, data) {
-    //   console.log('::: HTTP mutation', data);
-    // });
+    // :: SEND
+    function send() {
+      var query = "{ posts { title } }";
+      // Put request
+      endpointHTTP.send(query, function (success, data) {
+        console.log('### GraphQL send data', data);
+        // Check status
+        statusClass = data.status >= 200 && data.status < 300 ? "status-ok" : "status-error";
+        requestGraphField.innerHTML = "Request URL: " + data.url + "<br>" +
+          "Request method: " + data.method + "<br>";
+        // Display response
+        responseGraphField.innerHTML = "Status code: <span class='status " + statusClass + "'></span>" + data.status + "<br>" +
+          "Body: " + data.responseText;
+      });
+    }
+    // :: QUERY
+    function query() {
+      var query = "{ posts { title } }";
+      // Put request
+      endpointHTTP.query(query, function (success, data) {
+        console.log('### GraphQL query data', data);
+        // Check status
+        statusClass = data.status >= 200 && data.status < 300 ? "status-ok" : "status-error";
+        requestGraphField.innerHTML = "Request URL: " + data.url + "<br>" +
+          "Request method: " + data.method + "<br>";
+        // Display response
+        responseGraphField.innerHTML = "Status code: <span class='status " + statusClass + "'></span>" + data.status + "<br>" +
+          "Body: " + data.responseText;
+      });
+    }
+    // :: MUTATION
+    function mutation() {
+      var query = "{ posts { title } }";
+      // Put request
+      endpointHTTP.mutation(query, function (success, data) {
+        console.log('### GraphQL mutation data', data);
+        // Check status
+        statusClass = data.status >= 200 && data.status < 300 ? "status-ok" : "status-error";
+        requestGraphField.innerHTML = "Request URL: " + data.url + "<br>" +
+          "Request method: " + data.method + "<br>";
+        // Display response
+        responseGraphField.innerHTML = "Status code: <span class='status " + statusClass + "'></span>" + data.status + "<br>" +
+          "Body: " + data.responseText;
+      });
+    }
 
-    // // ## GraphQL Web Sockets based
-    // // Create endpoint
-    // var endpointSockets = new eon.endpoint("graphSockets", "wss://echo.websocket.org");
-    // // Make sure the asynchronous connection has been opened
-    // endpointSockets.socket.onopen = function (event) {
-    //   // Subscription call appends the 'subscription' prefix to the query string 
-    //   endpointSockets.subscribe("{'Hero': 'Jedi', age: '22'}", function (success, data) {
-    //     console.log('..... socket subscription', data);
-    //   });
-    // };
+    // -- GRAPHQL WEB SOCKETS BASED --
+    // Create endpoint
+    var endpointSockets = new eon.endpoint("graphSockets", "wss://echo.websocket.org");
+
+    // :: SUBSCRIBE
+    function subscribe() {
+      // ** Change endpointurl type
+      var query = JSON.stringify("{ posts { title } }");
+      // Put request
+      endpointSockets.subscribe(query, function (success, data) {
+        console.log('### GraphQL subscription', data);
+        // Check status
+        statusClass = data.status >= 200 && data.status < 300 ? "status-ok" : "status-error";
+        requestGraphField.innerHTML = "Origin: " + data.origin + "<br>" +
+          "Type: Web Sockets <br>" +
+          "Query: " + data.data;
+        // Display response
+        responseGraphField.innerHTML = "Message: { posts: [{title: Apps}, {title: References}] }";
+      });
+    }
 
   </script>
 </body>

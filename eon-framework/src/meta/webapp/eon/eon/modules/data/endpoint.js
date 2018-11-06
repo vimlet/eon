@@ -97,31 +97,31 @@ eon.endpoint = function (type, url) {
     @function send
     @description Query data source
   */
-  this.send = function (queryString, cb) {
+  this.send = type == "graphHTTP" ? function (queryString, cb) {
     el.query(queryString, cb);
-  };
+  } : "";
   /*
     @function query
     @description Query data source
   */
-  this.query = function (queryString, cb) {
+  this.query = type == "graphHTTP" ? function (queryString, cb) {
     graphHTTPQuery(queryString, cb);
-  };
+  } : "";
   /*
     @function mutation
     @description Update data source
    */
-  this.mutation = function (queryString, cb) {
+  this.mutation = type == "graphHTTP" ? function (queryString, cb) {
     graphHTTPMutation(queryString, cb);
-  };
+  } : "";
   /*
     @function subscribe
     @description Subscribe
    */
-  this.subscribe = function (queryString, cb) {
+  this.subscribe = type == "graphSockets" ? function (queryString, cb) {
     // Check graphQL protocol based on
     graphSocketsSubscription(queryString, cb);
-  };
+  } : "";
 
   /* 
       #################
@@ -133,13 +133,16 @@ eon.endpoint = function (type, url) {
 
   // Query call HTTP based
   function graphHTTPQuery(queryString, cb) {
+  
     // Validate query string 
     if (queryString) {
       // Set up request
       var options = {
         method: "GET",
-        payload: "query:" + queryString
+        contentType: "application/json",
+        payload: "query:" +  queryString
       };
+      console.log('options', options.payload);
       // Send request
       eon.ajax(el.url, options, cb);
     }
@@ -158,14 +161,14 @@ eon.endpoint = function (type, url) {
     }
   }
 
-  // -- GraphQL Web sockets API --
+  // -- GraphQL Web Sockets API --
 
   // Query call Web sockets based
   function graphSocketsSubscription(queryString, cb) {
     // Server response listener
     el.socket.onmessage = function (event) {
       // TODO Handle response messages
-      cb(true, event.data);
+      cb(true, event);
     };
     el.socket.send("subscription:" + queryString);
   }
