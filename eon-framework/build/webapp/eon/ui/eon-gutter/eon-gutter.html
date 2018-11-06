@@ -53,18 +53,18 @@
         reflect: true
       },
       /*
-        @property {String} height
+        @property {String} sectionHeight
         @description 
       */
-      height: {
+      sectionHeight: {
         value: "50%",
         reflect: true
       },
       /*
-        @property {String} width
+        @property {String} sectionWidth
         @description 
       */
-      width: {
+      sectionWidth: {
         value: "50%",
         reflect: true
       },
@@ -171,7 +171,7 @@
       */
       setUpSection: function() {
         var el = this;
-        var sectionSize, percent;
+        var sectionSize, percent, initialSizeProp;
         var children = el.getSourceElements();
         //
         el._refs.section = children[0];
@@ -179,12 +179,13 @@
         //
         el._refs.section.classList.add("eon-gutter-section");
         el._refs.secSection.classList.add("eon-gutter-section", "eon-gutter-secondary");
+        initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
         // Get initial size from config. Check size value type (Percentage or Number)
-        percent = el[el._misc.sizeProp].split("%").length > 1 ? el[el._misc.sizeProp].split("%")[0] : false;
+        percent = el[initialSizeProp].split("%").length > 1 ? el[initialSizeProp].split("%")[0] : false;
         if(percent) {
           sectionSize = (parseFloat(percent) * el._misc.size) / 100;
         } else {
-          sectionSize = parseFloat(el[el._misc.sizeProp]);
+          sectionSize = parseFloat(el[initialSizeProp]);
         }
 
         sectionSize -= (el.splitterSize / 2);
