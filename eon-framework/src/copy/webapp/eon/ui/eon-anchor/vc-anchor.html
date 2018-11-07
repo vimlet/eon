@@ -1,5 +1,5 @@
 <script>
-    vcomet.element("vc-anchor", "", {
+    eon.element("eon-anchor", "", {
         privateProperties: {
             /*
                 @property (private) {Object} _misc 
@@ -49,10 +49,10 @@
                 reflect: true
             },
             /*
-                @property {String} vc-scroll element query selector
-                @description vc-scroll element query selector
+                @property {String} eon-scroll element query selector
+                @description eon-scroll element query selector
             */
-            vcScroll: {
+            eonScroll: {
                 value: "",
                 reflect: true
             },
@@ -90,13 +90,13 @@
                 var prop = el.offsetTop;
                 switch (el.side) {
                     case "right":
-                        prop = vcomet.dom.offsetRight(el);
+                        prop = eon.dom.offsetRight(el);
                         break;
                     case "left":
                         prop = el.offsetLeft;
                         break;
                     case "bottom":
-                        prop = vcomet.dom.offsetBottom(el);
+                        prop = eon.dom.offsetBottom(el);
                         break;
                 }
                 return prop;
@@ -120,7 +120,7 @@
                             // ** TODO
                             if (el._misc.marginReached && !prevReachedValue) {
                                 // ** Should be onVisible
-                                vcomet.triggerCallback("onReached", el, el);
+                                eon.triggerCallback("onReached", el, el);
                             }
                             prevReachedValue = el._misc.marginReached;
 
@@ -129,17 +129,17 @@
 
                             if (!el._misc.reached) {
                                 el._misc.reached = true;
-                                vcomet.triggerCallback("onVisible", el, el);
+                                eon.triggerCallback("onVisible", el, el);
 
                             } else if (!el._misc.activated) {
                                 el._misc.activated = true;
-                                vcomet.triggerCallback("onActivated", el, el);
+                                eon.triggerCallback("onActivated", el, el);
                             }
 
                         } else if (el._misc.activated) {
                             el._misc.activated = false;
                             // ** OPTIONAL
-                            vcomet.triggerCallback("onDeactivated", el, el);
+                            eon.triggerCallback("onDeactivated", el, el);
 
                         }
                     }
@@ -151,9 +151,9 @@
                     }, delay);
                 };
                 // Check parent scroll container
-                if (el.vcScroll) {
-                    var vcScrollEl = document.querySelector(el.vcScroll);
-                    vcScrollEl.onScrolled(el._misc.activeAnchorFn);
+                if (el.eonScroll) {
+                    var eonScrollEl = document.querySelector(el.eonScroll);
+                    eonScrollEl.onScrolled(el._misc.activeAnchorFn);
                 } else {
                     window.addEventListener('scroll', el._misc.activeAnchorFn, false);
                 }
@@ -226,7 +226,7 @@
             */
             isVisible: function (rect) {
                 var el = this;
-                if (vcomet.util.isTrue(el.ghost)) {
+                if (eon.util.isTrue(el.ghost)) {
                     return ((rect.top >= 0 || rect.top < 0) &&
                         rect.left >= 0 &&
                         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
@@ -258,10 +258,10 @@
             }
         },
         onCreated: function () {
-            vcomet.createCallback("onVisible", this);
-            vcomet.createCallback("onReached", this);
-            vcomet.createCallback("onActivated", this);
-            vcomet.createCallback("onDeactivated", this);
+            eon.createCallback("onVisible", this);
+            eon.createCallback("onReached", this);
+            eon.createCallback("onActivated", this);
+            eon.createCallback("onDeactivated", this);
         },
         onTransformed: function () {
             var el = this;
@@ -279,8 +279,8 @@
             el._misc.activeAnchorFn();
 
             // TO BE REMOVED
-            // if (el.vcScroll) {
-            //     document.querySelector(el.vcScroll).onBubbleRender(function(){
+            // if (el.eonScroll) {
+            //     document.querySelector(el.eonScroll).onBubbleRender(function(){
             //         el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
             //     });
             // }
