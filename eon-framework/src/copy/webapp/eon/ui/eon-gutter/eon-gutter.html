@@ -287,10 +287,14 @@
           el._toggleCollapseAnimation();
           // Store new no collapsed values
           el._misc.sizeBeforeCollapse = el._refs.section[el._misc.sizeOffProp];
-          // Collapse
-          size = el.collapsibleEdge === "start" ? 0 : el[el._misc.sizeOffProp] + "px";
-          
-          el._refs.section.style[el._misc.sizeProp] = !end ? size : el[el._misc.sizeOffProp] + "px";
+          // Get collapse edge value
+          size = el.collapsibleEdge === "start" ? 0 : el[el._misc.sizeOffProp];
+          size = !end ? size : el[el._misc.sizeOffProp];
+          // Check min and max values
+          size = el.collapsibleEdge === "start" && el.min && el.min > size ? el.min : size;
+          size = el.collapsibleEdge === "end" && el.max && el.max < size ? el[el._misc.sizeOffProp] - el.max : size;
+          // Set size
+          el._refs.section.style[el._misc.sizeProp] = size + "px";
           // Rotate arrow icon
           rotateIcon = end || el.collapsibleEdge === "end" ? false : true;
           el._rotateCollapseIcon(rotateIcon);
@@ -358,7 +362,7 @@
           // Draggable variables
           var mousedown = false;
           var moveValue = 0;
-          var pixels, propertyMoveValue;
+          var pixels, propertyMoveValue, rotateIcon;
           // Start slide on mouse down event
           el._refs.splitter.addEventListener("pointerdown", function(e){
             // Needed to prevent bad mouseup event
@@ -378,7 +382,8 @@
               // Stop gutter from being collapsed
               if(el._misc.collapsed && moveValue !== e[el._misc.axisProp]){
                 // Rotate arrow icon to its initial position
-                el._rotateCollapseIcon();
+                rotateIcon = el.collapsibleEdge === "start" ? false : true;
+                el._rotateCollapseIcon(rotateIcon);
                 el._misc.collapsed = false;
               }
               // Get new section size
@@ -443,7 +448,7 @@
       sectionResize: function(oldGutterSize, oldSectionSize) {
         var el = this;
         var sectionSizePercent, newSectionSize;
-        // Check if the section is collapsed
+        // Check if the sectionsection is collapsed
         if(!el._misc.collapsed){
           // Get section size percentage before resize
           sectionSizePercent = el._misc.gutterResizePercent;
