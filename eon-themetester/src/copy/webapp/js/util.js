@@ -6,7 +6,7 @@ function setUpSearch(selector) {
     });
 }
 
-function loadVCometExamples() {
+function loadEonExamples() {
     var anchor, activePanel, groupId;
     // Configure tree
     var treeScroll = refs.tree.querySelector("eon-scroll");
@@ -15,7 +15,7 @@ function loadVCometExamples() {
     // Load vComet element example
     refs.tree.onNodeSelected(function (node) {
         // Go to group file
-        groupId = node._refs.parentNode.tagName == "VC-TREENODE" ? node._refs.parentNode.id : node.id;
+        groupId = node._refs.parentNode.tagName == "EON-TREENODE" ? node._refs.parentNode.id : node.id;
         refs.view.swapToPanel(groupId);
         // Get active panel
         activePanel = refs.view.getActivePanel();
@@ -41,7 +41,7 @@ function toggleMenu(forceAction) {
 }
 
 function initializePlayground(sectionsClass, pgClass) {
-    // PROBABLY NECESSARY DUE TO VC-PANEL SCRIPTS MANAGEMENT (to be removed...)
+    // PROBABLY NECESSARY DUE TO EON-PANEL SCRIPTS MANAGEMENT (to be removed...)
     setTimeout(function () {
         // Initialize playground
         var sections = document.querySelector(sectionsClass).content.children;
