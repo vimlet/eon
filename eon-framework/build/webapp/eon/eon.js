@@ -2815,9 +2815,7 @@ vimlet.meta = vimlet.meta || {};
     
 // ############################################################################################
 // CORE MODULES
-// ############################################################################################
-
-// ** First line not read by meta
+// ###########################################################################################// ** First line not read by meta
 eon.object = eon.object || {};
 
 eon.object.assignToPath = function(obj, path, value) {
@@ -4015,14 +4013,18 @@ eon.interpolation.prepare = function (template) {
 
           rootPath.shift();
           rootPath = rootPath.join(".");
+          
+          keyPath = rootPath != "" ? rootPath + "." + keyPath : keyPath;
 
-        } else if (!rootPath) {
+        } 
+        // else if (!rootPath) {
 
-          rootPath = "";
+        //   rootPath = "";
 
-        }
+        // }
 
-        this.echo('<eon-variable bind="' + keyPath + '" root="' + rootPath + '" global="' + global + '"></eon-variable>');
+        // this.echo('<eon-variable bind="' + keyPath + '" root="' + rootPath + '" global="' + global + '"></eon-variable>');
+        this.echo('<eon-variable bind="' + keyPath + '" global="' + global + '"></eon-variable>');
       }
     };
   }
@@ -4076,14 +4078,14 @@ eon.interpolation.handleInterpolationVariables = function (el, config) {
     isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
 
     bindString = currentVariable.getAttribute("bind");
-
+    
     scope = isGlobal ? eon : el;
     sourceName = isGlobal ? "global" : "data";
 
     // Reads if there is already a value on the source if there is not then it assigns an empty string
     bindValue = eon.object.readFromPath(scope[sourceName], bindString);
     bindValue = typeof bindValue == "undefined" ? "" : bindValue;
-
+    
     // Reassigns the value to the source, in case there was no value
     eon.object.assignToPath(scope[sourceName], bindString, bindValue);
 
@@ -4187,9 +4189,11 @@ eon.interpolation.setupDataChangeCallback = function (el, scope, source) {
 
   // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
   scope._onDataChanged(function (keyPath, oldVal, newVal) {
-    
-    if (keyPath == "data") {
-      eon.interpolation.replaceData(scope, oldVal, newVal, source);
+    // console.log('data changed', keyPath, oldVal, newVal);
+    // if (keyPath == "data") {
+    if (newVal.constructor === Object) {
+      // console.log('replaceData', keyPath);
+      eon.interpolation.replaceData(el, scope, oldVal, newVal, source);
     } else {
       eon.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, source);
     }
@@ -4234,7 +4238,6 @@ eon.interpolation.interpolate = function (el, obj, interpolations, bind) {
 
 // Handles the value change of the variable element and triggers onDataChanged
 eon.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVal, config) {
-  var interpolations = el.__interpolations;
   var pathArray = keyPath.split(".");
   var interpolationPath;
   var variablesToChange;
@@ -4257,17 +4260,17 @@ eon.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVal, 
 }
 
 // Handles the situation when the whole data has been changed for another object
-eon.interpolation.replaceData = function (el, oldData, newData, config) {
+eon.interpolation.replaceData = function (el, scope, oldData, newData, config) {
   var checked = {};
 
-  eon.triggerAllCallbackEvents(el, config, "onDataChanged", ["data", oldData, newData]);
+  eon.triggerAllCallbackEvents(scope, config, "onDataChanged", ["data", oldData, newData]);
 
   // Checks differences between the old and the new data
-  checked = eon.interpolation.backwardDataDiffing(el, "data", oldData, newData, checked, config);
+  checked = eon.interpolation.backwardDataDiffing(scope, "data", oldData, newData, checked, config);
 
   // Checks differences between the new and the old data, escaping the already checked ones
-  eon.interpolation.forwardDataDiffing(el, "data", newData, checked, config);
-  eon.interpolation.createObjectPropDescriptors(el, newData, "data", config);
+  eon.interpolation.forwardDataDiffing(scope, "data", newData, checked, config);
+  eon.interpolation.createObjectPropDescriptors(scope, newData, "data", config);
 }
 
 // Compares the old data with the new one and triggers the changes
