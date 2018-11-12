@@ -20,14 +20,12 @@ eon.interpolation.prepare = function (template) {
 
           rootPath.shift();
           rootPath = rootPath.join(".");
-
-        } else if (!rootPath) {
-
-          rootPath = "";
+          
+          keyPath = rootPath != "" ? rootPath + "." + keyPath : keyPath;
 
         }
 
-        this.echo('<eon-variable bind="' + keyPath + '" root="' + rootPath + '" global="' + global + '"></eon-variable>');
+        this.echo('<eon-variable bind="' + keyPath + '" global="' + global + '"></eon-variable>');
       }
     };
   }
@@ -81,14 +79,14 @@ eon.interpolation.handleInterpolationVariables = function (el, config) {
     isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
 
     bindString = currentVariable.getAttribute("bind");
-
+    
     scope = isGlobal ? eon : el;
     sourceName = isGlobal ? "global" : "data";
 
     // Reads if there is already a value on the source if there is not then it assigns an empty string
     bindValue = eon.object.readFromPath(scope[sourceName], bindString);
     bindValue = typeof bindValue == "undefined" ? "" : bindValue;
-
+    
     // Reassigns the value to the source, in case there was no value
     eon.object.assignToPath(scope[sourceName], bindString, bindValue);
 
@@ -108,7 +106,7 @@ eon.interpolation.handleInterpolationVariables = function (el, config) {
 
     source = sources[sourceKeys[j]];
     
-    eon.interpolation.setupDataChangeCallback(el, source.scope, source.obj);
+    eon.interpolation.setupDataChangeCallback(el, source.scope, config);
     eon.interpolation.setupDataPropDescriptors(source.scope, sourceKeys[j]);
     eon.interpolation.interpolate(el, source.obj, el.__interpolations);
 
@@ -183,7 +181,7 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
 }
 
 // Creates the private onDataChanged callback to handle the public one
-eon.interpolation.setupDataChangeCallback = function (el, scope, source) {
+eon.interpolation.setupDataChangeCallback = function (el, scope, config) {
   
   // If the private callback doesnt exist creates it
   if (!scope._onDataChanged) {
@@ -192,11 +190,11 @@ eon.interpolation.setupDataChangeCallback = function (el, scope, source) {
 
   // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
   scope._onDataChanged(function (keyPath, oldVal, newVal) {
-    
-    if (keyPath == "data") {
-      eon.interpolation.replaceData(scope, oldVal, newVal, source);
+
+    if (newVal.constructor === Object) {
+      eon.interpolation.handleObjectChange(el, scope, keyPath, oldVal, newVal, config);
     } else {
-      eon.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, source);
+      eon.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, config);
     }
 
   });
@@ -237,13 +235,26 @@ eon.interpolation.interpolate = function (el, obj, interpolations, bind) {
   }
 }
 
+// Handles the situation when a whole object has been changed
+eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, newData, config) {
+  var checked = {};
+  
+  eon.triggerAllCallbackEvents(el, config, "onDataChanged", [keyPath, oldData, newData]);
+
+  // Checks differences between the old and the new data
+  checked = eon.interpolation.backwardDataDiffing(el, scope, keyPath, oldData, newData, checked, config);
+
+  // Checks differences between the new and the old data, escaping the already checked ones
+  eon.interpolation.forwardDataDiffing(el, scope, keyPath, newData, checked, config);
+  eon.interpolation.createObjectPropDescriptors(scope, newData, keyPath, config);
+}
+
 // Handles the value change of the variable element and triggers onDataChanged
 eon.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVal, config) {
-  var interpolations = el.__interpolations;
   var pathArray = keyPath.split(".");
   var interpolationPath;
   var variablesToChange;
-
+  
   // Removes the first index of the pathArray, that corresponds to "data", which we dont need for the interpolations
   pathArray.shift();
   // Sets the path back together withouth data
@@ -261,22 +272,8 @@ eon.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVal, 
   eon.triggerAllCallbackEvents(el, config, "onDataChanged", [interpolationPath, oldVal, newVal]);
 }
 
-// Handles the situation when the whole data has been changed for another object
-eon.interpolation.replaceData = function (el, oldData, newData, config) {
-  var checked = {};
-
-  eon.triggerAllCallbackEvents(el, config, "onDataChanged", ["data", oldData, newData]);
-
-  // Checks differences between the old and the new data
-  checked = eon.interpolation.backwardDataDiffing(el, "data", oldData, newData, checked, config);
-
-  // Checks differences between the new and the old data, escaping the already checked ones
-  eon.interpolation.forwardDataDiffing(el, "data", newData, checked, config);
-  eon.interpolation.createObjectPropDescriptors(el, newData, "data", config);
-}
-
 // Compares the old data with the new one and triggers the changes
-eon.interpolation.backwardDataDiffing = function (el, keyPath, oldData, newData, checked, config) {
+eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, newData, checked, config) {
   var newVal;
   // Loops through the oldData
   for (var key in oldData) {
@@ -284,7 +281,7 @@ eon.interpolation.backwardDataDiffing = function (el, keyPath, oldData, newData,
     if (key.indexOf("__") == -1) {
       // If the property is an object, we enter this function again for that object
       if (oldData[key].constructor === Object) {
-        checked[key] = eon.interpolation.backwardDataDiffing(el, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config);
+        checked[key] = eon.interpolation.backwardDataDiffing(el, scope, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config);
       } else {
         // If there is no such property on the new Data we set it as an empty string
         newVal = newData ? newData[key] : "";
@@ -302,7 +299,7 @@ eon.interpolation.backwardDataDiffing = function (el, keyPath, oldData, newData,
 }
 
 // Compares the data with the already checked object
-eon.interpolation.forwardDataDiffing = function (el, keyPath, data, checked, config) {
+eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, checked, config) {
   var oldVal;
   // Loops through data
   for (var key in data) {
@@ -310,7 +307,7 @@ eon.interpolation.forwardDataDiffing = function (el, keyPath, data, checked, con
     if (key.indexOf("__") == -1) {
       // If the property is an object, we enter this function again for that object
       if (data[key].constructor === Object) {
-        eon.interpolation.forwardDataDiffing(el, keyPath + "." + key, data[key], checked ? checked[key] : checked, config);
+        eon.interpolation.forwardDataDiffing(el, scope, keyPath + "." + key, data[key], checked ? checked[key] : checked, config);
       } else {
         oldVal = checked ? checked[key] : "";
         // To only trigger variable change for properties that are not already checked/triggered
