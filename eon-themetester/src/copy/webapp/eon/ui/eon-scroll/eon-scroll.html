@@ -156,13 +156,13 @@
             scrollTop = value;
           }
 
-          el._performVerticalSmoothScroll(scrollTop, smooth);
+          el._performScroll(scrollTop, el.content.scrollLeft, smooth);
 
         };
 
         // ScrollLeft property descriptor
         scrollLeftDescriptor.get = function () {
-          return el.content.scrollTop;
+          return el.content.scrollLeft;
         };
 
         scrollLeftDescriptor.set = function (value) {
@@ -1618,10 +1618,14 @@
         var el = this;
 
         var positive = top > el.content.scrollTop ? true : false;
-        var finished;
-
+        var initial = el.content.scrollTop;
+        var advance = top - initial;
+        var duration = Math.min(1200, Math.abs(advance) * 1.2);
+        var endTime = + new Date() + duration;
+        var finished, rate, proportion;
+        
         // Removes the smooth scroll class
-        el.classList.remove("eon-scroll-smooth");
+        el.classList.remove("vc-scroll-smooth");
 
         // If there is a previous animation frame still runing we cancel it
         cancelAnimationFrame(el._misc.smoothScroll.vertical.animationFrame);
@@ -1630,21 +1634,21 @@
         top = top > el._getVerticalScrollableSize() ? el._getVerticalScrollableSize() : top;
         top = top < 0 ? 0 : top;
 
-        // Creates the function that will scroll unitl it reached the desired position
+        // Creates the function that will scroll until it reached the desired position
         el._misc.smoothScroll.vertical.fn = function () {
 
+          var currentTime = +new Date();
+          var remaining = (endTime - currentTime);
+
+          rate = 1 - Math.pow(remaining/duration, 3);
+          rate = rate > 1 ? 1 : rate;
+
+          proportion = rate * advance;
+          
           // If there is place for us to scroll
           if ((positive && el.content.scrollTop < top) || (!positive && el.content.scrollTop > top)) {
 
-            // If its scrolling right and it hasn reach its destination
-            if ((positive && el.content.scrollTop < top)) {
-              // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
-              el.content.scrollTop = (top - el.content.scrollTop) > el._misc.smoothScroll.amount ? el.content.scrollTop + el._misc.smoothScroll.amount : top;
-              // If its scrolling left and it hasn reach its destination
-            } else if (!positive && el.content.scrollTop > top) {
-              // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
-              el.content.scrollTop = (el.content.scrollTop - top) > el._misc.smoothScroll.amount ? el.content.scrollTop - el._misc.smoothScroll.amount : 0;
-            }
+            el.content.scrollTop = initial + proportion;
 
             // Once it finishes sets the finished variable to true
           } else {

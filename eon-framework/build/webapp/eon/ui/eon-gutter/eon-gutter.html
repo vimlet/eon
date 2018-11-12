@@ -148,6 +148,7 @@
         // Set gutter variables
         el._misc.posProp = el.type == "vertical" ? "top" : "left";
         el._misc.sizeOffProp = el.type == "vertical" ? "offsetHeight" : "offsetWidth";
+        el._misc.posSizeOffProp = el.type == "vertical" ? "offsetWidth" : "offsetHeight";
         el._misc.sizeProp = el.type == "vertical" ? "height" : "width";
         el._misc.axisProp = el.type == "vertical" ? "clientY" : "clientX";
         el._misc.axisProp = el.type == "vertical" ? "clientY" : "clientX";
@@ -163,7 +164,9 @@
         }
         // ** Force gutter to fit its parent (no style applied yet)
         el.style[el._misc.sizeProp] = "100%";
-        el._misc.size = el[el._misc.sizeOffProp];  
+        el._misc.size = el[el._misc.sizeOffProp];
+        
+        // el.style[el._misc.posSizeProp] = "100%";
       },
       /*
         @function (private) _setUpSection
@@ -447,15 +450,33 @@
       */
       sectionResize: function(oldGutterSize, oldSectionSize) {
         var el = this;
-        var sectionSizePercent, newSectionSize;
+        var sectionSizePercent, sectionSize, newSectionSize, initialSizeProp, percent;
         // Check if the sectionsection is collapsed
         if(!el._misc.collapsed){
           // Get section size percentage before resize
           sectionSizePercent = el._misc.gutterResizePercent;
-          // Calculate new section size
-          newSectionSize = sectionSizePercent * el._misc.size / 100;
-          // Set new section size
-          el._refs.section.style[el._misc.sizeProp] = newSectionSize + "px";
+
+          if (!el._misc.loaded) {
+            // Check initial size customization
+            initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
+            // Get initial size from config. Check size value type (Percentage or Number)
+            percent = el[initialSizeProp].split("%").length > 1 ? el[initialSizeProp].split("%")[0] : false;
+            if(percent) {
+              sectionSize = (parseFloat(percent) * el._misc.size) / 100;
+            } else {
+              sectionSize = parseFloat(el[initialSizeProp]);
+            }
+
+            sectionSize -= (el.splitterSize / 2);
+
+            el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";  
+          } else {
+            // Calculate new section size
+            newSectionSize = sectionSizePercent * el._misc.size / 100;
+            // Set new section size
+            el._refs.section.style[el._misc.sizeProp] = newSectionSize + "px";
+          }
+
         } else {
           // Get value set before been collapsed
           sectionSizePercent = el._misc.sizeBeforeCollapse * 100 / oldGutterSize;
@@ -596,6 +617,7 @@
       var el = this;
        // Make sure correct size calculation when the gutter is a part of another component
        el.resize();
+       el._misc.loaded = true;
     }
   });
 </script>
