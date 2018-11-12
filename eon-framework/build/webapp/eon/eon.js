@@ -3995,30 +3995,61 @@ eon.onImportsReady(function () {
 
 eon.interpolation = eon.interpolation || {};
 eon.interpolation.tags = ["{{", "}}", "="];
+eon.global = {};
 
 // Replaces all the echo/script for its corresponding elements and prepares them
 eon.interpolation.prepare = function (template) {
 
-
   // Extend vimlet.meta
-  if(!vimlet.meta.sandbox) {
+  if (!vimlet.meta.sandbox) {
     vimlet.meta.sandbox = {
-      "bind": function(s) {
-        this.echo('<eon-variable bind="' + s + '"></eon-variable>');
+      "bind": function (keyPath, rootPath, global) {
+
+        global = eon.util.isTrue(global) ? true : false;
+
+        // If rootPath is provided we split it
+        rootPath = rootPath && rootPath != "" ? rootPath.split(".") : rootPath;
+
+        // If the first element of the rootPath is either "data" or "global" and it meets our conditions, then we remove this element from the rootPath
+        if (rootPath && ((rootPath[0] == "data" && !global) || (rootPath[0] == "global"))) {
+
+          rootPath.shift();
+          rootPath = rootPath.join(".");
+
+        } else if (!rootPath) {
+
+          rootPath = "";
+
+        }
+
+        this.echo('<eon-variable bind="' + keyPath + '" root="' + rootPath + '" global="' + global + '"></eon-variable>');
       }
     };
   }
-  if(!vimlet.meta.shortcut) {
+
+  if (!vimlet.meta.shortcut) {
     vimlet.meta.shortcut = {
-      "@": function(s) {
-        return "bind(\"" + s.trim() + "\");";
+      "@": function (s) {
+
+        // Transforms the string argument into our binding parameters
+        var params = s.split(" ");
+
+        var keyPath = params.length > 1 ? params[1] : params[0];
+        var rootPath = params.length > 1 ? params[0] : undefined;
+        var global = rootPath && rootPath.split(".")[0] == "global" ? true : false;
+
+        keyPath = "\"" + keyPath + "\"";
+        rootPath = rootPath ? "\"" + rootPath + "\"" : rootPath;
+        params = "[ " + keyPath + ", " + rootPath + ", " + global + "]";
+
+        return "bind.apply(undefined, " + params + ");";
       }
     };
   }
 
 
   vimlet.meta.tags = eon.interpolation.tags;
-  vimlet.meta.parse(window, template.innerHTML, null, function(result){
+  vimlet.meta.parse(window, template.innerHTML, null, function (result) {
     template.innerHTML = result;
   });
 
@@ -4029,44 +4060,142 @@ eon.interpolation.prepare = function (template) {
 eon.interpolation.handleInterpolationVariables = function (el, config) {
   var variables = el.template.querySelectorAll("eon-variable");
   var currentVariable;
-  var bindString;
-  var bindValue;
+
+  var isGlobal, scope, source;
+  var bindString, bindValue;
+
+  var sources = {};
 
   el.__interpolations = el.__interpolations || {};
 
   // For each variable we take its binding and if we dont have a value for that key we set it as empty
   for (var i = 0; i < variables.length; i++) {
-    currentVariable = variables[i];
-    bindString = "data." + currentVariable.getAttribute("bind");
-    bindValue = eon.object.readFromPath(el, bindString);
 
+    currentVariable = variables[i];
+
+    isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
+
+    bindString = currentVariable.getAttribute("bind");
+
+    scope = isGlobal ? eon : el;
+    sourceName = isGlobal ? "global" : "data";
+
+    // Reads if there is already a value on the source if there is not then it assigns an empty string
+    bindValue = eon.object.readFromPath(scope[sourceName], bindString);
     bindValue = typeof bindValue == "undefined" ? "" : bindValue;
 
-    eon.object.assignToPath(el, bindString, bindValue);
+    // Reassigns the value to the source, in case there was no value
+    eon.object.assignToPath(scope[sourceName], bindString, bindValue);
+
+    if (!sources[sourceName]) {
+
+      sources[sourceName] = {};
+      sources[sourceName].scope = scope;
+      sources[sourceName].obj = scope[sourceName];
+
+    }
+
   }
 
-  eon.interpolation.setupDataChangeCallback(el, config);
-  eon.interpolation.setupDataPropDescriptors(el, config);
-  eon.interpolation.interpolate(el, el.data, el.__interpolations);
+  var sourceKeys = Object.keys(sources);
+
+  for (let j = 0; j < sourceKeys.length; j++) {
+
+    source = sources[sourceKeys[j]];
+    
+    eon.interpolation.setupDataChangeCallback(el, source.scope, source.obj);
+    eon.interpolation.setupDataPropDescriptors(source.scope, sourceKeys[j]);
+    eon.interpolation.interpolate(el, source.obj, el.__interpolations);
+
+  }
+
 };
 
+// Creates the descriptor for the data object itself and for all its properties
+// eon.interpolation.setupDataPropDescriptors = function (el, config) {
+eon.interpolation.setupDataPropDescriptors = function (scope, sourceName) {
+  
+  // Defines its own descriptor, in case the whole "data" object changes
+  Object.defineProperty(
+    scope,
+    sourceName,
+    eon.interpolation.createPropDescriptor(scope, scope, sourceName, "", scope[sourceName])
+  );
+
+  // Loops through all the keys of the object
+  eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName);
+}
+
+// Simple property descriptor creation that in case its changed it will trigger our internal callback
+eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyPath, value) {
+  var propDescriptor = {};
+
+  // Update property value
+  keyOwnerObj["__" + key] = value;
+
+  // Redirect get and set to __key
+  propDescriptor.get = function () {
+    return keyOwnerObj["__" + key];
+  };
+
+  propDescriptor.set = function (value) {
+    // Trigger onDataChanged
+    eon.triggerCallback("_onDataChanged", scope, scope, [keyPath + key, keyOwnerObj["__" + key], value]);
+
+    // Update property value
+    keyOwnerObj["__" + key] = value;
+  };
+
+  return propDescriptor;
+}
+
+// When the property we want to observer is an object we create its descriptor and ones for its properties
+eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
+  var value;
+
+  keyPath = keyPath + ".";
+
+  for (var key in obj) {
+    // We only want take into account the keys that are not used for the descriptor
+    if (key.indexOf("__") == -1) {
+      value = obj[key];
+
+      obj["__" + key] = value;
+
+      Object.defineProperty(
+        obj,
+        key,
+        eon.interpolation.createPropDescriptor(el, obj, key, keyPath, value)
+      );
+
+      // If the value is an Object then we update the keyPath and create the propDescriptors
+      if (value && value.constructor === Object) {
+        keyPath = keyPath + key;
+        eon.interpolation.createObjectPropDescriptors(el, value, keyPath);
+      }
+    }
+  }
+}
+
 // Creates the private onDataChanged callback to handle the public one
-eon.interpolation.setupDataChangeCallback = function (el, config) {
+eon.interpolation.setupDataChangeCallback = function (el, scope, source) {
+  
   // If the private callback doesnt exist creates it
-  if (!el._onDataChanged) {
-    eon.createCallback("_onDataChanged", el);
+  if (!scope._onDataChanged) {
+    eon.createCallback("_onDataChanged", scope);
   }
 
   // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
-  el._onDataChanged(function (keyPath, oldVal, newVal) {
-
+  scope._onDataChanged(function (keyPath, oldVal, newVal) {
+    
     if (keyPath == "data") {
-      eon.interpolation.replaceData(el, oldVal, newVal, config);
+      eon.interpolation.replaceData(scope, oldVal, newVal, source);
     } else {
-      eon.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, config);
+      eon.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, source);
     }
 
   });
+
 }
 
 // Takes all the properties from data, finds its variable and sets its value
@@ -4123,14 +4252,14 @@ eon.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVal, 
       variablesToChange[i].textContent = newVal;
     }
   }
-  
+
   eon.triggerAllCallbackEvents(el, config, "onDataChanged", [interpolationPath, oldVal, newVal]);
 }
 
 // Handles the situation when the whole data has been changed for another object
 eon.interpolation.replaceData = function (el, oldData, newData, config) {
   var checked = {};
-  
+
   eon.triggerAllCallbackEvents(el, config, "onDataChanged", ["data", oldData, newData]);
 
   // Checks differences between the old and the new data
@@ -4183,73 +4312,6 @@ eon.interpolation.forwardDataDiffing = function (el, keyPath, data, checked, con
         if ((checked && !checked[key]) || !checked) {
           eon.interpolation.handleVariableChange(el, keyPath + "." + key, oldVal, data[key], config);
         }
-      }
-    }
-  }
-}
-
-// Creates the descriptor for the data object itself and for all its properties
-eon.interpolation.setupDataPropDescriptors = function (el, config) {
-  // Also creates a propDescriptor for the base object property
-  el.__data = el.data;
-
-  // Defines its own descriptor, in case the whole "data" object changes
-  Object.defineProperty(
-    el,
-    "data",
-    eon.interpolation.createPropDescriptor(el, el, "data", "", el.data, config)
-  );
-
-  // Loops through all the keys of the object
-  eon.interpolation.createObjectPropDescriptors(el, el.data, "data", config);
-}
-
-// Simple property descriptor creation that in case its changed it will trigger our internal callback
-eon.interpolation.createPropDescriptor = function (callbackOwner, keyOwnerObj, key, keyPath, value, config) {
-  var propDescriptor = {};
-
-  // Update property value
-  keyOwnerObj["__" + key] = value;
-
-  // Redirect get and set to __key
-  propDescriptor.get = function () {
-    return keyOwnerObj["__" + key];
-  };
-
-  propDescriptor.set = function (value) {
-    // Trigger onDataChanged
-    eon.triggerCallback("_onDataChanged", callbackOwner, callbackOwner, [keyPath + key, keyOwnerObj["__" + key], value]);
-
-    // Update property value
-    keyOwnerObj["__" + key] = value;
-  };
-
-  return propDescriptor;
-}
-
-// When the property we want to observer is an object we create its descriptor and ones for its properties
-eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, config) {
-  var value;
-
-  keyPath = keyPath + ".";
-
-  for (var key in obj) {
-    // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
-      value = obj[key];
-
-      obj["__" + key] = value;
-
-      Object.defineProperty(
-        obj,
-        key,
-        eon.interpolation.createPropDescriptor(el, obj, key, keyPath, value, config)
-      );
-
-      // If the value is an Object then we update the keyPath and create the propDescriptors
-      if (value && value.constructor === Object) {
-        keyPath = keyPath + key;
-        eon.interpolation.createObjectPropDescriptors(el, value, keyPath, config);
       }
     }
   }
