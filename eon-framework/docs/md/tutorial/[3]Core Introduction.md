@@ -253,7 +253,7 @@ hello-world.html
 
 <script>
 eon.element("hello-world", null, {
-  interpolation: true;
+  parse: true;
   data: {
       name: "World";
   }
