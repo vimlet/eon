@@ -3486,7 +3486,7 @@ eon.handleDependencies = function () {
 
 // Handle template interpolation
 eon.handleTemplateInterpolation = function (name) {
-    if (eon.imports.config[name].interpolation) {
+    if (eon.imports.config[name].parse) {
         eon.interpolation.prepare(eon.imports.templates[name]);
     }
 };

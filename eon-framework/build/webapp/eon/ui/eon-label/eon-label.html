@@ -7,17 +7,17 @@
   <div class="eon-label-main eon-fg2">
 
     <div class="eon-label-default">
-        <div class="eon-label-value"></div>
-        <div class="eon-label-button vicon vicon-edit"></div>
+      <div class="eon-label-value"></div>
+      <div class="eon-label-button vicon vicon-edit"></div>
     </div>
 
     <div class="eon-label-edit">
-        <div class="eon-label-inputWrapper">
-            <input class="eon-label-input eon-fg2"></input>
-        </div>
-        <div class="eon-label-button vicon vicon-floppy"></div>
+      <div class="eon-label-inputWrapper">
+        <input class="eon-label-input eon-fg2"></input>
+      </div>
+      <div class="eon-label-button vicon vicon-floppy"></div>
     </div>
-    
+
   </div>
 
   <span class="eon-label-underline"></span>
@@ -80,16 +80,25 @@
       @description Font size specified by the user
       */
       fontSize: {
-          value: "",
-          reflect: true
+        value: "",
+        reflect: true
       },
       /*
       @property {String} value
       @description Value of the element
       */
       value: {
-          value: "",
-          reflect: true
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Boolean} editable
+      @description Value of the element
+      */
+      editable: {
+        value: "true",
+        reflect: true,
+        reflectDefault: true
       }
     },
 
@@ -122,9 +131,9 @@
       @description Sets a label if provided by the user
       */
       setupLabel: function () {
-        
+
         var el = this;
-        
+
         if (el.label) {
           el._refs.label.innerHTML = el.label;
         }
@@ -135,7 +144,7 @@
       @description Sets a font size if provided by the user
       */
       setupFontSize: function () {
-        
+
         var el = this;
 
         if (el.fontSize) {
@@ -149,7 +158,7 @@
       @description Creates the input focus/blur events
       */
       setupInput: function () {
-        
+
         var el = this;
 
         el._refs.input.addEventListener("focus", function () {
@@ -191,7 +200,7 @@
       startEditing: function () {
 
         var el = this;
-        
+
         el._refs.input.value = el._refs.value.innerText;
 
         el._refs.main.classList.add("eon-label-editing", "eon-bg2");
@@ -225,7 +234,7 @@
       @description Finishes the user editing
       */
       updateValue: function (value) {
-       
+
         var el = this;
 
         value = value ? value : el.value;
@@ -234,6 +243,19 @@
         el._refs.input.value = value;
 
         el.__value = value;
+
+      },
+      /*
+      @function (private) _updateEditable
+      @description Finishes the user editing
+      */
+      updateEditable: function (editable) {
+
+        var el = this;
+
+        if (el.classList.contains("eon-label-focus")) {
+          el._finishEditing();
+        }
 
       }
 
@@ -252,6 +274,23 @@
       el._setupEditing();
 
       el._updateValue();
+
+    },
+
+    onPropertyChanged: function (key, oldVal, newVal) {
+
+      var el = this;
+
+      switch (key) {
+
+        case "value":
+          el._updateValue(newVal);
+          break;
+
+        case "editable":
+          el._updateEditable(newVal);
+          break;
+      }
 
     }
 
