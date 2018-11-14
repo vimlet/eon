@@ -79,10 +79,10 @@
         reflect: true
       },
       /*
-        @property {String} vcScroll
+        @property {String} eonScroll
         @description eon-scroll element query selector
       */
-      vcScroll: {
+      eonScroll: {
         value: "",
         reflect: true
       },
@@ -218,7 +218,7 @@
         var el = this;
         if (el.animPosition) {
           // Parent is the document body element or eon-scroll if sticky is currently relative positioned
-          var parent = el._refs.vcScroll && ~["static", "relative"].indexOf(window.getComputedStyle(el.wrapper).position) ? el._refs.vcScroll : document.documentElement;
+          var parent = el._refs.eonScroll && ~["static", "relative"].indexOf(window.getComputedStyle(el.wrapper).position) ? el._refs.eonScroll : document.documentElement;
           var scrollValue = scrollMisc && scrollMisc[el._misc.scrollProp] ? scrollMisc[el._misc.scrollProp] : parent[el._misc.scrollProp];
           el.wrapper.style.transition = "all .2s";
           // Check animation scroll position
@@ -259,11 +259,11 @@
       setFixContainer: function () {
         var el = this;
         // Sticky inside eon-scroll container
-        el._refs.vcScroll = el.vcScroll ? document.querySelector(el.vcScroll) : false;
+        el._refs.eonScroll = el.eonScroll ? document.querySelector(el.eonScroll) : false;
         // Sticky fix container
         el.fixContainer = !el.fixContainer ? document.body : document.querySelector(el.fixContainer);
         el.fixContainer = !el.fixContainer ? document.body : el.fixContainer;
-        el._refs.vcScroll = el.fixContainer.tagName.toLowerCase() == "eon-scroll" ? el.fixContainer : el._refs.vcScroll;
+        el._refs.eonScroll = el.fixContainer.tagName.toLowerCase() == "eon-scroll" ? el.fixContainer : el._refs.eonScroll;
       },
       /*
         @function (private) _scrollSticky
@@ -285,7 +285,7 @@
             el._fixedMonitor(el._misc.viewPosition, el._misc.offsetPos, el._misc.initOffsetPos, el.wrapper.style.position);
             el._animationMonitor(arg);
             // Throttle only using custom eon-scroll
-            if(el._refs.vcScroll) {
+            if(el._refs.eonScroll) {
               throttled = true;
               // Set a timeout to un-throttle
               setTimeout(function () {
@@ -295,12 +295,17 @@
           }
         };
         // Check scroll parent container
-        if (el._refs.vcScroll) {
-          el._refs.vcScroll.onCreated(function(){
-            el._refs.vcScroll.onScrolled(el._refs.setPositionFn);
+        if (el._refs.eonScroll) {
+          el._refs.eonScroll.onCreated(function(){
+            el._refs.eonScroll.onScrolled(el._refs.setPositionFn);
           });
         } else if (el.fixContainer.tagName.toLowerCase() == "body") {
-          window.addEventListener("scroll", el._refs.setPositionFn);
+          // ** Fix html & body scroll incongruous behavior
+          if(window.getComputedStyle(document.documentElement).overflow == "hidden") {
+            document.body.addEventListener("scroll", el._refs.setPositionFn);
+          } else {
+            window.addEventListener("scroll", el._refs.setPositionFn);
+          }
         } else {
           el.fixContainer.addEventListener("scroll", el._refs.setPositionFn);
         }
@@ -364,7 +369,7 @@
     onPropertyChanged: function (attrName, oldVal, newVal) {
       var el = this;
       // Monitor wrapper fixed displaying with eon-scroll integration
-      if (attrName == "_viewPosition" && el._refs.vcScroll) {
+      if (attrName == "_viewPosition" && el._refs.eonScroll) {
         el.wrapper.style.display = newVal == -el.spacing ? "none" : "flex";
       }
     }

@@ -1295,6 +1295,7 @@
       <!-- UI components -->
       <script>
         eon.import([
+          "/eon/ui/eon-button",
           "/eon/ui/eon-panel",
           "/eon/ui/eon-scroll"
         ]);
@@ -1309,7 +1310,7 @@
               <h2>Panel</h2>
             </div>
             <div class="tExampleContainer d-panel-example">
-              <eon-panel id="declPanel" default-style="false" allow-scroll="false" fit="true">
+              <eon-panel id="declPanel" class="d-panel" default-style="false" allow-scroll="false" fit="true">
                 <div class="d-panel-content green">
                   I'm a declarative div!
                 </div>
@@ -1321,9 +1322,45 @@
               <h2>Ajax panel</h2>
             </div>
             <div class="tExampleContainer d-panel-example">
-              <eon-panel id="d-panel-ajax" default-style="false" allow-scroll="false" href="data/panel/ajaxContent.html"
+              <eon-panel id="d-panel-ajax" class="d-panel" default-style="false" allow-scroll="false" href="data/panel/ajaxContent.html"
                 class="panel">
               </eon-panel>
+            </div>
+          </div>
+        </div>
+        <div class="row d-panel-row">
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Lazy rendering</h2>
+            </div>
+            <div class="tExampleContainer d-panel-example">
+              <eon-button class="d-panel-button" inline="true" value="Render lazy" onclick="renderLazy()"></eon-button>
+
+              <eon-panel id="d-lazy-content" class="d-panel" default-style="false" allow-scroll="false">
+                <template>
+                  <div class="d-panel-content" style="background-color: #3b78b7;">
+                    I'm an on demand rendered div!
+                  </div>
+                  <script defer>
+                    if (eon.util.getBrowser() === "IE") {
+                      console.log("Example log - * IE executes scripts inside templates too");
+                    }
+                    console.log("Example log - Blue panel content rendered on demand")
+                  </script>
+                </template>
+              </eon-panel>
+            </div>
+          </div>
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Lazy remote loading</h2>
+            </div>
+            <div class="tExampleContainer d-panel-example">
+              <eon-button class="d-panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
+
+              <eon-panel id="d-lazy-remote" class="d-panel" default-style="false" allow-scroll="false" href="data/panel/lazyContent.html" lazy-load="true">
+              </eon-panel>
+
             </div>
           </div>
         </div>
@@ -1334,23 +1371,33 @@
       eon.onReady(function () {
         var panelAjax = document.querySelector("#d-panel-ajax");
 
-        console.log('panelAjax', panelAjax);
         // Make sure panel has its event callbacks initialized
         panelAjax.onReady(function () {
           setTimeout(function () {
-            console.log('REFRESH');
             // Refresh with another source content
             panelAjax.href = "data/panel/ajaxContent2.html";
             panelAjax.refresh();
           }, 2500);
         });
+
       });
+
+      function renderLazy() {
+        document.querySelector("#d-lazy-content").render();
+      }
+      function importRemote() {
+        document.querySelector("#d-lazy-remote").importContent();
+      }
     </script>
 
     <style class="template-style">
-      /* .d-panel-example {
-                width: 100% !important;
-            } */
+      .d-panel {
+        flex-direction: column;
+        min-width: 275px;
+      }
+      .d-panel-example {
+        flex-direction: column;
+      }
 
       .d-panel-content {
         height: 100px;
@@ -1358,6 +1405,13 @@
         justify-content: center;
         align-items: center;
         font-size: 18px;
+        text-align: center;
+        padding: 6px;
+      }
+
+      .d-panel-button {
+        width: 150px;
+        margin-bottom: 10px;
       }
 
       #d-refreshed-text {
@@ -1396,6 +1450,7 @@
         margin: 15px;
         min-height: 50px;
         flex-grow: 1;
+        flex-basis: 0;
       }
 
       h2 {
@@ -1437,4 +1492,157 @@
   </template>
   <!-- END PLAYGROUND -->
 </div>
+    <eon-anchor state="stack" eon-scroll="eon-scroll" type="top"></eon-anchor>
+<div class="card">
+    <h1>PANEL</h1>
+  
+    <!-- PLAYGROUND -->
+    <!-- Playground declaration -->
+    <eon-playground class="d-pg d-stack-pg"></eon-playground>
+  
+    <script>
+      initializePlayground(".d-stack-tmp", ".d-stack-pg");
+    </script>
+  
+    <!-- Playground content -->
+    <template class="d-stack-tmp">
+      <div class="template-head">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Import VimletJS  -->
+        <script src="/eon/eon.js"></script>
+        <!-- UI components -->
+        <script>
+          eon.import([
+            "/eon/ui/eon-stack",
+            "/eon/ui/eon-scroll"
+          ]);
+        </script>
+      </div>
+      <!-- EXAMPLES BODY -->
+      <div class="template-body">
+        <eon-scroll>
+          <div class="row">
+            <div class="example">
+              <div class="tSubtitleContainer">
+                <h2>Panel</h2>
+              </div>
+              <div class="tExampleContainer d-stack-example">
+                  <div class="d-stack-menu">
+                    <div onclick='document.querySelector("eon-stack").swapToPanelByIndex(0)'>
+                      Colors
+                    </div>
+                    <div onclick='document.querySelector("eon-stack").swapToPanel("wikipedia")'>
+                      Wikipedia
+                    </div>
+                  </div>
+              
+                <eon-stack class="d-stack"> 
+                    <eon-panel class="d-panel-colors" name="colors">
+                        <div class="yellow"></div>
+                        <div class="blue"></div>
+                        <div class="red"></div>
+                    </eon-panel>
+            
+                    <eon-panel name="wikipedia" fit="true">
+                      <iframe src="http://en.wikipedia.org/wiki/Framekiller" width="100%" height="100%" style="border: none;"></iframe>
+                    </eon-panel>
+                </eon-stack>
+              </div>
+            </div>
+          </div>
+        </eon-scroll>
+        <!-- END EXAMPLES BODY -->
+      </div>
+      <script class="template-js">
+      </script>
+  
+      <style class="template-style">
+        .d-stack {
+          height: 300px;
+        }
+        .d-stack-example {
+          flex-direction: column;
+        }
+        .d-stack-menu {
+          display: flex;
+          justify-content: flex-start;
+        }
+        .d-stack-menu div {
+          padding: 15px 20px;
+          font-weight: bold;
+          color: #f1f1f1;
+          opacity: 0.8;
+        }
+        .d-panel-colors > div {
+          height: 100px;
+        }
+        /* -- Shared cross-examples -- */
+        html,
+        body {
+          height: 100%;
+          width: 100%;
+          padding: 0;
+          margin: 0;
+          background-color: #2d2d2d;
+          color: #e6e6e6;
+          overflow: hidden;
+        }
+  
+        .row {
+          padding: 10px;
+          display: flex;
+          /* align-items: center; */
+          flex-wrap: wrap;
+        }
+  
+        .example {
+          background-color: #383838;
+          padding: 10px;
+          box-sizing: border-box;
+          margin: 15px;
+          min-height: 50px;
+          flex-grow: 1;
+          flex-basis: 0;
+        }
+  
+        h2 {
+          margin: 0;
+        }
+  
+        .tSubtitleContainer {
+          margin-bottom: 10px;
+        }
+  
+        .tExampleContainer {
+          display: flex;
+        }
+  
+        .pink {
+          background-color: #b73ba2;
+        }
+  
+        .blue {
+          background-color: #3b78b7 !important;
+        }
+  
+        .yellow {
+          background-color: #b78f47;
+        }
+  
+        .green {
+          background-color: #519a51 !important;
+        }
+  
+        .red {
+          background-color: #9c4747;
+        }
+  
+        .purple {
+          background-color: #6c479c;
+        }
+      </style>
+    </template>
+    <!-- END PLAYGROUND -->
+  </div>
 </template>

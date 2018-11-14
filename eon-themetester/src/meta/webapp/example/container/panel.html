@@ -20,6 +20,7 @@
       <!-- UI components -->
       <script>
         eon.import([
+          "/eon/ui/eon-button",
           "/eon/ui/eon-panel",
           "/eon/ui/eon-scroll"
         ]);
@@ -34,7 +35,7 @@
               <h2>Panel</h2>
             </div>
             <div class="tExampleContainer d-panel-example">
-              <eon-panel id="declPanel" default-style="false" allow-scroll="false" fit="true">
+              <eon-panel id="declPanel" class="d-panel" default-style="false" allow-scroll="false" fit="true">
                 <div class="d-panel-content green">
                   I'm a declarative div!
                 </div>
@@ -46,9 +47,45 @@
               <h2>Ajax panel</h2>
             </div>
             <div class="tExampleContainer d-panel-example">
-              <eon-panel id="d-panel-ajax" default-style="false" allow-scroll="false" href="data/panel/ajaxContent.html"
+              <eon-panel id="d-panel-ajax" class="d-panel" default-style="false" allow-scroll="false" href="data/panel/ajaxContent.html"
                 class="panel">
               </eon-panel>
+            </div>
+          </div>
+        </div>
+        <div class="row d-panel-row">
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Lazy rendering</h2>
+            </div>
+            <div class="tExampleContainer d-panel-example">
+              <eon-button class="d-panel-button" inline="true" value="Render lazy" onclick="renderLazy()"></eon-button>
+
+              <eon-panel id="d-lazy-content" class="d-panel" default-style="false" allow-scroll="false">
+                <template>
+                  <div class="d-panel-content" style="background-color: #3b78b7;">
+                    I'm an on demand rendered div!
+                  </div>
+                  <script defer>
+                    if (eon.util.getBrowser() === "IE") {
+                      console.log("Example log - * IE executes scripts inside templates too");
+                    }
+                    console.log("Example log - Blue panel content rendered on demand")
+                  </script>
+                </template>
+              </eon-panel>
+            </div>
+          </div>
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Lazy remote loading</h2>
+            </div>
+            <div class="tExampleContainer d-panel-example">
+              <eon-button class="d-panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
+
+              <eon-panel id="d-lazy-remote" class="d-panel" default-style="false" allow-scroll="false" href="data/panel/lazyContent.html" lazy-load="true">
+              </eon-panel>
+
             </div>
           </div>
         </div>
@@ -59,23 +96,33 @@
       eon.onReady(function () {
         var panelAjax = document.querySelector("#d-panel-ajax");
 
-        console.log('panelAjax', panelAjax);
         // Make sure panel has its event callbacks initialized
         panelAjax.onReady(function () {
           setTimeout(function () {
-            console.log('REFRESH');
             // Refresh with another source content
             panelAjax.href = "data/panel/ajaxContent2.html";
             panelAjax.refresh();
           }, 2500);
         });
+
       });
+
+      function renderLazy() {
+        document.querySelector("#d-lazy-content").render();
+      }
+      function importRemote() {
+        document.querySelector("#d-lazy-remote").importContent();
+      }
     </script>
 
     <style class="template-style">
-      /* .d-panel-example {
-                width: 100% !important;
-            } */
+      .d-panel {
+        flex-direction: column;
+        min-width: 275px;
+      }
+      .d-panel-example {
+        flex-direction: column;
+      }
 
       .d-panel-content {
         height: 100px;
@@ -83,6 +130,13 @@
         justify-content: center;
         align-items: center;
         font-size: 18px;
+        text-align: center;
+        padding: 6px;
+      }
+
+      .d-panel-button {
+        width: 150px;
+        margin-bottom: 10px;
       }
 
       #d-refreshed-text {
@@ -121,6 +175,7 @@
         margin: 15px;
         min-height: 50px;
         flex-grow: 1;
+        flex-basis: 0;
       }
 
       h2 {

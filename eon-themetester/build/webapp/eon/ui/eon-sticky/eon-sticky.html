@@ -300,7 +300,12 @@
             el._refs.eonScroll.onScrolled(el._refs.setPositionFn);
           });
         } else if (el.fixContainer.tagName.toLowerCase() == "body") {
-          window.addEventListener("scroll", el._refs.setPositionFn);
+          // ** Fix html & body scroll incongruous behavior
+          if(window.getComputedStyle(document.documentElement).overflow == "hidden") {
+            document.body.addEventListener("scroll", el._refs.setPositionFn);
+          } else {
+            window.addEventListener("scroll", el._refs.setPositionFn);
+          }
         } else {
           el.fixContainer.addEventListener("scroll", el._refs.setPositionFn);
         }
