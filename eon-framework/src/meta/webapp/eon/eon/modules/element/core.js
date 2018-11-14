@@ -1,8 +1,23 @@
-eon.element = function (name, stylePath, config) {
+
+eon.element = function (param1, param2) {
+
+    if (param2) {
+
+        config = param2.config ? param2.config : param2;
+        stylePath = config.style;
+        name = param1;
+        
+    } else {
+
+        config = param1.config ? param1.config : param1;
+        stylePath = config.style;
+        name = config.name;
+
+    }
     
     stylePath = stylePath ? stylePath : "";
     config = config ? config : {};
-
+    
     // If the user provided a style path then we create its link and append it
     if (stylePath != "") {
 
