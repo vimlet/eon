@@ -1337,6 +1337,7 @@
               <eon-button class="d-panel-button" inline="true" value="Render lazy" onclick="renderLazy()"></eon-button>
 
               <eon-panel id="d-lazy-content" class="d-panel" default-style="false" allow-scroll="false">
+                  <div class="d-panel-content d-place-holder">I'm a hidden div!</div>
                 <template>
                   <div class="d-panel-content" style="background-color: #3b78b7;">
                     I'm an on demand rendered div!
@@ -1359,6 +1360,7 @@
               <eon-button class="d-panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
 
               <eon-panel id="d-lazy-remote" class="d-panel" default-style="false" allow-scroll="false" href="data/panel/lazyContent.html" lazy-load="true">
+                <div class="d-panel-content d-place-holder" style="box-shadow: none;">No content here</div>
               </eon-panel>
 
             </div>
@@ -1384,9 +1386,13 @@
 
       function renderLazy() {
         document.querySelector("#d-lazy-content").render();
+        // Remove place holder
+        document.querySelector("#d-lazy-content .d-place-holder").style.display = "none";
       }
       function importRemote() {
         document.querySelector("#d-lazy-remote").importContent();
+        // Remove place holder
+        document.querySelector("#d-lazy-remote .d-place-holder").style.display = "none";
       }
     </script>
 
@@ -1409,6 +1415,12 @@
         padding: 6px;
       }
 
+      .d-place-holder {
+        background-color: #333333;
+        -moz-box-shadow: inset 0 0 10px #000000;
+        -webkit-box-shadow: inset 0 0 10px #000000;
+        box-shadow: inset 0 0 10px #000000;
+      }
       .d-panel-button {
         width: 150px;
         margin-bottom: 10px;
@@ -1494,155 +1506,318 @@
 </div>
     <eon-anchor state="stack" eon-scroll="eon-scroll" type="top"></eon-anchor>
 <div class="card">
-    <h1>PANEL</h1>
-  
-    <!-- PLAYGROUND -->
-    <!-- Playground declaration -->
-    <eon-playground class="d-pg d-stack-pg"></eon-playground>
-  
-    <script>
-      initializePlayground(".d-stack-tmp", ".d-stack-pg");
-    </script>
-  
-    <!-- Playground content -->
-    <template class="d-stack-tmp">
-      <div class="template-head">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Import VimletJS  -->
-        <script src="/eon/eon.js"></script>
-        <!-- UI components -->
-        <script>
-          eon.import([
-            "/eon/ui/eon-stack",
-            "/eon/ui/eon-scroll"
-          ]);
-        </script>
-      </div>
-      <!-- EXAMPLES BODY -->
-      <div class="template-body">
-        <eon-scroll>
-          <div class="row">
-            <div class="example">
-              <div class="tSubtitleContainer">
-                <h2>Panel</h2>
+  <h1>STACK</h1>
+
+  <!-- PLAYGROUND -->
+  <!-- Playground declaration -->
+  <eon-playground class="d-pg d-stack-pg"></eon-playground>
+
+  <script>
+    initializePlayground(".d-stack-tmp", ".d-stack-pg");
+  </script>
+
+  <!-- Playground content -->
+  <template class="d-stack-tmp">
+    <div class="template-head">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Import VimletJS  -->
+      <script src="/eon/eon.js"></script>
+      <!-- UI components -->
+      <script>
+        eon.import([
+          "/eon/ui/eon-stack",
+          "/eon/ui/eon-scroll"
+        ]);
+      </script>
+    </div>
+    <!-- EXAMPLES BODY -->
+    <div class="template-body">
+      <eon-scroll>
+        <div class="row">
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Stack</h2>
+            </div>
+            <div class="tExampleContainer d-stack-example">
+              <div class="d-stack-menu">
+                <div onclick='document.querySelector("eon-stack").swapToPanelByIndex(0)'>
+                  Yellow Page
+                </div>
+                <div onclick='document.querySelector("eon-stack").swapToPanel("blue")'>
+                  Blue Page
+                </div>
+                <div onclick='document.querySelector("eon-stack").swapToPanelByIndex(2)'>
+                  Red Page
+                </div>
               </div>
-              <div class="tExampleContainer d-stack-example">
-                  <div class="d-stack-menu">
-                    <div onclick='document.querySelector("eon-stack").swapToPanelByIndex(0)'>
-                      Colors
-                    </div>
-                    <div onclick='document.querySelector("eon-stack").swapToPanel("wikipedia")'>
-                      Wikipedia
-                    </div>
-                  </div>
-              
-                <eon-stack class="d-stack"> 
-                    <eon-panel class="d-panel-colors" name="colors">
-                        <div class="yellow"></div>
-                        <div class="blue"></div>
-                        <div class="red"></div>
-                    </eon-panel>
-            
-                    <eon-panel name="wikipedia" fit="true">
-                      <iframe src="http://en.wikipedia.org/wiki/Framekiller" width="100%" height="100%" style="border: none;"></iframe>
-                    </eon-panel>
-                </eon-stack>
-              </div>
+
+              <eon-stack class="d-stack">
+                <eon-panel default-style="false" name="yellow" class="d-panel-colors">
+                  <div class="d-panel-color yellow"></div>
+                </eon-panel>
+                <eon-panel default-style="false" name="blue" fit="true">
+                  <div class="d-panel-color blue"></div>
+                </eon-panel>
+                <eon-panel default-style="false" name="red" fit="true">
+                  <div class="d-panel-color red"></div>
+                </eon-panel>
+              </eon-stack>
             </div>
           </div>
-        </eon-scroll>
-        <!-- END EXAMPLES BODY -->
-      </div>
-      <script class="template-js">
+        </div>
+      </eon-scroll>
+    </div>
+    <!-- END EXAMPLES BODY -->
+    <script class="template-js">
+
+
+
+    </script>
+
+    <style class="template-style">
+      .d-stack {
+        height: 330px;
+      }
+
+      .d-stack-example {
+        flex-direction: column;
+      }
+
+      .d-stack-menu {
+        display: flex;
+        justify-content: flex-start;
+      }
+
+      .d-stack-menu div {
+        padding: 15px 20px;
+        font-weight: bold;
+        color: #f1f1f1;
+        opacity: 0.8;
+        cursor: pointer;
+      }
+
+      .d-stack-menu div:hover {
+        opacity: 1;
+      }
+
+      .d-panel-color {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* -- Shared cross-examples -- */
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        background-color: #2d2d2d;
+        color: #e6e6e6;
+        overflow: hidden;
+      }
+
+      .row {
+        padding: 10px;
+        display: flex;
+        /* align-items: center; */
+        flex-wrap: wrap;
+      }
+
+      .example {
+        background-color: #383838;
+        padding: 10px;
+        box-sizing: border-box;
+        margin: 15px;
+        min-height: 50px;
+        flex-grow: 1;
+        flex-basis: 0;
+      }
+
+      h2 {
+        margin: 0;
+      }
+
+      .tSubtitleContainer {
+        margin-bottom: 10px;
+      }
+
+      .tExampleContainer {
+        display: flex;
+      }
+
+      .pink {
+        background-color: #b73ba2;
+      }
+
+      .blue {
+        background-color: #3b78b7 !important;
+      }
+
+      .yellow {
+        background-color: #b78f47;
+      }
+
+      .green {
+        background-color: #519a51 !important;
+      }
+
+      .red {
+        background-color: #9c4747;
+      }
+
+      .purple {
+        background-color: #6c479c;
+      }
+    </style>
+  </template>
+  <!-- END PLAYGROUND -->
+</div>
+    <eon-anchor state="tabs" eon-scroll="eon-scroll" type="top"></eon-anchor>
+<div class="card">
+  <h1>Tabs</h1>
+
+  <!-- PLAYGROUND -->
+  <!-- Playground declaration -->
+  <eon-playground class="d-pg d-tabs-pg"></eon-playground>
+
+  <script>
+    initializePlayground(".d-tabs-tmp", ".d-tabs-pg");
+  </script>
+
+  <!-- Playground content -->
+  <template class="d-tabs-tmp">
+    <div class="template-head">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Import VimletJS  -->
+      <script src="/eon/eon.js"></script>
+      <!-- UI components -->
+      <script>
+        eon.import([
+          "/eon/ui/eon-tabs",
+          "/eon/ui/eon-scroll"
+        ]);
       </script>
-  
-      <style class="template-style">
-        .d-stack {
-          height: 300px;
-        }
-        .d-stack-example {
-          flex-direction: column;
-        }
-        .d-stack-menu {
-          display: flex;
-          justify-content: flex-start;
-        }
-        .d-stack-menu div {
-          padding: 15px 20px;
-          font-weight: bold;
-          color: #f1f1f1;
-          opacity: 0.8;
-        }
-        .d-panel-colors > div {
-          height: 100px;
-        }
-        /* -- Shared cross-examples -- */
-        html,
-        body {
-          height: 100%;
-          width: 100%;
-          padding: 0;
-          margin: 0;
-          background-color: #2d2d2d;
-          color: #e6e6e6;
-          overflow: hidden;
-        }
-  
-        .row {
-          padding: 10px;
-          display: flex;
-          /* align-items: center; */
-          flex-wrap: wrap;
-        }
-  
-        .example {
-          background-color: #383838;
-          padding: 10px;
-          box-sizing: border-box;
-          margin: 15px;
-          min-height: 50px;
-          flex-grow: 1;
-          flex-basis: 0;
-        }
-  
-        h2 {
-          margin: 0;
-        }
-  
-        .tSubtitleContainer {
-          margin-bottom: 10px;
-        }
-  
-        .tExampleContainer {
-          display: flex;
-        }
-  
-        .pink {
-          background-color: #b73ba2;
-        }
-  
-        .blue {
-          background-color: #3b78b7 !important;
-        }
-  
-        .yellow {
-          background-color: #b78f47;
-        }
-  
-        .green {
-          background-color: #519a51 !important;
-        }
-  
-        .red {
-          background-color: #9c4747;
-        }
-  
-        .purple {
-          background-color: #6c479c;
-        }
-      </style>
-    </template>
-    <!-- END PLAYGROUND -->
-  </div>
+    </div>
+    <!-- EXAMPLES BODY -->
+    <div class="template-body">
+      <eon-scroll>
+        <div class="row">
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Tab</h2>
+            </div>
+            <div class="tExampleContainer d-stack-example">
+
+              <eon-tabs class="d-tabs" dragging="true" closable="true">
+                <eon-panel default-style="false" name="serverStart" tab-title="Red">
+                  <div class="d-tabs-content red"></div>
+                </eon-panel>
+                <eon-panel default-style="false"  name="build" tab-title="Yellow">
+                  <div class="d-tabs-content yellow"></div>
+                </eon-panel>
+                <eon-panel  default-style="false" name="Help" tab-title="Blue">
+                    <div class="d-tabs-content blue"></div>
+                </eon-panel>
+              </eon-tabs>
+
+            </div>
+          </div>
+        </div>
+      </eon-scroll>
+    </div>
+    <!-- END EXAMPLES BODY -->
+    <script class="template-js">
+
+
+
+
+
+
+
+    </script>
+
+    <style class="template-style">
+      .d-tabs {
+        height: 330px;
+      }
+      .d-tabs-content {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* -- Shared cross-examples -- */
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        background-color: #2d2d2d;
+        color: #e6e6e6;
+        overflow: hidden;
+      }
+
+      .row {
+        padding: 10px;
+        display: flex;
+        /* align-items: center; */
+        flex-wrap: wrap;
+      }
+
+      .example {
+        background-color: #383838;
+        padding: 10px;
+        box-sizing: border-box;
+        margin: 15px;
+        min-height: 50px;
+        flex-grow: 1;
+        flex-basis: 0;
+      }
+
+      h2 {
+        margin: 0;
+      }
+
+      .tSubtitleContainer {
+        margin-bottom: 10px;
+      }
+
+      .tExampleContainer {
+        display: flex;
+      }
+
+      .pink {
+        background-color: #b73ba2;
+      }
+
+      .blue {
+        background-color: #3b78b7 !important;
+      }
+
+      .yellow {
+        background-color: #b78f47;
+      }
+
+      .green {
+        background-color: #519a51 !important;
+      }
+
+      .red {
+        background-color: #9c4747;
+      }
+
+      .purple {
+        background-color: #6c479c;
+      }
+    </style>
+  </template>
+  <!-- END PLAYGROUND -->
+</div>
 </template>
