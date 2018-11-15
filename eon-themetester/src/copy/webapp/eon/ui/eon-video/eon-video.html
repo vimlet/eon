@@ -164,6 +164,14 @@
                 reflect: true
             },
             /*
+                @property {Number}
+                @description
+            */
+            responsive: {
+                value: 500,
+                reflect: true
+            },
+            /*
                 @property {Boolean}
                 @description
                 Values: contain, cover, fit
@@ -842,6 +850,28 @@
                     el._refs.video.load();
                     el._refs.video.play();
                 }
+            },
+            /*
+                @function (private) _responsiveStyle
+                @description 
+            */
+            responsiveStyle: function () {
+                var el = this;
+                //
+                if (window.innerWidth <= parseInt(el.responsive)) {
+                    el._refs.playIcon.style.fontSize = "26px";
+                    el._refs.volumeIcon.style.fontSize = "20px";
+                    el._refs.fullscreen.style.fontSize = "24px";
+
+                    el._refs.volume.parentNode.style.width = "96px";
+                    el._refs.playIcon.parentNode.style.width = "28px";
+                } else {
+                    el._refs.playIcon.style.fontSize = "";
+                    el._refs.volumeIcon.style.fontSize = "";
+                    el._refs.fullscreen.style.fontSize = "";
+                    el._refs.volume.parentNode.style.width = "";
+                    el._refs.playIcon.parentNode.style.width = "";
+                }
             }
         },
         onCreated: function () {
@@ -919,6 +949,8 @@
                     el.play();
                 }
             }
+            // Add responsive style
+            el._responsiveStyle();
         },
 
         onWindowResize: function () {

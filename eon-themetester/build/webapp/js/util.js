@@ -46,6 +46,7 @@ function initializePlayground(sectionsClass, pgClass) {
         // Initialize playground
         var sections = document.querySelector(sectionsClass).content.children;
         var pg = document.querySelector(pgClass);
+        // Set playground content
         pg.onReady(function () {
             var pgObj = {
                 head: sections[0].innerHTML,
@@ -55,5 +56,42 @@ function initializePlayground(sectionsClass, pgClass) {
             };
             pg.setData(pgObj);
         });
+        // Get content height
+        pg.onContentSet(function(iframe){
+            var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+            //** PROVISIONAL
+            setTimeout(function () {
+                if(innerDoc.body) {
+                    var scroll = innerDoc.body.children[0];
+                    scroll.onReady(function(){
+                        setPgHeight(pg, scroll.children[0].querySelector(".row").offsetHeight);
+                    });
+                    // Playground resize listener
+                    playgroundResizeListener(pgClass, innerDoc);
+                }
+            }, 100);
+        });
     }, 0);
+}
+
+function playgroundResizeListener(selector, innerDoc) {
+    var pg = document.querySelector(selector);
+    // Resize listener
+    pg.onResize(function(){
+        if(innerDoc.body) {
+            // Get scroll content
+            var scroll = innerDoc.body.children[0];
+            scroll.onReady(function(){
+                // Set playground new size
+                setPgHeight(pg, scroll.children[0].querySelector(".row").offsetHeight);
+            });
+        }
+    });
+}
+
+function setPgHeight(pg, size) {
+    // Check null values
+    if(size) {
+        pg.style.height = 37 + size + "px";
+    }
 }
