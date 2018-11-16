@@ -207,6 +207,7 @@
         initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
         // Get initial size from config. Check size value type (Percentage or Number)
         percent = el[initialSizeProp].split("%").length > 1 ? el[initialSizeProp].split("%")[0] : false;
+ 
         if(percent) {
           sectionSize = (parseFloat(percent) * el._misc.size) / 100;
         } else {
@@ -422,6 +423,7 @@
           // Slide element on mouse move
           el.addEventListener("pointermove", function(e){
             if(mousedown){
+              el._misc.dragged = true;
               // Get y/z translate pixels
               pixels = moveValue - e[el._misc.axisProp];
               // Stop gutter from being collapsed
@@ -497,8 +499,8 @@
         if(!el._misc.collapsed){
           // Get section size percentage before resize
           sectionSizePercent = el._misc.gutterResizePercent;
-
-          if (!el._misc.loaded) {
+  
+          if (!el._misc.dragged) {
             // Check initial size customization
             initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
             // Get initial size from config. Check size value type (Percentage or Number)
@@ -659,7 +661,6 @@
       var el = this;
        // Make sure correct size calculation when the gutter is a part of another component
        el.resize();
-       el._misc.loaded = true;
     }
   });
 </script>

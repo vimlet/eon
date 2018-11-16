@@ -58,12 +58,15 @@ function initializePlayground(sectionsClass, pgClass) {
         });
         // Get content height
         pg.onContentSet(function(iframe){
+           
             var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
             //** PROVISIONAL
             setTimeout(function () {
+                console.log('SET', innerDoc.body);
                 if(innerDoc.body) {
                     var scroll = innerDoc.body.children[0];
                     scroll.onReady(function(){
+                        console.log('->', pg, scroll.children[0]);
                         setPgHeight(pg, scroll.children[0].querySelector(".row").offsetHeight);
                     });
                     // Playground resize listener
