@@ -11,7 +11,6 @@ function loadEonExamples() {
     // Configure tree
     var treeScroll = refs.tree.querySelector("eon-scroll");
     treeScroll.thickness = "10";
-
     // Load vComet element example
     refs.tree.onNodeSelected(function (node) {
         // Go to group file
@@ -30,14 +29,12 @@ function loadEonExamples() {
 }
 
 function toggleMenu(forceAction) {
-
     var drawer = document.querySelector(".tTreeContainer");
     if ((drawer._misc.displayed && !forceAction) || forceAction == "close") {
         drawer.close();
     } else if ((!drawer._misc.displayed && !forceAction) || forceAction == "open") {
         drawer.show();
     }
-
 }
 
 function initializePlayground(sectionsClass, pgClass) {
@@ -58,21 +55,18 @@ function initializePlayground(sectionsClass, pgClass) {
         });
         // Get content height
         pg.onContentSet(function(iframe){
-           
-            var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-            //** PROVISIONAL
-            setTimeout(function () {
-                console.log('SET', innerDoc.body);
-                if(innerDoc.body) {
-                    var scroll = innerDoc.body.children[0];
-                    scroll.onReady(function(){
-                        console.log('->', pg, scroll.children[0]);
-                        setPgHeight(pg, scroll.children[0].querySelector(".row").offsetHeight);
-                    });
-                    // Playground resize listener
-                    playgroundResizeListener(pgClass, innerDoc);
-                }
-            }, 100);
+            // Iframe on content loaded 
+            eon.createCallback("onLoaded", iframe);
+            // Make playground fit its iframe content
+            iframe.onLoaded(function(){
+                var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+                var scroll = innerDoc.body.children[0];
+                scroll.onReady(function(){
+                    setPgHeight(pg, scroll.children[0].querySelector(".row").offsetHeight);
+                });
+                // Playground resize listener
+                playgroundResizeListener(pgClass, innerDoc);
+            });
         });
     }, 0);
 }
@@ -85,8 +79,13 @@ function playgroundResizeListener(selector, innerDoc) {
             // Get scroll content
             var scroll = innerDoc.body.children[0];
             scroll.onReady(function(){
+                // Get rows size
+                var size = 0;
+                for (var i = 0; i < scroll.children[0].querySelectorAll(".row").length; i++) {
+                    size += scroll.children[0].querySelectorAll(".row")[i].offsetHeight;
+                }
                 // Set playground new size
-                setPgHeight(pg, scroll.children[0].querySelector(".row").offsetHeight);
+                setPgHeight(pg, size);
             });
         }
     });

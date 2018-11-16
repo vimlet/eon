@@ -1,9 +1,9 @@
 <script type="text/javascript">
   //@header A container with dynamic eon-section elements size
   eon.element("eon-gutter", "eon-gutter.css", {
-    dependencies: [
-      "../eon-section"
-    ],
+      dependencies: [
+        "../eon-section"
+      ],
     properties: {
       /*
         @property {String} type
@@ -203,6 +203,7 @@
         initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
         // Get initial size from config. Check size value type (Percentage or Number)
         percent = el[initialSizeProp].split("%").length > 1 ? el[initialSizeProp].split("%")[0] : false;
+ 
         if(percent) {
           sectionSize = (parseFloat(percent) * el._misc.size) / 100;
         } else {
@@ -379,16 +380,16 @@
       rotateCollapseIcon: function(reverse) {
         var el = this;
         var direction, invert;
-        if(el.type =="vertical") {
+        if(el.type =="vertical" && eon.util.isTrue(el.collapsible)) {
           // Check icon direction
           direction = reverse ? "down" : "up";
-          invert = reverse ? "up" : "down"
+          invert = reverse ? "up" : "down";
           el._refs.collapseIcon.classList.add("vicon-chevron-" + direction);
           el._refs.collapseIcon.classList.remove("vicon-chevron-" + invert);
-        } else {
+        } else if (eon.util.isTrue(el.collapsible)){
           // Check icon direction
           direction = reverse ? "right" : "left";
-          invert = reverse ? "left" : "right"
+          invert = reverse ? "left" : "right";
           el._refs.collapseIcon.classList.add("vicon-chevron-" + direction);
           el._refs.collapseIcon.classList.remove("vicon-chevron-" + invert);
         }
@@ -418,6 +419,7 @@
           // Slide element on mouse move
           el.addEventListener("pointermove", function(e){
             if(mousedown){
+              el._misc.dragged = true;
               // Get y/z translate pixels
               pixels = moveValue - e[el._misc.axisProp];
               // Stop gutter from being collapsed
@@ -493,8 +495,8 @@
         if(!el._misc.collapsed){
           // Get section size percentage before resize
           sectionSizePercent = el._misc.gutterResizePercent;
-
-          if (!el._misc.loaded) {
+  
+          if (!el._misc.dragged) {
             // Check initial size customization
             initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
             // Get initial size from config. Check size value type (Percentage or Number)
@@ -655,7 +657,6 @@
       var el = this;
        // Make sure correct size calculation when the gutter is a part of another component
        el.resize();
-       el._misc.loaded = true;
     }
   });
 </script>
