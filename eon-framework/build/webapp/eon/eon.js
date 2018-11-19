@@ -3995,7 +3995,9 @@ eon.onImportsReady(function () {
 
 eon.interpolation = eon.interpolation || {};
 eon.interpolation.tags = ["{{", "}}", "="];
-eon.global = {};
+
+window.data = window.data || {};
+window.lang = window.lang || {};
 
 // Replaces all the echo/script for its corresponding elements and prepares them
 eon.interpolation.prepare = function (template) {
@@ -4010,12 +4012,14 @@ eon.interpolation.prepare = function (template) {
         // If rootPath is provided we split it
         rootPath = rootPath && rootPath != "" ? rootPath.split(".") : rootPath;
 
-        // If the first element of the rootPath is either "data" or "global" and it meets our conditions, then we remove this element from the rootPath
+        // If the first element of the rootPath is either "data" or "global"
         if (rootPath && ((rootPath[0] == "data" && !global) || (rootPath[0] == "global"))) {
 
+          // Removes the data/global from the path
           rootPath.shift();
+          // Joins the remaining path
           rootPath = rootPath.join(".");
-          
+
           keyPath = rootPath != "" ? rootPath + "." + keyPath : keyPath;
 
         }
@@ -4059,51 +4063,68 @@ eon.interpolation.handleInterpolationVariables = function (el, config) {
   var variables = el.template.querySelectorAll("eon-variable");
   var currentVariable;
 
-  var isGlobal, scope, source;
-  var bindString, bindValue;
+  var isGlobal, scope, source, sourceType;
+  var bindString, bindValue, root;
 
   var sources = {};
 
+  sources.element = {};
+  sources.global = {};
+
   el.__interpolations = el.__interpolations || {};
 
-  // For each variable we take its binding and if we dont have a value for that key we set it as empty
+  // Loops all the inner element variables
   for (var i = 0; i < variables.length; i++) {
 
     currentVariable = variables[i];
 
+    // Sets some basic variables to be used later on
     isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
-
     bindString = currentVariable.getAttribute("bind");
-    
-    scope = isGlobal ? eon : el;
-    sourceName = isGlobal ? "global" : "data";
+    scope = isGlobal ? window : el;
+    sourceName = isGlobal && bindString.split(".")[0] == "lang" ? "lang" : "data";
+
+    root = sourceName != "lang" ? scope[sourceName] : scope;
 
     // Reads if there is already a value on the source if there is not then it assigns an empty string
-    bindValue = eon.object.readFromPath(scope[sourceName], bindString);
+    bindValue = eon.object.readFromPath(root, bindString);
     bindValue = typeof bindValue == "undefined" ? "" : bindValue;
     
     // Reassigns the value to the source, in case there was no value
-    eon.object.assignToPath(scope[sourceName], bindString, bindValue);
+    eon.object.assignToPath(root, bindString, bindValue);
 
-    if (!sources[sourceName]) {
+    sourceType = isGlobal ? "global" : "element";
 
-      sources[sourceName] = {};
-      sources[sourceName].scope = scope;
-      sources[sourceName].obj = scope[sourceName];
+    // Creates the source object
+    if (!sources[sourceType][sourceName]) {
+
+      sources[sourceType][sourceName] = {};
+      sources[sourceType][sourceName].scope = scope;
+      sources[sourceType][sourceName].obj = scope[sourceName];
+      sources[sourceType][sourceName].isGlobal = isGlobal;
+      sources[sourceType][sourceName].isLang = (sourceName == "lang");
+      
 
     }
 
   }
 
-  var sourceKeys = Object.keys(sources);
+  var sourceTypeKeys = Object.keys(sources);
+  var sourceKeys;
 
-  for (let j = 0; j < sourceKeys.length; j++) {
+  for (var i = 0; i < sourceTypeKeys.length; i++) {
 
-    source = sources[sourceKeys[j]];
-    
-    eon.interpolation.setupDataChangeCallback(el, source.scope, config);
-    eon.interpolation.setupDataPropDescriptors(source.scope, sourceKeys[j]);
-    eon.interpolation.interpolate(el, source.obj, el.__interpolations);
+    sourceKeys = Object.keys(sources[sourceTypeKeys[i]]);
+
+    for (var j = 0; j < sourceKeys.length; j++) {
+
+      source = sources[sourceTypeKeys[i]][sourceKeys[j]];
+
+      eon.interpolation.setupDataChangeCallback(el, source, config);
+      eon.interpolation.setupDataPropDescriptors(source, sourceKeys[j]);
+      eon.interpolation.interpolate(el, source, source.obj, el.__interpolations);
+
+    }
 
   }
 
@@ -4111,8 +4132,10 @@ eon.interpolation.handleInterpolationVariables = function (el, config) {
 
 // Creates the descriptor for the data object itself and for all its properties
 // eon.interpolation.setupDataPropDescriptors = function (el, config) {
-eon.interpolation.setupDataPropDescriptors = function (scope, sourceName) {
+eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
   
+  var scope = source.scope;
+
   // Defines its own descriptor, in case the whole "data" object changes
   Object.defineProperty(
     scope,
@@ -4176,31 +4199,36 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
 }
 
 // Creates the private onDataChanged callback to handle the public one
-eon.interpolation.setupDataChangeCallback = function (el, scope, config) {
+eon.interpolation.setupDataChangeCallback = function (el, source, config) {
   
+  var scope = source.scope;
+
   // If the private callback doesnt exist creates it
   if (!scope._onDataChanged) {
+
     eon.createCallback("_onDataChanged", scope);
+
+    // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
+    scope._onDataChanged(function (keyPath, oldVal, newVal) {
+      
+      if (newVal.constructor === Object) {
+        eon.interpolation.handleObjectChange(el, scope, keyPath, oldVal, newVal, config);
+      } else {
+        eon.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, config);
+      }
+
+    });
+
   }
-
-  // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
-  scope._onDataChanged(function (keyPath, oldVal, newVal) {
-
-    if (newVal.constructor === Object) {
-      eon.interpolation.handleObjectChange(el, scope, keyPath, oldVal, newVal, config);
-    } else {
-      eon.interpolation.handleVariableChange(el, keyPath, oldVal, newVal, config);
-    }
-
-  });
 
 }
 
 // Takes all the properties from data, finds its variable and sets its value
-eon.interpolation.interpolate = function (el, obj, interpolations, bind) {
+eon.interpolation.interpolate = function (el, source, obj, interpolations, bind) {
   var key, i, variableBind, variable;
-  
+
   for (key in obj) {
+    // console.log(key, obj);
     // We only want take into account the keys that are not used for the descriptor
     if (key.indexOf("__") == -1) {
       // If the property is an object the call ourselfs again to loop through our keys
@@ -4209,15 +4237,16 @@ eon.interpolation.interpolate = function (el, obj, interpolations, bind) {
         bind = bind ? bind + "." + key : key;
         interpolations[key] = {};
 
-        eon.interpolation.interpolate(el, obj[key], interpolations[key], bind);
+        eon.interpolation.interpolate(el, source, obj[key], interpolations[key], bind);
 
       } else {
 
         variableBind = bind ? bind + "." + key : key;
-
+        variableBind = source.isGlobal && source.isLang ? "lang." + variableBind : variableBind;
+        
         // Looks for the variables matching the binding
         interpolations[key] = el.template.querySelectorAll(
-          'eon-variable[bind="' + variableBind + '"]'
+          'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
         );
 
         // For each variable found previously sets its value
@@ -4233,7 +4262,7 @@ eon.interpolation.interpolate = function (el, obj, interpolations, bind) {
 // Handles the situation when a whole object has been changed
 eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, newData, config) {
   var checked = {};
-  
+
   eon.triggerAllCallbackEvents(el, config, "onDataChanged", [keyPath, oldData, newData]);
 
   // Checks differences between the old and the new data
@@ -4249,7 +4278,7 @@ eon.interpolation.handleVariableChange = function (el, keyPath, oldVal, newVal, 
   var pathArray = keyPath.split(".");
   var interpolationPath;
   var variablesToChange;
-  
+
   // Removes the first index of the pathArray, that corresponds to "data", which we dont need for the interpolations
   pathArray.shift();
   // Sets the path back together withouth data
