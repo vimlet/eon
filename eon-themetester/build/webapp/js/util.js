@@ -37,7 +37,7 @@ function toggleMenu(forceAction) {
     }
 }
 
-function initializePlayground(sectionsClass, pgClass) {
+function initializePlayground(sectionsClass, pgClass, static) {
     // PROBABLY NECESSARY DUE TO EON-PANEL SCRIPTS MANAGEMENT (to be removed...)
     setTimeout(function () {
         // Initialize playground
@@ -54,28 +54,30 @@ function initializePlayground(sectionsClass, pgClass) {
             };
             pg.setData(pgObj);
         });
-        // Get content height
-        pg.onContentSet(function (iframe) {
-            // Iframe on content loaded 
-            eon.createCallback("onLoaded", iframe);
-            // Make playground fit its iframe content
-            iframe.onLoaded(function () {
-                var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-                var scroll = innerDoc.body.children[0];
-                scroll.onReady(function () {
-                    scrollContent = scroll.children[0];
-                    var size = 0;
-                    for (var i = 0; i < scrollContent.children.length; i++) {
-                        size += scrollContent.children[i].offsetHeight;
-                    }
-                    setPgHeight(pg, size);
+        if(!static) {
+            // Get content height
+            pg.onContentSet(function (iframe) {
+                // Iframe on content loaded 
+                eon.createCallback("onLoaded", iframe);
+                // Make playground fit its iframe content
+                iframe.onLoaded(function () {
+                    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    var scroll = innerDoc.body.children[0];
+                    scroll.onReady(function () {
+                        scrollContent = scroll.children[0];
+                        var size = 0;
+                        for (var i = 0; i < scrollContent.children.length; i++) {
+                            size += scrollContent.children[i].offsetHeight;
+                        }
+                        setPgHeight(pg, size);
+                    });
+                    // Playground resize listener
+                    playgroundResizeListener(pg, innerDoc);
+                    // Playground fullscreen listeners
+                    fullScreenListeners(pg);
                 });
-                // Playground resize listener
-                playgroundResizeListener(pg, innerDoc);
-                // Playground fullscreen listeners
-                fullScreenListeners(pg);
             });
-        });
+        }
     }, 0);
 }
 
