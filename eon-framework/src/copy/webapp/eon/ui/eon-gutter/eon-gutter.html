@@ -100,7 +100,7 @@
         reflect: true
       }
     },
-    privateProperties:{
+    privateProperties: {
       /*
         @property (private) {Object} _refs
         @description Quick access to the gutter structure nodes references
@@ -121,13 +121,13 @@
         @function resize
         @description Recalculate gutter structure nodes size and position
       */
-      resize: function() {
+      resize: function () {
         var el = this;
         var oldGutterSize = parseFloat(el._misc.size);
         var oldSectionSize = el._refs.section[el._misc.sizeOffProp];
         // Store gutter new size
         el._misc.size = parseFloat(el[el._misc.sizeOffProp]);
-        if(el._misc.size !== oldGutterSize){
+        if (el._misc.size !== oldGutterSize) {
           // Update before collapse values
           el._sectionResize(oldGutterSize, oldSectionSize);
         }
@@ -136,7 +136,7 @@
         @function collapse
         @description
       */
-      collapse: function(end) {
+      collapse: function (end) {
         var el = this;
         // Collapse to a specific gutter edge
         el._collapse(end);
@@ -145,7 +145,7 @@
         @function expand
         @description
       */
-      expand: function() {
+      expand: function () {
         var el = this;
         // Expand to previous expanded position
         el._expand();
@@ -154,7 +154,7 @@
         @function toggleCollapse
         @description
       */
-      toggleCollapse: function() {
+      toggleCollapse: function () {
         var el = this;
         // 
         el._toggleCollapse();
@@ -165,7 +165,7 @@
         @function (private) _setUpGutter
         @description Apply gutter styling and user customizable behavior
       */
-      setUpGutter: function() {
+      setUpGutter: function () {
         var el = this;
         // Set gutter variables
         el._misc.posProp = el.type == "vertical" ? "top" : "left";
@@ -176,25 +176,25 @@
         el._misc.axisProp = el.type == "vertical" ? "clientY" : "clientX";
         el._misc.eventDelay = 10;
         // Set vertical gutter style
-        if(el.type == "vertical") {
+        if (el.type == "vertical") {
           el.classList.add("eon-gutter-vertical");
         }
         // Check if it is a nested gutter
         // ** Solves Safari flex child fit parent bug
-        if(el.parentNode.tagName == "eon-SECTION"){
+        if (el.parentNode.tagName == "eon-SECTION") {
           el.style.position = "absolute";
         }
         // ** Force gutter to fit its parent (no style applied yet)
         el.style[el._misc.sizeProp] = "100%";
         el._misc.size = el[el._misc.sizeOffProp];
-        
+
         // el.style[el._misc.posSizeProp] = "100%";
       },
       /*
         @function (private) _setUpSection
         @description Set sections size and styling
       */
-      setUpSection: function() {
+      setUpSection: function () {
         var el = this;
         var sectionSize, percent, initialSizeProp;
         var children = el.getSourceElements();
@@ -207,7 +207,8 @@
         initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
         // Get initial size from config. Check size value type (Percentage or Number)
         percent = el[initialSizeProp].split("%").length > 1 ? el[initialSizeProp].split("%")[0] : false;
-        if(percent) {
+
+        if (percent) {
           sectionSize = (parseFloat(percent) * el._misc.size) / 100;
         } else {
           sectionSize = parseFloat(el[initialSizeProp]);
@@ -215,21 +216,21 @@
 
         sectionSize -= (el.splitterSize / 2);
 
-        el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";  
-        el._misc.gutterResizePercent = 50;  
+        el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";
+        el._misc.gutterResizePercent = 50;
       },
       /*
         @function (private) _setUpSeparator
         @description Create splitter and configure it
       */
-      setUpSeparator: function() {
+      setUpSeparator: function () {
         var el = this;
         // Create splitter element
         var fragment = document.createDocumentFragment();
         var splitter = document.createElement("div");
         el._refs.splitter = splitter;
         //
-        splitter.style[el._misc.sizeProp] = parseInt(el.splitterSize) + "px";  
+        splitter.style[el._misc.sizeProp] = parseInt(el.splitterSize) + "px";
         splitter.classList.add("eon-gutter-splitter", "eon-sect1");
         //
         el.appendChild(splitter);
@@ -241,15 +242,15 @@
         @function (private) _setCollapsible
         @description Set gutter collapsible functionality
       */
-      setCollapsible: function() {
+      setCollapsible: function () {
         var el = this;
-        if(eon.util.isTrue(el.collapsible)){
+        if (eon.util.isTrue(el.collapsible)) {
           // Create separator clickable div
           el._refs.clickable = document.createElement("div");
           el._refs.clickableZone = document.createElement("div");
           el._refs.clickable.setAttribute("class", "eon-gutter-splitterClickable");
           // Splitter collapsible style
-          el._refs.clickable.classList.add("eon-bg8","eon-fg4","eon-bg8-hoverable", "eon-fg1-hoverable");
+          el._refs.clickable.classList.add("eon-bg8", "eon-fg4", "eon-bg8-hoverable", "eon-fg1-hoverable");
           el._refs.clickableZone.classList.add("eon-gutter-clickableZone");
           el._refs.clickable.setAttribute("touch-action", "none");
           // Create icon
@@ -269,30 +270,30 @@
         @function (private) _clickCollapsible
         @description Splitter clickable zone click listener
       */
-      clickCollapsible: function() {
+      clickCollapsible: function () {
         var el = this;
         var closeMargin = 3;
         var initValue, moveValue, mousedown, mousemove, isInitMajor, closeMarginReached;
         // Store before collapse position values
         el._misc.sizeBeforeCollapse = parseFloat(el._refs.section[el._misc.sizeOffProp]);
         // Set on mousedown listener
-        el._refs.clickable.addEventListener("pointerdown", function(e){
-          if(e.button == 0){
+        el._refs.clickable.addEventListener("pointerdown", function (e) {
+          if (e.button == 0) {
             initValue = moveValue = e[el._misc.axisProp];
             mousedown = true;
           }
         }, false);
         // Set on mousemove listener
-        el._refs.splitter.addEventListener("pointermove", function(e){
-          if(mousedown){
+        el._refs.splitter.addEventListener("pointermove", function (e) {
+          if (mousedown) {
             moveValue = e[el._misc.axisProp];
             mousemove = true;
           }
         });
         // Set on mouseup listener
-        document.addEventListener("pointerup", function(){
+        document.addEventListener("pointerup", function () {
           // Check collapse constraints
-          if(mousedown && (initValue === moveValue)){
+          if (mousedown && (initValue === moveValue)) {
             el._toggleCollapse();
           } else {
             mousemove = false;
@@ -304,7 +305,7 @@
         @function (private) _expand
         @description 
       */
-      expand: function() {
+      expand: function () {
         var el = this;
         // Set expand animation style
         el._toggleCollapseAnimation();
@@ -321,13 +322,13 @@
         @function (private) _collapse
         @description Force collapse
       */
-      collapse: function(end) {
+      collapse: function (end) {
         var el = this;
         var rotateIcon, size;
         // Set collapse animation style
         el._toggleCollapseAnimation();
         // Store last expanded section size if the previous state is collapsed
-        if(!el._misc.collapsed){
+        if (!el._misc.collapsed) {
           // Store new no collapsed values
           el._misc.sizeBeforeCollapse = el._refs.section[el._misc.sizeOffProp];
         }
@@ -349,28 +350,28 @@
         @function (private) _toggleCollapse
         @description Collapse or expand gutter section
       */
-      toggleCollapse: function(end) {
+      toggleCollapse: function (end) {
         var el = this;
         // var rotateIcon, size;
-        if(!el._misc.collapsed){
+        if (!el._misc.collapsed) {
           el._collapse(end);
         } else {
           el._expand();
         }
-      }, 
+      },
       /*
         @function (private) _toggleCollapseAnimation
         @description Add or remove collapsible element icon animation
         @param {Boolean} stop [Stop icon animation]
       */
-      toggleCollapseAnimation: function(stop) {
+      toggleCollapseAnimation: function (stop) {
         var el = this;
-        if(stop){
+        if (stop) {
           // Stop animation
           setTimeout(function () {
             el._refs.section.style.transition = "none";
           }, 200);
-        }else{
+        } else {
           // Toggle animation
           el._refs.section.style.transition = el._misc.sizeProp + ".2s";
         }
@@ -380,16 +381,16 @@
         @description Reverse collapsible element icon
         @param {Boolean} reverse [Set the reversed icon]
       */
-      rotateCollapseIcon: function(reverse) {
+      rotateCollapseIcon: function (reverse) {
         var el = this;
         var direction, invert;
-        if(el.type =="vertical" && eon.util.isTrue(el.collapsible)) {
+        if (el.type == "vertical" && eon.util.isTrue(el.collapsible)) {
           // Check icon direction
           direction = reverse ? "down" : "up";
           invert = reverse ? "up" : "down";
           el._refs.collapseIcon.classList.add("vicon-chevron-" + direction);
           el._refs.collapseIcon.classList.remove("vicon-chevron-" + invert);
-        } else if (eon.util.isTrue(el.collapsible)){
+        } else if (eon.util.isTrue(el.collapsible)) {
           // Check icon direction
           direction = reverse ? "right" : "left";
           invert = reverse ? "left" : "right";
@@ -401,31 +402,32 @@
         @function (private) _drag
         @description Set up splitter drag functionality
       */
-      drag: function() {
+      drag: function () {
         var el = this;
-        if(eon.util.isTrue(el.allowDrag)){
+        if (eon.util.isTrue(el.allowDrag)) {
           // Draggable variables
           var mousedown = false;
           var moveValue = 0;
           var pixels, propertyMoveValue, rotateIcon;
           // Start slide on mouse down event
-          el._refs.splitter.addEventListener("pointerdown", function(e){
+          el._refs.splitter.addEventListener("pointerdown", function (e) {
             // Needed to prevent bad mouseup event
             e.preventDefault();
             // Only trigger mouse down on splitter element
-            if(e.button == 0){
+            if (e.button == 0) {
               mousedown = true;
               // Get x/y value
               moveValue = e[el._misc.axisProp];
             }
           }, false);
           // Slide element on mouse move
-          el.addEventListener("pointermove", function(e){
-            if(mousedown){
+          el.addEventListener("pointermove", function (e) {
+            if (mousedown) {
+              el._misc.dragged = true;
               // Get y/z translate pixels
               pixels = moveValue - e[el._misc.axisProp];
               // Stop gutter from being collapsed
-              if(el._misc.collapsed && moveValue !== e[el._misc.axisProp]){
+              if (el._misc.collapsed && moveValue !== e[el._misc.axisProp]) {
                 // Rotate arrow icon to its initial position
                 rotateIcon = el.collapsibleEdge === "start" ? false : true;
                 el._rotateCollapseIcon(rotateIcon);
@@ -440,9 +442,9 @@
             }
           });
           // Stop slide on mouse up
-          document.addEventListener("pointerup", function(e){
+          document.addEventListener("pointerup", function (e) {
             // Make sure a movement has been fired
-            if(mousedown){
+            if (mousedown) {
               mousedown = false;
             }
           });
@@ -454,10 +456,10 @@
         @param {Number} pixels [Move distance in pixels]
         @param {Number} value [New section size]
       */
-      checkMoveConstraints: function(pixels, value){
+      checkMoveConstraints: function (pixels, value) {
         var el = this;
         // Under maximum value or above minimum value
-        if((pixels > 0 && value >= el.min) || pixels < 0 && value <= (el._misc.size - el.max)){
+        if ((pixels > 0 && value >= el.min) || pixels < 0 && value <= (el._misc.size - el.max)) {
           // Update section size to change splitter position
           el._refs.section.style[el._misc.sizeProp] = value + "px";
           el._misc.gutterResizePercent = value * 100 / el._misc.size;
@@ -465,45 +467,25 @@
         }
       },
       /*
-        @function (private) _addGutterResizeListener
-        @description Set up gutter resize listener
-      */
-      addGutterResizeListener: function() {
-        var el = this;
-        // Throttle event triggering for better performance
-        var throttled = false;
-        eon.addResizeListener(el, "resize", function(){
-          if (!throttled) {
-            el.resize();
-            // Throttle
-            throttled = true;
-            // Set a timeout to un-throttle
-            setTimeout(function() {
-             throttled = false;
-            }, el._misc.eventDelay);
-          }
-        });
-      },
-      /*
         @function (private) _sectionResize
         @description Set the new section size after gutter resizing
         @param {Number} oldGutterSize [Gutter size before resizing]
         @param {Number} oldSectionSize [Section size before resizing]
       */
-      sectionResize: function(oldGutterSize, oldSectionSize) {
+      sectionResize: function (oldGutterSize, oldSectionSize) {
         var el = this;
         var sectionSizePercent, sectionSize, newSectionSize, initialSizeProp, percent;
         // Check if the sectionsection is collapsed
-        if(!el._misc.collapsed){
+        if (!el._misc.collapsed) {
           // Get section size percentage before resize
           sectionSizePercent = el._misc.gutterResizePercent;
 
-          if (!el._misc.loaded) {
+          if (!el._misc.dragged) {
             // Check initial size customization
             initialSizeProp = el.type == "horizontal" ? "sectionWidth" : "sectionHeight";
             // Get initial size from config. Check size value type (Percentage or Number)
             percent = el[initialSizeProp].split("%").length > 1 ? el[initialSizeProp].split("%")[0] : false;
-            if(percent) {
+            if (percent) {
               sectionSize = (parseFloat(percent) * el._misc.size) / 100;
             } else {
               sectionSize = parseFloat(el[initialSizeProp]);
@@ -511,7 +493,7 @@
 
             sectionSize -= (el.splitterSize / 2);
 
-            el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";  
+            el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";
           } else {
             // Calculate new section size
             newSectionSize = sectionSizePercent * el._misc.size / 100;
@@ -527,86 +509,62 @@
         }
       },
       /*
-        @function (private) _responsiveListener
-        @description Set up window resize listener for gutter responsive monitor
-      */
-      responsiveListener: function() {
-        var el = this;
-        // Check the screen device type
-        el._misc.touch = eon.util.isTouchScreen() ? true : false;
-        // Apply responsive
-        el._applyResponsive();
-        // Throttle event triggering for better performance
-        var throttled = false;
-        window.addEventListener("resize", function(){
-          if (!throttled) {
-            el._applyResponsive();
-            // Throttle
-            throttled = true;
-            // Set a timeout to un-throttle
-            setTimeout(function() {
-             throttled = false;
-            }, el._misc.eventDelay);
-          }
-        });
-      },
-       /*
-        @function (private) _applyResponsive
-        @description Check device resolution and change the splitter size
-      */
-      applyResponsive: function() {
+       @function (private) _applyResponsive
+       @description Check device resolution and change the splitter size
+     */
+      applyResponsive: function () {
         var el = this;
         el._misc.desktop = window.innerWidth <= el.responsiveLimit ? false : true;
         // Increase splitter under desktop resolution
-        if(!el._misc.desktop || el._misc.touch){
+        if (!el._misc.desktop || el._misc.touch) {
           el._changeSplitterSize(15, true);
         }
         // Set splitter standard size on desktop resolution
-        if(el._misc.desktop && !el._misc.touch){
+        if (el._misc.desktop && !el._misc.touch) {
           el._changeSplitterSize(6);
         }
         // ** Fix IE and Safari bad icon positioning on horizontal gutter
-        if(eon.util.isTrue(el.collapsible)) {
+        if (eon.util.isTrue(el.collapsible)) {
           el._splitterStyleBrowserFix();
         }
       },
-       /*
-        @function (private) _splitterStyleBrowserFix
-        @description 
-      */
-      splitterStyleBrowserFix: function() {
+      /*
+       @function (private) _splitterStyleBrowserFix
+       @description 
+     */
+      splitterStyleBrowserFix: function () {
         var el = this;
         // Check browser
-        if(eon.util.getBrowser() === "IE"){
-            if(el.type === "horizontal") {
-              el._refs.collapseIcon.style.position = "relative";
-              el._refs.collapseIcon.style.right = "3px";
-              el._refs.clickableZone.style.top = "0";
-              el._refs.clickableZone.style.right = "-4px";
-              // Applied touchable screen device style
-              el._splitterStyleOnTouchScreen();
-            } else {
-              el._refs.collapseIcon.style.paddingTop = "3px";
-            }
-          } else if(eon.util.getBrowser() === "Safari"){
-            el._refs.clickableZone.style.right = "-3px";
+        if (eon.util.getBrowser() === "IE") {
+          if (el.type === "horizontal") {
+            el._refs.collapseIcon.style.position = "relative";
+            el._refs.collapseIcon.style.right = "3px";
+            el._refs.clickableZone.style.top = "0";
+            el._refs.clickableZone.style.right = "-4px";
             // Applied touchable screen device style
             el._splitterStyleOnTouchScreen();
+          } else {
+            el._refs.collapseIcon.style.paddingTop = "3px";
           }
+        } else if (eon.util.getBrowser() === "Safari") {
+          el._refs.clickableZone.style.right = "-3px";
+          // Applied touchable screen device style
+          el._splitterStyleOnTouchScreen();
+        }
       },
       /*
         @function (private) _splitterStyleOnTouchScreen
         @description Set splitter position on touch screen device browsers
       */
-      splitterStyleOnTouchScreen: function() {
+      splitterStyleOnTouchScreen: function () {
         var el = this;
         // Check touchable device
-        if(el._misc.touch || !el._misc.desktop) {
+        if (el._misc.touch || !el._misc.desktop) {
           // Check browser
-          if(eon.util.getBrowser() === "IE"){
-                el._refs.collapseIcon.style.right = 0;
-                el._refs.clickableZone.style.right = "-7px";
-            }
+          if (eon.util.getBrowser() === "IE") {
+            el._refs.collapseIcon.style.right = 0;
+            el._refs.clickableZone.style.right = "-7px";
+          }
         }
       },
       /*
@@ -615,27 +573,20 @@
         @param {Number} value [New splitter size]
         @param {Number} increase [Increased thickness]
       */
-      changeSplitterSize: function(value, increase) {
+      changeSplitterSize: function (value, increase) {
         var el = this;
         var oldValue = el._refs.splitter[el._misc.sizeOffProp];
         // Change size if old and new value differ
-        if(oldValue !== value) {
+        if (oldValue !== value) {
           el._refs.splitter.style[el._misc.sizeProp] = value + "px";
-          if(increase) {
-            // Adjust section size to splitter keep visual position
-            el._refs.section.style[el._misc.sizeProp] = (el._refs.section[el._misc.sizeOffProp] - (parseInt(value) / 3)) + "px";
-          } else {
-            // Adjust section size to keep splitter visual position
-            el._refs.section.style[el._misc.sizeProp] = (el._refs.section[el._misc.sizeOffProp] + (parseInt(oldValue) / 3)) + "px";
-          }
         }
       }
     },
-    onCreated: function() {
+    onCreated: function () {
       var el = this;
       eon.createCallback("onDrag", el);
     },
-    onInit: function() {
+    onInit: function () {
       var el = this;
       // Pointer events attribute required
       el.setAttribute("touch-action", "none");
@@ -646,20 +597,48 @@
     },
     onTransformed: function () {
       var el = this;
-       // Create splitter
-       el._setUpSeparator();
-       // Drag functionality
-       el._drag();
-       // Control splitter position on window resize
-       el._addGutterResizeListener();
-       // Responsive behavior
-       el._responsiveListener();
+      // Create splitter
+      el._setUpSeparator();
+      // Drag functionality
+      el._drag();
+    },
+    onResize: function () {
+      var el = this;
+      // Throttle event triggering for better performance
+      var throttled = false;
+      if (!throttled) {
+        // Make sure correct size calculation when the gutter is a part of another component
+        el.resize();
+        // Throttle
+        throttled = true;
+        // Set a timeout to un-throttle
+        setTimeout(function () {
+          throttled = false;
+        }, el._misc.eventDelay);
+      }
+    },
+    onWindowResize: function () {
+      var el = this;
+      // Check the screen device type
+      el._misc.touch = eon.util.isTouchScreen() ? true : false;
+      // Apply responsive
+      el._applyResponsive();
+      // Throttle event triggering for better performance
+      var throttled = false;
+      if (!throttled) {
+        el._applyResponsive();
+        // Throttle
+        throttled = true;
+        // Set a timeout to un-throttle
+        setTimeout(function () {
+          throttled = false;
+        }, el._misc.eventDelay);
+      }
     },
     onRender: function () {
       var el = this;
-       // Make sure correct size calculation when the gutter is a part of another component
-       el.resize();
-       el._misc.loaded = true;
+      // Make sure correct size calculation when the gutter is a part of another component
+      el.resize();
     }
   });
 </script>

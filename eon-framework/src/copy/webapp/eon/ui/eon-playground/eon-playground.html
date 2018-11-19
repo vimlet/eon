@@ -1,43 +1,33 @@
-<style>
-    eon-playground eon-panel {
-        height: 100%;
-        width: 100%;
-        overflow: hidden !important;
-        position: relative;
-    }
-
-    eon-playground .eon-playground-htmlTags-button {
-        cursor: pointer
-    }
-
-    eon-playground .eon-playground-htmlTags-enabled {
-        color: white !important;
-    }
-
-    eon-playground .eon-playground-editor-hidden {
-        display: none !important;
-    }
-</style>
 <template>
-    <eon-loading></eon-loading>
-    <div id="eon-playground-content" class="eon-playground-until-render"></div>
+    <div class="eon-loader-bar">
+        <div class="eon-loader-rail eon-bg8"></div>
+        <div class="eon-loader-loadingBar"></div>
+    </div>
+    <div class="eon-fg1 eon-loader-indicator"></div>
 </template>
 
 <script>
     eon.element({
 
-        name: "eon-playground",
-        style: "eon-playground.css",
+        name: "eon-loader",
+        style: "eon-loader.css",
 
-        dependencies: [
-            "../eon-editor",
-            "../eon-tabs",
-            "../eon-gutter",
-            "../eon-scroll",
-            "../eon-panel",
-            "../eon-loading"
-        ],
-
+        privateProperties: {
+            /*
+              @property (private) {Number} type
+              @description Last progress bar position
+            */
+            lastLoad: {
+                value: 0
+            },
+            /*
+              @property (private) {String} animFunction
+              @description Load progress animation function
+            */
+            animFunction: {
+                value: ""
+            }
+        },
         properties: {
             head: {
                 value: "",
@@ -223,7 +213,7 @@
                 el._refs.htmlTab.content.appendChild(bodyTag);
                 el._refs.htmlTab.content.appendChild(el._refs.html.head);
                 el._refs.htmlTab.content.appendChild(el._refs.html.body);
-         
+
             },
             // @function setJsTab (private) [Set up js tab]
             setJsTab: function () {
@@ -247,7 +237,7 @@
                 el._refs.js.language = "javascript";
                 el._refs.js.readonly = false;
                 // ** Append section to the panel content (Spaced container if default style is active)
-                 el._refs.jsTab.content.appendChild(el._refs.js);
+                el._refs.jsTab.content.appendChild(el._refs.js);
             },
             // @function setCssTab (private) [Set up css tab]
             setCssTab: function () {
@@ -298,9 +288,9 @@
                 var el = this;
                 el._misc.fullscreen = false;
                 var fullScreenBtt = document.createElement("div");
-                fullScreenBtt.classList.add("eon-playground-fullScreenBttn");
+                fullScreenBtt.classList.add("eon-playground-fullScreenBttn", "eon-fg1-hoverable");
                 el._refs.fullScreenIcon = document.createElement("i");
-                el._refs.fullScreenIcon.classList.add("vicon","vicon-fullscreen");
+                el._refs.fullScreenIcon.classList.add("vicon", "vicon-fullscreen");
                 fullScreenBtt.appendChild(el._refs.fullScreenIcon);
                 fullScreenBtt.setAttribute("onclick",
                     "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
@@ -334,6 +324,8 @@
                     iframeContent.open();
                     iframeContent.write(iframeSrc);
                     iframeContent.close();
+                    // Trigger on content set callback
+                    eon.triggerCallback("onContentSet", el, el, [iframe]);
                 }
                 el._refs.result.appendChild(iframe);
             },
@@ -393,6 +385,8 @@
                     el._misc.parent = el.parentNode;
                     el._misc.nextSibling = el.nextSibling;
                     document.body.appendChild(el);
+                    // Fire full screen activated event
+                    eon.triggerCallback("onFullScreenActivated", el, el);
                 } else {
                     el._refs.fullScreenIcon.classList.add("vicon-fullscreen");
                     el._refs.fullScreenIcon.classList.remove("vicon-fullscreen-exit");
@@ -402,6 +396,8 @@
                     } else {
                         el._misc.parent.appendChild(el);
                     }
+                    // Fire full screen deactivated event
+                    eon.triggerCallback("onFullScreenDeactivated", el, el);
                 }
                 el._showResult();
                 if (el._refs.htmlPanel && el.htmlView != "single") {
@@ -423,7 +419,11 @@
             }
         },
 
-        onCreated: function () {},
+        onCreated: function () {
+            eon.createCallback("onContentSet", this);
+            eon.createCallback("onFullScreenActivated", this);
+            eon.createCallback("onFullScreenDeactivated", this);
+        },
 
         onReady: function () {
             var el = this;
