@@ -371,7 +371,7 @@
       assignSize: function () {
 
         var el = this;
-        
+
         // If the element will take the size of its parent
         if (eon.util.isTrue(el.fill)) {
 
@@ -393,8 +393,13 @@
             el.style.height = "100%";
             el.style.width = "100%";
 
-            el.content.style.height = "calc(100% + " + el._misc.scrollBarSpace + "px)";
-            el.content.style.width = "calc(100% + " + el._misc.scrollBarSpace + "px)";
+            if (el._isAllowedToHaveScroll("vertical")) {
+              el.content.style.width = "calc(100% + " + el._misc.scrollBarSpace + "px)";
+            }
+
+            if (el._isAllowedToHaveScroll("horizontal")) {
+              el.content.style.height = "calc(100% + " + el._misc.scrollBarSpace + "px)";
+            }
 
             el._misc.calculatedContentSize = true;
 
@@ -1626,7 +1631,7 @@
         var duration = Math.min(1200, Math.abs(advance) * 1.2);
         var endTime = + new Date() + duration;
         var finished, rate, proportion;
-        
+
         // Removes the smooth scroll class
         el.classList.remove("vc-scroll-smooth");
 
@@ -1643,11 +1648,11 @@
           var currentTime = +new Date();
           var remaining = (endTime - currentTime);
 
-          rate = 1 - Math.pow(remaining/duration, 3);
+          rate = 1 - Math.pow(remaining / duration, 3);
           rate = rate > 1 ? 1 : rate;
 
           proportion = rate * advance;
-          
+
           // If there is place for us to scroll
           if ((positive && el.content.scrollTop < top) || (!positive && el.content.scrollTop > top)) {
 
