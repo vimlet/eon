@@ -47,7 +47,7 @@
                         <div class="tSubtitleContainer">
                             <h2>Loader ease</h2>
                         </div>
-                        <div class="tExampleContainer d-loader-example-container">
+                        <div style="position: relative;" class="tExampleContainer d-loader-example-container">
                             <eon-loader id="d-l2" bar-color="pink" class="d-loader" duration="1000" effect="ease">
                             </eon-loader>
                             <div class="d-loader-btn-container">
@@ -211,8 +211,6 @@
 
     .d-loader-example-container {
         flex-direction: column;
-        position: relative;
-        min-width: 260px;
     }
 
     .d-loader-btn-container {
@@ -239,6 +237,7 @@
     .d-round-bar .eon-loader-loadingBar {
         border-radius: 35px;
     }
+
     .d-round-bar .eon-loader-rail {
         background-color: #561616 !important;
     }
@@ -246,6 +245,7 @@
     @media (max-width: 580px) {
         .d-loader-row {
             padding: 0px 10px 0 10px !important;
+            flex-direction: column;
         }
     }
 
@@ -275,7 +275,6 @@
         margin: 15px;
         min-height: 50px;
         flex-grow: 1;
-        flex-basis: 0;
     }
 
     @media (max-width: 580px) {
@@ -438,6 +437,12 @@
         min-height: 50px;
         flex-grow: 1;
       }
+      @media (max-width: 580px) {
+        .example {
+          margin: 0;
+          width: 100%;
+        }
+      }
 
       h2 {
         margin: 0;
@@ -486,21 +491,21 @@
     <!-- EXAMPLES BODY -->
     <div class="template-body">
       <eon-scroll>
-        <div class="row">
+        <div class="row d-searchbar-row">
           <div class="example">
             <div class="tSubtitleContainer">
               <h2>Search bar</h2>
             </div>
             <div class="tExampleContainer d-searchbar-example">
-              <eon-searchbar class="onlyInput">
+              <eon-searchbar class="d-searchbar onlyInput">
                 <eon-text name="name" onkeyup='searchColor()'></eon-text>
               </eon-searchbar>
 
               <div class="d-searchbar-colors">
-                <div value="Green" class="eon-searchbar-visible">Green</div>
-                <div value="Red" class="eon-searchbar-visible">Red</div>
-                <div value="Gray" class="eon-searchbar-visible">Gray</div>
-                <div value="Pink" class="eon-searchbar-visible">Pink</div>
+                <div value="Green" class="d-search-item-visible">Green</div>
+                <div value="Red" class="d-search-item-visible">Red</div>
+                <div value="Gray" class="d-search-item-visible">Gray</div>
+                <div value="Pink" class="d-search-item-visible">Pink</div>
               </div>
             </div>
           </div>
@@ -509,7 +514,7 @@
               <h2>Full screen</h2>
             </div>
             <div class="tExampleContainer d-searchbar-example">
-              <eon-searchbar class="dates">
+              <eon-searchbar class="d-filter-searchbar dates">
                 <eon-date name="startDate" mask="DDMMYYYY" weekstart="monday" weekdaysformat="short" valueformat="YYYY/MM/DD"
                   width=200 pickerfontsize=14.4 pickerwidth=200 pickerheight=180 toolbar="true" pickerposition="bottom"
                   pickerselectable="dmy"> </eon-date>
@@ -552,9 +557,9 @@
           for (var i = 0; i < toFilterChilds.length; i++) {
 
             if (toFilterChilds[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) > -1) {
-              toFilterChilds[i].classList.add("eon-searchbar-visible");
+              toFilterChilds[i].classList.add("d-search-item-visible");
             } else {
-              toFilterChilds[i].classList.remove("eon-searchbar-visible");
+              toFilterChilds[i].classList.remove("d-search-item-visible");
             }
           }
         });
@@ -566,8 +571,17 @@
       }
     </script>
     <style class="template-style">
+      .d-searchbar-row {
+        flex-direction: column;
+      }
+
       .d-searchbar-example {
         flex-direction: column;
+        align-items: center;
+      }
+
+      .d-searchbar {
+        width: 300px;
       }
 
       .d-searchbar-placeholder {
@@ -576,25 +590,53 @@
       }
 
       .d-searchbar-colors {
-        background-color: #3a3a3a;
-        margin-top: 30px;
+        background-color: #2d2d2d;
+        margin-top: 10px;
         padding: 20px;
         color: #c1c1c1;
         height: 250px;
-        width: 100%;
+        width: 300px;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
         box-sizing: border-box;
         align-items: center;
-        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 16px 0 #242424;
       }
+
       .d-searchbar-colors div {
         padding: 10px 10px;
         display: none;
       }
-      .d-searchbar-colors div.eon-searchbar-visible {
-          display: flex;
+
+      /* -- ** TODO - Theming - eon-text override -- */
+      .d-searchbar .eon-text-description {
+        margin-top: 0;
+      }
+
+      .d-searchbar-colors .d-search-item-visible {
+        display: flex;
+      }
+
+      eon-searchbar .eon-searchbar-fields {
+        flex-wrap: wrap;
+      }
+
+      eon-searchbar .eon-searchbar-fields>div {
+        margin: 0;
+      }
+
+      @media (max-width: 426px) {
+
+        .d-searchbar,
+        .d-searchbar-colors {
+          width: 100%;
+        }
+
+        /* -- ** TODO - Theming - eon-text override -- */
+        .d-filter-searchbar .eon-searchbar-searchbar {
+          flex-direction: column;
+        }
       }
 
       /* -- Shared cross-examples -- */
@@ -625,6 +667,13 @@
         flex-grow: 1;
       }
 
+      @media (max-width: 580px) {
+        .example {
+          margin: 0;
+          width: 100%;
+        }
+      }
+
       h2 {
         margin: 0;
       }
@@ -639,5 +688,420 @@
     </style>
   </template>
   <!-- END PLAYGROUND -->
+</div>
+  <eon-anchor state="separator" eon-scroll="eon-scroll" type="top"></eon-anchor>
+<div class="card">
+  <h1>SEPATARATOR</h1>
+
+  <!-- PLAYGROUND -->
+  <!-- Playground declaration -->
+  <eon-playground class="d-pg d-separator-pg"></eon-playground>
+
+  <script>
+    initializePlayground(".d-separator-tmp", ".d-separator-pg");
+  </script>
+
+  <!-- Playground content -->
+  <template class="d-separator-tmp">
+    <div class="template-head">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Import VimletJS  -->
+      <script src="/eon/eon.js"></script>
+      <!-- UI components -->
+      <script>
+        eon.import([
+          "/eon/ui/eon-separator",
+          "/eon/ui/eon-scroll"
+        ]);
+      </script>
+    </div>
+    <!-- EXAMPLES BODY -->
+    <div class="template-body">
+      <eon-scroll>
+        <div class="row d-separator-row">
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Horizontal</h2>
+            </div>
+            <div class="tExampleContainer">
+              <div class="d-separator-form">
+
+                <div class="d-separator-content">
+                  Full bleed separator
+                  <!-- SEPARATOR -->
+                  <eon-separator>
+
+                  </eon-separator>
+                  <!-- ::::::: -->
+                </div>
+
+                <div class="d-separator-content">
+                  Mid position separator
+                  <!-- SEPARATOR -->
+                  <eon-separator type="mid" border="3" length="50%">
+
+                  </eon-separator>
+                  <!-- ::::::: -->
+                </div>
+
+                <div class="d-separator-content">
+                  Start position separator
+                  <!-- SEPARATOR -->
+                  <eon-separator type="start" border="1" length="200">
+
+                  </eon-separator>
+                  <!-- ::::::: -->
+                </div>
+                <div class="d-separator-content">
+                  End position separator
+                  <!-- SEPARATOR -->
+                  <eon-separator type="end" border="3" length="70%">
+
+                  </eon-separator>
+                  <!-- ::::::: -->
+                </div>
+                <div class="d-separator-content">
+                  No separator
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Loader ease</h2>
+            </div>
+            <div class="tExampleContainer">
+              <div class="d-separator-form d-separator-form-hor">
+                <div class="d-separator-content d-separator-content-hor">
+                  <div class="d-separator-text">Full bleed</div>
+
+                  <!-- SEPARATOR -->
+                  <eon-separator direction="vertical" border="1">
+
+                  </eon-separator>
+                  <!-- ::::::: -->
+                </div>
+
+                <div class="d-separator-content d-separator-content-hor">
+                  <div class="d-separator-text">Mid position</div>
+                  <!-- SEPARATOR -->
+                  <eon-separator direction="vertical" type="mid" border="3" length="50%">
+
+                  </eon-separator>
+                  <!-- ::::::: -->
+                </div>
+
+                <div class="d-separator-content d-separator-content-hor">
+                  <div class="d-separator-text">Start position</div>
+                  <!-- SEPARATOR -->
+                  <eon-separator direction="vertical" type="start" border="1" length="200">
+
+                  </eon-separator>
+                  <!-- ::::::: -->
+                </div>
+                <div class="d-separator-content d-separator-content-hor">
+                  <div class="d-separator-text">End position</div>
+                  <!-- SEPARATOR -->
+                  <eon-separator direction="vertical" type="end" border="3" length="70%">
+
+                  </eon-separator>
+                  <!-- ::::::: -->
+                </div>
+                <div class="d-separator-content d-separator-content-hor">
+                  <!-- <div class="d-separator-text">No separator</div> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+</eon-scroll>
+</div>
+
+<!-- END EXAMPLES BODY -->
+<script class="template-js">
+  // ** Playground resize fix
+  eon.onReady(function () {
+    // Iframe content loaded monitoring
+    eon.triggerCallback("onLoaded", window.frameElement);
+  });
+</script>
+
+<style class="template-style">
+  .d-separator {}
+
+  .d-separator-example {
+    flex-direction: column;
+  }
+
+  .d-separator-form {
+    height: 350px;
+    width: 500px;
+    background-color: #2d2d2d;
+    color: white;
+    font-size: 13px;
+    font-weight: bolder;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+
+  .d-separator-form-hor {
+    flex-direction: row;
+  }
+
+  .d-separator-content {
+    height: 100px;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .d-separator-content-hor {
+    height: 100%;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 580px) {
+    .d-separator-text {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 24px;
+      overflow: hidden;
+    }
+  }
+
+  /* -- Shared cross-examples -- */
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: #2d2d2d;
+    color: #e6e6e6;
+    overflow: hidden;
+  }
+
+  .row {
+    padding: 10px;
+    display: flex;
+    /* align-items: center; */
+    flex-wrap: wrap;
+  }
+
+  .example {
+    background-color: #383838;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 15px;
+    min-height: 50px;
+    flex-grow: 1;
+  }
+
+  @media (max-width: 580px) {
+    .example {
+      margin: 10px 0;
+      width: 100%;
+    }
+  }
+
+  h2 {
+    margin: 0;
+  }
+
+  .tSubtitleContainer {
+    margin-bottom: 10px;
+  }
+
+  .tExampleContainer {
+    display: flex;
+  }
+
+  .pink {
+    background-color: #b73ba2;
+  }
+
+  .blue {
+    background-color: #3b78b7 !important;
+  }
+
+  .yellow {
+    background-color: #b78f47;
+  }
+
+  .green {
+    background-color: #519a51 !important;
+  }
+
+  .red {
+    background-color: #9c4747;
+  }
+
+  .purple {
+    background-color: #6c479c;
+  }
+</style>
+</template>
+<!-- END PLAYGROUND -->
+</div>
+  <eon-anchor state="tree" eon-scroll="eon-scroll" type="top"></eon-anchor>
+<div class="card">
+  <h1>TREE</h1>
+
+  <!-- PLAYGROUND -->
+  <!-- Playground declaration -->
+  <eon-playground class="d-pg d-tree-pg"></eon-playground>
+
+  <script>
+    initializePlayground(".d-tree-tmp", ".d-tree-pg");
+  </script>
+
+  <!-- Playground content -->
+  <template class="d-tree-tmp">
+    <div class="template-head">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Import VimletJS  -->
+      <script src="/eon/eon.js"></script>
+      <!-- UI components -->
+      <script>
+        eon.import([
+          "/eon/ui/eon-tree",
+          "/eon/ui/eon-scroll"
+        ]);
+      </script>
+    </div>
+    <!-- EXAMPLES BODY -->
+    <div class="template-body">
+      <eon-scroll>
+        <div class="row d-tree-row">
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Tree</h2>
+            </div>
+            <div class="tExampleContainer">
+              <!-- TREE -->
+              <eon-tree id="d-tree" icons="all">
+
+                <eon-treenode name="dir" path="dir"></eon-treenode>
+                <eon-treenode type="file" name="file1" path="file1"></eon-treenode>
+                <eon-treenode path="dir2/dir2.1/dir2.1.1"></eon-treenode>
+                <eon-treenode path="dir2/dir2.1/dir2.1.2"></eon-treenode>
+                <eon-treenode type="file" path="dir2/dir2.1/dir2.1.1/dir2.1.1.1/file2"></eon-treenode>
+                <eon-treenode name="dir2.1.2.1.1" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.1"></eon-treenode>
+                <eon-treenode name="dir2.1.2.1.2" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.2"></eon-treenode>
+                <eon-treenode type="file" extension="js" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.2/file3"></eon-treenode>
+
+              </eon-tree>
+              <!-- ::::::: -->
+            </div>
+          </div>
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Store based tree</h2>
+            </div>
+            <div class="tExampleContainer">
+              <!-- TREE -->
+              <eon-tree id="store-tree" store="true" drag="true">
+                
+              </eon-tree>
+              <!-- ::::::: -->
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+</eon-scroll>
+</div>
+
+<!-- END EXAMPLES BODY -->
+<script class="template-js">
+  // ** Playground resize fix
+  eon.onReady(function () {
+    // Iframe content loaded monitoring
+    eon.triggerCallback("onLoaded", window.frameElement);
+  });
+</script>
+
+<style class="template-style">
+  /* -- Shared cross-examples -- */
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: #2d2d2d;
+    color: #e6e6e6;
+    overflow: hidden;
+  }
+
+  .row {
+    padding: 10px;
+    display: flex;
+    /* align-items: center; */
+    flex-wrap: wrap;
+  }
+
+  .example {
+    background-color: #383838;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 15px;
+    min-height: 50px;
+    flex-grow: 1;
+  }
+
+  @media (max-width: 580px) {
+    .example {
+      margin: 10px 0;
+      width: 100%;
+    }
+  }
+
+  h2 {
+    margin: 0;
+  }
+
+  .tSubtitleContainer {
+    margin-bottom: 10px;
+  }
+
+  .tExampleContainer {
+    display: flex;
+  }
+
+  .pink {
+    background-color: #b73ba2;
+  }
+
+  .blue {
+    background-color: #3b78b7 !important;
+  }
+
+  .yellow {
+    background-color: #b78f47;
+  }
+
+  .green {
+    background-color: #519a51 !important;
+  }
+
+  .red {
+    background-color: #9c4747;
+  }
+
+  .purple {
+    background-color: #6c479c;
+  }
+</style>
+</template>
+<!-- END PLAYGROUND -->
 </div>
 </template>
