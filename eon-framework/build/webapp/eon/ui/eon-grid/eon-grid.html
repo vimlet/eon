@@ -13,11 +13,11 @@
 
     <div class="eon-grid-footer eon-fg1 eon-sect1 eon-unselectable">
         <div class="eon-grid-pagControls eon-fg5">
-            <i class="vicon vicon-arrow-back eon-grid-pagIcon eon-fg1-hoverable" data-navigation="first"></i>
+            <i class="vicon vicon-arrow-first eon-grid-pagIcon eon-fg1-hoverable" data-navigation="first"></i>
             <i class="vicon vicon-chevron-left eon-grid-pagIcon eon-fg1-hoverable" data-navigation="previous"></i>
             <div class="pageSelector"></div>
             <i class="vicon vicon-chevron-right eon-grid-pagIcon eon-fg1-hoverable" data-navigation="next"></i>
-            <i class="vicon vicon-arrow-forward eon-grid-pagIcon eon-fg1-hoverable" data-navigation="last"></i>
+            <i class="vicon vicon-arrow-last eon-grid-pagIcon eon-fg1-hoverable" data-navigation="last"></i>
         </div>
         <span class="eon-grid-entriesCount eon-fg5"></span>
     </div>
@@ -199,7 +199,30 @@
                 el._refs.buttons.next = el.template.querySelector('i[data-navigation="next"]');
                 el._refs.buttons.last = el.template.querySelector('i[data-navigation="last"]');
 
+            },
+            /*
+           @function (private) _setupStore
+           @description Creates the store that will handle all the grid data
+           */
+            setupStore: function () {
+
+                var el = this;
+
                 el.store = new eon.store();
+                
+                // When the store data changes we reloaded the current page, if the page no longer exists we take the last available one
+                el.store.onDataChanged(function () {
+
+                    var currentPage = parseInt(el._misc.currentPage) > el._getLastAvailablePage() ? el._getLastAvailablePage() : parseInt(el._misc.currentPage);
+                    var pageSize = parseInt(el._misc.pageSize);
+
+                    start = parseInt((currentPage - 1) * pageSize + 1);
+                    limit = parseInt(start + pageSize - 1);
+
+                    el._handleRange(start, limit, true);
+                    el._updatePagination(currentPage);
+
+                });
 
             },
             /*
@@ -397,17 +420,16 @@
 
                     var rowsData = el._generateSourceRowsData();
 
-                    if (rowsData && Object.keys(rowsData).length > 0) {
+                    if (rowsData && rowsData.size > 0) {
                         el.store.data = rowsData;
                     }
 
-                    el._misc.pageSize = el._misc.pagingType == "all" ? Object.keys(el.store.data).length : el._misc.pageSize;
+                    el._misc.pageSize = el._misc.pagingType == "all" ? el.store.data.size : el._misc.pageSize;
 
                     start = 1;
                     limit = parseInt(el._misc.pageSize);
 
                     el.store.read().limit(start, limit).result(function (error, data) {
-                        console.log('data', data);
                         el._handleEntries(data, true, start, limit);
                         el._updatePagination(1);
                     });
@@ -583,7 +605,7 @@
                         case "last":
                             var lastPage;
 
-                            limit = Object.keys(el.store.data).length;
+                            limit = el.store.data.size;
                             lastPage = el._getLastAvailablePage();
                             start = parseInt(((lastPage * pageSize) - pageSize) + 1);
 
@@ -608,9 +630,6 @@
                 var rows = el._misc.sourceFragment.querySelectorAll("eon-row");
                 var dataMap = new Map();
                 var counter = 0;
-                
-                // Map source
-                
 
                 if (rows.length > 0) {
 
@@ -657,7 +676,7 @@
                     };
 
                     for (var k = 0; k < rows.length; k++) {
-                        
+
                         rows[k].entryId = counter;
 
                         dataMap.set(rows[k].entryId, fillRowData(rows[k]));
@@ -666,8 +685,6 @@
                     }
 
                 }
-
-                console.log('dataMap', dataMap);
 
                 return dataMap;
 
@@ -684,44 +701,25 @@
             handleEntries: function (data, cleanCurrentRange, start, limit) {
 
                 var el = this;
-                var dataType = data.constructor === Array ? "array" : "object";
-                var handleFunction, dataSource, source;
-
-                el._misc.range.start = start ? start : el._misc.range.start;
-                el._misc.range.limit = limit ? limit : el._misc.range.limit;
-
-                el._misc.range.limit = (el._misc.pagingType == "all") ? Object.keys(el.store.data).length : el._misc.range.limit;
-
-                handleFunction = (dataType == "object") ? el._handleObjectEntries : el._handleArrayEntries;
-                handleFunction.apply(el, [data, cleanCurrentRange]);
-
-            },
-            /*
-            @function (private) _handleObjectEntries
-            @description Handles the store data that is returned as an object
-            @param {Object} storeData
-            @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
-            */
-            handleObjectEntries: function (storeData, cleanCurrentRange) {
-
-                var el = this;
 
                 var columnsKeys = Object.keys(el._misc.columns);
                 var rowsDocFragment = document.createDocumentFragment();
-                var entriesCount = Object.keys(storeData).length;
-                var dataObject;
-                var row;
-                var cell;
-                var eventObject;
+                var entriesCount = data.size;
+                var dataObject, row, cell, eventObject;
+
+                el._misc.range.start = start ? start : el._misc.range.start;
+                el._misc.range.limit = limit ? limit : el._misc.range.limit;
+                el._misc.range.limit = (el._misc.pagingType == "all") ? el.store.data.size : el._misc.range.limit;
 
                 if (cleanCurrentRange) {
                     el._refs.rowsWrapper.innerHTML = "";
                     el._resetEntriesCount();
                 }
 
-                //for each dataObject in the storeData we create a Row
-                for (var key in storeData) {
-                    dataObject = storeData[key];
+                // Store map keys
+                data.forEach(function (value, key, map) {
+
+                    dataObject = value;
 
                     row = document.createElement("eon-row");
                     row.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
@@ -730,18 +728,13 @@
                     //For each column we have in the grid we will look for its value on the dataObject
                     // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
                     for (var i = 0; i < columnsKeys.length; i++) {
-
-                        cell = el._createCell(columnsKeys[i], dataObject, storeData);
+                        cell = el._createCell(columnsKeys[i], dataObject, data);
                         row.appendChild(cell);
-
                     }
 
-                    if (el.autofit == "true" || el.autofit == true) {
-
+                    if (eon.util.isTrue(el.autofit)) {
                         row.classList.add("eon-grid-autofit");
-
                     } else {
-
                         row.style.minHeight = el.rowMinHeight + "px";
                     }
 
@@ -750,82 +743,18 @@
                     rowsDocFragment.appendChild(row);
 
                     // Creates the callback event object for the user
-                    eventObject = {
-
-                        data: dataObject,
-                        row: row
-
-                    };
+                    eventObject = { data: dataObject, row: row };
 
                     eon.triggerCallback("onRowCreated", el, el, [eventObject]);
 
-                };
+                });
 
                 el._refs.rowsWrapper.appendChild(rowsDocFragment);
 
                 if (el._misc.pagingType == "auto") {
                     el._handleRowsLayout(entriesCount)
                 };
-            },
-            /*
-            @function (private) _handleArrayEntries
-            @description Handles the store data that is returned as an array
-            @param {Array} storeData
-            @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
-            */
-            handleArrayEntries: function (storeData, cleanCurrentRange) {
 
-                var el = this;
-
-                var columnsKeys = Object.keys(el._misc.columns);
-                var rowsDocFragment = document.createDocumentFragment();
-                var entriesCount = storeData.length;
-                var dataObject;
-                var row;
-                var cell;
-
-                if (cleanCurrentRange) {
-                    el._refs.rowsWrapper.innerHTML = "";
-                }
-
-                el._resetEntriesCount();
-
-                //for each dataObject in the storeData we create a Row
-                for (var i = 0; i < entriesCount; i++) {
-                    dataObject = storeData[i];
-
-                    row = document.createElement("eon-row");
-                    row.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
-                    row.dataset.entryId = dataObject[el.keyProperty];
-
-                    //For each column we have in the grid we will look for its value on the dataObject
-                    // and create a cell, this way if a dataObject doesn't have a columnKey it will still have the cell but it will be an empty one
-                    for (var j = 0; j < columnsKeys.length; j++) {
-
-                        cell = el._createCell(columnsKeys[j], dataObject, storeData);
-                        row.appendChild(cell);
-
-                    }
-
-                    if (el.autofit == "true" || el.autofit == true) {
-
-                        row.classList.add("eon-grid-autofit");
-
-                    } else {
-
-                        row.style.minHeight = el.rowMinHeight + "px";
-                    }
-
-                    el._increaseEntriesCount();
-
-                    rowsDocFragment.appendChild(row);
-                }
-
-                el._refs.rowsWrapper.appendChild(rowsDocFragment);
-
-                if (el._misc.pagingType == "auto") {
-                    el._handleRowsLayout(entriesCount)
-                };
             },
             /*
             @function (private) _createCell
@@ -854,13 +783,7 @@
                 }
 
                 // Creates the callback event object for the user
-                eventObject = {
-
-                    data: dataObject,
-                    column: columnKey,
-                    cell: cell
-
-                };
+                eventObject = { data: dataObject, column: columnKey, cell: cell };
 
                 eon.triggerCallback("onCellCreated", el, el, [eventObject]);
 
@@ -1246,7 +1169,7 @@
             getLastAvailablePage: function () {
 
                 var el = this;
-                var dataLength = Object.keys(el.store.data).length;
+                var dataLength = el.store.data.size;
 
                 if (el._misc.pageSizeType == "all" && dataLength > 0) {
                     return 1;
@@ -1373,6 +1296,7 @@
             @function (private) _updateHeaders
             @description Resets all the sorted headers, it does nothing in the clicked header
             @param {Object} header
+            @param {String} sortType
             */
             updateHeaders: function (header, sortType) {
 
@@ -1574,6 +1498,7 @@
             var el = this;
 
             el._setupRefs();
+            el._setupStore();
             el._setupMisc();
 
             el._generateSourceFragment();
