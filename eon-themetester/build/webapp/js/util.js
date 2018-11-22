@@ -84,27 +84,37 @@ function initializePlayground(sectionsClass, pgClass, static) {
 function playgroundResizeListener(pg, innerDoc) {
     var scrollContent;
     pg._misc.prevSize = pg.offsetHeight;
+    var delay = 400;
+    var throttled = false;
     // Resize listener
     pg.onResize(function () {
-        if (innerDoc.body) {
-            // Get scroll content
-            var scroll = innerDoc.body.children[0];
-            scroll.onReady(function () {
-                scrollContent = scroll.children[0];
-                // Get rows size
-                var size = 0;
-                for (var i = 0; i < scrollContent.children.length; i++) {
-                    size += scrollContent.children[i].offsetHeight;
-                }
-                // Keep playground full screen size if activated
-                if(pg._misc.fullScreenActivated) {
-                    pg.style.height = "100%";
-                } else {
-                    // Set playground new size
-                    setPgHeight(pg, size);
-                }
-            });
+        if (!throttled) {
+            if (innerDoc.body) {
+                // Get scroll content
+                var scroll = innerDoc.body.children[0];
+                scroll.onReady(function () {
+                    scrollContent = scroll.children[0];
+                    // Get rows size
+                    var size = 0;
+                    for (var i = 0; i < scrollContent.children.length; i++) {
+                        size += scrollContent.children[i].offsetHeight;
+                    }
+                    // Keep playground full screen size if activated
+                    if(pg._misc.fullScreenActivated) {
+                        pg.style.height = "100%";
+                    } else {
+                        // Set playground new size
+                        setPgHeight(pg, size);
+                    }
+                });
+            }
         }
+        // Throttle
+        throttled = true;
+        // Set a timeout to un-throttle
+        setTimeout(function () {
+            throttled = false;
+        }, delay);
     });
 }
 
