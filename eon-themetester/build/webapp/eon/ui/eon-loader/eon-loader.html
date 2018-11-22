@@ -7,20 +7,24 @@
 </template>
 
 <script>
-  eon.element("eon-loader", "eon-loader.css", {
-    privateProperties: {
+  eon.element({
+
+    name: "eon-loader",
+    style: "eon-loader.css",
+
+    privateProperties:{
       /*
         @property (private) {Number} type
         @description Last progress bar position
       */
-      lastLoad: {
+      lastLoad:{
         value: 0
       },
       /*
         @property (private) {String} animFunction
         @description Load progress animation function
       */
-      animFunction: {
+      animFunction:{
         value: ""
       }
     },
@@ -49,7 +53,7 @@
         @property {Number} duration
         @description Loader animation duration
       */
-      duration: {
+      duration:{
         value: 100,
         reflect: true
       },
@@ -58,7 +62,7 @@
         @description Maximum progress value the loader could reach
         Values: 0 to 1
       */
-      limit: {
+      limit:{
         value: .5,
         reflect: true
       },
@@ -66,7 +70,7 @@
         @property {Boolean} indicator
         @description Whether or not the progress value should be displayed
       */
-      indicator: {
+      indicator:{
         value: true,
         reflect: true
       },
@@ -74,27 +78,19 @@
         @property {String} barColor
         @description Load bar color code
       */
-      barColor: {
+      barColor:{
         value: "#77afcc",
-        reflect: true
-      },
-      /*
-       @property {String} barClass
-       @description
-     */
-      barClass: {
-        value: "",
         reflect: true
       }
     },
-    privateFunctions: {
+    privateFunctions:{
       /*
         @function (private) _animate
         @description Move panel content to the new panel structure
         @param {Number} limit [Maximum progress value reachable]
         @param {Number} time [Progress animation duration in milliseconds]
       */
-      animate: function (limit, time) {
+      animate: function(limit, time){
         var el = this;
         var bar = el.querySelector(".eon-loader-bar");
         var loadBar = el.querySelector(".eon-loader-loadingBar");
@@ -106,26 +102,26 @@
         duration = el.limit === 0 ? time : duration / el.limit;
         var endTime = + new Date() + duration;
         // Load animation function
-        el._animFunction = function () {
+        el._animFunction = function(){
           // Get animation progress
           var currentTime = +new Date();
           var remaining = (endTime - currentTime);
           // Check animation progress
-          if (remaining < 20) {
+          if(remaining < 20) {
             cancel = el._runAnimation(1, bar, loadBar);
             // End animation here as there's less than 60 milliseconds left
             return;
           } else {
             // Get animation progress rate applying effects
-            var rate = el._runEffect(remaining / duration);
+            var rate = el._runEffect(remaining/duration);
             // Do some animation
-            if (el._lastLoad > el.limit) {
+            if(el._lastLoad > el.limit){
               cancel = el._runReverseAnimation(rate, bar, loadBar);
-            } else {
+            }else{
               cancel = el._runAnimation(rate, bar, loadBar);
             }
           }
-          if (!cancel) {
+          if(!cancel){
             _animFunction = window.requestAnimationFrame(el._animFunction);
           }
         }
@@ -138,7 +134,7 @@
         @param {Number} rate [Maximum progress value reachable]
         @return {Number} [Progress rate resulted]
       */
-      runEffect: function (rate) {
+      runEffect: function(rate){
         var el = this;
         // Check loader selected effect
         switch (el.effect) {
@@ -161,14 +157,14 @@
         @param {Number} loadBar [Load bar element]
         @return {String} [Whether or not animation should be cancelled]
       */
-      runReverseAnimation: function (rate, bar, loadBar) {
+      runReverseAnimation: function(rate, bar, loadBar){
         var el = this;
         var indicator = el.querySelector(".eon-loader-indicator");
         // Get start and end animation points
         var end = bar.offsetWidth;
         var start = !el._lastLoad ? 0 : (end * el._lastLoad);
         // Is limit loading value reached
-        if (rate >= (1 - el.limit)) {
+        if(rate >= (1 - el.limit)){
           // Finish loading
           var loadValue = (rate * (0 - start) + start);
           loadBar.style.width = (el.limit * 100) + "%";
@@ -179,14 +175,14 @@
           // Trigger on load end
           eon.triggerCallback("onLoadEnd", el, el, []);
           // Check if loading is completed
-          if (el.limit == 1) {
+          if(el.limit == 1){
             // Trigger on load completed
             eon.triggerCallback("onLoadComplete", el, el, []);
           }
           // Cancel animation
           cancelAnimationFrame(el._animFunction);
           return "cancel";
-        } else {
+        }else{
           // Increase loading bar width
           // ** 10 value could change, used to prevent animation width excess
           var loadValue = (rate * (0 - start) + start);
@@ -203,14 +199,14 @@
         @param {Number} loadBar [Load bar element]
         @return {String} [Whether or not animation should be cancelled]
       */
-      runAnimation: function (rate, bar, loadBar) {
+      runAnimation: function(rate, bar, loadBar){
         var el = this;
 
         // Get start and end animation points
         var end = bar.offsetWidth;
         var start = !el._lastLoad ? 0 : (end * el._lastLoad);
         // Is limit loading value reached
-        if (rate >= el.limit) {
+        if(rate >= el.limit){
           // Finish loading
           var loadValue = (rate * (end - start) + start);
           loadBar.style.width = (el.limit * 100) + "%";
@@ -221,14 +217,14 @@
           // Trigger on load end
           eon.triggerCallback("onLoadEnd", el, el, []);
           // Check if loading is completed
-          if (el.limit == 1) {
+          if(el.limit == 1){
             // Trigger on load completed
             eon.triggerCallback("onLoadComplete", el, el, []);
           }
           // Cancel animation
           cancelAnimationFrame(el._animFunction);
           return "cancel";
-        } else {
+        }else{
           // Increase loading bar width
           // ** 10 value could change, used to prevent animation width excess
           var loadValue = (rate * (end - start) + start);
@@ -242,31 +238,31 @@
         @description Update progress indicator value
         @param {Number} rate [Relation between total value and current progress point]
       */
-      updateIndicator: function (rate) {
+      updateIndicator: function(rate){
         var el = this;
         var indicator = el.querySelector(".eon-loader-indicator");
         // Load bar is a progress bar
-        if (el.type == "progress" && (el.indicator || el.indicator === "true")) {
+        if(el.type == "progress" && (el.indicator || el.indicator === "true")){
           // Check if loading is completed
-          if (rate) {
+          if(rate){
             // Set the rounded rate value as indicator value
             var roundValue = Math.floor(rate * 100) / 100;
             indicator.innerHTML = parseInt(roundValue * 100) + "%";
-          } else {
+          }else{
             // Set the loading limit as indicator value
             indicator.innerHTML = (el.limit * 100) + "%";
           }
         }
       }
     },
-    functions: {
+    functions:{
       /*
         @function animate
         @description Trigger progress loading
         @param {Number} limit [Maximum progress value the loader could reach]
         @param {Number} duration [Progress animation duration]
       */
-      animate: function (limit, duration) {
+      animate: function(limit, duration){
         var el = this;
         el._animate(limit, duration);
       },
@@ -276,35 +272,30 @@
         @param {Number} limit [Maximum progress value the loader could reach]
         @param {Number} duration [Progress animation duration]
       */
-      reverse: function (limit, duration) {
+      reverse: function(limit, duration){
         var el = this;
         el._animate(limit, duration);
       }
     },
-    onCreated: function () {
+    onCreated: function(){
       var el = this;
       // Create loading events
       eon.createCallback("onLoadEnd", el);
       eon.createCallback("onLoadComplete", el);
     },
-    onRender: function () {
+    onRender: function(){
       var el = this;
       var rail = el.querySelector(".eon-loader-rail");
-      var bar = el.querySelector(".eon-loader-bar");
-      var fillBar = el.querySelector(".eon-loader-loadingBar");
+      var barColor = el.querySelector(".eon-loader-loadingBar");
       // Check loader type
-      if (el.type == "progress") {
+      if(el.type == "progress"){
         // Set progress styling
         el.classList.add("eon-loader-progress");
         // Show load bar rail
         rail.style.opacity = 1;
       }
       // Set bar color
-      fillBar.style.backgroundColor = el.barColor;
-      // 
-      if (el.barClass) {
-        bar.classList.add(el.barClass);
-      }
+      barColor.style.backgroundColor = el.barColor;
     }
   });
 </script>

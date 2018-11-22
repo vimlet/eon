@@ -8,7 +8,10 @@
 </template>
 
 <script>
-    eon.element("eon-editor", "eon-editor.css", {
+    eon.element({
+
+        name: "eon-editor",
+        style: "eon-editor.css",
 
         dependencies: [
             "../eon-loading"
@@ -17,7 +20,7 @@
         properties: {
             value: {
                 value: "",
-        observe: true
+                observe: true
             },
             language: {
                 value: "html",
@@ -96,9 +99,16 @@
 
                     el._refs.editor.model.onDidChangeContent((event) => {
                         try {
-                            eon.triggerCallback("onchange", el, el, [el]);                            
-                            el.value = el._refs.editor.getValue();                            
+                            eon.triggerCallback("onchange", el, el, [el]);
+                            el.value = el._refs.editor.getValue();
                         } catch (e) {}
+                    });
+
+                    el._refs.editor.onDidFocusEditor((event)=>{
+                            eon.triggerCallback("onFocus", el, el, [el]);
+                    });
+                    el._refs.editor.onDidBlurEditor((event)=>{
+                            eon.triggerCallback("onBlur", el, el, [el]);
                     });
                 });
             },
@@ -124,6 +134,8 @@
             // Custom callback to know when monaco editor is ready to be used
             eon.createCallback("oneditorready", this, "ready");
             eon.createCallback("onchange", this);
+            eon.createCallback("onFocus", this);
+            eon.createCallback("onBlur", this);
             eon.createCallback("onloader", this, "ready");
         },
 
@@ -138,8 +150,7 @@
         onPropertyChanged: function (key, oldVal, newVal) {
             switch (key) {
                 case "value":
-                    // console.log("oldVal",oldVal);
-                    // console.log("newVal",newVal);
+                    // Do nothing
                     break;
             }
         }

@@ -2,7 +2,11 @@
 </template>
 
 <script>
-  eon.element("eon-stack", "eon-stack.css", {
+  eon.element({
+
+    name: "eon-stack",
+    style: "eon-stack.css",
+
     dependencies: [
       "../eon-panel"
     ],
@@ -50,6 +54,24 @@
             el._misc.activePanel.classList.add("eon-stack-visible");
             el._misc.activePanel.render();
           })
+
+        }
+
+      },
+      /*
+      @function (private) _assignSize
+      @description Depending on our container we will add some style
+      */
+      assignSize: function () {
+
+        var el = this;
+        var container = el.parentNode;
+        var containerComputedStyle = window.getComputedStyle(container);
+
+        if (containerComputedStyle.flexGrow == "1") {
+
+          container.style.display = "flex";
+          el.classList.add("eon-stack-flex");
 
         }
 
@@ -168,6 +190,7 @@
     },
     onTransformed: function () {
       this._setup();
+      this._assignSize();
     }
   });
 
