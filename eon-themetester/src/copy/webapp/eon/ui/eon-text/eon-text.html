@@ -14,8 +14,13 @@
 </template>
 
 <script>
-    eon.element("eon-text", "eon-text.css", {
+    eon.element({
+
+        name: "eon-text",
+        style: "eon-text.css",
+
         themed: true,
+
         dependencies: [
             "../eon-scroll"
         ],
@@ -361,12 +366,14 @@
                 el._refs.editableArea.addEventListener("focus", function () {
                     if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
+                        eon.triggerCallback("onFocus", el);
                     }
                 });
 
                 el._refs.editableArea.addEventListener("blur", function () {
                     el._restoreAreaInnerHTML();
                     el.classList.remove("focus");
+                    eon.triggerCallback("onBlur", el);
                 });
 
             },
@@ -406,11 +413,13 @@
                 input.addEventListener("focus", function (e) {
                     if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
                         el.classList.add("focus");
+                        eon.triggerCallback("onFocus", el);
                     }
                 });
 
                 input.addEventListener("blur", function (e) {
                     el.classList.remove("focus");
+                    eon.triggerCallback("onBlur", el);
                 });
 
                 main.appendChild(input)
@@ -811,7 +820,9 @@
 
                 } else {
 
-                    el._refs.input.value = el.value;
+                    el.onReady(function () {
+                        el._refs.input.value = el.value;
+                    });
 
                 }
 
@@ -874,6 +885,19 @@
                 el._misc.descriptionText = description;
                 el._refs.description.innerHTML = description;
 
+            },
+            // @function focus (public) [Give focus to vc-text]
+            focus: function () {
+                var el = this;
+                el.onReady(function () {
+                    if (el.type != "area") {
+                        el._refs.input.focus();
+                    } else {
+                        if (el._misc.area.isNative) {
+                            el._refs.editableArea.focus();
+                        }
+                    }
+                });
             }
         },
 
@@ -894,6 +918,8 @@
             el.source.textContent = "";
 
             eon.createCallback("onEnter", this);
+            eon.createCallback("onBlur", this);
+            eon.createCallback("onFocus", this);
 
         },
 

@@ -1,0 +1,163 @@
+<eon-anchor state="tree" eon-scroll="eon-scroll" type="top"></eon-anchor>
+<div class="card">
+  <h1>TREE</h1>
+
+  <!-- PLAYGROUND -->
+  <!-- Playground declaration -->
+  <eon-playground class="d-pg d-tree-pg"></eon-playground>
+
+  <script>
+    initializePlayground(".d-tree-tmp", ".d-tree-pg");
+  </script>
+
+  <!-- Playground content -->
+  <template class="d-tree-tmp">
+    <div class="template-head">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Import VimletJS  -->
+      <script src="/eon/eon.js"></script>
+      <!-- UI components -->
+      <script>
+        eon.import([
+          "/eon/ui/eon-tree",
+          "/eon/ui/eon-scroll"
+        ]);
+      </script>
+    </div> 
+    <!-- EXAMPLES BODY -->
+    <div class="template-body">
+      <eon-scroll>
+        <div class="row d-tree-row">
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Tree</h2>
+            </div>
+            <div class="tExampleContainer">
+              <!-- TREE -->
+              <eon-tree id="d-tree" icons="all">
+
+                <eon-treenode name="dir" path="dir"></eon-treenode>
+                <eon-treenode type="file" name="file1" path="file1"></eon-treenode>
+                <eon-treenode path="dir2/dir2.1/dir2.1.1"></eon-treenode>
+                <eon-treenode path="dir2/dir2.1/dir2.1.2"></eon-treenode>
+                <eon-treenode type="file" path="dir2/dir2.1/dir2.1.1/dir2.1.1.1/file2"></eon-treenode>
+                <eon-treenode name="dir2.1.2.1.1" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.1"></eon-treenode>
+                <eon-treenode name="dir2.1.2.1.2" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.2"></eon-treenode>
+                <eon-treenode type="file" extension="js" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.2/file3"></eon-treenode>
+
+              </eon-tree>
+              <!-- ::::::: -->
+            </div>
+          </div>
+          <div class="example">
+            <div class="tSubtitleContainer">
+              <h2>Store based tree</h2>
+            </div>
+            <div class="tExampleContainer">
+              <!-- TREE -->
+              <eon-tree id="store-tree" store="true" drag="true">
+
+              </eon-tree>
+              <!-- ::::::: -->
+            </div>
+          </div>
+        </div>
+      </eon-scroll>
+    </div>
+
+    <!-- END EXAMPLES BODY -->
+    <script class="template-js">
+      // ** Playground resize fix
+      eon.onReady(function () {
+        var storeTree = document.querySelector("#store-tree");
+
+        storeTree.onRender(function () {
+          // ** New store
+          var endpoint = new eon.endpoint("rest", "data/tree/tree-data.json");
+          // Get request
+          endpoint.get("", function (success, data) {
+            // Update store data & tree items
+            storeTree.store.data = eon.util.objectToMap(JSON.parse(data.responseText));
+            // Iframe content loaded monitoring
+            eon.triggerCallback("onLoaded", window.frameElement);
+          });
+        });
+      });
+    </script>
+
+    <style class="template-style">
+      /* -- Shared cross-examples -- */
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        background-color: #2d2d2d;
+        color: #e6e6e6;
+        overflow: hidden;
+      }
+
+      .row {
+        padding: 10px;
+        display: flex;
+        /* align-items: center; */
+        flex-wrap: wrap;
+      }
+
+      .example {
+        background-color: #383838;
+        padding: 10px;
+        box-sizing: border-box;
+        margin: 15px;
+        min-height: 50px;
+        flex-grow: 1;
+      }
+
+      @media (max-width: 580px) {
+        .example {
+          margin: 10px 0;
+          width: 100%;
+        }
+      }
+
+      h2 {
+        margin: 0;
+      }
+
+      .tSubtitleContainer {
+        margin-bottom: 10px;
+      }
+
+      .tExampleContainer {
+        display: flex;
+      }
+
+      .pink {
+        background-color: #b73ba2;
+      }
+
+      .blue {
+        background-color: #3b78b7 !important;
+      }
+
+      .yellow {
+        background-color: #b78f47;
+      }
+
+      .green {
+        background-color: #519a51 !important;
+      }
+
+      .red {
+        background-color: #9c4747;
+      }
+
+      .purple {
+        background-color: #6c479c;
+      }
+    </style>
+  </template>
+  <!-- END PLAYGROUND -->
+</div>
