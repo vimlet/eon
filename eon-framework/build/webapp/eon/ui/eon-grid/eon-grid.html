@@ -627,7 +627,7 @@
 
                 var el = this;
 
-                var rows = el._misc.sourceFragment.querySelectorAll("eon-row");
+                var rows = el._misc.sourceFragment.children;
                 var dataMap = new Map();
                 var counter = 0;
 
@@ -648,7 +648,7 @@
                         var data = Object.assign({}, dataModel);
 
                         counter++;
-
+                        
                         for (var m = 0; m < row.children.length; m++) {
 
                             if (row.children[m].tagName.toLowerCase() == "eon-cell") {
@@ -714,14 +714,14 @@
                 if (cleanCurrentRange) {
                     el._clearPage();
                 }
-
+                console.log('data', data);
                 // Store map keys
                 data.forEach(function (value, key, map) {
 
                     dataObject = value;
-
+                    console.log('dataObject', dataObject);
                     row = document.createElement("eon-row");
-                    row.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
+                    row.classList.add("eon-grid-entryRow", "eon-bg1-border2");
                     row.dataset.entryId = dataObject[el.keyProperty];
 
                     el._createChildRows(row, dataObject);
@@ -730,7 +730,7 @@
                     // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
                     for (var i = 0; i < columnsKeys.length; i++) {
                         cell = el._createCell(columnsKeys[i], dataObject, data);
-                        row.appendChild(cell);
+                        row.content.appendChild(cell);
                     }
 
                     if (eon.util.isTrue(el.autofit)) {
@@ -782,9 +782,9 @@
 
                         //For each column we have in the grid we will look for its value on the dataObject
                         // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
-                        for (var i = 0; i < columnsKeys.length; i++) {
-                            cell = el._createCell(columnsKeys[i], dataObject, data);
-                            childRow.appendChild(cell);
+                        for (var j = 0; j < columnsKeys.length; j++) {
+                            cell = el._createCell(columnsKeys[j], dataObject[el.childProperty][i] , data);
+                            childRow.content.appendChild(cell);
                         }
 
                         if (eon.util.isTrue(el.autofit)) {
@@ -797,13 +797,15 @@
 
                     }
 
-                    row.childrenDocFragment = childrenDocFragment;
+                    row.dropdown.appendChild(childrenDocFragment);
                     
                     row.addEventListener("click", function () {
                        
-                        var childsWrapper = document.createElement("div");
+                        var subRowsCount = row.dropdown.children.length;
 
-                        console.log('childrenDocFragment', this.childrenDocFragment);
+                        row.appendChild(row.dropdown);
+
+                        row.style.flexGrow = 1 + subRowsCount;
 
 
                     });
