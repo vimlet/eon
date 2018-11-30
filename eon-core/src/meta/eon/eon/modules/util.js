@@ -274,10 +274,8 @@ eon.util.objectToMap = function (object) {
  */
 eon.util.mapToObject = function (map) {
   var obj = Object.create(null);
-  for (var [k, v] of map) {
-    // We don’t escape the key '__proto__'
-    // which can cause problems on older engines
-    obj[k] = v;
-  }
+  map.forEach(function (value, key, mapObj) {
+    mapObj[key] = value;
+});
   return obj;
 };

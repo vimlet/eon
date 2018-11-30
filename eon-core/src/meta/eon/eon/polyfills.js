@@ -47,6 +47,12 @@ eon.needLocalStringPolyfill = function () {
   return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
 }
 
+eon.needPromisesPolyfill = function () {
+  if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
+    return false;
+  }
+  return true;
+}
 eon.needClassListAddPolyfill = function () {
   var div = document.createElement("div");
   div.classList.add("class1", "class2");
@@ -80,6 +86,11 @@ if (eon.needObjectAssignPolyfill()) {
 
 // Pointer events (Must run always)
 eon.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
+
+// Promises
+if (eon.needPromisesPolyfill()) {
+  eon.injectPolyfill(eon.basePath + "/polyfill/promises/promises.js");
+}
 
 // Date locale polyfill
 if (eon.needLocalStringPolyfill()) {
