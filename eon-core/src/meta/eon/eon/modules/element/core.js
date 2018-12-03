@@ -179,6 +179,7 @@ eon.parse = function (el, config) {
     eon.importPublic(el, config);
     eon.importPrivate(el, config);
 
+    eon.definePath(el);
     eon.defineParentComponent(el);
     eon.defineOverlayCreation(el);
     eon.definePlaceholderCreation(el);
@@ -186,6 +187,10 @@ eon.parse = function (el, config) {
     eon.triggerAllCallbackEvents(el, config, "onParsed");
     eon.registry.updateElementStatus(el, "parsed");
 
+};
+
+eon.definePath = function (el) {
+    el.importPath = eon.imports.paths[el.nodeName.toLowerCase()];
 };
 
 eon.defineParentComponent = function (el) {
