@@ -41,9 +41,9 @@ Note eon/eon.js is the default location but you can use any other path if you wi
 
 ## Importing components
 
-Now we can start importing components, you can think of components as the parts of what your application would be made of. This "parts" can be build by others or by you, by default eon comes with a rich library of UI components that will fulfill most of your needs.
+Now we can start importing components, you can think of components as the parts of what your application would be made of. This "parts" can be built by others or by you, by default eon comes with a rich library of UI components that will fulfill most of your needs.
 
-For now, we will use a simple button component as an example, but you can read more about custom component creation on the [Components Creation tutorial](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Creation.md).
+For now, we will use a simple button component as an example, but you can read more about custom components creation on the [Components Creation tutorial](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Creation.md).
 
 ```[html]
 <head>

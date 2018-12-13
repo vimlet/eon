@@ -1,55 +1,41 @@
 
 eon.element = function (param1, param2) {
 
+    var config, stylePath, name;
+
     if (param2) {
 
-        config = param2.config ? param2.config : param2;
-        stylePath = config.style;
+        config = param2.config ? param2.config : param2.constructor === Object ? param2 : {};
         name = param1;
-        
+
     } else {
 
-        config = param1.config ? param1.config : param1;
-        stylePath = config.style;
-        name = config.name;
+        config = param1.config ? param1.config : param1.constructor === Object ? param1 : {};
+        name = config.name ? config.name : param1;
 
     }
-    
-    stylePath = stylePath ? stylePath : "";
-    config = config ? config : {};
-    
+
+    stylePath = config.style ? config.style : "";
+
     // If the user provided a style path then we create its link and append it
     if (stylePath != "") {
 
         var link = document.createElement("link");
-        
+
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
 
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", stylePath);
 
         // Cache
-        eon.cache.add(stylePath, {name: name});
+        eon.cache.add(stylePath, { name: name });
 
         document.head.appendChild(link);
 
     }
 
-    if (config.constructor === Object) {
-
-        eon.imports.config[name.toLowerCase()] = config;
-        eon.triggerCallback('onScriptsReady', eon);
-
-    } else if (config) {
-
-        eon.amd.require([eon.imports.paths[name.toLowerCase()] + config], function (config) {
-
-            eon.imports.config[name.toLowerCase()] = config;
-            eon.triggerCallback('onScriptsReady', eon);
-
-        });
-
-    }
+    eon.imports.config[name.toLowerCase()] = config;
+    eon.triggerCallback('onScriptsReady', eon);
 
 };
 
@@ -232,7 +218,7 @@ eon.defineOverlayCreation = function (el) {
 
         })
 
-        return overlay; 
+        return overlay;
 
     };
 
@@ -266,7 +252,7 @@ eon.collectObserveData = function (el, config) {
     el.__observeProperties = {};
     el.__observeAttributes = {};
     el.__reflectProperties = {};
-
+    
     // Assigns each index of the array to the object
     eon.addObserveFromArray(el.__observeProperties, config.observeProperties);
     eon.addObserveFromArray(el.__observeAttributes, config.observeAttributes);

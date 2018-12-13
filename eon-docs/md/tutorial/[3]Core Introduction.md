@@ -2,7 +2,7 @@
 
 ## What are eon components?
 
-eon components are the individual parts of what your application is composed of, providing both functionality and visuals. With eon components you can develop an application by composing it of small parts that can be built one at a time, this foments a encapsulated and reusable architecture.
+Eon components are the individual parts of what your application is composed of, providing both functionality and visuals. With eon components you can develop an application by composing it of small parts that can be built one at a time, this foments a encapsulated and reusable architecture.
 
 ## What can I build with them?
 
@@ -23,11 +23,11 @@ By splitting a complex problem such as an application in small parts or componen
 
 [Usage]<>
 
-eon imported components can be added **declarative** using html tags or **programmatically** creating and appending elements to the DOM with javascript.
+Eon imported components can be added **declaratively** using html tags or **programmatically** creating and appending elements to the DOM with javascript.
 
 ## Import
 
-In order to be able to use eon components, first they must be imported, since this operation is fully asynchronous its recommend to declare component imports on the `head` section. You may access the a wide library of components under the `ui` directory or any other custom element in a directory of your choice.
+In order to be able to use eon components, first they must be imported, since this operation is fully asynchronous its recommended to declare component imports on the `head` section. You may access to the wide library of components under the `ui` directory or any other custom element in a directory of your choice.
 
 ```[html]
 <!DOCTYPE html>
@@ -165,12 +165,21 @@ Now you can use your custom eon component importing in a declaratively or progra
 
 ## Advanced config
 
-Now we mastered the basics of eon component creation, we can play with components configuration.
-When declaring a new component through `eon.element` function you can pass a config object as a second parameter, where properties and functions can be declared and callbacks to element life-cycle can be use to add additional behaviour.
+Now we have mastered the basics of eon component creation, we can play with components configuration.
+
+When declaring a new component through `eon.element` function you can pass an config object as parameter, where the name, style, properties and functions can be declared and callbacks to element life-cycle can be used to add additional behaviour.
+
+There are other options to declare the component:
+
+- Passing an object as the parameter, with a name and the config object.
+- It can also be passed the name as the first parameter and the rest of the config as the second one.
 
 ```[html]
 <script>
-  eon.element("my-element", null, {
+  eon.element({
+
+    name: "my-element",
+    style: "my-element.css"
 
     properties: {
       customProperty: "I'm a custom property"
@@ -193,7 +202,7 @@ When declaring a new component through `eon.element` function you can pass a con
 
 [Life-cycle]<>
 
-eon components pass through a series of events that determine their life-cycle. Understanding this events is crucial for an optimal performance implementation. 
+Eon components pass through a series of events that determine their life-cycle. Understanding this events is crucial for an optimal performance implementation. 
 
 ## Sequential events
 
