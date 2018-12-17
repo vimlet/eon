@@ -216,7 +216,7 @@ Events by execution order:
 
 - **onTransformed** - Triggers after transform, which mean its template fragment and source fragment has been imported to the dom using element slotting approach.
 
-- **onRender** - Triggers after **ALL** elements has been transformed. This is the main event to define element behaviour with trickle flow where parents triggers always before its children.
+- **onRender** - Triggers after **ALL** elements have been transformed. This is the main event to define element behaviour with trickle flow where parents triggers always before its children.
 
 - **onBubbleRender** - Triggers after **ALL** elements has been transformed and rendered. This is an auxiliary event to define element behaviour with an inverse rendering order. Triggers with a bubble flow where children always triggers before its parents.
 
@@ -226,7 +226,9 @@ Events by execution order:
 
 Recurrent events might be triggered more than once:
 
-- **onResize** - By default triggers each time window is resized unless element config properties selfResize is set to true, in this case it adds a element resize listener and triggers on element resize. 
+- **onResize** - Adds a resize listener element and triggers and gets triggered everytime the size changes. 
+
+- **onWindowResize** - Triggers each time window is resized.
 
 - **onAttached** - Triggers each time element is attached to the DOM.
 
@@ -240,13 +242,13 @@ Recurrent events might be triggered more than once:
 
 [Interpolation]<>
 
-eon template engine makes usage of interpolation in order to provide a powerful and handy way of data binding and scripting.
+Eon template engine makes usage of interpolation in order to provide a powerful and handy way of data binding and scripting.
 This allows components to display changeable data in the right place without having to manually update each value. It also provides logic driven content such as conditional or loop based content, in fact it so powerful that any javascript logic can be written inside the interpolation tags and it will be executed in a safe sandboxed environment.
 
 
 ## Basic Usage
 
-Interpolation is represented by `{{ }}` tags and must be written inside the element template. It's also mandatory to set interpolation to 'true' on the element config.
+Interpolation is represented by `{{ }}` tags and must be written inside the element template. It's also mandatory to set parse to 'true' on the element config.
 
 Sometimes specific behaviour can be triggered with the use of shorthands, this are special tokens that are preceded by `{{`. Examples of this are echo shorthand `{{=` and bind shorthand `{{@`.
 
@@ -261,11 +263,15 @@ hello-world.html
 </template>
 
 <script>
-eon.element("hello-world", null, {
+eon.element({
+
+  name: "hello-world"
   parse: true;
+
   data: {
       name: "World";
   }
+
 });
 </script>
 ```
@@ -275,8 +281,10 @@ Now when `<hellow-world></hellow-world>` is used the text 'Hello World' is displ
 Note that any change on `el.data.name` will immediately get reflected on the text, for example doing something like this:
 
 ```[javascript]
-var el = document.querySelector("hellow-world");
-el.data.name = "Vimlet";
+<script>
+  var el = document.querySelector("hellow-world");
+  el.data.name = "Vimlet";
+</script>
 ```
 
 would yield the following output instead:
@@ -387,8 +395,36 @@ Now lets say we want to place it inside the div with the class eon-container-par
 </eon-container>
 ```
 
-eon takes care of the element placement so you can stay focus on other important aspects of your application.
+Eon takes care of the element placement so you can stay focus on other important aspects of your application.
 
 [Theming]<>
 
-Coming soon...
+For the visual aspect of the element eon offers a wide and easy way to customize themes, having themes is really usefull as it provides a way of standardize colors, borders and all the visual related CSS. Since all the rules are scoped by the theme attribute, you can have several themes active in the same web application avoiding any troubles or conflicts. 
+
+By default, if no theme is specified, Eon will work with the "noire" dark theme, but you have multiple options to change it depending on what you wish to do.
+
+If you want to change the default eon theme for all your components the easiest way to do so is to change it directly at the start, after importing eon:
+
+```[javascript]
+<script src="/eon/eon.js"></script>
+
+<script>
+  eon.theme = "myTheme";
+</script>
+```
+
+If what you want to do is have a different theme for a specific component you just have to change it like so:
+
+```[html]
+<eon-component theme="myTheme"></eon-component>
+```
+
+Once you have specified your themes, eon will import them as needed, you can also specify more themes to have them loaded for the future, that can be done with Eon's theme schema:
+
+```[javascript]
+<script>
+  eon.themeSchema = {
+      "claro": ["eon-component"],
+  };
+</script>
+```

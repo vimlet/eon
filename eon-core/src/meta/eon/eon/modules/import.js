@@ -205,7 +205,7 @@ eon.handleTemplateInterpolation = function (name) {
     }
 };
 
-// Imports specific componentes themesif specified
+// Imports specific componentes themes if specified
 eon.importSchemaThemes = function () {
 
     if (eon.themeSchema) {
@@ -417,11 +417,11 @@ eon.handleConfigDependencies = function (name) {
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
             dependencyName = elementConfig.dependencies[j].match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase();
-            dependencyPath = elementConfig.dependencies[j];
+            dependencyPath = elementConfig.dependencies[j].charAt(0) == "/" ? eon.basePath + elementConfig.dependencies[j] : elementConfig.dependencies[j];
             if (!(dependencyName in eon.imports.templates)) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
-                dependencyFile = eon.imports.paths[name] + dependencyPath;
+                dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
                 eon.import(dependencyFile);
             }
         }
