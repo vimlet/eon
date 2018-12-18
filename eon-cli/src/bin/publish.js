@@ -1,4 +1,3 @@
-var commons = require("@vimlet/commons");
 var os = require("os");
 var path = require("path");
 var fs = require("fs-extra");

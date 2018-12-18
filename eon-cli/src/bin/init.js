@@ -8,7 +8,8 @@ var readlineSync = require("readline-sync");
 var Sync = require("sync");
 var install = require("./install");
 
-var releaseURL = "https://github.com/vimlet/VimletComet-Examples/releases/download/eon-init/";
+var releaseURL = "https://github.com/vimlet/eon-examples/releases/download/eon-init/";
+var versionURL = "https://api.github.com/repos/vimlet/eon-examples/releases/tags/eon-init";
 var templateName;
 
 var projectPath;
@@ -72,8 +73,6 @@ module.exports = function (result) {
 }
 
 function handleVersion(cb) {
-    var url = "https://api.github.com/repos/vimlet/VimletComet-Examples/releases/tags/eon-init";
-
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
@@ -88,7 +87,7 @@ function handleVersion(cb) {
         }
     };
 
-    xhttp.open("GET", url, true);
+    xhttp.open("GET", versionURL, true);
     xhttp.setRequestHeader("User-Agent", "vimlet");
     xhttp.send();
 }
@@ -101,10 +100,10 @@ function downloadAndExtractTemplate(releaseURL, templateName, projectPath, cb) {
     var dest = path.join(downloadPath, templateName);
 
     if (!fs.existsSync(dest)) {
-        commons.request.download(file_url, dest, null, null, function (error) {
+        commons.request.download(file_url, dest, {}, function (error) {
             if (!error) {
                 // Extract
-                commons.compress.unpack(dest, projectPath, "zip", null, null, function (error) {
+                commons.compress.unpack(dest, projectPath, "zip", {}, function (error) {
                     cb(error);
                 });
             } else {
@@ -113,7 +112,7 @@ function downloadAndExtractTemplate(releaseURL, templateName, projectPath, cb) {
         });
     } else {
         // Extract
-        commons.compress.unpack(dest, projectPath, "zip", null, null, function (error) {
+        commons.compress.unpack(dest, projectPath, "zip", {}, function (error) {
             cb(error);
         });
     }

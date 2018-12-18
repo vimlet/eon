@@ -9,7 +9,7 @@ var rimraf = require("rimraf");
 var Sync = require("sync");
 
 var gh_owner = "vimlet";
-var gh_repo = "VimletComet";
+var gh_repo = "eon";
 // var gh_credentials;
 var eonFileName = "eon-";
 
@@ -456,10 +456,10 @@ function downloadAndExtract(file_url, extractPath, version, cb) {
         //         "Authorization": "Basic " + btoa(gh_credentials)
         //     };
         // }
-        commons.request.download(file_url, dest, null, null, function (error) {
+        commons.request.download(file_url, dest, {}, function (error) {
             if (!error) {
                 // Extract
-                commons.compress.unpack(dest, extractPath, "zip", null, null, function (error) {
+                commons.compress.unpack(dest, extractPath, "zip", {}, function (error) {
                     cb(error);
                 });
             } else {
@@ -469,7 +469,7 @@ function downloadAndExtract(file_url, extractPath, version, cb) {
 
     } else {
         // Extract
-        commons.compress.unpack(dest, extractPath, "zip", null, null, function (error) {
+        commons.compress.unpack(dest, extractPath, "zip", {}, function (error) {
             cb(error);
         });
     }
