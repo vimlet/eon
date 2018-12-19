@@ -11,7 +11,8 @@ var Sync = require("sync");
 var gh_owner = "vimlet";
 var gh_repo = "eon";
 // var gh_credentials;
-var eonFileName = "eon-";
+var eonCoreFileName = "eon-core.zip";
+var eonUIFileName = "eon-ui.zip";
 
 var eonJsonObject = {};
 var actualPackages = {};
@@ -116,7 +117,7 @@ function handleRemoteVersions(value, noSave, cb) {
         // General installation            
         if (value === true || value === "true") {
             try {
-                var packageVersion = getLatesteonRelease.sync(null);
+                var packageVersion = getLatestEonRelease.sync(null);
 
                 if (!eonJsonObject.eon || eonJsonObject.eon == "latest") {
                     eonJsonObject.eon = packageVersion;
@@ -139,7 +140,7 @@ function handleRemoteVersions(value, noSave, cb) {
                         checkPackageExists.sync(null, packageName, valueArray[1]);
                         packageVersion = valueArray[1];
                     } else {
-                        packageVersion = getLatesteonRelease.sync(null);
+                        packageVersion = getLatestEonRelease.sync(null);
                     }
 
                     eonJsonObject[packageName] = packageVersion;
@@ -204,7 +205,7 @@ function checkPackageExists(name, version, cb) {
 
 
 // Search on GitHub the latest version of the required package
-function getLatesteonRelease(cb) {
+function getLatestEonRelease(cb) {
     var url = "https://api.github.com/repos/" + gh_owner + "/" + gh_repo + "/releases/latest";
 
     var xhttp = new XMLHttpRequest();
@@ -289,12 +290,12 @@ function installPackages(cb) {
         var summaryMessage = "";
 
         // Avoid checking things twice by using flags
-        var iseon = eonJsonObject.eon && actualPackages.eon != eonJsonObject.eon;
+        var isEon = eonJsonObject.eon && actualPackages.eon != eonJsonObject.eon;
         var isSinglePackageDependency = singlePackageMode && (!(singlePackageName in actualPackages.dependencies) || actualPackages.dependencies[singlePackageName] != eonJsonObject.dependencies[singlePackageName]);
         var isMultiplePackageDependency = !singlePackageMode && eonJsonObject.dependencies;
 
         // Log install summary message
-        if (iseon) {
+        if (isEon) {
             summaryMessage += formatSummaryMessage("eon", actualPackages.eon, eonJsonObject.eon);
         }
 
@@ -318,19 +319,25 @@ function installPackages(cb) {
         }
 
         // eon
-        if (iseon) {
+        if (isEon) {
+
+            cleanLocal("eon");
 
             try {
-                eonFileName = eonFileName + eonJsonObject.eon + ".zip";
-                var url = getGitHubDownloadURL.sync(null, eonFileName, eonJsonObject.eon);
-
-                cleanLocal("eon");
+                var url = getGitHubDownloadURL.sync(null, eonCoreFileName, eonJsonObject.eon);
                 downloadAndExtract.sync(null, url, localPath, eonJsonObject.eon);
-                updateeonVersion("eon", eonJsonObject.eon);
+            } catch (error) {
+                cb(error);
+            }
+            
+            try {
+                var url = getGitHubDownloadURL.sync(null, eonUIFileName, eonJsonObject.eon);
+                downloadAndExtract.sync(null, url, localPath, eonJsonObject.eon);
             } catch (error) {
                 cb(error);
             }
 
+            updateeonVersion("eon", eonJsonObject.eon);
         }
 
         if (isSinglePackageDependency) {
