@@ -27,7 +27,7 @@ Since we need to import multiple components we are passing an `Array` with their
                 <span class="title">To-Do list</span>
 
                 <!-- Scroll component that will allow us to scroll through our list -->
-                <eon-scroll thickness="5" fillContainer="false">
+                <eon-scroll thickness="5" fill="false">
                     <!-- It will contain the elements to the list that are added. -->
                     <div class="listContainer"></div>
                 </eon-scroll>
@@ -47,7 +47,7 @@ Since we need to import multiple components we are passing an `Array` with their
 
 As you can see we have prepared a basic structure for our `To-Do List` and we have included a `scroll` component that will let us scroll through our list, we also have a `text` component so that the user can type any text that will be added to the list when our `button` component is triggered.
 
-If you take a closer look you might find some `attributes` you have never seen before, these are `exclusive` for each type of components that will let us configure the behavior we want for the components, for instance, you can see that in the scroll element there are two attributes we are using, `thickness` and `fillContainer`; the value of `thickness` will determine the size of the scroll bars, while the value of `fillContainer` will tell the scroll if we want it to fill the size of its parent or it will have its own size.
+If you take a closer look you might find some `attributes` you have never seen before, these are `exclusive` for each type of components that will let us configure the behavior we want for the components, for instance, you can see that in the scroll element there are two attributes we are using, `thickness` and `fill`; the value of `thickness` will determine the size of the scroll bars, while the value of `fill` will tell the scroll if we want it to fill the size of its parent or it will have its own size.
 
  ## Dynamic components
  Once the static components are declared, we establish dynamic functionality in order to add the list items.
@@ -71,7 +71,7 @@ function addItem() {
 ```
 
 With this function we dinamically create the required components that will shape the list item. 
-To use eon programmatically we will do it inside the `onReady` event, ensure that all 
+To use eon programmatically we will do it inside the `onReady` event, ensuring that all 
 the functionalities are loaded in the document.
 ``` [javascript]
 function setItem(newItem) {

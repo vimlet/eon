@@ -1,4 +1,3 @@
-var commons = require("@vimlet/commons");
 var path = require("path");
 var fs = require("fs-extra");
 var rimraf = require("rimraf");

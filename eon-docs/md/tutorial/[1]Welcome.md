@@ -9,7 +9,7 @@ Tutorials are also available to help you getting started and guide you step by s
 
 ## What is eon?
 
-eon (or Vimlet Comet) aims to provide a solution for user interface composition through web technologies, with extensibility and customization in mind, providing a first class unified user experience, no matter what resolution, device or platform is being used. 
+Eon aims to provide a solution for user interface composition through web technologies, with extensibility and customization in mind, providing a first class unified user experience, no matter what resolution, device or platform is being used. 
 
 Unlike other view abstraction frameworks eon is design to remain true to the DOM and strongly bound to its underlying technologies, this means is easy to pick and easy to integrate with other frameworks since it uses the the technologies you all ready know and love. 
 
