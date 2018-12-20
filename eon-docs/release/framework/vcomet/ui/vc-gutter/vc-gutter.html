@@ -1,8 +1,8 @@
 <script type="text/javascript">
-  //@header A container with dynamic eon-section elements size
-  eon.element("eon-gutter", "eon-gutter.css", {
+  //@header A container with dynamic vc-section elements size
+  vcomet.element("vc-gutter", "vc-gutter.css", {
     dependencies: [
-      "../eon-section"
+      "../vc-section"
     ],
     properties: {
       /*
@@ -120,11 +120,11 @@
         el._misc.eventDelay = 10;
         // Set vertical gutter style
         if(el.type == "vertical") {
-          el.classList.add("eon-gutter-vertical");
+          el.classList.add("vc-gutter-vertical");
         }
         // Check if it is a nested gutter
         // ** Solves Safari flex child fit parent bug
-        if(el.parentNode.tagName == "eon-SECTION"){
+        if(el.parentNode.tagName == "VC-SECTION"){
           el.style.position = "absolute";
         }
         // ** Force gutter to fit its parent (no style applied yet)
@@ -144,8 +144,8 @@
         el._refs.section = children[0];
         el._refs.secSection = children[1];
         //
-        el._refs.section.classList.add("eon-gutter-section");
-        el._refs.secSection.classList.add("eon-gutter-section", "eon-gutter-secondary");
+        el._refs.section.classList.add("vc-gutter-section");
+        el._refs.secSection.classList.add("vc-gutter-section", "vc-gutter-secondary");
         //
         sectionSize = (el._misc.size / 2) - (el.splitterSize / 2);
         el._refs.section.style[el._misc.sizeProp] = sectionSize + "px";  
@@ -163,7 +163,7 @@
         el._refs.splitter = splitter;
         //
         splitter.style[el._misc.sizeProp] = parseInt(el.splitterSize) + "px";  
-        splitter.classList.add("eon-gutter-splitter", "eon-sect1");
+        splitter.classList.add("vc-gutter-splitter", "vc-sect1");
         //
         el.appendChild(splitter);
         el.insertBefore(el._refs.splitter, el._refs.secSection);
@@ -176,18 +176,18 @@
       */
       setCollapsible: function() {
         var el = this;
-        if(eon.util.isTrue(el.collapsible)){
+        if(vcomet.util.isTrue(el.collapsible)){
           // Create separator clickable div
           el._refs.clickable = document.createElement("div");
           el._refs.clickableZone = document.createElement("div");
-          el._refs.clickable.setAttribute("class", "eon-gutter-splitterClickable");
+          el._refs.clickable.setAttribute("class", "vc-gutter-splitterClickable");
           // Splitter collapsible style
-          el._refs.clickable.classList.add("eon-bg8","eon-fg4","eon-bg8-hoverable", "eon-fg1-hoverable");
-          el._refs.clickableZone.classList.add("eon-gutter-clickableZone");
+          el._refs.clickable.classList.add("vc-bg8","vc-fg4","vc-bg8-hoverable", "vc-fg1-hoverable");
+          el._refs.clickableZone.classList.add("vc-gutter-clickableZone");
           el._refs.clickable.setAttribute("touch-action", "none");
           // Create icon
           el._refs.collapseIcon = document.createElement("i");
-          el._refs.collapseIcon.classList.add("eon-unselectable", "eon-gutter-splitterCollapseIcon");
+          el._refs.collapseIcon.classList.add("vc-unselectable", "vc-gutter-splitterCollapseIcon");
           el._rotateCollapseIcon();
 
           el._refs.clickable.appendChild(el._refs.collapseIcon);
@@ -306,7 +306,7 @@
       */
       drag: function() {
         var el = this;
-        if(eon.util.isTrue(el.allowDrag)){
+        if(vcomet.util.isTrue(el.allowDrag)){
           // Draggable variables
           var mousedown = false;
           var moveValue = 0;
@@ -363,7 +363,7 @@
           // Update section size to change splitter position
           el._refs.section.style[el._misc.sizeProp] = value + "px";
           el._misc.gutterResizePercent = value * 100 / el._misc.size;
-          eon.triggerCallback("onDrag", el, el, [value]);
+          vcomet.triggerCallback("onDrag", el, el, [value]);
         }
       },
       /*
@@ -374,7 +374,7 @@
         var el = this;
         // Throttle event triggering for better performance
         var throttled = false;
-        eon.addResizeListener(el, "resize", function(){
+        vcomet.addResizeListener(el, "resize", function(){
           if (!throttled) {
             el.resize();
             // Throttle
@@ -417,7 +417,7 @@
       responsiveListener: function() {
         var el = this;
         // Check the screen device type
-        el._misc.touch = eon.util.isTouchScreen() ? true : false;
+        el._misc.touch = vcomet.util.isTouchScreen() ? true : false;
         // Apply responsive
         el._applyResponsive();
         // Throttle event triggering for better performance
@@ -450,7 +450,7 @@
           el._changeSplitterSize(6);
         }
         // ** Fix IE and Safari bad icon positioning on horizontal gutter
-        if(eon.util.isTrue(el.collapsible)) {
+        if(vcomet.util.isTrue(el.collapsible)) {
           el._splitterStyleBrowserFix();
         }
       },
@@ -461,7 +461,7 @@
       splitterStyleBrowserFix: function() {
         var el = this;
         // Check browser
-        if(eon.util.getBrowser() === "IE"){
+        if(vcomet.util.getBrowser() === "IE"){
             if(el.type === "horizontal") {
               el._refs.collapseIcon.style.position = "relative";
               el._refs.collapseIcon.style.right = "3px";
@@ -472,7 +472,7 @@
             } else {
               el._refs.collapseIcon.style.paddingTop = "3px";
             }
-          } else if(eon.util.getBrowser() === "Safari"){
+          } else if(vcomet.util.getBrowser() === "Safari"){
             el._refs.clickableZone.style.right = "-3px";
             // Applied touchable screen device style
             el._splitterStyleOnTouchScreen();
@@ -487,7 +487,7 @@
         // Check touchable device
         if(el._misc.touch || !el._misc.desktop) {
           // Check browser
-          if(eon.util.getBrowser() === "IE"){
+          if(vcomet.util.getBrowser() === "IE"){
                 el._refs.collapseIcon.style.right = 0;
                 el._refs.clickableZone.style.right = "-7px";
             }
@@ -517,7 +517,7 @@
     },
     onCreated: function() {
       var el = this;
-      eon.createCallback("onDrag", el);
+      vcomet.createCallback("onDrag", el);
     },
     onInit: function() {
       var el = this;

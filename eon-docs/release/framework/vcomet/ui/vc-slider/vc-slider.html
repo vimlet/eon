@@ -1,23 +1,23 @@
 <template>
 
-    <div class="eon-slider-wrapper eon-unselectable">
-        <div class="eon-slider-shell">
+    <div class="vc-slider-wrapper vc-unselectable">
+        <div class="vc-slider-shell">
 
-            <div class="eon-slider-track eon-bg5"></div>
-            <input class="eon-slider-slider" type="range" />
-            <div class="eon-slider-fill">
-                <div class="eon-slider-thumb"></div>
+            <div class="vc-slider-track vc-bg5"></div>
+            <input class="vc-slider-slider" type="range" />
+            <div class="vc-slider-fill">
+                <div class="vc-slider-thumb"></div>
             </div>
 
         </div>
 
-        <div class="eon-slider-display">0</div>
+        <div class="vc-slider-display">0</div>
     </div>
 
 </template>
 
 <script>
-    eon.element("eon-slider", "eon-slider.css", {
+    vcomet.element("vc-slider", "vc-slider.css", {
         properties: {
             /*
               @property {String} name 
@@ -186,7 +186,7 @@
                 el._refs.slider.value = el.value;
                 el._currentValue = el.value;
                 el._updateSlider(true);
-                eon.triggerCallback("onChange", el);
+                vcomet.triggerCallback("onChange", el);
 
             },
             /*
@@ -196,12 +196,12 @@
             createRefs: function () {
                 var el = this;
 
-                el._refs.shell = el.template.querySelector(".eon-slider-shell");
-                el._refs.track = el.template.querySelector(".eon-slider-track");
-                el._refs.slider = el.template.querySelector(".eon-slider-slider");
-                el._refs.fill = el.template.querySelector(".eon-slider-fill");
-                el._refs.thumb = el.template.querySelector(".eon-slider-thumb");
-                el._refs.range = el.template.querySelector(".eon-slider-display");
+                el._refs.shell = el.template.querySelector(".vc-slider-shell");
+                el._refs.track = el.template.querySelector(".vc-slider-track");
+                el._refs.slider = el.template.querySelector(".vc-slider-slider");
+                el._refs.fill = el.template.querySelector(".vc-slider-fill");
+                el._refs.thumb = el.template.querySelector(".vc-slider-thumb");
+                el._refs.range = el.template.querySelector(".vc-slider-display");
             },
             /*
               @function (private) _updateSlider
@@ -256,14 +256,14 @@
                     el.style.width = "auto";
 
                     // Sets height of slider depending on the properties inline and size 
-                    if (eon.util.isTrue(el.inline)) {
+                    if (vcomet.util.isTrue(el.inline)) {
                         el.style.height = el.size == "" ? "auto" : el.size;
                     } else {
                         el.style.height = el.size;
                     }
 
                     // Sets the property to place the slider in vertical for IE and Firefox browsers
-                    (eon.util.getBrowser() == "Firefox" || eon.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
+                    (vcomet.util.getBrowser() == "Firefox" || vcomet.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
                 }
             },
 
@@ -278,7 +278,7 @@
                 el._thumbEvent = startThumb;
 
                 function startThumb(e) {
-                    if (!eon.util.isTrue(el.readonly)) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
                         el._startY = e.clientY;
                         document.addEventListener("pointermove", moveThumb, false);
                         document.addEventListener("pointerup", function stopThumb(e) {
@@ -355,8 +355,8 @@
                 // On IE, Safari and IOS devices not work event "input"
                 // So is necessary a click event
                 el._refs.slider.addEventListener("click", function (e) {
-                    if (!eon.util.isTrue(el.readonly)) {
-                        if (eon.util.getBrowser() == "IE" || eon.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
+                        if (vcomet.util.getBrowser() == "IE" || vcomet.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
                             // On iOS devices and IE clicking on the input does not update its status
                             // Is is necessary  to do it programmatically
                             el._interactionSlider(e);
@@ -369,7 +369,7 @@
                 }, false);
 
                 el._refs.slider.addEventListener("input", function (e) {
-                    if (!eon.util.isTrue(el.readonly)) {
+                    if (!vcomet.util.isTrue(el.readonly)) {
                         el._updateSlider();
                         el._updateCurrentValue();
                     }
@@ -383,25 +383,25 @@
             updateDisabled: function () {
                 var el = this;
 
-                if (!eon.util.isTrue(el.disabled)) {
+                if (!vcomet.util.isTrue(el.disabled)) {
                     el._refs.slider.removeAttribute("disabled");
-                    el._refs.shell.classList.remove("eon-slider-disabled");
-                    el._refs.fill.classList.remove("eon-bg5-disabled");
-                    el._refs.fill.classList.add("eon-fg3");
-                    el._refs.thumb.classList.remove("eon-bg5-disabled");
-                    el._refs.thumb.classList.add("eon-fg3");
-                    el._refs.track.classList.remove("eon-bg5-disabled");
+                    el._refs.shell.classList.remove("vc-slider-disabled");
+                    el._refs.fill.classList.remove("vc-bg5-disabled");
+                    el._refs.fill.classList.add("vc-fg3");
+                    el._refs.thumb.classList.remove("vc-bg5-disabled");
+                    el._refs.thumb.classList.add("vc-fg3");
+                    el._refs.track.classList.remove("vc-bg5-disabled");
 
                     el._thumbMotion();
 
                 } else {
                     el._refs.slider.setAttribute("disabled", "true");
-                    el._refs.shell.classList.add("eon-slider-disabled");
-                    el._refs.fill.classList.add("eon-bg5-disabled");
-                    el._refs.fill.classList.remove("eon-fg3");
-                    el._refs.thumb.classList.add("eon-bg5-disabled");
-                    el._refs.thumb.classList.remove("eon-fg3");
-                    el._refs.track.classList.add("eon-bg5-disabled");
+                    el._refs.shell.classList.add("vc-slider-disabled");
+                    el._refs.fill.classList.add("vc-bg5-disabled");
+                    el._refs.fill.classList.remove("vc-fg3");
+                    el._refs.thumb.classList.add("vc-bg5-disabled");
+                    el._refs.thumb.classList.remove("vc-fg3");
+                    el._refs.track.classList.add("vc-bg5-disabled");
                     el._refs.thumb.removeEventListener("pointerdown", el._thumbEvent, false);
                 }
 
@@ -414,7 +414,7 @@
             updateReadonly: function () {
                 var el = this;
 
-                if (eon.util.isTrue(el.readonly)) {
+                if (vcomet.util.isTrue(el.readonly)) {
                     el._refs.slider.setAttribute("readonly", "true");
                 } else {
                     el._refs.slider.removeAttribute("readonly");
@@ -428,7 +428,7 @@
             */
             updateCurrentValue: function () {
                 var el = this;
-                (el.value !== el._currentValue) ? eon.triggerCallback("onChange", el) : null;
+                (el.value !== el._currentValue) ? vcomet.triggerCallback("onChange", el) : null;
                 el._currentValue = (el.value !== el._currentValue) ? el.value : el._currentValue;
             },
 
@@ -440,7 +440,7 @@
                 var el = this;
 
                 // Small devices view
-                if (window.innerWidth <= eon.tabletWidth) {
+                if (window.innerWidth <= vcomet.tabletWidth) {
                     el.setAttribute("version", "tablet");
 
                     // Desktop view
@@ -467,7 +467,7 @@
         },
 
         onCreated: function () {
-            eon.createCallback("onChange", this);
+            vcomet.createCallback("onChange", this);
             this._createRefs();
 
             this._misc.first = true;

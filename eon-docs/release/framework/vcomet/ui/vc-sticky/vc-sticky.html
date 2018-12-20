@@ -1,7 +1,7 @@
 <script>
-  eon.element("eon-sticky", "eon-sticky.css", {
+  vcomet.element("vc-sticky", "vc-sticky.css", {
     dependencies: [
-      "../eon-scroll"
+      "../vc-scroll"
     ],
     privateProperties: {
       /*
@@ -71,7 +71,7 @@
       },
       /*
         @property {String} vcScroll
-        @description eon-scroll element query selector
+        @description vc-scroll element query selector
       */
       vcScroll: {
         value: "",
@@ -97,7 +97,7 @@
         var wrapperFragment = document.createDocumentFragment();
         var wrapper = document.createElement("div");
         el.wrapper = wrapper;
-        wrapper.classList.add("eon-sticky-stickyWrapper");
+        wrapper.classList.add("vc-sticky-stickyWrapper");
    
         // Copy size property from parent
         wrapper.style.width = el.side == "top" || el.side == "bottom" ? "100%" : el.offsetWidth + "px";
@@ -151,7 +151,7 @@
         var position = window.getComputedStyle(el.wrapper).position;
         var limitValue = el.side == "right" ? body.offsetWidth : body.offsetHeight;
         // **Right value is not an exact number on IE
-        // el._misc.viewPosition = eon.util.getBrowser() === "IE" ? parseInt(Math.floor(el.wrapper.getBoundingClientRect()[el.side])) : el._misc.viewPosition;
+        // el._misc.viewPosition = vcomet.util.getBrowser() === "IE" ? parseInt(Math.floor(el.wrapper.getBoundingClientRect()[el.side])) : el._misc.viewPosition;
         el._misc.viewPosition += parseInt(el.spacing);
         // Monitor fixed element behavior
         if (el.offsetParent && el._misc.viewPosition > limitValue && ~["static", "relative"].indexOf(position)) {
@@ -191,7 +191,7 @@
           el.wrapper.style.position = "relative";
           el.wrapper.style[el.side] = "auto";
         }
-        eon.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
+        vcomet.triggerCallback("onPositionChanged", el, el, [position == "relative" ? "relative" : "fixed"]);
       },
       /*
         @function (private) _animationMonitor
@@ -201,7 +201,7 @@
       animationMonitor: function (scrollMisc) {
         var el = this;
         if (el.animPosition) {
-          // Parent is the document body element or eon-scroll if sticky is currently relative positioned
+          // Parent is the document body element or vc-scroll if sticky is currently relative positioned
           var parent = el.vcScroll && ~["static", "relative"].indexOf(window.getComputedStyle(el.wrapper).position) ? el.vcScroll : document.documentElement;
           var scrollValue = scrollMisc && scrollMisc[el._misc.scrollProp] ? scrollMisc[el._misc.scrollProp] : parent[el._misc.scrollProp];
           el.wrapper.style.transition = "all .2s";
@@ -225,13 +225,13 @@
         var prop = el.offsetTop;
         switch (el.side) {
           case "right":
-            prop = eon.dom.offsetRight(el);
+            prop = vcomet.dom.offsetRight(el);
             break;
           case "left":
             prop = el.offsetLeft;
             break;
           case "bottom":
-            prop = eon.dom.offsetBottom(el);
+            prop = vcomet.dom.offsetBottom(el);
             break;
         }
         return prop;
@@ -242,12 +242,12 @@
       */
       setFixContainer: function () {
         var el = this;
-        // Sticky inside eon-scroll container
+        // Sticky inside vc-scroll container
         el.vcScroll = el.vcScroll ? document.querySelector(el.vcScroll) : false;
         // Sticky fix container
         el.fixContainer = !el.fixContainer ? document.body : document.querySelector(el.fixContainer);
         el.fixContainer = !el.fixContainer ? document.body : el.fixContainer;
-        el.vcScroll = el.fixContainer.tagName.toLowerCase() == "eon-scroll" ? el.fixContainer : el.vcScroll;
+        el.vcScroll = el.fixContainer.tagName.toLowerCase() == "vc-scroll" ? el.fixContainer : el.vcScroll;
       },
       /*
         @function (private) _scrollSticky
@@ -261,7 +261,7 @@
         // Check sticky position
         el._refs.setPositionFn = function (arg) {
           // Only apply throttled on desktop devices (Higher scroll call number)
-          if (!throttled || eon.util.isTouchScreen()) {
+          if (!throttled || vcomet.util.isTouchScreen()) {
             // Get the element top offset value and style top value
             el._misc.viewPosition = el.getBoundingClientRect()[el.side];
             value = Math.abs(el._getOffsetProp());
@@ -307,7 +307,7 @@
     },
     onCreated: function () {
       var el = this;
-      eon.createCallback("onPositionChanged", el);
+      vcomet.createCallback("onPositionChanged", el);
       // Store sticky information
       el._misc.scrollProp = el.side == "top" || el.side == "bottom" ? "scrollTop" : "scrollLeft";
     },
@@ -340,7 +340,7 @@
     },
     onPropertyChanged: function (attrName, oldVal, newVal) {
       var el = this;
-      // Monitor wrapper fixed displaying with eon-scroll integration
+      // Monitor wrapper fixed displaying with vc-scroll integration
       if (attrName == "_viewPosition" && el.vcScroll) {
         el.wrapper.style.display = newVal == -el.spacing ? "none" : "flex";
       }

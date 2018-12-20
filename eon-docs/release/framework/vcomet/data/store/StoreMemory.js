@@ -44,7 +44,7 @@ var Vimlet;
           });
         } else {
           // Show as object use warning
-          eon.warn.log(
+          vcomet.warn.log(
             "store",
             "asObject() function will reorder sorted data with an integer idProperty"
           );
@@ -68,7 +68,7 @@ var Vimlet;
           });
         } else {
           // Show as object use warning
-          eon.warn.log(
+          vcomet.warn.log(
             "store",
             "asObject() function will reorder sorted data with an integer idProperty"
           );
@@ -157,7 +157,7 @@ var Vimlet;
       // Process store data filters and lists
       StoreMemory.processData(store, attrs);
       // Trigger onSourceChanged event
-      eon.triggerCallback("onSourceChanged", store);
+      vcomet.triggerCallback("onSourceChanged", store);
       return store.data;
     }
     StoreMemory.list = list;
@@ -188,10 +188,10 @@ var Vimlet;
               // Process store data filters and lists
               StoreMemory.processData(store, attrs);
               // Trigger user callback once data has been retrieved
-              eon.triggerCallback("onListRemote", store);
+              vcomet.triggerCallback("onListRemote", store);
             } else {
               // Request error output
-              eon.error.log(xhr.statusText);
+              vcomet.error.log(xhr.statusText);
             }
           }
         };
@@ -348,7 +348,7 @@ var Vimlet;
           }
         }
       } else {
-        eon.error.log("store", "Incorrect range values format");
+        vcomet.error.log("store", "Incorrect range values format");
       }
       // Update store data object
       store.rangeData = new Result(rangeData, store, store.data.__sorted);
@@ -369,7 +369,7 @@ var Vimlet;
         // Get store data by range
         StoreMemory.getRange(start, limit, null, store);
         // Trigger user callback once data has been retrieved
-        eon.triggerCallback("onGetRangeRemote", store);
+        vcomet.triggerCallback("onGetRangeRemote", store);
       });
     }
     StoreMemory.getRangeRemote = getRangeRemote;
@@ -385,7 +385,7 @@ var Vimlet;
       // Get item from data object
       return data[id]
         ? data[id]
-        : eon.error.log("store", "Item with id " + id + " not found");
+        : vcomet.error.log("store", "Item with id " + id + " not found");
     }
     StoreMemory.get = get;
     /*
@@ -404,7 +404,7 @@ var Vimlet;
           data[item[store.idProperty]] = item;
         } else {
           // Item already exists
-          return eon.error.log(
+          return vcomet.error.log(
             "store",
             "Item with id " + item[store.idProperty] + " already exists"
           );
@@ -421,10 +421,10 @@ var Vimlet;
         // Update store data items length
         store.size = Object.keys(store.data).length;
         // Trigger onSourceChanged event
-        eon.triggerCallback("onSourceChanged", store);
+        vcomet.triggerCallback("onSourceChanged", store);
         return item;
       } else {
-        return eon.error.log("store", "Incorrect item format");
+        return vcomet.error.log("store", "Incorrect item format");
       }
     }
     StoreMemory.create = create;
@@ -449,10 +449,10 @@ var Vimlet;
         // Update store data items length
         store.size = Object.keys(store.data).length;
         // Trigger onSourceChanged event
-        eon.triggerCallback("onSourceChanged", store);
+        vcomet.triggerCallback("onSourceChanged", store);
       } else {
         // Item not found warning
-        return eon.error.log("store", "Item with id " + id + " not found");
+        return vcomet.error.log("store", "Item with id " + id + " not found");
       }
       return item;
     }
@@ -480,10 +480,10 @@ var Vimlet;
         // Update store data items length
         store.size = Object.keys(store.data).length;
         // Trigger onSourceChanged event
-        eon.triggerCallback("onSourceChanged", store);
+        vcomet.triggerCallback("onSourceChanged", store);
       } else {
         // Item not found warning
-        return eon.error.log("store", "Item with id " + id + " not found");
+        return vcomet.error.log("store", "Item with id " + id + " not found");
       }
       return item;
     }
@@ -507,11 +507,11 @@ var Vimlet;
         // Update store data items length
         store.size = Object.keys(store.data).length;
         // Trigger onSourceChanged event
-        eon.triggerCallback("onSourceChanged", store);
+        vcomet.triggerCallback("onSourceChanged", store);
         return JSON.parse(deleted);
       } else {
         // Item not found warning
-        return eon.error.log("store", "Item with id " + id + " not found");
+        return vcomet.error.log("store", "Item with id " + id + " not found");
       }
     }
     StoreMemory.remove = remove;
@@ -541,7 +541,7 @@ var Vimlet;
             // Process store data filters and lists
             StoreMemory.processData(store);
             // Trigger user callback once data has been retrieved
-            eon.triggerCallback(eventName, store, store, [store.rootData]);
+            vcomet.triggerCallback(eventName, store, store, [store.rootData]);
           }
         }
       };
@@ -549,5 +549,5 @@ var Vimlet;
       store.onLoaded(function(){xhr.send()});
     }
     StoreMemory.xhr = xhr;
-  })((StoreMemory = eon.StoreMemory || (eon.StoreMemory = {})));
+  })((StoreMemory = vcomet.StoreMemory || (vcomet.StoreMemory = {})));
 })(Vimlet || (Vimlet = {}));

@@ -1,36 +1,36 @@
 <template>
 
-  <div class="eon-grid-header">
-    <div class="eon-grid-wrapper eon-sect1"></div>
+  <div class="vc-grid-header">
+    <div class="vc-grid-wrapper vc-sect1"></div>
   </div>
 
-  <div class="eon-grid-rows">
-    <eon-scroll prevent-render="false" arrowScrolls="false" type="auto" scrollsLength="auto" thickness="10" observers="true" rail-scrolls="false">
-      <div class="eon-grid-wrapper">
+  <div class="vc-grid-rows">
+    <vc-scroll prevent-render="false" arrowScrolls="false" type="auto" scrollsLength="auto" thickness="10" observers="true" rail-scrolls="false">
+      <div class="vc-grid-wrapper">
       </div>
-    </eon-scroll>
+    </vc-scroll>
   </div>
 
-  <div class="eon-grid-footer eon-sect1 eon-unselectable">
-    <div class="eon-grid-pagControls eon-fg5">
-      <i class="material-icons eon-grid-pagIcon eon-fg1-hoverable" data-navigation="first">skip_previous</i>
-      <i class="material-icons eon-grid-pagIcon eon-fg1-hoverable" data-navigation="previous">keyboard_arrow_left</i>
+  <div class="vc-grid-footer vc-sect1 vc-unselectable">
+    <div class="vc-grid-pagControls vc-fg5">
+      <i class="material-icons vc-grid-pagIcon vc-fg1-hoverable" data-navigation="first">skip_previous</i>
+      <i class="material-icons vc-grid-pagIcon vc-fg1-hoverable" data-navigation="previous">keyboard_arrow_left</i>
       <div class="pageSelector"></div>
-      <i class="material-icons eon-grid-pagIcon eon-fg1-hoverable" data-navigation="next">keyboard_arrow_right</i>
-      <i class="material-icons eon-grid-pagIcon eon-fg1-hoverable" data-navigation="last">skip_next</i>
+      <i class="material-icons vc-grid-pagIcon vc-fg1-hoverable" data-navigation="next">keyboard_arrow_right</i>
+      <i class="material-icons vc-grid-pagIcon vc-fg1-hoverable" data-navigation="last">skip_next</i>
     </div>
-    <span class="eon-grid-entriesCount eon-fg5"></span>
+    <span class="vc-grid-entriesCount vc-fg5"></span>
   </div>
 
 </template>
 
 <script type="text/javascript">
-  eon.element("eon-grid", "eon-grid.css", {
+  vcomet.element("vc-grid", "vc-grid.css", {
     themed: true,
     dependencies: [
-      "../eon-row",
-      "../eon-cell",
-      "../eon-scroll"
+      "../vc-row",
+      "../vc-cell",
+      "../vc-scroll"
     ],
     privateProperties: {
       /*
@@ -150,16 +150,16 @@
 
         var el = this;
 
-        el._refs.header = el.querySelector(".eon-grid-header");
-        el._refs.headersWrapper = el.querySelector(".eon-grid-header .eon-grid-wrapper");
-        el._refs.rowsWrapper = el.querySelector(".eon-grid-rows .eon-grid-wrapper");
-        el._refs.footer = el.querySelector(".eon-grid-footer");
+        el._refs.header = el.querySelector(".vc-grid-header");
+        el._refs.headersWrapper = el.querySelector(".vc-grid-header .vc-grid-wrapper");
+        el._refs.rowsWrapper = el.querySelector(".vc-grid-rows .vc-grid-wrapper");
+        el._refs.footer = el.querySelector(".vc-grid-footer");
 
-        el.eonScroll = el.querySelector("eon-scroll");
+        el.vcometScroll = el.querySelector("vc-scroll");
 
         el._refs.pageSelector = el.querySelector(".pageSelector");
-        el._refs.entriesCount = el.querySelector(".eon-grid-entriesCount");
-        el.store = el.querySelector("eon-store");
+        el._refs.entriesCount = el.querySelector(".vc-grid-entriesCount");
+        el.store = el.querySelector("vc-store");
       },
       /*
       @function (private) _setupMisc
@@ -207,7 +207,7 @@
         for (var i = 0; i < columns.length; i++) {
 
           rulePosition = sheet.cssRules.length;
-          sheet.insertRule("eon-grid[uid='" + el.uid + "'] eon-cell:nth-child(" + (i + 1) + ") {}", rulePosition);
+          sheet.insertRule("vc-grid[uid='" + el.uid + "'] vc-cell:nth-child(" + (i + 1) + ") {}", rulePosition);
           columnRule = sheet.cssRules[rulePosition];
           columnRule.style.minWidth = el.columnMinWidth + "px";
           layoutWidth = layoutWidth + parseInt(el.columnMinWidth);
@@ -234,7 +234,7 @@
 
         var el = this;
 
-        var header = el.querySelector(".eon-grid-header .eon-grid-wrapper");
+        var header = el.querySelector(".vc-grid-header .vc-grid-wrapper");
         var columnsKeys = Object.keys(el._misc.columns);
         var docFragment = document.createDocumentFragment();
         var headerCell;
@@ -243,7 +243,7 @@
         header.classList.add("headers");
         //Create header for each column
         for (var i = 0; i < columnsKeys.length; i++) {
-          headerCell = document.createElement("eon-cell");
+          headerCell = document.createElement("vc-cell");
 
           //Adding Attributes to the header
           headerCell.setAttribute("type", "header");
@@ -264,7 +264,7 @@
 
             headerResize = document.createElement("div");
 
-            headerResize.classList.add("eon-grid-resizeIndicator");
+            headerResize.classList.add("vc-grid-resizeIndicator");
             headerResize.dataset.columnTarget = i;
 
             headerResize.onmousedown = function (e) {
@@ -326,13 +326,13 @@
         } else if ((el.autofit == "true" || el.autofit == true)) {
 
           el.autofit = true;
-          el.eonScroll.onRender(function () {
-            el.eonScroll.content.style.display = "flex";
+          el.vcometScroll.onRender(function () {
+            el.vcometScroll.content.style.display = "flex";
           });
         }
 
         if (el._misc.pageSizeType == "auto") {
-          el._refs.rowsWrapper.classList.add("eon-grid-autofitRows");
+          el._refs.rowsWrapper.classList.add("vc-grid-autofitRows");
         }
 
       },
@@ -349,13 +349,13 @@
 
           el._setupStore();
 
-          // Else if the user has not provided a store we create one and check if it has atleast provided eon-rows and eon-cells from which
+          // Else if the user has not provided a store we create one and check if it has atleast provided vc-rows and vc-cells from which
           // we will elaborate our data object
         } else {
 
           var data = el._generateDataFromDeclarativeRows();
 
-          el.store = document.createElement("eon-store");
+          el.store = document.createElement("vc-store");
           el.store.setAttribute("type", "memory");
           el.idProperty = el.idProperty != "" ? el.idProperty : "entryid";
 
@@ -481,12 +481,12 @@
         var stripPageSelector = document.createElement("div");
         var currentStripPage = document.createElement("div");
 
-        stripPageSelector.classList.add("eon-grid-stripPageSelector");
+        stripPageSelector.classList.add("vc-grid-stripPageSelector");
 
         currentStripPage.id = "currentPage";
         currentStripPage.dataset.page = 1;
         currentStripPage.innerHTML = 1;
-        currentStripPage.classList.add("eon-grid-currentPage", "eon-bg8", "eon-fg2", "eon-grid-stripPage", "eon-sect2-border-hoverable");
+        currentStripPage.classList.add("vc-grid-currentPage", "vc-bg8", "vc-fg2", "vc-grid-stripPage", "vc-sect2-border-hoverable");
 
         el._misc.currentPage = 1;
 
@@ -507,7 +507,7 @@
         var separator = document.createElement("div");
         var totalPages = document.createElement("div");
 
-        inputPageSelector.classList.add("eon-grid-inputPageSelector");
+        inputPageSelector.classList.add("vc-grid-inputPageSelector");
 
         pageInput.classList.add("pageInput");
         pageInput.setAttribute("contenteditable", "true");
@@ -528,10 +528,10 @@
           }
         };
 
-        separator.classList.add("separator", "eon-unselectable");
+        separator.classList.add("separator", "vc-unselectable");
         separator.innerHTML = "/";
 
-        totalPages.classList.add("totalPages", "eon-unselectable");
+        totalPages.classList.add("totalPages", "vc-unselectable");
         totalPages.innerHTML = 1;
 
         el._misc.currentPage = 1;
@@ -550,13 +550,13 @@
 
         var el = this;
 
-        el.querySelector(".eon-grid-pagControls").style.display = "none";
+        el.querySelector(".vc-grid-pagControls").style.display = "none";
         el._misc.infiniteScroll = {};
         el._misc.infiniteScroll.loadedPages = [];
         el._misc.infiniteScroll.checkedPages = [];
         el._misc.infiniteScroll.firstLoad = true;
 
-        el.eonScroll.onScrolled(function (e) {
+        el.vcometScroll.onScrolled(function (e) {
 
           function isElementInViewport(el) {
 
@@ -637,7 +637,7 @@
 
         var el = this;
 
-        eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
+        vcomet.addResizeListener(el, el.nodeName.toLowerCase(), function () {
 
           if (!el._misc.isEditing) {
 
@@ -662,7 +662,7 @@
 
         var el = this;
 
-        el.eonScroll.onScrolled(function (e) {
+        el.vcometScroll.onScrolled(function (e) {
           // TODO fix, as the scroll is no longer providing direction
           if (e.direction == "horizontal" || e.direction == "both") {
             el._refs.header.style.transform = "translate3d(" + e.horizontalTranslatePosition + "px, 0, 0)";
@@ -679,7 +679,7 @@
         var el = this;
 
         var storeData = {};
-        var rows = el._misc.sourceFragment.querySelectorAll("eon-row");
+        var rows = el._misc.sourceFragment.querySelectorAll("vc-row");
 
         if (rows.length > 0) {
 
@@ -699,7 +699,7 @@
             data = Object.assign({}, dataModel);
             data.entryid = j;
 
-            cells = rows[j].querySelectorAll("eon-cell");
+            cells = rows[j].querySelectorAll("vc-cell");
 
             for (var k = 0; k < cells.length; k++) {
               data[cells[k].getAttribute("column")] = cells[k].getAttribute("value");
@@ -729,8 +729,8 @@
 
         var el = this;
 
-        var store = this._misc.sourceFragment.querySelector("eon-store");
-        var rows = this._misc.sourceFragment.querySelectorAll("eon-row");
+        var store = this._misc.sourceFragment.querySelector("vc-store");
+        var rows = this._misc.sourceFragment.querySelectorAll("vc-row");
 
         if (store) {
 
@@ -774,8 +774,8 @@
         for (var key in storeData) {
           dataObject = storeData[key];
 
-          row = document.createElement("eon-row");
-          row.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
+          row = document.createElement("vc-row");
+          row.classList.add("vc-grid-entryRow", "vc-bg1-hoverable3", "vc-bg1-border2");
           row.id = key;
 
           if (el._misc.infiniteScroll.loadedPages.indexOf(Math.floor(rowIndex / parseInt(el.pageSize)) + 1) == -1) {
@@ -791,7 +791,7 @@
           //For each column we have in the grid we will look for its value on the dataObject
           // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
           for (var i = 0; i < columnsKeys.length; i++) {
-            cell = document.createElement("eon-cell");
+            cell = document.createElement("vc-cell");
 
             if (dataObject[columnsKeys[i]]) {
               cell.setAttribute("value", dataObject[columnsKeys[i]]);
@@ -984,10 +984,10 @@
 
         if (el.store.type == "rest") {
 
-          var paramsObj = eon.util.queryToObject(el.store.url);
+          var paramsObj = vcomet.util.queryToObject(el.store.url);
           paramsObj.start = start;
           paramsObj.limit = limit;
-          el.store.url = el.store._rootUrl + "?" + eon.util.objectToQuery(paramsObj);
+          el.store.url = el.store._rootUrl + "?" + vcomet.util.objectToQuery(paramsObj);
           el.store.sortRemote(columnKey, isDescending, sortCallback);
 
         } else {
@@ -1055,8 +1055,8 @@
         for (var key in storeData) {
           dataObject = storeData[key];
 
-          row = document.createElement("eon-row");
-          row.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
+          row = document.createElement("vc-row");
+          row.classList.add("vc-grid-entryRow", "vc-bg1-hoverable3", "vc-bg1-border2");
           row.dataset.entryId = dataObject[el.store.idProperty];
 
           //For each column we have in the grid we will look for its value on the dataObject
@@ -1070,7 +1070,7 @@
 
           if (el.autofit == "true" || el.autofit == true) {
 
-            row.classList.add("eon-grid-autofit");
+            row.classList.add("vc-grid-autofit");
 
           } else {
 
@@ -1115,8 +1115,8 @@
         for (var i = 0; i < entriesCount; i++) {
           dataObject = storeData[i];
 
-          row = document.createElement("eon-row");
-          row.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
+          row = document.createElement("vc-row");
+          row.classList.add("vc-grid-entryRow", "vc-bg1-hoverable3", "vc-bg1-border2");
           row.dataset.entryId = dataObject[el.store.idProperty];
 
           //For each column we have in the grid we will look for its value on the dataObject
@@ -1130,7 +1130,7 @@
 
           if (el.autofit == "true" || el.autofit == true) {
 
-            row.classList.add("eon-grid-autofit");
+            row.classList.add("vc-grid-autofit");
 
           } else {
 
@@ -1156,7 +1156,7 @@
       createCell: function (columnKey, dataObject, storeData) {
 
         var el = this;
-        var cell = document.createElement("eon-cell");
+        var cell = document.createElement("vc-cell");
         var editableColumns;
 
         if (dataObject[columnKey]) {
@@ -1166,7 +1166,7 @@
         cell.setAttribute("column", columnKey);
         cell.dataset.entryId = dataObject[el.store.idProperty];
 
-        if (eon.util.isTrue(el.editable)) {
+        if (vcomet.util.isTrue(el.editable)) {
 
           editableColumns = el.columns.replace(/\s/g, '').split(',');
 
@@ -1182,7 +1182,7 @@
 
           cell.onReady(function () {
 
-            var cellContent = this.querySelector(".eon-grid-cellContent");
+            var cellContent = this.querySelector(".vc-grid-cellContent");
 
             cellContent.setAttribute("contenteditable", "true");
             cellContent.spellcheck = false;
@@ -1246,7 +1246,7 @@
 
         data[entryId][column] = value;
 
-        eon.triggerCallback("onEdit", el, el, [entryId, column, value]);
+        vcomet.triggerCallback("onEdit", el, el, [entryId, column, value]);
 
       },
       /*
@@ -1263,7 +1263,7 @@
         //One row will be the smallest number of rows possible, we will not allow pages with no rows
         if (rowsCapacity >= 1) {
 
-          var existingDummiesCount = el.querySelectorAll(".eon-grid-dummyRow").length;
+          var existingDummiesCount = el.querySelectorAll(".vc-grid-dummyRow").length;
           var totalPageRows = existingDummiesCount + entriesCount;
           var dummyRowsAmount = rowsCapacity - entriesCount;
 
@@ -1272,18 +1272,18 @@
           if (rowsCapacity < totalPageRows) {
 
             var rowsAmountDifference = totalPageRows - rowsCapacity;
-            var rows = el._refs.rowsWrapper.querySelectorAll(".eon-grid-entryRow, .eon-grid-dummyRow");
+            var rows = el._refs.rowsWrapper.querySelectorAll(".vc-grid-entryRow, .vc-grid-dummyRow");
             var rowsLength = rows.length;
             var lastRowIndex;
 
             for (var i = rowsAmountDifference; i > 0; i--) {
               lastRowIndex = rowsLength - 1;
 
-              if (rows[lastRowIndex].classList.contains("eon-grid-entryRow")) {
+              if (rows[lastRowIndex].classList.contains("vc-grid-entryRow")) {
                 el._decreaseEntriesCount();
               }
 
-              el._refs.rowsWrapper.removeChild(el._refs.rowsWrapper.querySelectorAll(".eon-grid-entryRow, .eon-grid-dummyRow")[lastRowIndex]);
+              el._refs.rowsWrapper.removeChild(el._refs.rowsWrapper.querySelectorAll(".vc-grid-entryRow, .vc-grid-dummyRow")[lastRowIndex]);
               rowsLength--;
             }
 
@@ -1296,7 +1296,7 @@
 
             for (var i = 0; i < newDummiesCount; i++) {
               dummyRow = document.createElement("div");
-              dummyRow.classList.add("eon-grid-autofit", "eon-grid-dummyRow");
+              dummyRow.classList.add("vc-grid-autofit", "vc-grid-dummyRow");
               dummyDocFragment.appendChild(dummyRow);
             }
 
@@ -1440,17 +1440,17 @@
         //add the remainingSpace to the last column
         if (headersWrapperWidth <= contentWidth) {
 
-          var sibling = el._refs.headersWrapper.querySelector('eon-cell[order="' + nextSiblingOrder + '"]');
+          var sibling = el._refs.headersWrapper.querySelector('vc-cell[order="' + nextSiblingOrder + '"]');
 
           if (!sibling) {
-            sibling = el._refs.headersWrapper.querySelector('eon-cell[order="' + previousSiblingOrder + '"]');
+            sibling = el._refs.headersWrapper.querySelector('vc-cell[order="' + previousSiblingOrder + '"]');
           }
 
           el._misc.columns[sibling.column].rule.style.minWidth = parseInt(sibling.offsetWidth) + parseInt(remainingSpace) + "px";
         }
 
         // While we are resizing we want the scrolls to resize aswell
-        el.eonScroll.update();
+        el.vcometScroll.update();
 
       },
       /*
@@ -1465,9 +1465,9 @@
         var columnRule = el._misc.columns[el._misc.resize.header.column].rule;
 
         //At the end of the resizing event we remove the header resizing indicator
-        var headersWithResizingClass = el._refs.headersWrapper.querySelectorAll(".eon-grid-resizingHeader");
+        var headersWithResizingClass = el._refs.headersWrapper.querySelectorAll(".vc-grid-resizingHeader");
         for (var i = 0; i < headersWithResizingClass.length; i++) {
-          headersWithResizingClass[i].classList.remove("eon-grid-resizingHeader", "eon-bg1-hoverable3");
+          headersWithResizingClass[i].classList.remove("vc-grid-resizingHeader", "vc-bg1-hoverable3");
         }
 
         columnRule.style.minWidth = el._misc.resize.header.offsetWidth + "px";
@@ -1489,7 +1489,7 @@
         if (headersWrapperWidth < contentWidth) {
 
           var remainingSpace = contentWidth - headersWrapperWidth;
-          var headers = el._refs.headersWrapper.querySelectorAll("eon-cell");
+          var headers = el._refs.headersWrapper.querySelectorAll("vc-cell");
           var lastHeader = headers[(headers.length - 1)];
 
           var lastHeaderActualWidth = parseInt(el._misc.columns[lastHeader.column].rule.style.minWidth.split("px")[0]);
@@ -1521,13 +1521,13 @@
           overlay.style.left = 0;
           overlay.style.backgroundColor = "transparent";
           overlay.style.cursor = "col-resize";
-          overlay.classList.add("eon-unselectable");
+          overlay.classList.add("vc-unselectable");
 
           document.body.appendChild(overlay);
 
-          el._refs.headersWrapper.classList.add("eon-unselectable");
-          el._refs.rowsWrapper.classList.add("eon-unselectable");
-          el._refs.footer.classList.add("eon-unselectable");
+          el._refs.headersWrapper.classList.add("vc-unselectable");
+          el._refs.rowsWrapper.classList.add("vc-unselectable");
+          el._refs.footer.classList.add("vc-unselectable");
         }
       },
       /*
@@ -1543,9 +1543,9 @@
           overlay.parentNode.removeChild(overlay);
         }
 
-        el._refs.headersWrapper.classList.remove("eon-unselectable");
-        el._refs.rowsWrapper.classList.remove("eon-unselectable");
-        el._refs.footer.classList.remove("eon-unselectable");
+        el._refs.headersWrapper.classList.remove("vc-unselectable");
+        el._refs.rowsWrapper.classList.remove("vc-unselectable");
+        el._refs.footer.classList.remove("vc-unselectable");
       },
       /*
       @function (private) _resizeColumn
@@ -1562,7 +1562,7 @@
 
         if (el._misc.resize.firstTime == true) {
 
-          el._misc.resize.headers = el._refs.headersWrapper.querySelectorAll("eon-cell");
+          el._misc.resize.headers = el._refs.headersWrapper.querySelectorAll("vc-cell");
           el._misc.resize.firstTime = false;
 
           var headerWidth;
@@ -1610,7 +1610,7 @@
         el._createResizeOverlay();
 
         //We add a class to the header of the columns we are resizing as an indicator
-        el._misc.resize.header.classList.add("eon-grid-resizingHeader", "eon-bg1-hoverable3");
+        el._misc.resize.header.classList.add("vc-grid-resizingHeader", "vc-bg1-hoverable3");
       },
       /*
       @function (private) _sortEntries
@@ -1620,7 +1620,7 @@
       */
       sortEntries: function (e, header) {
 
-        if (e.target != header.querySelector(".eon-grid-resizeIndicator")) {
+        if (e.target != header.querySelector(".vc-grid-resizeIndicator")) {
 
           var el = this;
 
@@ -1658,7 +1658,7 @@
 
         var el = this;
 
-        var sortedHeaders = el._refs.headersWrapper.querySelectorAll('eon-cell[sort="descending"], eon-cell[sort="ascending"]');
+        var sortedHeaders = el._refs.headersWrapper.querySelectorAll('vc-cell[sort="descending"], vc-cell[sort="ascending"]');
         var icon = "";
 
         if (sortType != "none") {
@@ -1771,7 +1771,7 @@
       @param {Object} button
       */
       disableNavigationbutton: function (button) {
-        button.classList.add("eon-grid-disabled");
+        button.classList.add("vc-grid-disabled");
         button.dataset.enabled = "false";
       },
       /*
@@ -1780,7 +1780,7 @@
       @param {Object} button
       */
       enableNavigationButton: function (button) {
-        button.classList.remove("eon-grid-disabled");
+        button.classList.remove("vc-grid-disabled");
         button.dataset.enabled = "true";
       },
       /*
@@ -1798,7 +1798,7 @@
 
         var pagesToCreate = [];
 
-        el.querySelector(".eon-grid-stripPageSelector").innerHTML = "";
+        el.querySelector(".vc-grid-stripPageSelector").innerHTML = "";
 
         var loopStart;
         var loopEnd;
@@ -1845,7 +1845,7 @@
 
           pageItem = document.createElement("div");
 
-          pageItem.classList.add("eon-grid-stripPage", "eon-sect2-border-hoverable");
+          pageItem.classList.add("vc-grid-stripPage", "vc-sect2-border-hoverable");
           pageItem.dataset.page = pagesToCreate[i];
           pageItem.innerHTML = pagesToCreate[i];
           pageItem.onclick = function () {
@@ -1855,13 +1855,13 @@
 
           if (currentPage == pagesToCreate[i]) {
             pageItem.id = "currentPage";
-            pageItem.classList.add("eon-grid-currentPage", "eon-sect2-hoverable", "eon-fg1");
+            pageItem.classList.add("vc-grid-currentPage", "vc-sect2-hoverable", "vc-fg1");
             pageItem.setAttribute("selected", "true");
           }
           pageItemsDocFragment.appendChild(pageItem);
         }
 
-        el.querySelector(".eon-grid-stripPageSelector").appendChild(pageItemsDocFragment);
+        el.querySelector(".vc-grid-stripPageSelector").appendChild(pageItemsDocFragment);
       },
       /*
       @function (private) _updatePageSelector
@@ -1896,12 +1896,12 @@
         var newPageToSelect = pageSelector.querySelector('[data-page="' + page + '"]');
 
         if (previousSelectedPage) {
-          previousSelectedPage.classList.remove("eon-grid-currentPage", "eon-sect2-hoverable", "eon-fg1");
+          previousSelectedPage.classList.remove("vc-grid-currentPage", "vc-sect2-hoverable", "vc-fg1");
           previousSelectedPage.setAttribute("selected", "false");
         }
 
         if (newPageToSelect) {
-          newPageToSelect.classList.add("eon-grid-currentPage", "eon-sect2-hoverable", "eon-fg1");
+          newPageToSelect.classList.add("vc-grid-currentPage", "vc-sect2-hoverable", "vc-fg1");
           newPageToSelect.setAttribute("selected", "true");
         }
 
@@ -2035,7 +2035,7 @@
         var dataInstance = data.constructor === Array ? data[0] : data[Object.keys(data)[0]]
 
         // If the object provided doesnt have our idproperty we set it based on the order in which the entries of the object were given
-        if (dataInstance && !dataInstance.hasOwnProperty(el.store.idProperty)) {
+        if (!dataInstance.hasOwnProperty(el.store.idProperty)) {
 
           var dataKeys = Object.keys(data);
 
@@ -2066,7 +2066,7 @@
       el._generateSourceFragment();
       el._defineDataSourceType();
 
-      eon.createCallback("onEdit", el);
+      vcomet.createCallback("onEdit", el);
 
     },
 
@@ -2075,7 +2075,7 @@
       var el = this;
       var sourceNodes = el.getSourceElements();
 
-      el.classList.add("eon-bg1", "eon-boxshadow1");
+      el.classList.add("vc-bg1", "vc-boxshadow1");
 
       el._setupRefs();
       el._setupNavigationButtons();

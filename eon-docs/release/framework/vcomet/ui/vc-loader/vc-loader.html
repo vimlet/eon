@@ -1,13 +1,13 @@
 <template>
-  <div class="eon-loader-bar">
-    <div class="eon-loader-rail eon-bg8"></div>
-    <div class="eon-loader-loadingBar"></div>
+  <div class="vc-loader-bar">
+    <div class="vc-loader-rail vc-bg8"></div>
+    <div class="vc-loader-loadingBar"></div>
   </div>
-  <div class="eon-loader-indicator"></div>
+  <div class="vc-loader-indicator"></div>
 </template>
 
 <script>
-  eon.element("eon-loader", "eon-loader.css", {
+  vcomet.element("vc-loader", "vc-loader.css", {
     privateProperties:{
       /*
         @property (private) {Number} type
@@ -88,8 +88,8 @@
       */
       animate: function(limit, time){
         var el = this;
-        var bar = el.querySelector(".eon-loader-bar");
-        var loadBar = el.querySelector(".eon-loader-loadingBar");
+        var bar = el.querySelector(".vc-loader-bar");
+        var loadBar = el.querySelector(".vc-loader-loadingBar");
         var cancel = false;
         // Set animation duration
         el.limit = !limit && limit !== 0 ? 1 : limit;
@@ -155,7 +155,7 @@
       */
       runReverseAnimation: function(rate, bar, loadBar){
         var el = this;
-        var indicator = el.querySelector(".eon-loader-indicator");
+        var indicator = el.querySelector(".vc-loader-indicator");
         // Get start and end animation points
         var end = bar.offsetWidth;
         var start = !el._lastLoad ? 0 : (end * el._lastLoad);
@@ -169,11 +169,11 @@
           // Store rate reached
           el._lastLoad = el.limit;
           // Trigger on load end
-          eon.triggerCallback("onLoadEnd", el, el, []);
+          vcomet.triggerCallback("onLoadEnd", el, el, []);
           // Check if loading is completed
           if(el.limit == 1){
             // Trigger on load completed
-            eon.triggerCallback("onLoadComplete", el, el, []);
+            vcomet.triggerCallback("onLoadComplete", el, el, []);
           }
           // Cancel animation
           cancelAnimationFrame(el._animFunction);
@@ -211,11 +211,11 @@
           // Update indicator value
           el._updateIndicator();
           // Trigger on load end
-          eon.triggerCallback("onLoadEnd", el, el, []);
+          vcomet.triggerCallback("onLoadEnd", el, el, []);
           // Check if loading is completed
           if(el.limit == 1){
             // Trigger on load completed
-            eon.triggerCallback("onLoadComplete", el, el, []);
+            vcomet.triggerCallback("onLoadComplete", el, el, []);
           }
           // Cancel animation
           cancelAnimationFrame(el._animFunction);
@@ -236,7 +236,7 @@
       */
       updateIndicator: function(rate){
         var el = this;
-        var indicator = el.querySelector(".eon-loader-indicator");
+        var indicator = el.querySelector(".vc-loader-indicator");
         // Load bar is a progress bar
         if(el.type == "progress" && (el.indicator || el.indicator === "true")){
           // Check if loading is completed
@@ -276,17 +276,17 @@
     onCreated: function(){
       var el = this;
       // Create loading events
-      eon.createCallback("onLoadEnd", el);
-      eon.createCallback("onLoadComplete", el);
+      vcomet.createCallback("onLoadEnd", el);
+      vcomet.createCallback("onLoadComplete", el);
     },
     onRender: function(){
       var el = this;
-      var rail = el.querySelector(".eon-loader-rail");
-      var barColor = el.querySelector(".eon-loader-loadingBar");
+      var rail = el.querySelector(".vc-loader-rail");
+      var barColor = el.querySelector(".vc-loader-loadingBar");
       // Check loader type
       if(el.type == "progress"){
         // Set progress styling
-        el.classList.add("eon-loader-progress");
+        el.classList.add("vc-loader-progress");
         // Show load bar rail
         rail.style.opacity = 1;
       }

@@ -1,7 +1,7 @@
 <script>
-  eon.element("eon-panel", "eon-panel.css", {
+  vcomet.element("vc-panel", "vc-panel.css", {
     dependencies: [
-      "../eon-scroll"
+      "../vc-scroll"
     ],
     privateProperties: {
       /*
@@ -55,7 +55,7 @@
       },
       /*
         @property {Object} fit
-        @description Indicates whether the eon-scroll will autofill its container or grow according to its content until it fills its container
+        @description Indicates whether the vc-scroll will autofill its container or grow according to its content until it fills its container
         Values true, false
         Default: false
       */
@@ -65,7 +65,7 @@
       },
       /*
         @property {Boolean} arrowScrolls
-        @description Indicates the eon-scroll whether it needs arrow scrolls or not
+        @description Indicates the vc-scroll whether it needs arrow scrolls or not
         Values true, false
         Default: false
       */
@@ -75,7 +75,7 @@
       },
       /*
         @property {Number} thickness
-        @description Indicates the thickness for the eon-scroll rails
+        @description Indicates the thickness for the vc-scroll rails
         Default: 15
       */
       thickness: {
@@ -84,7 +84,7 @@
       },
       /*
       @property {String} name
-      @description In case of being used in eon-tabs it will be used internally to link a tab to its panel
+      @description In case of being used in vc-tabs it will be used internally to link a tab to its panel
       */
       name: {
         value: "",
@@ -92,7 +92,7 @@
       },
       /*
       @property {String} tabTitle
-      @description In case of being used in eon-tabs , it will be used as a visual text for the tab
+      @description In case of being used in vc-tabs , it will be used as a visual text for the tab
       */
       tabTitle: {
         value: "",
@@ -117,7 +117,7 @@
         // Get panel elements
         var documentFragment = document.createDocumentFragment();
         // Check href property
-        if (el.href && !eon.util.isTrue(el.lazyLoad)) {
+        if (el.href && !vcomet.util.isTrue(el.lazyLoad)) {
           // Request content file
           el.importContent(documentFragment);
         } else if (!el.href) {
@@ -137,7 +137,7 @@
         var el = this;
         var nodes, scripts, script, scriptKey;
         // ** IE do not support 'children' property
-        if (eon.util.getBrowser() === "IE") {
+        if (vcomet.util.getBrowser() === "IE") {
           // Avoid empty element template on programmatic cases
           nodes = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
           // From node list to js array
@@ -178,7 +178,7 @@
         var fragment = document.createDocumentFragment();
         var i;
         var t = 0;
-        var reAppend = el.href || eon.util.isTrue(el.allowScroll);
+        var reAppend = el.href || vcomet.util.isTrue(el.allowScroll);
         // Get first generation template children
         while (nodes.length) {
           // Build nodes structure
@@ -201,7 +201,7 @@
         }
         // Wait until the element is ready
         el.onReady(function () {
-          eon.triggerCallback("onLoad", el, el, []);
+          vcomet.triggerCallback("onLoad", el, el, []);
         });
 
       },
@@ -282,8 +282,8 @@
           }
         }
         // Update scroll
-        if(eon.util.isTrue(el.allowScroll)) {
-          el.eonScroll.onReady(function(){
+        if(vcomet.util.isTrue(el.allowScroll)) {
+          el.vcometScroll.onReady(function(){
             this.update();
           })
         }
@@ -309,7 +309,7 @@
             // Response status successfully completed - status 200
             if (this.status !== 200) { return };
             // Allow execute imported html scripts
-            fragment = eon.fragmentFromString(xhr.responseText);
+            fragment = vcomet.fragmentFromString(xhr.responseText);
             // Extract script nodes that belong to template elements for deferring their execution
             var nodes = el._deferScripts(fragment);
             el._appendContent(nodes);
@@ -335,8 +335,8 @@
     onCreated: function () {
       var el = this;
       // Create content related callbacks
-      eon.createCallback("onLoad", this);
-      eon.createCallback("onContent", this);
+      vcomet.createCallback("onLoad", this);
+      vcomet.createCallback("onContent", this);
     },
     onInit: function () {
       var el = this;
@@ -344,15 +344,15 @@
       el._refs.scripts = {};
       el._misc = {};
       // Get body container
-      if (eon.util.isTrue(el.allowScroll)) {
-        el._refs.wrapper = document.createElement("eon-scroll");
+      if (vcomet.util.isTrue(el.allowScroll)) {
+        el._refs.wrapper = document.createElement("vc-scroll");
         // Configure scroll
         el._setUpScroll();
       } else {
         el._refs.wrapper = el;
       }
       // Get body container
-      el.content = eon.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
+      el.content = vcomet.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
     },
     onTransformed: function () {
       var el = this;

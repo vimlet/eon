@@ -1,6 +1,6 @@
 <script>
   //@header A collapsible side container
-  eon.element("eon-drawer", "eon-drawer.css", {
+  vcomet.element("vc-drawer", "vc-drawer.css", {
     properties: {
       /*
         @property {String} type
@@ -115,13 +115,13 @@
         // Get size property from drawer type
         el._misc.sizeProperty = el.type == "left" || el.type == "right" ? "offsetWidth" : "offsetHeight";
         // Static and no collapsible drawer
-        if (eon.util.isTrue(el.static) && (el.staticLimit > 0 && window.innerWidth > el.staticLimit)) {
-          el.classList.add("eon-drawer-static");
+        if (vcomet.util.isTrue(el.static) && (el.staticLimit > 0 && window.innerWidth > el.staticLimit)) {
+          el.classList.add("vc-drawer-static");
           el.closable = false;
           el._translate(0);
         } else {
           // Drawer initial displaying
-          if (!eon.util.isTrue(el.hide)) {
+          if (!vcomet.util.isTrue(el.hide)) {
             el.style.opacity = 1;
             el._translate(0);
           } else {
@@ -139,10 +139,10 @@
       addBlurListener: function () {
         var el = this;
         var dropdParentElement, preventCloseElms, preventClose;
-        el._misc.close = eon.util.isTrue(el.closable) ? true: false;
+        el._misc.close = vcomet.util.isTrue(el.closable) ? true: false;
 
         function documentBlurDown(e) {
-          if (eon.util.isTrue(el.closable)) {
+          if (vcomet.util.isTrue(el.closable)) {
             // Prevent drawer from being closed during drag transition
             if (el._misc.close && !el.isOnPath) {
               preventClose = false;
@@ -184,10 +184,10 @@
         var initialValue = 0, moveValue = 0 , slideCounter = 0;
         var axis = el.type == "left" || el.type == "right" ? "clientX" : "clientY";
         // A minimum delay must be set to make it works on Firefox but non on Edge or IE
-        var browser = eon.util.getBrowser();
+        var browser = vcomet.util.getBrowser();
         var delay = browser === "IE" || browser === "Edge" ? 0 : 60;
         // May drawer be opened by dragging
-        if (eon.util.isTrue(el.drag) && eon.util.isTrue(el.closable)) {
+        if (vcomet.util.isTrue(el.drag) && vcomet.util.isTrue(el.closable)) {
           function documentDragDown(e) {
             // Detect mouse down only outside drawer
             if (!el.isOnPath) {
@@ -215,14 +215,14 @@
                 // Set drawer loaded property to true
                 el.style.opacity = 1;
                 // Get transform axis value
-                position = eon.dom.getTransformAxis(el, axis.substring(axis.length - 1));
+                position = vcomet.dom.getTransformAxis(el, axis.substring(axis.length - 1));
                 // Calculate movement pixels from initial position
                 pixels = moveValue - e[axis];
                 // Check limits
                 position = el._processPosition(position, pixels);
                 // Translate element
                 if (dragLimitExceeded) {
-                  eon.dom.translate(el, axis.substring(axis.length - 1), position);
+                  vcomet.dom.translate(el, axis.substring(axis.length - 1), position);
                 }
                 // Update initial value
                 moveValue = e[axis];
@@ -251,7 +251,7 @@
                 el._triggerCompleteSlide(initialValue, moveValue, sign);
               } else {
                 // Get transform axis value
-                position = eon.dom.getTransformAxis(el, axis.substring(axis.length - 1));
+                position = vcomet.dom.getTransformAxis(el, axis.substring(axis.length - 1));
                 // Get middle drawer position
                 middlePosition = sign == -1 ? -Math.abs(el[el._misc.sizeProperty] / 2) : el[el._misc.sizeProperty] / 2;
                 if ((sign == -1 && position > middlePosition) || (sign == 1 && position < middlePosition)) {
@@ -502,7 +502,7 @@
       var delay = 10;
       // Prevent resize functionality from trigger before element css styling
       setTimeout(function () {
-        if (!el._misc.displayed && eon.util.isTrue(el.closable)) {
+        if (!el._misc.displayed && vcomet.util.isTrue(el.closable)) {
           el._translate();
         }
         // Throttle
@@ -521,16 +521,16 @@
       setTimeout(function () {
         // Monitor drawer static behaviour on window resize
         if (el.staticLimit > 0) {
-          if (window.innerWidth < el.staticLimit && !eon.util.isTrue(el.closable)) {
+          if (window.innerWidth < el.staticLimit && !vcomet.util.isTrue(el.closable)) {
             el.closable = true;
-            el.classList.remove("eon-drawer-static");
-          } else if(window.innerWidth > el.staticLimit && eon.util.isTrue(el.closable)){
+            el.classList.remove("vc-drawer-static");
+          } else if(window.innerWidth > el.staticLimit && vcomet.util.isTrue(el.closable)){
             el.closable = false;
             // Avoid drawer from resize blinking 
             if(el._misc.displayed == false){
               el.style.transition="none";
             }
-            el.classList.add("eon-drawer-static");
+            el.classList.add("vc-drawer-static");
             el.show();
             if(el.style.transition == "none"){
               // Reset transform animation
@@ -555,7 +555,7 @@
       // Initial element displaying configuration
       el._initialDisplay();
       // Events nodes path configuration
-      eon.registerPathListener(el);
+      vcomet.registerPathListener(el);
       // Pointer events attribute required
       document.body.setAttribute("touch-action", "none");
       // Format the excluded nodes array properties

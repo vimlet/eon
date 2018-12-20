@@ -1,37 +1,37 @@
 <template>
-        <div class="eon-video-wrapper">
-            <div class="eon-video-controls">
-                <div class="eon-video-timerail eon-boxshadow5">
-                    <div class="eon-video-timerail-back eon-bg1">
-                        <div class="eon-video-timeline eon-bg7"></div>
+        <div class="vc-video-wrapper">
+            <div class="vc-video-controls">
+                <div class="vc-video-timerail vc-boxshadow5">
+                    <div class="vc-video-timerail-back vc-bg1">
+                        <div class="vc-video-timeline vc-bg7"></div>
                     </div>
                 </div>
-                <div class="eon-video-controls-container eon-sect3">
-                    <div class="eon-video-play eon-fg1-hoverable">
+                <div class="vc-video-controls-container vc-sect3">
+                    <div class="vc-video-play vc-fg1-hoverable">
                         <span class="vicon-play"></span>
                     </div>
-                    <div class="eon-video-volume-container">
-                        <span class="vicon-volume-on eon-fg1-hoverable"></span>
-                        <eon-slider max="100" size="50%" class="eon-video-volume"></eon-slider>
+                    <div class="vc-video-volume-container">
+                        <span class="vicon-volume-on vc-fg1-hoverable"></span>
+                        <vc-slider max="100" size="50%" class="vc-video-volume"></vc-slider>
                     </div>
-                    <div class="eon-video-time">
-                        <span class="eon-video-currentTime"></span>
-                        <span class="eon-video-totalTime"></span>
+                    <div class="vc-video-time">
+                        <span class="vc-video-currentTime"></span>
+                        <span class="vc-video-totalTime"></span>
                     </div>
-                    <div class="eon-video-fullscreen eon-fg1-hoverable">
+                    <div class="vc-video-fullscreen vc-fg1-hoverable">
                         <span class="vicon-fullscreen"></span>
                     </div>
                 </div>
             </div>
-            <div class="eon-video-poster eon-bg1-modal">
-                <span class="vicon-circle-play eon-fg1-hoverable"></span>
+            <div class="vc-video-poster vc-bg1-modal">
+                <span class="vicon-circle-play vc-fg1-hoverable"></span>
             </div>
         </div>
     </template>
     <script>
-        eon.element("eon-video", "eon-video.css", {
+        vcomet.element("vc-video", "vc-video.css", {
             dependencies: [
-                "../eon-slider"
+                "../vc-slider"
             ],
             properties: {
                 /*
@@ -224,7 +224,7 @@
                     el._refs.video.autoplay = el.autoPlay;
                     el._refs.video.loop = el.loop;
                     // Video fit class
-                    fitClass = el.objectFit == "cover" ? "eon-video-cover" : "eon-video-fit";
+                    fitClass = el.objectFit == "cover" ? "vc-video-cover" : "vc-video-fit";
                     el._refs.video.classList.add(fitClass);
                     // Allow multiple sources
                     el.src = el.src.replace(/\s/g, '').split(",");
@@ -260,7 +260,7 @@
                     // Video custom style
                     el.style.backgroundColor = el.background;
                     // Controls event path monitor 
-                    eon.registerPathListener(el._refs.controls);
+                    vcomet.registerPathListener(el._refs.controls);
                     // Auto play configuration
                     el._autoPlaySetUp();
                     // Poster configuration
@@ -288,7 +288,7 @@
                         iOSVersion = window.Number(agent.substr(start + 3, 3).replace("_", "."));
                     }
                     // Hide poster
-                    if (eon.util.isTrue(el.autoPlay) && (!iOSVersion || (iOSVersion >= 10))) {
+                    if (vcomet.util.isTrue(el.autoPlay) && (!iOSVersion || (iOSVersion >= 10))) {
                         el._refs.poster.style.display = "none";
                         el._misc.posterHidden = true;
                         // Toggle video play icon
@@ -300,7 +300,7 @@
                 controlsSetUp: function () {
                     var el = this;
                     // Show video controls displaying
-                    if (eon.util.isTrue(el.controls)) {
+                    if (vcomet.util.isTrue(el.controls)) {
                         el._refs.controls.style.display = "flex";
                     }
                 },
@@ -322,7 +322,7 @@
                     // Toggle play on video wrapper click
                     el._refs.wrapper.addEventListener("pointerdown", function (e) {
                         if (!el._refs.controls.isOnPath && e.button == 0 && el._misc.posterHidden == true
-                            && el._misc.controlsHided == false && eon.util.isTrue(el.touchPlaying)) {
+                            && el._misc.controlsHided == false && vcomet.util.isTrue(el.touchPlaying)) {
                             el._togglePlay();
                         }
                     });
@@ -331,9 +331,9 @@
                 keyboardControl: function () {
                     var el = this;
                     // Toggle video playing using keyboards
-                    if (eon.util.isTrue(el.touchPlaying)) {
+                    if (vcomet.util.isTrue(el.touchPlaying)) {
                         el.addEventListener("keydown", function (e) {
-                            if (e.keyCode == 32 && eon.util.isTrue(el.touchPlaying)) {
+                            if (e.keyCode == 32 && vcomet.util.isTrue(el.touchPlaying)) {
                                 el._togglePlay();
                             }
                         });
@@ -372,7 +372,7 @@
                     //
                     function toggleControls(hide) {
                         el._refs.controls.style.opacity = hide ? 0 : 1;
-                        el.classList[hide ? "add" : "remove"]("eon-video-hideCursor");
+                        el.classList[hide ? "add" : "remove"]("vc-video-hideCursor");
                         el._misc.controlsHided = hide;
                     }
                     // 
@@ -523,8 +523,8 @@
                 //
                 timeListener: function () {
                     var el = this;
-                    var currentTime = el.querySelector(".eon-video-currentTime");
-                    var totalTime = el.querySelector(".eon-video-totalTime");
+                    var currentTime = el.querySelector(".vc-video-currentTime");
+                    var totalTime = el.querySelector(".vc-video-totalTime");
                     var secs, mins, time;
                     // Update current time
                     totalTime.innerHTML = "/ " + el._getMinutes(el._misc.duration) + ":" + el._getSeconds(el._misc.duration);
@@ -541,7 +541,7 @@
                 timeLineListener: function (time) {
                     var el = this;
                     var railWidth, lineWidth, duration, currentTime, endTime, remaining, rate, initValue, thresholdValue;
-                    var poster = el.querySelector(".eon-video-poster");
+                    var poster = el.querySelector(".vc-video-poster");
                     var railPressed = false;
                     // Set time line color
                     el._refs.timeline.style.backgroundColor = el.timeLineColor;
@@ -620,7 +620,7 @@
                         el._refs.playIcon.classList.add("vicon-play");
                         el._refs.playIcon.classList.remove("vicon-pause");
                         // Check loop functionality
-                        if (!eon.util.isTrue(el.loop)) {
+                        if (!vcomet.util.isTrue(el.loop)) {
                             // Show poster
                             poster.style.display = "flex";
                             poster.style.backgroundImage = "url(" + el.poster + ")";
@@ -670,13 +670,13 @@
                 toggleFullscreen: function (el) {
                     // Toggle full screen
                     if (!el._misc.isFullscreen) {
-                        el.classList.remove("eon-video-fullscreenActive", "eon-bg2");
-                        el._refs.wrapper.classList.remove("eon-video-wrapperFullscreen");
+                        el.classList.remove("vc-video-fullscreenActive", "vc-bg2");
+                        el._refs.wrapper.classList.remove("vc-video-wrapperFullscreen");
                         clearTimeout(el._misc.hideTimeout);
                     } else {
                         // Append video wrapper to the body
-                        el.classList.add("eon-video-fullscreenActive", "eon-bg2");
-                        el._refs.wrapper.classList.add("eon-video-wrapperFullscreen");
+                        el.classList.add("vc-video-fullscreenActive", "vc-bg2");
+                        el._refs.wrapper.classList.add("vc-video-wrapperFullscreen");
                     }
                 },
                 //
@@ -769,36 +769,36 @@
                 var el = this;
                 // Create video element (** MacOS bug declaring on element template)
                 var vid = document.createElement("video");
-                vid.classList.add("eon-video-video");
-                el._refs.wrapper = el.template.querySelector(".eon-video-wrapper");
+                vid.classList.add("vc-video-video");
+                el._refs.wrapper = el.template.querySelector(".vc-video-wrapper");
                 el.template.insertBefore(vid,  el._refs.wrapper);
                
                 // Quick access
-                el._refs.poster = el.template.querySelector(".eon-video-poster");
-                el._refs.controls = el.template.querySelector(".eon-video-controls");
-                el._refs.play = el.template.querySelector(".eon-video-play");
-                el._refs.playIcon = el.template.querySelector(".eon-video-play").children[0];
-                el._refs.videoContainer = el.template.querySelector(".eon-video-volume-container");
-                el._refs.volume = el.template.querySelector(".eon-video-volume");
-                el._refs.volumeIcon = el.template.querySelector(".eon-video-volume").previousSibling.previousSibling;
-                el._refs.time = el.template.querySelector(".eon-video-time");
-                el._refs.timerail = el.template.querySelector(".eon-video-timerail");
-                el._refs.timerail.back = el.template.querySelector(".eon-video-timerail-back");
-                el._refs.timeline = el.template.querySelector(".eon-video-timeline");
-                el._refs.fullscreen = el.template.querySelector(".eon-video-fullscreen");
+                el._refs.poster = el.template.querySelector(".vc-video-poster");
+                el._refs.controls = el.template.querySelector(".vc-video-controls");
+                el._refs.play = el.template.querySelector(".vc-video-play");
+                el._refs.playIcon = el.template.querySelector(".vc-video-play").children[0];
+                el._refs.videoContainer = el.template.querySelector(".vc-video-volume-container");
+                el._refs.volume = el.template.querySelector(".vc-video-volume");
+                el._refs.volumeIcon = el.template.querySelector(".vc-video-volume").previousSibling.previousSibling;
+                el._refs.time = el.template.querySelector(".vc-video-time");
+                el._refs.timerail = el.template.querySelector(".vc-video-timerail");
+                el._refs.timerail.back = el.template.querySelector(".vc-video-timerail-back");
+                el._refs.timeline = el.template.querySelector(".vc-video-timeline");
+                el._refs.fullscreen = el.template.querySelector(".vc-video-fullscreen");
             },
             onInit: function () {
                 var el = this;
                 // PEP support
                 el.setAttribute("touch-action", "none");
                 //
-                el._misc.touch = eon.util.isTouchScreen();
+                el._misc.touch = vcomet.util.isTouchScreen();
             },
             onTransformed: function () {
                 var el = this;
                 // Initialize HTML video
                 el._setUpHTMLVideo();
-                // Initialize eon-video inner configuration
+                // Initialize vc-video inner configuration
                 el._setUp();
                 //
                 el._refs.video.addEventListener("loadeddata", function () {
@@ -808,7 +808,7 @@
                     el._playBtnListener();
                     // 
                     if (!/iPad|iPhone|iPod/.test(navigator.platform)) {
-                        el._refs.videoContainer.classList.add("eon-video-volume-container-display");
+                        el._refs.videoContainer.classList.add("vc-video-volume-container-display");
                         el._volumeListener();
                     }
                     // 
@@ -829,23 +829,23 @@
     
                 var el = this;
                 var promise;
-                if (eon.util.isTrue(el.autoPlay)) {
+                if (vcomet.util.isTrue(el.autoPlay)) {
                     if (/iPad|iPhone/.test(navigator.platform)) {
                         // Automatic playback failed, Fallback! set gif to imitate video
                         el.autoPlayAllowed = false;
-                        eon.triggerCallback("onPlayTested", el, el);
+                        vcomet.triggerCallback("onPlayTested", el, el);
                     } else {
                         promise = el._refs.video.play();
                         // ** IE play function does not retrieve a promise
                         if (promise) {
                             promise.then(function () {
                                 // Automatic playback started!
-                                eon.triggerCallback("onPlayTested", el, el);
+                                vcomet.triggerCallback("onPlayTested", el, el);
                             }).catch(function (error) {
                                 // Automatic playback failed, Fallback! set gif to imitate video
                                 el._refs.video.poster = el.fallbackGif ? el.fallbackGif : el._refs.video.poster;
                                 el.autoPlayAllowed = false;
-                                eon.triggerCallback("onPlayTested", el, el);
+                                vcomet.triggerCallback("onPlayTested", el, el);
                             });
                         }
                     }

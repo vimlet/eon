@@ -1,21 +1,21 @@
 <template>
 
-    <div class="eon-togglemenu-button eon-sect1 eon-bg1-border eon-bg1-hoverable eon-unselectable">
-        <div class="eon-togglemenu-title"></div>
-        <i class="eon-togglemenu-arrow vicon vicon-chevron-down"></i>
+    <div class="vc-togglemenu-button vc-sect1 vc-bg1-border vc-bg1-hoverable vc-unselectable">
+        <div class="vc-togglemenu-title"></div>
+        <i class="vc-togglemenu-arrow vicon vicon-chevron-down"></i>
     </div>
 
-    <div class="eon-togglemenu-content eon-bg1-border eon-bg1 eon-unselectable">
-        <eon-scroll arrowScrolls="true"></eon-scroll>
+    <div class="vc-togglemenu-content vc-bg1-border vc-bg1 vc-unselectable">
+        <vc-scroll arrowScrolls="true"></vc-scroll>
     </div>
 
 </template>
 
 <script type="text/javascript">
-    eon.element("eon-togglemenu", "eon-togglemenu.css", {
+    vcomet.element("vc-togglemenu", "vc-togglemenu.css", {
         dependencies: [
-            "../eon-item",
-            "../eon-scroll"
+            "../vc-item",
+            "../vc-scroll"
         ],
 
         properties: {
@@ -75,10 +75,10 @@
               @param {String} newVal [new togglemenu button text value]
             */
             setHeading: function (newVal) {
-                var title = this.querySelector(".eon-togglemenu-title");
+                var title = this.querySelector(".vc-togglemenu-title");
                 title.innerHTML = newVal;
                 this.heading = newVal;
-                eon.triggerCallback("onChange", this);
+                vcomet.triggerCallback("onChange", this);
             },
             /*
               @function addItem
@@ -87,8 +87,8 @@
             */
             addItem: function (item) {
                 (item.value) ? this._setupSpan(item) : null;
-                item.classList.add("eon-togglemenu-item");
-                this._content.eonScroll.content.appendChild(item);
+                item.classList.add("vc-togglemenu-item");
+                this._content.vcometScroll.content.appendChild(item);
             },
             /*
               @function removeItem 
@@ -96,7 +96,7 @@
               @param {Object} item [Node to removes from togglemenu] 
              */
             removeItem: function (item) {
-                this._content.eonScroll.content.removeChild(item);
+                this._content.vcometScroll.content.removeChild(item);
             },
             /*
               @function replaceItem 
@@ -105,12 +105,12 @@
               @param {Object} oldItem [Node to be replaced]
              */
             replaceItem: function (newItem, oldItem) {
-                if (newItem.value && !newItem.querySelector(".eon-togglemenu-itemSpan")) {
+                if (newItem.value && !newItem.querySelector(".vc-togglemenu-itemSpan")) {
                     this._setupSpan(newItem);
                 }
 
-                newItem.classList.add("eon-togglemenu-item");
-                this._content.eonScroll.content.replaceChild(newItem, oldItem);
+                newItem.classList.add("vc-togglemenu-item");
+                this._content.vcometScroll.content.replaceChild(newItem, oldItem);
             }
         },
 
@@ -128,14 +128,14 @@
 
                 while (sourceNodes.length) {
                     item = sourceNodes.shift();
-                    item.classList.add("eon-togglemenu-item");
+                    item.classList.add("vc-togglemenu-item");
                     (item.value) ? this._setupSpan(item) : null;
                     itemsDocFragment.appendChild(item);
                 }
 
                 // Move documentFragment to shadowRoot
-                el._content.eonScroll.content.appendChild(itemsDocFragment);
-                el._content.eonScroll.update();
+                el._content.vcometScroll.content.appendChild(itemsDocFragment);
+                el._content.vcometScroll.update();
 
             },
             /*
@@ -146,7 +146,7 @@
             setupSpan: function (item) {
                 var itemSpan = document.createElement("span");
                 itemSpan.innerHTML = item.value;
-                itemSpan.classList.add("eon-togglemenu-itemSpan");
+                itemSpan.classList.add("vc-togglemenu-itemSpan");
                 item.appendChild(itemSpan);
             },
 
@@ -186,7 +186,7 @@
                 var totalItemsHeight = 0;
 
                 if (el.occupy == "fit") {
-                    totalItemsHeight = el._content.eonScroll.content.scrollHeight;
+                    totalItemsHeight = el._content.vcometScroll.content.scrollHeight;
                     el._content.style.height = totalItemsHeight + "px";
 
                 } else {
@@ -214,13 +214,13 @@
             updateDisplay: function () {
                 var el = this;
 
-                if (eon.util.isTrue(el.displayed)) {
+                if (vcomet.util.isTrue(el.displayed)) {
                     this._displayTogglemenu();
                     el.autoAdjustHeight = true;
 
                 } else {
-                    el._content.classList.remove("eon-togglemenu-display");
-                    el._button.classList.remove("eon-togglemenu-buttonActive");
+                    el._content.classList.remove("vc-togglemenu-display");
+                    el._button.classList.remove("vc-togglemenu-buttonActive");
                     el.autoAdjustHeight = false;
                     el._content.style.height = 0;
                 }
@@ -233,26 +233,26 @@
             */
             displayTogglemenu: function () {
                 var el = this;
-                var icon = this.querySelector(".eon-togglemenu-arrow");
+                var icon = this.querySelector(".vc-togglemenu-arrow");
 
-                el._content.classList.add("eon-togglemenu-transition");
+                el._content.classList.add("vc-togglemenu-transition");
 
-                if (el._content.classList.contains("eon-togglemenu-display")) {
+                if (el._content.classList.contains("vc-togglemenu-display")) {
                     el._firstUndisplay = (el._firstUndisplay == "false") ? "true" : el._firstUndisplay;
                     el._content.style.height = (el._firstUndisplay == "false") ? this._content.offsetHeight + "px" : null;
                     el._content.style.height = 0;
-                    el._button.classList.add("eon-bg1-hoverable");
-                    el._content.classList.remove("eon-togglemenu-display");
-                    el._button.classList.remove("eon-togglemenu-buttonActive", "eon-sect1-hoverable");
-                    eon.triggerCallback("onUndisplay", this);
+                    el._button.classList.add("vc-bg1-hoverable");
+                    el._content.classList.remove("vc-togglemenu-display");
+                    el._button.classList.remove("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
+                    vcomet.triggerCallback("onUndisplay", this);
                     el.autoAdjustHeight = false;
                     el._content.style.height = 0;
 
                 } else {
-                    el._content.classList.add("eon-togglemenu-display");
-                    el._button.classList.remove("eon-bg1-hoverable");
-                    el._button.classList.add("eon-togglemenu-buttonActive", "eon-sect1-hoverable");
-                    eon.triggerCallback("onDisplay", this);
+                    el._content.classList.add("vc-togglemenu-display");
+                    el._button.classList.remove("vc-bg1-hoverable");
+                    el._button.classList.add("vc-togglemenu-buttonActive", "vc-sect1-hoverable");
+                    vcomet.triggerCallback("onDisplay", this);
                     el._setDisplayHeight();
 
                 }
@@ -261,13 +261,13 @@
 
         onCreated: function () {
             var el = this;
-            el._button = el.template.querySelector(".eon-togglemenu-button");
-            el._title = el.template.querySelector(".eon-togglemenu-title");
-            el._content = el.template.querySelector(".eon-togglemenu-content");
+            el._button = el.template.querySelector(".vc-togglemenu-button");
+            el._title = el.template.querySelector(".vc-togglemenu-title");
+            el._content = el.template.querySelector(".vc-togglemenu-content");
 
-            eon.createCallback("onChange", this);
-            eon.createCallback("onDisplay", this);
-            eon.createCallback("onUndisplay", this);
+            vcomet.createCallback("onChange", this);
+            vcomet.createCallback("onDisplay", this);
+            vcomet.createCallback("onUndisplay", this);
         },
 
         onInit: function () {
@@ -289,10 +289,10 @@
             }, false);
 
             // Resizes toggle content when adds or deletes elements
-            // eon.addResizeListener(el._content, el.tagName + el.uid, function () {
+            // vcomet.addResizeListener(el._content, el.tagName + el.uid, function () {
             //     var differentHeight = (parseInt(el._content.style.height) != el._content);
-            eon.addResizeListener(el._content.eonScroll.content, el.tagName + el.uid, function () {
-                var differentHeight = (parseInt(el._content.style.height) != el._content.eonScroll.content.scrollHeight);
+            vcomet.addResizeListener(el._content.vcometScroll.content, el.tagName + el.uid, function () {
+                var differentHeight = (parseInt(el._content.style.height) != el._content.vcometScroll.content.scrollHeight);
 
                 (el.autoAdjustHeight && differentHeight) ? el._setDisplayHeight() : null;
             });
@@ -300,10 +300,10 @@
         },
 
         onWindowResize: function (event) {
-            this._content.classList.remove("eon-togglemenu-transition");
+            this._content.classList.remove("vc-togglemenu-transition");
             this._setMeasurements();
 
-            if (this._content.classList.contains("eon-togglemenu-display")) {
+            if (this._content.classList.contains("vc-togglemenu-display")) {
                 this._setDisplayHeight();
             }
         },

@@ -1,8 +1,8 @@
 <script type="text/javascript">
 //@header A hierarchical data representation
-eon.element("eon-tree", "eon-tree.css", {
+vcomet.element("vc-tree", "vc-tree.css", {
     dependencies: [
-      "../eon-treenode"
+      "../vc-treenode"
     ],
     properties: {
       /*
@@ -34,7 +34,7 @@ eon.element("eon-tree", "eon-tree.css", {
       },
       /*
         @property {Object} store
-        @description eon-store element reference
+        @description vc-store element reference
       */
       store: {
         value: {},
@@ -104,7 +104,7 @@ eon.element("eon-tree", "eon-tree.css", {
           lastNode = el._build(data);
           // Trigger on tree data ready after tree nodes processing
           lastNode.onRender(function () {
-            eon.triggerCallback("onDataReady", el, el, [el.nodes]);
+            vcomet.triggerCallback("onDataReady", el, el, [el.nodes]);
           });
         }
       },
@@ -150,7 +150,7 @@ eon.element("eon-tree", "eon-tree.css", {
               filterNodes[cNode.path] = cNode;
             } else if (!filter) {
               // Append node belonging to a tree node
-              if (parentNode.tagName.toLowerCase() == "eon-treenode") {
+              if (parentNode.tagName.toLowerCase() == "vc-treenode") {
                 parentNode._refs.wrapper.appendChild(cNode);
                 // Append root node
               } else {
@@ -183,7 +183,7 @@ eon.element("eon-tree", "eon-tree.css", {
         node.type = !type ? "directory" : type;
         node.extension = !extension ? "" : extension;
         // Trigger node created callback
-        eon.triggerCallback("onNodeCreate", el, el, [node]);
+        vcomet.triggerCallback("onNodeCreate", el, el, [node]);
         // Prevent node creation default
         if (!el.__onNodeCreate[0]) {
           el.create(node);
@@ -200,7 +200,7 @@ eon.element("eon-tree", "eon-tree.css", {
         // Deselect previous selected node
         if (el.selectedNode) {
           el.selectedNode.selected = false;
-          eon.triggerCallback("onNodeUnselected", el, el, [el.selectedNode]);
+          vcomet.triggerCallback("onNodeUnselected", el, el, [el.selectedNode]);
         }
         if (el.markedNode) {
           el.markedNode.marked = false;
@@ -208,7 +208,7 @@ eon.element("eon-tree", "eon-tree.css", {
         // Select node
         el.selectedNode = node;
         node.selected = true;
-        eon.triggerCallback("onNodeSelected", el, el, [node]);
+        vcomet.triggerCallback("onNodeSelected", el, el, [node]);
       },
       /*
         @function markNode
@@ -220,7 +220,7 @@ eon.element("eon-tree", "eon-tree.css", {
         // Deselect previous selected node
         if (el.markedNode) {
           el.markedNode.marked = false;
-          eon.triggerCallback("onNodeUnmarked", el, el, [el.markedNode]);
+          vcomet.triggerCallback("onNodeUnmarked", el, el, [el.markedNode]);
         }
         if (el.selectedNode) {
           el.selectedNode.selected = false;
@@ -228,7 +228,7 @@ eon.element("eon-tree", "eon-tree.css", {
         // Select node
         el.markedNode = node;
         node.marked = true;
-        eon.triggerCallback("onNodeMarked", el, el, [node]);
+        vcomet.triggerCallback("onNodeMarked", el, el, [node]);
       },
       /*
         @function create
@@ -263,7 +263,7 @@ eon.element("eon-tree", "eon-tree.css", {
         var el = this;
         var node = typeof path === "string" ? el.nodes[path] : path;
         // Trigger node drop callback
-        eon.triggerCallback("onNodeRemove", el, el, [node]);
+        vcomet.triggerCallback("onNodeRemove", el, el, [node]);
         // Prevent node create default
         if (!el.__onNodeRemove[0]) {
           el.remove(node);
@@ -305,7 +305,7 @@ eon.element("eon-tree", "eon-tree.css", {
         var el = this;
         var node = typeof dragNode === "string" ? el.nodes[dragNode] : dragNode;
         // Trigger node drop callback
-        eon.triggerCallback("onNodeMove", el, el, [node, dropNode]);
+        vcomet.triggerCallback("onNodeMove", el, el, [node, dropNode]);
         // Prevent node create default
         if (!el.__onNodeMove[0]) {
           el.move(dragNode, dropNode, callback, errCallback);
@@ -381,7 +381,7 @@ eon.element("eon-tree", "eon-tree.css", {
         for (var index in data) {
           node = data[index];
           // Create tree node
-          treeNode = document.createElement("eon-treenode");
+          treeNode = document.createElement("vc-treenode");
           el._copyProperties(node, treeNode);
           // Append tree node
           tree.appendChild(treeNode);
@@ -427,7 +427,7 @@ eon.element("eon-tree", "eon-tree.css", {
         // Check if other nodes are pending to be appended
         // This means that only the first node in this cycle will create the new onReady callback
         if (!el._misc.pendingNodes) {
-          eon.onReady(function(){
+          vcomet.onReady(function(){
             var tree = el._refs.tree;
             var nodes = tree.children;
             var fragment = document.createDocumentFragment();
@@ -538,7 +538,7 @@ eon.element("eon-tree", "eon-tree.css", {
         if (!el.nodes[node.path]) {
           var parent = el.nodes[node.parent] ? el.nodes[node.parent] : el._refs.tree;
           // Create new tree node
-          var nodeEl = document.createElement("eon-treenode");
+          var nodeEl = document.createElement("vc-treenode");
           nodeEl.name = node.name;
           nodeEl.path = node.path;
           nodeEl.parent = node.parent;
@@ -551,7 +551,7 @@ eon.element("eon-tree", "eon-tree.css", {
 
           setTimeout(function () {
             el._sortNodes();
-            eon.triggerCallback("onNodeCreated", el, el, [nodeEl]);
+            vcomet.triggerCallback("onNodeCreated", el, el, [nodeEl]);
           }, 100);
         }
       },
@@ -578,7 +578,7 @@ eon.element("eon-tree", "eon-tree.css", {
           delete el._misc.srcNodesPaths[node.path];
           delete el.nodes[node.path];
 
-          eon.triggerCallback("onNodeRemoved", el, el, [node]);
+          vcomet.triggerCallback("onNodeRemoved", el, el, [node]);
         }
       },
       /*
@@ -602,7 +602,7 @@ eon.element("eon-tree", "eon-tree.css", {
           } else {
             el._moveFile(dragNode, dropNode);
           }
-          eon.triggerCallback("onNodeMoved", el, el, [dragNode]);
+          vcomet.triggerCallback("onNodeMoved", el, el, [dragNode]);
           // Call success callback
           if (callback) {
             callback();
@@ -629,7 +629,7 @@ eon.element("eon-tree", "eon-tree.css", {
           // Denied append node with a name of an existing node
           if (!el.nodes[newPath]) {
             // Make old container no expandable
-            if (dragNode._refs.parentNode.tagName.toLowerCase() === "eon-treenode") {
+            if (dragNode._refs.parentNode.tagName.toLowerCase() === "vc-treenode") {
               dragNode._refs.parentNode._makeNoExpandable(1);
             }
             // Update tree nodes object
@@ -687,18 +687,18 @@ eon.element("eon-tree", "eon-tree.css", {
     onCreated: function () {
       var el = this;
       // Util element event callbacks
-      eon.createCallback("onDataReady", el);
-      eon.createCallback("onNodeSelected", el);
-      eon.createCallback("onNodeUnselected", el);
-      eon.createCallback("onNodeMarked", el);
-      eon.createCallback("onNodeUnmarked", el);
-      eon.createCallback("onNodeRightClicked", el);
-      eon.createCallback("onNodeCreate", el);
-      eon.createCallback("onNodeCreated", el);
-      eon.createCallback("onNodeRemove", el);
-      eon.createCallback("onNodeRemoved", el);
-      eon.createCallback("onNodeMove", el);
-      eon.createCallback("onNodeMoved", el);
+      vcomet.createCallback("onDataReady", el);
+      vcomet.createCallback("onNodeSelected", el);
+      vcomet.createCallback("onNodeUnselected", el);
+      vcomet.createCallback("onNodeMarked", el);
+      vcomet.createCallback("onNodeUnmarked", el);
+      vcomet.createCallback("onNodeRightClicked", el);
+      vcomet.createCallback("onNodeCreate", el);
+      vcomet.createCallback("onNodeCreated", el);
+      vcomet.createCallback("onNodeRemove", el);
+      vcomet.createCallback("onNodeRemoved", el);
+      vcomet.createCallback("onNodeMove", el);
+      vcomet.createCallback("onNodeMoved", el);
 
       var tree = document.createElement('div');
       // Tree container quick access
@@ -706,15 +706,15 @@ eon.element("eon-tree", "eon-tree.css", {
       tree._refs = {
         hostTree: el
       };
-      tree.classList.add("eon-tree-tree");
+      tree.classList.add("vc-tree-tree");
       // Data store quick access
-      el.store = el.source.querySelector("eon-store");
+      el.store = el.source.querySelector("vc-store");
     },
     onInit: function () {
       var el = this;
       var tree = el._refs.tree;
       var srcNodes = el.getSourceElements();
-      var scroll = document.createElement('eon-scroll');
+      var scroll = document.createElement('vc-scroll');
       // References
       el._misc.srcNodes = [];
       el._misc.srcNodesPaths = {};
@@ -727,7 +727,7 @@ eon.element("eon-tree", "eon-tree.css", {
         el._misc.srcNodesPaths[srcNode.getAttribute("path")] = { type: srcNode.getAttribute("type") };
         el._misc.srcNodes.push(srcNode);
         // Append them to the tree
-        if (srcNode.tagName.toLowerCase() !== "eon-scroll") {
+        if (srcNode.tagName.toLowerCase() !== "vc-scroll") {
           tree.appendChild(srcNode)
         }
       }

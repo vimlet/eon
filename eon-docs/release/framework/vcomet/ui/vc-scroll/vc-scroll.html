@@ -1,9 +1,9 @@
 <template>
-  <div class="eon-scroll-content"></div>
+  <div class="vc-scroll-content"></div>
 </template>
 
 <script type="text/javascript">
-  eon.element("eon-scroll", "eon-scroll.css", {
+  vcomet.element("vc-scroll", "vc-scroll.css", {
 
     privateProperties: {
       /*
@@ -188,7 +188,7 @@
       @description Sets up basic aspects of the scroll content, such as pushing it with the scroll rails or adding the resize listener
       */
       setupContent: function () {
-        this.content = this.template.querySelector(".eon-scroll-content");
+        this.content = this.template.querySelector(".vc-scroll-content");
       },
       /*
       @function (private) _setupResizeListeners
@@ -198,11 +198,11 @@
 
         var el = this;
 
-        eon.addResizeListener(el, "eon-scroll", function () {
+        vcomet.addResizeListener(el, "vc-scroll", function () {
           el._handleScrollResize();
         });
 
-        eon.addResizeListener(el.content, "content", function () {
+        vcomet.addResizeListener(el.content, "content", function () {
           el._handleScrollResize();
         });
 
@@ -215,7 +215,7 @@
 
         var el = this;
 
-        if (eon.util.isTrue(el.fit)) {
+        if (vcomet.util.isTrue(el.fit)) {
 
           el.style.height = "100%";
           el.style.width = "100%";
@@ -241,11 +241,11 @@
 
           el._refs.container = el.parentNode;
 
-          el._refs.container.eonScroll = el;
-          el._refs.container.eonScroll.content = el.content;
+          el._refs.container.vcometScroll = el;
+          el._refs.container.vcometScroll.content = el.content;
 
-          if (!el._refs.container.classList.contains("eon-scroll-content")) {
-            el._refs.container.classList.add("eon-scroll-container");
+          if (!el._refs.container.classList.contains("vc-scroll-content")) {
+            el._refs.container.classList.add("vc-scroll-container");
           }
 
         }
@@ -272,14 +272,14 @@
         var el = this;
 
         // For desktop window we setup some events for it
-        if (!eon.util.isTouchScreen()) {
+        if (!vcomet.util.isTouchScreen()) {
 
           //This event is to show the scrolls when the mouse hovers the container
           el.addEventListener("pointerenter", function (e) {
 
             if (el._misc.pointerLeft) {
 
-              if (!eon.util.isTrue(el._misc.horizontal.drag.active) && !eon.util.isTrue(el._misc.vertical.drag.active)) {
+              if (!vcomet.util.isTrue(el._misc.horizontal.drag.active) && !vcomet.util.isTrue(el._misc.vertical.drag.active)) {
                 el.showScrollbars(el._misc.hideScrollbarsMs);
               }
 
@@ -291,7 +291,7 @@
 
           //This event is to show the scrolls when the mouse moves the container
           el.addEventListener("pointermove", function (e) {
-            if (!eon.util.isTrue(el._misc.horizontal.drag.active) && !eon.util.isTrue(el._misc.vertical.drag.active)) {
+            if (!vcomet.util.isTrue(el._misc.horizontal.drag.active) && !vcomet.util.isTrue(el._misc.vertical.drag.active)) {
 
               var now = Date.now();
 
@@ -324,7 +324,7 @@
 
         var el = this;
 
-        if (eon.util.isTrue(el.fillContainer)) {
+        if (vcomet.util.isTrue(el.fillContainer)) {
           if (window.getComputedStyle(el._refs.container, false).position == "static") {
             el._refs.container.style.position = "relative";
           }
@@ -340,7 +340,7 @@
         var el = this;
 
         // We only want to setup the device setup if the user specified that it wants it that way
-        if (eon.util.isTrue(el.nativeOnDevice)) {
+        if (vcomet.util.isTrue(el.nativeOnDevice)) {
 
           el._setupDeviceTouchAction();
 
@@ -352,7 +352,7 @@
             eventObject.scrollTop = el.content.scrollTop;
             eventObject.scrollLeft = el.content.scrollLeft;
 
-            eon.triggerCallback("onScrolled", el, el, [eventObject]);
+            vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
 
           };
 
@@ -361,11 +361,11 @@
         // Enables the dragging it theres no element to prevent it
         el.content.addEventListener("pointerdown", function (e) {
 
-          if (!eon.util.isTrue(el.getAttribute("native"))) {
+          if (!vcomet.util.isTrue(el.getAttribute("native"))) {
 
             if (e.pointerType != "mouse") {
 
-              el.classList.add("eon-unselectable");
+              el.classList.add("vc-unselectable");
 
               // Once the user touches the screen we set this property to true
               el._misc.dragScroll.active = true;
@@ -607,12 +607,12 @@
               if (el._misc.vertical.created) {
 
                 // We only want to do things if the native scroll its not being used
-                if (!eon.util.isTrue(el.getAttribute("native"))) {
+                if (!vcomet.util.isTrue(el.getAttribute("native"))) {
 
                   e.preventDefault();
 
                   // Handle the scroll if the mouse is not in an element that prevents it
-                  if (el._refs.verticalScroll.classList.contains("eon-scroll-active")) {
+                  if (el._refs.verticalScroll.classList.contains("vc-scroll-active")) {
 
                     var preventDragScroll = false;
 
@@ -697,7 +697,7 @@
 
           el._misc.vertical.created = true;
 
-          eon.triggerCallback("onVerticalScrollCreated", el, el, [el._refs.verticalScroll]);
+          vcomet.triggerCallback("onVerticalScrollCreated", el, el, [el._refs.verticalScroll]);
         }
 
       },
@@ -800,7 +800,7 @@
 
           el._misc.horizontal.created = true;
 
-          eon.triggerCallback("onHorizontalScrollCreated", el, el, [el._refs.horizontalScroll]);
+          vcomet.triggerCallback("onHorizontalScrollCreated", el, el, [el._refs.horizontalScroll]);
         }
 
       },
@@ -815,13 +815,13 @@
 
         //If ether the horizontal or the vertical scroll are static we will make the square static aswell
         if (el._misc.horizontal.static == true || el._misc.vertical.static == true) {
-          square.classList.add("eon-scroll-static");
+          square.classList.add("vc-scroll-static");
           el._misc.square.static = true;
         }
 
-        square.classList.add("eon-scroll-square");
-        square.classList.add("eon-bg8");
-        square.classList.add("eon-scroll-active");
+        square.classList.add("vc-scroll-square");
+        square.classList.add("vc-bg8");
+        square.classList.add("vc-scroll-active");
 
         //The square width and height depends on the vertical and horizontal scroll thickness
         square.style.height = el.thickness + "px";
@@ -841,9 +841,9 @@
 
         var el = this;
 
-        if (eon.util.isTrue(el.nativeOnDevice)) {
+        if (vcomet.util.isTrue(el.nativeOnDevice)) {
 
-          if (eon.util.isTouchScreen()) {
+          if (vcomet.util.isTouchScreen()) {
 
             el._performScroll(0, 0);
 
@@ -936,7 +936,7 @@
       moveSourceToContent: function () {
 
         var sourceNodes = this.getSourceElements();
-        var content = this.template.querySelector(".eon-scroll-content");
+        var content = this.template.querySelector(".vc-scroll-content");
 
         for (var i = 0; i < sourceNodes.length; i++) {
           content.appendChild(sourceNodes[i]);
@@ -1000,7 +1000,7 @@
 
           el.classList.remove("active-transitions");
           el._performScroll(el._misc.horizontal.position, el._misc.vertical.position);
-          eon.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("requested")]);
+          vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("requested")]);
 
         }
 
@@ -1155,7 +1155,7 @@
         //Trigger the scroll event
         if (el._misc.direction) {
           var eventObject = el._createScrollEventObject("drag");
-          eon.triggerCallback("onScrolled", el, el, [eventObject]);
+          vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
         }
 
       },
@@ -1242,7 +1242,7 @@
               //If the scroll has changed we trigger the callback
               if (currentVerticalPosition != el._misc.vertical.position) {
                 var eventObject = el._createScrollEventObject("arrow");
-                eon.triggerCallback("onScrolled", el, el, [eventObject]);
+                vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
               }
             };
 
@@ -1262,7 +1262,7 @@
               ///If the scroll has changed we trigger the callback
               if (currentVerticalPosition != el._misc.vertical.position) {
                 var eventObject = el._createScrollEventObject("arrow");
-                eon.triggerCallback("onScrolled", el, el, [eventObject]);
+                vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
               }
             };
 
@@ -1279,7 +1279,7 @@
               //If the scroll has changed we trigger the callback
               if (currentHorizontalPosition != el._misc.horizontal.position) {
                 var eventObject = el._createScrollEventObject("arrow");
-                eon.triggerCallback("onScrolled", el, el, [eventObject]);
+                vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
               }
             };
 
@@ -1297,7 +1297,7 @@
               //If the scroll has changed we trigger the callback
               if (currentHorizontalPosition != el._misc.horizontal.position) {
                 var eventObject = el._createScrollEventObject("arrow");
-                eon.triggerCallback("onScrolled", el, el, [eventObject]);
+                vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
               }
             };
 
@@ -1366,7 +1366,7 @@
 
           if (el._misc.direction) {
             eventObject = el._createScrollEventObject("drag");
-            eon.triggerCallback("onScrolled", el, el, [eventObject]);
+            vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
           }
 
           return true;
@@ -1437,7 +1437,7 @@
 
         var el = this;
 
-        if (!eon.util.isTrue(el.getAttribute("native"))) {
+        if (!vcomet.util.isTrue(el.getAttribute("native"))) {
 
           var hasSquare = (el._misc.square.created == true);
           var hasHorizontalScroll = (el.content.scrollWidth > el.offsetWidth);
@@ -1451,7 +1451,7 @@
               el._setupSquare();
             }
 
-            el._refs.square.classList.add("eon-scroll-active");
+            el._refs.square.classList.add("vc-scroll-active");
             hasSquare = true;
           }
 
@@ -1472,7 +1472,7 @@
 
                 //We calculate the new bars width depending on the rail
                 el._handleVerticalScrollLength();
-                el._refs.verticalScroll.classList.add("eon-scroll-active");
+                el._refs.verticalScroll.classList.add("vc-scroll-active");
 
                 el._verticalUpdate(-proportionalTranslatePosition);
 
@@ -1483,7 +1483,7 @@
                 //Changes the vertical bar size depending on the new vertical scroll height
                 el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight))) + "px";
 
-                eon.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("resize")]);
+                vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("resize")]);
 
               }
 
@@ -1495,15 +1495,15 @@
 
                 //If the scroll is not static then we remove the active class to hide it
                 if (el._misc.vertical.static == false) {
-                  el._refs.verticalScroll.classList.remove("eon-scroll-active");
+                  el._refs.verticalScroll.classList.remove("vc-scroll-active");
                 }
 
                 //If the square is created and the scroll is not static we can hide it
                 if (el._misc.square.created == true && el._misc.vertical.static == false) {
-                  el._refs.square.classList.remove("eon-scroll-active");
+                  el._refs.square.classList.remove("vc-scroll-active");
                 }
 
-                if (el._misc.horizontal.created == true && el._misc.square.created == true && !el._refs.square.classList.contains("eon-scroll-active")) {
+                if (el._misc.horizontal.created == true && el._misc.square.created == true && !el._refs.square.classList.contains("vc-scroll-active")) {
                   el._refs.horizontalScroll.style.width = '100%';
                   el._updateHorizontalBarPosition();
                 }
@@ -1534,7 +1534,7 @@
 
                 //We calculate the new bars width depending on the rail
                 el._handleHorizontalScrollLength();
-                el._refs.horizontalScroll.classList.add("eon-scroll-active");
+                el._refs.horizontalScroll.classList.add("vc-scroll-active");
                 el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth))) + "px";
 
                 el._horizontalUpdate(-proportionalTranslatePosition);
@@ -1546,7 +1546,7 @@
                 //Changes the vertical bar size depending on the new vertical scroll height
                 el._refs.horizontalBar.style.width = Math.ceil(parseFloat(window.getComputedStyle(el._refs.horizontalRail, null).getPropertyValue("width").split("px")[0] / (el.content.scrollWidth / el.offsetWidth))) + "px";
 
-                eon.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("resize")]);
+                vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject("resize")]);
 
               }
 
@@ -1558,15 +1558,15 @@
 
                 //If the scroll is not static then we remove the active class to hide it
                 if (el._misc.horizontal.static == false) {
-                  el._refs.horizontalScroll.classList.remove("eon-scroll-active");
+                  el._refs.horizontalScroll.classList.remove("vc-scroll-active");
                 }
 
                 //If the square is created and the scroll is not static we can hide it
                 if (el._misc.square.created == true && el._misc.vertical.static == false) {
-                  el._refs.square.classList.remove("eon-scroll-active");
+                  el._refs.square.classList.remove("vc-scroll-active");
                 }
 
-                if (el._misc.vertical.created == true && el._misc.square.created == true && !el._refs.square.classList.contains("eon-scroll-active")) {
+                if (el._misc.vertical.created == true && el._misc.square.created == true && !el._refs.square.classList.contains("vc-scroll-active")) {
 
                   el._refs.verticalScroll.style.height = "100%";
                   el._updateVerticalBarPosition();
@@ -1598,11 +1598,11 @@
         var el = this;
         var scrollDelta, scrollPosition, previousPosition;
 
-        if (eon.util.getBrowser() == "Firefox" && Math.abs(e.deltaY < 3)) {
+        if (vcomet.util.getBrowser() == "Firefox" && Math.abs(e.deltaY < 3)) {
           scrollDelta = (e.deltaY * 100);
           el.classList.add("active-transitions");
         } else {
-          scrollDelta = eon.util.getBrowser() == "Firefox" ? Math.sign(e.deltaY) * 100 : e.deltaY;
+          scrollDelta = vcomet.util.getBrowser() == "Firefox" ? Math.sign(e.deltaY) * 100 : e.deltaY;
           el.classList.add("active-transitions");
         }
 
@@ -1673,7 +1673,7 @@
           //If the scroll has changed we trigger the callback
           if (currentVerticalPosition != el._misc.vertical.position) {
             var eventObject = el._createScrollEventObject("drag");
-            eon.triggerCallback("onScrolled", el, el, [eventObject]);
+            vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
           }
 
         }
@@ -1713,7 +1713,7 @@
             el._misc.transition.lastHorizontalPosition = Math.abs(el._misc.horizontal.position);
 
             if (triggerOnScrolled) {
-              eon.triggerCallback("onScrolled", el, el, [el._createScrollEventObject(scrollObj.trigger)]);
+              vcomet.triggerCallback("onScrolled", el, el, [el._createScrollEventObject(scrollObj.trigger)]);
             }
 
             el.content.removeEventListener("transitionend", el._misc.transition.transitionEndFunction);
@@ -1758,7 +1758,7 @@
             el.showScrollbars(el._misc.hideScrollbarsMs);
 
             if (differentVertical || differentHorizontal) {
-              eon.triggerCallback("onScrolled", el, el, [eventObject]);
+              vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
             }
 
             el._misc.transition.lastVerticalPosition = eventObject.scrollTop;
@@ -1832,7 +1832,7 @@
           //If the scroll has changed we trigger the callback
           if (currentHorizontalPosition != el._misc.horizontal.position) {
             var eventObject = el._createScrollEventObject("drag");
-            eon.triggerCallback("onScrolled", el, el, [eventObject]);
+            vcomet.triggerCallback("onScrolled", el, el, [eventObject]);
           }
         }
       },
@@ -1857,7 +1857,7 @@
       */
       handleVerticalScrollLength: function () {
         var el = this;
-        el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+        el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
       },
       /*
       @function (private) _handleHorizontalScrollLength
@@ -1865,7 +1865,7 @@
       */
       handleHorizontalScrollLength: function () {
         var el = this;
-        el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+        el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
       },
       /*
       @function (private) _createVerticalScroll
@@ -1882,18 +1882,18 @@
         el._refs.verticalRail = rail;
         el._refs.verticalBar = bar;
 
-        scroll.classList.add("eon-scroll-verticalScroll");
-        rail.classList.add("eon-scroll-verticalRail");
-        bar.classList.add("eon-scroll-verticalBar", "eon-bg8");
+        scroll.classList.add("vc-scroll-verticalScroll");
+        rail.classList.add("vc-scroll-verticalRail");
+        bar.classList.add("vc-scroll-verticalBar", "vc-bg8");
 
-        scroll.classList.add("eon-scroll-active");
+        scroll.classList.add("vc-scroll-active");
 
         rail.appendChild(bar);
         scroll.appendChild(rail);
         el.appendChild(scroll);
 
         if (el._misc.vertical.static == true) {
-          scroll.classList.add("eon-scroll-static");
+          scroll.classList.add("vc-scroll-static");
           el.content.style.paddingRight = el.thickness + "px";
         }
 
@@ -1922,14 +1922,14 @@
         el._refs.horizontalRail = rail;
         el._refs.horizontalBar = bar;
 
-        scroll.classList.add("eon-scroll-horizontalScroll");
-        rail.classList.add("eon-scroll-horizontalRail");
-        bar.classList.add("eon-scroll-horizontalBar", "eon-bg8");
+        scroll.classList.add("vc-scroll-horizontalScroll");
+        rail.classList.add("vc-scroll-horizontalRail");
+        bar.classList.add("vc-scroll-horizontalBar", "vc-bg8");
 
-        scroll.classList.add("eon-scroll-active");
+        scroll.classList.add("vc-scroll-active");
 
         if (el._misc.horizontal.static == true) {
-          scroll.classList.add("eon-scroll-static");
+          scroll.classList.add("vc-scroll-static");
           el.content.style.paddingBottom = el.thickness + "px";
         }
 
@@ -1969,7 +1969,7 @@
         downIcon.innerHTML = "expand_more";
 
         upButton.appendChild(upIcon);
-        upButton.classList.add("eon-scroll-arrowButton", "eon-bg8", "eon-fg1-hoverable", "eon-unselectable");
+        upButton.classList.add("vc-scroll-arrowButton", "vc-bg8", "vc-fg1-hoverable", "vc-unselectable");
         upButton.style.height = el.thickness + "px";
         upButton.style.width = el.thickness + "px";
         upButton.dataset.direction = "up";
@@ -1979,7 +1979,7 @@
         };
 
         downButton.appendChild(downIcon);
-        downButton.classList.add("eon-scroll-arrowButton", "eon-bg8", "eon-fg1-hoverable", "eon-unselectable");
+        downButton.classList.add("vc-scroll-arrowButton", "vc-bg8", "vc-fg1-hoverable", "vc-unselectable");
         downButton.style.height = el.thickness + "px";
         downButton.style.width = el.thickness + "px";
         downButton.dataset.direction = "down";
@@ -2018,7 +2018,7 @@
         rightIcon.innerHTML = "chevron_right";
 
         leftButton.appendChild(leftIcon);
-        leftButton.classList.add("eon-scroll-arrowButton", "eon-unselectable", "eon-bg8", "eon-fg1-hoverable");
+        leftButton.classList.add("vc-scroll-arrowButton", "vc-unselectable", "vc-bg8", "vc-fg1-hoverable");
         leftButton.style.height = el.thickness + "px";
         leftButton.style.width = el.thickness + "px";
         leftButton.dataset.direction = "left";
@@ -2028,7 +2028,7 @@
         });
 
         rightButton.appendChild(rightIcon);
-        rightButton.classList.add("eon-scroll-arrowButton", "eon-unselectable", "eon-bg8", "eon-fg1-hoverable");
+        rightButton.classList.add("vc-scroll-arrowButton", "vc-unselectable", "vc-bg8", "vc-fg1-hoverable");
         rightButton.style.height = el.thickness + "px";
         rightButton.style.width = el.thickness + "px";
         rightButton.dataset.direction = "right";
@@ -2290,13 +2290,13 @@
 
         if (el._refs.verticalScroll) {
           el._refs.verticalScroll.style.width = el.thickness + "px";
-          el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+          el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
           el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight))) + "px";
         }
 
         if (el._refs.horizontalScroll) {
           el._refs.horizontalScroll.style.height = el.thickness + "px";
-          el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
+          el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("vc-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
           el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth))) + "px";
         }
 
@@ -2338,7 +2338,7 @@
       forceRepaint: function () {
         var el = this;
 
-        if (eon.util.getBrowser() == "Safari" && /iPad|iPhone|iPod/.test(navigator.platform)) {
+        if (vcomet.util.getBrowser() == "Safari" && /iPad|iPhone|iPod/.test(navigator.platform)) {
           var hasStyleDisplay = (el.style.display);
           var displays = ["block", "flex"];
           var previousDisplay, newDisplay;
@@ -2367,7 +2367,7 @@
 
         var el = this;
 
-        if (eon.util.isTrue(el.getAttribute("native"))) {
+        if (vcomet.util.isTrue(el.getAttribute("native"))) {
 
           el._handleNativeScrollToRequest(verticalPosition, horizontalPosition, transition);
 
@@ -2388,7 +2388,7 @@
         var el = this;
 
         if (!node.isOnPath) {
-          eon.registerPathListener(node);
+          vcomet.registerPathListener(node);
         }
 
         el._preventDragNodes.push(node);
@@ -2411,11 +2411,11 @@
 
         clearTimeout(el._misc.hideScrollbarsTimeout);
 
-        if (el._misc.vertical.created == true && el._refs.verticalScroll.classList.contains("eon-scroll-active") == true && el._misc.vertical.static == false) {
+        if (el._misc.vertical.created == true && el._refs.verticalScroll.classList.contains("vc-scroll-active") == true && el._misc.vertical.static == false) {
           el._refs.verticalScroll.style.opacity = 1;
         }
 
-        if (el._misc.horizontal.created == true && el._refs.horizontalScroll.classList.contains("eon-scroll-active") == true && el._misc.horizontal.static == false) {
+        if (el._misc.horizontal.created == true && el._refs.horizontalScroll.classList.contains("vc-scroll-active") == true && el._misc.horizontal.static == false) {
           el._refs.horizontalScroll.style.opacity = 1;
         }
 
@@ -2463,9 +2463,9 @@
       var el = this;
 
       // Creates a scroll callback for the user to use
-      eon.createCallback("onScrolled", el);
-      eon.createCallback("onHorizontalScrollCreated", el);
-      eon.createCallback("onVerticalScrollCreated", el);
+      vcomet.createCallback("onScrolled", el);
+      vcomet.createCallback("onHorizontalScrollCreated", el);
+      vcomet.createCallback("onVerticalScrollCreated", el);
 
       el._initMisc();
       el._setupContent();
@@ -2501,7 +2501,7 @@
       el._setupContainerPosition();
       el._forceRepaint();
 
-      eon.onReady(function () {
+      vcomet.onReady(function () {
         el._setupScrollBars();
       });
 

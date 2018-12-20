@@ -1,17 +1,17 @@
 <template>
 
-  <div class="eon-menu-wrapper eon-sect1 eon-unselectable">
+  <div class="vc-menu-wrapper vc-sect1 vc-unselectable">
   </div>
 
 </template>
 
 <script>
-  eon.element("eon-menu", "eon-menu.css", {
+  vcomet.element("vc-menu", "vc-menu.css", {
 
     dependencies: [
-      "../eon-item",
-      "../eon-combobox",
-      "../eon-scroll"
+      "../vc-item",
+      "../vc-combobox",
+      "../vc-scroll"
     ],
     properties: {
       /*
@@ -58,19 +58,19 @@
 
         var fragment = document.createDocumentFragment();
         var srcNodes = el.getSourceElements();
-        var menuItems = el.querySelectorAll("eon-item");
+        var menuItems = el.querySelectorAll("vc-item");
         var i;
 
         // Append source nodes
         for (i = 0; i < srcNodes.length; i++) {
           fragment.appendChild(srcNodes[i]);
         }
-        // Set up eon-item elements
+        // Set up vc-item elements
         for (i = 0; i < menuItems.length; i++) {
           el._setupItem(menuItems[i]);
         }
 
-        el.querySelector(".eon-menu-wrapper").appendChild(fragment);
+        el.querySelector(".vc-menu-wrapper").appendChild(fragment);
 
       },
       setupItem: function (item) {
@@ -109,7 +109,7 @@
           item.appendChild(iconNode);
         }
 
-        item.classList.add("eon-menu-header", "eon-sect3-hoverable");
+        item.classList.add("vc-menu-header", "vc-sect3-hoverable");
 
       },
       /*
@@ -129,7 +129,7 @@
         var yAxisDirection = (el.direction.indexOf("top") > -1) ? "top" : "bottom";
         var xAxisDirection = (el.direction.indexOf("left") > -1) ? "left" : "right";
 
-        var dropdownTrigger = document.createElement("eon-item");
+        var dropdownTrigger = document.createElement("vc-item");
 
         var innerDropdownDirection;
 
@@ -147,7 +147,7 @@
         el._setupVisuals(dropdownTrigger);
         el._setupItemEvents(item, dropdownTrigger, itemsDropdown);
 
-        itemsDropdown.classList.add("eon-menu-dropdown", "eon-sect1");
+        itemsDropdown.classList.add("vc-menu-dropdown", "vc-sect1");
         itemsDropdown.appendChild(dropdownItemsFragment);
 
         item.appendChild(dropdownTrigger);
@@ -163,8 +163,8 @@
 
         var el = this;
 
-        eon.registerPathListener(item);
-        eon.registerPathListener(dropdownTrigger);
+        vcomet.registerPathListener(item);
+        vcomet.registerPathListener(dropdownTrigger);
 
         item.dataset.visible = false;
 
@@ -186,7 +186,7 @@
           // Dropdown item visited
           dropdownTrigger.addEventListener("pointerover", function (e) {
 
-            if (!eon.util.isTouchScreen()) {
+            if (!vcomet.util.isTouchScreen()) {
 
               // Check if menu dropdown is already displayed
               if (!item.dataset.visible || item.dataset.visible == "false") {
@@ -201,7 +201,7 @@
           // Dropdown item left
           item.addEventListener("pointerleave", function (e) {
 
-            if (!eon.util.isTouchScreen()) {
+            if (!vcomet.util.isTouchScreen()) {
 
               // Check if menu dropdown is already hidden
               if (item.dataset.visible == true || item.dataset.visible == "true") {
@@ -227,7 +227,7 @@
         // Dropdown item clicked
         document.body.addEventListener("pointerdown", function (e) {
 
-          if (eon.util.isTouchScreen() || (!eon.util.isTouchScreen() && el.hover != "true")) {
+          if (vcomet.util.isTouchScreen() || (!vcomet.util.isTouchScreen() && el.hover != "true")) {
 
             if (dropdownTrigger.isOnPath) {
 
@@ -239,7 +239,7 @@
               item.dataset.visible = false;
               item.style.visibility = "visible";
 
-              item.classList.remove("eon-sect3");
+              item.classList.remove("vc-sect3");
 
             }
 
@@ -260,7 +260,7 @@
         item.dataset.visible = item.dataset.visible == "true" || item.dataset.visible == true ? false : true;
         item.style.visibility = "visible";
         
-        item.classList[classListFunction]("eon-sect3");
+        item.classList[classListFunction]("vc-sect3");
 
       },
       /*
@@ -269,7 +269,7 @@
       */
       hideVisibleMenuItems: function () {
         var el = this;
-        var visibleMenuItems = el.querySelectorAll('eon-item[data-visible="true"]');
+        var visibleMenuItems = el.querySelectorAll('vc-item[data-visible="true"]');
 
         console.log('hideVisibleMenuItems');
 
@@ -332,7 +332,7 @@
       */
       relocateDropdownIfNeeded: function (item) {
 
-        var exceedsObject = this._exceedsWindow(item.querySelector(".eon-menu-dropdown"));
+        var exceedsObject = this._exceedsWindow(item.querySelector(".vc-menu-dropdown"));
 
         if (exceedsObject.exceeds == true) {
 

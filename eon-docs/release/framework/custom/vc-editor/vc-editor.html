@@ -1,12 +1,12 @@
 <style>
-    eon-editor {
+    vc-editor {
         height: 100%;
         width: 100%;
         max-height: 450px;
         position: relative;
     }
 
-    .eon-editor-padding {
+    .vc-editor-padding {
         height: 100%;
         width: 100%;
         padding: 10px 0px;
@@ -15,7 +15,7 @@
         position: absolute;
     }
 
-    #eon-editor-content {
+    #vc-editor-content {
         width: 100%;
         height: 100%;
         min-height: 10px;
@@ -24,26 +24,26 @@
         flex-grow: 1;
     }
 
-    eon-editor eon-loading {
+    vc-editor vc-loading {
         width: 100%;
         height: 100%;
         min-height: 300px;
         box-sizing: border-box;
     }
 
-    #eon-editor-loading {
+    #vc-editor-loading {
         width: 100%;
         height: 100%;
         min-height: 300px;
         box-sizing: border-box;
     }
 
-    eon-editor span {
+    vc-editor span {
         font-family: Consolas, "Courier New", monospace !important;
         font-size: 14px !important;
     }
 
-    .eon-editor-until-render {
+    .vc-editor-until-render {
         display: none;
     }
 
@@ -56,17 +56,17 @@
 <template>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <eon-loading></eon-loading>
-    <div class="eon-editor-padding">
-        <div id="eon-editor-content" class="eon-editor-until-render"></div>
+    <vc-loading></vc-loading>
+    <div class="vc-editor-padding">
+        <div id="vc-editor-content" class="vc-editor-until-render"></div>
     </div>
 </template>
 
 <script>
-    eon.element("eon-editor", null, {
+    vcomet.element("vc-editor", null, {
 
         dependencies: [
-            "../eon-loading"
+            "../vc-loading"
         ],
         
         properties: {
@@ -117,11 +117,11 @@
                 }
                 require.config({
                     paths: {
-                        'vs': 'framework/custom/eon-editor/vs'
+                        'vs': 'framework/custom/vc-editor/vs'
                     }
                 });
                 require(['vs/editor/editor.main'], function () {
-                    el._refs.editor = monaco.editor.create(el.querySelector("#eon-editor-content"), {
+                    el._refs.editor = monaco.editor.create(el.querySelector("#vc-editor-content"), {
                         value: el.value,
                         language: el.language,
                         theme: 'vs-dark',
@@ -142,7 +142,7 @@
 
                     el._refs.editor.model.onDidChangeContent((event) => {
                         try {
-                            eon.triggerCallback("onchange", el, el, [el]);
+                            vcomet.triggerCallback("onchange", el, el, [el]);
                         } catch (e) {}
                     });
                 });
@@ -151,25 +151,25 @@
             editorReady: function () {
                 var el = this;
                 el._show();
-                eon.triggerCallback("oneditorready", el, el, [el]);
+                vcomet.triggerCallback("oneditorready", el, el, [el]);
             },
             // @function show (private) [Hides loading mask and shows editor]
             show: function () {
                 var el = this;
-                el.querySelector("#eon-editor-content").classList.remove("eon-editor-until-render");
-                el.querySelector("eon-loading").hide();
+                el.querySelector("#vc-editor-content").classList.remove("vc-editor-until-render");
+                el.querySelector("vc-loading").hide();
             }
         },
 
         onCreated: function () {
             var el = this;
-            eon.amd.require(["framework/custom/eon-editor/vs/loader.js"], function () {
-                eon.triggerCallback("onloader", el, el, [el]);
+            vcomet.amd.require(["framework/custom/vc-editor/vs/loader.js"], function () {
+                vcomet.triggerCallback("onloader", el, el, [el]);
             });
             // Custom callback to know when monaco editor is ready to be used
-            eon.createCallback("oneditorready", this, "ready");
-            eon.createCallback("onchange", this);
-            eon.createCallback("onloader", this, "ready");
+            vcomet.createCallback("oneditorready", this, "ready");
+            vcomet.createCallback("onchange", this);
+            vcomet.createCallback("onloader", this, "ready");
         },
 
         onReady: function () {

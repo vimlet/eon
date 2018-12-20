@@ -1,14 +1,14 @@
 <template>
-    <div class="eon-checkbox-checkbox">
-        <input class="eon-checkbox-input" type="checkbox">
-        <label class="eon-checkbox-label  eon-unselectable">
-            <div class="eon-checkbox-labelText"></div>
+    <div class="vc-checkbox-checkbox">
+        <input class="vc-checkbox-input" type="checkbox">
+        <label class="vc-checkbox-label  vc-unselectable">
+            <div class="vc-checkbox-labelText"></div>
         </label>
     </div>
 </template>
 
 <script>
-    eon.element("eon-checkbox", "eon-checkbox.css", {
+    vcomet.element("vc-checkbox", "vc-checkbox.css", {
         themed: true,
         properties: {
             /*
@@ -110,7 +110,7 @@
             */
             setValue: function () {
                 this._currentValue = this.value;
-                eon.triggerCallback("onChange", this);
+                vcomet.triggerCallback("onChange", this);
 
             },
             /*
@@ -120,7 +120,7 @@
             updateDisabled: function () {
                 var el = this;
 
-                if (!eon.util.isTrue(el.disabled)) {
+                if (!vcomet.util.isTrue(el.disabled)) {
                     el._refs.input.removeAttribute("disabled");
                     // For Edge bug (not solved yet): when enable o disable an input dynamically,
                     // it is not automatically associated with the corresponding css,
@@ -144,7 +144,7 @@
             updateReadonly: function () {
                 var el = this;
 
-                if (eon.util.isTrue(el.readonly)) {
+                if (vcomet.util.isTrue(el.readonly)) {
                     el._refs.input.setAttribute("readonly", "true");
                 } else {
                     el._refs.input.removeAttribute("readonly");
@@ -160,18 +160,18 @@
             updateCheck: function () {
                 var el = this;
 
-                if (!eon.util.isTrue(el.checked)) {
+                if (!vcomet.util.isTrue(el.checked)) {
                     el._refs.input.checked = false;
                     el._refs.input.removeAttribute("checked");
-                    el._refs.input.classList.remove("eon-checkbox-checked");
-                    eon.triggerCallback("onUncheck", el);
+                    el._refs.input.classList.remove("vc-checkbox-checked");
+                    vcomet.triggerCallback("onUncheck", el);
 
                 } else {
                     el._refs.input.checked = true;
                     el._refs.input.setAttribute("checked", "true");
                     // Required for set style correctly when checkbox is checked and disabled
-                    el._refs.input.classList.add("eon-checkbox-checked");
-                    eon.triggerCallback("onCheck", el);
+                    el._refs.input.classList.add("vc-checkbox-checked");
+                    vcomet.triggerCallback("onCheck", el);
                 }
 
             },
@@ -183,18 +183,18 @@
             createRefs: function () {
                 var el = this;
 
-                el._refs.checkbox = el.template.querySelector(".eon-checkbox-checkbox");
-                el._refs.input = el.template.querySelector(".eon-checkbox-input");
-                el._refs.label = el.template.querySelector(".eon-checkbox-label");
-                el._refs.labelText = el.template.querySelector(".eon-checkbox-labelText");
+                el._refs.checkbox = el.template.querySelector(".vc-checkbox-checkbox");
+                el._refs.input = el.template.querySelector(".vc-checkbox-input");
+                el._refs.label = el.template.querySelector(".vc-checkbox-label");
+                el._refs.labelText = el.template.querySelector(".vc-checkbox-labelText");
                 el._refs.span = document.createElement("span");
             }
         },
 
         onCreated: function () {
-            eon.createCallback("onChange", this);
-            eon.createCallback("onCheck", this);
-            eon.createCallback("onUncheck", this);
+            vcomet.createCallback("onChange", this);
+            vcomet.createCallback("onCheck", this);
+            vcomet.createCallback("onUncheck", this);
 
             this._createRefs();
         },
@@ -203,7 +203,7 @@
             var el = this;
 
             el._refs.label.insertBefore(el._refs.span, el._refs.label.firstChild);
-            el._refs.span.classList.add("eon-checkbox-span", "eon-bg2-border");
+            el._refs.span.classList.add("vc-checkbox-span", "vc-bg2-border");
             el._currentValue = el.value;
 
             el._refs.labelText.innerHTML = el.label;
@@ -213,8 +213,8 @@
                 // The click event is triggered by two elements, the real input and the
                 // visual custom element. So it is necessary to control one of the two elements
                 // fot not activate the action twice.
-                if (!eon.util.isTrue(el.disabled) && !eon.util.isTrue(el.readonly) && e.target.type !== "checkbox") {
-                    el.checked = eon.util.isTrue(el.checked) ? false : true;
+                if (!vcomet.util.isTrue(el.disabled) && !vcomet.util.isTrue(el.readonly) && e.target.type !== "checkbox") {
+                    el.checked = vcomet.util.isTrue(el.checked) ? false : true;
                 }
 
             }, false);

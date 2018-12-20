@@ -1,25 +1,25 @@
 <style>
-    eon-playground-read-only {
+    vc-playground-read-only {
         height: 600px;
         width: 100%;
         overflow: hidden;
     }
 
-    eon-playground-read-only eon-panel .eon-tabs-closeButton {
+    vc-playground-read-only vc-panel .vc-tabs-closeButton {
         display: none !important;
     }
 
-    eon-playground-read-only eon-panel {
+    vc-playground-read-only vc-panel {
         height: 100%;
         width: 100%;
     }
 
-    #eon-playground-read-only-content {
+    #vc-playground-read-only-content {
         height: 100%;
         width: 100%;
     }
 
-    eon-playground-read-only iframe {
+    vc-playground-read-only iframe {
         border: none;
         height: 100%;
         width: 100%;
@@ -28,16 +28,16 @@
         box-sizing: border-box;
     }
 
-    /* eon-playground-read-only eon-gutter eon-section {
+    /* vc-playground-read-only vc-gutter vc-section {
         height: 100% !important;
     } */
 
-    eon-playground-read-only eon-gutter eon-code {
+    vc-playground-read-only vc-gutter vc-code {
         /* margin-bottom: 0px; */
         width: 100%;
     }
 
-    eon-playground-read-only eon-code {
+    vc-playground-read-only vc-code {
         height: 100%;
         min-height: 100% !important;
         margin-top: 0px !important;
@@ -46,21 +46,21 @@
         box-sizing: border-box;
     }
 
-    eon-playground-read-only eon-code eon-scroll {
+    vc-playground-read-only vc-code vc-scroll {
         max-height: 100% !important;
     }
     
 
-    eon-playground-read-only eon-section eon-code {
+    vc-playground-read-only vc-section vc-code {
         flex-grow: 1;
     }
 
-    eon-playground-read-only eon-section {
+    vc-playground-read-only vc-section {
         flex-direction: column;
     }
 
 
-    .eon-playground-read-only-htmlTags {
+    .vc-playground-read-only-htmlTags {
         position: absolute;
         right: 20px;
         z-index: 500;
@@ -68,35 +68,35 @@
         color: #ffffff42;
     }
 
-    .eon-playground-read-only-until-render {
+    .vc-playground-read-only-until-render {
         display: none;
     }
 
-    .eon-playground-read-only-fullScreenBttn {
+    .vc-playground-read-only-fullScreenBttn {
         cursor: pointer;
     }
 
-    .eon-playground-read-only-fullScreenBttn i {
+    .vc-playground-read-only-fullScreenBttn i {
         line-height: 30px;
     }
 </style>
 <template>
-    <eon-loading></eon-loading>
-    <div id="eon-playground-read-only-content" class="eon-playground-read-only-until-render"></div>
+    <vc-loading></vc-loading>
+    <div id="vc-playground-read-only-content" class="vc-playground-read-only-until-render"></div>
 </template>
 
 <script>
-    eon.element("eon-playground-read-only", null, {
+    vcomet.element("vc-playground-read-only", null, {
 
         dependencies: [
-            "../../eon/ui/eon-tabs",
-            "../../eon/ui/eon-tab",
-            "../../eon/ui/eon-gutter",
-            "../../eon/ui/eon-scroll",
-            "../../eon/ui/eon-section",
-            "../../eon/ui/eon-panel",
-            "../eon-code",
-            "../eon-loading"
+            "../../vcomet/ui/vc-tabs",
+            "../../vcomet/ui/vc-tab",
+            "../../vcomet/ui/vc-gutter",
+            "../../vcomet/ui/vc-scroll",
+            "../../vcomet/ui/vc-section",
+            "../../vcomet/ui/vc-panel",
+            "../vc-code",
+            "../vc-loading"
         ],
 
 
@@ -137,10 +137,10 @@
                 var el = this;
                 el._setStructure();
             },
-            // @function setTabs (private) [Generate eon-tabs]
+            // @function setTabs (private) [Generate vc-tabs]
             setTabs: function () {
                 var el = this;
-                el._refs.tabs = document.createElement("eon-tabs");
+                el._refs.tabs = document.createElement("vc-tabs");
                 el._refs.tabs.dragging = false;
                 el._refs.tabs.onTabSelected(function (tab) {
                     switch (tab.name) {
@@ -150,8 +150,8 @@
                             }
                             break;
                         case "html":
-                            el._refs.htmlPanel.querySelector("eon-gutter").resize();
-                            el._refs.htmlPanel.querySelector("eon-code").refresh();
+                            el._refs.htmlPanel.querySelector("vc-gutter").resize();
+                            el._refs.htmlPanel.querySelector("vc-code").refresh();
                             break;
                         case "js":
                             el._refs.js.refresh();
@@ -165,7 +165,7 @@
             // @function setResultTab (private) [Set up result tab]
             setResultTab: function () {
                 var el = this;
-                var resultTab = document.createElement("eon-panel");
+                var resultTab = document.createElement("vc-panel");
                 resultTab.allowScroll = false;
                 resultTab.scrollType = "none"
                 resultTab.name = "result";
@@ -183,35 +183,35 @@
             // @function setHtmlTab (private) [Set up html tab, it contains head and body editors]
             setHtmlTab: function () {
                 var el = this;
-                var htmlTab = document.createElement("eon-panel");
+                var htmlTab = document.createElement("vc-panel");
                 htmlTab.allowScroll = false;
                 htmlTab.name = "html";
                 htmlTab.title = "Html";
-                var htmlGutter = document.createElement("eon-gutter");
+                var htmlGutter = document.createElement("vc-gutter");
                 htmlGutter.collapsable = true;
                 htmlGutter.type = "vertical";
-                var headSection = document.createElement("eon-section");
-                var bodySection = document.createElement("eon-section");
+                var headSection = document.createElement("vc-section");
+                var bodySection = document.createElement("vc-section");
                 el._refs.html = {};
-                el._refs.html.head = document.createElement("eon-code");
+                el._refs.html.head = document.createElement("vc-code");
                 el._refs.html.head.oncodeready(function (currentEditor) {
                     el._editorsLoaded()
                 });
                 el._refs.html.head.value = el.head;
                 el._refs.html.head.language = "html";
                 var headTag = document.createElement("div");
-                headTag.classList.add("eon-playground-read-only-htmlTags");
+                headTag.classList.add("vc-playground-read-only-htmlTags");
                 headTag.innerHTML = "head";
                 headSection.appendChild(headTag);
                 el._refs.html.head.readonly = false;
-                el._refs.html.body = document.createElement("eon-code");
+                el._refs.html.body = document.createElement("vc-code");
                 el._refs.html.body.oncodeready(function () {
                     el._editorsLoaded();
                 });
                 el._refs.html.body.value = el.body;
                 el._refs.html.body.language = "html";
                 var bodyTag = document.createElement("div");
-                bodyTag.classList.add("eon-playground-read-only-htmlTags");
+                bodyTag.classList.add("vc-playground-read-only-htmlTags");
                 bodyTag.innerHTML = "body";
                 bodySection.appendChild(bodyTag);
                 el._refs.html.body.readonly = false;
@@ -219,7 +219,7 @@
                 bodySection.appendChild(el._refs.html.body);
                 htmlGutter.appendChild(headSection);
                 htmlGutter.appendChild(bodySection);
-                el._refs.htmlPanel = document.createElement("eon-panel");
+                el._refs.htmlPanel = document.createElement("vc-panel");
                 el._refs.htmlPanel.allowScroll = false;
                 el._refs.htmlPanel.setAttribute("allow-scroll", false);
                 el._refs.htmlPanel.appendChild(htmlGutter);
@@ -229,11 +229,11 @@
             // @function setJsTab (private) [Set up js tab editor]
             setJsTab: function () {
                 var el = this;
-                var jsTab = document.createElement("eon-panel");
+                var jsTab = document.createElement("vc-panel");
                 jsTab.allowScroll = false;
                 jsTab.name = "js";
                 jsTab.title = "Js";
-                el._refs.js = document.createElement("eon-code");
+                el._refs.js = document.createElement("vc-code");
                 el._refs.js.minheight = 564;
                 el._refs.js.oncodeready(function () {
                     el._editorsLoaded();
@@ -247,11 +247,11 @@
             // @function setCssTab (private) [Set up css tab editor]
             setCssTab: function () {
                 var el = this;
-                var cssTab = document.createElement("eon-panel");
+                var cssTab = document.createElement("vc-panel");
                 cssTab.allowScroll = false;
                 cssTab.name = "css";
                 cssTab.title = "Css";
-                el._refs.css = document.createElement("eon-code");
+                el._refs.css = document.createElement("vc-code");
                 el._refs.css.minheight = 564;
                 el._refs.css.oncodeready(function () {
                     el._editorsLoaded();
@@ -275,15 +275,15 @@
                 el._refs.tabs.appendChild(htmlTab);
                 el._refs.tabs.appendChild(jsTab);
                 el._refs.tabs.appendChild(cssTab);
-                el.querySelector("#eon-playground-read-only-content").appendChild(el._refs.tabs);
-                el.querySelector("#eon-playground-read-only-content").querySelector(".eon-tabs-tabsSection").appendChild(
+                el.querySelector("#vc-playground-read-only-content").appendChild(el._refs.tabs);
+                el.querySelector("#vc-playground-read-only-content").querySelector(".vc-tabs-tabsSection").appendChild(
                     el._setFullSCreenBttn());
             },
             setFullSCreenBttn: function () {
                 var el = this;
                 el._misc.fullscreen = false;
                 var fullScreenBtt = document.createElement("div");
-                fullScreenBtt.classList.add("eon-playground-read-only-fullScreenBttn");
+                fullScreenBtt.classList.add("vc-playground-read-only-fullScreenBttn");
                 el._refs.fullScreenIcon = document.createElement("i");
                 el._refs.fullScreenIcon.classList.add("material-icons");
                 el._refs.fullScreenIcon.innerHTML = "fullscreen";
@@ -301,7 +301,7 @@
                     el._show();
                 }
             },
-            // @function refresh (private) [Update stored data to eon-code]
+            // @function refresh (private) [Update stored data to vc-code]
             refresh: function () {
                 var el = this;
                 el._refs.html.head.setValue(el.head);
@@ -336,9 +336,9 @@
             // @function show (private) [Hides loading mask and shows playground]
             show: function () {
                 var el = this;
-                el.querySelector("#eon-playground-read-only-content").classList.remove(
-                    "eon-playground-read-only-until-render");
-                el.querySelector("eon-loading").hide();
+                el.querySelector("#vc-playground-read-only-content").classList.remove(
+                    "vc-playground-read-only-until-render");
+                el.querySelector("vc-loading").hide();
             }
         },
         functions: {
@@ -384,7 +384,7 @@
                     }
                 }
                 el._showResult();
-                el._refs.htmlPanel.querySelector("eon-gutter").resize();
+                el._refs.htmlPanel.querySelector("vc-gutter").resize();
             }
         },
 

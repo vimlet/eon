@@ -1,14 +1,14 @@
-<template class="eon-unselectable">
-  <div class="eon-radio-radio">
-    <input class="eon-radio-input eon-unselectable" type="radio">
-    <label class="eon-radio-label eon-unselectable" onclick="">
-      <div class="eon-radio-labelText"></div>
+<template class="vc-unselectable">
+  <div class="vc-radio-radio">
+    <input class="vc-radio-input vc-unselectable" type="radio">
+    <label class="vc-radio-label vc-unselectable" onclick="">
+      <div class="vc-radio-labelText"></div>
     </label>
   </div>
 </template>
 
 <script>
-  eon.element("eon-radio", "eon-radio.css", {
+  vcomet.element("vc-radio", "vc-radio.css", {
     themed: true,
     properties: {
       /*
@@ -100,7 +100,7 @@
         el._refs.input.setAttribute("id", el.value);
         el._refs.label.setAttribute("for", el.value);
 
-        eon.triggerCallback("onChange", this);
+        vcomet.triggerCallback("onChange", this);
       },
       /*
         @function (private) _updateDisabled
@@ -109,16 +109,16 @@
       updateDisabled: function () {
 
         // Radio disabled
-        if (!eon.util.isTrue(this.disabled)) {
+        if (!vcomet.util.isTrue(this.disabled)) {
 
           this._refs.input.disabled = false;
-          this._refs.input.classList.remove("eon-radio-disabledRadio", "eon-radio-checkedDisabledRadio");
+          this._refs.input.classList.remove("vc-radio-disabledRadio", "vc-radio-checkedDisabledRadio");
 
           // Radio NOT disabled
         } else {
 
           this._refs.input.disabled = true;
-          this._refs.input.classList.add("eon-radio-disabledRadio");
+          this._refs.input.classList.add("vc-radio-disabledRadio");
 
         }
       },
@@ -130,7 +130,7 @@
       updateReadonly: function () {
         var el = this;
 
-        if (eon.util.isTrue(el.readonly)) {
+        if (vcomet.util.isTrue(el.readonly)) {
           el._refs.input.setAttribute("readonly", "true");
         } else {
           el._refs.input.removeAttribute("readonly");
@@ -143,35 +143,35 @@
         @description Update check status
       */
       updateCheck: function () {
-        if (this.parentNode.tagName.toLowerCase() == "eon-group") {
+        if (this.parentNode.tagName.toLowerCase() == "vc-group") {
           var radioGroupHost = this.parentNode;
-          var previousChecked = eon.Radio.checkedRadios[radioGroupHost.name];
+          var previousChecked = vcomet.Radio.checkedRadios[radioGroupHost.name];
           var previousSpan;
           // Uncheck previousRadio
           if (previousChecked) {
   
-            previousSpan = previousChecked.querySelector(".eon-radio-outspan");
+            previousSpan = previousChecked.querySelector(".vc-radio-outspan");
             previousChecked._refs.input.checked = false;
             previousChecked.checked = false;
             previousChecked.setAttribute("checked", "false");
-            previousChecked._refs.input.classList.remove("eon-radio-checkRadio");
-            previousSpan.classList.remove("eon-radio-checked");
-            eon.createCallback("onUncheck", this);
+            previousChecked._refs.input.classList.remove("vc-radio-checkRadio");
+            previousSpan.classList.remove("vc-radio-checked");
+            vcomet.createCallback("onUncheck", this);
   
           }
 
           radioGroupHost.value = this.value;
           radioGroupHost._checked = true;
-          radioGroupHost._disabled = eon.util.isTrue(this.disabled) ? true : false;
-          eon.Radio.checkedRadios[radioGroupHost.name] = this;
+          radioGroupHost._disabled = vcomet.util.isTrue(this.disabled) ? true : false;
+          vcomet.Radio.checkedRadios[radioGroupHost.name] = this;
         }
 
         // Check new Radio
         this._refs.input.checked = true;
         this.checked = true;
-        this._refs.input.classList.add("eon-radio-checkRadio");
-        this._refs.span.classList.add("eon-radio-checked");
-        eon.triggerCallback("onCheck", this);
+        this._refs.input.classList.add("vc-radio-checkRadio");
+        this._refs.span.classList.add("vc-radio-checked");
+        vcomet.triggerCallback("onCheck", this);
 
       },
 
@@ -181,7 +181,7 @@
       */
       setCheck: function () {
 
-        if (eon.util.isTrue(this.checked)) {
+        if (vcomet.util.isTrue(this.checked)) {
           this._refs.input.checked = true;
           this._updateCheck();
         }
@@ -195,8 +195,8 @@
       createRefs: function () {
         var el = this;
 
-        el._refs.input = el.template.querySelector(".eon-radio-input");
-        el._refs.label = el.template.querySelector(".eon-radio-label");
+        el._refs.input = el.template.querySelector(".vc-radio-input");
+        el._refs.label = el.template.querySelector(".vc-radio-label");
         el._refs.span = document.createElement("span");
         el._refs.inspan = document.createElement("span");
       }
@@ -204,13 +204,13 @@
     },
 
     onCreated: function () {
-      eon.Radio = eon.Radio || {
+      vcomet.Radio = vcomet.Radio || {
         checkedRadios: {}
       };
 
-      eon.createCallback("onChange", this);
-      eon.createCallback("onCheck", this);
-      eon.createCallback("onUncheck", this);
+      vcomet.createCallback("onChange", this);
+      vcomet.createCallback("onCheck", this);
+      vcomet.createCallback("onUncheck", this);
 
       this._createRefs();
     },
@@ -218,13 +218,13 @@
     onRender: function () {
       var el = this;
 
-      if (this.parentNode.tagName.toLowerCase() == "eon-group") {
+      if (this.parentNode.tagName.toLowerCase() == "vc-group") {
         var radioGroupHost = el.parentNode;
         el._refs.input.setAttribute("name", radioGroupHost.name);
       }
 
-      el._refs.span.classList.add("eon-radio-outspan", "eon-bg3-border");
-      el._refs.inspan.classList.add("eon-radio-inspan");
+      el._refs.span.classList.add("vc-radio-outspan", "vc-bg3-border");
+      el._refs.inspan.classList.add("vc-radio-inspan");
       el._refs.label.insertBefore(el._refs.span, el._refs.label.firstChild);
       el._refs.span.appendChild(el._refs.inspan);
 
@@ -232,11 +232,11 @@
       el._updateDisabled();
       el._updateReadonly();
       el._setCheck();
-      el.querySelector(".eon-radio-labelText").innerHTML = el.label;
+      el.querySelector(".vc-radio-labelText").innerHTML = el.label;
 
       // Checking a radio option
       el._refs.label.addEventListener("click", function (e) {
-        ((!eon.util.isTrue(el.disabled) && !eon.util.isTrue(el.readonly)) || el.disabled == null) ? el._updateCheck() : null;
+        ((!vcomet.util.isTrue(el.disabled) && !vcomet.util.isTrue(el.readonly)) || el.disabled == null) ? el._updateCheck() : null;
 
       }, false);
     },
@@ -253,7 +253,7 @@
           this._setCheck();
           break;
         case "label":
-          this.querySelector(".eon-radio-labelText").innerHTML = newVal;
+          this.querySelector(".vc-radio-labelText").innerHTML = newVal;
           break;
         case "value":
           this._setValue();

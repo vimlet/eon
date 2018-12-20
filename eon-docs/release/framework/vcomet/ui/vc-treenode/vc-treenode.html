@@ -1,14 +1,14 @@
 <template>
-    <div class="eon-treenode-head eon-unselectable">
-      <i class="material-icons eon-treenode-expand eon-fg2">expand_more</i>
-      <i class="material-icons eon-treenode-icon eon-fg2">folder</i>
-      <div class="eon-treenode-name eon-fg2 eon-unselectable"></div>
+    <div class="vc-treenode-head vc-unselectable">
+      <i class="material-icons vc-treenode-expand vc-fg2">expand_more</i>
+      <i class="material-icons vc-treenode-icon vc-fg2">folder</i>
+      <div class="vc-treenode-name vc-fg2 vc-unselectable"></div>
     </div>
-    <div class="eon-treenode-wrapper">
+    <div class="vc-treenode-wrapper">
     </div>
   </template>
   <script type="text/javascript">
-    eon.element("eon-treenode", "eon-treenode.css", {
+    vcomet.element("vc-treenode", "vc-treenode.css", {
       themed: true,
       properties: {
         /*
@@ -141,18 +141,18 @@
         */
         toggleExpand: function (expandIcon) {
           var el = this;
-          var expandIcon = !expandIcon ? el._refs.head.querySelector(".eon-treenode-expand") : expandIcon;
+          var expandIcon = !expandIcon ? el._refs.head.querySelector(".vc-treenode-expand") : expandIcon;
           // Check expandable property
-          if (!eon.util.isTrue(el.expanded) && eon.util.isTrue(el._misc.expandable)) {
+          if (!vcomet.util.isTrue(el.expanded) && vcomet.util.isTrue(el._misc.expandable)) {
             // Expand node
             el._refs.wrapper.style.display = "flex";
             el.expanded = true;
-          } else if (eon.util.isTrue(el._misc.expandable)) {
+          } else if (vcomet.util.isTrue(el._misc.expandable)) {
             // Collapse node
             el._refs.wrapper.style.display = "none";
             el.expanded = false;
           }
-          el._refs.hostTree.eonScroll.update();
+          el._refs.hostTree.vcometScroll.update();
         },
         /*
           @function select 
@@ -161,7 +161,7 @@
         select: function () {
           var el = this;
           // Directories can not be selected
-          if (!eon.util.isTrue(el.selected)) {
+          if (!vcomet.util.isTrue(el.selected)) {
             el._refs.hostTree.selectNode(el);
           }
           // Expand if directory
@@ -226,7 +226,7 @@
           }
           // Set extension visibility
           label = el.name;
-          if (el.type != "directory" && eon.util.isTrue(el._refs.hostTree.showExtension)) {
+          if (el.type != "directory" && vcomet.util.isTrue(el._refs.hostTree.showExtension)) {
             label += el.extension;
           }
           el._refs.nameNode.innerHTML = label;
@@ -239,8 +239,8 @@
         setUpNode: function () {
           var el = this;
           var ext, name;
-          var icon = el.template.querySelector(".eon-treenode-icon");
-          var expandIcon = el._refs.head.querySelector(".eon-treenode-expand");
+          var icon = el.template.querySelector(".vc-treenode-icon");
+          var expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
           var tree = el._refs.hostTree;
   
           // Set sorting order
@@ -258,7 +258,7 @@
               // Check icon
               if (el.type !== "directory") {
                 icon.innerHTML = "insert_drive_file";
-              } else if (el.type === "directory" && !eon.util.isTrue(el.initExpanded)) {
+              } else if (el.type === "directory" && !vcomet.util.isTrue(el.initExpanded)) {
                 el.expanded = false;
                 expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "chevron_right" : "";
                 icon.innerHTML = "folder";
@@ -267,7 +267,7 @@
           }
   
           // Set draggable behaviour
-          if (eon.util.isTrue(el._refs.hostTree.drag)) {
+          if (vcomet.util.isTrue(el._refs.hostTree.drag)) {
             el.setAttribute("draggable", true);
           }
           // Declare dragging monitor variables
@@ -299,14 +299,14 @@
           var el = this;
           var parent = el._refs.parentNode;
           // Check expandable parent
-          if (parent && parent.tagName.toLowerCase() === "eon-treenode") {
+          if (parent && parent.tagName.toLowerCase() === "vc-treenode") {
             // Parent node is a tree node
             if (!parent._misc.expandFunction && !parent._misc.expandable) {
-              var expandIcon = parent._refs.head.querySelector(".eon-treenode-expand");
+              var expandIcon = parent._refs.head.querySelector(".vc-treenode-expand");
               // Make expandable
               parent._makeExpandable(expandIcon);
               // Check configurable initial state
-              if (!eon.util.isTrue(parent.initExpanded)) {
+              if (!vcomet.util.isTrue(parent.initExpanded)) {
                 parent.toggleExpand(expandIcon);
                 expandIcon.innerHTML = ["expand", "all"].indexOf(el._refs.hostTree.icons) > -1 ? "chevron_right" : "";
               }
@@ -322,11 +322,11 @@
           var el = this;
           var tree = el._refs.hostTree;
           var children = el._refs.wrapper.children;
-          expandIcon = !expandIcon ? el._refs.head.querySelector(".eon-treenode-expand") : expandIcon;
+          expandIcon = !expandIcon ? el._refs.head.querySelector(".vc-treenode-expand") : expandIcon;
           var icon = expandIcon.nextSibling.nextSibling;
           el._misc.expandable = true;
           el.expanded = true;
-          icon.innerHTML = ["all", "type"].indexOf(tree.icons) > -1 && eon.util.isTrue(el.initExpanded) ?
+          icon.innerHTML = ["all", "type"].indexOf(tree.icons) > -1 && vcomet.util.isTrue(el.initExpanded) ?
             "folder_open" : "folder";
   
           expandIcon.style.visibility = ["expand", "all"].indexOf(tree.icons) > -1 ? "visible" : "";
@@ -339,7 +339,7 @@
           }
 
           // Join single directory child
-          if(eon.util.isTrue(el._refs.hostTree.joinDirs) && children.length == 1 && children[0].type == "directory") {
+          if(vcomet.util.isTrue(el._refs.hostTree.joinDirs) && children.length == 1 && children[0].type == "directory") {
             // Set the joined names result as the displayed node name 
             el._refs.nameNode.innerHTML = el.name + "/" + children[0].name;
             // Hide children after its path has been joined to its parent's
@@ -354,7 +354,7 @@
         */
         makeNoExpandable: function (index) {
           var el = this;
-          var icon = el._refs.head.querySelector(".eon-treenode-expand");
+          var icon = el._refs.head.querySelector(".vc-treenode-expand");
           var wrapper = el._refs.wrapper;
           // Check if this node have children nodes
           if (!wrapper.children[!index ? 0 : index]) {
@@ -375,7 +375,7 @@
           });
           // Right button listener
           el._refs.head.addEventListener("contextmenu", function (e) {
-            eon.triggerCallback("onNodeRightClicked", el._refs.hostTree, el);
+            vcomet.triggerCallback("onNodeRightClicked", el._refs.hostTree, el);
           });
         },
         /*
@@ -425,8 +425,8 @@
           var el = this;
           // Necessary for allowing drop
           evt.preventDefault();
-          if (!eon.util.isTrue(el.selected)) {
-            el.head.classList.add("eon-treenode-selected");
+          if (!vcomet.util.isTrue(el.selected)) {
+            el.head.classList.add("vc-treenode-selected");
           }
         },
         /*
@@ -435,8 +435,8 @@
         */
         handleDragLeave: function () {
           var el = this;
-          if (!eon.util.isTrue(el.selected)) {
-            el.head.classList.remove("eon-treenode-selected");
+          if (!vcomet.util.isTrue(el.selected)) {
+            el.head.classList.remove("vc-treenode-selected");
           }
         },
         /*
@@ -454,17 +454,17 @@
             path = event.dataTransfer.getData("text");
           }
           dragNode = el._refs.hostTree.nodes[path];
-          el.head.classList.remove("eon-treenode-selected");
+          el.head.classList.remove("vc-treenode-selected");
           el._refs.hostTree.moveNode(dragNode, el);
         }
       },
       onInit: function () {
         var el = this;
         // Store host nodes
-        var isTreeComponent = !el.parentNode.classList.contains("eon-tree-tree");
+        var isTreeComponent = !el.parentNode.classList.contains("vc-tree-tree");
   
         el._refs.hostTree = isTreeComponent ? el.parentNode : el.parentNode._refs.hostTree;
-        el._refs.hostTreeWrapper = isTreeComponent ? el.parentNode.querySelector(".eon-tree-tree") : el.parentNode;
+        el._refs.hostTreeWrapper = isTreeComponent ? el.parentNode.querySelector(".vc-tree-tree") : el.parentNode;
   
         if (!el._refs.hostTree.nodes[el.path]) {
   
@@ -479,17 +479,17 @@
           }
   
           var parentPath = el.path.substring(0, el.path.length - (parentStr.length + 1));
-          var parentNode = el._refs.hostTreeWrapper.querySelector("eon-treenode[path='" + parentPath + "']");
+          var parentNode = el._refs.hostTreeWrapper.querySelector("vc-treenode[path='" + parentPath + "']");
           el._refs.parent = parentPath;
   
           // Tree node shell quick access
-          el._refs.head = el.head = el.template.querySelector(".eon-treenode-head");
-          el._refs.nameNode = el._refs.head.querySelector(".eon-treenode-name");
-          el._refs.wrapper = el.template.querySelector(".eon-treenode-wrapper");
+          el._refs.head = el.head = el.template.querySelector(".vc-treenode-head");
+          el._refs.nameNode = el._refs.head.querySelector(".vc-treenode-name");
+          el._refs.wrapper = el.template.querySelector(".vc-treenode-wrapper");
           // Parent node not exists
           if (parentPath && !parentNode) {
             // Create parent node
-            var node = document.createElement("eon-treenode");
+            var node = document.createElement("vc-treenode");
             node.path = parentPath;
             
             // Check if the path contains escaped characters
@@ -507,7 +507,7 @@
           // Select tree node functionality
           el._setNodeClickListener();
           // Adds the basic dragging events to the tree node
-          if (eon.util.isTrue(el._refs.hostTree.drag)) {
+          if (vcomet.util.isTrue(el._refs.hostTree.drag)) {
             el._setupDraggingEvents();
           }
         } else {
@@ -532,7 +532,7 @@
         var expandIcon, icon;
         var tree = el._refs.hostTree;
         
-        expandIcon = el._refs.head.querySelector(".eon-treenode-expand");
+        expandIcon = el._refs.head.querySelector(".vc-treenode-expand");
         // Monitor _expandable property
         if (prop == "_expandable") {
           // Hide or show expandable icon
@@ -540,7 +540,7 @@
         } else if (prop == "expanded") {
           icon = expandIcon.nextSibling.nextSibling;
           // Check expandable conditions
-          if ((eon.util.isTrue(el.expanded)) && el._refs.wrapper.children[0]) {
+          if ((vcomet.util.isTrue(el.expanded)) && el._refs.wrapper.children[0]) {
             expandIcon.innerHTML = ["expand", "all"].indexOf(tree.icons) > -1 ? "expand_more" : "";
             icon.innerHTML = ["type", "all"].indexOf(tree.icons) > -1 ? "folder_open" : "";
           } else {
@@ -548,12 +548,12 @@
             icon.innerHTML = ["type", "all"].indexOf(tree.icons) > -1 ? "folder" : "";
           }
         } else if (prop == "selected" || prop == "marked") {
-          if (eon.util.isTrue(value)) {
+          if (vcomet.util.isTrue(value)) {
             // Select node style
-            el._refs.head.classList.add("eon-treenode-selected");
+            el._refs.head.classList.add("vc-treenode-selected");
           } else {
             // Deselect node style
-            el._refs.head.classList.remove("eon-treenode-selected");
+            el._refs.head.classList.remove("vc-treenode-selected");
           }
         }
       }
