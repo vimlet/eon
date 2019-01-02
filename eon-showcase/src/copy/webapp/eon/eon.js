@@ -3568,15 +3568,12 @@ eon.importMainTheme = function (theme) {
 };
 
 eon.importElementTheme = function (config, name, theme) {
-  console.log('config', config);
-  console.log('name', name);
-  console.log('theme', theme);
     if (theme && config.themed && !eon.registry.isThemeRegistered(name, theme)) {
 
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-        console.log('themePath', themePath);
+        
         eon.registry.registerTheme(name, theme);
 
         elementLink.setAttribute("rel", "stylesheet");
