@@ -159,6 +159,12 @@ eon.needLocalStringPolyfill = function () {
   return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
 }
 
+eon.needPromisesPolyfill = function () {
+  if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
+    return false;
+  }
+  return true;
+}
 eon.needClassListAddPolyfill = function () {
   var div = document.createElement("div");
   div.classList.add("class1", "class2");
@@ -192,6 +198,11 @@ if (eon.needObjectAssignPolyfill()) {
 
 // Pointer events (Must run always)
 eon.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
+
+// Promises
+if (eon.needPromisesPolyfill()) {
+  eon.injectPolyfill(eon.basePath + "/polyfill/promises/promises.js");
+}
 
 // Date locale polyfill
 if (eon.needLocalStringPolyfill()) {
@@ -2815,7 +2826,9 @@ vimlet.meta = vimlet.meta || {};
     
 // ############################################################################################
 // CORE MODULES
-// ###########################################################################################// ** First line not read by meta
+// ############################################################################################
+
+// ** First line not read by meta
 eon.object = eon.object || {};
 
 eon.object.assignToPath = function(obj, path, value) {
@@ -3491,7 +3504,7 @@ eon.handleTemplateInterpolation = function (name) {
     }
 };
 
-// Imports specific componentes themesif specified
+// Imports specific componentes themes if specified
 eon.importSchemaThemes = function () {
 
     if (eon.themeSchema) {
@@ -3703,11 +3716,11 @@ eon.handleConfigDependencies = function (name) {
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
             dependencyName = elementConfig.dependencies[j].match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase();
-            dependencyPath = elementConfig.dependencies[j];
+            dependencyPath = elementConfig.dependencies[j].charAt(0) == "/" ? eon.basePath + elementConfig.dependencies[j] : elementConfig.dependencies[j];
             if (!(dependencyName in eon.imports.templates)) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
-                dependencyFile = eon.imports.paths[name] + dependencyPath;
+                dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
                 eon.import(dependencyFile);
             }
         }
@@ -4402,55 +4415,41 @@ eon.constructClass = function (baseElement) {
 
 eon.element = function (param1, param2) {
 
+    var config, stylePath, name;
+
     if (param2) {
 
-        config = param2.config ? param2.config : param2;
-        stylePath = config.style;
+        config = param2.config ? param2.config : param2.constructor === Object ? param2 : {};
         name = param1;
-        
+
     } else {
 
-        config = param1.config ? param1.config : param1;
-        stylePath = config.style;
-        name = config.name;
+        config = param1.config ? param1.config : param1.constructor === Object ? param1 : {};
+        name = config.name ? config.name : param1;
 
     }
-    
-    stylePath = stylePath ? stylePath : "";
-    config = config ? config : {};
-    
+
+    stylePath = config.style ? config.style : "";
+
     // If the user provided a style path then we create its link and append it
     if (stylePath != "") {
 
         var link = document.createElement("link");
-        
+
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
 
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", stylePath);
 
         // Cache
-        eon.cache.add(stylePath, {name: name});
+        eon.cache.add(stylePath, { name: name });
 
         document.head.appendChild(link);
 
     }
 
-    if (config.constructor === Object) {
-
-        eon.imports.config[name.toLowerCase()] = config;
-        eon.triggerCallback('onScriptsReady', eon);
-
-    } else if (config) {
-
-        eon.amd.require([eon.imports.paths[name.toLowerCase()] + config], function (config) {
-
-            eon.imports.config[name.toLowerCase()] = config;
-            eon.triggerCallback('onScriptsReady', eon);
-
-        });
-
-    }
+    eon.imports.config[name.toLowerCase()] = config;
+    eon.triggerCallback('onScriptsReady', eon);
 
 };
 
@@ -4580,6 +4579,7 @@ eon.parse = function (el, config) {
     eon.importPublic(el, config);
     eon.importPrivate(el, config);
 
+    eon.definePath(el);
     eon.defineParentComponent(el);
     eon.defineOverlayCreation(el);
     eon.definePlaceholderCreation(el);
@@ -4587,6 +4587,10 @@ eon.parse = function (el, config) {
     eon.triggerAllCallbackEvents(el, config, "onParsed");
     eon.registry.updateElementStatus(el, "parsed");
 
+};
+
+eon.definePath = function (el) {
+    el.importPath = eon.imports.paths[el.nodeName.toLowerCase()];
 };
 
 eon.defineParentComponent = function (el) {
@@ -4628,7 +4632,7 @@ eon.defineOverlayCreation = function (el) {
 
         })
 
-        return overlay; 
+        return overlay;
 
     };
 
@@ -4662,7 +4666,7 @@ eon.collectObserveData = function (el, config) {
     el.__observeProperties = {};
     el.__observeAttributes = {};
     el.__reflectProperties = {};
-
+    
     // Assigns each index of the array to the object
     eon.addObserveFromArray(el.__observeProperties, config.observeProperties);
     eon.addObserveFromArray(el.__observeAttributes, config.observeAttributes);
@@ -6294,11 +6298,9 @@ eon.util.objectToMap = function (object) {
  */
 eon.util.mapToObject = function (map) {
   var obj = Object.create(null);
-  for (var [k, v] of map) {
-    // We don’t escape the key '__proto__'
-    // which can cause problems on older engines
-    obj[k] = v;
-  }
+  map.forEach(function (value, key, mapObj) {
+    mapObj[key] = value;
+});
   return obj;
 };
 
