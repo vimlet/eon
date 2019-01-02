@@ -3568,7 +3568,9 @@ eon.importMainTheme = function (theme) {
 };
 
 eon.importElementTheme = function (config, name, theme) {
-
+  console.log('config', config);
+  console.log('name', name);
+  console.log('theme', theme);
     if (theme && config.themed && !eon.registry.isThemeRegistered(name, theme)) {
 
         var importedDocumentHead = document.querySelector("head");
