@@ -3576,7 +3576,7 @@ eon.importElementTheme = function (config, name, theme) {
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
 
         eon.registry.registerTheme(name, theme);
-
+      console.log('themePath', themePath);
         elementLink.setAttribute("rel", "stylesheet");
         elementLink.setAttribute("href", themePath);
 
