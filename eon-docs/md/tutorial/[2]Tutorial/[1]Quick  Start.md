@@ -1,4 +1,4 @@
-# Quick Start
+# Getting Started
 
 This tutorial assumes you are familiarized with the basics of HTML, CSS and JavaScript.
 
@@ -59,7 +59,7 @@ Once a component is imported it can be used as any other html element.
 
 ```[html]
 <body>
-    <eon-button value="Click Me!"><eon-button>
+    <eon-button label="Button"><eon-button>
 </body>
 ``` 
 
