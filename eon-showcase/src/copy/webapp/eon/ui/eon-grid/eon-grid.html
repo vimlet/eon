@@ -155,10 +155,10 @@
                 reflect: true
             },
             /*
-            @property {String} keyProperty
-            @description Property that sets the id for the entries
+            @property {String} childProperty
+            @description Property to indicate the entries children
             */
-            treeProperty: {
+            childProperty: {
                 value: "children",
                 reflect: true
             },
@@ -209,14 +209,14 @@
                 var el = this;
 
                 el.store = new eon.store();
-                
+
                 // When the store data changes we reloaded the current page, if the page no longer exists we take the last available one
                 el.store.onDataChanged(function () {
 
                     var currentPage = parseInt(el._misc.currentPage) > el._getLastAvailablePage() ? el._getLastAvailablePage() : parseInt(el._misc.currentPage);
                     var pageSize = parseInt(el._misc.pageSize);
 
-                    start = parseInt((currentPage - 1) * pageSize + 1);
+                    start = parseInt((currentPage - 1) * pageSize);
                     limit = parseInt(start + pageSize - 1);
 
                     el._handleRange(start, limit, true);
@@ -250,6 +250,12 @@
                 el._misc.sort.active = false;
                 el._misc.sort.column = "";
                 el._misc.sort.type = "none";
+
+                el._misc.dropdowns = {};
+                el._misc.dropdowns.rows = [];
+                el._misc.dropdowns.childRowsCount = 0;
+
+                el._misc.browser = eon.util.getBrowser();
 
             },
             /*
@@ -426,7 +432,7 @@
 
                     el._misc.pageSize = el._misc.pagingType == "all" ? el.store.data.size : el._misc.pageSize;
 
-                    start = 1;
+                    start = 0;
                     limit = parseInt(el._misc.pageSize);
 
                     el.store.read().limit(start, limit).result(function (error, data) {
@@ -573,7 +579,7 @@
 
                     switch (navigation) {
                         case "first":
-                            start = 1;
+                            start = 0;
                             limit = parseInt(start + pageSize - 1);
 
                             el._handleRange(start, limit, true);
@@ -582,7 +588,7 @@
                         case "previous":
                             var previousPage = currentPage - 1;
 
-                            start = parseInt(((previousPage - 1) * pageSize) + 1);
+                            start = parseInt(((previousPage - 1) * pageSize));
                             limit = parseInt(start + pageSize - 1);
 
                             if (previousPage >= 1) {
@@ -594,7 +600,7 @@
                         case "next":
                             var nextPage = currentPage + 1;
 
-                            start = parseInt((nextPage - 1) * pageSize + 1);
+                            start = parseInt((nextPage - 1) * pageSize);
                             limit = parseInt(start + pageSize - 1);
 
                             if (nextPage <= el._getLastAvailablePage()) {
@@ -607,7 +613,7 @@
 
                             limit = el.store.data.size;
                             lastPage = el._getLastAvailablePage();
-                            start = parseInt(((lastPage * pageSize) - pageSize) + 1);
+                            start = parseInt(((lastPage * pageSize) - pageSize));
 
                             if (lastPage > 0) {
                                 el._handleRange(start, limit, true);
@@ -627,7 +633,7 @@
 
                 var el = this;
 
-                var rows = el._misc.sourceFragment.querySelectorAll("eon-row");
+                var rows = el._misc.sourceFragment.childNodes;
                 var dataMap = new Map();
                 var counter = 0;
 
@@ -664,8 +670,8 @@
                                 childData = fillRowData(row.children[m], true);
                                 childData.id = row.children[m].entryId;
 
-                                data.children = data.children ? data.children : [];
-                                data.children.push(childData);
+                                data[el.childProperty] = data[el.childProperty] ? data[el.childProperty] : [];
+                                data[el.childProperty].push(childData);
 
                             }
 
@@ -677,10 +683,13 @@
 
                     for (var k = 0; k < rows.length; k++) {
 
-                        rows[k].entryId = counter;
+                        if (rows[k].nodeType == 1) {
 
-                        dataMap.set(rows[k].entryId, fillRowData(rows[k]));
-                        dataMap.set(rows[k].entryId, dataMap.get(rows[k].entryId));
+                            rows[k].entryId = counter;
+
+                            dataMap.set(rows[k].entryId, fillRowData(rows[k]));
+                            dataMap.set(rows[k].entryId, dataMap.get(rows[k].entryId));
+                        }
 
                     }
 
@@ -712,8 +721,7 @@
                 el._misc.range.limit = (el._misc.pagingType == "all") ? el.store.data.size : el._misc.range.limit;
 
                 if (cleanCurrentRange) {
-                    el._refs.rowsWrapper.innerHTML = "";
-                    el._resetEntriesCount();
+                    el._clearPage();
                 }
 
                 // Store map keys
@@ -722,21 +730,24 @@
                     dataObject = value;
 
                     row = document.createElement("eon-row");
-                    row.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
+                    row.classList.add("eon-grid-entryRow", "eon-bg1-border2");
                     row.dataset.entryId = dataObject[el.keyProperty];
+
+                    el._createChildRows(row, dataObject);
 
                     //For each column we have in the grid we will look for its value on the dataObject
                     // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
                     for (var i = 0; i < columnsKeys.length; i++) {
                         cell = el._createCell(columnsKeys[i], dataObject, data);
-                        row.appendChild(cell);
+                        row.content.appendChild(cell);
                     }
 
                     if (eon.util.isTrue(el.autofit)) {
                         row.classList.add("eon-grid-autofit");
-                    } else {
-                        row.style.minHeight = el.rowMinHeight + "px";
                     }
+
+                    row.style.minHeight = el.rowMinHeight + "px";
+                    row.content.style.minHeight = el.rowMinHeight + "px";
 
                     el._increaseEntriesCount();
 
@@ -752,8 +763,150 @@
                 el._refs.rowsWrapper.appendChild(rowsDocFragment);
 
                 if (el._misc.pagingType == "auto") {
-                    el._handleRowsLayout(entriesCount)
+                    el._handleRowsLayout(entriesCount);
                 };
+
+            },
+            /*
+            @function (private) _createChildRows
+            @description Creates the child rows for the given row
+            @param {Object} row
+            @param {Object} dataObject
+            */
+            createChildRows: function (row, dataObject) {
+
+                var el = this;
+
+                if (dataObject[el.childProperty] && dataObject[el.childProperty].length > 0) {
+
+                    var columnsKeys = Object.keys(el._misc.columns);
+                    var children = dataObject[el.childProperty];
+                    var childrenDocFragment = document.createDocumentFragment();
+                    var childRow;
+
+                    for (var i = 0; i < children.length; i++) {
+
+                        childRow = document.createElement("eon-row");
+                        childRow.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
+                        childRow.dataset.entryId = dataObject[el.keyProperty];
+
+                        //For each column we have in the grid we will look for its value on the dataObject
+                        // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
+                        for (var j = 0; j < columnsKeys.length; j++) {
+                            cell = el._createCell(columnsKeys[j], dataObject[el.childProperty][i], data);
+                            childRow.content.appendChild(cell);
+                        }
+
+                        if (eon.util.isTrue(el.autofit)) {
+                            childRow.classList.add("eon-grid-autofit");
+                        } else {
+                            childRow.style.minHeight = el.rowMinHeight + "px";
+                            childRow.content.style.minHeight = el.rowMinHeight + "px";
+                        }
+
+                        childrenDocFragment.appendChild(childRow);
+
+                    }
+
+                    row.dropdown.appendChild(childrenDocFragment);
+
+                    row.addEventListener("click", function () {
+                        el[eon.util.isTrue(el.autofit) ? "_handleAutofitRowDropdown" : "_handleRowDropdown"].apply(el, [row]);
+                    });
+
+                }
+
+            },
+            /*
+            @function (private) _handleRowDropdown
+            @description shows the row childs
+            @param {Object} row
+            */
+            handleRowDropdown: function (row) {
+
+                var el = this;
+
+                var rowIndex = el._misc.dropdowns.rows.indexOf(row);
+                var subRowsCount;
+
+                // If it is in the opened dropdowns array
+                if (rowIndex != -1) {
+                    // Substracts the dropdown to be closed children to the global childs amount
+                    subRowsCount = el._misc.dropdowns.childRowsCount - row.dropdown.children.length;
+                    // Returns the row height to its original one
+                    row.style.minHeight = el.rowMinHeight + "px";
+                    row.removeChild(row.dropdown);
+                    el._misc.dropdowns.rows.splice(rowIndex, 1);
+
+                } else {
+
+                    var rowHeight = row.content.offsetHeight;
+                    // Add the dropdown to be opened children to the global childs amount
+                    subRowsCount = el._misc.dropdowns.childRowsCount + row.dropdown.children.length;
+                    // Takes the current row height and multiplies it to the childs + itself
+                    row.style.minHeight = rowHeight * (1 + row.dropdown.children.length) + "px";
+                    row.dropdown.style.minHeight = (rowHeight * row.dropdown.children.length) + "px";
+                    row.appendChild(row.dropdown);
+
+                    el._misc.dropdowns.rows.push(row);
+
+                }
+                
+                // Updates the count
+                el._misc.dropdowns.childRowsCount = subRowsCount;
+
+            },
+            /*
+            @function (private) _handleAutofitRowDropdown
+            @description shows the row childs on autofit grid
+            @param {Object} row
+            */
+            handleAutofitRowDropdown: function (row) {
+
+                var el = this;
+
+                var rowIndex = el._misc.dropdowns.rows.indexOf(row);
+                var rowHeight = el._refs.scroll.offsetHeight / el._misc.entriesCount;
+                var subRowsCount;
+                
+                // If it is in the opened dropdowns array
+                if (rowIndex != -1) {
+                    // Substracts the dropdown to be closed children to the global childs amount
+                    subRowsCount = el._misc.dropdowns.childRowsCount - row.dropdown.children.length;
+
+                    row.removeChild(row.dropdown);
+                    row.style.flexGrow = 1;
+
+                    if (el._misc.browser == "IE") {
+                        row.style.minHeight = el.rowMinHeight + "px";
+                    }
+
+                    el._misc.dropdowns.rows.splice(rowIndex, 1);
+
+                } else {
+                    // Add the dropdown to be opened children to the global childs amount
+                    subRowsCount = el._misc.dropdowns.childRowsCount + row.dropdown.children.length;
+
+                    row.appendChild(row.dropdown);
+
+                    if (el._misc.browser != "IE") {
+                        row.style.flexGrow = 1 + row.dropdown.children.length;
+                    } else {
+                        row.style.flexGrow = 0;
+                        row.style.minHeight = rowHeight * (1 + row.dropdown.children.length) + "px";
+                    }
+
+                    row.dropdown.style.flexGrow = row.dropdown.children.length;
+
+                    el._misc.dropdowns.rows.push(row);
+
+                }
+                
+                // Updates the count
+                el._misc.dropdowns.childRowsCount = subRowsCount;
+                // Since we are working with flex on autofit, we change the wrapper size so everything can still work as always and all the rows
+                // keep its height
+                el._refs.rowsWrapper.style.height = subRowsCount > 0 ? rowHeight * (subRowsCount + el._misc.entriesCount) + "px" : "auto";
 
             },
             /*
@@ -1191,7 +1344,7 @@
 
                     var pageSize = parseInt(el._misc.pageSize);
                     var rangeLimit = (parseInt(selectedPage) * pageSize);
-                    var rangeStart = rangeLimit - pageSize + 1;
+                    var rangeStart = rangeLimit - pageSize;
 
                     el._handleRange(rangeStart, rangeLimit, true);
                     el._updatePagination(selectedPage);
@@ -1451,11 +1604,7 @@
             @description Gets the current rows capacity
             */
             getRowsCapacity: function () {
-
-                var el = this;
-                var rowsWrapperHeight = (parseInt(el._refs.rowsWrapper.offsetHeight) == 0) ? (el.offsetHeight - (el._refs.header.offsetHeight + el._refs.footer.offsetHeight)) : el.offsetHeight;
-
-                return Math.floor(rowsWrapperHeight / parseInt(el.rowMinHeight));
+                return Math.floor(this._refs.rowsWrapper.offsetHeight / parseInt(this.rowMinHeight));
             },
             /*
             @function (private) _increaseEntriesCount
@@ -1480,17 +1629,19 @@
                 el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
             },
             /*
-            @function (private) _resetEntriesCount
-            @description Resets the count of the entries
+            @function (private) _clearPage
+            @description Clears the page and resets the entries count
             */
-            resetEntriesCount: function () {
+            clearPage: function () {
 
                 var el = this;
+
+                el._refs.rowsWrapper.innerHTML = "";
 
                 el._misc.entriesCount = 0;
                 el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
 
-            },
+            }
         },
 
         onCreated: function () {

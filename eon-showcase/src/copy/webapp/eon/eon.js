@@ -2823,6 +2823,143 @@ vimlet.meta = vimlet.meta || {};
   };
 
 }.apply(vimlet.meta));  
+    // ############################################################################################
+// VPA JS
+// ############################################################################################
+
+// Creates a namespace for vpa.js
+eon.vpa = eon.vpa || {};
+
+(function () {
+  
+  var define = eon.amd.define;
+  var require = eon.amd.require;
+
+  var vpa = {};
+  vpa.useAmd = true;
+  vpa.declareLocal = true;
+
+  // Import vpa.js file
+  // ------------------------------------------------------------------------------------
+    // USE ONLY WITH SCRIPT SRC!
+
+// Support module in any environment
+var scope = typeof global != "undefined" ? global : window;
+scope["module"] = scope["module"] || undefined;
+
+// Global vpa declaration
+scope.vpa = scope.vpa || {};
+
+vpa.declareLocal = vpa.hasOwnProperty("declareLocal") ? vpa.declareLocal : true;
+vpa.declareGlobal = vpa.hasOwnProperty("declareGlobal") ? vpa.declareGlobal : true;
+
+vpa.useAmd = vpa.hasOwnProperty("useAmd") ? vpa.useAmd : false;
+vpa.allowAmdRequire = vpa.hasOwnProperty("allowAmdRequire") ? vpa.allowAmdRequire : false;
+
+if (vpa.useAmd || vpa.allowAmdRequire) {
+  vpa.define = vpa.define || define;
+  vpa.require = vpa.require || require;
+  vpa.useAmd = true; // Force AMD when any related option is used
+}
+
+vpa.declareAdapter = function (name, adapter, ext_module) {
+  (function () {
+    if (vpa.declareLocal && vpa.useAmd) {
+        vpa.define(function () {
+          return adapter;
+        });      
+    }
+    if (vpa.declareGlobal) {
+      vpa[name] = adapter;
+    }
+  })();
+};
+
+// Base implementation
+(function () {
+    var self = this;
+    // Base Query and Adapter Objects
+    self.createBaseQuery = function (adapterData) {
+        var BaseQuery = /** @class */ (function () {
+            function BaseQuery() {
+                this.query = adapterData || {};
+            }
+            BaseQuery.prototype.options = function (o) {
+                this.query.options = o;
+                return this;
+            };
+            BaseQuery.prototype.limit = function (start, amount) {
+                this.query.limitStart = start;
+                this.query.limitAmount = amount;
+                return this;
+            };
+            BaseQuery.prototype.validate = function (schema) {
+                this.query.validate = schema;
+                return this;
+            };
+            BaseQuery.prototype.sort = function (field, rule) {
+                this.query.sortField = field;
+                this.query.sortRule = rule;
+                return this;
+            };
+            BaseQuery.prototype.view = function (v) {
+                this.query.view = v;
+                return this;
+            };
+            BaseQuery.prototype.result = function (cb) {
+                throw "Not implemented, please override result function";
+            };
+            return BaseQuery;
+        }());
+        return new BaseQuery();
+    };
+    self.createBaseAdapter = function (queryHandler) {
+        var BaseAdapter = /** @class */ (function () {
+            function BaseAdapter() {
+            }
+            BaseAdapter.prototype.create = function (data) {
+                return queryHandler({
+                    action: "create",
+                    data: data
+                });
+            };
+            BaseAdapter.prototype.read = function (id) {
+                return queryHandler({
+                    action: "read",
+                    id: id
+                });
+            };
+            BaseAdapter.prototype.update = function (id, data) {
+                return queryHandler({
+                    action: "update",
+                    id: id,
+                    data: data
+                });
+            };
+            BaseAdapter.prototype.delete = function (id) {
+                return queryHandler({
+                    action: "delete",
+                    id: id
+                });
+            };
+            return BaseAdapter;
+        }());
+        return new BaseAdapter();
+    };
+}).apply(vpa);
+
+
+// Allow vpa require
+if (vpa.allowAmdRequire) {
+  vpa.define(function () {
+    return vpa;
+  });
+}  // ------------------------------------------------------------------------------------
+
+  eon.vpa = vpa;
+
+}).apply({});
+
     
 // ############################################################################################
 // CORE MODULES
@@ -3568,12 +3705,13 @@ eon.importMainTheme = function (theme) {
 };
 
 eon.importElementTheme = function (config, name, theme) {
+
     if (theme && config.themed && !eon.registry.isThemeRegistered(name, theme)) {
 
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-        
+
         eon.registry.registerTheme(name, theme);
 
         elementLink.setAttribute("rel", "stylesheet");
@@ -6344,7 +6482,7 @@ eon.cache.config = eon.cache.config || {};
 
       // Register eon service worker
       navigator.serviceWorker
-        .register(eon.basePath + '/data/eon-cache/service-worker.js')
+        .register(eon.basePath + '/modules/eon-cache/service-worker.js')
         .then(function () {
           console.log('[ServiceWorker] Registered');
       });
@@ -6445,79 +6583,76 @@ eon.history.getURLInformation = function () {
     : window.location.pathname.substring(1);
 };
 
-
 eon.store = function () {
-    var el = this;
-    /* Resources representation */
-    this.data = {};
-    
-    // Create useful callbacks
-    createCallbacks();
+  var el = this;
+  /* Resources representation */
+  this.data = {};
 
-    // Import Memory Adapter
-    importAdapter();
+  // Create useful callbacks
+  createCallbacks();
 
-    /* 
-        ##########
-        Private Functions
-        ##########
-    */
-    /*
-        @function _createCallbacks
-        @description 
-    */
-    function createCallbacks() {
-        eon.createCallback("onLoaded", el, "ready");
-        eon.createCallback("onDataChanged", el);
-    }
-    /*
-        ** TO BE REMOVED
-        @function importAdapter
-        @description 
-    */
-    function importAdapter() {
-        // Import vpa memory adapter
-       eon.amd.require([eon.basePath + "/data/eon-newstore/adapters/MemoryAdapter.js"], function (adapter) {
-            // Clone adapter functions
-            cloneFunctions(adapter());
-            //
-            createDataDescriptor();
-            // Trigger user callback once VPA has been loaded
-            eon.triggerCallback("onLoaded", el, el, [el]);
-        });
-    };
-    /*
-        @function (private) _cloneFunctions
-        @description 
-    */
-    function cloneFunctions(adapter) {
-        // Clone adapter data object
-        Object.assign(el, adapter);
-        // Get BaseAdapter prototype functions
-        Object.assign(el, adapter.constructor.prototype);
-    };
-    /*
-        @function (private) _cloneFunctions
-        @description 
-    */
-    function createDataDescriptor() {
-        // Define property descriptor with custom get and set
-        Object.defineProperty(
-            el,
-            "data",
-            {
-                get: function () {
-                    return el._memory.data;
-                },
-                set: function (value) {
-                    // Update property value
-                    el._memory.data = value;
-                    // Fire data changed event
-                    eon.triggerCallback("onDataChanged", el, el, [el.data]);
-                }
-            }
-        );
-    }
+  // Import Memory Adapter
+  importAdapter();
+  
+  /* 
+      ##########
+      Private Functions
+      ##########
+  */
+  /*
+      @function _createCallbacks
+      @description 
+  */
+  function createCallbacks() {
+    eon.createCallback("onLoaded", el, "ready");
+    eon.createCallback("onDataChanged", el);
+  }
+  /*
+      ** TO BE REMOVED
+      @function importAdapter
+      @description 
+  */
+  function importAdapter() {
+    // Clone adapter functions
+    cloneFunctions(new eon.data.MemoryAdapter());
+    // Store data access
+    createDataDescriptor();
+    // Trigger user callback once VPA has been loaded
+    eon.triggerCallback("onLoaded", el, el, [el]);
+
+  };
+  /*
+      @function (private) _cloneFunctions
+      @description 
+  */
+  function cloneFunctions(adapter) {
+    // Clone adapter data object
+    Object.assign(el, adapter);
+    // Get BaseAdapter prototype functions
+    Object.assign(el, adapter.constructor.prototype);
+  };
+  /*
+      @function (private) _cloneFunctions
+      @description 
+  */
+  function createDataDescriptor() {
+    // Define property descriptor with custom get and set
+    Object.defineProperty(
+      el,
+      "data",
+      {
+        get: function () {
+          return el._memory.data;
+        },
+        set: function (value) {
+          // Update property value
+          el._memory.data = value;
+          // Fire data changed event
+          eon.triggerCallback("onDataChanged", el, el, [el.data]);
+        }
+      }
+    );
+  }
 }
 
 
@@ -6695,6 +6830,263 @@ eon.endpoint = function (type, url) {
     el.socket.send("subscription:" + queryString);
   }
 }
+
+eon.data = eon.data || {};
+
+eon.data.MemoryAdapter = function () {
+  // eon.vpa.declareAdapter("MemoryAdapter", function (config) {
+  var memory = {}; // Memory itself
+  memory.data = new Map(); // Where data will be stored
+  var counter = 0;
+
+  // @function create (private) [Create a new entry to the memory object with given data] @param query
+  function create(query) {
+    return new Promise(function (resolve, reject) {
+      if (query.data) {
+        var id;
+        if (query.data.id) {
+          id = query.data.id;
+        }
+        else {
+          // ** Check if some data has already been inserted
+          counter = memory.data.size ? memory.data.size + 1 : 0;
+          id = counter;
+          query.data.id = "" + id;
+          counter++;
+        }
+        var validated = validate(query);
+        if (validated) {
+          memory.data.set(id, validated);
+          resolve(validated);
+        }
+        else {
+          reject(new Error("Validation error"));
+        }
+      }
+      else {
+        reject(new Error("Data not found"));
+      }
+    });
+  }
+  // @function read (private) [Read from memory or list if no id given] @param query
+  function read(query) {
+    return new Promise(function (resolve, reject) {
+      // Check id value
+      if (query.id) {
+        if (memory.data.get(query.id)) {
+          console.log('memory.data.get(query.id)', memory.data.get(query.id));
+          resolve(memory.data.get(query.id));
+        } else {
+          reject(new Error("Not found"));
+        }
+      } else {
+        var keys;
+        var result = new Map();
+        // Sort data before get range
+        if (query.sortField) {
+          var asc = 1;
+          if (query.sortRule && ~["descending", "desc"].indexOf(query.sortRule)) {
+            asc = -1;
+          }
+          keys = sortArray(memory.data, query.sortField, asc);
+        }
+        // Check ranges
+        var start = query.limitStart || 0;
+        var end = (query.limitAmount + query.limitStart) || memory.data.size;
+        end = end > memory.data.size ? memory.data.size : end;
+
+        if (!keys) {
+          keys = [];
+          // Store map keys
+          memory.data.forEach(function (value, key, map) {
+            keys.push(key);
+          });
+        }
+        // Build sorted map
+        for (var i = start; i < end; i++) {
+          // Check keys sorted 
+          if (query.sortField) {
+            result.set(keys[i].key, memory.data.get(keys[i].key));
+          } else {
+            result.set(keys[i], memory.data.get(keys[i]));
+          }
+        }
+        resolve(result);
+      }
+    });
+  }
+  // @function update (private) [Update an existing entry from memory] @param query
+  function update(query) {
+    return new Promise(function (resolve, reject) {
+      // Check null values
+      if (query.id) {
+        if (query.data) {
+          // Check update target
+          if (memory.data.get(query.id)) {
+            // Merge current and new data
+            query.data = deepMerge(memory.data.get(query.id), query.data);
+            var validated = validate(query);
+            if (validated) {
+              // Set new validated data entry
+              memory.data.set(query.id, validated);
+              resolve(validated);
+            }
+            else {
+              reject(new Error("Validation error"));
+            }
+          }
+          else {
+            reject(new Error("Id doesn't exist"));
+          }
+        }
+        else {
+          reject(new Error("Data not found"));
+        }
+      }
+      else {
+        reject(new Error("Id not found"));
+      }
+    });
+  }
+  // @function delete (private) [Delete from memory] @param query
+  function remove(query) {
+    return new Promise(function (resolve, reject) {
+      // Check null values
+      if (query.id) {
+        // Check remove target
+        if (memory.data.get(query.id)) {
+          var result = memory.data.get(query.id);
+          memory.data.delete(query.id);
+          resolve(result);
+        }
+        else {
+          reject("Id not found");
+        }
+      }
+      else {
+        // Remove all entries
+        var result = memory;
+        // Safe clear object and its copy baseAdapter._memory
+        memory.data.forEach(function (value, key, map) {
+          memory.data.delete(key);
+        });
+        resolve(result);
+      }
+    });
+  }
+  // @function sortArray (private) [Sort an array of objects] @param array @param key @param asc (number) [1 if ascendant, -1 if descendant]
+  function sortArray(data, field, asc) {
+    // ** IMPROVE
+    var array = [];
+    // Store map keys
+    data.forEach(function (value, key, map) {
+      array.push({
+        key: key,
+        field: data.get(key)[field]
+      });
+    });
+    // Check ascending value
+    asc = asc || 1;
+    // Sort comparing function
+    function compare(a, b) {
+      if (a.field < b.field) {
+        return -1 * asc;
+      }
+      else if (a.field > b.field) {
+        return 1 * asc;
+      }
+      else {
+        return 0;
+      }
+    }
+    // Sort map keys
+    array.sort(compare);
+    return array;
+  }
+  // @function validate(private) [Not implemented yet] @param query
+  function validate(query) {
+    if (query.validate) {
+      // Do something
+    }
+    return query.data;
+  }
+  // @function deepMerge (private) [Merge two objects] @param args
+  var deepMerge = function () {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+      args[_i] = arguments[_i];
+    }
+    var merged = {};
+    var merge = function (obj) {
+      for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+          if (obj[prop] && typeof obj[prop] == 'object') {
+            merged[prop] = deepMerge(merged[prop], obj[prop]);
+          }
+          else {
+            merged[prop] = obj[prop];
+          }
+        }
+      }
+    };
+    for (var i = 0; i < arguments.length; i++) {
+      var obj = arguments[i];
+      merge(obj);
+    }
+    return merged;
+  };
+  var queryHandler = function (adapterData) {
+    var baseQuery = eon.vpa.createBaseQuery(adapterData);
+    baseQuery.result = function (cb) {
+      var query = baseQuery.query;
+      var result;
+      var error;
+      switch (query.action) {
+        case "create":
+          create(query).then(function (data) {
+            result = data;
+            cb(error, result);
+          }).catch(function (er) {
+            error = er;
+            cb(error, result);
+          });
+          break;
+        case "read":
+          read(query).then(function (data) {
+            result = data;
+            cb(error, result);
+          }).catch(function (er) {
+            error = er;
+            cb(error, result);
+          });
+          break;
+        case "update":
+          update(query).then(function (data) {
+            result = data;
+            cb(error, result);
+          }).catch(function (er) {
+            error = er;
+            cb(error, result);
+          });
+          break;
+        case "delete":
+          remove(query).then(function (data) {
+            result = data;
+            cb(error, result);
+          }).catch(function (er) {
+            error = er;
+            cb(error, result);
+          });
+          break;
+      }
+    };
+    return baseQuery;
+  };
+  var baseAdapter = eon.vpa.createBaseAdapter(queryHandler);
+  baseAdapter._memory = memory;
+  return baseAdapter;
+}
+
 
 
 eon.validator = eon.validator || {};
@@ -6975,143 +7367,6 @@ eon.validator.fillErrorObj = function (property, errorMessage, errorObj) {
 
 
   
-    // ############################################################################################
-// VPA JS
-// ############################################################################################
-
-// Creates a namespace for vpa.js
-eon.vpa = eon.vpa || {};
-
-(function () {
-  
-  var define = eon.amd.define;
-  var require = eon.amd.require;
-
-  var vpa = {};
-  vpa.useAmd = true;
-  vpa.declareLocal = true;
-
-  // Import vpa.js file
-  // ------------------------------------------------------------------------------------
-    // USE ONLY WITH SCRIPT SRC!
-
-// Support module in any environment
-var scope = typeof global != "undefined" ? global : window;
-scope["module"] = scope["module"] || undefined;
-
-// Global vpa declaration
-scope.vpa = scope.vpa || {};
-
-vpa.declareLocal = vpa.hasOwnProperty("declareLocal") ? vpa.declareLocal : true;
-vpa.declareGlobal = vpa.hasOwnProperty("declareGlobal") ? vpa.declareGlobal : true;
-
-vpa.useAmd = vpa.hasOwnProperty("useAmd") ? vpa.useAmd : false;
-vpa.allowAmdRequire = vpa.hasOwnProperty("allowAmdRequire") ? vpa.allowAmdRequire : false;
-
-if (vpa.useAmd || vpa.allowAmdRequire) {
-  vpa.define = vpa.define || define;
-  vpa.require = vpa.require || require;
-  vpa.useAmd = true; // Force AMD when any related option is used
-}
-
-vpa.declareAdapter = function (name, adapter, ext_module) {
-  (function () {
-    if (vpa.declareLocal && vpa.useAmd) {
-        vpa.define(function () {
-          return adapter;
-        });      
-    }
-    if (vpa.declareGlobal) {
-      vpa[name] = adapter;
-    }
-  })();
-};
-
-// Base implementation
-(function () {
-    var self = this;
-    // Base Query and Adapter Objects
-    self.createBaseQuery = function (adapterData) {
-        var BaseQuery = /** @class */ (function () {
-            function BaseQuery() {
-                this.query = adapterData || {};
-            }
-            BaseQuery.prototype.options = function (o) {
-                this.query.options = o;
-                return this;
-            };
-            BaseQuery.prototype.limit = function (start, amount) {
-                this.query.limitStart = start;
-                this.query.limitAmount = amount;
-                return this;
-            };
-            BaseQuery.prototype.validate = function (schema) {
-                this.query.validate = schema;
-                return this;
-            };
-            BaseQuery.prototype.sort = function (field, rule) {
-                this.query.sortField = field;
-                this.query.sortRule = rule;
-                return this;
-            };
-            BaseQuery.prototype.view = function (v) {
-                this.query.view = v;
-                return this;
-            };
-            BaseQuery.prototype.result = function (cb) {
-                throw "Not implemented, please override result function";
-            };
-            return BaseQuery;
-        }());
-        return new BaseQuery();
-    };
-    self.createBaseAdapter = function (queryHandler) {
-        var BaseAdapter = /** @class */ (function () {
-            function BaseAdapter() {
-            }
-            BaseAdapter.prototype.create = function (data) {
-                return queryHandler({
-                    action: "create",
-                    data: data
-                });
-            };
-            BaseAdapter.prototype.read = function (id) {
-                return queryHandler({
-                    action: "read",
-                    id: id
-                });
-            };
-            BaseAdapter.prototype.update = function (id, data) {
-                return queryHandler({
-                    action: "update",
-                    id: id,
-                    data: data
-                });
-            };
-            BaseAdapter.prototype.delete = function (id) {
-                return queryHandler({
-                    action: "delete",
-                    id: id
-                });
-            };
-            return BaseAdapter;
-        }());
-        return new BaseAdapter();
-    };
-}).apply(vpa);
-
-
-// Allow vpa require
-if (vpa.allowAmdRequire) {
-  vpa.define(function () {
-    return vpa;
-  });
-}  // ------------------------------------------------------------------------------------
-
-  eon.vpa = vpa;
-
-}).apply({});
-
 
 }.apply(eon));
   
