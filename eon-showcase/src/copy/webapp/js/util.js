@@ -38,12 +38,14 @@ function toggleMenu(forceAction) {
 }
 
 function initializePlayground(sectionsClass, pgClass, static) {
+
   // PROBABLY NECESSARY DUE TO EON-PANEL SCRIPTS MANAGEMENT (to be removed...)
   setTimeout(function () {
     // Initialize playground
     var sections = document.querySelector(sectionsClass).content.children;
     var pg = document.querySelector(pgClass);
     var scrollContent;
+
     // Set playground content
     pg.onReady(function () {
       var pgObj = {
@@ -54,14 +56,16 @@ function initializePlayground(sectionsClass, pgClass, static) {
       };
       pg.setData(pgObj);
     });
+
     if (!static) {
       // Get content height
-      pg.onContentSet(function (iframe) {
+      pg.onContentSet(function (iframe) {        
         // Iframe on content loaded 
         eon.createCallback("onLoaded", iframe);
         // Make playground fit its iframe content
         iframe.onLoaded(function () {
           var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+          
           var scroll = innerDoc.body.children[0];
           scroll.onReady(function () {
             scrollContent = scroll.children[0];

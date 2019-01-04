@@ -115,7 +115,7 @@ if (!eon.theme) {
 // ############################################################################################
 
 eon.injectPolyfill = function (url) {
-  document.write('<script type="text/javascript" src="' + url + '"></script>');
+  document.write("<script type='text/javascript' src='" + url + "'><\/script>");
 };
 
 eon.needCustomElementsPolyfill = function () {
