@@ -76,6 +76,16 @@
       closable: {
         value: "true",
         reflect: true
+      },
+      /*
+        @property {String} controllers
+        @description 
+        Values: auto, static
+        Default: 
+      */
+      controllers: {
+        value: "auto",
+        reflect: true
       }
     },
     privateFunctions: {
@@ -238,32 +248,33 @@
 
       },
       /*
-      @function (private) _handleTabsScrollsStatus
-      @description Enables/disabled the tabs scroll
-      */
+        @function (private) _handleTabsScrollsStatus
+        @description Enables/disabled the tabs scroll
+        */
       handleTabsScrollsStatus: function () {
-
         var el = this;
 
         setTimeout(function () {
 
           if (el._refs.tabsWrapper.scrollWidth <= el._refs.tabsRegion.offsetWidth) {
-
+            // Monitor scroll controllers display
+            if (el.controllers == "auto") {
+              el._refs.tabsScrolls.classList.add("eon-tabs-auto");
+            }
             el._refs.tabsScrolls.classList.remove("enabled");
             el._refs.leftScroll.classList.remove("eon-fg1-hoverable");
             el._refs.rightScroll.classList.remove("eon-fg1-hoverable");
             el._refs.tabsWrapper.style.left = 0;
-
           } else {
-
+            // Monitor scroll controllers display
+            if (el.controllers == "auto") {
+              el._refs.tabsScrolls.classList.remove("eon-tabs-auto");
+            }
             el._refs.tabsScrolls.classList.add("enabled");
             el._refs.leftScroll.classList.add("eon-fg1-hoverable");
             el._refs.rightScroll.classList.add("eon-fg1-hoverable");
-
           }
-
         }, 0);
-
       },
       /*
       @function (private) _selectTab
@@ -472,8 +483,10 @@
         var el = this;
         var tab = el._misc.tabs[name];
 
-        el._refs.stack.wipeout(tab.dataset.panel);
-        tab.parentNode.removeChild(tab);
+        if (tab.parentNode) {
+          el._refs.stack.wipeout(tab.dataset.panel);
+          tab.parentNode.removeChild(tab);
+        }
 
       },
       /*
@@ -639,6 +652,7 @@
 
         el._reorderTabs();
         el._handleTabsScrollsStatus();
+        eon.triggerCallback("onTabRemoved", el, el, [tab]);
       },
       /*
       @function hide
@@ -776,6 +790,7 @@
       el._setupRefs();
 
       eon.createCallback("onTabSelected", el);
+      eon.createCallback("onTabRemoved", el);
 
     },
     onTransformed: function () {

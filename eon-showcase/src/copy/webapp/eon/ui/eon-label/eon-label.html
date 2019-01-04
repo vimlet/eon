@@ -26,13 +26,20 @@
 
 <script type="text/javascript">
   eon.element({
-    
+
     name: "eon-label",
     style: "eon-label.css",
 
     themed: true,
 
     privateProperties: {
+      /*
+      @property (private) {String} _formElement 
+      @description Necessary property for a form
+      */
+      formElement: {
+        value: "label"
+      },
       /*
       @property (private) {Object} _misc
       @description Object with useful information
@@ -52,6 +59,14 @@
     },
 
     properties: {
+      /*
+      @property {String} name
+      @description Name to identify the element in a form
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
       /*
       @property {Boolean} inline 
       @description Space that occupies the button inside its parent container.
@@ -167,6 +182,7 @@
 
         el._refs.input.addEventListener("focus", function () {
           el.classList.add("eon-label-focus");
+          eon.triggerCallback("onFocus", el);
         });
 
         el._refs.input.addEventListener("blur", function () {
@@ -176,6 +192,8 @@
           if (eon.util.isTrue(el.blurSave)) {
             el._finishEditing();
           }
+
+          eon.triggerCallback("onBlur", el);
 
         });
 
@@ -292,6 +310,13 @@
         }
 
       }
+
+    },
+
+    onCreated: function () {
+
+      eon.createCallback("onBlur", this);
+      eon.createCallback("onFocus", this);
 
     },
 
