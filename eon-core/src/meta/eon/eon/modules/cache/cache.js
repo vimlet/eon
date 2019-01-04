@@ -39,7 +39,7 @@ eon.cache.config = eon.cache.config || {};
 
       // Register eon service worker
       navigator.serviceWorker
-        .register(eon.basePath + '/modules/eon-cache/service-worker.js')
+        .register(eon.basePath + '/modules/cache-sw.js')
         .then(function () {
           console.log('[ServiceWorker] Registered');
       });
