@@ -7,6 +7,9 @@ cache:
   - node_modules
   - eon-core/node_modules
   - eon-ui/node_modules
+env:
+  global:
+  - secure: YcHkN+WJ9ICUS8BxfyeVs1RlpnFJ02dZACvCgMC/14mib7OWUwWeDG2bnoTAAdMLO8cxaRcTz6LIdGIv0Rvx/GgO5oMIVp787MaURX2g9JJtxDDzz7ajf3NUqjkeGXqka8OaiC9t2IRROs/ymEdTawCdyMkLiOn/ouE91e/TlYdawfALcsqnEhVQ7v9TddY1Bp5dG/JpeqA3YwSSGmfBETWhFeCzXhYWylthO4tI50ELSdLpHwMLeU8PO/D0LUVSZYDtoIca3TlyzeR0cJEN315voL6QiJERtdY5Yhlpq1ejazDGjZkHqTWVdlahFeaMvKPHCT5qAfARtuCGRBT2uRHxjCq0LbYdDmJdLlKx0idsXgof+QzRP/8VyycmwyEpSdQuTRMf/hK4Lip6Kf0hJ2oU9l5s9/xdU5A4KpWiF0CKBELfCn7FsA+YGJicgOGsLimuoJ3KnZJtOy/vtv/UWbrFToJ55++3iM2fPHdHiQciRU4KeNNvIjg+BcgrZYca5ifQkJSOhnz/OiRZysvRW1jV3sxrI8F95DngqGJXo3WXSQMfjmCT3Va+JaivfmXA7m2ss7Ge7dCBkLfgCaxIyribJVJPtB7E6sg3FrVtGib0EuuGbHj4do69oCrtPe1Nj2CjNj0T8Pb1fEZazgXPEHdApMiaR08GwRz6haaCNLE=
 install:
 - npm install
 script:
@@ -18,7 +21,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: YcHkN+WJ9ICUS8BxfyeVs1RlpnFJ02dZACvCgMC/14mib7OWUwWeDG2bnoTAAdMLO8cxaRcTz6LIdGIv0Rvx/GgO5oMIVp787MaURX2g9JJtxDDzz7ajf3NUqjkeGXqka8OaiC9t2IRROs/ymEdTawCdyMkLiOn/ouE91e/TlYdawfALcsqnEhVQ7v9TddY1Bp5dG/JpeqA3YwSSGmfBETWhFeCzXhYWylthO4tI50ELSdLpHwMLeU8PO/D0LUVSZYDtoIca3TlyzeR0cJEN315voL6QiJERtdY5Yhlpq1ejazDGjZkHqTWVdlahFeaMvKPHCT5qAfARtuCGRBT2uRHxjCq0LbYdDmJdLlKx0idsXgof+QzRP/8VyycmwyEpSdQuTRMf/hK4Lip6Kf0hJ2oU9l5s9/xdU5A4KpWiF0CKBELfCn7FsA+YGJicgOGsLimuoJ3KnZJtOy/vtv/UWbrFToJ55++3iM2fPHdHiQciRU4KeNNvIjg+BcgrZYca5ifQkJSOhnz/OiRZysvRW1jV3sxrI8F95DngqGJXo3WXSQMfjmCT3Va+JaivfmXA7m2ss7Ge7dCBkLfgCaxIyribJVJPtB7E6sg3FrVtGib0EuuGbHj4do69oCrtPe1Nj2CjNj0T8Pb1fEZazgXPEHdApMiaR08GwRz6haaCNLE=
+    secure: ${secure}
   file: 
     - eon-core/release/eon-core.zip
     - eon-ui/release/eon-ui.zip
@@ -28,3 +31,16 @@ deploy:
     tags: true
     all_branches: true
     condition: "$TRAVIS_TAG =~ ^release-.*$"
+after_deploy:
+- MESSAGE=$(git log --format=%B -n 1 $TRAVIS_COMMIT)
+- cd ${TRAVIS_BUILD_DIR}
+- git clone git://github.com/vimlet/eon-cdn.git
+- cp -rf eon-core/build eon-cdn
+- cp -rf eon-ui/build eon-cdn
+- cd eon-cdn
+- git remote
+- git config user.email eon@mail.com
+- git config user.name eon
+- git add .
+- git commit -m ${MESSAGE}
+- git push "https://${TRAVIS_SECURE_TOKEN_NAME}@github.com/vimlet/eon-cdn.git" master > /dev/null 2>&1
