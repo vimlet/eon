@@ -37,16 +37,16 @@ function toggleMenu(forceAction) {
   }
 }
 
-function initializePlayground(sectionsClass, pgClass, static) {
+function initializeShowcase(sectionsClass, pgClass, static) {
 
   // PROBABLY NECESSARY DUE TO EON-PANEL SCRIPTS MANAGEMENT (to be removed...)
   setTimeout(function () {
-    // Initialize playground
+    // Initialize showcase
     var sections = document.querySelector(sectionsClass).content.children;
     var pg = document.querySelector(pgClass);
     var scrollContent;
 
-    // Set playground content
+    // Set showcase content
     pg.onReady(function () {
       var pgObj = {
         head: sections[0].innerHTML,
@@ -62,7 +62,7 @@ function initializePlayground(sectionsClass, pgClass, static) {
       pg.onContentSet(function (iframe) {        
         // Iframe on content loaded 
         eon.createCallback("onLoaded", iframe);
-        // Make playground fit its iframe content
+        // Make showcase fit its iframe content
         iframe.onLoaded(function () {
           var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
           
@@ -75,9 +75,9 @@ function initializePlayground(sectionsClass, pgClass, static) {
             }
             setPgHeight(pg, size);
           });
-          // Playground resize listener
-          playgroundResizeListener(pg, innerDoc);
-          // Playground fullscreen listeners
+          // Showcase resize listener
+          showcaseResizeListener(pg, innerDoc);
+          // Showcase fullscreen listeners
           fullScreenListeners(pg);
         });
       });
@@ -85,7 +85,7 @@ function initializePlayground(sectionsClass, pgClass, static) {
   }, 0);
 }
 
-function playgroundResizeListener(pg, innerDoc) {
+function showcaseResizeListener(pg, innerDoc) {
   var scrollContent, body, scroll;
   pg._misc.prevSize = pg.offsetHeight;
   var delay = 200;
@@ -104,11 +104,11 @@ function playgroundResizeListener(pg, innerDoc) {
           for (var i = 0; i < scrollContent.children.length; i++) {
             size += scrollContent.children[i].offsetHeight;
           }
-          // Keep playground full screen size if activated
+          // Keep showcase full screen size if activated
           if (pg._misc.fullScreenActivated) {
             pg.style.height = "100%";
           } else {
-            // Set playground new size
+            // Set showcase new size
             setPgHeight(pg, size);
           }
         });

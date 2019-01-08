@@ -1,32 +1,32 @@
 <style>
-  eon-playground eon-panel {
+  eon-showcase eon-panel {
     height: 100%;
     width: 100%;
     overflow: hidden !important;
     position: relative;
   }
 
-  eon-playground .eon-playground-htmlTags-button {
+  eon-showcase .eon-showcase-htmlTags-button {
     cursor: pointer
   }
 
-  eon-playground .eon-playground-htmlTags-enabled {
+  eon-showcase .eon-showcase-htmlTags-enabled {
     color: white !important;
   }
 
-  eon-playground .eon-playground-editor-hidden {
+  eon-showcase .eon-showcase-editor-hidden {
     display: none !important;
   }
 </style>
 <template>
   <eon-loading></eon-loading>
-  <div id="eon-playground-content" class="eon-playground-until-render"></div>
+  <div id="eon-showcase-content" class="eon-showcase-until-render"></div>
 </template>
 
 <script>
   eon.element({
-    name: "eon-playground",
-    style: "eon-playground.css",
+    name: "eon-showcase",
+    style: "eon-showcase.css",
     dependencies: [
       "../eon-editor",
       "../eon-tabs",
@@ -68,7 +68,7 @@
     },
 
     privateFunctions: {
-      // @function init (private) [Set up playground]
+      // @function init (private) [Set up showcase]
       init: function () {
         var el = this;
         el._setStructure();
@@ -151,7 +151,7 @@
         });
         el._refs.html.head.language = "html";
         var headTag = document.createElement("div");
-        headTag.classList.add("eon-playground-htmlTags");
+        headTag.classList.add("eon-showcase-htmlTags");
         headTag.innerHTML = "head";
         headSection.appendChild(headTag);
         el._refs.html.head.readonly = false;
@@ -164,7 +164,7 @@
         });
         el._refs.html.body.language = "html";
         var bodyTag = document.createElement("div");
-        bodyTag.classList.add("eon-playground-htmlTags");
+        bodyTag.classList.add("eon-showcase-htmlTags");
         bodyTag.innerHTML = "body";
         bodySection.appendChild(bodyTag);
         el._refs.html.body.readonly = false;
@@ -193,12 +193,12 @@
         });
         el._refs.html.head.language = "html";
         var headTag = document.createElement("div");
-        headTag.classList.add("eon-playground-htmlTags", "eon-playground-htmlTags-button");
+        headTag.classList.add("eon-showcase-htmlTags", "eon-showcase-htmlTags-button");
         headTag.innerHTML = "head";
         headTag.parent = el;
         headTag.setAttribute("onclick", "this.parent.toggleSingleHtmlView('head');");
         headTag.style.marginRight = "55px";
-        el._refs.html.head.classList.add("eon-playground-editor-hidden");
+        el._refs.html.head.classList.add("eon-showcase-editor-hidden");
         el._refs.html.head.readonly = false;
         el._refs.html.body = document.createElement("eon-editor");
         el._refs.html.body.oneditorready(function () {
@@ -209,7 +209,7 @@
         });
         el._refs.html.body.language = "html";
         var bodyTag = document.createElement("div");
-        bodyTag.classList.add("eon-playground-htmlTags", "eon-playground-htmlTags-button", "eon-playground-htmlTags-enabled");
+        bodyTag.classList.add("eon-showcase-htmlTags", "eon-showcase-htmlTags-button", "eon-showcase-htmlTags-enabled");
         el._refs.html.enabledView = "body";
         bodyTag.innerHTML = "body";
         bodyTag.parent = el;
@@ -241,7 +241,7 @@
         });
         el._refs.js.onchange(function () {
           if (!el._misc.loaded) {
-            // Hide playground internal used code
+            // Hide showcase internal used code
             rgx = /(\/\/\*\*)[^\*\*]*(\*\*)/mg;
             jsValue = el.js.replace(rgx, "");
             el._misc.loaded = true;
@@ -281,7 +281,7 @@
         // ** Append section to the panel content (Spaced container if default style is active)
         el._refs.cssTab.content.appendChild(el._refs.css);
       },
-      // @function setStructure (private) [Set up playground content]
+      // @function setStructure (private) [Set up showcase content]
       setStructure: function () {
         var el = this;
         el._setTabs();
@@ -293,8 +293,8 @@
         el._refs.tabs.appendChild(htmlTab);
         el._refs.tabs.appendChild(jsTab);
         el._refs.tabs.appendChild(cssTab);
-        el.querySelector("#eon-playground-content").appendChild(el._refs.tabs);
-        el.querySelector("#eon-playground-content").querySelector(".eon-tabs-tabsSection").appendChild(
+        el.querySelector("#eon-showcase-content").appendChild(el._refs.tabs);
+        el.querySelector("#eon-showcase-content").querySelector(".eon-tabs-tabsSection").appendChild(
           el._setFullSCreenBttn());
         setTimeout(function () {
           el._showResult();
@@ -305,7 +305,7 @@
         var el = this;
         el._misc.fullscreen = false;
         var fullScreenBtt = document.createElement("div");
-        fullScreenBtt.classList.add("eon-playground-fullScreenBttn", "eon-fg1-hoverable");
+        fullScreenBtt.classList.add("eon-showcase-fullScreenBttn", "eon-fg1-hoverable");
         el._refs.fullScreenIcon = document.createElement("i");
         el._refs.fullScreenIcon.classList.add("vicon", "vicon-fullscreen");
         fullScreenBtt.appendChild(el._refs.fullScreenIcon);
@@ -362,15 +362,15 @@
         iframeSrc += "</body></html>";
         return iframeSrc;
       },
-      // @function show (private) [Hides loading mask and shows playground]
+      // @function show (private) [Hides loading mask and shows showcase]
       show: function () {
         var el = this;
-        el.querySelector("#eon-playground-content").classList.remove("eon-playground-until-render");
+        el.querySelector("#eon-showcase-content").classList.remove("eon-showcase-until-render");
         el.querySelector("eon-loading").hide();
       }
     },
     functions: {
-      // @function setData (public) [Set data to the playground]
+      // @function setData (public) [Set data to the showcase]
       setData: function (data) {
         var el = this;
         if (data.js) {
@@ -426,12 +426,12 @@
       toggleSingleHtmlView: function (toggleTo) {
         var el = this;
         if (el._refs.html.enabledView != toggleTo) {
-          var tags = el._refs.htmlTab.querySelectorAll(".eon-playground-htmlTags");
+          var tags = el._refs.htmlTab.querySelectorAll(".eon-showcase-htmlTags");
           tags.forEach(function (tag) {
-            tag.classList.toggle("eon-playground-htmlTags-enabled");
+            tag.classList.toggle("eon-showcase-htmlTags-enabled");
           });
-          el._refs.html.body.classList.toggle("eon-playground-editor-hidden");
-          el._refs.html.head.classList.toggle("eon-playground-editor-hidden");
+          el._refs.html.body.classList.toggle("eon-showcase-editor-hidden");
+          el._refs.html.head.classList.toggle("eon-showcase-editor-hidden");
           el._refs.html.enabledView = toggleTo;
         }
       }
