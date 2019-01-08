@@ -221,13 +221,14 @@
                 el._misc.posterHidden = true;
                 el.setAttribute("paused", false);
             },
-             /*  
-               @function reload
-               @description 
-           */
-           reload: function () {
-                var el =this;
-                
+            /*  
+              @function reload
+              @description 
+          */
+            reload: function () {
+                var el = this;
+
+                el._misc.reloaded = true;
                 el._refs.video.load();
             },
             /*  
@@ -247,7 +248,7 @@
 
                 el.setAttribute("paused", true);
             },
-          
+
             /*  
                 @function mute
                 @description 
@@ -890,7 +891,7 @@
             vid.classList.add("eon-video-video");
             el._refs.wrapper = el.template.querySelector(".eon-video-wrapper");
             el.template.insertBefore(vid, el._refs.wrapper);
-            
+
             eon.createCallback("onEnd", el);
 
             // Quick access
@@ -923,19 +924,22 @@
             el._setUp();
             //
             el._refs.video.addEventListener("loadeddata", function () {
-                //
-                el._durationListener();
-                // 
-                el._playBtnListener();
-                // 
-                if (!/iPad|iPhone|iPod/.test(navigator.platform)) {
-                    el._refs.videoContainer.classList.add("eon-video-volume-container-display");
-                    el._volumeListener();
+                if (!el._misc.reloaded) {
+
+                    //
+                    el._durationListener();
+                    // 
+                    el._playBtnListener();
+                    // 
+                    if (!/iPad|iPhone|iPod/.test(navigator.platform)) {
+                        el._refs.videoContainer.classList.add("eon-video-volume-container-display");
+                        el._volumeListener();
+                    }
+                    // 
+                    el._timeListener();
+                    // 
+                    el._fullScreenListener();
                 }
-                // 
-                el._timeListener();
-                // 
-                el._fullScreenListener();
             });
         },
         onRender: function () {
