@@ -65,16 +65,16 @@ function initializeShowcase(sectionsClass, pgClass, static) {
         // Make showcase fit its iframe content
         iframe.onLoaded(function () {
           var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-          
-          var scroll = innerDoc.body.children[0];
-          scroll.onReady(function () {
-            scrollContent = scroll.children[0];
-            var size = 0;
-            for (var i = 0; i < scrollContent.children.length; i++) {
-              size += scrollContent.children[i].offsetHeight;
-            }
-            setPgHeight(pg, size);
-          });
+          var body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
+          // var scroll = innerDoc.body.children[0];
+          // scroll.onReady(function () {
+          //   scrollContent = scroll.children[0];
+          //   var size = 0;
+          //   for (var i = 0; i < scrollContent.children.length; i++) {
+          //     size += scrollContent.children[i].offsetHeight;
+          //   }
+            setPgHeight(pg, body.offsetHeight);
+          // });
           // Showcase resize listener
           showcaseResizeListener(pg, innerDoc);
           // Showcase fullscreen listeners
@@ -95,23 +95,38 @@ function showcaseResizeListener(pg, innerDoc) {
     if (!throttled) {
       body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
       if (body) {
-        // Get scroll content
-        var scroll = body.children[0];
-        scroll.onReady(function () {
-          scrollContent = scroll.children[0];
-          // Get rows size
-          var size = 0;
-          for (var i = 0; i < scrollContent.children.length; i++) {
-            size += scrollContent.children[i].offsetHeight;
-          }
-          // Keep showcase full screen size if activated
-          if (pg._misc.fullScreenActivated) {
-            pg.style.height = "100%";
-          } else {
-            // Set showcase new size
-            setPgHeight(pg, size);
-          }
-        });
+
+        // Get rows size
+        // var size = 0;
+        // EON-SCROLL RESIZE SUPPORT
+        // for (var i = 0; i < body.children.length; i++) {
+        //   size += body.children[i].offsetHeight;
+        // }
+
+        // Keep showcase full screen size if activated
+        if (pg._misc.fullScreenActivated) {
+          pg.style.height = "100%";
+        } else {
+          // Set showcase new size
+          setPgHeight(pg, body.offsetHeight);
+        }
+        // EON-SCROLL RESIZE SUPPORT
+        // var scroll = body.children[0];
+        // scroll.onReady(function () {
+        //   scrollContent = scroll.children[0];
+        //   // Get rows size
+        //   var size = 0;
+        //   for (var i = 0; i < scrollContent.children.length; i++) {
+        //     size += scrollContent.children[i].offsetHeight;
+        //   }
+        //   // Keep showcase full screen size if activated
+        //   if (pg._misc.fullScreenActivated) {
+        //     pg.style.height = "100%";
+        //   } else {
+        //     // Set showcase new size
+        //     setPgHeight(pg, size);
+        //   }
+        // });
       }
     }
     // Throttle
@@ -126,7 +141,15 @@ function showcaseResizeListener(pg, innerDoc) {
 function setPgHeight(pg, size) {
   // Check null values
   if (size) {
-    pg.style.height = 37 + size + "px";
+    size = size < 250 ? 250 : size;
+    var bodySize = size;
+
+    if(bodySize >= pg.offsetHeight || pg.offsetHeight - 37 >= bodySize) {
+      size = bodySize + 37;
+    } else  {
+      size = pg.offsetHeight;
+    }
+    pg.style.height = size + "px";
   }
 }
 
