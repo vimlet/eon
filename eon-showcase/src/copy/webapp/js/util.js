@@ -15,6 +15,7 @@ function loadEonExamples() {
   refs.tree.onNodeSelected(function (node) {
     // Go to group file
     groupId = node._refs.parentNode.tagName == "EON-TREENODE" ? node._refs.parentNode.id : node.id;
+    console.log(groupId, node.id);
     refs.view.swapToPanel(groupId);
     // Get active panel
     activePanel = refs.view.getActivePanel();
@@ -25,7 +26,13 @@ function loadEonExamples() {
       // Scroll to the specific element section
       panelScroll.scrollTop = [anchor.getOffsetPosition(), true];
     }
-  })
+  });
+  // Initialize forms
+  eon.onReady(function(){
+    refs.view._misc.activePanel.onLoad(function(){
+      this.render()
+    });
+  });
 }
 
 function toggleMenu(forceAction) {
