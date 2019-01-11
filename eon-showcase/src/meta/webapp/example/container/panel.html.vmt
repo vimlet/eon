@@ -1,0 +1,126 @@
+<eon-anchor state="panel" eon-scroll="eon-scroll" type="top"></eon-anchor>
+<div class="card">
+  <h1>PANEL</h1>
+
+  <!-- SHOWCASE -->
+  <!-- Showcase declaration -->
+  <eon-showcase class="d-pg d-panel-pg"></eon-showcase>
+
+  <script>
+    initializeShowcase(".d-panel-tmp", ".d-panel-pg");
+  </script>
+
+  <!-- Showcase content -->
+  <template class="d-panel-tmp">
+    <div class="template-head">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Import eon-js  -->
+      <script>
+        // ** Eon polyfill path fix
+        document.currentScript.src = window.location.href + "eon";
+        // Inject js with meta
+        /*<% template("../other/eon.js"); %>*/
+        eon.theme = "claro";
+        // UI components
+        eon.import([
+          "/eon/ui/eon-button",
+          "/eon/ui/eon-panel",
+          "/eon/ui/eon-showcase-item"
+        ]);
+      </script>
+    </div>
+    <!-- EXAMPLES BODY -->
+    <div class="template-body">
+      <eon-showcase-item title="On demand import">
+        <eon-button class="d-panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
+        <eon-panel id="d-lazy-remote" class="d-panel" default-style="false" allow-scroll="false" href="data/panel/lazyContent.html"
+          lazy-load="true">
+          <div class="d-panel-content d-place-holder" style="box-shadow: none;">No content here</div>
+        </eon-panel>
+      </eon-showcase-item>
+
+      <eon-showcase-item title="On demand rendering">
+        <eon-button class="d-panel-button" inline="true" value="Render lazy" onclick="renderLazy()"></eon-button>
+        <eon-panel id="d-lazy-content" class="d-panel" default-style="false" allow-scroll="false">
+          <div class="d-panel-content d-place-holder">I'm a hidden div!</div>
+          <template>
+            <div class="d-panel-content" style="background-color: #3b78b7;">
+              I'm an on demand rendered div!
+            </div>
+          </template>
+        </eon-panel>
+      </eon-showcase-item>
+    </div>
+    <!-- END EXAMPLES BODY -->
+    <script class="template-js">
+      //** Showcase resize fix
+      eon.onReady(function () {
+        // Iframe content loaded monitoring
+        eon.triggerCallback("onLoaded", window.frameElement);
+      });
+      //**
+      function renderLazy() {
+        document.querySelector("#d-lazy-content").render();
+        // Remove place holder
+        document.querySelector("#d-lazy-content .d-place-holder").style.display = "none";
+      }
+      function importRemote() {
+        document.querySelector("#d-lazy-remote").importContent();
+        // Remove place holder
+        document.querySelector("#d-lazy-remote .d-place-holder").style.display = "none";
+      }
+    </script>
+
+    <style class="template-style">
+      html,
+      body {
+        height: auto;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
+        color: #888888;
+        overflow: hidden;
+      }
+
+      /* Panel custom style */
+      .d-panel {
+        flex-direction: column;
+        min-width: 275px;
+      }
+
+      .d-panel-content {
+        height: 100px;
+        width: 350px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        text-align: center;
+        padding: 6px;
+        color: #ffffff;
+      }
+
+      .d-place-holder {
+        background-color: #76bb72;
+        -moz-box-shadow: inset 0 0 10px #ffffff;
+        -webkit-box-shadow: inset 0 0 10px #ffffff;
+        box-shadow: inset 0 0 10px #ffffff;
+      }
+
+      .d-panel-button {
+        width: 150px;
+        margin-bottom: 10px;
+      }
+
+      @media (max-width: 480px) {
+
+        .d-panel-content {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </template>
+  <!-- END SHOWCASE -->
+</div>
