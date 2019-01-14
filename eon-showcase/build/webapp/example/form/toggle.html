@@ -6021,7 +6021,6 @@ eon.insertImport = function (href) {
 };
 
 eon.insertFragment = function (elementName, content) {
-    
     var importFragment = eon.fragmentFromString(content);
 
     var i;
@@ -6150,9 +6149,8 @@ eon.handleTemplateInterpolation = function (name) {
 
 // Imports specific componentes themes if specified
 eon.importSchemaThemes = function () {
-
-    if (eon.themeSchema) {
-
+  if (eon.themeSchema) {
+   
         var themes = Object.keys(eon.themeSchema);
         var documentHead = document.querySelector("head");
         var theme, themeElements, themeLink, themePath;
@@ -6218,7 +6216,7 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-
+        
         eon.registry.registerTheme(name, theme);
 
         elementLink.setAttribute("rel", "stylesheet");
@@ -6355,7 +6353,6 @@ eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
-
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
@@ -6365,11 +6362,11 @@ eon.handleConfigDependencies = function (name) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
                 dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
+                
                 eon.import(dependencyFile);
             }
         }
     }
-
     return hasDependencies;
 }
 
@@ -6545,6 +6542,7 @@ eon.registry.triggerReadyCallbacks = function () {
 };
 
 eon.registry.registerTheme = function (tagName, theme) {
+  
   if (!eon.registry.elementThemes[theme]) {
     eon.registry.elementThemes[theme] = {};
   }
@@ -7076,8 +7074,7 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath != "") {
-
+    if (stylePath != "" ) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
@@ -10016,13 +10013,540 @@ if (vpa.allowAmdRequire) {
   
 
 
+
         eon.theme = "claro";
-        // UI components
-        eon.import([
-          "eon/ui/eon-toggle",
-          "eon/ui/eon-showcase-item"
-        ]);
       </script>
+      <!-- EON elements import configuration -->
+      <script>
+          eon.imports = eon.imports || {
+            count: 0,
+            total: 0,
+            ready: false
+          };
+          eon.imports.style = eon.imports.style || "";
+          eon.imports.scripts = eon.imports.scripts || {};
+          eon.imports.links = eon.imports.links || {};
+          eon.imports.templates = eon.imports.templates || {};
+          eon.imports.paths = eon.imports.paths || {};
+          eon.imports.config = eon.imports.config || {};
+  
+          eon.imports.paths["eon-toggle"] = "eon/ui/eon-toggle/";
+          eon.registry.registerTheme("eon-toggle", "claro");
+  
+          eon.imports.paths["eon-showcase-item"] = "eon/ui/eon-showcase-item/";
+          var elements = ["eon-toggle", "eon-showcase-item"];
+        </script>
+  
+        <!-- Inject eon elements -->
+        <div class="eon-toggle-config">
+          <template>
+
+    <div class="eon-toggle-toggle eon-fg1">
+        <input class="eon-toggle-input" type="checkbox">
+        <label class="eon-toggle-label">
+            <div class="eon-toggle-span eon-bg6 eon-bg6-boxshadow">
+                <div class="eon-toggle-circle"></div>
+            </div>
+            <div class="eon-toggle-nameLabel eon-unselectable"></div>
+        </label>
+
+    </div>
+</template>
+
+<script>
+    eon.element({
+        
+        name: "eon-toggle",
+        style: "",
+        
+        themed: true,
+
+        properties: {
+            /*
+              @property {String} name labelWrapper
+              @description Toggle name for the form functionality
+            */
+            name: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {String} value 
+              @description Toggle value for the form functionality
+            */
+            value: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {String} label 
+              @description Toggle label
+            */
+            label: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {Boolean} disabled 
+              @description Toggle deactivation
+              Default: false
+            */
+            disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the checkbox
+              Default: false
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Boolean} checked 
+              @description Checkbox checked status
+              Values can be: true or false
+            */
+            checked: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {Boolean} default
+            @description Sets checked status by default when the element is reset
+            Values can be: true or false
+            */
+            default: {
+                value: "",
+                reflect: true
+            },
+            /*
+             @property {Boolean} inline 
+             @description Space that occupy the toggle inside parent container.
+             By default, its size adapts to its content
+             Values can be: true or false
+             Default: true
+           */
+            inline: {
+                value: true,
+                reflect: true
+            },
+            /*
+             @property {Boolean} labelPosition 
+             @description Space that occupy the toggle inside parent container.
+             By default, its size adapts to its content
+             Values can be: "left" or "right"
+             Default: "right"
+           */
+            labelPosition: {
+                value: "right",
+                reflect: true,
+                reflectDefault: true
+            }
+        },
+
+        privateProperties: {
+            /*
+              @property (private) {String} _formElement 
+              @description Set that toggle is a form element
+              Value: checkbox
+            */
+            formElement: {
+                value: "checkbox"
+            },
+            /*
+              @property (private) {Object} _refs 
+              @description Object with  references
+            */
+            refs: {
+                value: {}
+            }
+        },
+
+        functions: {
+            /*
+            @function clear
+            @description Unchecks the element
+            */
+            clear: function () {
+                this.checked = false;
+            },
+            /*
+            @function reset
+            @description Resets checked status of the element to the default one
+            */
+            reset: function () {
+                var el = this;
+
+                if (eon.util.isTrue(el.default)) {
+                    el.checked = el.default;
+                } else {
+                    el.clear();
+                }
+
+            }
+        },
+
+        privateFunctions: {
+            /*
+              @function (private) _setValue
+              @description Set new checkbox value
+              @param {String} newVal [New checkbox value]
+            */
+            setValue: function () {
+                this._currentValue = this.value;
+                eon.triggerCallback("onChange", this);
+
+            },
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.input = el.template.querySelector(".eon-toggle-input");
+                el._refs.label = el.template.querySelector(".eon-toggle-label");
+                el._refs.span = el.template.querySelector(".eon-toggle-span");
+                el._refs.nameLabel = el.template.querySelector(".eon-toggle-nameLabel");
+            },
+            /*
+              @function (private) _updateDisabled
+              @description Update disabled status
+            */
+            updateDisabled: function () {
+                !eon.util.isTrue(this.disabled) ? this._refs.input.removeAttribute("disabled") : this._refs.input.setAttribute("disabled", "true");
+            },
+
+            /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
+
+                if (eon.util.isTrue(el.readonly)) {
+                    el._refs.input.setAttribute("readonly", "true");
+                } else {
+                    el._refs.input.removeAttribute("readonly");
+                }
+
+            },
+
+            /*
+              @function (private) _updateCheck
+              @description Update checked status
+            */
+            updateCheck: function () {
+                
+                if (!eon.util.isTrue(this.checked)) {
+                    this._refs.input.removeAttribute("checked");
+                    this._refs.label.classList.remove("checked");
+                    eon.triggerCallback("onUncheck", this);
+
+                } else {
+                    this._refs.input.setAttribute("checked", "true");
+                    this._refs.label.classList.add("checked");
+                    eon.triggerCallback("onCheck", this);
+
+                }
+            },
+        },
+
+        onCreated: function () {
+            eon.createCallback("onCheck", this);
+            eon.createCallback("onUncheck", this);
+
+            this._createRefs();
+        },
+
+        onRender: function () {
+            var el = this;
+
+            // el._refs.input.setAttribute("name", el.name);
+            el.checked = el.default != "" && el.checked == "" ? el.default : el.checked;
+            el._refs.nameLabel.innerHTML = el.label;
+
+
+            // Checking or unchecking the checkbox
+            el._refs.label.addEventListener("click", function (e) {
+                // The click event is triggered by two elements, the real input and the
+                // visual custom element. So it is necessary to control one of the two elements
+                // fot not activate the action twice.
+                if (!eon.util.isTrue(el.disabled) && e.target.type !== "checkbox") {
+                    el.checked = (eon.util.isTrue(el.checked)) ? false : true;
+                }
+
+            }, false);
+
+            el._updateDisabled();
+            el._updateReadonly();
+            el._updateCheck();
+
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+
+            switch (attrName) {
+                case "disabled":
+                    this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadonly();
+                    break;
+                case "checked":
+                    this._updateCheck();
+                    break;
+                case "label":
+                    this._refs.nameLabel.innerHTML = newVal;
+                    break;
+                case "value":
+                    this._setValue();
+                    break;
+            }
+        }
+    });
+
+</script>
+          <style>
+            eon-toggle {
+  position: relative;
+}
+eon-toggle[label-position="left"] .eon-toggle-label {
+  flex-direction: row-reverse;
+}
+eon-toggle[label-position="left"] .eon-toggle-label .eon-toggle-span {
+  margin: 0 0 0 5px;
+}
+eon-toggle[label-position="right"] .eon-toggle-label .eon-toggle-span {
+  margin: 0 5px 0 0;
+}
+eon-toggle[inline="true"] {
+  display: inline-block;
+}
+eon-toggle[inline="true"] .eon-toggle-toggle {
+  width: auto;
+}
+eon-toggle[readonly="true"] .eon-toggle-label {
+  cursor: auto;
+  pointer-events: none;
+}
+eon-toggle[disabled="true"] .eon-toggle-label {
+  cursor: auto;
+}
+eon-toggle[checked="true"] .eon-toggle-circle {
+  left: 20px;
+}
+.eon-toggle-toggle {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.eon-toggle-input[type="checkbox"] {
+  display: none;
+}
+.eon-toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.eon-toggle-input[type="checkbox"] + .eon-toggle-label .eon-toggle-span {
+  width: 40px;
+  height: 15px;
+  border-radius: 100px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.eon-toggle-circle {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  transition: all 0.3s ease;
+  width: 20px;
+  height: 20px;
+  content: "";
+  border-radius: 100%;
+}
+.eon-toggle-input:disabled ~ .eon-toggle-span {
+  pointer-events: none;
+}
+          </style>
+          <style>
+            /*TEST*/
+/* Set 1 - Containers (appmenu, searchbar, datepicker, appmenu, grid, headerpanel,
+           loadingmask, menu, swiper, tab, tabs, togglemenu, video) */
+/* Set 2 - Elements (button, checkbox, combobox, spinner, text, 
+           radio, contextmenu, slider, treenode) */
+eon-toggle[theme="claro"] .eon-toggle-circle,
+div[data-theme="claro"] eon-toggle .eon-toggle-circle,
+body[data-theme="claro"] eon-toggle .eon-toggle-circle {
+  background: #888888;
+}
+eon-toggle[theme="claro"][checked="true"] .eon-toggle-circle,
+div[data-theme="claro"] eon-toggle[checked="true"] .eon-toggle-circle,
+body[data-theme="claro"] eon-toggle[checked="true"] .eon-toggle-circle {
+  background: #47cce2;
+}
+eon-toggle[theme="claro"] .eon-toggle-input:checked ~ .eon-toggle-label .eon-toggle-span,
+div[data-theme="claro"] eon-toggle .eon-toggle-input:checked ~ .eon-toggle-label .eon-toggle-span,
+body[data-theme="claro"] eon-toggle .eon-toggle-input:checked ~ .eon-toggle-label .eon-toggle-span {
+  background: #bef2ff;
+}
+eon-toggle[theme="claro"] .eon-toggle-input:disabled ~ .eon-toggle-label .eon-toggle-span,
+div[data-theme="claro"] eon-toggle .eon-toggle-input:disabled ~ .eon-toggle-label .eon-toggle-span,
+body[data-theme="claro"] eon-toggle .eon-toggle-input:disabled ~ .eon-toggle-label .eon-toggle-span {
+  background: #cecece;
+}
+eon-toggle[theme="claro"] .eon-toggle-input:disabled ~ .eon-toggle-label::after,
+div[data-theme="claro"] eon-toggle .eon-toggle-input:disabled ~ .eon-toggle-label::after,
+body[data-theme="claro"] eon-toggle .eon-toggle-input:disabled ~ .eon-toggle-label::after {
+  background: #9a9a9a;
+}
+eon-toggle[theme="claro"] .eon-toggle-input[type="checkbox"]:disabled + .eon-toggle-label::after,
+div[data-theme="claro"] eon-toggle .eon-toggle-input[type="checkbox"]:disabled + .eon-toggle-label::after,
+body[data-theme="claro"] eon-toggle .eon-toggle-input[type="checkbox"]:disabled + .eon-toggle-label::after {
+  background: #9a9a9a;
+}
+eon-toggle[theme="claro"] .eon-toggle-input[type="checkbox"]:disabled ~ .eon-toggle-label .eon-toggle-circle,
+div[data-theme="claro"] eon-toggle .eon-toggle-input[type="checkbox"]:disabled ~ .eon-toggle-label .eon-toggle-circle,
+body[data-theme="claro"] eon-toggle .eon-toggle-input[type="checkbox"]:disabled ~ .eon-toggle-label .eon-toggle-circle {
+  background: #cecece;
+}
+          </style>
+        </div>
+        <div class="eon-showcase-item-config">
+          <template>
+
+  <div class="eon-showcase-item-title"></div>
+  <div class="eon-showcase-item-content"></div>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-showcase-item",
+    style: "",
+
+    themed: false,
+
+    properties: {
+      /*
+        @property {String} title
+        @description 
+      */
+      title: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property {object} _refs
+        @description 
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+      /*
+        @property (private) {Object} _misc
+        @description 
+      */
+      misc: {
+        value: {},
+        reflect: false
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setUpRefs
+        @description 
+      */
+      setUpRefs: function () {
+        var el = this;
+
+        el._refs.title = el.template.querySelector(".eon-showcase-item-title");
+        el._refs.content = el.template.querySelector(".eon-showcase-item-content");
+      },
+      /*
+        @function (private) _setTitle
+        @description 
+      */
+      setTitle: function () {
+        var el = this;
+        el._refs.title.innerHTML = el.title;
+      },
+      /*
+        @function (private) _setContent
+        @description 
+      */
+      setContent: function () {
+        var el = this;
+        var srcNodes = el.getSourceElements();
+        var srcNode;
+
+        // Showcase item style
+        el.classList.add("eon-bg1");
+
+        // Move source children to the content element safely
+        while (srcNodes.length) {
+          // Get the shifted element
+          srcNode = srcNodes.shift();
+          // Append them to the tree
+          el._refs.content.appendChild(srcNode);
+        }
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      el._setUpRefs();
+    },
+    onInit: function () {
+      var el = this;
+      el._setTitle();
+      el._setContent();
+    },
+    onRender: function () {
+      var el = this;
+
+    }
+  });
+</script>
+          <style>
+            eon-showcase-item {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px;
+  box-sizing: border-box
+}
+.eon-showcase-item-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.eon-showcase-item-content {
+  height: calc(100% - 33px);
+}          </style>
+        </div>
+        <script>
+          // Insert and declare
+          for (var i = 0; i < elements.length; i++) {
+            var elementName = elements[i];
+            if (!(elementName in eon.imports.templates)) {
+              // Increment total
+              eon.imports.total++;
+              // Avoid duplicated imports while waiting XMLHttpRequest callback.
+              eon.imports.templates[elementName] = null;
+              eon.declare(elementName);
+              eon.insertFragment(elementName, document.querySelector("." + elementName + "-config").innerHTML);
+            }
+          }
+        </script>
     </div>
     <!-- EXAMPLES BODY -->
     <div class="template-body">

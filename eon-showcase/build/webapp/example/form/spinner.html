@@ -6016,7 +6016,6 @@ eon.insertImport = function (href) {
 };
 
 eon.insertFragment = function (elementName, content) {
-    
     var importFragment = eon.fragmentFromString(content);
 
     var i;
@@ -6145,9 +6144,8 @@ eon.handleTemplateInterpolation = function (name) {
 
 // Imports specific componentes themes if specified
 eon.importSchemaThemes = function () {
-
-    if (eon.themeSchema) {
-
+  if (eon.themeSchema) {
+   
         var themes = Object.keys(eon.themeSchema);
         var documentHead = document.querySelector("head");
         var theme, themeElements, themeLink, themePath;
@@ -6213,7 +6211,7 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-
+        
         eon.registry.registerTheme(name, theme);
 
         elementLink.setAttribute("rel", "stylesheet");
@@ -6350,7 +6348,6 @@ eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
-
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
@@ -6360,11 +6357,11 @@ eon.handleConfigDependencies = function (name) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
                 dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
+                
                 eon.import(dependencyFile);
             }
         }
     }
-
     return hasDependencies;
 }
 
@@ -6540,6 +6537,7 @@ eon.registry.triggerReadyCallbacks = function () {
 };
 
 eon.registry.registerTheme = function (tagName, theme) {
+  
   if (!eon.registry.elementThemes[theme]) {
     eon.registry.elementThemes[theme] = {};
   }
@@ -7071,8 +7069,7 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath != "") {
-
+    if (stylePath != "" ) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
@@ -10011,13 +10008,914 @@ if (vpa.allowAmdRequire) {
   
 
 
+
         eon.theme = "claro";
-        // UI components
-        eon.import([
-          "eon/ui/eon-spinner",
-          "eon/ui/eon-showcase-item"
-        ]);
       </script>
+      <!-- EON elements import configuration -->
+      <script>
+          eon.imports = eon.imports || {
+            count: 0,
+            total: 0,
+            ready: false
+          };
+          eon.imports.style = eon.imports.style || "";
+          eon.imports.scripts = eon.imports.scripts || {};
+          eon.imports.links = eon.imports.links || {};
+          eon.imports.templates = eon.imports.templates || {};
+          eon.imports.paths = eon.imports.paths || {};
+          eon.imports.config = eon.imports.config || {};
+  
+          eon.imports.paths["eon-spinner"] = "eon/ui/eon-spinner/";
+          eon.registry.registerTheme("eon-spinner", "claro");
+  
+          eon.imports.paths["eon-showcase-item"] = "eon/ui/eon-showcase-item/";
+          var elements = ["eon-spinner", "eon-showcase-item"];
+        </script>
+  
+        <!-- Inject eon elements -->
+        <div class="eon-spinner-config">
+          <template>
+
+    <div class="eon-spinner-group eon-fg2 eon-unselectable">
+        <label class="eon-spinner-label"></label>
+        <div class="eon-spinner-spinner eon-bg2">
+            <div class="eon-spinner-control eon-fg2-hoverable eon-spinner-controlDown">
+                <i class="vicon vicon-remove-circle-o"></i>
+            </div>
+
+            <div class="eon-spinner-inputBox">
+                <input class="eon-spinner-input eon-fg2" type="number" pattern="[0-9]*">
+            </div>
+
+            <div class="eon-spinner-control eon-fg2-hoverable eon-spinner-controlUp">
+                <i class="vicon vicon-add-circle-o"></i>
+            </div>
+        </div>
+        <span class="eon-spinner-inputBar"></span>
+    </div>
+
+    <div class="eon-spinner-description"></div>
+
+</template>
+
+<script>
+    eon.element({
+
+        name: "eon-spinner",
+        style: "",
+
+        themed: true,
+
+        properties: {
+            /*
+              @property {String} name 
+              @description spinner name
+            */
+            name: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {Number} value 
+              @description Spinner value
+            */
+            value: {
+                value: 0,
+                reflect: true
+            },
+            /*
+            @property {Number} default
+            @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+            */
+            default: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {String} placeholder 
+              @description spinner placeholder
+            */
+            placeholder: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {String} label 
+              @description spinner label
+            */
+            label: {
+                value: "",
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+              @property {Boolean} disabled 
+              @description Spinner deactivation
+              Default: false
+            */
+            disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the spinner
+              Default: false
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Boolean} autofocus 
+              @description Spinner automatically get focus when page loads
+              Default: false
+            */
+            autofocus: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Number} max 
+              @description Spinner maximum number value
+              Value must be int number
+              Default: valueless
+            */
+            max: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {Number} min 
+              @description Spinner minimum number value
+              Value must be int number
+              Default: valueless
+            */
+            min: {
+                value: "",
+                reflect: true
+            },
+            /*
+             @property {Boolean} inline 
+             @description Space that occupy the spinner inside parent container.
+             By default, its size adapts to its content
+             Values can be: true or false
+             Default: true
+           */
+            inline: {
+                value: true,
+                reflect: true
+            },
+            /*
+            @property {String} tooltip
+            @description Text to be shown for the element
+            */
+            tooltip: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {Boolean} invalid
+            @description Whether the element meets the requirements or not
+            */
+            invalid: {
+                value: false,
+                reflect: true,
+                reflectDefault: false
+            }
+        },
+
+        privateProperties: {
+            /*
+              @property (private) {String} _formElement 
+              @description Set that spinner is a form element
+              Value: spinner
+            */
+            formElement: {
+                value: "spinner"
+            },
+            /*
+              @property (private) {String} _currentValue
+              @description Current textarea value
+            */
+            currentValue: {
+                value: ""
+            },
+            /*
+              @property (private) {Object} _callUpdateEvent
+              @description Store spinner call update spinner event
+            */
+            callUpdateEvent: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _refs 
+              @description Object with  references
+            */
+            refs: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _misc
+              @description Object with useful information
+            */
+            misc: {
+                value: {}
+            }
+        },
+        functions: {
+            /*
+            @function clear
+            @description Empties the value
+            */
+            clear: function () {
+                this.value = 0;
+            },
+            /*
+            @function reset
+            @description Resets the value of the element to the default one, if no default is provided then empties the value
+            */
+            reset: function () {
+                var el = this;
+
+                if (el.default != "") {
+                    el.value = el.default;
+                } else {
+                    el.clear();
+                }
+
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the
+            */
+            updateDescription: function (text) {
+                this._misc.descriptionText = text;
+                this._refs.description.innerHTML = this._misc.descriptionText;
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the
+            */
+            resetDescription: function () {
+                
+                var el = this;
+                var description = el.tooltip != "" ? el.tooltip : "";
+
+                el._misc.descriptionText = description;
+                el._refs.description.innerHTML = description;
+
+            }
+
+        },
+        privateFunctions: {
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.spinner = el.template.querySelector(".eon-spinner-spinner");
+                el._refs.group = el.template.querySelector(".eon-spinner-group");
+                el._refs.inputBox = el.template.querySelector(".eon-spinner-inputBox");
+                el._refs.input = el.template.querySelector(".eon-spinner-input");
+                el._refs.label = el.template.querySelector(".eon-spinner-label");
+                el._refs.inputBar = el.template.querySelector(".eon-spinner-inputBar");
+                el._refs.description = el.template.querySelector(".eon-spinner-description");
+
+            },
+
+            /*
+              @function (private) _setValue
+              @description Set new spinner value
+              @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
+            */
+            setValue: function (privateValueKey) {
+                var el = this;
+                var value = el.value;
+                var valueKey = privateValueKey ? "__value" : "value";
+                var newValue;
+
+                if (el.value !== "") {
+                    newValue = this._checkMin(value);
+                    newValue = this._checkMax(newValue);
+                    // If we have to fix the value because it exceeds any of the limits we update the elements value
+                    if (parseInt(newValue) != parseInt(value)) {
+                        setTimeout(function () {
+                            el.value = newValue;
+                        }, 0);
+
+                    } else {
+                        el[valueKey] = newValue;
+                    }
+
+                    el._refs.input.value = newValue;
+                    el._currentValue = newValue;
+
+                    el._refs.input.setAttribute("value", newValue);
+
+                    eon.triggerCallback("onChange", el);
+
+
+                }
+            },
+            /*
+              @function (private) _updateDisabled
+              @description Update disabled status
+            */
+            updateDisabled: function () {
+                var el = this;
+                var spinnerGroup = el.querySelector(".eon-spinner-group");
+                var controlDown = el.querySelector(".eon-spinner-controlDown");
+                var controlUp = el.querySelector(".eon-spinner-controlUp");
+
+                if (!eon.util.isTrue(el.disabled)) {
+                    el._refs.input.removeAttribute("disabled");
+                    el.removeAttribute("disabled");
+                    spinnerGroup.classList.remove("eon-spinner-disabled", "eon-fg2-disabled");
+                    controlUp.classList.remove("eon-fg2-disabled");
+                    controlUp.classList.add("fg2-hover");
+                    controlDown.classList.remove("eon-fg2-disabled");
+                    controlDown.classList.add("eon-fg2-hoverable");
+                    el._refs.input.classList.remove("eon-fg2-disabled");
+                    el._refs.input.classList.add("eon-fg2");
+                    el._refs.label.classList.remove("eon-fg2-disabled");
+
+                } else {
+                    el._refs.input.setAttribute("disabled", "true");
+                    spinnerGroup.classList.add("eon-spinner-disabled", "eon-fg2-disabled");
+                    controlUp.classList.add("eon-fg2-disabled");
+                    controlUp.classList.remove("eon-fg2-hoverable");
+                    controlDown.classList.add("eon-fg2-disabled");
+                    controlDown.classList.remove("eon-fg2-hoverable");
+                    el._refs.input.classList.add("eon-fg2-disabled");
+                    el._refs.input.classList.remove("eon-fg2");
+                    el._refs.label.classList.add("eon-fg2-disabled");
+                }
+
+            },
+            /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
+
+                if (eon.util.isTrue(el.readonly)) {
+                    el._refs.input.setAttribute("readonly", "true");
+                } else {
+                    el._refs.input.removeAttribute("readonly");
+                }
+
+            },
+            /*
+              @function (private) _updateSpinner
+              @description Update spinner value
+              @param {Object} e [Event object]
+            */
+            updateSpinner: function (e) {
+                var el = this;
+                var value = isNaN(parseInt(el._refs.input.value)) ? "" : parseInt(el._refs.input.value);
+                var control = e.target.parentNode;
+
+                // Added isOnPath condition, this solves issues when clicking between spinners
+                if (el._refs.spinner.isOnPath && e.type == "click" && !eon.util.isTrue(el.readonly)) {
+                    (control.classList.contains("eon-spinner-controlDown")) ? value-- : null;
+                    (control.classList.contains("eon-spinner-controlUp")) ? value++ : null;
+
+                    value = el._checkMin(value);
+                    value = el._checkMax(value);
+                }
+
+                el.value = value;
+                el._refs.input.value = value;
+                el._refs.input.setAttribute("value", value);
+
+            },
+
+            /*
+            @function (private) {String} _setupDescription
+            @description Creates the touch blur
+            */
+            setupDescription: function () {
+
+                var el = this;
+
+                if (el.tooltip != "") {
+                    el.updateDescription(el.tooltip);
+                }
+
+            },
+
+            /*
+            @function (private) _updateInvalid
+            @description Updates the invalid status
+            */
+            updateInvalid: function () {
+
+                var el = this;
+                var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
+
+                el.classList[classListFn]("eon-spinner-error");
+
+            },
+
+            /*
+            @function (private) _setFocusingListeners
+            @description Set listener for focus and blur
+            */
+            setFocusingListeners: function () {
+                var el = this;
+                var eventType = /iPad|iPhone/.test(navigator.platform) ? "touchstart" : "click";
+                eon.registerPathListener(el._refs.spinner);
+
+                document.addEventListener(eventType, function (e) {
+                    if (el._refs.spinner.isOnPath && !el._refs.label.classList.contains("eon-spinner-focusLabel")) {
+                        el._inputFocus()
+                    } else if (!el._refs.spinner.isOnPath && el._refs.label.classList.contains("eon-spinner-focusLabel")) {
+                        el._inputBlur(e);
+                    }
+
+                });
+
+                el._refs.input.addEventListener("blur", function (e) {
+                    if (!el._refs.spinner.isOnPath) {
+                        el._inputBlur(e);
+                    }
+                });
+
+            },
+
+            /*
+            @function (private) _setFocusingListeners
+            @description Set listener for update the spinner value
+            */
+            setUpdateListeners: function () {
+                var el = this;
+                var controlDown = el.querySelector(".eon-spinner-controlDown");
+                var controlUp = el.querySelector(".eon-spinner-controlUp");
+
+                // Click listener to control decrement spinner value
+                controlDown.addEventListener("click", callUpdateEvent, false);
+
+                // Click listener to control increment spinner value
+                controlUp.addEventListener("click", callUpdateEvent, false);
+
+                // Handle the invalids keys in the input
+                el._refs.input.addEventListener("keyup", function (e) {
+                    var keysComprobation = (e.keyCode != "9" && e.keyCode != "46" && e.keyCode != "8" && e.keyCode != "38" && e.keyCode != "40" && isNaN(parseInt(e.key)));
+
+                    keysComprobation ? e.preventDefault() : null;
+                    keysComprobation ? e.stopPropagation() : null;
+
+                    // Checks if the key press corresponds to ENTER
+                    if (e.keyCode == 13) {
+                        eon.triggerCallback("onEnter", el)
+                    }
+
+                    el._updateSpinner(e);
+
+                });
+
+                el._callUpdateEvent = callUpdateEvent;
+
+                function callUpdateEvent(e) {
+                    el._updateSpinner(e);
+                }
+
+            },
+
+            /*
+            @function (private) _inputFocus
+            @description Set focus functionality to spinner element and to spinner input
+            */
+            inputFocus: function () {
+                if (!eon.util.isTrue(this.readonly)) {
+                    this._refs.label.classList.add("eon-spinner-focusLabel", "eon-fg1");
+                    this._refs.inputBar.classList.add("eon-spinner-animate");
+                }
+            },
+
+            /*
+            @function (private) _inputBlur
+            @description Set blur functionality to spinner element and to spinner input
+            @param {Object} e [Event object]
+            */
+            inputBlur: function (e) {
+
+                if (this._refs.label.classList.contains("eon-spinner-focusLabel")) {
+                    this._updateSpinner(e);
+                }
+
+                this._refs.label.classList.remove("eon-spinner-focusLabel", "eon-fg1");
+                this._refs.inputBar.classList.remove("eon-spinner-animate");
+
+                // Trigger onChange callback
+                this._currentValue = (this.value !== this._currentValue) ? this.value : this._currentValue;
+                (this.value !== this._currentValue) ? eon.triggerCallback("onChange", this) : null;
+
+            },
+
+            /*
+            @function (private) _setAutofocus
+            @description Gives autofocus to the spinner
+            */
+            setAutofocus: function () {
+                var el = this;
+
+                setTimeout(function () {
+                    if (eon.util.isTrue(el.autofocus) && el.disabled == false) {
+                        el._refs.input.focus();
+                        el._inputFocus();
+                    }
+                }, 100);
+            },
+
+            /*
+            @function (private) {Number} _checkMin
+            @description Check that value is not less than minimum
+            @param {Number} value [spinner value]
+            */
+            checkMin: function (value) {
+                var el = this;
+                var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : parseInt(value);
+
+                return returnValue;
+            },
+
+            /*
+            @function (private) {Number} _checkMax
+            @description Check that value is not greater than maximum
+            @param {Number} value [spinner value]
+            */
+            checkMax: function (value) {
+                var el = this;
+                var returnValue = (el.max && parseInt(value) > parseInt(el.max)) ? parseInt(el.max) : parseInt(value);
+
+                return returnValue;
+            }
+        },
+
+        onCreated: function () {
+            var el = this;
+            eon.createCallback("onChange", this);
+            eon.createCallback("onEnter", this);
+
+            el._createRefs();
+        },
+
+        onRender: function () {
+            var el = this;
+
+            // Sets a default value set by the user
+            el.value = el.default != "" && el.value == "" ? el.default : el.value;
+            el._setValue();
+
+            el._updateDisabled();
+            el._updateReadonly();
+            el._setFocusingListeners();
+            el._setUpdateListeners();
+            el._setupDescription();
+            el._updateInvalid();
+
+            // Sets the name of the input
+            el._refs.input.setAttribute("name", el.name);
+
+            // Set label
+            if (el.label) {
+                el._refs.label.innerHTML = el.label ? el.label : el._refs.label.innerHTML;
+                el._refs.label.classList.add("eon-spinner-labelDisplay");
+            }
+        },
+
+        onReady: function () {
+            var el = this;
+            el._setAutofocus();
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            switch (attrName) {
+                case "disabled":
+                    this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadonly();
+                    break;
+                case "label":
+                    this._refs.label.innerHTML = newVal;
+                    break;
+                case "value":
+                    this._setValue(true);
+                    break;
+                case "invalid":
+                    this._updateInvalid();
+                    break;
+            }
+        }
+    });
+
+</script>
+          <style>
+            eon-spinner {
+  position: relative;
+  min-width: 130px;
+}
+eon-spinner[inline="true"] {
+  display: inline-block;
+  width: 200px;
+}
+eon-spinner[readonly="false"] .eon-spinner-control:hover {
+  cursor: pointer;
+}
+eon-spinner[disabled="true"] {
+  pointer-events: none;
+}
+.eon-spinner-group {
+  display: flex;
+  flex-direction: column;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  width: 100%;
+}
+.eon-spinner-spinner {
+  display: flex;
+  flex-direction: row;
+  outline: none;
+  width: 100%;
+}
+.eon-spinner-inputBox {
+  width: 100%;
+}
+.eon-spinner-input {
+  font-size: 15px;
+  box-sizing: border-box;
+  flex-grow: 1;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  border: none;
+  background-color: transparent;
+}
+.eon-spinner-control {
+  font-weight: bold;
+  flex-grow: 0;
+  display: flex;
+  min-width: 36px;
+  padding: 8px 8px 5px 8px;
+  box-sizing: border-box;
+  pointer-events: all;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+.eon-spinner-control i {
+  font-size: 20px;
+}
+.eon-spinner-input:focus {
+  outline: none;
+}
+.eon-spinner-label {
+  font-size: 15px;
+  padding: 8px 0;
+  display: none;
+  -webkit-transition: 0.3s ease all;
+  -moz-transition: 0.3s ease all;
+  transition: 0.3s ease all;
+}
+.eon-spinner-labelDisplay {
+  display: flex;
+}
+.eon-spinner-disabled .eon-spinner-control {
+  pointer-events: none;
+}
+.eon-spinner-disabled .eon-spinner-control:hover {
+  cursor: auto;
+  pointer-events: none;
+}
+.eon-spinner-input[type=number]::-webkit-inner-spin-button,
+.eon-spinner-input[type=number]::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+.eon-spinner-input[type=number] {
+  -webkit--appearance: textfield;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.eon-spinner-inputBar {
+  position: relative;
+  display: block;
+  width: auto;
+}
+.eon-spinner-inputBar:before,
+.eon-spinner-inputBar:after {
+  position: absolute;
+  width: 0;
+  height: 2px;
+  content: "";
+  -webkit-transition: 0.5s ease all;
+  -moz-transition: 0.5s ease all;
+  transition: 0.5s ease all;
+}
+.eon-spinner-inputBar:before {
+  left: 50%;
+}
+.eon-spinner-inputBar:after {
+  right: 50%;
+}
+.eon-spinner-animate:before,
+.eon-spinner-animate:after {
+  width: 50%;
+}
+.eon-spinner-description {
+  margin-top: 5px;
+  font-size: 14px;
+  width: 100%;
+}
+          </style>
+          <style>
+            /*TEST*/
+/* Set 1 - Containers (appmenu, searchbar, datepicker, appmenu, grid, headerpanel,
+           loadingmask, menu, swiper, tab, tabs, togglemenu, video) */
+/* Set 2 - Elements (button, checkbox, combobox, spinner, text, 
+           radio, contextmenu, slider, treenode) */
+eon-spinner[theme="claro"][readonly="true"] .eon-spinner-control:hover,
+div[data-theme="claro"] eon-spinner[readonly="true"] .eon-spinner-control:hover,
+body[data-theme="claro"] eon-spinner[readonly="true"] .eon-spinner-control:hover {
+  color: #888888;
+}
+eon-spinner[theme="claro"] .eon-spinner-inputBar:before,
+div[data-theme="claro"] eon-spinner .eon-spinner-inputBar:before,
+body[data-theme="claro"] eon-spinner .eon-spinner-inputBar:before,
+eon-spinner[theme="claro"] .eon-spinner-inputBar:after,
+div[data-theme="claro"] eon-spinner .eon-spinner-inputBar:after,
+body[data-theme="claro"] eon-spinner .eon-spinner-inputBar:after {
+  background: #47cce2;
+}
+eon-spinner[theme="claro"].eon-spinner-error .eon-spinner-label,
+div[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-label,
+body[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-label {
+  color: #c33232;
+}
+eon-spinner[theme="claro"].eon-spinner-error .eon-spinner-group,
+div[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-group,
+body[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-group {
+  border-bottom: 1px solid #c33232;
+}
+eon-spinner[theme="claro"].eon-spinner-error .eon-spinner-inputBar:before,
+div[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-inputBar:before,
+body[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-inputBar:before,
+eon-spinner[theme="claro"].eon-spinner-error .eon-spinner-inputBar:after,
+div[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-inputBar:after,
+body[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-inputBar:after {
+  background: #c33232;
+}
+eon-spinner[theme="claro"].eon-spinner-error .eon-spinner-description,
+div[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-description,
+body[data-theme="claro"] eon-spinner.eon-spinner-error .eon-spinner-description {
+  color: #c33232;
+}
+eon-spinner[theme="claro"] .eon-spinner-control,
+div[data-theme="claro"] eon-spinner .eon-spinner-control,
+body[data-theme="claro"] eon-spinner .eon-spinner-control {
+  cursor: pointer;
+}
+          </style>
+        </div>
+        <div class="eon-showcase-item-config">
+          <template>
+
+  <div class="eon-showcase-item-title"></div>
+  <div class="eon-showcase-item-content"></div>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-showcase-item",
+    style: "",
+
+    themed: false,
+
+    properties: {
+      /*
+        @property {String} title
+        @description 
+      */
+      title: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property {object} _refs
+        @description 
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+      /*
+        @property (private) {Object} _misc
+        @description 
+      */
+      misc: {
+        value: {},
+        reflect: false
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setUpRefs
+        @description 
+      */
+      setUpRefs: function () {
+        var el = this;
+
+        el._refs.title = el.template.querySelector(".eon-showcase-item-title");
+        el._refs.content = el.template.querySelector(".eon-showcase-item-content");
+      },
+      /*
+        @function (private) _setTitle
+        @description 
+      */
+      setTitle: function () {
+        var el = this;
+        el._refs.title.innerHTML = el.title;
+      },
+      /*
+        @function (private) _setContent
+        @description 
+      */
+      setContent: function () {
+        var el = this;
+        var srcNodes = el.getSourceElements();
+        var srcNode;
+
+        // Showcase item style
+        el.classList.add("eon-bg1");
+
+        // Move source children to the content element safely
+        while (srcNodes.length) {
+          // Get the shifted element
+          srcNode = srcNodes.shift();
+          // Append them to the tree
+          el._refs.content.appendChild(srcNode);
+        }
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      el._setUpRefs();
+    },
+    onInit: function () {
+      var el = this;
+      el._setTitle();
+      el._setContent();
+    },
+    onRender: function () {
+      var el = this;
+
+    }
+  });
+</script>
+          <style>
+            eon-showcase-item {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px;
+  box-sizing: border-box
+}
+.eon-showcase-item-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.eon-showcase-item-content {
+  height: calc(100% - 33px);
+}          </style>
+        </div>
+        <script>
+          // Insert and declare
+          for (var i = 0; i < elements.length; i++) {
+            var elementName = elements[i];
+            if (!(elementName in eon.imports.templates)) {
+              // Increment total
+              eon.imports.total++;
+              // Avoid duplicated imports while waiting XMLHttpRequest callback.
+              eon.imports.templates[elementName] = null;
+              eon.declare(elementName);
+              eon.insertFragment(elementName, document.querySelector("." + elementName + "-config").innerHTML);
+            }
+          }
+        </script>
     </div>
     <!-- EXAMPLES BODY -->
     <div class="template-body">

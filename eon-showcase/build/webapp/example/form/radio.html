@@ -6023,7 +6023,6 @@ eon.insertImport = function (href) {
 };
 
 eon.insertFragment = function (elementName, content) {
-    
     var importFragment = eon.fragmentFromString(content);
 
     var i;
@@ -6152,9 +6151,8 @@ eon.handleTemplateInterpolation = function (name) {
 
 // Imports specific componentes themes if specified
 eon.importSchemaThemes = function () {
-
-    if (eon.themeSchema) {
-
+  if (eon.themeSchema) {
+   
         var themes = Object.keys(eon.themeSchema);
         var documentHead = document.querySelector("head");
         var theme, themeElements, themeLink, themePath;
@@ -6220,7 +6218,7 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-
+        
         eon.registry.registerTheme(name, theme);
 
         elementLink.setAttribute("rel", "stylesheet");
@@ -6357,7 +6355,6 @@ eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
-
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
@@ -6367,11 +6364,11 @@ eon.handleConfigDependencies = function (name) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
                 dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
+                
                 eon.import(dependencyFile);
             }
         }
     }
-
     return hasDependencies;
 }
 
@@ -6547,6 +6544,7 @@ eon.registry.triggerReadyCallbacks = function () {
 };
 
 eon.registry.registerTheme = function (tagName, theme) {
+  
   if (!eon.registry.elementThemes[theme]) {
     eon.registry.elementThemes[theme] = {};
   }
@@ -7078,8 +7076,7 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath != "") {
-
+    if (stylePath != "" ) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
@@ -10018,14 +10015,717 @@ if (vpa.allowAmdRequire) {
   
 
 
+
         eon.theme = "claro";
-        // UI components
-        eon.import([
-          "eon/ui/eon-radio",
-          "eon/ui/eon-group",
-          "eon/ui/eon-showcase-item"
-        ]);
       </script>
+      <!-- EON elements import configuration -->
+      <script>
+          eon.imports = eon.imports || {
+            count: 0,
+            total: 0,
+            ready: false
+          };
+          eon.imports.style = eon.imports.style || "";
+          eon.imports.scripts = eon.imports.scripts || {};
+          eon.imports.links = eon.imports.links || {};
+          eon.imports.templates = eon.imports.templates || {};
+          eon.imports.paths = eon.imports.paths || {};
+          eon.imports.config = eon.imports.config || {};
+  
+          eon.imports.paths["eon-radio"] = "eon/ui/eon-radio/";
+          eon.registry.registerTheme("eon-radio", "claro");
+
+          eon.imports.paths["eon-group"] = "eon/ui/eon-group/";
+          eon.registry.registerTheme("eon-group", "claro");
+  
+          eon.imports.paths["eon-showcase-item"] = "eon/ui/eon-showcase-item/";
+          var elements = ["eon-radio", "eon-group", "eon-showcase-item"];
+        </script>
+  
+        <!-- Inject eon elements -->
+        <div class="eon-radio-config">
+          <template class="eon-unselectable">
+  <div class="eon-radio-radio">
+    <input class="eon-radio-input eon-unselectable" type="radio">
+    <label class="eon-radio-label eon-fg1 eon-unselectable" onclick="">
+      <div class="eon-radio-labelText"></div>
+    </label>
+  </div>
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-radio",
+    style: "",
+
+    themed: true,
+
+    properties: {
+      /*
+        @property {String} value 
+        @description Radio value
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} label 
+        @description Radio label
+      */
+      label: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} disabled 
+        @description Radio deactivation
+        Values can be: true or false
+        Default: false
+      */
+      disabled: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} readonly 
+        @description Toggles the readonly status of the radio element
+        Default: false
+      */
+      readonly: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} checked
+        @description Radio checked status
+        Values can be: true or false
+      */
+      checked: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Boolean} default
+      @description Sets checked status by default when the element is reset
+      Values can be: true or false
+      */
+      default: {
+        value: "",
+        reflect: true
+      },
+      /*
+       @property {Boolean} inline 
+       @description Space that occupy the radio inside parent container.
+       By default, its size adapts to its content
+       Values can be: true or false
+       Default: true
+     */
+      inline: {
+        value: true,
+        reflect: true
+      },
+    },
+
+    privateProperties: {
+      /*
+        @property (private) {Object} _refs 
+        @description Object with  references
+      */
+      refs: {
+        value: {}
+      }
+    },
+    functions: {
+      /*
+      @function clear
+      @description Unchecks the element
+      */
+      clear: function () {
+        this.checked = false;
+      },
+      /*
+      @function reset
+      @description Resets checked status of the element to the default one
+      */
+      reset: function () {
+        var el = this;
+
+        if (eon.util.isTrue(el.default)) {
+          el.checked = el.default;
+        } else {
+          el.clear();
+        }
+
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setValue
+        @description Set new radio value
+        @param {String} newVal [new radio value]
+      */
+      setValue: function () {
+        var el = this;
+
+        el._refs.input.setAttribute("value", el.value);
+        el._refs.input.setAttribute("id", el.value);
+        el._refs.label.setAttribute("for", el.value);
+
+        eon.triggerCallback("onChange", this);
+      },
+      /*
+        @function (private) _updateDisabled
+        @description Update disabled status
+      */
+      updateDisabled: function () {
+
+        // Radio disabled
+        if (!eon.util.isTrue(this.disabled)) {
+
+          this._refs.input.disabled = false;
+          this._refs.input.classList.remove("eon-radio-disabledRadio", "eon-radio-checkedDisabledRadio");
+
+          // Radio NOT disabled
+        } else {
+
+          this._refs.input.disabled = true;
+          this._refs.input.classList.add("eon-radio-disabledRadio");
+
+        }
+      },
+
+      /*
+      @function (private) _updateReadonly
+      @description Updates readonly status
+      */
+      updateReadonly: function () {
+        var el = this;
+
+        if (eon.util.isTrue(el.readonly)) {
+          el._refs.input.setAttribute("readonly", "true");
+        } else {
+          el._refs.input.removeAttribute("readonly");
+        }
+
+      },
+
+      /*
+        @function (private) _setCheck
+        @description Call method to update check status  
+      */
+      // setCheck: function (oldVal) {
+      setCheck: function () {
+        if (eon.util.isTrue(this.checked)) {
+          this._handleCheck();
+        } else {
+          this._handleUncheck();
+        }
+      },
+
+      /*
+        @function (private) _handleCheck
+        @description Changes different element values to check status
+      */
+      handleCheck: function (radioGroupHost) {
+        if (this.parentNode.tagName.toLowerCase() == "eon-group") {
+          var radioGroupHost = this.parentNode;
+        }
+        if (radioGroupHost) {
+          var previousChecked = eon.Radio.checkedRadios[radioGroupHost.name];
+          var previousSpan;
+
+          // Uncheck previousRadio
+          if (previousChecked) {
+            previousSpan = previousChecked.querySelector(".eon-radio-outspan");
+            previousChecked._refs.input.checked = false;
+            previousChecked._checked = false;
+            previousChecked.setAttribute("checked", "false");
+            previousChecked._refs.input.classList.remove("eon-radio-checkRadio");
+            previousSpan.classList.remove("eon-radio-checked");
+            eon.createCallback("onUncheck", this);
+
+          }
+
+          radioGroupHost.value = this.value;
+          radioGroupHost._checked = true;
+          radioGroupHost.disabled = eon.util.isTrue(this.disabled) ? true : false;
+          eon.Radio.checkedRadios[radioGroupHost.name] = this;
+        }
+
+        // Check new Radio
+        this._refs.input.checked = true;
+        this._refs.input.classList.add("eon-radio-checkRadio");
+        this._refs.span.classList.add("eon-radio-checked");
+        eon.triggerCallback("onCheck", this);
+      },
+
+      /*
+        @function (private) _handleUncheck
+        @description Changes different element values to uncheck status 
+      */
+      handleUncheck: function () {
+        if (this.parentNode.tagName.toLowerCase() == "eon-group") {
+          var radioGroupHost = this.parentNode;
+        }
+
+        if (radioGroupHost) {
+          radioGroupHost.value = "";
+          // Group checked
+          radioGroupHost._checked = false;
+          radioGroupHost.disabled = eon.util.isTrue(this.disabled) ? true : false;
+          eon.Radio.checkedRadios[radioGroupHost.name] = "";
+        }
+
+        this._refs.input.checked = false;
+        this._refs.input.classList.remove("eon-radio-checkRadio");
+        this._refs.span.classList.remove("eon-radio-checked");
+        eon.triggerCallback("onCheck", this);
+      },
+
+
+      /*
+        @function (private) _createRefs
+        @description Creates fast access to elements
+      */
+      createRefs: function () {
+        var el = this;
+
+        el._refs.input = el.template.querySelector(".eon-radio-input");
+        el._refs.label = el.template.querySelector(".eon-radio-label");
+        el._refs.span = document.createElement("span");
+        el._refs.inspan = document.createElement("span");
+      }
+
+    },
+
+    onCreated: function () {
+      eon.Radio = eon.Radio || {
+        checkedRadios: {}
+      };
+
+      eon.createCallback("onChange", this);
+      eon.createCallback("onCheck", this);
+      eon.createCallback("onUncheck", this);
+
+      this._createRefs();
+    },
+
+    onRender: function () {
+      var el = this;
+
+      if (this.parentNode.tagName.toLowerCase() == "eon-group") {
+        var radioGroupHost = el.parentNode;
+        el._refs.input.setAttribute("name", radioGroupHost.name);
+      }
+
+      el._refs.span.classList.add("eon-radio-outspan", "eon-bg3-border");
+      el._refs.inspan.classList.add("eon-radio-inspan");
+      el._refs.label.insertBefore(el._refs.span, el._refs.label.firstChild);
+      el._refs.span.appendChild(el._refs.inspan);
+
+      el.checked = el.default != "" && el.checked == "" ? el.default : el.checked;
+      el._setValue();
+      el._updateDisabled();
+      el._updateReadonly();
+      el._setCheck();
+      el.querySelector(".eon-radio-labelText").innerHTML = el.label;
+
+      // Checking a radio option
+      el._refs.label.addEventListener("click", function (e) {
+        if ((!eon.util.isTrue(el.disabled) && !eon.util.isTrue(el.readonly)) || el.disabled == null) {
+          el.checked = true;
+        }
+
+      }, false);
+
+    },
+
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case "disabled":
+          this._updateDisabled();
+          break;
+        case "readonly":
+          this._updateReadonly();
+          break;
+        case "checked":
+          this._setCheck();
+          break;
+        case "label":
+          this.querySelector(".eon-radio-labelText").innerHTML = newVal;
+          break;
+        case "value":
+          this._setValue();
+          break;
+      }
+    }
+
+  });
+
+</script>
+          <style>
+            eon-radio {
+  position: relative;
+}
+eon-radio[inline="true"] {
+  display: inline-block;
+}
+eon-radio[inline="true"] .eon-radio-radio {
+  width: auto;
+}
+eon-radio[readonly="true"] .eon-radio-input {
+  pointer-events: none;
+}
+eon-radio[readonly="true"] .eon-radio-label {
+  pointer-events: none;
+  cursor: auto;
+}
+.eon-radio-radio {
+  width: 100%;
+  display: flex;
+}
+.eon-radio-input {
+  display: none;
+}
+.eon-radio-label {
+  display: flex;
+  cursor: pointer;
+  align-items: flex-start;
+}
+.eon-radio-outspan {
+  box-sizing: border-box;
+  min-width: 18px;
+  min-height: 18px;
+  margin: 0 5px 0 0;
+  padding: 2px;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 100%;
+  display: flex;
+}
+.eon-radio-inspan {
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  visibility: hidden;
+  -webkit-transition: 0.3s ease all;
+  -moz-transition: 0.3s ease all;
+  transition: 0.3s ease all;
+  border-radius: 100%;
+}
+.eon-radio-input:checked + .eon-radio-label .eon-radio-inspan {
+  visibility: visible;
+  -webkit-transition: 0.3s ease all;
+  -moz-transition: 0.3s ease all;
+  transition: 0.3s ease all;
+}
+.eon-radio-input:disabled + .eon-radio-label,
+.eon-radio-input[type="radio"]:disabled + .eon-radio-label .eon-radio-outspan {
+  cursor: auto;
+}
+          </style>
+          <style>
+            /*TEST*/
+/* Set 1 - Containers (appmenu, searchbar, datepicker, appmenu, grid, headerpanel,
+           loadingmask, menu, swiper, tab, tabs, togglemenu, video) */
+/* Set 2 - Elements (button, checkbox, combobox, spinner, text, 
+           radio, contextmenu, slider, treenode) */
+eon-radio[theme="claro"],
+div[data-theme="claro"] eon-radio,
+body[data-theme="claro"] eon-radio {
+  /* Change the radio style when it's checked */
+  /* Change the inside radio style when it's checked */
+  /* Style of the circle when the radio it's disabled */
+  /* Circle style when the radio it's checked and disabled */
+}
+eon-radio[theme="claro"] .eon-radio-input:checked + .eon-radio-label .eon-radio-outspan,
+div[data-theme="claro"] eon-radio .eon-radio-input:checked + .eon-radio-label .eon-radio-outspan,
+body[data-theme="claro"] eon-radio .eon-radio-input:checked + .eon-radio-label .eon-radio-outspan {
+  border-color: #47cce2;
+}
+eon-radio[theme="claro"] .eon-radio-input:checked + .eon-radio-label .eon-radio-inspan,
+div[data-theme="claro"] eon-radio .eon-radio-input:checked + .eon-radio-label .eon-radio-inspan,
+body[data-theme="claro"] eon-radio .eon-radio-input:checked + .eon-radio-label .eon-radio-inspan {
+  border-color: #47cce2;
+  background-color: #47cce2;
+}
+eon-radio[theme="claro"] .eon-radio-input:disabled + .eon-radio-label .eon-radio-outspan,
+div[data-theme="claro"] eon-radio .eon-radio-input:disabled + .eon-radio-label .eon-radio-outspan,
+body[data-theme="claro"] eon-radio .eon-radio-input:disabled + .eon-radio-label .eon-radio-outspan {
+  border-color: #cecece;
+}
+eon-radio[theme="claro"] .eon-radio-input:disabled + .eon-radio-label,
+div[data-theme="claro"] eon-radio .eon-radio-input:disabled + .eon-radio-label,
+body[data-theme="claro"] eon-radio .eon-radio-input:disabled + .eon-radio-label,
+eon-radio[theme="claro"] .eon-radio-input[type="radio"]:disabled + .eon-radio-label .eon-radio-outspan,
+div[data-theme="claro"] eon-radio .eon-radio-input[type="radio"]:disabled + .eon-radio-label .eon-radio-outspan,
+body[data-theme="claro"] eon-radio .eon-radio-input[type="radio"]:disabled + .eon-radio-label .eon-radio-outspan {
+  color: #cecece;
+}
+eon-radio[theme="claro"] .eon-radio-checkedDisabledRadio:checked + .eon-radio-label .eon-radio-inspan,
+div[data-theme="claro"] eon-radio .eon-radio-checkedDisabledRadio:checked + .eon-radio-label .eon-radio-inspan,
+body[data-theme="claro"] eon-radio .eon-radio-checkedDisabledRadio:checked + .eon-radio-label .eon-radio-inspan,
+eon-radio[theme="claro"] .eon-radio-disabledRadio[type="radio"]:checked + .eon-radio-label .eon-radio-inspan,
+div[data-theme="claro"] eon-radio .eon-radio-disabledRadio[type="radio"]:checked + .eon-radio-label .eon-radio-inspan,
+body[data-theme="claro"] eon-radio .eon-radio-disabledRadio[type="radio"]:checked + .eon-radio-label .eon-radio-inspan {
+  border-color: #cecece;
+  background-color: #cecece;
+}
+          </style>
+        </div>
+        <div class="eon-group-config">
+          <style>
+  .eon-group-label {
+    font-size: 15px;
+    height: 18px;
+    margin-bottom: 5px;
+    display: block;
+  }
+</style>
+
+<template>
+  <label class="eon-group-label"></label>
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-group",
+
+    properties: {
+      /*
+        @property {String} name 
+        @description Group name
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} value 
+        @description Group value
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property (private) {Boolean} disabled 
+        @description Sets its value to true when the selected element is disabled
+      */
+      disabled: {
+        value: false
+      },
+
+      /*
+        @property {String} label
+        @description Label for the element
+      */
+      label: {
+        value: "",
+        reflect: true,
+        reflectDefault: true
+      },
+
+    },
+
+    privateProperties: {
+      /*
+        @property (private) {Boolean} _checked 
+        @description Sets its value to true when checks an element
+      */
+      checked: {
+        value: false
+      },
+      /*
+        @property (private) {String} _formElement 
+        @description Set that group is a form element
+        Value: radio
+      */
+      formElement: {
+        value: "radio"
+      }
+    },
+
+    privateFunctions: {
+      /*
+        @function (private) _updateLabel
+        @description Updates the label node with the new label
+      */
+      updateLabel: function () {
+
+        var el = this;
+
+        if (el.label != "") {
+          el.querySelector(".eon-group-label").innerHTML = el.label;
+        }
+
+      },
+    },
+
+    onRender: function () {
+      var el = this;
+      var sourceNodes = this.getSourceElements();
+      var documentFragment = document.createDocumentFragment();
+      var length = sourceNodes.length;
+      var currentEl;
+
+      el._updateLabel();
+
+      while (sourceNodes.length) {
+        currentEl = sourceNodes.shift();
+        documentFragment.appendChild(currentEl);
+      }
+
+      el.appendChild(documentFragment);
+
+    },
+
+    onPropertyChanged: function (key, oldVal, newVal) {
+
+      switch (key) {
+        case "label":
+          this._updateLabel();
+          break;
+      }
+
+    }
+
+  });
+</script>
+        </div>
+        <div class="eon-showcase-item-config">
+          <template>
+
+  <div class="eon-showcase-item-title"></div>
+  <div class="eon-showcase-item-content"></div>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-showcase-item",
+    style: "",
+
+    themed: false,
+
+    properties: {
+      /*
+        @property {String} title
+        @description 
+      */
+      title: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property {object} _refs
+        @description 
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+      /*
+        @property (private) {Object} _misc
+        @description 
+      */
+      misc: {
+        value: {},
+        reflect: false
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setUpRefs
+        @description 
+      */
+      setUpRefs: function () {
+        var el = this;
+
+        el._refs.title = el.template.querySelector(".eon-showcase-item-title");
+        el._refs.content = el.template.querySelector(".eon-showcase-item-content");
+      },
+      /*
+        @function (private) _setTitle
+        @description 
+      */
+      setTitle: function () {
+        var el = this;
+        el._refs.title.innerHTML = el.title;
+      },
+      /*
+        @function (private) _setContent
+        @description 
+      */
+      setContent: function () {
+        var el = this;
+        var srcNodes = el.getSourceElements();
+        var srcNode;
+
+        // Showcase item style
+        el.classList.add("eon-bg1");
+
+        // Move source children to the content element safely
+        while (srcNodes.length) {
+          // Get the shifted element
+          srcNode = srcNodes.shift();
+          // Append them to the tree
+          el._refs.content.appendChild(srcNode);
+        }
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      el._setUpRefs();
+    },
+    onInit: function () {
+      var el = this;
+      el._setTitle();
+      el._setContent();
+    },
+    onRender: function () {
+      var el = this;
+
+    }
+  });
+</script>
+          <style>
+            eon-showcase-item {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px;
+  box-sizing: border-box
+}
+.eon-showcase-item-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.eon-showcase-item-content {
+  height: calc(100% - 33px);
+}          </style>
+        </div>
+        <script>
+          // Insert and declare
+          for (var i = 0; i < elements.length; i++) {
+            var elementName = elements[i];
+            if (!(elementName in eon.imports.templates)) {
+              // Increment total
+              eon.imports.total++;
+              // Avoid duplicated imports while waiting XMLHttpRequest callback.
+              eon.imports.templates[elementName] = null;
+              eon.declare(elementName);
+              eon.insertFragment(elementName, document.querySelector("." + elementName + "-config").innerHTML);
+            }
+          }
+        </script>
     </div>
     <!-- EXAMPLES BODY -->
     <div class="template-body">

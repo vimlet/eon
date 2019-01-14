@@ -20,14 +20,60 @@
         // ** Eon polyfill path fix
         document.currentScript.src = window.location.href + "eon";
         // Inject js with meta
-        /*<% template("../other/eon-bundle.js"); %>*/
+        //<% template("../../util/eon-bundle.js");%>
         eon.theme = "claro";
-        // UI components
-        eon.import([
-          "eon/ui/eon-spinner",
-          "eon/ui/eon-showcase-item"
-        ]);
       </script>
+      <!-- EON elements import configuration -->
+      <script>
+          eon.imports = eon.imports || {
+            count: 0,
+            total: 0,
+            ready: false
+          };
+          eon.imports.style = eon.imports.style || "";
+          eon.imports.scripts = eon.imports.scripts || {};
+          eon.imports.links = eon.imports.links || {};
+          eon.imports.templates = eon.imports.templates || {};
+          eon.imports.paths = eon.imports.paths || {};
+          eon.imports.config = eon.imports.config || {};
+  
+          eon.imports.paths["eon-spinner"] = "eon/ui/eon-spinner/";
+          eon.registry.registerTheme("eon-spinner", "claro");
+  
+          eon.imports.paths["eon-showcase-item"] = "eon/ui/eon-showcase-item/";
+          var elements = ["eon-spinner", "eon-showcase-item"];
+        </script>
+  
+        <!-- Inject eon elements -->
+        <div class="eon-spinner-config">
+          <% template("../../util/eon-spinner/eon-spinner.html");%>
+          <style>
+            /* <% template("../../util/eon-spinner/eon-spinner.css");%> */
+          </style>
+          <style>
+            /* <% template("../../util/eon-spinner/claro/eon-spinner.css");%> */
+          </style>
+        </div>
+        <div class="eon-showcase-item-config">
+          <% template("../../util/eon-showcase-item/eon-showcase-item.html");%>
+          <style>
+            /* <% template("../../util/eon-showcase-item/eon-showcase-item.css");%> */
+          </style>
+        </div>
+        <script>
+          // Insert and declare
+          for (var i = 0; i < elements.length; i++) {
+            var elementName = elements[i];
+            if (!(elementName in eon.imports.templates)) {
+              // Increment total
+              eon.imports.total++;
+              // Avoid duplicated imports while waiting XMLHttpRequest callback.
+              eon.imports.templates[elementName] = null;
+              eon.declare(elementName);
+              eon.insertFragment(elementName, document.querySelector("." + elementName + "-config").innerHTML);
+            }
+          }
+        </script>
     </div>
     <!-- EXAMPLES BODY -->
     <div class="template-body">

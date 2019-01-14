@@ -1,0 +1,595 @@
+<template></template>
+<script>
+  eon.element({
+
+    name: "eon-form",
+    style: "eon-form.css",
+
+    privateProperties: {
+      /*
+      @property (private) {Object} _misc
+      @description Object with useful information
+      */
+      misc: {
+        value: {}
+      }
+    },
+    properties: {
+      /*
+        @property {String} schema 
+        @description Path of the schema
+      */
+      schema: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} querySeparator 
+        @description Set query separator
+      */
+      querySeparator: {
+        value: "?",
+        reflect: true
+      },
+      /*
+        @property {String} paramSeparator 
+        @description Set param separator
+      */
+      paramSeparator: {
+        value: "&",
+        reflect: true
+      },
+      /*
+        @property {String} type 
+        @description Set form type
+      */
+      type: {
+        value: "html",
+        reflect: true
+      },
+      /*
+        @property {String} url 
+        @description Set where to send form data
+      */
+      url: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} action 
+        @description Same as url, respecting html standard
+      */
+      action: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} method 
+        @description Set how send form data
+      */
+      method: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} defaultStyle 
+        @description Wether or not the default style should be applied
+        Values: true, false
+        Default: true
+      */
+      defaultStyle: {
+        value: true,
+        reflect: true
+      }
+    },
+    privateFunctions: {
+
+      walkRecursive: function (original, node, fn) {
+        original = original || this;
+        node = node || this;
+
+        // Exclude formElement children since sometimes they wrap html form elements.
+        if (!node._formElement) {
+          var children = node.children;
+          for (var i = 0; i < children.length; i++) {
+            original._walkRecursive(original, children[i], fn);
+          }
+        }
+        fn(node);
+      },
+
+      /*
+      @function (private) {String} _generateParams
+      @description Return an string of form data for ajax request
+      @param {Object} data [Form data]
+      */
+      generateParams: function (data) {
+        var dataKeys = Object.keys(data);
+        var param = dataKeys[0] + "=" + data[dataKeys[0]];
+
+        for (var i = 1; i < dataKeys.length; i++) {
+          param += this.paramSeparator + dataKeys[i] + "=" + data[dataKeys[i]];
+        }
+
+        // Replace , with +
+        return param.replace(/,/g, "+");
+      },
+
+      htmlSubmit: function (action, data, method) {
+        method = method.toUpperCase() || "GET";
+
+        if (method == "GET") {
+          // Cleaner version for GET
+          window.location.href = action + this.querySeparator + this._generateParams(data);;
+        } else {
+          // Other methods require a real html form
+          var form = document.createElement("form");
+          form.setAttribute("method", method);
+          form.setAttribute("action", action);
+
+          for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+              var hiddenField = document.createElement("input");
+              hiddenField.setAttribute("type", "hidden");
+              hiddenField.setAttribute("name", key);
+              hiddenField.setAttribute("value", data[key]);
+              form.appendChild(hiddenField);
+            }
+          }
+
+          document.body.appendChild(form);
+          form.submit();
+        }
+      },
+
+      xhrSubmit: function (url, method, payload, contentType) {
+        var el = this;
+        eon.ajax(url, {
+          method: method,
+          payload: payload,
+          contentType: contentType
+        }, function (success, data) {
+          eon.triggerCallback("onSubmit", el, null, [success, data]);
+        });
+      },
+
+      handleCheckbox: function (data, node) {
+
+        var nameAlreadyExists = data.hasOwnProperty(node.name);
+        var nodeValue;
+
+        // First it gets the value that will be assign for this node
+        if (eon.util.isTrue(node.checked)) {
+          nodeValue = node.value != "" ? node.value : true
+        } else {
+          nodeValue = false;
+        }
+
+        // Then it checks if there is already a node with the same name, if there is then it creates an array and pushes the new value
+        if (nameAlreadyExists) {
+
+          if (Object.prototype.toString.call(data[node.name]) === "[object Array]") {
+            data[node.name].push(nodeValue);
+          } else {
+            data[node.name] = [data[node.name], nodeValue];
+          }
+          // Else if there is no previous data assignation to the name we just assign it
+        } else {
+          data[node.name] = nodeValue;
+        }
+
+      },
+      /*
+      @function (private) _setDefaultStyle
+      @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+        var el = this;
+        // Check default style configuration
+        if (!eon.util.isTrue(el.defaultStyle)) {
+          // Remove default style
+          el.classList.remove("eon-spaced-container");
+        } else {
+          // Spaced items style
+          el.classList.add("eon-spaced-container");
+        }
+        // Check fill behavior
+        if (eon.util.isTrue(el.fill)) {
+          el.classList.add("eon-fill");
+        }
+      },
+      /*
+      @function (private) {Boolean} _isCheckBox
+      @description Returns whether the provided node is a checkbox or not
+      @param {Object} node
+      */
+      isCheckBox: function (node) {
+        if (node.nodeName.toLowerCase() == "eon-checkbox" || (node instanceof HTMLInputElement && node.type.toLowerCase() == "checkbox")) {
+          return true;
+        }
+        return false;
+      },
+      /*
+      @function (private) {Boolean} _isRadioButton
+      @description Returns whether the provided node is a radio or not
+      @param {Object} node
+      */
+      isRadioButton: function (node) {
+        if (node.nodeName.toLowerCase() == "eon-radio" || (node instanceof HTMLInputElement && node.type.toLowerCase() == "radio")) {
+          return true;
+        }
+        return false;
+      },
+      /*
+      @function (private) {Boolean} _isRadioGroup
+      @description Returns whether the provided node is a radio group or not
+      @param {Object} node
+      */
+      isRadioGroup: function (node) {
+        if (node.nodeName.toLowerCase() == "eon-group") {
+          return true;
+        }
+        return false;
+      },
+      /*
+      @function (private) {Boolean} _isToggle
+      @description Returns whether the provided node is a toggle or not
+      @param {Object} node
+      */
+      isToggle: function (node) {
+        if (node.nodeName.toLowerCase() == "eon-toggle") {
+          return true;
+        }
+        return false;
+      },
+      /*
+      @function (private) {Boolean} _setupSchema
+      @description XMLHttpRequest to the schema provided by the user
+      */
+      setupSchema: function () {
+
+        var el = this;
+
+        if (el.schema != "") {
+
+          if (!eon.validator.containsSchema(el.schema)) {
+
+            var xhttp = new XMLHttpRequest();
+
+            xhttp.onreadystatechange = function () {
+
+              if (this.readyState == 4 && this.status == 200) {
+
+                eon.validator.addSchema(el.schema, JSON.parse(xhttp.responseText))
+
+                eon.triggerCallback("onSchemaLoaded", el, null, []);
+
+              }
+
+            };
+
+            xhttp.open("GET", el.schema, true);
+            xhttp.send();
+
+          } else {
+
+            eon.triggerCallback("onSchemaLoaded", el, null, []);
+
+          }
+
+        }
+
+      },
+      /*
+      @function (private) {Boolean} _validate
+      @description Reads the schema and and the data object and compares/validates them
+      @param {Object} data
+      */
+      validate: function (data) {
+
+        var el = this;
+
+        if (el.schema && eon.validator.containsSchema(el.schema)) {
+
+          el.onSchemaLoaded(function () {
+
+            var error;
+
+            data = data ? data : el.getData();
+            error = eon.validator.validate(data, el.schema);
+
+            if (error) {
+              
+              var fields = Object.keys(data);
+              var field, element;
+
+              for (var i = 0; i < fields.length; i++) {
+
+                field = fields[i];
+                element = el.querySelector('[name="' + field + '"]');
+
+                if (element && element.eon && element.hasOwnProperty("invalid")) {
+
+                  if (error[field]) {
+
+                    var description = "";
+
+                    for (var j = 0; j < error[field].length; j++) {
+
+                      description = description != "" ? description + "\r\n" : description;
+                      description = description != "" ? description + error[field][j] : error[field][j];
+
+                    }
+
+                    element.updateDescription(description);
+                    element.invalid = true;
+
+                  } else {
+
+                    if (element.invalid) {
+
+                      element.resetDescription();
+                      element.invalid = false;
+                      
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }
+
+          });
+
+        }
+
+      },
+
+    },
+
+    functions: {
+      /*
+      @function {Object} getData 
+      @description Return form values as an object
+      */
+      getData: function () {
+        var el = this;
+        var data = {};
+
+        // Walk form recursively
+        el._walkRecursive(el, el, function (node) {
+
+          // Only add elements if they have name, value and not disabled
+          if (node.name !== "" && !eon.util.isTrue(node.disabled)) {
+
+            // eon elements
+            if (node._formElement) {
+              if (node.nodeName.toLowerCase() == "eon-checkbox" || node.nodeName.toLowerCase() == "eon-toggle") {
+                el._handleCheckbox(data, node);
+              } else if (node.nodeName.toLowerCase() == "eon-group") {
+                data[node.name] = node.value != "" ? node.value : false;
+              } else {
+                data[node.name] = node.value;
+              }
+            }
+
+            // HTML form elements
+            else if (node instanceof HTMLInputElement) {
+
+              // Handle radio
+              if (node.type.toLowerCase() == "radio") {
+
+                if (!data.hasOwnProperty(node.name)) {
+
+                  if (node.hasOwnProperty("checked") || node.checked) {
+                    data[node.name] = node.value;
+                  } else {
+                    data[node.name] = false;
+                  }
+
+                } else if (node.hasOwnProperty("checked") || node.checked) {
+
+                  data[node.name] = node.value;
+
+                }
+
+              }
+
+              // Handle checkbox
+              else if (node.type.toLowerCase() == "checkbox") {
+                el._handleCheckbox(data, node);
+              }
+
+              // Handle all other HTMLInputElement
+              else {
+                data[node.name] = node.value;
+              }
+            }
+
+            // Other HTML form elements
+            else if (node instanceof HTMLTextAreaElement
+              || node instanceof HTMLSelectElement) {
+              data[node.name] = node.value;
+            }
+          }
+
+
+        });
+
+        return data;
+      },
+      /*
+      @function {Object} setData 
+      @description Sets the provided data to the form elements
+      @param {Object} data [Form data]
+      */
+      setData: function (data) {
+
+        var el = this;
+        var value, isArrayValue, node, nodes;
+
+        // Loops through the data keys and searchs for the elements with that key as its name
+        for (var key in data) {
+
+          nodes = el.querySelectorAll("[name='" + key + "']");
+          value = data[key];
+          isArrayValue = (Object.prototype.toString.call(value) === '[object Array]');
+
+          if (nodes.length > 0) {
+
+            // if its a radio, checkbox or toggle we loop through the nodes to see if they are in the value array
+            if (el._isRadioButton(nodes[0]) || el._isCheckBox(nodes[0]) || el._isToggle(nodes[0])) {
+
+              for (var i = 0; i < nodes.length; i++) {
+                nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || value == nodes[i].value) ? true : false;
+              }
+
+              // if its a readio group we take the radio childs and loop through them
+            } else if (el._isRadioGroup(nodes[0])) {
+
+              nodes = el.querySelectorAll("eon-radio");
+
+              for (var i = 0; i < nodes.length; i++) {
+                nodes[i].checked = (value == nodes[i].value) ? true : false;
+              }
+
+              // else just assign the value to the node
+            } else {
+
+              for (var i = 0; i < nodes.length; i++) {
+
+                nodes[i].value = value;
+
+              }
+
+            }
+
+          }
+
+        }
+
+      },
+      /*
+      @function {Object} saveData 
+      @description Saves the current data of the form elements
+      @param {Object} data [Form data]
+      */
+      saveData: function () {
+        var el = this;
+        el._savedData = el.getData();
+        return el._savedData;
+      },
+      /*
+      @function {Object} clear 
+      @description Clears the form elements
+      */
+      clear: function () {
+        var el = this;
+        el._walkRecursive(el, el, function (node) {
+          // eon elements
+          if (node._formElement) {
+            if (node.nodeName.toLowerCase() == "eon-checkbox"
+              || node.nodeName.toLowerCase() == "eon-toggle"
+              || node.nodeName.toLowerCase() == "eon-radio") { // TODO: Review radio
+              node.checked = false;
+            } else {
+              if (node.clear) {
+                node.clear();
+              } else {
+                node.value = "";
+              }
+            }
+          }
+
+          // HTML form elements
+          else if (node instanceof HTMLInputElement) {
+
+            // Handle radio and checkbox
+            if (node.type.toLowerCase() == "radio" || node.type.toLowerCase() == "checkbox") {
+              node.checked = false;
+            }
+            // Handle all other HTMLInputElement
+            else {
+              node.value = "";
+            }
+          }
+
+          // Other HTML form elements
+          else if (node instanceof HTMLTextAreaElement
+            || node instanceof HTMLSelectElement) {
+            node.value = "";
+          }
+
+        });
+      },
+      /*
+      @function {Object} restore 
+      @description Restores the form elements to the previous saved data
+      */
+      restore: function () {
+        var el = this;
+        el.setData(el._savedData);
+      },
+      /*
+      @function submit
+      @description Sends the form data
+      */
+      submit: function () {
+        var el = this;
+        var type = el.type.toLowerCase();
+        var url = el.url ? el.url : el.action;
+        var method = el.method.toUpperCase();
+        var data = el.getData();
+
+        if (type == "html") { // Mimics html form including redirect
+          el._htmlSubmit(url, data, method);
+        } else if (type == "query") { // Uses query string with the given method
+          el._xhrSubmit(url + el.querySeparator + el._generateParams(data), method);
+        } else if (type == "form-data") { // Uses query string with GET and FormData with all others.
+          if (method == "GET") {
+            // Since GET can't have a body send a query string instead
+            el._xhrSubmit(url + el.querySeparator + el._generateParams(data), method);
+          } else {
+            var formData = new FormData();
+            for (var key in data) {
+              formData.append(key, data[key]);
+            }
+            el._xhrSubmit(url, method, formData, "application/x-www-form-urlencoded");
+          }
+        } else if (type == "json") { // Uses a JSON payload and the given method
+          el._xhrSubmit(url, method, JSON.stringify(data), "application/json");
+        }
+      }
+    },
+
+    onCreated: function () {
+      eon.createCallback("onSubmit", this);
+      eon.createCallback("onSchemaLoaded", this, "ready");
+    },
+    onInit: function () {
+      // ** Apply default items positioning style
+      this._setDefaultStyle();
+      this._setupSchema();
+    },
+
+
+    onRender: function () {
+      var el = this;
+      var submit = el.querySelector('[type="submit"]');
+
+      if (submit) {
+        submit.addEventListener("click", function () {
+          el.submit();
+        }, true);
+      }
+    },
+
+    onReady: function () {
+      this.saveData();
+    }
+
+  });
+
+</script>

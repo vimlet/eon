@@ -6021,7 +6021,6 @@ eon.insertImport = function (href) {
 };
 
 eon.insertFragment = function (elementName, content) {
-    
     var importFragment = eon.fragmentFromString(content);
 
     var i;
@@ -6150,9 +6149,8 @@ eon.handleTemplateInterpolation = function (name) {
 
 // Imports specific componentes themes if specified
 eon.importSchemaThemes = function () {
-
-    if (eon.themeSchema) {
-
+  if (eon.themeSchema) {
+   
         var themes = Object.keys(eon.themeSchema);
         var documentHead = document.querySelector("head");
         var theme, themeElements, themeLink, themePath;
@@ -6218,7 +6216,7 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-
+        
         eon.registry.registerTheme(name, theme);
 
         elementLink.setAttribute("rel", "stylesheet");
@@ -6355,7 +6353,6 @@ eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
-
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
@@ -6365,11 +6362,11 @@ eon.handleConfigDependencies = function (name) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
                 dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
+                
                 eon.import(dependencyFile);
             }
         }
     }
-
     return hasDependencies;
 }
 
@@ -6545,6 +6542,7 @@ eon.registry.triggerReadyCallbacks = function () {
 };
 
 eon.registry.registerTheme = function (tagName, theme) {
+  
   if (!eon.registry.elementThemes[theme]) {
     eon.registry.elementThemes[theme] = {};
   }
@@ -7076,8 +7074,7 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath != "") {
-
+    if (stylePath != "" ) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
@@ -10016,13 +10013,1372 @@ if (vpa.allowAmdRequire) {
   
 
 
+
         eon.theme = "claro";
-        // UI components
-        eon.import([
-          "eon/ui/eon-text",
-          "eon/ui/eon-showcase-item"
-        ]);
       </script>
+      <!-- EON elements import configuration -->
+      <script>
+          eon.imports = eon.imports || {
+            count: 0,
+            total: 0,
+            ready: false
+          };
+          eon.imports.style = eon.imports.style || "";
+          eon.imports.scripts = eon.imports.scripts || {};
+          eon.imports.links = eon.imports.links || {};
+          eon.imports.templates = eon.imports.templates || {};
+          eon.imports.paths = eon.imports.paths || {};
+          eon.imports.config = eon.imports.config || {};
+  
+          eon.imports.paths["eon-text"] = "eon/ui/eon-text/";
+          eon.registry.registerTheme("eon-text", "claro");
+  
+          eon.imports.paths["eon-showcase-item"] = "eon/ui/eon-showcase-item/";
+          var elements = ["eon-text", "eon-showcase-item"];
+        </script>
+  
+        <!-- Inject eon elements -->
+        <div class="eon-text-config">
+          <template>
+
+  <div class="eon-text-data eon-fg2">
+    <label class="eon-text-label"></label>
+    <label class="eon-text-counter"></label>
+  </div>
+
+  <div class="eon-text-main eon-bg2 eon-fg2"></div>
+
+  <span class="eon-text-underline"></span>
+
+  <div class="eon-text-description"></div>
+
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-text",
+    style: "",
+
+    themed: true,
+
+    dependencies: [
+      "../eon-scroll"
+    ],
+
+    privateProperties: {
+      /*
+      @property (private) {String} _formElement 
+      @description Necessary property for a form
+      */
+      formElement: {
+        value: "textbox"
+      },
+      /*
+      @property (private) {Object} _misc
+      @description Object with useful information
+      */
+      misc: {
+        value: {},
+        reflect: false
+      },
+      /*
+      @property (private) {Object} _refs
+      @description Object with references to frecuently queryied nodes
+      */
+      refs: {
+        value: {},
+        reflect: false
+      }
+
+    },
+
+    properties: {
+      /*
+      @property {String} name
+      @description Name to identify the element in a form
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} placeholder
+      @description Placeholder for the user typing area
+      */
+      placeholder: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} label
+      @description Label for the element
+      */
+      label: {
+        value: "",
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {String} type
+      @description Determines the type of the element (area, text, password)
+      */
+      type: {
+        value: "text",
+        reflect: true
+      },
+      /*
+      @property {Boolean} inline 
+      @description Space that occupies the button inside its parent container.
+      */
+      inline: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {Number} areaHeight
+      @description Determines the height of the typeable area
+      */
+      areaHeight: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} maxlength
+      @description Characters input limit
+      */
+      maxLength: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} counter
+      @description Whether the user wants a counter or not
+      */
+      counter: {
+        value: "false",
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {String} value
+      @description Value of the element
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} default
+      @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+      */
+      default: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {string} readonly
+      @description Toggles the readonly status of the element
+      */
+      readonly: {
+        value: false,
+        reflect: true
+      },
+      /*
+      @property {String} disabled
+      @description Toggles the disabled status of the element
+      */
+      disabled: {
+        value: false,
+        reflect: true
+      },
+      /*
+      @property {String} tooltip
+      @description Text to be shown for the element
+      */
+      tooltip: {
+        value: "",
+        reflect: true,
+        reflectDefault: false
+      },
+      /*
+      @property {Boolean} invalid
+      @description Whether the element meets the requirements or not
+      */
+      invalid: {
+        value: false,
+        reflect: true,
+        reflectDefault: false
+      }
+    },
+
+    privateFunctions: {
+      /*
+      @function (private) _setup
+      @description Sets up all the necessary stuff for the element
+      */
+      setup: function () {
+
+        var el = this;
+
+        el._setupRefs();
+        el._setupCounter();
+        el._setupForType();
+
+        el._initDefault();
+        el._initValue();
+
+        el._setupTouchBlur();
+        el._setupDescription();
+
+        el._updateLabel();
+        el._updateDisabled();
+        el._updateReadOnly();
+        el._updateInvalid();
+
+      },
+      /*
+      @function (private) _setupRefs
+      @description Creates references for relevant nodes
+      */
+      setupRefs: function () {
+
+        var el = this;
+
+        el._refs.data = el.querySelector(".eon-text-data");
+        el._refs.main = el.querySelector(".eon-text-main");
+        el._refs.description = el.querySelector(".eon-text-description");
+
+      },
+      /*
+      @function (private) _setupForType
+      @description Depending on the specified type we will determine the needed setup
+      */
+      setupForType: function () {
+
+        var el = this;
+
+        if (el.type != "area") {
+          el._setupAsInput();
+        } else {
+          el._setupAsTextarea();
+        }
+
+      },
+      /*
+      @function (private) _setupAsTextarea
+      @description Created all nodes and events for the area type element
+      */
+      setupAsTextarea: function () {
+
+        var el = this;
+
+        el._misc.area.isNative = navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i);
+
+        if (!el._misc.area.isNative) {
+          el._setupAsCustomArea();
+        } else {
+          el._setupAsNativeArea();
+        }
+
+        el._setupAreaEvents();
+
+      },
+      /*
+      @function (private) _setupAsNativeArea
+      @description Prepares the element to work as a native textarea for touch devices
+      */
+      setupAsNativeArea: function () {
+
+        var el = this;
+
+        var main = el.querySelector(".eon-text-main");
+        var editable = document.createElement("div");
+
+        // If the user has specified a height for the textarea we set up some style and listeners for its functionality
+        if (el.areaHeight != "") {
+          main.style.height = el.areaHeight + "px";
+          main.style.cursor = "text";
+        }
+
+        editable = document.createElement("textarea");
+        editable.classList.add("eon-text-editable", "eon-fg2");
+        editable.setAttribute("placeholder", el.placeholder);
+        editable.setAttribute("resize", false);
+        editable.setAttribute("maxlength", el.maxLength);
+
+        el._misc.area.update = function () {
+          el._misc.area.preventUpdate = true;
+          el.value = el._refs.editableArea.value;
+          el._updateCounter();
+        };
+
+        el._refs.editableArea = editable;
+
+        main.appendChild(editable);
+
+      },
+      /*
+      @function (private) _setupAsCustomArea
+      @description Prepares the element to work as a custom textarea with custom scroll
+      */
+      setupAsCustomArea: function () {
+
+        var el = this;
+
+        var main = el.querySelector(".eon-text-main");
+        var scroll = document.createElement("eon-scroll");
+        var editableContainer = document.createElement("div");
+        var editable = document.createElement("div");
+
+        // If the user has specified a height for the textarea we set up some style and listeners for its functionality
+        if (el.areaHeight != "") {
+          main.style.height = el.areaHeight + "px";
+          main.style.cursor = "text";
+        }
+
+        el._misc.area.update = function () {
+          var value = el._getValue();
+          el._misc.area.preventUpdate = true;
+          el.value = value;
+          el._saveAreaInnerHTML();
+          el._updateCounter();
+        };
+
+        el._refs.editableArea = editable;
+
+        scroll.setAttribute("thickness", "8");
+        scroll.setAttribute("type", "vertical");
+
+        editable.classList.add("eon-text-editable");
+        editable.setAttribute("contenteditable", "true");
+        editable.setAttribute("placeholder", el.placeholder);
+
+        eon.registerPathListener(editable);
+
+        main.addEventListener("click", function () {
+
+          // If the users clicks on the main node that is not covered by the editable
+          if (!editable.isOnPath) {
+            el._placeCaretAtEnd(editable);
+          }
+
+        });
+
+        // Appends the new nodes
+        editableContainer.appendChild(editable);
+        scroll.appendChild(editableContainer);
+        main.appendChild(scroll);
+
+      },
+      /*
+      @function (private) _setupAreaEvents
+      @description Creates the keyboard events for the area
+      */
+      setupAreaEvents: function () {
+
+        var el = this;
+
+        el._refs.editableArea.addEventListener("keydown", function (e) {
+
+          // Checks if the key press corresponds to ENTER
+          if (e.keyCode == 13) {
+            eon.triggerCallback("onEnter", el)
+          }
+
+          setTimeout(function () {
+            el._misc.area.update();
+          }, 0);
+
+        });
+
+        // Updates everything needed for new inputs and prevents keyup from triggering
+        el._refs.editableArea.addEventListener("input", function (e) {
+          el._misc.area.inputEventTriggered = true;
+        });
+
+        // As some browsers doesnt handle spaces and different keys with the input event we also created the keyup event, 
+        // which will only do stuff if the input event was not triggered
+        el._refs.editableArea.addEventListener("keyup", function (e) {
+          el._misc.area.inputEventTriggered = false;
+        });
+
+        el._refs.editableArea.addEventListener("focus", function () {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el.classList.add("focus");
+            eon.triggerCallback("onFocus", el);
+          }
+        });
+
+        el._refs.editableArea.addEventListener("blur", function () {
+          el._restoreAreaInnerHTML();
+          el.classList.remove("focus");
+          eon.triggerCallback("onBlur", el);
+        });
+
+      },
+      /*
+      @function (private) _setupAsTextarea
+      @description Created all nodes and events for all the types except the area
+      */
+      setupAsInput: function () {
+
+        var el = this;
+
+        var main = el.querySelector(".eon-text-main");
+        var input = document.createElement("input");
+
+        el._refs = el._refs || {};
+        el._refs.input = input;
+
+        input.setAttribute("type", el.type);
+        input.setAttribute("placeholder", el.placeholder);
+        input.setAttribute("maxlength", el.maxLength);
+        input.classList.add("eon-fg2");
+
+        input.addEventListener("keypress", function (e) {
+
+          // Checks if the key press corresponds to ENTER
+          if (e.keyCode == 13) {
+            eon.triggerCallback("onEnter", el)
+          }
+
+        });
+
+        input.addEventListener("input", function (e) {
+          el.value = input.value;
+          el._updateCounter();
+        });
+
+        input.addEventListener("focus", function (e) {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el.classList.add("focus");
+            eon.triggerCallback("onFocus", el);
+          }
+        });
+
+        input.addEventListener("blur", function (e) {
+          el.classList.remove("focus");
+          eon.triggerCallback("onBlur", el);
+        });
+
+        main.appendChild(input)
+
+      },
+      /*
+      @function (private) _setupCounter
+      @description Fills the counter with the maxlength
+      */
+      setupCounter: function () {
+
+        var el = this;
+
+        if (el.counter != "false" && el.maxLength != "") {
+          var counter = el.querySelector(".eon-text-counter");
+          counter.innerHTML = el.maxLength;
+        }
+
+      },
+      /*
+      @function (private) {String} _setupTouchBlur
+      @description Creates the touch blur
+      */
+      setupTouchBlur: function () {
+
+        var el = this;
+
+        eon.registerPathListener(el);
+
+        document.addEventListener("touchstart", function () {
+          if (!el.isOnPath) {
+            var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+            el.classList.remove("focus");
+            typingNode.blur();
+          }
+        });
+
+      },
+      /*
+      @function (private) {String} _setupDescription
+      @description Creates the touch blur
+      */
+      setupDescription: function () {
+
+        var el = this;
+
+        if (el.tooltip != "") {
+          el.updateDescription(el.tooltip);
+        }
+
+      },
+      /*
+      @function (private) {String} _saveAreaInnerHTML
+      @description Triggered when typing, it saves the innerHTML of the area while the user has not exceeded the max length
+      */
+      saveAreaInnerHTML: function () {
+
+        var el = this;
+
+        if (!el._misc.area.isNative && el.maxLength != "" && !el._valueExceedsLength()) {
+          el._misc.area.validValueInnerHTML = el._refs.editableArea.innerHTML;
+        }
+
+      },
+      /*
+      @function (private) {String} _saveAreaInnerHTML
+      @description Triggered when the element is blured, if the typed value exceeds the max length it restores the previous valid innerHTML
+      */
+      restoreAreaInnerHTML: function () {
+
+        var el = this;
+
+        if (!el._misc.area.isNative && el.maxLength != "" && el._valueExceedsLength()) {
+
+          el._refs.editableArea.innerHTML = el._misc.area.validValueInnerHTML;
+          var value = el._getValue();
+          el._misc.area.preventUpdate = true;
+          el.value = value;
+          el._updateCounter();
+
+        }
+
+      },
+      /*
+      @function (private) _initDefault
+      @description If a value has been provided by the user we set it for our element
+      */
+      initDefault: function () {
+        this.value = this.default != "" && this.value == "" ? this.default : this.value;
+      },
+      /*
+      @function (private) _initValue
+      @description Sets the initial value depending if an innerText or a value has been provided
+      */
+      initValue: function () {
+
+        var el = this;
+
+        el._misc.initialText = el.value != "" ? el.value : el._misc.initialText;
+
+        if (el._misc.initialText != "") {
+
+          if (el._misc.initialText.length > parseInt(el.maxLength)) {
+            el._misc.initialText = el._misc.initialText.substring(0, el.maxLength);
+          }
+
+        }
+
+        if (el.type != "area") {
+          el._refs.input.value = el._misc.initialText;
+        } else {
+          el._refs.editableArea.innerText = el._misc.initialText;
+        }
+
+        el.__value = el._misc.initialText;
+
+        el._updateCounter();
+
+      },
+      /*
+      @function (private) {String} _getValue
+      @description Returns the proper value for the element
+      */
+      getValue: function () {
+
+        var value;
+
+        if (eon.util.getBrowser() == "IE" && this.type == "area") {
+
+          // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
+          value = this._refs.editableArea.innerHTML
+            .replace(new RegExp("</p><p>", "g"), "\r\n")
+            .replace(new RegExp("<br></p><p>", "g"), "\r\n")
+            .replace(new RegExp("<p>", "g"), "")
+            .replace(new RegExp("</p>", "g"), "")
+            .replace(new RegExp("<br>", "g"), "");
+
+        } else {
+
+          value = this._refs.editableArea.innerText;
+
+        }
+
+        return value;
+      },
+      /*
+      @function (private) {Number} _getValueLength
+      @description Returns the length of the value
+      */
+      getValueLength: function () {
+
+        var el = this;
+        var value, valueLength;
+
+        if (eon.util.getBrowser() == "IE" && this.type == "area") {
+
+          // As innerText is not usefull in IE, we take its innerHTML and parse it to give us the value
+          valueLength = el._refs.editableArea.innerHTML
+            .replace(new RegExp("</p><p>", "g"), "~")
+            .replace(new RegExp("<br></p><p>", "g"), "~")
+            .replace(new RegExp("<p>", "g"), "")
+            .replace(new RegExp("</p>", "g"), "")
+            .replace(new RegExp("<br>", "g"), "").length;
+
+        } else {
+
+          value = el.value.toString();
+          valueLength = Array.prototype.slice.apply(value.match(/\n/g) || []).length > 1 ? value.length - 1 : value.length;
+
+        }
+
+        return valueLength;
+      },
+      /*
+      @function (private) {Boolean} _valueExceedsLength
+      @description Returns a boolean whether the current value is already exceeding the maxlength or not
+      */
+      valueExceedsLength: function () {
+        return this._getValueLength() > parseInt(this.maxLength);
+      },
+      /*
+      @function (private) {Object} _getSelectionCoords
+      @description Returns an object with the absolute position of the cursor
+      */
+      getSelectionCoords: function () {
+
+        var win = window;
+        var doc = win.document;
+        var sel = doc.selection, range, rects, rect;
+        var left = 0, top = 0, right = 0, bottom = 0;
+
+        if (sel) {
+
+          if (sel.type != "Control") {
+
+            range = sel.createRange();
+            range.collapse(true);
+            left = range.boundingLeft;
+            top = range.boundingTop;
+            right = range.boundingRight;
+            bottom = range.boundingBottom;
+
+          }
+
+        } else if (win.getSelection) {
+
+          sel = win.getSelection();
+
+          if (sel.rangeCount) {
+
+            range = sel.getRangeAt(0).cloneRange();
+
+            if (range.getClientRects) {
+
+              range.collapse(true);
+              rects = range.getClientRects();
+
+              if (rects.length > 0) {
+
+                rect = rects[0];
+
+                left = rect.left;
+                top = rect.top;
+                right = rect.right;
+                bottom = rect.bottom;
+              }
+
+            }
+            // Fall back to inserting a temporary element
+            if (left == 0 && top == 0) {
+
+              var span = doc.createElement("span");
+
+              if (span.getClientRects) {
+                // Ensure span has dimensions and position by
+                // adding a zero-width space character
+                span.appendChild(doc.createTextNode("\u200b"));
+                range.insertNode(span);
+                rect = span.getClientRects()[0];
+                left = rect.left;
+                top = rect.top;
+                right = rect.right;
+                bottom = rect.bottom;
+                var spanParent = span.parentNode;
+                spanParent.removeChild(span);
+
+                // Glue any broken text nodes back together
+                spanParent.normalize();
+              }
+            }
+          }
+        }
+
+        return { left: left, top: top, right: right, bottom: bottom };
+      },
+      /*
+      @function (private) {Object} _getSelectionRange
+      @description Returns the actual range of the selection
+      */
+      getSelectionRange: function () {
+        var sel;
+        if (window.getSelection) {
+          sel = window.getSelection();
+          if (sel.rangeCount) {
+            return sel.getRangeAt(0);
+          }
+        } else if (document.selection) {
+          return document.selection.createRange();
+        }
+        return null;
+      },
+      /*
+      @function (private) {Boolean} _placeCaretAtEnd
+      @description Places the caret at the end of the element
+      */
+      placeCaretAtEnd: function (div) {
+
+        div.focus();
+
+        if (typeof window.getSelection != "undefined"
+          && typeof document.createRange != "undefined") {
+          var range = document.createRange();
+          range.selectNodeContents(div);
+          range.collapse(false);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else if (typeof document.body.createTextRange != "undefined") {
+          var textRange = document.body.createTextRange();
+          textRange.moveToElementText(div);
+          textRange.collapse(false);
+          textRange.select();
+        }
+      },
+      /*
+      @function (private) _updateCounter
+      @description Updates the counter with the current characters count left for typing
+      */
+      updateCounter: function () {
+
+        var el = this;
+
+        if (el.counter != "false") {
+          el.querySelector(".eon-text-counter").innerHTML = el.maxLength != "" ? (parseInt(el.maxLength) - el._getValueLength()) : el._getValueLength();
+        }
+
+      },
+      /*
+      @function (private) _updateLabel
+      @description Updates the label node with the new label
+      */
+      updateLabel: function () {
+
+        var el = this;
+
+        if (el.label != "") {
+          el.querySelector(".eon-text-label").innerHTML = el.label;
+        }
+
+      },
+      /*
+      @function (private) _updateDisabled
+      @description Updates disabled status
+      */
+      updateDisabled: function () {
+
+        var el = this;
+        var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+
+        if (!eon.util.isTrue(el.disabled)) {
+
+          typingNode.classList.add("eon-fg2");
+          typingNode.classList.remove("eon-fg2-disabled");
+
+          el._refs.data.classList.remove("eon-fg2-disabled");
+          el._refs.main.classList.remove("eon-fg2-disabled");
+
+          el.removeAttribute("disabled");
+          typingNode.removeAttribute("disabled");
+
+        } else {
+
+          typingNode.setAttribute("disabled", "true");
+
+          typingNode.classList.remove("eon-fg2");
+          typingNode.classList.add("eon-fg2-disabled");
+
+          el._refs.data.classList.add("eon-fg2-disabled");
+          el._refs.main.classList.add("eon-fg2-disabled");
+
+        }
+      },
+      /*
+      @function (private) _updateReadOnly
+      @description Updates readonly status
+      */
+      updateReadOnly: function () {
+
+        var el = this;
+        var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+
+        if (eon.util.isTrue(el.readonly)) {
+
+          if (el.type != "area" || el._misc.area.isNative) {
+            typingNode.setAttribute("readonly", "true");
+          } else {
+            el._refs.editableArea.setAttribute("contenteditable", "false");
+          }
+
+        } else {
+
+          if (el.type != "area" || el._misc.area.isNative) {
+            typingNode.removeAttribute("readonly");
+          } else {
+            el._refs.editableArea.setAttribute("contenteditable", "true");
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _updateValue
+      @description Updates the value
+      */
+      updateValue: function () {
+
+        var el = this;
+
+        if (el.type == "area") {
+          // This is set to true when the value propertyChanged is triggered from the textarea change, 
+          // in those scenarios we dont want to update the area again
+          if (!el._misc.area.preventUpdate) {
+            el._refs.editableArea.innerText = el.value;
+            el._updateCounter();
+          }
+
+          el._misc.area.preventUpdate = false;
+
+        } else {
+
+          el.onReady(function () {
+            el._refs.input.value = el.value;
+          });
+
+        }
+
+      },
+      /*
+      @function (private) _updateInvalid
+      @description Updates the invalid status
+      */
+      updateInvalid: function () {
+
+        var el = this;
+        var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
+
+        el.classList[classListFn]("eon-text-error");
+
+      }
+
+    },
+
+    functions: {
+      /*
+      @function clear
+      @description Empties the value
+      */
+      clear: function () {
+        this.value = "";
+      },
+      /*
+      @function reset
+      @description Resets the value of the element to the default one, if no default is provided then empties the value
+      */
+      reset: function () {
+
+        var el = this;
+
+        if (el.default != "") {
+          el.value = el.default;
+        } else {
+          el.clear();
+        }
+
+      },
+      /*
+      @function updateDescription
+      @description Updates the description value for the element
+      */
+      updateDescription: function (text) {
+        this._misc.descriptionText = text;
+        this._refs.description.innerHTML = this._misc.descriptionText;
+      },
+      /*
+      @function resetDescription
+      @description Updates the description value for the element
+      */
+      resetDescription: function () {
+
+        var el = this;
+        var description = el.tooltip != "" ? el.tooltip : "";
+
+        el._misc.descriptionText = description;
+        el._refs.description.innerHTML = description;
+
+      },
+      // @function focus (public) [Give focus to vc-text]
+      focus: function () {
+        var el = this;
+        el.onReady(function () {
+          if (el.type != "area") {
+            el._refs.input.focus();
+          } else {
+            if (el._misc.area.isNative) {
+              el._refs.editableArea.focus();
+            }
+          }
+        });
+      }
+    },
+
+    onCreated: function () {
+
+      var el = this;
+
+      el._misc.initialText = this.source.textContent;
+      el._misc.descriptionText = "";
+
+      el.value = el.value == "" && el._misc.initialText != "" ? el._misc.initialText : el.value;
+
+      el._misc.area = {};
+      el._misc.area.inputEventTriggered = false;
+      el._misc.area.verticalSize = 0;
+      el._misc.area.horizontalSize = 0;
+
+      el.source.textContent = "";
+
+      eon.createCallback("onEnter", this);
+      eon.createCallback("onBlur", this);
+      eon.createCallback("onFocus", this);
+
+    },
+
+    onBubbleRender: function () {
+      this._setup();
+    },
+
+    onPropertyChanged: function (key, oldVal, newVal) {
+
+      switch (key) {
+        case "label":
+          this._updateLabel();
+          break;
+        case "counter":
+          this._updateCounter();
+          break;
+        case "disabled":
+          this._updateDisabled();
+          break;
+        case "readonly":
+          this._updateReadOnly();
+          break;
+        case "value":
+          this._updateValue();
+          break;
+        case "invalid":
+          this._updateInvalid();
+          break;
+      }
+
+    }
+
+  })
+
+</script>
+          <style>
+            eon-text[inline="true"] {
+  display: inline-block;
+  width: 200px;
+}
+eon-text[label=""][counter="false"] .eon-text-data {
+  display: none;
+}
+eon-text[type="area"] .eon-text-main {
+  display: block;
+}
+eon-text input {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+eon-text textarea.eon-text-editable {
+  height: 100%;
+  width: 100%;
+  background: transparent;
+  overflow: auto;
+  resize: none;
+}
+eon-text.focus .eon-text-underline:before,
+eon-text.focus .eon-text-underline:after {
+  width: 50%;
+}
+eon-text[disabled="true"] {
+  pointer-events: none;
+}
+eon-text.disabled .eon-text-editable:empty:before {
+  content: attr(placeholder);
+}
+.eon-text-data {
+  height: 18px;
+  margin-bottom: 5px;
+  flex-grow: 0;
+  display: flex;
+}
+.eon-text-label {
+  font-size: 15px;
+  height: 100%;
+  flex-grow: 1;
+}
+.eon-text-counter {
+  height: 100%;
+  flex-grow: 0;
+  font-size: 11px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.eon-text-main {
+  flex-grow: 1;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+.eon-text-editable:empty:before {
+  content: attr(placeholder);
+}
+.eon-text-editable,
+input {
+  font-family: sans-serif;
+  font-size: 15px;
+  padding: 0;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.eon-text-editable {
+  outline: none;
+  cursor: text;
+  word-wrap: break-word;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden;
+}
+.eon-text-editable div {
+  max-width: 100%;
+  word-wrap: break-word;
+}
+.eon-text-editable p {
+  margin: 0;
+}
+.eon-text-underline {
+  position: relative;
+  display: block;
+  width: auto;
+}
+.eon-text-underline:before,
+.eon-text-underline:after {
+  position: absolute;
+  bottom: 0px;
+  width: 0;
+  height: 2px;
+  content: "";
+  -webkit-transition: 0.5s ease all;
+  -moz-transition: 0.5s ease all;
+  transition: 0.5s ease all;
+}
+.eon-text-underline:before {
+  left: 50%;
+}
+.eon-text-underline:after {
+  right: 50%;
+}
+.eon-text-description {
+  margin-top: 5px;
+  font-size: 14px;
+  width: 100%;
+}
+          </style>
+          <style>
+            /*TEST*/
+/* Set 1 - Containers (appmenu, searchbar, datepicker, appmenu, grid, headerpanel,
+           loadingmask, menu, swiper, tab, tabs, togglemenu, video) */
+/* Set 2 - Elements (button, checkbox, combobox, spinner, text, 
+           radio, contextmenu, slider, treenode) */
+eon-text[theme="claro"],
+div[data-theme="claro"] eon-text,
+body[data-theme="claro"] eon-text {
+  /* - Chrome ≤56,
+  - Safari 5-10.0
+  - iOS Safari 4.2-10.2
+  - Opera 15-43
+  - Opera Mobile >12
+  - Android Browser 2.1-4.4.4
+  - Samsung Internet
+  - UC Browser for Android
+  - QQ Browser */
+  /* Firefox 4-18 */
+  /* Firefox 19-50 */
+  /* - Internet Explorer 10–11
+  - Internet Explorer Mobile 10-11 */
+  /* - Chrome ≤56,
+  - Safari 5-10.0
+  - iOS Safari 4.2-10.2
+  - Opera 15-43
+  - Opera Mobile >12
+  - Android Browser 2.1-4.4.4
+  - Samsung Internet
+  - UC Browser for Android
+  - QQ Browser */
+  /* Firefox 4-18 */
+  /* Firefox 19-50 */
+  /* - Internet Explorer 10–11
+  - Internet Explorer Mobile 10-11 */
+}
+eon-text[theme="claro"] .eon-text-editable:empty:before,
+div[data-theme="claro"] eon-text .eon-text-editable:empty:before,
+body[data-theme="claro"] eon-text .eon-text-editable:empty:before {
+  content: attr(placeholder);
+  color: #9a9a9a;
+}
+eon-text[theme="claro"] ::-webkit-input-placeholder,
+div[data-theme="claro"] eon-text ::-webkit-input-placeholder,
+body[data-theme="claro"] eon-text ::-webkit-input-placeholder {
+  color: #9a9a9a;
+}
+eon-text[theme="claro"] :-moz-placeholder,
+div[data-theme="claro"] eon-text :-moz-placeholder,
+body[data-theme="claro"] eon-text :-moz-placeholder {
+  color: #9a9a9a;
+}
+eon-text[theme="claro"] ::-moz-placeholder,
+div[data-theme="claro"] eon-text ::-moz-placeholder,
+body[data-theme="claro"] eon-text ::-moz-placeholder {
+  color: #9a9a9a;
+}
+eon-text[theme="claro"] :-ms-input-placeholder,
+div[data-theme="claro"] eon-text :-ms-input-placeholder,
+body[data-theme="claro"] eon-text :-ms-input-placeholder {
+  color: #9a9a9a !important;
+}
+eon-text[theme="claro"] .eon-text-underline:before,
+div[data-theme="claro"] eon-text .eon-text-underline:before,
+body[data-theme="claro"] eon-text .eon-text-underline:before,
+eon-text[theme="claro"] .eon-text-underline:after,
+div[data-theme="claro"] eon-text .eon-text-underline:after,
+body[data-theme="claro"] eon-text .eon-text-underline:after {
+  background: #47cce2;
+}
+eon-text[theme="claro"].focus .eon-text-label,
+div[data-theme="claro"] eon-text.focus .eon-text-label,
+body[data-theme="claro"] eon-text.focus .eon-text-label,
+eon-text[theme="claro"].focus .eon-text-counter,
+div[data-theme="claro"] eon-text.focus .eon-text-counter,
+body[data-theme="claro"] eon-text.focus .eon-text-counter {
+  color: #47cce2;
+}
+eon-text[theme="claro"].eon-text-error .eon-text-label,
+div[data-theme="claro"] eon-text.eon-text-error .eon-text-label,
+body[data-theme="claro"] eon-text.eon-text-error .eon-text-label,
+eon-text[theme="claro"].eon-text-error .eon-text-counter,
+div[data-theme="claro"] eon-text.eon-text-error .eon-text-counter,
+body[data-theme="claro"] eon-text.eon-text-error .eon-text-counter,
+eon-text[theme="claro"].eon-text-error .eon-text-description,
+div[data-theme="claro"] eon-text.eon-text-error .eon-text-description,
+body[data-theme="claro"] eon-text.eon-text-error .eon-text-description {
+  color: #c33232;
+}
+eon-text[theme="claro"].eon-text-error .eon-text-main,
+div[data-theme="claro"] eon-text.eon-text-error .eon-text-main,
+body[data-theme="claro"] eon-text.eon-text-error .eon-text-main {
+  border-bottom: 1px solid #c33232;
+}
+eon-text[theme="claro"].eon-text-error .eon-text-underline:before,
+div[data-theme="claro"] eon-text.eon-text-error .eon-text-underline:before,
+body[data-theme="claro"] eon-text.eon-text-error .eon-text-underline:before,
+eon-text[theme="claro"].eon-text-error .eon-text-underline:after,
+div[data-theme="claro"] eon-text.eon-text-error .eon-text-underline:after,
+body[data-theme="claro"] eon-text.eon-text-error .eon-text-underline:after {
+  background: #c33232;
+}
+eon-text[theme="claro"][disabled="true"] .eon-text-editable:empty:before,
+div[data-theme="claro"] eon-text[disabled="true"] .eon-text-editable:empty:before,
+body[data-theme="claro"] eon-text[disabled="true"] .eon-text-editable:empty:before {
+  color: #9a9a9a;
+}
+eon-text[theme="claro"][disabled="true"] ::-webkit-input-placeholder,
+div[data-theme="claro"] eon-text[disabled="true"] ::-webkit-input-placeholder,
+body[data-theme="claro"] eon-text[disabled="true"] ::-webkit-input-placeholder {
+  color: #9a9a9a;
+}
+eon-text[theme="claro"][disabled="true"] :-moz-placeholder,
+div[data-theme="claro"] eon-text[disabled="true"] :-moz-placeholder,
+body[data-theme="claro"] eon-text[disabled="true"] :-moz-placeholder {
+  color: #9a9a9a;
+}
+eon-text[theme="claro"][disabled="true"] ::-moz-placeholder,
+div[data-theme="claro"] eon-text[disabled="true"] ::-moz-placeholder,
+body[data-theme="claro"] eon-text[disabled="true"] ::-moz-placeholder {
+  color: #9a9a9a;
+}
+eon-text[theme="claro"][disabled="true"] :-ms-input-placeholder,
+div[data-theme="claro"] eon-text[disabled="true"] :-ms-input-placeholder,
+body[data-theme="claro"] eon-text[disabled="true"] :-ms-input-placeholder {
+  color: #9a9a9a !important;
+}
+eon-text[theme="claro"] input:disabled,
+div[data-theme="claro"] eon-text input:disabled,
+body[data-theme="claro"] eon-text input:disabled {
+  -webkit-text-fill-color: #cecece;
+  /* Override iOS / Android font color change */
+  -webkit-opacity: 1;
+  /* Override iOS opacity change affecting text & background color */
+}
+          </style>
+        </div>
+        <div class="eon-showcase-item-config">
+          <template>
+
+  <div class="eon-showcase-item-title"></div>
+  <div class="eon-showcase-item-content"></div>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-showcase-item",
+    style: "",
+
+    themed: false,
+
+    properties: {
+      /*
+        @property {String} title
+        @description 
+      */
+      title: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property {object} _refs
+        @description 
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+      /*
+        @property (private) {Object} _misc
+        @description 
+      */
+      misc: {
+        value: {},
+        reflect: false
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setUpRefs
+        @description 
+      */
+      setUpRefs: function () {
+        var el = this;
+
+        el._refs.title = el.template.querySelector(".eon-showcase-item-title");
+        el._refs.content = el.template.querySelector(".eon-showcase-item-content");
+      },
+      /*
+        @function (private) _setTitle
+        @description 
+      */
+      setTitle: function () {
+        var el = this;
+        el._refs.title.innerHTML = el.title;
+      },
+      /*
+        @function (private) _setContent
+        @description 
+      */
+      setContent: function () {
+        var el = this;
+        var srcNodes = el.getSourceElements();
+        var srcNode;
+
+        // Showcase item style
+        el.classList.add("eon-bg1");
+
+        // Move source children to the content element safely
+        while (srcNodes.length) {
+          // Get the shifted element
+          srcNode = srcNodes.shift();
+          // Append them to the tree
+          el._refs.content.appendChild(srcNode);
+        }
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      el._setUpRefs();
+    },
+    onInit: function () {
+      var el = this;
+      el._setTitle();
+      el._setContent();
+    },
+    onRender: function () {
+      var el = this;
+
+    }
+  });
+</script>
+          <style>
+            eon-showcase-item {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px;
+  box-sizing: border-box
+}
+.eon-showcase-item-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.eon-showcase-item-content {
+  height: calc(100% - 33px);
+}          </style>
+        </div>
+        <script>
+          // Insert and declare
+          for (var i = 0; i < elements.length; i++) {
+            var elementName = elements[i];
+            if (!(elementName in eon.imports.templates)) {
+              // Increment total
+              eon.imports.total++;
+              // Avoid duplicated imports while waiting XMLHttpRequest callback.
+              eon.imports.templates[elementName] = null;
+              eon.declare(elementName);
+              eon.insertFragment(elementName, document.querySelector("." + elementName + "-config").innerHTML);
+            }
+          }
+        </script>
     </div>
     <!-- EXAMPLES BODY -->
     <div class="template-body">

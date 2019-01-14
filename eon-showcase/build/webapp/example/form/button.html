@@ -6016,7 +6016,6 @@ eon.insertImport = function (href) {
 };
 
 eon.insertFragment = function (elementName, content) {
-    
     var importFragment = eon.fragmentFromString(content);
 
     var i;
@@ -6145,9 +6144,8 @@ eon.handleTemplateInterpolation = function (name) {
 
 // Imports specific componentes themes if specified
 eon.importSchemaThemes = function () {
-
-    if (eon.themeSchema) {
-
+  if (eon.themeSchema) {
+   
         var themes = Object.keys(eon.themeSchema);
         var documentHead = document.querySelector("head");
         var theme, themeElements, themeLink, themePath;
@@ -6213,7 +6211,7 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-
+        
         eon.registry.registerTheme(name, theme);
 
         elementLink.setAttribute("rel", "stylesheet");
@@ -6350,7 +6348,6 @@ eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
-
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
@@ -6360,11 +6357,11 @@ eon.handleConfigDependencies = function (name) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
                 dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
+                
                 eon.import(dependencyFile);
             }
         }
     }
-
     return hasDependencies;
 }
 
@@ -6540,6 +6537,7 @@ eon.registry.triggerReadyCallbacks = function () {
 };
 
 eon.registry.registerTheme = function (tagName, theme) {
+  
   if (!eon.registry.elementThemes[theme]) {
     eon.registry.elementThemes[theme] = {};
   }
@@ -7071,8 +7069,7 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath != "") {
-
+    if (stylePath != "" ) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
@@ -10011,12 +10008,473 @@ if (vpa.allowAmdRequire) {
   
 
 
+
         eon.theme = "claro";
-        // UI components
-        eon.import([
-          "eon/ui/eon-button",
-          "eon/ui/eon-showcase-item"
-        ]);
+      </script>
+      <!-- EON elements import configuration -->
+      <script>
+        eon.imports = eon.imports || {
+          count: 0,
+          total: 0,
+          ready: false
+        };
+        eon.imports.style = eon.imports.style || "";
+        eon.imports.scripts = eon.imports.scripts || {};
+        eon.imports.links = eon.imports.links || {};
+        eon.imports.templates = eon.imports.templates || {};
+        eon.imports.paths = eon.imports.paths || {};
+        eon.imports.config = eon.imports.config || {};
+
+        eon.imports.paths["eon-button"] = "eon/ui/eon-button/";
+        eon.registry.registerTheme("eon-button", "claro");
+
+        eon.imports.paths["eon-showcase-item"] = "eon/ui/eon-showcase-item/";
+        var elements = ["eon-button", "eon-showcase-item"];
+      </script>
+
+      <!-- Inject eon elements -->
+      <div class="eon-button-config">
+        <template>
+  <div class="eon-button-button eon-bg2-border eon-bg2-hoverable eon-fg2 eon-fg2-hoverable eon-unselectable"></div>
+</template>
+
+<!-- <script data-src="eon-button.js"></script> -->
+
+<script>
+  eon.element({
+
+    name: "eon-button",
+    style: "",
+
+    themed: false,
+
+    properties: {
+      /*
+        @property {String} label 
+        @description Button text
+      */
+      label: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} value 
+        @description Button text
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} disabled 
+        @description Button deactivation
+        Values can be: true o false
+        Default: false
+      */
+      disabled: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {String} type 
+        @description Only indicate for submit buttons
+        Values can be: submit or valueless
+        Default: valueless
+      */
+      type: {
+        value: "",
+        reflect: true
+      },
+      /*
+       @property {Boolean} inline 
+       @description Space that occupy the button inside parent container.
+       By default, its size adapts to its content
+       Values can be: true or false
+       Default: true
+     */
+      inline: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+        @property {String} icon 
+        @description Button icon
+      */
+      icon: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} iconPosition 
+        @description Button icon position with respect text
+        Values can be: left or right
+        Default: left
+      */
+      iconPosition: {
+        value: "left",
+        reflect: true
+      },
+      vicon: {
+        value: "",
+        reflect: true
+      }
+    },
+
+    functions: {
+      /*
+        @function setOnClick
+        @description Set onclick attribute
+        @param {String} functionality [Button onclick functionality]
+      */
+      setOnClick: function (functionality) {
+
+        this.setAttribute("onclick", functionality);
+      },
+
+    },
+
+    privateFunctions: {
+      /*
+        @function (private) _setLabel
+        @description Set new button text
+        @param {String} newVal [New button text]
+      */
+      setLabel: function () {
+        var el = this;
+        var button = el.querySelector(".eon-button-button");
+        var buttonText = document.createElement("div");
+
+        var label = el.label || (el.label && el.value) ? el.label : el.value;
+
+        if (label) {
+          // First time the button text is added
+          if (!el.hasAttribute("text")) {
+
+            buttonText.innerHTML = label;
+            button.appendChild(buttonText);
+            buttonText.classList.add("eon-button-buttonText");
+
+            // When the button text is dynamically changed
+          } else {
+            var oldText = button.querySelector(".eon-button-buttonText");
+
+            if (!oldText) {
+              buttonText.innerHTML = label;
+              button.appendChild(buttonText);
+              buttonText.classList.add("eon-button-buttonText");
+
+            } else {
+              buttonText.innerHTML = label;
+              var newText = buttonText;
+              newText.classList.add("eon-button-buttonText");
+              button.replaceChild(newText, oldText);
+            }
+
+          }
+
+        }
+
+        // When the button has no text is added an attribute
+        // so if the button has icon it will be placed centered
+        (!label) ? el.setAttribute("text", "false") : el.setAttribute("text", "true");
+      },
+      /*
+        @function (private) _setupIcon
+        @description Set new button icon
+        @param {String} newVal [New button icon]
+      */
+      setupIcon: function () {
+        var el = this;
+
+        if (el.vicon) {
+
+          var button = el.querySelector(".eon-button-button");
+          var vicon = document.createElement("i");
+          vicon.classList.add("vicon", el.vicon, "eon-button-buttonIcon");
+          button.appendChild(vicon);
+
+        } else if (el.icon) {
+          var button = el.querySelector(".eon-button-button");
+          var iconAttribute = el.icon;
+          var icon;
+
+          // When change the icon dynamically is necessary delete old icon
+          if (button.classList.contains("eon-button-addedIcon")) {
+            var oldIcon = el.querySelector(".eon-button-buttonIcon");
+
+            button.removeChild(oldIcon);
+          }
+
+          if (iconAttribute.indexOf("</i>") !== -1) {
+            var tempDiv = document.createElement("div");
+
+            tempDiv.innerHTML = iconAttribute;
+            icon = tempDiv.querySelector("i");
+            icon.classList.add("eon-button-buttonIcon");
+
+          } else {
+            icon = document.createElement("div");
+            icon.style.backgroundImage = "url('" + iconAttribute + "')";
+            icon.classList.add("eon-button-buttonIcon");
+          }
+
+          button.appendChild(icon);
+          button.classList.add("eon-button-addedIcon");
+        }
+      },
+
+      /*
+        @function (private) _updateDisabled
+        @description Update disabled status
+        @param {String} newVal [New value of disabled]
+      */
+      updateDisabled: function () {
+        var button = this.querySelector(".eon-button-button");
+
+        if (!eon.util.isTrue(this.disabled)) {
+          button.removeAttribute("disabled");
+          button.classList.remove("eon-fg2-disabled");
+          this.style.pointerEvents = "auto";
+
+        } else {
+
+          button.setAttribute("disabled", "true");
+          button.classList.add("eon-fg2-disabled");
+          this.style.pointerEvents = "none";
+
+        }
+      }
+    },
+
+    onRender: function () {
+      var el = this;
+      var button = el.querySelector(".eon-button-button");
+
+      el._setLabel();
+      el._updateDisabled();
+      el._setupIcon(el.icon);
+      // When the button is a type form submit
+      (el.type) ? button.setAttribute("type", el.type) : null;
+
+      el.setAttribute("icon-position", el.iconPosition);
+
+    },
+
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case "disabled":
+          this._updateDisabled();
+          break;
+        case "icon":
+          this._setupIcon();
+          break;
+        case "label":
+          this._setLabel();
+          break;
+        case "value":
+          this._setLabel();
+          break;
+      }
+    }
+  });
+</script>
+        <style>
+          eon-button[inline="true"] {
+  display: inline-block;
+}
+eon-button[inline="true"] .eon-button-button {
+  width: auto;
+}
+eon-button[icon-position="left"] .eon-button-button {
+  flex-direction: row-reverse;
+}
+eon-button[icon-position="left"] .eon-button-buttonIcon {
+  margin-right: 5px;
+}
+eon-button[icon-position="right"] .eon-button-button {
+  flex-direction: row;
+}
+eon-button[icon-position="right"] .eon-button-buttonIcon {
+  margin-left: 5px;
+  flex-direction: row;
+}
+eon-button[text="false"] .eon-button-buttonIcon {
+  margin-right: 0;
+  margin-left: 0;
+}
+eon-button[text="false"] .eon-button-button {
+  padding: 16px 5px;
+}
+eon-button[icon-position="left"][text="true"] .eon-button-addedIcon {
+  padding-left: 10px;
+}
+eon-button[icon-position="right"][text="true"] .eon-button-addedIcon {
+  padding-right: 10px;
+}
+.eon-button-button {
+  font-weight: bold;
+  position: relative;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  height: 30px;
+  padding: 16px;
+  cursor: pointer;
+  -webkit-transition: background-color ease 0.5s;
+  -moz-transition: background-color ease 0.5s;
+  transition: background-color ease 0.5s;
+  border-width: 3px;
+  border-style: solid;
+  align-items: center;
+  justify-content: center;
+}
+.eon-button-buttonIcon {
+  font-size: 22px;
+}
+        </style>
+        <style>
+          /*TEST*/
+/* Set 1 - Containers (appmenu, searchbar, datepicker, appmenu, grid, headerpanel,
+           loadingmask, menu, swiper, tab, tabs, togglemenu, video) */
+/* Set 2 - Elements (button, checkbox, combobox, spinner, text, 
+           radio, contextmenu, slider, treenode) */
+eon-button[theme="claro"] .eon-button-button,
+div[data-theme="claro"] eon-button .eon-button-button,
+body[data-theme="claro"] eon-button .eon-button-button {
+  transition: background-color ease 0.5s, color ease 0.2s;
+}
+        </style>
+      </div>
+      <div class="eon-showcase-item-config">
+        <template>
+
+  <div class="eon-showcase-item-title"></div>
+  <div class="eon-showcase-item-content"></div>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-showcase-item",
+    style: "",
+
+    themed: false,
+
+    properties: {
+      /*
+        @property {String} title
+        @description 
+      */
+      title: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property {object} _refs
+        @description 
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+      /*
+        @property (private) {Object} _misc
+        @description 
+      */
+      misc: {
+        value: {},
+        reflect: false
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setUpRefs
+        @description 
+      */
+      setUpRefs: function () {
+        var el = this;
+
+        el._refs.title = el.template.querySelector(".eon-showcase-item-title");
+        el._refs.content = el.template.querySelector(".eon-showcase-item-content");
+      },
+      /*
+        @function (private) _setTitle
+        @description 
+      */
+      setTitle: function () {
+        var el = this;
+        el._refs.title.innerHTML = el.title;
+      },
+      /*
+        @function (private) _setContent
+        @description 
+      */
+      setContent: function () {
+        var el = this;
+        var srcNodes = el.getSourceElements();
+        var srcNode;
+
+        // Showcase item style
+        el.classList.add("eon-bg1");
+
+        // Move source children to the content element safely
+        while (srcNodes.length) {
+          // Get the shifted element
+          srcNode = srcNodes.shift();
+          // Append them to the tree
+          el._refs.content.appendChild(srcNode);
+        }
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      el._setUpRefs();
+    },
+    onInit: function () {
+      var el = this;
+      el._setTitle();
+      el._setContent();
+    },
+    onRender: function () {
+      var el = this;
+
+    }
+  });
+</script>
+        <style>
+          eon-showcase-item {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px;
+  box-sizing: border-box
+}
+.eon-showcase-item-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.eon-showcase-item-content {
+  height: calc(100% - 33px);
+}        </style>
+      </div>
+      <script>
+        // Insert and declare
+        for (var i = 0; i < elements.length; i++) {
+          var elementName = elements[i];
+          if (!(elementName in eon.imports.templates)) {
+            // Increment total
+            eon.imports.total++;
+            // Avoid duplicated imports while waiting XMLHttpRequest callback.
+            eon.imports.templates[elementName] = null;
+            eon.declare(elementName);
+            eon.insertFragment(elementName, document.querySelector("." + elementName + "-config").innerHTML);
+          }
+        }
       </script>
     </div>
     <!-- EXAMPLES BODY -->

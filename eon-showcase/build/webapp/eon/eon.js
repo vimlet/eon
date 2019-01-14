@@ -3465,7 +3465,7 @@ eon.insertImport = function (href) {
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
-
+    
     // Cache
     eon.cache.add(href, { name: elementName });
 
@@ -3490,7 +3490,6 @@ eon.insertImport = function (href) {
 
         // Avoid duplicated imports while waiting XMLHttpRequest callback.
         eon.imports.templates[elementName] = null;
-
         // Saves the paths of the imported elements
         eon.imports.paths[elementName] = href.substring(0, href.length - href.match(/[^\/]*$/g)[0].length);
 
