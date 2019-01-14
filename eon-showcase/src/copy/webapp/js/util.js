@@ -15,7 +15,7 @@ function loadEonExamples() {
   refs.tree.onNodeSelected(function (node) {
     // Go to group file
     groupId = node._refs.parentNode.tagName == "EON-TREENODE" ? node._refs.parentNode.id : node.id;
-    console.log(groupId, node.id);
+    
     refs.view.swapToPanel(groupId);
     // Get active panel
     activePanel = refs.view.getActivePanel();
@@ -26,6 +26,7 @@ function loadEonExamples() {
       // Scroll to the specific element section
       panelScroll.scrollTop = [anchor.getOffsetPosition(), true];
     }
+    refs.drawer.close();
   });
   // Initialize forms
   eon.onReady(function(){
@@ -45,7 +46,6 @@ function toggleMenu(forceAction) {
 }
 
 function initializeShowcase(sectionsClass, pgClass, static) {
-
   // PROBABLY NECESSARY DUE TO EON-PANEL SCRIPTS MANAGEMENT (to be removed...)
   setTimeout(function () {
     // Initialize showcase
@@ -87,9 +87,9 @@ function initializeShowcase(sectionsClass, pgClass, static) {
 }
 
 function showcaseResizeListener(pg, innerDoc) {
-  var scrollContent, body, scroll;
+  var body;
   pg._misc.prevSize = pg.offsetHeight;
-  var delay = 100;
+  var delay = 250;
   var throttled = false;
   // Resize listener
   pg.onResize(function () {
@@ -117,8 +117,6 @@ function showcaseResizeListener(pg, innerDoc) {
 function setPgHeight(pg, size) {
   // Check null values
   if (size) {
-    console.log(pg,'SIZE', size,  pg.offsetHeight);
-    
     size = size < 250 ? 250 : size;
 
     var bodySize = size;
@@ -128,7 +126,6 @@ function setPgHeight(pg, size) {
       size = pg.offsetHeight;
     }
     
-    console.log('FINAL', size);
     pg.style.height = size + "px";
   }
 }

@@ -6,5 +6,6 @@ paths.example = "example/";
 refs.initialize = function(){
     // Store useful nodes references
     refs.tree = document.querySelector(".tTree");
+    refs.drawer = document.querySelector(".tTreeContainer");
     refs.view = document.querySelector("#tViewContent");
 }
