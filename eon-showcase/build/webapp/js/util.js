@@ -53,14 +53,13 @@ function initializeShowcase(sectionsClass, pgClass, static) {
     var pg = document.querySelector(pgClass);
 
     // Set showcase content
-    pg.onTransformed(function () {
+    pg.onReady(function () {
       var pgObj = {
         head: sections[0].innerHTML,
         body: sections[1].innerHTML,
         js: sections[2].innerHTML,
         css: sections[3].innerHTML
       };
-      console.log(pgClass, 'set');
 
       pg.setData(pgObj);
     });

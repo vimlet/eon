@@ -1,445 +1,466 @@
 <style>
-    eon-showcase eon-panel {
-      height: 100%;
-      width: 100%;
-      overflow: hidden !important;
-      position: relative;
-    }
-  
-    eon-showcase .eon-showcase-htmlTags-button {
-      cursor: pointer
-    }
-  
-    eon-showcase .eon-showcase-htmlTags-enabled {
-      color: white !important;
-    }
-  
-    eon-showcase .eon-showcase-editor-hidden {
-      display: none !important;
-    }
-  </style>
-  <template>
-    <eon-loading></eon-loading>
-    <div id="eon-showcase-content" class="eon-showcase-until-render"></div>
-  </template>
-  
-  <script>
-    eon.element({
-      name: "eon-showcase",
-      style: "eon-showcase.css",
-      dependencies: [
-        "../eon-editor",
-        "../eon-tabs",
-        "../eon-gutter",
-        "../eon-scroll",
-        "../eon-panel",
-        "../eon-loading"
-      ],
-      properties: {
-        head: {
-          value: "",
-          reflect: false
-        },
-        body: {
-          value: "",
-          reflect: false
-        },
-        js: {
-          value: "",
-          reflect: false
-        },
-        css: {
-          value: "",
-          reflect: false
-        },
-        htmlView: { // Single (one view at a time) Multiple (head and body at the same time)
-          value: "single",
-          reflect: true
-        }
-      },
-  
-      privateProperties: {
-        refs: {
-          value: {}
-        },
-        misc: {
-          value: {}
-        }
-      },
-  
-      privateFunctions: {
-        // @function init (private) [Set up showcase]
-        init: function () {
-          var el = this;
-          el._setStructure();
-        },
-        // @function setTabs (private) [Generate eon-tabs]
-        setTabs: function () {
-          var el = this;
-          el._refs.tabs = document.createElement("eon-tabs");
-          el._refs.tabs.dragging = false;
-          el._refs.tabs.closable = false;
-          el._refs.tabs.onTabSelected(function (tab) {
-            switch (tab.name) {
-              case "result":
-                el._showResult();
-                break;
-              case "html":
-                if (!el._refs.html) {
-                  el._setHtmlEditor();
-                }
-                if (el.htmlView != "single") {
-                  el._refs.htmlPanel.querySelector("eon-gutter").resize();
-                }
-                break;
-              case "css":
-                if (!el._refs.css) {
-                  el._setCssEditor();
-                }
-                break;
-              case "js":
-                if (!el._refs.js) {
-                  el._setJsEditor();
-                }
-                break;
-            }
-          });
-        },
-        // @function setResultTab (private) [Set up result tab]
-        setResultTab: function () {
-          var el = this;
-          var resultTab = document.createElement("eon-panel");
-          resultTab.allowScroll = false;
-          resultTab.scrollType = "none"
-          resultTab.name = "result";
-          resultTab.title = "Result";
-          el._refs.result = resultTab;
-          return resultTab;
-        },
-        // @function setHtmlTab (private) [Set up html tab, it contains head and body editors]
-        setHtmlTab: function () {
-          var el = this;
-          el._refs.htmlTab = document.createElement("eon-panel");
-          el._refs.htmlTab.allowScroll = false;
-          el._refs.htmlTab.name = "html";
-          el._refs.htmlTab.title = "Html";
-          return el._refs.htmlTab;
-        },
-        setHtmlEditor: function () {
-          var el = this;
-          if (el.htmlView != "single") {
-            el._setHmlMultipleEditor();
-          } else {
-            el._setHmlSingleEditor();
-          }
-        },
-        // @function setHmlMultipleEditor (private) [Set up multiple html view]
-        setHmlMultipleEditor: function () {
-          var el = this;
-          var htmlGutter = document.createElement("eon-gutter");
-          htmlGutter.collapsable = true;
-          htmlGutter.type = "vertical";
-          var headSection = document.createElement("eon-section");
-          var bodySection = document.createElement("eon-section");
-          el._refs.html = {};
-          el._refs.html.head = document.createElement("eon-editor");
-          el._refs.html.head.oneditorready(function (currentEditor) {
-            el._refs.html.head.setValue(el.head);
-          });
-          el._refs.html.head.onchange(function () {
-            el.head = el._refs.html.head.getValue();
-          });
-          el._refs.html.head.language = "html";
-          var headTag = document.createElement("div");
-          headTag.classList.add("eon-showcase-htmlTags");
-          headTag.innerHTML = "head";
-          headSection.appendChild(headTag);
-          el._refs.html.head.readonly = false;
-          el._refs.html.body = document.createElement("eon-editor");
-          el._refs.html.body.oneditorready(function () {
-            el._refs.html.body.setValue(el.body);
-          });
-          el._refs.html.body.onchange(function () {
-            el.body = el._refs.html.body.getValue();
-          });
-          el._refs.html.body.language = "html";
-          var bodyTag = document.createElement("div");
-          bodyTag.classList.add("eon-showcase-htmlTags");
-          bodyTag.innerHTML = "body";
-          bodySection.appendChild(bodyTag);
-          el._refs.html.body.readonly = false;
-          headSection.appendChild(el._refs.html.head);
-          bodySection.appendChild(el._refs.html.body);
-          htmlGutter.appendChild(headSection);
-          htmlGutter.appendChild(bodySection);
-  
-          // ** Check panel default style configuration
-          el._refs.htmlPanel = document.createElement("eon-panel");
-          el._refs.htmlPanel.allowScroll = false;
-          el._refs.htmlPanel.setAttribute("allow-scroll", false);
-          el._refs.htmlPanel.appendChild(htmlGutter);
-          el._refs.htmlTab.appendChild(el._refs.htmlPanel);
-        },
-        // @function setHmlSingleEditor (private) [Set up single html view]
-        setHmlSingleEditor: function () {
-          var el = this;
-          el._refs.html = {};
-          el._refs.html.body = document.createElement("eon-editor");
-          el._refs.html.body.oneditorready(function () {
-            el._refs.html.body.setValue(el.body);
-          });
-          el._refs.html.body.onchange(function () {
-            el.body = el._refs.html.body.getValue();
-          });
-          el._refs.html.body.language = "html";
-          var bodyTag = document.createElement("div");
-          bodyTag.classList.add("eon-showcase-htmlTags", "eon-showcase-htmlTags-button", "eon-showcase-htmlTags-enabled");
-          el._refs.html.enabledView = "html";
-          bodyTag.innerHTML = "html";
-          bodyTag.parent = el;
-          bodyTag.setAttribute("onclick", "this.parent.toggleSingleHtmlView('body');");
-          el._refs.html.body.readonly = false;
-          el._refs.htmlTab.content.appendChild(bodyTag);
-          el._refs.htmlTab.content.appendChild(el._refs.html.body);
-        },
-        // @function setJsTab (private) [Set up js tab]
-        setJsTab: function () {
-          var el = this;
-          el._refs.jsTab = document.createElement("eon-panel");
-          el._refs.jsTab.allowScroll = false;
-          el._refs.jsTab.name = "js";
-          el._refs.jsTab.title = "Js";
-          return el._refs.jsTab;
-        },
-        setJsEditor: function () {
-          var el = this;
-          var jsValue, rgx;
-          el._refs.js = document.createElement("eon-editor");
-          el._refs.js.minheight = 564;
-          el._refs.js.oneditorready(function () {
-            el._refs.js.setValue(el.js);
-          });
-          el._refs.js.onchange(function () {
-            if (!el._misc.loaded) {
-              // Hide showcase internal used code
-              rgx = /(\/\/\*\*)[^\*\*]*(\*\*)/mg;
-              jsValue = el.js.replace(rgx, "");
-              el._misc.loaded = true;
-              el._refs.js.setValue(jsValue);
-              
-            } else {
-              jsValue = el._refs.js.getValue();
-            }
-            el.js = jsValue;
-          });
-          el._refs.js.language = "javascript";
-          el._refs.js.readonly = false;
-          // ** Append section to the panel content (Spaced container if default style is active)
-          el._refs.jsTab.content.appendChild(el._refs.js);
-        },
-        // @function setCssTab (private) [Set up css tab]
-        setCssTab: function () {
-          var el = this;
-          el._refs.cssTab = document.createElement("eon-panel");
-          el._refs.cssTab.allowScroll = false;
-          el._refs.cssTab.name = "css";
-          el._refs.cssTab.title = "Css";
-          return el._refs.cssTab;
-        },
-        // @function setCssEditor (private) [Set up css editor]
-        setCssEditor: function () {
-          var el = this;
-          el._refs.css = document.createElement("eon-editor");
-          el._refs.css.minheight = 564;
-          el._refs.css.oneditorready(function () {
-            el._refs.css.setValue(el.css);
-          });
-          el._refs.css.onchange(function () {
-            el.css = el._refs.css.getValue();
-          });
-          el._refs.css.language = "css";
-          el._refs.css.readonly = false;
-          // ** Append section to the panel content (Spaced container if default style is active)
-          el._refs.cssTab.content.appendChild(el._refs.css);
-        },
-        // @function setStructure (private) [Set up showcase content]
-        setStructure: function () {
-          var el = this;
-          el._setTabs();
-          var resultTab = el._setResultTab();
-          var htmlTab = el._setHtmlTab();
-          var jsTab = el._setJsTab();
-          var cssTab = el._setCssTab();
-          el._refs.tabs.appendChild(resultTab);
-          el._refs.tabs.appendChild(htmlTab);
-          el._refs.tabs.appendChild(jsTab);
-          el._refs.tabs.appendChild(cssTab);
-          el.querySelector("#eon-showcase-content").appendChild(el._refs.tabs);
-          el.querySelector("#eon-showcase-content").querySelector(".eon-tabs-tabsSection").appendChild(
-            el._setFullSCreenBttn());
-          setTimeout(function () {
-            el._showResult();
-            console.log('show');
-            el._show();
-          }, 0);
-        },
-        setFullSCreenBttn: function () {
-          var el = this;
-          el._misc.fullscreen = false;
-          var fullScreenBtt = document.createElement("div");
-          fullScreenBtt.classList.add("eon-showcase-fullScreenBttn", "eon-fg1-hoverable");
-          el._refs.fullScreenIcon = document.createElement("i");
-          el._refs.fullScreenIcon.classList.add("vicon", "vicon-fullscreen");
-          fullScreenBtt.appendChild(el._refs.fullScreenIcon);
-          fullScreenBtt.setAttribute("onclick",
-            "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
-          return fullScreenBtt;
-        },
-        // @function refresh (private) [Update stored data to eon-editor]
-        refresh: function () {
-          var el = this;
-          
-          if (el._refs.html && el._refs.html.head) {
-            el._refs.html.head.setValue(el.head);
-          }
-          if (el._refs.html && el._refs.html.body) {
-            el._refs.html.body.setValue(el.body);
-          }
-          if (el._refs.js) {
-            el._refs.js.setValue(el.js);
-          }
-          if (el._refs.css) {
-            el._refs.css.setValue(el.css);
-          }
-          el._showResult();
-        },
-        // @function showResult (private) [Show result at iframe]
-        showResult: function () {
-          var el = this;
-          el._refs.result.innerHTML = "";
+  eon-showcase eon-panel {
+    height: 100%;
+    width: 100%;
+    overflow: hidden !important;
+    position: relative;
+  }
 
-          el._refs.test = el._refs.test ? el._refs.test : document.createElement("iframe");
-          var iframe = el._refs.test;
-          iframe.onload = function () {
-            var iframeContent = iframe.contentWindow.document || iframe.contentDocument;
-            var iframeSrc = el._getResultString();
-            iframeContent.open();
-            iframeContent.write(iframeSrc);
-            iframeContent.close();
-            el._refs.resizable = iframeContent;
-            // Trigger on content set callback
-            eon.triggerCallback("onContentSet", el, el, [iframe]);
-            el._show();
-          }
-          el._refs.result.appendChild(iframe);
-        },
-        // @function getResultString (private) [Format result into a string to be written at iframe]
-        getResultString: function () {
-          var el = this;
-          var iframeSrc = "<!DOCTYPE html><html><head>";
-          iframeSrc += el.head;
-          iframeSrc += "<style>";
-          iframeSrc += el.css;
-          iframeSrc += "</style>";
-          iframeSrc += "</head><body>" + el.body;
-          iframeSrc += "<script>";
-          iframeSrc += el.js;
-          iframeSrc += "<\/script>";
-          iframeSrc += "</body></html>";
-          return iframeSrc;
-        },
-        // @function show (private) [Hides loading mask and shows showcase]
-        show: function () {
-          var el = this;
-          el.querySelector("#eon-showcase-content").classList.remove("eon-showcase-until-render");
-          el.querySelector("eon-loading").hide();
-        },
-        hide: function () {
-          var el = this;
-          el.querySelector("#eon-showcase-content").classList.add("eon-showcase-until-render");
-          el.querySelector("eon-loading").show();
-        }
+  eon-showcase .eon-showcase-htmlTags-button {
+    cursor: pointer
+  }
+
+  eon-showcase .eon-showcase-htmlTags-enabled {
+    color: white !important;
+  }
+
+  eon-showcase .eon-showcase-editor-hidden {
+    display: none !important;
+  }
+</style>
+<template>
+  <eon-loading></eon-loading>
+  <div id="eon-showcase-content" class="eon-showcase-until-render"></div>
+</template>
+
+<script>
+  eon.element({
+    name: "eon-showcase",
+    style: "eon-showcase.css",
+    dependencies: [
+      "../eon-editor",
+      "../eon-tabs",
+      "../eon-gutter",
+      "../eon-scroll",
+      "../eon-panel",
+      "../eon-loading"
+    ],
+    properties: {
+      head: {
+        value: "",
+        reflect: false
       },
-      functions: {
-        // @function setData (public) [Set data to the showcase]
-        setData: function (data) {
-          var el = this;
-          // Show loading mask
-          el._hide();
-          if (data.js) {
-            el.js = data.js;
-          }
-          if (data.css) {
-            el.css = data.css;
-          }
-          if (data.head) {
-            el.head = data.head;
-          }
-          if (data.body) {
-            el.body = data.body;
-          }
-          el._refresh();
-        },
-        // @function toggleFullScreen (public) [Toggle full screen mode]
-        toggleFullScreen: function () {
-          var el = this;
-          el._misc.fullscreen = !el._misc.fullscreen;
-          if (el._misc.fullscreen) {
-            el._refs.fullScreenIcon.classList.add("vicon-fullscreen-exit");
-            el._refs.fullScreenIcon.classList.remove("vicon-fullscreen");
-            el.style.height = "100%";
-            el.style.width = "100%";
-            el.style.position = "fixed";
-            el.style.top = "0px";
-            el.style.left = "0px";
-            el.style.zIndex = "9999";
-            el._misc.parent = el.parentNode;
-            el._misc.nextSibling = el.nextSibling;
-            document.body.appendChild(el);
-            // Fire full screen activated event
-            eon.triggerCallback("onFullScreenActivated", el, el);
-          } else {
-            el._refs.fullScreenIcon.classList.add("vicon-fullscreen");
-            el._refs.fullScreenIcon.classList.remove("vicon-fullscreen-exit");
-            el.style = "";
-            if (el._misc.nextSibling) {
-              el._misc.parent.insertBefore(el, el._misc.nextSibling);
-            } else {
-              el._misc.parent.appendChild(el);
-            }
-            // Fire full screen deactivated event
-            eon.triggerCallback("onFullScreenDeactivated", el, el);
-          }
-          el._showResult();
-          if (el._refs.htmlPanel && el.htmlView != "single") {
-            el._refs.htmlPanel.querySelector("eon-gutter").resize();
-          }
-        },
-        // @function toggleSingleHtmlView (private) [Toggle between head and body in single html view]
-        toggleSingleHtmlView: function (toggleTo) {
-          var el = this;
-          if (el._refs.html.enabledView != toggleTo) {
-            var tags = el._refs.htmlTab.querySelectorAll(".eon-showcase-htmlTags");
-            tags.forEach(function (tag) {
-              tag.classList.toggle("eon-showcase-htmlTags-enabled");
-            });
-            el._refs.html.body.classList.toggle("eon-showcase-editor-hidden");
-            el._refs.html.head.classList.toggle("eon-showcase-editor-hidden");
-            el._refs.html.enabledView = toggleTo;
-          }
-        }
+      body: {
+        value: "",
+        reflect: false
       },
-  
-      onCreated: function () {
-        eon.createCallback("onContentSet", this);
-        eon.createCallback("onFullScreenActivated", this);
-        eon.createCallback("onFullScreenDeactivated", this);
+      js: {
+        value: "",
+        reflect: false
       },
-  
-      onTransformed: function () {
-        var el = this;
-        el._init();
+      css: {
+        value: "",
+        reflect: false
+      },
+      htmlView: { // Single (one view at a time) Multiple (head and body at the same time)
+        value: "single",
+        reflect: true
       }
-  
-    });
-  </script>
+    },
+
+    privateProperties: {
+      refs: {
+        value: {}
+      },
+      misc: {
+        value: {}
+      }
+    },
+
+    privateFunctions: {
+      // @function init (private) [Set up showcase]
+      init: function () {
+        var el = this;
+        el._setStructure();
+      },
+      // @function setTabs (private) [Generate eon-tabs]
+      setTabs: function () {
+        var el = this;
+        el._refs.tabs = document.createElement("eon-tabs");
+        el._refs.tabs.dragging = false;
+        el._refs.tabs.closable = false;
+        el._refs.tabs.onTabSelected(function (tab) {
+          switch (tab.name) {
+            case "result":
+              el._showResult();
+              break;
+            case "html":
+              if (!el._refs.html) {
+                el._setHtmlEditor();
+              }
+              if (el.htmlView != "single") {
+                el._refs.htmlPanel.querySelector("eon-gutter").resize();
+              }
+              break;
+            case "css":
+              if (!el._refs.css) {
+                el._setCssEditor();
+              }
+              break;
+            case "js":
+              if (!el._refs.js) {
+                el._setJsEditor();
+              }
+              break;
+          }
+        });
+      },
+      // @function setResultTab (private) [Set up result tab]
+      setResultTab: function () {
+        var el = this;
+        var resultTab = document.createElement("eon-panel");
+        resultTab.allowScroll = false;
+        resultTab.scrollType = "none"
+        resultTab.name = "result";
+        resultTab.title = "Result";
+        el._refs.result = resultTab;
+        return resultTab;
+      },
+      // @function setHtmlTab (private) [Set up html tab, it contains head and body editors]
+      setHtmlTab: function () {
+        var el = this;
+        el._refs.htmlTab = document.createElement("eon-panel");
+        el._refs.htmlTab.allowScroll = false;
+        el._refs.htmlTab.name = "html";
+        el._refs.htmlTab.title = "Html";
+        return el._refs.htmlTab;
+      },
+      setHtmlEditor: function () {
+        var el = this;
+        if (el.htmlView != "single") {
+          el._setHmlMultipleEditor();
+        } else {
+          el._setHmlSingleEditor();
+        }
+      },
+      // @function setHmlMultipleEditor (private) [Set up multiple html view]
+      setHmlMultipleEditor: function () {
+        var el = this;
+        var htmlGutter = document.createElement("eon-gutter");
+        htmlGutter.collapsable = true;
+        htmlGutter.type = "vertical";
+        var headSection = document.createElement("eon-section");
+        var bodySection = document.createElement("eon-section");
+        el._refs.html = {};
+        el._refs.html.head = document.createElement("eon-editor");
+        el._refs.html.head.oneditorready(function (currentEditor) {
+          el._refs.html.head.setValue(el.head);
+        });
+        el._refs.html.head.onchange(function () {
+          el.head = el._refs.html.head.getValue();
+        });
+        el._refs.html.head.language = "html";
+        var headTag = document.createElement("div");
+        headTag.classList.add("eon-showcase-htmlTags");
+        headTag.innerHTML = "head";
+        headSection.appendChild(headTag);
+        el._refs.html.head.readonly = false;
+        el._refs.html.body = document.createElement("eon-editor");
+        el._refs.html.body.oneditorready(function () {
+          el._refs.html.body.setValue(el.body);
+        });
+        el._refs.html.body.onchange(function () {
+          el.body = el._refs.html.body.getValue();
+        });
+        el._refs.html.body.language = "html";
+        var bodyTag = document.createElement("div");
+        bodyTag.classList.add("eon-showcase-htmlTags");
+        bodyTag.innerHTML = "body";
+        bodySection.appendChild(bodyTag);
+        el._refs.html.body.readonly = false;
+        headSection.appendChild(el._refs.html.head);
+        bodySection.appendChild(el._refs.html.body);
+        htmlGutter.appendChild(headSection);
+        htmlGutter.appendChild(bodySection);
+
+        // ** Check panel default style configuration
+        el._refs.htmlPanel = document.createElement("eon-panel");
+        el._refs.htmlPanel.allowScroll = false;
+        el._refs.htmlPanel.setAttribute("allow-scroll", false);
+        el._refs.htmlPanel.appendChild(htmlGutter);
+        el._refs.htmlTab.appendChild(el._refs.htmlPanel);
+      },
+      // @function setHmlSingleEditor (private) [Set up single html view]
+      setHmlSingleEditor: function () {
+        var el = this;
+        el._refs.html = {};
+        el._refs.html.body = document.createElement("eon-editor");
+        el._refs.html.body.oneditorready(function () {
+          el._refs.html.body.setValue(el.body);
+        });
+        el._refs.html.body.onchange(function () {
+          el.body = el._refs.html.body.getValue();
+        });
+        el._refs.html.body.language = "html";
+        var bodyTag = document.createElement("div");
+        bodyTag.classList.add("eon-showcase-htmlTags", "eon-showcase-htmlTags-button", "eon-showcase-htmlTags-enabled");
+        el._refs.html.enabledView = "html";
+        bodyTag.innerHTML = "html";
+        bodyTag.parent = el;
+        bodyTag.setAttribute("onclick", "this.parent.toggleSingleHtmlView('body');");
+        el._refs.html.body.readonly = false;
+        el._refs.htmlTab.content.appendChild(bodyTag);
+        el._refs.htmlTab.content.appendChild(el._refs.html.body);
+      },
+      // @function setJsTab (private) [Set up js tab]
+      setJsTab: function () {
+        var el = this;
+        el._refs.jsTab = document.createElement("eon-panel");
+        el._refs.jsTab.allowScroll = false;
+        el._refs.jsTab.name = "js";
+        el._refs.jsTab.title = "Js";
+        return el._refs.jsTab;
+      },
+      setJsEditor: function () {
+        var el = this;
+        var jsValue, rgx;
+        el._refs.js = document.createElement("eon-editor");
+        el._refs.js.minheight = 564;
+        el._refs.js.oneditorready(function () {
+          el._refs.js.setValue(el.js);
+        });
+        el._refs.js.onchange(function () {
+          if (!el._misc.loaded) {
+            // Hide showcase internal used code
+            rgx = /(\/\/\*\*)[^\*\*]*(\*\*)/mg;
+            jsValue = el.js.replace(rgx, "");
+            el._misc.loaded = true;
+            el._refs.js.setValue(jsValue);
+
+          } else {
+            jsValue = el._refs.js.getValue();
+          }
+          el.js = jsValue;
+        });
+        el._refs.js.language = "javascript";
+        el._refs.js.readonly = false;
+        // ** Append section to the panel content (Spaced container if default style is active)
+        el._refs.jsTab.content.appendChild(el._refs.js);
+      },
+      // @function setCssTab (private) [Set up css tab]
+      setCssTab: function () {
+        var el = this;
+        el._refs.cssTab = document.createElement("eon-panel");
+        el._refs.cssTab.allowScroll = false;
+        el._refs.cssTab.name = "css";
+        el._refs.cssTab.title = "Css";
+        return el._refs.cssTab;
+      },
+      // @function setCssEditor (private) [Set up css editor]
+      setCssEditor: function () {
+        var el = this;
+        el._refs.css = document.createElement("eon-editor");
+        el._refs.css.minheight = 564;
+        el._refs.css.oneditorready(function () {
+          el._refs.css.setValue(el.css);
+        });
+        el._refs.css.onchange(function () {
+          el.css = el._refs.css.getValue();
+        });
+        el._refs.css.language = "css";
+        el._refs.css.readonly = false;
+        // ** Append section to the panel content (Spaced container if default style is active)
+        el._refs.cssTab.content.appendChild(el._refs.css);
+      },
+      // @function setStructure (private) [Set up showcase content]
+      setStructure: function () {
+        var el = this;
+        el._setTabs();
+        var resultTab = el._setResultTab();
+        var htmlTab = el._setHtmlTab();
+        var jsTab = el._setJsTab();
+        var cssTab = el._setCssTab();
+        el._refs.tabs.appendChild(resultTab);
+        el._refs.tabs.appendChild(htmlTab);
+        el._refs.tabs.appendChild(jsTab);
+        el._refs.tabs.appendChild(cssTab);
+        el.querySelector("#eon-showcase-content").appendChild(el._refs.tabs);
+        el.querySelector("#eon-showcase-content").querySelector(".eon-tabs-tabsSection").appendChild(
+          el._setFullSCreenBttn());
+        setTimeout(function () {
+          // el._showResult();
+          // console.log('show');
+          el._show();
+        }, 0);
+      },
+      setFullSCreenBttn: function () {
+        var el = this;
+        el._misc.fullscreen = false;
+        var fullScreenBtt = document.createElement("div");
+        fullScreenBtt.classList.add("eon-showcase-fullScreenBttn", "eon-fg1-hoverable");
+        el._refs.fullScreenIcon = document.createElement("i");
+        el._refs.fullScreenIcon.classList.add("vicon", "vicon-fullscreen");
+        fullScreenBtt.appendChild(el._refs.fullScreenIcon);
+        fullScreenBtt.setAttribute("onclick",
+          "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
+        return fullScreenBtt;
+      },
+      // @function refresh (private) [Update stored data to eon-editor]
+      refresh: function () {
+        var el = this;
+
+        if (el._refs.html && el._refs.html.head) {
+          el._refs.html.head.setValue(el.head);
+        }
+        if (el._refs.html && el._refs.html.body) {
+          el._refs.html.body.setValue(el.body);
+        }
+        if (el._refs.js) {
+          el._refs.js.setValue(el.js);
+        }
+        if (el._refs.css) {
+          el._refs.css.setValue(el.css);
+        }
+        el._showResult();
+      },
+      // @function showResult (private) [Show result at iframe]
+      showResult: function () {
+        var el = this;
+        el._refs.result.innerHTML = "";
+        var iframe = document.createElement("iframe");
+        // iframe.src = "about:blank";
+        // iframe.scrolling = "no";
+        // iframe.frameborder = "0";
+        // iframe.allowTransparency = "true";
+        // console.log('append');
+
+        
+
+        // setTimeout(() => {
+
+        iframe.onload = function () {
+          var iframeContent = iframe.contentWindow.document || iframe.contentDocument;
+          var iframeSrc = el._getResultString();
+          // var Base64 = { _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=", encode: function (e) { var t = ""; var n, r, i, s, o, u, a; var f = 0; e = Base64._utf8_encode(e); while (f < e.length) { n = e.charCodeAt(f++); r = e.charCodeAt(f++); i = e.charCodeAt(f++); s = n >> 2; o = (n & 3) << 4 | r >> 4; u = (r & 15) << 2 | i >> 6; a = i & 63; if (isNaN(r)) { u = a = 64 } else if (isNaN(i)) { a = 64 } t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a) } return t }, decode: function (e) { var t = ""; var n, r, i; var s, o, u, a; var f = 0; e = e.replace(/++[++^A-Za-z0-9+/=]/g, ""); while (f < e.length) { s = this._keyStr.indexOf(e.charAt(f++)); o = this._keyStr.indexOf(e.charAt(f++)); u = this._keyStr.indexOf(e.charAt(f++)); a = this._keyStr.indexOf(e.charAt(f++)); n = s << 2 | o >> 4; r = (o & 15) << 4 | u >> 2; i = (u & 3) << 6 | a; t = t + String.fromCharCode(n); if (u != 64) { t = t + String.fromCharCode(r) } if (a != 64) { t = t + String.fromCharCode(i) } } t = Base64._utf8_decode(t); return t }, _utf8_encode: function (e) { e = e.replace(/\r\n/g, "n"); var t = ""; for (var n = 0; n < e.length; n++) { var r = e.charCodeAt(n); if (r < 128) { t += String.fromCharCode(r) } else if (r > 127 && r < 2048) { t += String.fromCharCode(r >> 6 | 192); t += String.fromCharCode(r & 63 | 128) } else { t += String.fromCharCode(r >> 12 | 224); t += String.fromCharCode(r >> 6 & 63 | 128); t += String.fromCharCode(r & 63 | 128) } } return t }, _utf8_decode: function (e) { var t = ""; var n = 0; var r = c1 = c2 = 0; while (n < e.length) { r = e.charCodeAt(n); if (r < 128) { t += String.fromCharCode(r); n++ } else if (r > 191 && r < 224) { c2 = e.charCodeAt(n + 1); t += String.fromCharCode((r & 31) << 6 | c2 & 63); n += 2 } else { c2 = e.charCodeAt(n + 1); c3 = e.charCodeAt(n + 2); t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63); n += 3 } } return t } }
+
+          // Encode the String
+          // var encodedString = Base64.encode(iframeSrc);
+          // console.log(encodedString); 
+          // Outputs: "SGVsbG8gV29ybGQh"
+
+          iframeContent.open();
+          iframeContent.write(iframeSrc);
+          iframeContent.close();
+          // // var iframeContent = "<html><body>\n\
+          // //   <div style='height: 200px;\n\
+          // //   width: 200px;\n\
+          // //   background: blue;'></div></body></html>";
+          // if (el.classList.contains("d-button-pg")) {
+          //   console.log(iframeSrc);
+
+          // }
+          // iframe.src = "data:text/html;base64," + encodedString;
+          el._refs.resizable = iframeContent;
+          // Trigger on content set callback
+          eon.triggerCallback("onContentSet", el, el, [iframe]);
+
+          // console.log('on load');
+        }
+        el._refs.result.appendChild(iframe);
+        // }, 100);
+
+      },
+      // @function getResultString (private) [Format result into a string to be written at iframe]
+      getResultString: function () {
+        var el = this;
+        var iframeSrc = "<!DOCTYPE html><html><head>";
+        iframeSrc += el.head;
+        iframeSrc += "<style>";
+        iframeSrc += el.css;
+        iframeSrc += "</style>";
+        iframeSrc += "</head><body>" + el.body;
+        iframeSrc += "<script>";
+        iframeSrc += el.js;
+        iframeSrc += "<\/script>";
+        iframeSrc += "</body></html>";
+        return iframeSrc;
+      },
+      // @function show (private) [Hides loading mask and shows showcase]
+      show: function () {
+        var el = this;
+        el.querySelector("#eon-showcase-content").classList.remove("eon-showcase-until-render");
+        el.querySelector("eon-loading").hide();
+      }
+    },
+    functions: {
+      // @function setData (public) [Set data to the showcase]
+      setData: function (data) {
+        var el = this;
+        if (data.js) {
+          el.js = data.js;
+        }
+        if (data.css) {
+          el.css = data.css;
+        }
+        if (data.head) {
+          el.head = data.head;
+        }
+        if (data.body) {
+          el.body = data.body;
+        }
+        el._refresh();
+      },
+      // @function toggleFullScreen (public) [Toggle full screen mode]
+      toggleFullScreen: function () {
+        var el = this;
+        el._misc.fullscreen = !el._misc.fullscreen;
+        if (el._misc.fullscreen) {
+          el._refs.fullScreenIcon.classList.add("vicon-fullscreen-exit");
+          el._refs.fullScreenIcon.classList.remove("vicon-fullscreen");
+          el.style.height = "100%";
+          el.style.width = "100%";
+          el.style.position = "fixed";
+          el.style.top = "0px";
+          el.style.left = "0px";
+          el.style.zIndex = "9999";
+          el._misc.parent = el.parentNode;
+          el._misc.nextSibling = el.nextSibling;
+          document.body.appendChild(el);
+          // Fire full screen activated event
+          eon.triggerCallback("onFullScreenActivated", el, el);
+        } else {
+          el._refs.fullScreenIcon.classList.add("vicon-fullscreen");
+          el._refs.fullScreenIcon.classList.remove("vicon-fullscreen-exit");
+          el.style = "";
+          if (el._misc.nextSibling) {
+            el._misc.parent.insertBefore(el, el._misc.nextSibling);
+          } else {
+            el._misc.parent.appendChild(el);
+          }
+          // Fire full screen deactivated event
+          eon.triggerCallback("onFullScreenDeactivated", el, el);
+        }
+        el._showResult();
+        if (el._refs.htmlPanel && el.htmlView != "single") {
+          el._refs.htmlPanel.querySelector("eon-gutter").resize();
+        }
+      },
+      // @function toggleSingleHtmlView (private) [Toggle between head and body in single html view]
+      toggleSingleHtmlView: function (toggleTo) {
+        var el = this;
+        if (el._refs.html.enabledView != toggleTo) {
+          var tags = el._refs.htmlTab.querySelectorAll(".eon-showcase-htmlTags");
+          tags.forEach(function (tag) {
+            tag.classList.toggle("eon-showcase-htmlTags-enabled");
+          });
+          el._refs.html.body.classList.toggle("eon-showcase-editor-hidden");
+          el._refs.html.head.classList.toggle("eon-showcase-editor-hidden");
+          el._refs.html.enabledView = toggleTo;
+        }
+      }
+    },
+
+    onCreated: function () {
+
+      eon.createCallback("onContentSet", this);
+      eon.createCallback("onFullScreenActivated", this);
+      eon.createCallback("onFullScreenDeactivated", this);
+    },
+
+    onReady: function () {
+      var el = this;
+      el._init();
+    }
+
+  });
+</script>
