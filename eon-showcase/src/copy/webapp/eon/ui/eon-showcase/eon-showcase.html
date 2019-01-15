@@ -279,6 +279,7 @@
             el._setFullSCreenBttn());
           setTimeout(function () {
             el._showResult();
+            console.log('show');
             el._show();
           }, 0);
         },
@@ -297,6 +298,7 @@
         // @function refresh (private) [Update stored data to eon-editor]
         refresh: function () {
           var el = this;
+          
           if (el._refs.html && el._refs.html.head) {
             el._refs.html.head.setValue(el.head);
           }
@@ -315,7 +317,9 @@
         showResult: function () {
           var el = this;
           el._refs.result.innerHTML = "";
-          var iframe = document.createElement("iframe");
+
+          el._refs.test = el._refs.test ? el._refs.test : document.createElement("iframe");
+          var iframe = el._refs.test;
           iframe.onload = function () {
             var iframeContent = iframe.contentWindow.document || iframe.contentDocument;
             var iframeSrc = el._getResultString();
@@ -325,6 +329,7 @@
             el._refs.resizable = iframeContent;
             // Trigger on content set callback
             eon.triggerCallback("onContentSet", el, el, [iframe]);
+            el._show();
           }
           el._refs.result.appendChild(iframe);
         },
@@ -348,12 +353,19 @@
           var el = this;
           el.querySelector("#eon-showcase-content").classList.remove("eon-showcase-until-render");
           el.querySelector("eon-loading").hide();
+        },
+        hide: function () {
+          var el = this;
+          el.querySelector("#eon-showcase-content").classList.add("eon-showcase-until-render");
+          el.querySelector("eon-loading").show();
         }
       },
       functions: {
         // @function setData (public) [Set data to the showcase]
         setData: function (data) {
           var el = this;
+          // Show loading mask
+          el._hide();
           if (data.js) {
             el.js = data.js;
           }
@@ -424,11 +436,10 @@
         eon.createCallback("onFullScreenDeactivated", this);
       },
   
-      onReady: function () {
+      onTransformed: function () {
         var el = this;
         el._init();
-      },
-  
+      }
   
     });
   </script>

@@ -15,7 +15,7 @@ function loadEonExamples() {
   refs.tree.onNodeSelected(function (node) {
     // Go to group file
     groupId = node._refs.parentNode.tagName == "EON-TREENODE" ? node._refs.parentNode.id : node.id;
-    
+
     refs.view.swapToPanel(groupId);
     // Get active panel
     activePanel = refs.view.getActivePanel();
@@ -29,8 +29,8 @@ function loadEonExamples() {
     refs.drawer.close();
   });
   // Initialize forms
-  eon.onReady(function(){
-    refs.view._misc.activePanel.onLoad(function(){
+  eon.onReady(function () {
+    refs.view._misc.activePanel.onLoad(function () {
       this.render()
     });
   });
@@ -51,22 +51,23 @@ function initializeShowcase(sectionsClass, pgClass, static) {
     // Initialize showcase
     var sections = document.querySelector(sectionsClass).content.children;
     var pg = document.querySelector(pgClass);
-    var scrollContent;
 
     // Set showcase content
-    pg.onReady(function () {
+    pg.onTransformed(function () {
       var pgObj = {
         head: sections[0].innerHTML,
         body: sections[1].innerHTML,
         js: sections[2].innerHTML,
         css: sections[3].innerHTML
       };
+      console.log(pgClass, 'set');
+
       pg.setData(pgObj);
     });
 
     if (!static) {
       // Get content height
-      pg.onContentSet(function (iframe) {        
+      pg.onContentSet(function (iframe) {
         // Iframe on content loaded 
         eon.createCallback("onLoaded", iframe);
         // Make showcase fit its iframe content
@@ -120,12 +121,12 @@ function setPgHeight(pg, size) {
     size = size < 250 ? 250 : size;
 
     var bodySize = size;
-    if(bodySize >= pg.offsetHeight || pg.offsetHeight - 37 >= bodySize) {
+    if (bodySize >= pg.offsetHeight || pg.offsetHeight - 37 >= bodySize) {
       size = bodySize + 37;
-    } else  {
+    } else {
       size = pg.offsetHeight;
     }
-    
+
     pg.style.height = size + "px";
   }
 }
