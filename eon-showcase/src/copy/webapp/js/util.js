@@ -26,12 +26,14 @@ function loadEonExamples() {
       // Scroll to the specific element section
       panelScroll.scrollTop = [anchor.getOffsetPosition(), true];
     }
-    refs.drawer.close();
+    if (eon.util.isTrue(node.initExpanded)) {
+      refs.drawer.close();
+    }
   });
   // Initialize forms
   eon.onReady(function () {
     refs.view._misc.activePanel.onLoad(function () {
-      this.render()
+      this.render();
     });
   });
 }
@@ -45,7 +47,7 @@ function toggleMenu(forceAction) {
   }
 }
 
-function initializeShowcase(sectionsClass, pgClass, static) {
+function initializeShowcase(sectionsClass, pgClass) {
   // PROBABLY NECESSARY DUE TO EON-PANEL SCRIPTS MANAGEMENT (to be removed...)
   setTimeout(function () {
     // Initialize showcase
@@ -53,36 +55,52 @@ function initializeShowcase(sectionsClass, pgClass, static) {
     var pg = document.querySelector(pgClass);
 
     // Set showcase content
-    pg.onReady(function () {
-      var pgObj = {
-        head: sections[0].innerHTML,
-        body: sections[1].innerHTML,
-        js: sections[2].innerHTML,
-        css: sections[3].innerHTML
-      };
-
-      pg.setData(pgObj);
-    });
-
-    if (!static) {
-      // Get content height
-      pg.onContentSet(function (iframe) {
-        // Iframe on content loaded 
-        eon.createCallback("onLoaded", iframe);
-        // Make showcase fit its iframe content
-        iframe.onLoaded(function () {
-          var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-          var body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
-
-          setPgHeight(pg, body.offsetHeight);
-
-          // Showcase resize listener
-          showcaseResizeListener(pg, innerDoc);
-          // Showcase fullscreen listeners
-          fullScreenListeners(pg);
+    if (!~[".d-button-pg", 
+    ".d-checkbox-pg", 
+  ].indexOf(pgClass)) {
+      setTimeout(function () {
+        pg.onReady(function () {
+          var pgObj = {
+            head: sections[0].innerHTML,
+            body: sections[1].innerHTML,
+            js: sections[2].innerHTML,
+            css: sections[3].innerHTML
+          };
+          pg.setData(pgObj);
         });
-      });
+      }, 1600);
+    } else {
+      pg.onReady(function () {
+        var pgObj = {
+          head: sections[0].innerHTML,
+          body: sections[1].innerHTML,
+          js: sections[2].innerHTML,
+          css: sections[3].innerHTML
+        };
+        pg.setData(pgObj);
+      })
     }
+
+    // Get content height
+    pg.onContentSet(function (iframe) {
+      // Iframe on content loaded 
+      eon.createCallback("onLoaded", iframe);
+      // Make showcase fit its iframe content
+      iframe.onLoaded(function () {
+        // Load next showcase sections
+        loadNextSections(pgClass);
+        
+        var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+        var body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
+
+        setPgHeight(pg, body.offsetHeight);
+
+        // Showcase resize listener
+        showcaseResizeListener(pg, innerDoc);
+        // Showcase fullscreen listeners
+        fullScreenListeners(pg);
+      });
+    });
   }, 0);
 }
 
@@ -139,5 +157,18 @@ function fullScreenListeners(pg) {
   // Full screen deactivated listener
   pg.onFullScreenDeactivated(function () {
     pg._misc.fullScreenActivated = false;
+  });
+}
+
+function loadNextSections(pgClass) {
+  refs.view._misc.panels.containers.onLoad(function () {
+    if (pgClass == ".d-button-pg" && Object.keys(refs.view._misc.panels.containers._refs.templates).length) {
+      // alert(refs.view._misc.panels.containers._refs.templates[0]);
+      
+      refs.view._misc.panels.containers.render();
+      refs.view._misc.panels.media.render();
+      refs.view._misc.panels.menus.render();
+      refs.view._misc.panels.other.render();
+    }
   });
 }

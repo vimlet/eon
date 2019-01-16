@@ -6271,7 +6271,7 @@ eon.util.getBrowser = function () {
     browserName = "Edge";
   }
   // Chrome 1+
-  if (window.chrome && window.chrome.webstore) {
+  if (window.chrome || window.chrome.webstore) {
     browserName = "Chrome";
   }
   // Firefox 1.0+
