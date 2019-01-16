@@ -6024,7 +6024,6 @@ eon.insertImport = function (href) {
 };
 
 eon.insertFragment = function (elementName, content) {
-    
     var importFragment = eon.fragmentFromString(content);
 
     var i;
@@ -6153,9 +6152,8 @@ eon.handleTemplateInterpolation = function (name) {
 
 // Imports specific componentes themes if specified
 eon.importSchemaThemes = function () {
-
-    if (eon.themeSchema) {
-
+  if (eon.themeSchema) {
+   
         var themes = Object.keys(eon.themeSchema);
         var documentHead = document.querySelector("head");
         var theme, themeElements, themeLink, themePath;
@@ -6221,7 +6219,7 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-
+        
         eon.registry.registerTheme(name, theme);
 
         elementLink.setAttribute("rel", "stylesheet");
@@ -6358,7 +6356,6 @@ eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
     var dependencyName, dependencyPath, dependencyFile;
-
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
@@ -6368,11 +6365,11 @@ eon.handleConfigDependencies = function (name) {
                 hasDependencies = true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
                 dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
+                
                 eon.import(dependencyFile);
             }
         }
     }
-
     return hasDependencies;
 }
 
@@ -6548,6 +6545,7 @@ eon.registry.triggerReadyCallbacks = function () {
 };
 
 eon.registry.registerTheme = function (tagName, theme) {
+  
   if (!eon.registry.elementThemes[theme]) {
     eon.registry.elementThemes[theme] = {};
   }
@@ -7079,8 +7077,7 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath != "") {
-
+    if (stylePath != "" ) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
@@ -10019,13 +10016,1084 @@ if (vpa.allowAmdRequire) {
   
 
 
+
         eon.theme = "claro";
-        // UI components
-        eon.import([
-          "eon/ui/eon-slider",
-          "eon/ui/eon-showcase-item"
-        ]);
       </script>
+      <!-- EON elements import configuration -->
+      <script>
+          eon.imports = eon.imports || {
+            count: 0,
+            total: 0,
+            ready: false
+          };
+          eon.imports.style = eon.imports.style || "";
+          eon.imports.scripts = eon.imports.scripts || {};
+          eon.imports.links = eon.imports.links || {};
+          eon.imports.templates = eon.imports.templates || {};
+          eon.imports.paths = eon.imports.paths || {};
+          eon.imports.config = eon.imports.config || {};
+  
+          eon.imports.paths["eon-slider"] = "eon/ui/eon-slider/";
+          eon.registry.registerTheme("eon-slider", "claro");
+  
+          eon.imports.paths["eon-showcase-item"] = "eon/ui/eon-showcase-item/";
+          var elements = ["eon-slider", "eon-showcase-item"];
+        </script>
+  
+        <!-- Inject eon elements -->
+        <div class="eon-slider-config">
+          <template>
+
+  <div class="eon-slider-wrapper eon-fg1 eon-unselectable">
+    <div class="eon-slider-shell">
+
+      <div class="eon-slider-track eon-bg5"></div>
+      <input class="eon-slider-slider" type="range" />
+      <div class="eon-slider-fill">
+        <div class="eon-slider-thumb"></div>
+      </div>
+
+    </div>
+
+    <div class="eon-slider-display">0</div>
+  </div>
+
+  <div class="eon-slider-description"></div>
+
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-slider",
+    style: "",
+
+    themed: true,
+
+    properties: {
+
+      /*
+        @property {String} name 
+        @description Slider name
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} value 
+        @description Slider value
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Number} default
+      @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+      */
+      default: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Number} min 
+        @description Slider minimum range value
+        Value must be an integer
+      */
+      min: {
+        value: 0,
+        reflect: true
+      },
+      /*
+        @property {Number} max 
+        @description Slider maximum range value
+        Value must be an integer
+      */
+      max: {
+        value: 100,
+        reflect: true
+      },
+      /*
+        @property {Boolean} disabled 
+        @description Slider deactivation
+        Default: false
+      */
+      disabled: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} readonly 
+        @description Toggles the readonly status of the spinner
+        Default: false
+      */
+      readonly: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {String} orientation 
+        @description Slider orientation
+        Values can be: horizontal or vertical
+        Default: horizontal
+      */
+      orientation: {
+        value: "horizontal",
+        reflect: true
+      },
+      /*
+        @property {String} size 
+        @description Slider size respect to container
+        Value must be number percentage
+        Default: 50%
+      */
+      size: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} displayVisibility 
+        @description Slider range value visibility
+        Default: false
+      */
+      displayVisibility: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {String} displayAlign 
+        @description Slider range value align
+        Different depending the orientation of the slider
+        Vertical slider: center
+        Horizontal slider: center, left or right
+        Default: right
+      */
+      displayAlign: {
+        value: "right",
+        reflect: true
+      },
+      /*
+        @property {String} displayPosition 
+        @description Slider range value position
+        Different depending the orientation of the slider
+        Vertical slider: top, bottom, left or right
+        Horizontal slider: top & bottom
+        Default: bottom
+      */
+      displayPosition: {
+        value: "bottom",
+        reflect: true
+      },
+      /*
+       @property {Boolean} inline 
+       @description Space that occupy the slider inside parent container.
+       By default, its size adapts to its content
+       Values can be: true or false
+       Default: true
+     */
+      inline: {
+        value: true,
+        reflect: true
+      },
+      /*
+      @property {String} tooltip
+      @description Text to be shown for the element
+      */
+      tooltip: {
+        value: "",
+        reflect: true,
+        reflectDefault: false
+      },
+      /*
+      @property {Boolean} invalid
+      @description Whether the element meets the requirements or not
+      */
+      invalid: {
+        value: false,
+        reflect: true,
+        reflectDefault: false
+      }
+    },
+
+    privateProperties: {
+      /*
+        @property (private) {String} _formElement 
+        @description Set that slider is a form element
+        Value: slider
+      */
+      formElement: {
+        value: "slider"
+      },
+      /*
+        @property (private) {String} _currentValue
+        @description Current slider value
+     */
+      currentValue: {
+        value: ""
+      },
+      /*
+        @property (private) {Object} _thumbEvent
+        @description Store slider thumb event
+      */
+      thumbEvent: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _refs 
+        @description Object with  references
+      */
+      refs: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _misc 
+        @description Stores slider useful data.
+      */
+      misc: {
+        value: {}
+      },
+    },
+    functions: {
+      /*
+      @function clear
+      @description Empties the value
+      */
+      clear: function () {
+        this.value = 0;
+      },
+      /*
+      @function reset
+      @description Resets the value of the element to the default one, if no default is provided then empties the value
+      */
+      reset: function () {
+        var el = this;
+
+        if (el.default != "") {
+          el.value = el.default;
+        } else {
+          el.clear();
+        }
+
+      },
+
+      /*
+      @function updateDescription
+      @description Updates the description value for the element
+      */
+      updateDescription: function (text) {
+        this._misc.descriptionText = text;
+        this._refs.description.innerHTML = this._misc.descriptionText;
+      },
+      /*
+      @function resetDescription
+      @description Updates the description value for the element
+      */
+      resetDescription: function () {
+
+        var el = this;
+        var description = el.tooltip != "" ? el.tooltip : "";
+
+        el._misc.descriptionText = description;
+        el._refs.description.innerHTML = description;
+
+      }
+    },
+    privateFunctions: {
+
+      /*
+      @function (private) {String} _setupDescription
+      @description Creates the touch blur
+      */
+      setupDescription: function () {
+
+        var el = this;
+
+        if (el.tooltip != "") {
+          el.updateDescription(el.tooltip);
+        }
+
+      },
+
+      /*
+        @function (private) _setValue
+        @param {String} newVal [new slider value]
+      */
+      setValue: function () {
+        var el = this;
+        el._refs.slider.value = el.value;
+        el._currentValue = el.value;
+        el._updateSlider(true);
+
+        if (el.orientation == "vertical") {
+          el._updateVerticalHeight();
+        }
+
+        eon.triggerCallback("onChange", el);
+
+      },
+      /*
+        @function (private) _createRefs
+        @description Creates fast access to elements
+      */
+      createRefs: function () {
+        var el = this;
+
+        el._refs.shell = el.template.querySelector(".eon-slider-shell");
+        el._refs.track = el.template.querySelector(".eon-slider-track");
+        el._refs.slider = el.template.querySelector(".eon-slider-slider");
+        el._refs.fill = el.template.querySelector(".eon-slider-fill");
+        el._refs.thumb = el.template.querySelector(".eon-slider-thumb");
+        el._refs.range = el.template.querySelector(".eon-slider-display");
+        el._refs.description = el.template.querySelector(".eon-slider-description");
+      },
+      /*
+        @function (private) _updateSlider
+        @description Update slider view
+        @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
+      */
+      updateSlider: function (privateValueKey) {
+        var el = this;
+
+        var sliderVal = el._refs.slider.value;
+        var thumbPosition = -5.7;
+        el._misc.percentValue = (sliderVal - el._refs.slider.min) / (el._refs.slider.max - el._refs.slider.min); /* percentage slider value */
+        var valueKey = privateValueKey ? "__value" : "value";
+
+        el._refs.range.innerHTML = sliderVal;
+        (el.orientation == "horizontal") ? el._horizontalSlider() : el._verticalSlider();
+        el[valueKey] = el._refs.slider.value;
+        el._refs.slider.setAttribute("value", el._refs.slider.value);
+      },
+
+
+      /*
+      @function (private) _horizontalSlider
+      @description Specify horizontal slider view style
+      */
+      horizontalSlider: function () {
+        var el = this;
+        var trackSize = 100;
+
+        el.style.width = (el.size) ? el.size : el.offsetWidth;
+        el._refs.fill.style.width = (el._misc.percentValue * trackSize) + "%";
+        el._refs.track.style.width = trackSize + "%"; /* adjust for border */
+      },
+
+      /*
+        @function (private) _verticalSlider
+        @description Specify vertical slider view style
+      */
+      verticalSlider: function () {
+        var el = this;
+
+        // If its the first the verticalSlider is called then we have
+        // to invert the width and height
+        if (el._misc.first) {
+          // Stores the width of the input when it is horizontal,
+          // then use it as height when it is vertical
+          var actualNodeWidth = el.offsetWidth;
+          el._misc.first = false;
+
+          // Sets an automatic width for the vertical slider, because the value of the height when
+          // it was horizontal may not be a correct measurement
+          el.style.width = "auto";
+
+          // Sets height of slider depending on the properties inline and size 
+          if (eon.util.isTrue(el.inline)) {
+            el.style.height = el.size == "" ? "auto" : el.size;
+          } else {
+            el.style.height = el.size;
+          }
+
+          // Sets the property to place the slider in vertical for IE and Firefox browsers
+          (eon.util.getBrowser() == "Firefox" || eon.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
+        }
+
+      },
+
+      /*
+        @function (private) _thumbMotion
+        @description Slider thumb movement and update slider value
+      */
+      thumbMotion: function () {
+        var el = this;
+
+        el._refs.thumb.addEventListener("pointerdown", startThumb, false);
+        el._thumbEvent = startThumb;
+
+        function startThumb(e) {
+          if (!eon.util.isTrue(el.readonly)) {
+            el._startY = e.clientY;
+            document.addEventListener("pointermove", moveThumb, false);
+            document.addEventListener("pointerup", function stopThumb(e) {
+
+              document.removeEventListener("pointermove", moveThumb, false);
+              document.removeEventListener("pointerup", stopThumb, false);
+            }, false);
+          }
+        }
+
+        function moveThumb(e) {
+          el._interactionSlider(e);
+          el._updateCurrentValue();
+        }
+
+      },
+
+      /*
+        @function (private) _interactionSlider
+        @description Functionality when interacting with the slider
+        Only for thumb interaction and click interaction on iOS devices
+        @param {Object} e [Event]
+      */
+      interactionSlider: function (e) {
+        var el = this;
+        var trackSize;
+        var max = parseInt(el.max);
+        var min = parseInt(el.min);
+
+        if (el.orientation == "horizontal") {
+          trackSize = el._refs.slider.offsetWidth;
+          var shellLeft = el._refs.shell.getBoundingClientRect().left;
+          var trackRight = shellLeft + trackSize;
+
+          if (e.clientX <= trackRight && e.clientX >= shellLeft) {
+            el._refs.slider.value = (((e.clientX - shellLeft) / trackSize) * (max - min)) + min;
+            el._updateSlider();
+          }
+
+        } else {
+          trackSize = el._refs.slider.offsetHeight;
+          var shellTop = el._refs.shell.getBoundingClientRect().top;
+          var trackBottom = shellTop + trackSize;
+          var sliderNode = parseInt(el._refs.slider.value);
+          var positionDiff;
+
+          if (e.clientY <= trackBottom && e.clientY >= shellTop) {
+
+            // When interaction is moving the thumb
+            if (el._startY) {
+              positionDiff = el._startY - e.clientY;
+              el._startY = e.clientY;
+
+              // Vertical click slider on iOS
+            } else {
+              positionDiff = el._refs.fill.getBoundingClientRect().top - e.clientY;
+            }
+
+            el._refs.fill.style.height = (el._refs.fill.offsetHeight + positionDiff) + "px";
+            el._refs.slider.value = ((el._refs.fill.offsetHeight / trackSize) * (max - min)) + min;
+            el._refs.range.innerHTML = el._refs.slider.value;
+            el.value = el._refs.slider.value;
+          }
+        }
+      },
+
+      /*
+        @function (private) _setSliderListeners
+        @description Sets slider listeners
+      */
+      setSliderListeners: function () {
+        var el = this;
+
+        // On IE, Safari and IOS devices not work event "input"
+        // So is necessary a click event
+        el._refs.slider.addEventListener("click", function (e) {
+          if (!eon.util.isTrue(el.readonly)) {
+            if (eon.util.getBrowser() == "IE" || eon.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
+              // On iOS devices and IE clicking on the input does not update its status
+              // Is is necessary  to do it programmatically
+              el._interactionSlider(e);
+              el._updateCurrentValue();
+            }
+            // For the vertical slider it is necessary to update its height when clicking
+            el._updateVerticalHeight();
+
+          }
+        }, false);
+
+        el._refs.slider.addEventListener("input", function (e) {
+          if (!eon.util.isTrue(el.readonly)) {
+            el._updateSlider();
+            el._updateCurrentValue();
+          }
+        }, false);
+      },
+
+      /*
+        @function (private) _updateDisabled
+        @description Updates disabled status and activates the thumb motion when it is not disabled
+      */
+      updateDisabled: function () {
+        var el = this;
+
+        if (!eon.util.isTrue(el.disabled)) {
+          el._refs.slider.removeAttribute("disabled");
+          el._refs.shell.classList.remove("eon-slider-disabled");
+          el._refs.fill.classList.remove("eon-bg5-disabled");
+          el._refs.fill.classList.add("eon-fg3");
+          el._refs.thumb.classList.remove("eon-bg5-disabled");
+          el._refs.thumb.classList.add("eon-fg3");
+          el._refs.track.classList.remove("eon-bg5-disabled");
+
+          el._thumbMotion();
+
+        } else {
+          el._refs.slider.setAttribute("disabled", "true");
+          el._refs.shell.classList.add("eon-slider-disabled");
+          el._refs.fill.classList.add("eon-bg5-disabled");
+          el._refs.fill.classList.remove("eon-fg3");
+          el._refs.thumb.classList.add("eon-bg5-disabled");
+          el._refs.thumb.classList.remove("eon-fg3");
+          el._refs.track.classList.add("eon-bg5-disabled");
+          el._refs.thumb.removeEventListener("pointerdown", el._thumbEvent, false);
+        }
+
+      },
+
+      /*
+      @function (private) _updateReadonly
+      @description Updates readonly status
+      */
+      updateReadonly: function () {
+        var el = this;
+
+        if (eon.util.isTrue(el.readonly)) {
+          el._refs.slider.setAttribute("readonly", "true");
+        } else {
+          el._refs.slider.removeAttribute("readonly");
+        }
+
+      },
+
+      /*
+      @function (private) _updateInvalid
+      @description Updates the invalid status
+      */
+      updateInvalid: function () {
+
+        var el = this;
+        var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
+
+        el.classList[classListFn]("eon-slider-error");
+
+      },
+
+      /*
+        @function (private) _updateCurrentValue
+        @description Updates slider current value and trigger onChange callback
+      */
+      updateCurrentValue: function () {
+        var el = this;
+        (el.value !== el._currentValue) ? eon.triggerCallback("onChange", el) : null;
+        el._currentValue = (el.value !== el._currentValue) ? el.value : el._currentValue;
+      },
+
+      /*
+       @function (private) _verifyScreenResolution
+       @description Set device type
+     */
+      verifyScreenResolution: function () {
+        var el = this;
+
+        // Small devices view
+        if (window.innerWidth <= eon.tabletWidth) {
+          el.setAttribute("version", "tablet");
+
+          // Desktop view
+        } else {
+          el.setAttribute("version", "desktop");
+        }
+
+        el._updateSlider();
+
+      },
+
+      /*
+       @function (private) _updateVerticalHeight
+       @description Updates fill's height on vertical sliders
+     */
+      updateVerticalHeight: function () {
+        var el = this;
+
+        if (el.orientation == "vertical") {
+          el._refs.fill.style.height = (el._misc.percentValue * 100) + "%";
+        }
+      }
+
+    },
+
+    onCreated: function () {
+      eon.createCallback("onChange", this);
+      this._createRefs();
+
+      this._misc.first = true;
+      this._misc.descriptionText = "";
+    },
+
+    onRender: function () {
+      var el = this;
+
+      el.value = el.default != "" && el.value == "" ? el.default : el.value;
+      el._refs.slider.setAttribute("name", el.name);
+      el._refs.slider.setAttribute("value", el.value);
+      el._refs.slider.setAttribute("min", el.min);
+      el._refs.slider.setAttribute("max", el.max);
+      el.setAttribute("touch-action", "none");
+      el._verifyScreenResolution();
+
+      el._currentValue = el.value;
+
+      el._setSliderListeners();
+
+      if (el.orientation == "horizontal" && el.displayAlign != "center") {
+        el.displayPosition = "";
+      }
+
+      el._setupDescription();
+      el._updateDisabled();
+      el._updateReadonly();
+      el._updateVerticalHeight();
+
+    },
+
+    onWindowResize: function (event) {
+      this._verifyScreenResolution();
+    },
+
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case "disabled":
+          this._updateDisabled();
+          break;
+        case "readonly":
+          this._updateReadonly();
+          break;
+        case "value":
+          this._setValue();
+          break;
+        case "invalid":
+          this._updateInvalid();
+          break;
+      }
+    },
+
+  });
+
+</script>
+          <style>
+            eon-slider {
+  position: relative;
+}
+eon-slider[inline="true"] {
+  display: inline-block;
+}
+eon-slider[inline="true"] .eon-slider-wrapper {
+  width: auto;
+}
+eon-slider[orientation="vertical"] .eon-slider-wrapper {
+  display: inline-flex;
+  width: auto;
+}
+eon-slider[orientation="vertical"] .eon-slider-shell {
+  width: auto;
+}
+eon-slider[display-visibility="true"] .eon-slider-display {
+  display: flex;
+}
+eon-slider input[type=range] {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  color: transparent;
+  border: 0 none;
+  background: transparent;
+}
+eon-slider input[type=range]::-ms-track {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  color: transparent;
+  border: 0 none;
+  background: transparent;
+}
+eon-slider input[type=range]:focus::-webkit-slider-runnable-track {
+  border: transparent;
+  background: transparent;
+}
+eon-slider input[type=range]:focus {
+  outline: none;
+}
+eon-slider input[type=range]::-ms-thumb {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+}
+eon-slider input[type=range]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+}
+eon-slider input[type=range]::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  -webkit-appearance: none;
+}
+eon-slider input[type=range]::-ms-fill-lower {
+  border: 0 none;
+  background: transparent;
+}
+eon-slider input[type=range]::-ms-fill-upper {
+  border: 0 none;
+  background: transparent;
+}
+eon-slider input[type=range]::-ms-tooltip {
+  display: none;
+}
+eon-slider[disable="false"] .eon-slider-thumb:active {
+  transform: scale(1.2);
+}
+eon-slider[orientation="horizontal"] .eon-slider-slider {
+  height: 10px;
+}
+eon-slider[orientation="horizontal"] .eon-slider-shell {
+  height: 10px;
+}
+eon-slider[orientation="horizontal"] .eon-slider-display {
+  margin-left: 15px;
+  justify-content: center;
+}
+eon-slider[orientation="horizontal"] .eon-slider-track {
+  top: calc(50% - 2px);
+}
+eon-slider[orientation="horizontal"] .eon-slider-fill {
+  top: calc(50% - 2px);
+}
+eon-slider[orientation="horizontal"] .eon-slider-thumb {
+  top: -5.7px;
+}
+eon-slider[orientation="horizontal"][display-align="left"] .eon-slider-wrapper {
+  flex-direction: row-reverse;
+  align-items: center;
+}
+eon-slider[orientation="horizontal"][display-align="right"] .eon-slider-wrapper {
+  align-items: center;
+}
+eon-slider[orientation="horizontal"][display-position="top"] .eon-slider-wrapper {
+  flex-direction: column-reverse;
+  align-items: center;
+}
+eon-slider[orientation="horizontal"][display-position="bottom"] .eon-slider-wrapper {
+  flex-direction: column;
+  align-items: center;
+}
+eon-slider[orientation="horizontal"][display-align="right"] .eon-slider-display {
+  margin-left: 15px;
+  align-items: center;
+}
+eon-slider[orientation="horizontal"][display-align="left"] .eon-slider-display {
+  margin-right: 15px;
+  align-items: center;
+}
+eon-slider[orientation="horizontal"][display-position="bottom"] .eon-slider-display {
+  width: 100%;
+  margin-top: 10px;
+}
+eon-slider[orientation="horizontal"][display-position="top"] .eon-slider-display {
+  width: 100%;
+  margin-bottom: 10px;
+}
+eon-slider[orientation="vertical"] .eon-slider-wrapper {
+  flex-direction: column;
+}
+eon-slider[orientation="vertical"] .eon-slider-shell {
+  height: calc(100% - 35px);
+}
+eon-slider[orientation="vertical"] .eon-slider-track {
+  left: calc(50% - 2px);
+}
+eon-slider[orientation="vertical"] .eon-slider-fill {
+  left: calc(50% - 2px);
+}
+eon-slider[orientation="vertical"] {
+  min-height: 150px;
+}
+eon-slider[orientation="vertical"] .eon-slider-shell {
+  min-height: 150px;
+}
+eon-slider[orientation="vertical"][inline="false"] .eon-slider-slider {
+  height: 100%;
+}
+eon-slider[orientation="vertical"] .eon-slider-slider {
+  flex-grow: 1;
+  width: 10px;
+  left: calc(50% - 5px);
+  writing-mode: bt-lr;
+  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
+}
+eon-slider[orientation="vertical"] .eon-slider-track {
+  top: 0;
+  height: 100%;
+}
+eon-slider[orientation="vertical"] .eon-slider-fill {
+  bottom: 0;
+}
+eon-slider[orientation="vertical"] .eon-slider-thumb {
+  left: -5.7px;
+}
+eon-slider[orientation="vertical"] .eon-slider-display {
+  justify-content: center;
+  height: 20px;
+  margin-top: 15px;
+}
+eon-slider[orientation="vertical"][display-position="top"] .eon-slider-wrapper {
+  flex-direction: column-reverse;
+}
+eon-slider[orientation="vertical"][display-position="left"] .eon-slider-wrapper {
+  flex-direction: row-reverse;
+}
+eon-slider[orientation="vertical"][display-position="right"] .eon-slider-wrapper {
+  flex-direction: row;
+}
+eon-slider[orientation="vertical"][display-position="bottom"] .eon-slider-display {
+  margin-top: 15px;
+}
+eon-slider[orientation="vertical"][display-position="top"] .eon-slider-display {
+  margin-bottom: 15px;
+}
+eon-slider[orientation="vertical"][display-position="left"] .eon-slider-display {
+  margin-right: 15px;
+}
+eon-slider[orientation="vertical"][display-position="right"] .eon-slider-display {
+  margin-left: 15px;
+}
+.eon-slider-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  flex-direction: row;
+}
+.eon-slider-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-content: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+.eon-slider-slider {
+  position: relative;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  pointer-events: all !important;
+}
+.eon-slider-track {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  pointer-events: none;
+}
+.eon-slider-fill {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  pointer-events: none;
+}
+.eon-slider-thumb {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  pointer-events: all !important;
+  border: 0 none;
+  border-radius: 50%;
+}
+.eon-slider-display {
+  position: relative;
+  display: none;
+  min-width: 30px;
+  min-height: 20px;
+  justify-content: center;
+}
+.eon-slider-description {
+  font-size: 14px;
+  width: 100%;
+}
+          </style>
+          <style>
+            /*TEST*/
+/* Set 1 - Containers (appmenu, searchbar, datepicker, appmenu, grid, headerpanel,
+           loadingmask, menu, swiper, tab, tabs, togglemenu, video) */
+/* Set 2 - Elements (button, checkbox, combobox, spinner, text, 
+           radio, contextmenu, slider, treenode) */
+eon-slider[theme="claro"].eon-slider-error .eon-slider-fill,
+div[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-fill,
+body[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-fill,
+eon-slider[theme="claro"].eon-slider-error .eon-slider-thumb,
+div[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-thumb,
+body[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-thumb {
+  background-color: #c33232;
+}
+eon-slider[theme="claro"].eon-slider-error .eon-slider-fill,
+div[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-fill,
+body[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-fill,
+eon-slider[theme="claro"].eon-slider-error .eon-slider-thumb,
+div[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-thumb,
+body[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-thumb {
+  background-color: #c33232;
+}
+eon-slider[theme="claro"].eon-slider-error .eon-slider-description,
+div[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-description,
+body[data-theme="claro"] eon-slider.eon-slider-error .eon-slider-description {
+  color: #c33232;
+}
+          </style>
+        </div>
+        <div class="eon-showcase-item-config">
+          <template>
+
+  <div class="eon-showcase-item-title"></div>
+  <div class="eon-showcase-item-content"></div>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-showcase-item",
+    style: "",
+
+    themed: false,
+
+    properties: {
+      /*
+        @property {String} title
+        @description 
+      */
+      title: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property {object} _refs
+        @description 
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+      /*
+        @property (private) {Object} _misc
+        @description 
+      */
+      misc: {
+        value: {},
+        reflect: false
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setUpRefs
+        @description 
+      */
+      setUpRefs: function () {
+        var el = this;
+
+        el._refs.title = el.template.querySelector(".eon-showcase-item-title");
+        el._refs.content = el.template.querySelector(".eon-showcase-item-content");
+      },
+      /*
+        @function (private) _setTitle
+        @description 
+      */
+      setTitle: function () {
+        var el = this;
+        el._refs.title.innerHTML = el.title;
+      },
+      /*
+        @function (private) _setContent
+        @description 
+      */
+      setContent: function () {
+        var el = this;
+        var srcNodes = el.getSourceElements();
+        var srcNode;
+
+        // Showcase item style
+        el.classList.add("eon-bg1");
+
+        // Move source children to the content element safely
+        while (srcNodes.length) {
+          // Get the shifted element
+          srcNode = srcNodes.shift();
+          // Append them to the tree
+          el._refs.content.appendChild(srcNode);
+        }
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      el._setUpRefs();
+    },
+    onInit: function () {
+      var el = this;
+      el._setTitle();
+      el._setContent();
+    },
+    onRender: function () {
+      var el = this;
+
+    }
+  });
+</script>
+          <style>
+            eon-showcase-item {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  padding: 20px;
+  box-sizing: border-box
+}
+.eon-showcase-item-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.eon-showcase-item-content {
+  height: calc(100% - 33px);
+}          </style>
+        </div>
+        <script>
+          // Insert and declare
+          for (var i = 0; i < elements.length; i++) {
+            var elementName = elements[i];
+            if (!(elementName in eon.imports.templates)) {
+              // Increment total
+              eon.imports.total++;
+              // Avoid duplicated imports while waiting XMLHttpRequest callback.
+              eon.imports.templates[elementName] = null;
+              eon.declare(elementName);
+              eon.insertFragment(elementName, document.querySelector("." + elementName + "-config").innerHTML);
+            }
+          }
+        </script>
     </div>
     <!-- EXAMPLES BODY -->
     <div class="template-body">

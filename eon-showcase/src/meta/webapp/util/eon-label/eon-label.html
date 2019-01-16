@@ -1,0 +1,355 @@
+<template>
+
+  <div class="eon-label-data eon-fg2">
+    <label class="eon-label-label"></label>
+  </div>
+
+  <div class="eon-label-main eon-fg2">
+
+    <div class="eon-label-default">
+      <div class="eon-label-value"></div>
+      <div class="eon-label-button vicon vicon-edit"></div>
+    </div>
+
+    <div class="eon-label-edit">
+      <div class="eon-label-inputWrapper">
+        <input class="eon-label-input eon-fg2"></input>
+      </div>
+      <div class="eon-label-button vicon vicon-floppy"></div>
+    </div>
+
+  </div>
+
+  <span class="eon-label-underline"></span>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-label",
+    style: "eon-label.css",
+
+    themed: true,
+
+    privateProperties: {
+      /*
+      @property (private) {String} _formElement 
+      @description Necessary property for a form
+      */
+      formElement: {
+        value: "label"
+      },
+      /*
+      @property (private) {Object} _misc
+      @description Object with useful information
+      */
+      misc: {
+        value: {},
+        reflect: false
+      },
+      /*
+      @property (private) {Object} _refs
+      @description Object with references to frecuently queryied nodes
+      */
+      refs: {
+        value: {},
+        reflect: false
+      }
+    },
+
+    properties: {
+      /*
+      @property {String} name
+      @description Name to identify the element in a form
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Boolean} inline 
+      @description Space that occupies the button inside its parent container.
+      */
+      inline: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {String} label
+      @description Label for the element
+      */
+      label: {
+        value: "",
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {Number} blurSave
+      @description Whether the changes will be saved on the input blur
+      */
+      blurSave: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {Number} fontSize
+      @description Font size specified by the user
+      */
+      fontSize: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} value
+      @description Value of the element
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Boolean} editable
+      @description Value of the element
+      */
+      editable: {
+        value: "true",
+        reflect: true,
+        reflectDefault: true
+      }
+    },
+
+    privateFunctions: {
+      /*
+      @function (private) _setupRefs
+      @description Creates references for relevant nodes
+      */
+      setupRefs: function () {
+
+        var el = this;
+
+        el._refs.data = el.querySelector(".eon-label-data");
+        el._refs.label = el.querySelector(".eon-label-label");
+
+        el._refs.main = el.querySelector(".eon-label-main");
+
+        el._refs.default = el.querySelector(".eon-label-default");
+        el._refs.edit = el.querySelector(".eon-label-edit");
+
+        el._refs.value = el.querySelector(".eon-label-value");
+        el._refs.input = el.querySelector(".eon-label-input");
+
+        el._refs.editButton = el.querySelector(".eon-label-default .eon-label-button");
+        el._refs.saveButton = el.querySelector(".eon-label-edit .eon-label-button");
+
+      },
+      /*
+      @function (private) _setupLabel
+      @description Sets a label if provided by the user
+      */
+      setupLabel: function () {
+
+        var el = this;
+
+        if (el.label) {
+          el._refs.label.innerHTML = el.label;
+        }
+
+      },
+      /*
+      @function (private) _setupFontSize
+      @description Sets a font size if provided by the user
+      */
+      setupFontSize: function () {
+
+        var el = this;
+
+        if (el.fontSize) {
+          el._refs.value.style.fontSize = el.fontSize;
+          el._refs.input.style.fontSize = el.fontSize;
+        }
+
+      },
+      /*
+      @function (private) _setupInput
+      @description Creates the input focus/blur events
+      */
+      setupInput: function () {
+
+        var el = this;
+
+        el._refs.input.addEventListener("focus", function () {
+          el.classList.add("eon-label-focus");
+          eon.triggerCallback("onFocus", el);
+        });
+
+        el._refs.input.addEventListener("blur", function () {
+
+          el.classList.remove("eon-label-focus");
+
+          if (eon.util.isTrue(el.blurSave)) {
+            el._finishEditing();
+          }
+
+          eon.triggerCallback("onBlur", el);
+
+        });
+
+      },
+      /*
+      @function (private) _setupInput
+      @description Creates the input focus/blur events
+      */
+      setupEditing: function () {
+
+        var el = this;
+
+        el._refs.editButton.addEventListener("click", function () {
+          el._startEditing();
+        });
+
+        el._refs.saveButton.addEventListener("click", function () {
+          el._finishEditing();
+        });
+
+      },
+      /*
+      @function (private) _startEditing
+      @description Enables the user editing
+      */
+      startEditing: function () {
+
+        var el = this;
+
+        el._refs.input.value = el._refs.value.innerText;
+
+        el._refs.main.classList.add("eon-label-editing", "eon-bg2");
+
+        setTimeout(function () {
+          el._refs.input.focus();
+          el.classList.add("eon-label-focus");
+        }, 0);
+
+      },
+      /*
+      @function (private) _finishEditing
+      @description Finishes the user editing
+      */
+      finishEditing: function () {
+
+        var el = this;
+
+        el._refs.value.innerHTML = el._refs.input.value;
+
+        el._refs.input.blur();
+
+        el._refs.main.classList.remove("eon-label-editing", "eon-bg2");
+        el.classList.remove("eon-label-focus");
+
+        el._updateValue(el._refs.input.value);
+
+      },
+      /*
+      @function (private) _updateValue
+      @description Finishes the user editing
+      */
+      updateValue: function (value) {
+
+        var el = this;
+
+        value = value ? value : el.value;
+
+        el._refs.value.innerHTML = value;
+        el._refs.input.value = value;
+
+        el.__value = value;
+
+      },
+      /*
+      @function (private) _updateEditable
+      @description Finishes the user editing
+      */
+      updateEditable: function (editable) {
+
+        var el = this;
+
+        if (el.classList.contains("eon-label-focus")) {
+          el._finishEditing();
+        }
+
+      }
+
+    },
+
+    functions: {
+      /*
+      @function focus
+      @description Focuses the label and enables the input
+      */
+      focus: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.editable)) {
+          el._startEditing();
+        }
+
+      },
+      /*
+      @function blur
+      @description Stops focusing the label and disables the input
+      */
+      blur: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.editable)) {
+          el._finishEditing();
+        }
+
+      }
+
+    },
+
+    onCreated: function () {
+
+      eon.createCallback("onBlur", this);
+      eon.createCallback("onFocus", this);
+
+    },
+
+    onRender: function () {
+
+      var el = this;
+
+      el._setupRefs();
+      el._setupLabel();
+      el._setupFontSize();
+      el._setupInput();
+      el._setupEditing();
+
+      el._updateValue();
+
+    },
+
+    onPropertyChanged: function (key, oldVal, newVal) {
+
+      var el = this;
+
+      switch (key) {
+
+        case "value":
+          el._updateValue(newVal);
+          break;
+
+        case "editable":
+          el._updateEditable(newVal);
+          break;
+      }
+
+    }
+
+  });
+</script>
