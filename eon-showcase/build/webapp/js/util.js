@@ -53,6 +53,7 @@ function initializeShowcase(sectionsClass, pgClass) {
     // Initialize showcase
     var sections = document.querySelector(sectionsClass).content.children;
     var pg = document.querySelector(pgClass);
+    var renderingDelay = eon.util.isTouchScreen() ? 1600 : 500;
 
     // Set showcase content
     if (!~[".d-button-pg", 
@@ -68,7 +69,7 @@ function initializeShowcase(sectionsClass, pgClass) {
           };
           pg.setData(pgObj);
         });
-      }, 1600);
+      }, renderingDelay);
     } else {
       pg.onReady(function () {
         var pgObj = {
