@@ -89,7 +89,9 @@ function initializeShowcase(sectionsClass, pgClass) {
       // Make showcase fit its iframe content
       iframe.onLoaded(function () {
         // Load next showcase sections
-        loadNextSections(pgClass);
+        eon.onReady(function(){
+          loadNextSections(pgClass);
+        });
         
         var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
         var body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
@@ -108,7 +110,7 @@ function initializeShowcase(sectionsClass, pgClass) {
 function showcaseResizeListener(pg, innerDoc) {
   var body;
   pg._misc.prevSize = pg.offsetHeight;
-  var delay = 250;
+  var delay = 150;
   var throttled = false;
   // Resize listener
   pg.onResize(function () {
