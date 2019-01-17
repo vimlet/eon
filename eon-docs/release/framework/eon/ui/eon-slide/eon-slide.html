@@ -1,0 +1,59 @@
+<script>
+  //@header An element used as a eon-swiper slide
+  eon.element({
+
+    name: "eon-slide",
+
+    properties: {
+      /*
+        @property {Object} host
+        @description Quick access to swiper
+      */
+      host: {
+        value: {},
+      },
+      /*
+        @property {String} image
+        @description Image source URL
+      */
+      image: {
+        value: "",
+        reflect: true
+      }
+    },
+    functions: {
+      /*
+        @function setImageBackground
+        @description Add a slide background image
+      */
+      setImage: function () {
+        var el = this;
+        // Has image
+        if (el.image) {
+          var path = el.image;
+          // Add swiper image style
+          el.classList.add("eon-swiper-image");
+          el.style.backgroundImage = "url(" + path + ")";
+        }
+      }
+    },
+    onInit: function () {
+      var el = this;
+      // Get swiper parent
+      el.host = el.parentNode.classList.contains("eon-swiper-wrapper")
+        ? el.parentNode.parentNode
+        : el.parentNode;
+      // Set image background
+      el.setImage();
+    },
+    onTransformed: function () {
+      var el = this;
+      // Get swiper element
+      var swiper = el.host;
+      // Append the document fragment with the slide
+      el.host._refs.wrapper.appendChild(el);
+      // Create slide thumbnails and update wrapper translate properties
+      el.host._append(el);
+    }
+  });
+</script>
