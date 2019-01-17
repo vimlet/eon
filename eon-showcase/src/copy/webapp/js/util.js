@@ -54,7 +54,7 @@ function initializeShowcase(sectionsClass, pgClass) {
     var sections = document.querySelector(sectionsClass).content.children;
     var pg = document.querySelector(pgClass);
     var renderingDelay = eon.util.isTouchScreen() ? 1600 : 500;
-
+    
     // Set showcase content
     if (!~[".d-button-pg", 
     ".d-checkbox-pg", 
@@ -90,7 +90,9 @@ function initializeShowcase(sectionsClass, pgClass) {
       iframe.onLoaded(function () {
         // Load next showcase sections
         eon.onReady(function(){
-          loadNextSections(pgClass);
+          setTimeout(function(){
+            loadNextSections(pgClass);
+          }, 0);
         });
         
         var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -110,7 +112,7 @@ function initializeShowcase(sectionsClass, pgClass) {
 function showcaseResizeListener(pg, innerDoc) {
   var body;
   pg._misc.prevSize = pg.offsetHeight;
-  var delay = 150;
+  var delay = 250;
   var throttled = false;
   // Resize listener
   pg.onResize(function () {
