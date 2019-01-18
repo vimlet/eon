@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Import eon-js  -->
+    <script>
+      // ** Eon polyfill path fix
+      document.currentScript.src = window.location.href + "eon";
+      // Inject js with meta
+      //<% template("../../util/eon-bundle.js");%>
+      eon.theme = "claro";
+    </script>
+    <!-- EON elements import configuration -->
+    <script>
+      eon.imports = eon.imports || {
+        count: 0,
+        total: 0,
+        ready: false
+      };
+      eon.imports.style = eon.imports.style || "";
+      eon.imports.scripts = eon.imports.scripts || {};
+      eon.imports.links = eon.imports.links || {};
+      eon.imports.templates = eon.imports.templates || {};
+      eon.imports.paths = eon.imports.paths || {};
+      eon.imports.config = eon.imports.config || {};
+
+      eon.imports.paths["eon-button"] = "eon/ui/eon-button/";
+      eon.registry.registerTheme("eon-button", "claro");
+
+      eon.imports.paths["eon-showcase-item"] = "eon/ui/eon-showcase-item/";
+      var elements = ["eon-button", "eon-showcase-item"];
+    </script>
+
+    <!-- Inject eon elements -->
+    <div class="eon-button-config">
+      <% template("../../util/eon-button/eon-button.html");%>
+      <style>
+        /* <% template("../../util/eon-button/eon-button.css");%> */
+      </style>
+      <style>
+        /* <% template("../../util/eon-button/claro/eon-button.css");%> */
+      </style>
+    </div>
+    <div class="eon-showcase-item-config">
+      <% template("../../util/eon-showcase-item/eon-showcase-item.html");%>
+      <style>
+        /* <% template("../../util/eon-showcase-item/eon-showcase-item.css");%> */
+      </style>
+    </div>
+    <script>
+      // Insert and declare
+      for (var i = 0; i < elements.length; i++) {
+        var elementName = elements[i];
+        if (!(elementName in eon.imports.templates)) {
+          // Increment total
+          eon.imports.total++;
+          // Avoid duplicated imports while waiting XMLHttpRequest callback.
+          eon.imports.templates[elementName] = null;
+          eon.declare(elementName);
+          eon.insertFragment(elementName, document.querySelector("." + elementName + "-config").innerHTML);
+        }
+      }
+    </script>
+    <style class="template-style">
+        html,
+        body {
+          height: auto;
+          width: 100%;
+          padding: 0;
+          margin: 0;
+          background-color: transparent;
+          color: #888888;
+          overflow: hidden;
+        }
+      </style>
+</head>
+<body>
+    <eon-showcase-item title="Button">
+        <eon-button theme="claro" value="Alert" onclick="alert('Hi! ^_^')" icon='<i class="vicon vicon-build"></i>'></eon-button>
+      </eon-showcase-item>
+      <eon-showcase-item title="Disabled">
+        <eon-button value="Disabled" disabled="true"></eon-button>
+      </eon-showcase-item>
+</body>
+</html>
+

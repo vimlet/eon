@@ -9,10 +9,10 @@
   </template>
   <script type="text/javascript">
     eon.element({
-
+  
       name: "eon-treenode",
       style: "eon-treenode.css",
-
+  
       themed: true,
       properties: {
         /*
@@ -156,7 +156,7 @@
             el._refs.wrapper.style.display = "none";
             el.expanded = false;
           }
-          
+  
         },
         /*
           @function select 
@@ -164,22 +164,22 @@
         */
         select: function () {
           var el = this;
-          // Directories can not be selected
-          if (!eon.util.isTrue(el.selected)) {
-            el._refs.hostTree.selectNode(el);
-          }
           // Expand if directory
           if (el.type === "directory") {
             el.toggleExpand();
+          }
+          // Directories can not be selected
+          if (!eon.util.isTrue(el.selected)) {
+            el._refs.hostTree.selectNode(el);
           }
         },
         /*
           @function changeType 
           @description Change tree node default type
         */
-        changeType: function (type) {     
+        changeType: function (type) {
           var el = this;
-          el.type = type;        
+          el.type = type;
           el._refresh();
         }
       },
@@ -205,11 +205,11 @@
           @function (private) refresh
           @description Reset tree node attributes
         */
-        refresh: function(){ 
+        refresh: function () {
           var el = this;
           // Ensure that it is correct to remove name and extension and take it from node path
           el.name = null;
-          el.extension = null;        
+          el.extension = null;
           el._setNodeName();
         },
         /*
@@ -226,7 +226,7 @@
           el.name = !el.name ? str : el.name;
           // Set extension if not exists
           if (!el.extension) {
-            el._splitExtension();       
+            el._splitExtension();
           }
           // Set extension visibility
           label = el.name;
@@ -250,7 +250,7 @@
           // Set sorting order
           el.order = !el.order ? "" : parseInt(el.order);
           el._setNodeName();
-         
+  
           icon.style.display = ["all", "type"].indexOf(tree.icons) > -1 ? "inline-block" : "none";
           expandIcon.style.display = ["all", "expand"].indexOf(tree.icons) > -1 ? "block" : "none";
           // Set node icon
@@ -260,7 +260,7 @@
               el._toggleNodeIcon(icon);
             } else if (el.type === "directory" && !eon.util.isTrue(el.initExpanded)) {
               el.expanded = false;
-              if(["expand", "all"].indexOf(tree.icons) > -1) {
+              if (["expand", "all"].indexOf(tree.icons) > -1) {
                 el._toggleExpandIcon(expandIcon, false);
               }
               el._toggleNodeIcon(icon, false, true);
@@ -274,22 +274,22 @@
           el._misc.dragging = {};
           el._misc.dragging.functions = {};
         },
-
+  
         /*
           @function (private) _toggleNodeIcon
           @description
         */
         toggleExpandIcon: function (icon, expand) {
           var el = this;
-
-          if(expand) {
+  
+          if (expand) {
             icon.classList.add("vicon-chevron-down");
             icon.classList.remove("vicon-chevron-right");
           } else {
             icon.classList.add("vicon-chevron-right");
             icon.classList.remove("vicon-chevron-down");
           }
-
+  
         },
         /*
           @function (private) _toggleNodeIcon
@@ -297,8 +297,8 @@
         */
         toggleNodeIcon: function (icon, open, dir) {
           var el = this;
-          if(dir) {
-            if(open){
+          if (dir) {
+            if (open) {
               icon.classList.add("vicon-folder-open");
               icon.classList.remove("vicon-folder");
             } else {
@@ -307,6 +307,7 @@
             }
           } else {
             icon.classList.remove("vicon-folder");
+            icon.classList.remove("vicon-folder-open");
             icon.classList.add("vicon-file");
           }
         },
@@ -344,8 +345,8 @@
               // Check configurable initial state
               if (!eon.util.isTrue(parent.initExpanded)) {
                 parent.toggleExpand(expandIcon);
-
-                if(["expand", "all"].indexOf(el._refs.hostTree.icons) > -1) {
+  
+                if (["expand", "all"].indexOf(el._refs.hostTree.icons) > -1) {
                   el._toggleExpandIcon(expandIcon);
                 }
               }
@@ -366,10 +367,10 @@
           el._misc.expandable = true;
           el.expanded = true;
           // Set expanded node icon
-          if(["all", "type"].indexOf(tree.icons) > -1 && eon.util.isTrue(el.initExpanded)) {
+          if (["all", "type"].indexOf(tree.icons) > -1 && eon.util.isTrue(el.initExpanded)) {
             el._toggleNodeIcon(icon, true, true);
           }
-
+  
           expandIcon.style.visibility = ["expand", "all"].indexOf(tree.icons) > -1 ? "visible" : "";
   
           el._refs.wrapper.style.display = "flex";
@@ -378,9 +379,9 @@
             // Set expandable property
             el._misc.expandFunction = "expandIcon";
           }
-
+  
           // Join single directory child
-          if(eon.util.isTrue(el._refs.hostTree.joinDirs) && children.length == 1 && children[0].type == "directory") {
+          if (eon.util.isTrue(el._refs.hostTree.joinDirs) && children.length == 1 && children[0].type == "directory") {
             // Set the joined names result as the displayed node name 
             el._refs.nameNode.innerHTML = el.name + "/" + children[0].name;
             // Hide children after its path has been joined to its parent's
@@ -532,12 +533,12 @@
             // Create parent node
             var node = document.createElement("eon-treenode");
             node.path = parentPath;
-            
+  
             // Check if the path contains escaped characters
             parentStr = parentPath.split("/").pop();
             node.name = parentStr == "..." ? parentPath : parentPath.split("/").pop();
             // Make sure the node path is added to the tree source nodes array
-            if(el._refs.hostTree._misc.srcNodes.indexOf(node.path) < 0){
+            if (el._refs.hostTree._misc.srcNodes.indexOf(node.path) < 0) {
               el._refs.hostTree._misc.srcNodes.push(node);
             }
             el._refs.hostTreeWrapper.appendChild(node);
@@ -572,7 +573,7 @@
         var el = this;
         var expandIcon, icon;
         var tree = el._refs.hostTree;
-        
+  
         expandIcon = el._refs.head.querySelector(".eon-treenode-expand");
         // Monitor _expandable property
         if (prop == "_expandable") {
@@ -582,25 +583,25 @@
           icon = expandIcon.nextSibling.nextSibling;
           // Check expandable conditions
           if ((eon.util.isTrue(el.expanded)) && el._refs.wrapper.children[0]) {
-
-            if(["expand", "all"].indexOf(tree.icons) > -1) {
+  
+            if (["expand", "all"].indexOf(tree.icons) > -1) {
               el._toggleExpandIcon(expandIcon, true);
             }
-
-            if(["type", "all"].indexOf(tree.icons) > -1) {
+  
+            if (["type", "all"].indexOf(tree.icons) > -1) {
               el._toggleNodeIcon(icon, true, true);
             }
-
+  
           } else {
-
-            if(["expand", "all"].indexOf(tree.icons) > -1) {
+  
+            if (["expand", "all"].indexOf(tree.icons) > -1) {
               el._toggleExpandIcon(expandIcon, false);
-            } 
-
-            if(["type", "all"].indexOf(tree.icons) > -1) {
+            }
+  
+            if (["type", "all"].indexOf(tree.icons) > -1) {
               el._toggleNodeIcon(icon, false, true);
             }
-
+  
           }
         } else if (prop == "selected" || prop == "marked") {
           if (eon.util.isTrue(value)) {

@@ -1,0 +1,157 @@
+<template>
+
+    <div class="eon-loadingmask-loadingmask eon-bg1 eon-fg1">
+        <div class="eon-loadingmask-rotator">
+            <div class="eon-loadingmask-inner-spin eon-bg1"></div>
+            <div class="eon-loadingmask-inner-spin eon-bg1"></div>
+        </div>
+    </div>
+
+</template>
+
+<script type="text/javascript">
+    eon.element({
+
+        name: "eon-loadingmask",
+        style: "eon-loadingmask.css",
+
+        properties: {
+            /*
+              @property {String} format 
+              @description What loadingmask occupies
+              Values can be: complete or descendant
+              Default: complete
+            */
+            format: {
+                value: "complete",
+                reflect: true
+            },
+            /*
+              @property {Boolean} display 
+              @description Loadingmask is displayed since load the page or not
+              Values can be: false or true
+              Default: true
+            */
+            display: {
+                value: true,
+                reflect: true
+            },
+            /*
+              @property {Number} display 
+              @description Time until loadingmask hides
+              Value must be a number of milliseconds
+              Default: 2000
+            */
+            duration: {
+                value: 2000,
+                reflect: true
+            },
+            /*
+              @property {String} color 
+              @description Loadingmask color
+            */
+            color: {
+                value: "",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            /*
+              @property (private) {Object} _refs 
+              @description Object with  references
+            */
+            refs: {
+                value: {}
+            }
+        },
+
+        functions: {
+            /*
+              @function show
+              @description Show loadingmask
+            */
+            show: function () {
+                var el = this;
+
+                el._refs.loadingmask.classList.remove("eon-loadingmask-hidden");
+                el.classList.add("eon-loadingmask-active");
+                el._refs.loadingmask.classList.add("eon-loadingmask-noTransition", "eon-loadingmask-visible");
+
+                // In the IE browser
+                if (eon.util.getBrowser() == "IE") {
+                    el._refs.loadingmask.appendChild(el._refs.rotator);
+                }
+
+                eon.triggerCallback("onShow", this);
+
+                // Call the function to hide loadingmask in a time interval given by the user
+                if (el.duration) {
+                    setTimeout(function () {
+                        el.hide();
+                    }, el.duration);
+                }
+
+            },
+
+            /*
+              @function hide
+              @description Hide loadingmask
+            */
+            hide: function () {
+                var el = this;
+
+                el._refs.loadingmask.classList.remove("eon-loadingmask-noTransition", "eon-loadingmask-visible");
+                eon.triggerCallback("onHide", this);
+
+                // After hidden animation, changed display of the element to none
+                setTimeout(function () {
+                    el._refs.loadingmask.classList.add("eon-loadingmask-hidden");
+                    el.classList.remove("eon-loadingmask-active");
+                }, 1000);
+            }
+
+        },
+
+        privateFunctions: {
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.loadingmask = el.template.querySelector(".eon-loadingmask-loadingmask");
+                el._refs.rotator = el.template.querySelector(".eon-loadingmask-rotator");
+            }
+        },
+
+        onCreated: function () {
+            eon.createCallback("onShow", this);
+            eon.createCallback("onHide", this);
+
+            this._createRefs();
+        },
+
+        onRender: function () {
+            var el = this;
+
+            if (el.format == "complete") {
+                document.body.appendChild(el);
+                el._refs.loadingmask.classList.add("eon-loadingmask-complete");
+
+            } else if (el.format == "descendant") {
+                el._refs.loadingmask.classList.remove("eon-loadingmask-complete");
+                el._refs.loadingmask.classList.add("eon-loadingmask-descendant");
+                el.parentNode.style.position = "relative";
+            }
+
+            // Call the function to show loadingmask when the value is true
+            (eon.util.isTrue(el.display)) ? el.show() : null;
+
+            // Sets a custom color of the loadingmask
+            el._refs.rotator.style.color = (el.color) ? el.color : el._refs.rotator.style.color;
+        },
+
+    });
+</script>
