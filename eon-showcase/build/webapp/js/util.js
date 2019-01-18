@@ -94,9 +94,9 @@ function initializeShowcase(sectionsClass, pgClass) {
       // Make showcase fit its iframe content
       iframe.onLoaded(function () {
         // Load next showcase sections
-        eon.onReady(function(){
+        // eon.onReady(function(){
           // loadNextSections(pgClass);
-        });
+        // });
         
         var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
         var body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
