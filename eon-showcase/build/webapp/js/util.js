@@ -56,8 +56,13 @@ function initializeShowcase(sectionsClass, pgClass) {
     var renderingDelay = eon.util.isTouchScreen() ? 1600 : 500;
     
     // Set showcase content
-    if (!~[".d-button-pg", 
-    ".d-checkbox-pg", 
+    if (!~[
+      ".d-button-pg", 
+      ".d-checkbox-pg", 
+      ".d-dialog-pg", 
+      ".d-drawer-pg", 
+      ".d-loader-pg",
+      ".d-loadingmask-pg"
   ].indexOf(pgClass)) {
       setTimeout(function () {
         pg.onReady(function () {
@@ -89,11 +94,9 @@ function initializeShowcase(sectionsClass, pgClass) {
       // Make showcase fit its iframe content
       iframe.onLoaded(function () {
         // Load next showcase sections
-        eon.onReady(function(){
-          setTimeout(function(){
-            loadNextSections(pgClass);
-          }, 0);
-        });
+        // eon.onReady(function(){
+          // loadNextSections(pgClass);
+        // });
         
         var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
         var body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
