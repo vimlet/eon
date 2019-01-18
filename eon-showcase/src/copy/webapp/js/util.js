@@ -90,9 +90,7 @@ function initializeShowcase(sectionsClass, pgClass) {
       iframe.onLoaded(function () {
         // Load next showcase sections
         eon.onReady(function(){
-          setTimeout(function(){
-            loadNextSections(pgClass);
-          }, 0);
+          // loadNextSections(pgClass);
         });
         
         var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
