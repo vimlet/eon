@@ -56,8 +56,13 @@ function initializeShowcase(sectionsClass, pgClass) {
     var renderingDelay = eon.util.isTouchScreen() ? 1600 : 500;
     
     // Set showcase content
-    if (!~[".d-button-pg", 
-    ".d-checkbox-pg", 
+    if (!~[
+      ".d-button-pg", 
+      ".d-checkbox-pg", 
+      ".d-dialog-pg", 
+      ".d-drawer-pg", 
+      ".d-loader-pg",
+      ".d-loadingmask-pg"
   ].indexOf(pgClass)) {
       setTimeout(function () {
         pg.onReady(function () {
