@@ -105,7 +105,7 @@ function showcaseResizeListener(pg, innerDoc) {
   var throttled = false;
   // Resize listener
   pg.onResize(function () {
-  
+
     if (!throttled) {
       body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
       if (body) {
@@ -158,15 +158,20 @@ function fullScreenListeners(pg) {
 
 function loadNextSections() {
   setTimeout(function () {
-    refs.view._misc.panels.containers.onLoad(function () {
-      if (Object.keys(refs.view._misc.panels.containers._refs.templates).length) {
-        // alert(refs.view._misc.panels.containers._refs.templates[0]);
+    eon.onReady(function () {
+      refs.view._misc.panels.containers.onLoad(function () {
+        if (Object.keys(refs.view._misc.panels.containers._refs.templates).length) {
 
-        refs.view._misc.panels.containers.render();
-        refs.view._misc.panels.media.render();
-        refs.view._misc.panels.menus.render();
-        refs.view._misc.panels.other.render();
-      }
+          refs.view._misc.panels.containers.render();
+          refs.view._misc.panels.media.render();
+          refs.view._misc.panels.menus.render();
+          refs.view._misc.panels.other.render();
+
+          // Fix Togglemenu displaying
+        }
+      });
+
+      // refs.mask.hide();
     });
   }, 600);
 }
