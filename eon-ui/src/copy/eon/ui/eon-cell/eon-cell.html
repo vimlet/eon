@@ -6,7 +6,7 @@
   eon.element({
 
     name: "eon-cell",
-    
+
     properties: {
       /*
       @property {string} value
@@ -47,7 +47,7 @@
       @function generateContent
       @description Generates the content with the given value
       */
-      generateContent: function() {
+      generateContent: function () {
 
         var el = this;
 
@@ -72,7 +72,7 @@
       @function createCellContentStyleForIE
       @description CSS changes for the content on IE
       */
-      createHeaderStyleForIE: function(icon) {
+      createHeaderStyleForIE: function (icon) {
 
         var el = this;
 
@@ -87,7 +87,7 @@
 
         icon.style.position = "absolute";
         icon.style.top = "0";
-        icon.style.bottom = "0"; 
+        icon.style.bottom = "0";
         icon.style.display = "flex";
         icon.style.justifyContent = "center";
         icon.style.alignItems = "center";
@@ -96,10 +96,20 @@
     },
 
     onCreated: function () {
-      this.content = this.template.querySelector(".eon-grid-cellContent")
+
+      this.content = this.template.querySelector(".eon-grid-cellContent");
+      
+      // Since in the declarative creation eon-cell will not get to exists as it will be
+      // part of its eon-row parent, it will not transform and wont have its source appended
+      // since we want the provided cell innerHTML to be part of the component, we append 
+      // it manually in case it exists
+      if (this.source) {
+        this.appendChild(this.source);
+      }
+
     },
 
-    onRender: function() {
+    onRender: function () {
       this._generateContent();
     }
 
