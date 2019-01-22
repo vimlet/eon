@@ -171,7 +171,7 @@ function loadNextSections() {
         }
       });
 
-      // refs.mask.hide();
+      refs.mask.hide();
     });
   }, 600);
 }
