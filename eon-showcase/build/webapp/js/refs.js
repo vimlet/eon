@@ -8,4 +8,5 @@ refs.initialize = function(){
     refs.tree = document.querySelector(".tTree");
     refs.drawer = document.querySelector(".tTreeContainer");
     refs.view = document.querySelector("#tViewContent");
+    refs.mask = document.querySelector("eon-loading");
 }
