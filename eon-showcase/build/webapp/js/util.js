@@ -11,6 +11,8 @@ function loadEonExamples() {
   // Configure tree
   var treeScroll = refs.tree.querySelector("eon-scroll");
   treeScroll.thickness = "10";
+  // Get tree parent nodes
+  var rootNodes = [].slice.call(refs.tree._refs.tree.children);
   // Load vComet element example
   refs.tree.onNodeSelected(function (node) {
     // Go to group file
@@ -28,6 +30,16 @@ function loadEonExamples() {
     }
     if (eon.util.isTrue(node.initExpanded)) {
       refs.drawer.close();
+    } else {
+      // Shrink other tree nodes on mobile devices
+      if (eon.util.isTouchScreen()) {
+        for (var i = 0; i < rootNodes.length; i++) {
+          var rootNode = rootNodes[i];
+          if (rootNode.path !== node.path && eon.util.isTrue(rootNode.expanded)) {
+            rootNode.toggleExpand();
+          }
+        }
+      }
     }
   });
   // Initialize forms
@@ -93,6 +105,7 @@ function showcaseResizeListener(pg, innerDoc) {
   var throttled = false;
   // Resize listener
   pg.onResize(function () {
+  
     if (!throttled) {
       body = pg._refs.resizable ? pg._refs.resizable.body : innerDoc.body;
       if (body) {
@@ -125,8 +138,9 @@ function setPgHeight(pg, size) {
     } else {
       size = pg.offsetHeight;
     }
-
-    pg.style.height = size + "px";
+    // Set 
+    // pg.style.height = size + "px";
+    pg.getEnclosingComponent().style.height = size + "px";
   }
 }
 
