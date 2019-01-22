@@ -40,6 +40,14 @@
         reflect: true
       },
       /*
+        @property {String} target 
+        @description Target
+      */
+      target: {
+        value: "",
+        reflect: true
+      },
+      /*
         @property {Boolean} disabled 
         @description Button deactivation
         Values can be: true o false
@@ -203,18 +211,21 @@
       },
 
       /*
-        @function (private) _updateDisabled
-        @description Update disabled status
-        @param {String} newVal [New value of disabled]
+        @function (private) _setupLink
+        @description Assigns an href and target to the link element
       */
 
-      assignHref: function () {
+      setupLink: function () {
 
         var el = this;
         var a = el.querySelector("a");
 
         if (el.href != "") {
           a.href = el.href; 
+        }
+        
+        if (el.target != "") {
+          a.setAttribute("target", el.target);
         }
 
       },
@@ -250,7 +261,7 @@
       el._updateDisabled();
       el._setupIcon(el.icon);
 
-      el._assignHref();
+      el._setupLink();
 
       // When the button is a type form submit
       (el.type) ? button.setAttribute("type", el.type) : null;
