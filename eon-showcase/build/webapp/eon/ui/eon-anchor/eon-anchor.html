@@ -119,7 +119,6 @@
                         // ** To be improved
                         var prevReachedValue = el._misc.marginReached;
                         if (el.offsetParent && el._isInViewport()) {
-
                             // ** TODO
                             if (el._misc.marginReached && !prevReachedValue) {
                                 // ** Should be onVisible
@@ -155,8 +154,8 @@
                 };
                 // Check parent scroll container
                 if (el.eonScroll) {
-                    var eonScrollEl = document.querySelector(el.eonScroll);
-                    eonScrollEl.onScrolled(el._misc.activeAnchorFn);
+                  var eonScrollEl = document.querySelector(el.eonScroll);
+                  eonScrollEl.onScrolled(el._misc.activeAnchorFn);
                 } else {
                     window.addEventListener('scroll', el._misc.activeAnchorFn, false);
                 }
@@ -193,7 +192,14 @@
                 var el = this;
                 var innerMidHeight = (window.innerHeight || document.documentElement.clientHeight) / 2;
                 innerMidHeight = el.offsetActive ? innerMidHeight + Math.abs(parseInt(el.offsetActive)) : innerMidHeight;
-                return (rect.top < innerMidHeight);
+               
+                if((rect.top + el.offsetActive < innerMidHeight)) {
+                  el._misc.marginReached = true;
+                  return true;
+                } else {
+                  el._misc.marginReached = false;
+                  return false;
+                }
                 // return (rect.top >= (innerMidHeight - 40) && rect.top <= (innerMidHeight + 40));
             },
             /*

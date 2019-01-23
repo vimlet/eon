@@ -1,7 +1,6 @@
 <template>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <eon-loading></eon-loading>
   <div class="eon-editor-padding eon-editor-until-render">
     <div id="eon-editor-content"></div>
   </div>
@@ -29,6 +28,14 @@
       readonly: {
         value: "readonly",
         reflect: true
+      },
+      format: {
+        value: true,
+        reflect: true
+      },
+      loadingColor: {
+        value: "",
+        reflect: true
       }
     },
 
@@ -47,7 +54,14 @@
         var el = this;
         el.value = value;
         el._refs.editor.setValue(value);
-        el._refs.editor.getAction('editor.action.formatDocument').run();
+        // Format editor
+        if(eon.util.isTrue(el.format)){
+          el._refs.editor.getAction('editor.action.formatDocument').run();
+          // Fix to the under construction appearance after during formatting editor
+          setTimeout(function() {
+            el.querySelector("eon-loading").hide();
+          }, 300);
+        }
       },
       // @function getValue (public) {string}
       getValue: function () {
@@ -124,7 +138,10 @@
       show: function () {
         var el = this;
         el.querySelector("#eon-editor-content").parentNode.classList.remove("eon-editor-until-render");
-        el.querySelector("eon-loading").hide();
+        // Hide loading mask (instead of hiding it after formatting editor)
+        if(!eon.util.isTrue(el.format)){
+          el.querySelector("eon-loading").hide(); 
+        }
       }
     },
 
@@ -133,12 +150,21 @@
       eon.amd.require([eon.basePath + "/ui/eon-editor/vs/loader.js"], function () {
         eon.triggerCallback("onloader", el, el, [el]);
       });
+      
       // Custom callback to know when monaco editor is ready to be used
       eon.createCallback("oneditorready", this, "ready");
       eon.createCallback("onchange", this);
       eon.createCallback("onFocus", this);
       eon.createCallback("onBlur", this);
       eon.createCallback("onloader", this, "ready");
+    },
+
+    onInit: function () {
+      var el = this;
+      // Set loading mask color
+      el._refs.mask = document.createElement("eon-loading");
+      el._refs.mask.color = el.loadingColor;
+      el.appendChild(el._refs.mask);
     },
 
     onReady: function () {

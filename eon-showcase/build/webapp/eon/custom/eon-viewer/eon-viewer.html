@@ -61,7 +61,7 @@
         var el = this;
         el._refs.views = el.template.querySelector(".eon-viewer-views");
         el._refs.example = el.template.querySelector(".eon-viewer-example");
-        el._refs.showcase = el.template.querySelector(".eon-viewer-showcase");
+        el._refs.showcaseContainer = el.template.querySelector(".eon-viewer-showcase");
         el._refs.showcaseFragment = document.createDocumentFragment();
         el._refs.edit = el.template.querySelector(".eon-viewer-edit");
       },
@@ -104,28 +104,35 @@
         el._setUpExample(exampleNodes);
         el._setUpShowcase(showcaseNodes);
       },
-       /*
-        @function (private) _setUpEdit
-        @description 
-      */
+      /*
+       @function (private) _setUpEdit
+       @description 
+     */
       setUpEdit: function () {
         var el = this;
-        el._refs.edit.addEventListener("click", function(e) {
+        el._refs.edit.addEventListener("click", function (e) {
           // Append showcase
-          el._refs.showcase.appendChild(el._refs.showcaseFragment);
-          el._refs.showcase.style.height = (el.offsetHeight + 30) + "px"; 
+          el._refs.showcase = el._refs.showcaseFragment.querySelector("eon-showcase");
+          el._refs.showcaseContainer.appendChild(el._refs.showcaseFragment);
+          el._refs.showcaseContainer.style.height = (el.offsetHeight + 30) + "px";
+          // Display showcase HTML tab
+          el._refs.showcase.onReady(function () {
+            el._refs.showcase._refs.tabs.onReady(function () {
+              el._refs.showcase._refs.tabs.select("html");
+            });
+          });
           // On showcase load callback
           eval(el.load);
           // Hide example view
           el._refs.example.classList.remove("eon-viewer-view-visible");
-          el._refs.showcase.classList.add("eon-viewer-view-visible");
+          el._refs.showcaseContainer.classList.add("eon-viewer-view-visible");
           el._refs.edit.style.display = "none";
         }, false);
       },
-       /*
-        @function (private) _removeResidualNodes
-        @description 
-      */
+      /*
+       @function (private) _removeResidualNodes
+       @description 
+     */
       removeResidualNodes: function () {
         var el = this;
         // Remove residual nodes
