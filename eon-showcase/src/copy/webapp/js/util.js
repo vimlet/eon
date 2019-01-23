@@ -177,6 +177,8 @@ function loadNextSections() {
           refs.view._misc.panels.menus.render();
           refs.view._misc.panels.other.render();
 
+          othersInitialize();
+
           // Fix Togglemenu displaying
         }
       });

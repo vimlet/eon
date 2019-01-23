@@ -1,4 +1,27 @@
 /* EXAMPLE SPECIFICS */
+
+function othersInitialize(){
+  eon.onReady(function () {
+    /* Loader */
+    runLoader();
+    runEaseProgress();
+    /* Search bar */
+    document.querySelector(".onlyInput").onSearch(function (filters) {
+      var name = filters.name;
+      // Get colors
+      var toFilterChildren = document.querySelector(".d-searchbar-colors").children;
+      // Show filtered colors
+      for (var i = 0; i < toFilterChildren.length; i++) {
+        if (toFilterChildren[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) > -1) {
+          toFilterChildren[i].classList.add("d-search-item-visible");
+        } else {
+          toFilterChildren[i].classList.remove("d-search-item-visible");
+        }
+      }
+    });
+  });
+}
+
 /* DRAWER */
 function slideInDrawer(id) {
   var drawer = document.querySelector("#" + id);
@@ -32,24 +55,6 @@ function showComplete() {
   loadingmask.show();
 }
 /* SEARCHBAR */
-eon.onReady(function () {
-  setTimeout(function () {
-    document.querySelector(".onlyInput").onSearch(function (filters) {
-      var name = filters.name;
-      // Get colors
-      var toFilterChildren = document.querySelector(".d-searchbar-colors").children;
-      // Show filtered colors
-      for (var i = 0; i < toFilterChildren.length; i++) {
-        if (toFilterChildren[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) > -1) {
-          toFilterChildren[i].classList.add("d-search-item-visible");
-        } else {
-          toFilterChildren[i].classList.remove("d-search-item-visible");
-        }
-      }
-    });
-  }, 1000);
-});
-
 function searchColor() {
   var input = document.querySelector(".onlyInput");
   input.search(document.querySelector(".onlyInput"));
