@@ -802,7 +802,7 @@ eon.initializeDisplay = function (el, config) {
 
     if (!eon.rules[name]) {
 
-        ruleIndex = eon.style.sheet.insertRule(name + " { display: " + display + "; }", 0);
+        ruleIndex = eon.style.sheet.insertRule(name + " { display: " + display + "; -webkit-tap-highlight-color: transparent;}", 0);
         eon.rules[name] = eon.style.sheet.cssRules[ruleIndex];
 
     }
