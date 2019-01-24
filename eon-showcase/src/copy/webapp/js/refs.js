@@ -7,6 +7,7 @@ refs.initialize = function(){
     // Store useful nodes references
     refs.tree = document.querySelector(".tTree");
     refs.drawer = document.querySelector(".tTreeContainer");
-    refs.view = document.querySelector("#tViewContent");
+    // refs.view = document.querySelector("#tViewContent");
     refs.mask = document.querySelector("eon-loading");
 }
+

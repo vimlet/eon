@@ -47,10 +47,16 @@ function loadEonExamples() {
   });
   // Initialize forms
   eon.onReady(function () {
-    refs.view._misc.activePanel.onLoad(function () {
-      // Set up scroll anchor activation
-      anchorScrolling(this);
-      this.render();
+    refs.view.onReady(function(){
+      refs.view._misc.activePanel.onLoad(function () {
+        // Set up scroll anchor activation
+        anchorScrolling(this);
+        this.render();
+        // Expand forms tree node
+        refs.tree.nodes["forms"].toggleExpand();
+        // Select first node
+        refs.tree.selectNode(refs.tree.nodes["forms/button"]);
+      });
     });
   });
 }
@@ -71,7 +77,7 @@ function initializeShowcase(sectionsClass, pgClass) {
     var sections = document.querySelector(sectionsClass).content.children;
     var pg = document.querySelector(pgClass);
     // var renderingDelay = eon.util.isTouchScreen() ? 1600 : 500;
-
+    
     // Set showcase content
     pg.onReady(function () {
       var pgObj = {
@@ -162,6 +168,7 @@ function fullScreenListeners(pg) {
 }
 
 function loadNextSections() {
+  
   setTimeout(function () {
     eon.onReady(function () {
       refs.view._misc.panels.containers.onLoad(function () {

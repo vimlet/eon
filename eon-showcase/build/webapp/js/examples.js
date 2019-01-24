@@ -59,3 +59,4 @@ function searchColor() {
   var input = document.querySelector(".onlyInput");
   input.search(document.querySelector(".onlyInput"));
 }
+

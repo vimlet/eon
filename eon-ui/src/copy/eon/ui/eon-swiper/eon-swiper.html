@@ -1,7 +1,7 @@
 <script>
   //@header A container made to swipe eon-slide elements
   eon.element({
-    
+
     name: "eon-swiper",
     style: "eon-swiper.css",
 
@@ -238,7 +238,7 @@
         // if (Object.keys(el).length == 0) {
         //   return 0;
         // } else {
-          return parseFloat(getComputedStyle(el).getPropertyValue(property));
+        return parseFloat(getComputedStyle(el).getPropertyValue(property));
         // }
       },
       /*
@@ -266,7 +266,7 @@
         fragment.appendChild(wrapper);
         // Get maximum slide value
         el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
-        
+
       },
       /*
         @function (private) _buildPagination
@@ -348,8 +348,8 @@
           };
           el.backBtn = {
             node: backBtn,
-            minSize: btnSizeValue - sizeValue          
-};
+            minSize: btnSizeValue - sizeValue
+          };
           // If pagination is not hidable change clickable zone size
           if (el.pagination != "hidden") {
             el._decreaseNavButtonHeight(el.nextBtn);
@@ -758,12 +758,12 @@
         // Store swiper elements object
         slideObj.el = slide;
         // Set auto animation
-        if(eon.util.isTrue(el.auto)) {
+        if (eon.util.isTrue(el.auto)) {
           slide.style.transition = "width " + el.transition + "ms";
         }
         // Set slide range values
         el.slides.push(el._updateSlideRange(slideObj, newSlideIndex));
-        
+
         return slideObj;
       },
       /*
@@ -869,7 +869,7 @@
         el.querySelector(".eon-swiper-screenBtn").style.opacity = 0;
         // Remove translate animation
         el._refs.wrapper.style.transition = "none";
-        if(el.pagingNode.style) {
+        if (el.pagingNode.style) {
           el.pagingNode.style.transition = "none";
         }
         // Toggle full screen
@@ -880,7 +880,7 @@
             el.classList.remove("eon-swiper-fullscreen");
           }, 30);
         } else {
-          if(el.pagingNode.style) {
+          if (el.pagingNode.style) {
             el.pagingNode.style.opacity = 0;
           }
           // Append swiper to the body
@@ -890,7 +890,7 @@
           // Wait for the thumbnail positioning before making the paging node visible
           setTimeout(function () {
             el.style.height = "100%";
-            if(el.pagingNode.style) {
+            if (el.pagingNode.style) {
               el.pagingNode.style.opacity = 1;
             }
             el.classList.add("eon-swiper-fullscreen");
@@ -899,7 +899,7 @@
         // Restore translate animation
         setTimeout(function () {
           el._refs.wrapper.style.transition = "transform " + el.transition + "ms";
-          if(el.pagingNode.style) {
+          if (el.pagingNode.style) {
             el.pagingNode.style.transition = "transform " + el.transition + "ms";
           }
         }, 60);
@@ -932,7 +932,7 @@
         var index, slideLimitValue, minTranslValue, elementTranslateMiddle, slide;
         var delay = el._isTrickyBrowser() ? 10 : 0;
         var axis = el.direction == "horizontal" ? "clientX" : "clientY";
-        if (!eon.util.isTrue(el.externalSlide)){
+        if (!eon.util.isTrue(el.externalSlide)) {
           // Start slide on mouse down event
           el._refs.wrapper.addEventListener("pointerdown", function (e) {
             // Fix pointerup stacked bug
@@ -953,25 +953,25 @@
           // Slide element on mouse move
           el._refs.wrapper.addEventListener("pointermove", function (e) {
             if (mousedown) {
-              if(slideCounter > 1) {
+              if (slideCounter > 1) {
                 // if (!throttled) {
-                  // Get y/z translate pixels
-                  translatePixels = moveValue - e[axis];
-                  // Process position with the new movement values
-                  position = el._processPosition(el._refs.wrapper, translatePixels, "slides");
-                  // Translate element
-                  el._translate(el._refs.wrapper, position);
-                  if(translatePixels) {
-                    eon.triggerCallback("onDragStarted", el, el);
-                  }
-                  // Update initial move value
-                  moveValue = e[axis];
-                  // Throttle
-                  // throttled = true;
-                  // Set a timeout to un-throttle
-                  // setTimeout(function () {
-                  //   throttled = false;
-                  // }, delay);
+                // Get y/z translate pixels
+                translatePixels = moveValue - e[axis];
+                // Process position with the new movement values
+                position = el._processPosition(el._refs.wrapper, translatePixels, "slides");
+                // Translate element
+                el._translate(el._refs.wrapper, position);
+                if (translatePixels) {
+                  eon.triggerCallback("onDragStarted", el, el);
+                }
+                // Update initial move value
+                moveValue = e[axis];
+                // Throttle
+                // throttled = true;
+                // Set a timeout to un-throttle
+                // setTimeout(function () {
+                //   throttled = false;
+                // }, delay);
                 // }
               }
             }
@@ -1224,32 +1224,32 @@
       initAuto: function () {
         var el = this;
 
-        if(eon.util.isTrue(el.auto)) {
+        if (eon.util.isTrue(el.auto)) {
 
           // Get number of slides that fit into the wrapper size
           el._misc.containingSlides = el._refs.wrapper[el._misc.sizeProperty] / el.slides[0].el[el._misc.sizeProperty];
           el._misc.containingSlides = Math.round(el._misc.containingSlides);
-          
+
           // Ge first and last shown
-          if(el.autoType == "prev") {
+          if (el.autoType == "prev") {
             el._refs.lastVisible = el.currentSlide;
             el._refs.firstVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
-            
+
             // Trigger onSlideChange event
             eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
             // Init movement
-            setTimeout(function() {
+            setTimeout(function () {
               el.prev();
             }, el.duration);
 
           } else {
             el._refs.firstVisible = el.currentSlide;
             el._refs.lastVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
-            
+
             // Trigger onSlideChange event
             eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
             // Init movement
-            setTimeout(function() {
+            setTimeout(function () {
               el.next();
             }, el.duration);
           }
@@ -1261,12 +1261,12 @@
       */
       allInView: function () {
         var el = this;
-          var slide = el.slides[el.slides.length - 1].el;
-          if(slide.getBoundingClientRect().left < el._refs.wrapper[el._misc.sizeProperty]) {
-            return true;
-          } else {
-            return false
-          }
+        var slide = el.slides[el.slides.length - 1].el;
+        if (slide.getBoundingClientRect().left < el._refs.wrapper[el._misc.sizeProperty]) {
+          return true;
+        } else {
+          return false
+        }
       }
     },
     functions: {
@@ -1278,7 +1278,7 @@
         var el = this;
         // Current child has a next sibling
         if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("start")) {
-          
+
           // Update current element
           var currentIndex = el.slides.indexOf(el.currentSlide);
           el.currentSlide = el.slides[currentIndex + 1];
@@ -1304,23 +1304,23 @@
         // Trigger onNextCalled event
         eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
 
-          var slide = s3.slides[0];
-          slide.el.style.width = 0;
+        var slide = s3.slides[0];
+        slide.el.style.width = 0;
 
-          setTimeout(function() {
-            // Move element to the las of the queue
-            s3.slides.push(s3.slides.shift());
-            s3._refs.wrapper.appendChild(slide.el);
-            slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
+        setTimeout(function () {
+          // Move element to the las of the queue
+          s3.slides.push(s3.slides.shift());
+          s3._refs.wrapper.appendChild(slide.el);
+          slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
 
-            // Update first and last shown
-            el._refs.firstVisible = el.slides[0];
-            el._refs.lastVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
-          }, el.transition);
+          // Update first and last shown
+          el._refs.firstVisible = el.slides[0];
+          el._refs.lastVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
+        }, el.transition);
 
-          setTimeout(function() {
-            el.next();
-          }, el.duration);
+        setTimeout(function () {
+          el.next();
+        }, el.duration);
       },
       /*
         @function prev
@@ -1355,23 +1355,23 @@
         // Trigger onNextCalled event
         eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
 
-          var slide = s3.slides[0];
-          slide.el.style.width = 0;
+        var slide = s3.slides[0];
+        slide.el.style.width = 0;
 
-          setTimeout(function() {
-            // Move element to the las of the queue
-            s3.slides.unshift(s3.slides.pop());
-            s3._refs.wrapper.appendChild(slide.el);
-            slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
+        setTimeout(function () {
+          // Move element to the las of the queue
+          s3.slides.unshift(s3.slides.pop());
+          s3._refs.wrapper.appendChild(slide.el);
+          slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
 
-            // Update first and last shown
-            el._refs.lastVisible = el.slides[0];
-            el._refs.firstVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
-          }, el.transition);
+          // Update first and last shown
+          el._refs.lastVisible = el.slides[0];
+          el._refs.firstVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
+        }, el.transition);
 
-          setTimeout(function() {
-            el.prev();
-          }, el.duration);
+        setTimeout(function () {
+          el.prev();
+        }, el.duration);
       },
       /*
         @function slideTo
@@ -1388,14 +1388,14 @@
         var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
         var newPos = swiperHeight * (index);
         // Cancel animation 
-        if(cancelAnim) {
+        if (cancelAnim) {
           var currentTransition = el._refs.wrapper.style.transition;
           el._refs.wrapper.style.transition = "none";
         }
         // Translate element
         el._translate(el._refs.wrapper, -newPos);
-        if(cancelAnim) {
-          setTimeout(function() {
+        if (cancelAnim) {
+          setTimeout(function () {
             el._refs.wrapper.style.transition = currentTransition;
           }, 0);
         }
@@ -1480,8 +1480,8 @@
     },
     onBubbleRender: function () {
       var el = this;
-       // Set up auto functionality
-       el._initAuto();
+      // Set up auto functionality
+      el._initAuto();
     },
     onResize: function () {
       var el = this;
@@ -1503,7 +1503,7 @@
         // Translate current slide to its new centered position
         el.currentSlide = !el.currentSlide.el ? el.slides[0] : el.currentSlide;
         currentIndex = el.slides.indexOf(el.currentSlide);
-        
+
         // TODO: This was triggering slide change everytime the swiper was being resized
         // el.slideTo(currentIndex);
         el._keepInPlace();
