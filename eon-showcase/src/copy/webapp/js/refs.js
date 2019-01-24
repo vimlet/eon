@@ -10,11 +10,12 @@ refs.initialize = function () {
   refs.mask = document.querySelector("eon-loading");
 }
 refs.createSections = function () {
-  // refs.view = document.querySelector("#tViewContent");
+  // Create sections stack container
   var stackContainer = document.querySelector(".tViewContainer");
   refs.view = document.createElement("eon-stack");
   refs.view.id = "tViewContent";
 
+  // Get browser specific files
   var examples = eon.util.getBrowser() == "IE" ? "ie-example/" : "example/";
 
   var forms = document.createElement('eon-panel');
