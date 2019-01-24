@@ -15,37 +15,48 @@ function loadEonExamples() {
   var rootNodes = [].slice.call(refs.tree._refs.tree.children);
   // Load vComet element example
   refs.tree.onNodeSelected(function (node) {
-    // Go to group file
-    groupId = node._refs.parentNode.tagName == "EON-TREENODE" ? node._refs.parentNode.id : node.id;
-
-    refs.view.swapToPanel(groupId);
-    // Get active panel
-    activePanel = refs.view.getActivePanel();
-    var panelScroll = activePanel.$1("eon-scroll");
-    // Get node related anchor
-    anchor = activePanel.querySelector("[state=" + node.id + "]");
-    if (anchor) {
-      // Scroll to the specific element section
-      panelScroll.scrollTop = [anchor.getOffsetPosition(), true];
-    }
-    if (eon.util.isTrue(node.initExpanded)) {
-      refs.drawer.close();
-    } else {
-      // Shrink other tree nodes on mobile devices
-      if (eon.util.isTouchScreen()) {
-        for (var i = 0; i < rootNodes.length; i++) {
-          var rootNode = rootNodes[i];
-          if (rootNode.path !== node.path && eon.util.isTrue(rootNode.expanded)) {
-            rootNode.toggleExpand();
+    if(!refs.cancelTreeSelection) {
+      // Go to group file
+      groupId = node._refs.parentNode.tagName == "EON-TREENODE" ? node._refs.parentNode.id : node.id;
+  
+      refs.view.swapToPanel(groupId);
+      // Get active panel
+      activePanel = refs.view.getActivePanel();
+      var panelScroll = activePanel.$1("eon-scroll");
+      // Get node related anchor
+      anchor = activePanel.querySelector("[state=" + node.id + "]");
+      if (anchor) {
+        // Scroll to the specific element section
+        panelScroll.scrollTop = [anchor.getOffsetPosition(), true];
+      }
+      if (eon.util.isTrue(node.initExpanded)) {
+        refs.drawer.close();
+      } else {
+        // Shrink other tree nodes on mobile devices
+        if (eon.util.isTouchScreen()) {
+          for (var i = 0; i < rootNodes.length; i++) {
+            var rootNode = rootNodes[i];
+            if (rootNode.path !== node.path && eon.util.isTrue(rootNode.expanded)) {
+              rootNode.toggleExpand();
+            }
           }
         }
       }
     }
+    refs.cancelTreeSelection = false;
   });
   // Initialize forms
   eon.onReady(function () {
-    refs.view._misc.activePanel.onLoad(function () {
-      this.render();
+    refs.view.onReady(function(){
+      refs.view._misc.activePanel.onLoad(function () {
+        // Set up scroll anchor activation
+        anchorScrolling(this);
+        this.render();
+        // Expand forms tree node
+        refs.tree.nodes["forms"].toggleExpand();
+        // Select first node
+        refs.tree.selectNode(refs.tree.nodes["forms/button"]);
+      });
     });
   });
 }
@@ -66,7 +77,7 @@ function initializeShowcase(sectionsClass, pgClass) {
     var sections = document.querySelector(sectionsClass).content.children;
     var pg = document.querySelector(pgClass);
     // var renderingDelay = eon.util.isTouchScreen() ? 1600 : 500;
-
+    
     // Set showcase content
     pg.onReady(function () {
       var pgObj = {
@@ -157,15 +168,23 @@ function fullScreenListeners(pg) {
 }
 
 function loadNextSections() {
+  
   setTimeout(function () {
     eon.onReady(function () {
       refs.view._misc.panels.containers.onLoad(function () {
         if (Object.keys(refs.view._misc.panels.containers._refs.templates).length) {
 
+          anchorScrolling(refs.view._misc.panels.containers);
+          anchorScrolling(refs.view._misc.panels.media);
+          anchorScrolling(refs.view._misc.panels.menus);
+          anchorScrolling(refs.view._misc.panels.other);
+
           refs.view._misc.panels.containers.render();
           refs.view._misc.panels.media.render();
           refs.view._misc.panels.menus.render();
           refs.view._misc.panels.other.render();
+
+          othersInitialize();
 
           // Fix Togglemenu displaying
         }
@@ -175,65 +194,26 @@ function loadNextSections() {
     });
   }, 600);
 }
-/* EXAMPLE SPECIFICS */
-/* DRAWER */
-function slideInDrawer(id) {
-  var drawer = document.querySelector("#" + id);
-  drawer.show();
-}
-/* PANEL */
-function renderLazy() {
-  document.querySelector("#d-lazy-content").render();
-  // Remove place holder
-  document.querySelector("#d-lazy-content .d-place-holder").style.display = "none";
-}
-function importRemote() {
-  document.querySelector("#d-lazy-remote").importContent();
-  // Remove place holder
-  document.querySelector("#d-lazy-remote .d-place-holder").style.display = "none";
-}
-/* LOADER */
-function runLoader(l1) {
-  var l1 = document.querySelector("#d-l1");
-  l1.animate(0, 0);
-  l1.animate(1);
-}
-function runEaseProgress() {
-  var l4 = document.querySelector("#d-l4");
-  l4.animate(0, 0);
-  l4.animate(1, 2000);
-}
-eon.onReady(function () {
+
+function anchorScrolling(panel) {
+  // Make sure all panels has been loaded
   setTimeout(function () {
-    runLoader();
-    runEaseProgress()
-  }, 1000);
-});
-/* LOADINGMASK */
-function showComplete() {
-  var loadingmask = document.querySelector("#complete");
-  loadingmask.show();
-}
-/* SEARCHBAR */
-eon.onReady(function () {
-  setTimeout(function () {
-    document.querySelector(".onlyInput").onSearch(function (filters) {
-      var name = filters.name;
-      // Get colors
-      var toFilterChildren = document.querySelector(".d-searchbar-colors").children;
-      // Show filtered colors
-      for (var i = 0; i < toFilterChildren.length; i++) {
-        if (toFilterChildren[i].getAttribute("value").toLowerCase().indexOf(name.toLowerCase()) > -1) {
-          toFilterChildren[i].classList.add("d-search-item-visible");
-        } else {
-          toFilterChildren[i].classList.remove("d-search-item-visible");
-        }
+    // Get all anchors
+    panel.onLoad(function () {
+      var anchors = panel.querySelectorAll("eon-anchor");
+      var name;
+      // On anchor activated
+      for (var i = 0; i < anchors.length; i++) {
+        anchors[i].onReached(function(){
+          name = this.state;
+          refs.tree.onReady(function(){
+            //
+            refs.cancelTreeSelection = true;
+            refs.tree.selectNode(refs.tree.nodes[panel.name + "/" + name]);
+          });
+        });
       }
     });
-  }, 1000);
-});
 
-function searchColor() {
-  var input = document.querySelector(".onlyInput");
-  input.search(document.querySelector(".onlyInput"));
+  }, 0);
 }
