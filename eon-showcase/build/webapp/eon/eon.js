@@ -110,15 +110,17 @@ if (eon.addViewportMeta) {
 if (!eon.theme) {
     eon.theme = "noire";
 }    
-    // ############################################################################################
+    eon.polyfills = eon.polyfills || {};
+
+// ############################################################################################
 // POLYFILL DETECTION
 // ############################################################################################
 
-eon.injectPolyfill = function (url) {
-  document.write("<script type='text/javascript' src='" + url + "'><\/script>");
+eon.polyfills.injectPolyfill = function (url) {
+  document.write('<script type="text/javascript" src="' + url + '"></script>');
 };
 
-eon.needCustomElementsPolyfill = function () {
+eon.polyfills.needCustomElementsPolyfill = function () {
   var __customElements = window.hasOwnProperty("customElements");
   if (eon.debug.polyfill) {
     console.log("Polyfill custom-elements", !__customElements);
@@ -126,7 +128,7 @@ eon.needCustomElementsPolyfill = function () {
   return !__customElements;
 };
 
-eon.needTemplatePolyfill = function () {
+eon.polyfills.needTemplatePolyfill = function () {
   var __template = "content" in document.createElement("template") === true;
   if (eon.debug.polyfill) {
     console.log("Polyfill template", !__template);
@@ -134,7 +136,7 @@ eon.needTemplatePolyfill = function () {
   return !__template;
 };
 
-eon.needCSSScopePolyfill = function () {
+eon.polyfills.needCSSScopePolyfill = function () {
   var needPolyfill = false;
   try {
     doc.querySelector(":scope body");
@@ -147,7 +149,7 @@ eon.needCSSScopePolyfill = function () {
   return needPolyfill;
 };
 
-eon.needObjectAssignPolyfill = function () {
+eon.polyfills.needObjectAssignPolyfill = function () {
   var needPolyfill = !Object.assign;
   if (eon.debug.polyfill) {
     console.log("Polyfill Object Assign", needPolyfill);
@@ -155,17 +157,17 @@ eon.needObjectAssignPolyfill = function () {
   return needPolyfill;
 };
 
-eon.needLocalStringPolyfill = function () {
+eon.polyfills.needLocaleStringPolyfill = function () {
   return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
 }
 
-eon.needPromisesPolyfill = function () {
+eon.polyfills.needPromisesPolyfill = function () {
   if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
     return false;
   }
   return true;
 }
-eon.needClassListAddPolyfill = function () {
+eon.polyfills.needClassListAddPolyfill = function () {
   var div = document.createElement("div");
   div.classList.add("class1", "class2");
 
@@ -177,88 +179,45 @@ eon.needClassListAddPolyfill = function () {
 // ############################################################################################
 
 // Custom Elements - https://github.com/webcomponents/custom-elements
-if (eon.needCustomElementsPolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/custom-elements/custom-elements.min.js");
+if (!eon.polyfills.customElements && eon.polyfills.needCustomElementsPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/custom-elements/custom-elements.min.js");
 }
 
 // Template - https://github.com/webcomponents/template
-if (eon.needTemplatePolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/template/template.js");
+if (!eon.polyfills.template && eon.polyfills.needTemplatePolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/template/template.js");
 }
 
 // CSS :scope
-if (eon.needCSSScopePolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/css/scope.js");
+if (!eon.polyfills.CSSScope && eon.polyfills.needCSSScopePolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/css/scope.js");
 }
 
 // Object.assign
-if (eon.needObjectAssignPolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/object/assign.js");
+if (!eon.polyfills.assign && eon.polyfills.needObjectAssignPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/object/assign.js");
 }
 
-// Pointer events (Must run always)
-eon.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
-
 // Promises
-if (eon.needPromisesPolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/promises/promises.js");
+if (!eon.polyfills.promises && eon.polyfills.needPromisesPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/promises/promises.js");
 }
 
 // Date locale polyfill
-if (eon.needLocalStringPolyfill()) {
-  
-  (function (proxied) {
-    Date.prototype.toLocaleString = function (locale, options) {
-
-      if (options.month && Object.keys(options).length == 1) {
-        return eon.time.defaultLocale.months[options.month][this.getMonth()];
-      } else if (options.weekday && Object.keys(options).length == 1) {
-        return eon.time.defaultLocale.weekdays[options.weekday][this.getDay()];
-      }
-
-      return proxied.apply(this, arguments);
-    };
-  })(Date.prototype.toLocaleString);
-
+if (!eon.polyfills.localeString && eon.polyfills.needLocaleStringPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/locale-string/locale-string.js");
 }
+
 //
-if (eon.needClassListAddPolyfill()) {
-  
-  (function (proxied) {
-
-    DOMTokenList.prototype.add = function () {
-      
-      if(arguments.length > 1) {
-        
-        for (var i = 0; i < arguments.length; i++) {
-          proxied.apply(this, [arguments[i]]);
-        }
-        
-      } else {
-        return proxied.apply(this, arguments);
-      }
-
-    };
-  })(DOMTokenList.prototype.add);
-  
-  (function (proxied) {
-
-    DOMTokenList.prototype.remove = function () {
-
-      if (arguments.length > 1) {
-
-        for (var i = 0; i < arguments.length; i++) {
-          proxied.apply(this, [arguments[i]]);
-        }
-
-      } else {
-        return proxied.apply(this, arguments);
-      }
-
-    };
-  })(DOMTokenList.prototype.remove);
-
+if (!eon.polyfills.classList && eon.polyfills.needClassListAddPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/class-list/class-list.js");
 }
+
+// Pointer events (Must run always)
+if (!eon.polyfills.pep) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
+}
+
 
 
     
@@ -2823,143 +2782,6 @@ vimlet.meta = vimlet.meta || {};
   };
 
 }.apply(vimlet.meta));  
-    // ############################################################################################
-// VPA JS
-// ############################################################################################
-
-// Creates a namespace for vpa.js
-eon.vpa = eon.vpa || {};
-
-(function () {
-  
-  var define = eon.amd.define;
-  var require = eon.amd.require;
-
-  var vpa = {};
-  vpa.useAmd = true;
-  vpa.declareLocal = true;
-
-  // Import vpa.js file
-  // ------------------------------------------------------------------------------------
-    // USE ONLY WITH SCRIPT SRC!
-
-// Support module in any environment
-var scope = typeof global != "undefined" ? global : window;
-scope["module"] = scope["module"] || undefined;
-
-// Global vpa declaration
-scope.vpa = scope.vpa || {};
-
-vpa.declareLocal = vpa.hasOwnProperty("declareLocal") ? vpa.declareLocal : true;
-vpa.declareGlobal = vpa.hasOwnProperty("declareGlobal") ? vpa.declareGlobal : true;
-
-vpa.useAmd = vpa.hasOwnProperty("useAmd") ? vpa.useAmd : false;
-vpa.allowAmdRequire = vpa.hasOwnProperty("allowAmdRequire") ? vpa.allowAmdRequire : false;
-
-if (vpa.useAmd || vpa.allowAmdRequire) {
-  vpa.define = vpa.define || define;
-  vpa.require = vpa.require || require;
-  vpa.useAmd = true; // Force AMD when any related option is used
-}
-
-vpa.declareAdapter = function (name, adapter, ext_module) {
-  (function () {
-    if (vpa.declareLocal && vpa.useAmd) {
-        vpa.define(function () {
-          return adapter;
-        });      
-    }
-    if (vpa.declareGlobal) {
-      vpa[name] = adapter;
-    }
-  })();
-};
-
-// Base implementation
-(function () {
-    var self = this;
-    // Base Query and Adapter Objects
-    self.createBaseQuery = function (adapterData) {
-        var BaseQuery = /** @class */ (function () {
-            function BaseQuery() {
-                this.query = adapterData || {};
-            }
-            BaseQuery.prototype.options = function (o) {
-                this.query.options = o;
-                return this;
-            };
-            BaseQuery.prototype.limit = function (start, amount) {
-                this.query.limitStart = start;
-                this.query.limitAmount = amount;
-                return this;
-            };
-            BaseQuery.prototype.validate = function (schema) {
-                this.query.validate = schema;
-                return this;
-            };
-            BaseQuery.prototype.sort = function (field, rule) {
-                this.query.sortField = field;
-                this.query.sortRule = rule;
-                return this;
-            };
-            BaseQuery.prototype.view = function (v) {
-                this.query.view = v;
-                return this;
-            };
-            BaseQuery.prototype.result = function (cb) {
-                throw "Not implemented, please override result function";
-            };
-            return BaseQuery;
-        }());
-        return new BaseQuery();
-    };
-    self.createBaseAdapter = function (queryHandler) {
-        var BaseAdapter = /** @class */ (function () {
-            function BaseAdapter() {
-            }
-            BaseAdapter.prototype.create = function (data) {
-                return queryHandler({
-                    action: "create",
-                    data: data
-                });
-            };
-            BaseAdapter.prototype.read = function (id) {
-                return queryHandler({
-                    action: "read",
-                    id: id
-                });
-            };
-            BaseAdapter.prototype.update = function (id, data) {
-                return queryHandler({
-                    action: "update",
-                    id: id,
-                    data: data
-                });
-            };
-            BaseAdapter.prototype.delete = function (id) {
-                return queryHandler({
-                    action: "delete",
-                    id: id
-                });
-            };
-            return BaseAdapter;
-        }());
-        return new BaseAdapter();
-    };
-}).apply(vpa);
-
-
-// Allow vpa require
-if (vpa.allowAmdRequire) {
-  vpa.define(function () {
-    return vpa;
-  });
-}  // ------------------------------------------------------------------------------------
-
-  eon.vpa = vpa;
-
-}).apply({});
-
     
 // ############################################################################################
 // CORE MODULES
@@ -3465,7 +3287,7 @@ eon.insertImport = function (href) {
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
-    
+
     // Cache
     eon.cache.add(href, { name: elementName });
 
@@ -3490,6 +3312,7 @@ eon.insertImport = function (href) {
 
         // Avoid duplicated imports while waiting XMLHttpRequest callback.
         eon.imports.templates[elementName] = null;
+
         // Saves the paths of the imported elements
         eon.imports.paths[elementName] = href.substring(0, href.length - href.match(/[^\/]*$/g)[0].length);
 
@@ -6093,7 +5916,7 @@ eon.resize = eon.resize || {};
  * @return {[type]}            [description]
  */
 eon.addResizeListener = function (element, key, fn) {
-
+  
   if ('ResizeObserver' in window) {
 
     element.__resizeObservers = element.__resizeObservers || {};
@@ -6120,7 +5943,7 @@ eon.addResizeListener = function (element, key, fn) {
       if (element.__resizeListeners[key]) {
         eon.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
       }
-
+      console.log(element, key);
       // Creates the resizeObserver for the element with the provided callback
       element.__resizeListeners[key] = fn;
       eon.resize.ResizeListener.add(element, element.__resizeListeners[key]);
@@ -6481,7 +6304,7 @@ eon.cache.config = eon.cache.config || {};
 
       // Register eon service worker
       navigator.serviceWorker
-        .register(eon.basePath + '/modules/eon-cache/service-worker.js')
+        .register(eon.basePath + '/modules/cache-sw.js')
         .then(function () {
           console.log('[ServiceWorker] Registered');
       });
@@ -7366,8 +7189,146 @@ eon.validator.fillErrorObj = function (property, errorMessage, errorObj) {
 
 
   
+    // ############################################################################################
+// VPA JS
+// ############################################################################################
+
+// Creates a namespace for vpa.js
+eon.vpa = eon.vpa || {};
+
+(function () {
+  
+  var define = eon.amd.define;
+  var require = eon.amd.require;
+
+  var vpa = {};
+  vpa.useAmd = true;
+  vpa.declareLocal = true;
+
+  // Import vpa.js file
+  // ------------------------------------------------------------------------------------
+    // USE ONLY WITH SCRIPT SRC!
+
+// Support module in any environment
+var scope = typeof global != "undefined" ? global : window;
+scope["module"] = scope["module"] || undefined;
+
+// Global vpa declaration
+scope.vpa = scope.vpa || {};
+
+vpa.declareLocal = vpa.hasOwnProperty("declareLocal") ? vpa.declareLocal : true;
+vpa.declareGlobal = vpa.hasOwnProperty("declareGlobal") ? vpa.declareGlobal : true;
+
+vpa.useAmd = vpa.hasOwnProperty("useAmd") ? vpa.useAmd : false;
+vpa.allowAmdRequire = vpa.hasOwnProperty("allowAmdRequire") ? vpa.allowAmdRequire : false;
+
+if (vpa.useAmd || vpa.allowAmdRequire) {
+  vpa.define = vpa.define || define;
+  vpa.require = vpa.require || require;
+  vpa.useAmd = true; // Force AMD when any related option is used
+}
+
+vpa.declareAdapter = function (name, adapter, ext_module) {
+  (function () {
+    if (vpa.declareLocal && vpa.useAmd) {
+        vpa.define(function () {
+          return adapter;
+        });      
+    }
+    if (vpa.declareGlobal) {
+      vpa[name] = adapter;
+    }
+  })();
+};
+
+// Base implementation
+(function () {
+    var self = this;
+    // Base Query and Adapter Objects
+    self.createBaseQuery = function (adapterData) {
+        var BaseQuery = /** @class */ (function () {
+            function BaseQuery() {
+                this.query = adapterData || {};
+            }
+            BaseQuery.prototype.options = function (o) {
+                this.query.options = o;
+                return this;
+            };
+            BaseQuery.prototype.limit = function (start, amount) {
+                this.query.limitStart = start;
+                this.query.limitAmount = amount;
+                return this;
+            };
+            BaseQuery.prototype.validate = function (schema) {
+                this.query.validate = schema;
+                return this;
+            };
+            BaseQuery.prototype.sort = function (field, rule) {
+                this.query.sortField = field;
+                this.query.sortRule = rule;
+                return this;
+            };
+            BaseQuery.prototype.view = function (v) {
+                this.query.view = v;
+                return this;
+            };
+            BaseQuery.prototype.result = function (cb) {
+                throw "Not implemented, please override result function";
+            };
+            return BaseQuery;
+        }());
+        return new BaseQuery();
+    };
+    self.createBaseAdapter = function (queryHandler) {
+        var BaseAdapter = /** @class */ (function () {
+            function BaseAdapter() {
+            }
+            BaseAdapter.prototype.create = function (data) {
+                return queryHandler({
+                    action: "create",
+                    data: data
+                });
+            };
+            BaseAdapter.prototype.read = function (id) {
+                return queryHandler({
+                    action: "read",
+                    id: id
+                });
+            };
+            BaseAdapter.prototype.update = function (id, data) {
+                return queryHandler({
+                    action: "update",
+                    id: id,
+                    data: data
+                });
+            };
+            BaseAdapter.prototype.delete = function (id) {
+                return queryHandler({
+                    action: "delete",
+                    id: id
+                });
+            };
+            return BaseAdapter;
+        }());
+        return new BaseAdapter();
+    };
+}).apply(vpa);
+
+
+// Allow vpa require
+if (vpa.allowAmdRequire) {
+  vpa.define(function () {
+    return vpa;
+  });
+}  // ------------------------------------------------------------------------------------
+
+  eon.vpa = vpa;
+
+}).apply({});
+
 
 }.apply(eon));
   
+
 
 
