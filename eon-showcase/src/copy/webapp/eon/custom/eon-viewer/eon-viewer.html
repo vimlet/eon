@@ -110,24 +110,28 @@
      */
       setUpEdit: function () {
         var el = this;
-        el._refs.edit.addEventListener("click", function (e) {
-          // Append showcase
-          el._refs.showcase = el._refs.showcaseFragment.querySelector("eon-showcase");
-          el._refs.showcaseContainer.appendChild(el._refs.showcaseFragment);
-          el._refs.showcaseContainer.style.height = (el.offsetHeight + 30) + "px";
-          // Display showcase HTML tab
-          el._refs.showcase.onReady(function () {
-            el._refs.showcase._refs.tabs.onReady(function () {
-              el._refs.showcase._refs.tabs.select("html");
+        if (eon.util.getBrowser() !== "IE") {
+          el._refs.edit.addEventListener("click", function (e) {
+            // Append showcase
+            el._refs.showcase = el._refs.showcaseFragment.querySelector("eon-showcase");
+            el._refs.showcaseContainer.appendChild(el._refs.showcaseFragment);
+            el._refs.showcaseContainer.style.height = (el.offsetHeight + 30) + "px";
+            // Display showcase HTML tab
+            el._refs.showcase.onReady(function () {
+              el._refs.showcase._refs.tabs.onReady(function () {
+                el._refs.showcase._refs.tabs.select("html");
+              });
             });
-          });
-          // On showcase load callback
-          eval(el.load);
-          // Hide example view
-          el._refs.example.classList.remove("eon-viewer-view-visible");
-          el._refs.showcaseContainer.classList.add("eon-viewer-view-visible");
+            // On showcase load callback
+            eval(el.load);
+            // Hide example view
+            el._refs.example.classList.remove("eon-viewer-view-visible");
+            el._refs.showcaseContainer.classList.add("eon-viewer-view-visible");
+            el._refs.edit.style.display = "none";
+          }, false);
+        } else {
           el._refs.edit.style.display = "none";
-        }, false);
+        }
       },
       /*
        @function (private) _removeResidualNodes
