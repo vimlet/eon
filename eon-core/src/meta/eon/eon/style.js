@@ -24,14 +24,37 @@ eon.tabletWidth = 800;
 eon.addViewportMeta = eon.addViewportMeta || true;
 
 if (eon.addViewportMeta) {
-    document.write(
-        '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-    );
+  document.write(
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+  );
 }
 
 // ############################################################################################
 // DEFAULT THEME
 // ############################################################################################
-if (!eon.theme) {
+
+document.addEventListener("DOMContentLoaded", function (event) {
+
+  if (!eon.theme) {
     eon.theme = "noire";
-}
+  }
+
+  if (!document.body.dataset.theme && !document.body.hasAttribute("theme")) {
+    document.body.setAttribute("theme", eon.theme);
+  }
+
+  var themeDescriptor = {};
+  // theme property descriptor
+  themeDescriptor.get = function () { };
+  themeDescriptor.set = function (value) {
+    // console.log('BEFORE DOM');
+    eon.domReady(function(){
+      // console.log('AFTER DOM');
+      document.body.setAttribute("theme", value);
+    });
+  };
+
+  Object.defineProperty(eon, "theme", themeDescriptor);
+
+});
+
