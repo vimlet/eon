@@ -5,6 +5,42 @@ function setUpSearch(selector) {
     refs.tree.refresh(filters.tText);
   });
 }
+function setUpTheme(selector) {
+  // Search listener
+  document.querySelector(selector).onSelected(function (item) {
+    eon.theme = item.value;
+    if(item.value == "noire") {
+      document.querySelector(".tStickyClass").classList.add("to-noire");
+      document.querySelector(".tMenuBtn").classList.add("to-noire");
+      document.querySelector(".tViewContainer").classList.add("to-noire");
+      document.querySelector(".card h1").classList.add("to-noire");
+      document.querySelector(".tTreeContainer").classList.add("to-noire");
+
+      var titles = document.querySelectorAll(".card h1");
+      for (var i = 0; i < titles.length; i++) {
+        var title = titles[i];  
+        title.classList.add("to-noire");
+      }
+      // .tStickyClass
+      // .tMenuBtn
+      // .tViewContainer
+      // .card h1
+      // eon-viewer set theme claro
+      // .tTreeContainer set background-color to #2d2d2d
+    } else {
+      document.querySelector(".tStickyClass").classList.remove("to-noire");
+      document.querySelector(".tMenuBtn").classList.remove("to-noire");
+      document.querySelector(".tViewContainer").classList.remove("to-noire");
+      document.querySelector(".card h1").classList.remove("to-noire");
+      document.querySelector(".tTreeContainer").classList.remove("to-noire");
+      var titles = document.querySelectorAll(".card h1");
+      for (var i = 0; i < titles.length; i++) {
+        var title = titles[i];  
+        title.classList.remove("to-noire");
+      }
+    }
+  });
+}
 
 function loadEonExamples() {
   var anchor, activePanel, groupId;
