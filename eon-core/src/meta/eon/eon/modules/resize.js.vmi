@@ -1,82 +1,84 @@
 // Creates a namespace for requirejs
-eon.resize = eon.resize || {};
+eon.resizeObserver = eon.resizeObserver || {};
 
 (function () {
   
   <% template("resize/ResizeListener.js") %>
 
-}).apply(eon.resize);
+}).apply(eon);
 
 
 /**
- *
- * @param  {[type]} element [description]
- * @param  {[type]} key      [description]
- * @param  {Function} callback     [description]
- * @return {[type]}            [description]
- */
+*
+* @param {[type]} element [description]
+* @param {[type]} key [description]
+* @param {Function} callback [description]
+* @return {[type]} [description]
+*/
 eon.addResizeListener = function (element, key, fn) {
 
-  if ('ResizeObserver' in window) {
+if ('ResizeObserver' in window) {
 
-    element.__resizeObservers = element.__resizeObservers || {};
+element.__resizeObservers = element.__resizeObservers || {};
 
-    // If there is already a resizeObserver with that key, 
-    // we disconnect/delete it, and create a new one with the provided callback
-    if (element.__resizeObservers[key]) {
-      element.__resizeObservers[key].disconnect();
-      delete element.__resizeObservers[key];
-    }
+// If there is already a resizeObserver with that key,
+// we disconnect/delete it, and create a new one with the provided callback
+if (element.__resizeObservers[key]) {
+element.__resizeObservers[key].disconnect();
+delete element.__resizeObservers[key];
+}
 
-    // Creates the resizeObserver for the element with the provided callback
-    element.__resizeObservers[key] = new ResizeObserver(fn);
-    element.__resizeObservers[key].observe(element);
+// Creates the resizeObserver for the element with the provided callback
+element.__resizeObservers[key] = new ResizeObserver(fn);
+element.__resizeObservers[key].observe(element);
 
-  } else {
+} else {
 
-    eon.onReady(function () {
+eon.onReady(function () {
 
-      element.__resizeListeners = element.__resizeListeners || {};
+element._resizeMutationObservers = element._resizeMutationObservers || {};
 
-      // If there is already a resizeListener with that key, 
-      // we remove it, and create a new one with the provided callback
-      if (element.__resizeListeners[key]) {
-        eon.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
-      }
+// If there is already a resizeListener with that key,
+// we remove it, and create a new one with the provided callback
+if (element._resizeMutationObservers[key]) {
+element._resizeMutationObservers[key].disconnect();
+delete element._resizeMutationObservers[key]; 
+}
 
-      // Creates the resizeObserver for the element with the provided callback
-      element.__resizeListeners[key] = fn;
-      eon.resize.ResizeListener.add(element, element.__resizeListeners[key]);
+// Creates the resizeObserver for the element with the provided callback
+element._resizeMutationObservers[key] = new eon.resizeObserver(fn);
+element._resizeMutationObservers[key].observe(element);
 
-    });
+});
 
-  }
+}
 
 };
 
 /**
- *
- * @param  {[type]} element [description]
- * @param  {[type]} key      [description]
- * @return {[type]}            [description]
- */
+*
+* @param {[type]} element [description]
+* @param {[type]} key [description]
+* @return {[type]} [description]
+*/
 eon.removeResizeListener = function (element, key) {
 
-  if ('ResizeObserver' in window) {
+if ('ResizeObserver' in window) {
 
-    // Checks if the key already exists and disconnects/deletes it
-    if (element.__resizeObservers[key]) {
-      element.__resizeObservers[key].disconnect();
-      delete element.__resizeObservers[key];
-    }
+// Checks if the key already exists and disconnects/deletes it
+if (element.__resizeObservers[key]) {
+element.__resizeObservers[key].disconnect();
+delete element.__resizeObservers[key];
+}
 
-  } else {
+} else {
 
-    // Checks if there is a resizeListener with that key and removes it
-    if (element.__resizeListeners[key]) {
-      eon.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
-    }
+// Checks if there is a resizeListener with that key and removes it
+if (element._resizeMutationObservers[key]) {
+element._resizeMutationObservers[key].disconnect();
+delete element._resizeMutationObservers[key];
+}
 
-  }
+}
 
 };
