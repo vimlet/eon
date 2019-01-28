@@ -553,7 +553,7 @@ eon.transform = function (el, config) {
 
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
         // We pass the config so that if the element has themed: "false" but the element has a theme specified by the user it turns it into "true"
-        var theme = eon.getElementTheme(el, config);
+        var theme = eon.initElementTheme(el, config);
         var name = el.nodeName.toLowerCase();
 
         // Imports the template of the element
@@ -565,6 +565,9 @@ eon.transform = function (el, config) {
         // If the element has not yet registered its theme it will proceed on importing it
         eon.importElementTheme(config, name, theme);
 
+        // Prepares th element to change its theme in case eon theme changes
+        eon.setupEonThemeListener(el, config)
+
         // Adds the element to the transformQueue
         setTimeout(function () {
             eon.triggerTransformed(el, config);
@@ -574,10 +577,11 @@ eon.transform = function (el, config) {
 
 };
 
-eon.getElementTheme = function (el, config) {
+eon.initElementTheme = function (el, config) {
 
-    var userSpecifiedTheme = el.hasAttribute("theme") || el.theme ? true : false;
     var theme = eon.theme;
+
+    el.__specificTheme = el.hasAttribute("theme") || el.theme ? true : false;
 
     theme = document.body.dataset.theme ? document.body.dataset.theme : theme;
     theme = document.body.hasAttribute("theme") ? document.body.getAttribute("theme") : theme;
@@ -586,12 +590,37 @@ eon.getElementTheme = function (el, config) {
 
     // If the user has specified a theme but the element is not themeable then we turn themed: "true" so
     // that it can now import a theme
-    config.themed = userSpecifiedTheme && !config.themed ? true : config.themed;
+    config.themed = el.__specificTheme && !config.themed ? true : config.themed;
 
     // Whether it has the attribute or not, we set it
     el.setAttribute("theme", theme);
 
     return theme;
+}
+
+eon.setupEonThemeListener = function (el, config) {
+
+    // When eon theme changes it also changes the element's theme attribute and 
+    // if the theme file is not imported it also imports it
+    eon.onThemeChanged(function (previousTheme, newTheme) {
+
+        var elementName = el.nodeName.toLowerCase();
+        var elementTheme = document.body.hasAttribute("theme") != "" ? document.body.getAttribute("theme") : el.theme;
+        
+        // It will only change and attempt to import the new elements theme if matches the body one and 
+        // if it is not strictly specified by the user
+        if (elementTheme && !el.__specificTheme) {
+
+            el.setAttribute("theme", newTheme);
+
+            if (!eon.registry.isThemeRegistered(elementName, newTheme)) {
+                eon.importElementTheme(config, elementName, newTheme);
+            }
+
+        }
+
+    });
+
 }
 
 eon.slot = function (el) {
