@@ -16,6 +16,7 @@ function setUpTheme(selector) {
 function setUpSelector(themeSelector) {
   var selectorContainer = themeSelector.parentNode;
   var selectorContainerParent = themeSelector.parentNode.parentNode;
+  var content = document.querySelector(".tContent");
   //
   window.addEventListener("resize", function () {
     checkResponsive();
@@ -23,6 +24,7 @@ function setUpSelector(themeSelector) {
   function checkResponsive() {
     if (this.innerWidth >= 1301) {
       document.body.appendChild(selectorContainer);
+      selectorContainer.style.width = content.offsetWidth + "px";
     } else {
       selectorContainerParent.appendChild(selectorContainer);
     }
