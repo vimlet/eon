@@ -32,49 +32,15 @@ function setUpSelector(themeSelector) {
 function switchThemeListener(themeSelector) {
   // Get themed showcase DOM elements
   var logo = document.querySelector(".tIcon");
-  var elms = [".tStickyClass", ".tMenuBtn", ".tViewContainer",
-    ".tTreeContainer", ".theme-selector .eon-combobox-wrapper",
-    ".theme-selector-container", ".d-searchbar-colors", ".d-gutter eon-section",
-    "eon-gutter eon-section", ".d-gutter-root .eon-gutter-section", ".d-gutter .eon-gutter-section, .d-gutter-root .eon-gutter-section"];
+  var body = document.body;
+  
   // Search listener
   themeSelector.onSelected(function (item) {
     eon.theme = item.value;
     if (item.value == "noire") {
-      // Change EON logo
-      logo.style.backgroundImage = "url(../img/eon-logo-w.svg)";
-      // DOM elements theme
-      for (var i = 0; i < elms.length; i++) {
-        var elm = document.querySelector(elms[i]);
-        console.log('elm', elm, elm.style.boxShadow);
-        if(window.getComputedStyle(elm).boxShadow) {
-          elm.style.boxShadow = "0px 0px 10px #1b1b1b";
-        }
-        elm.classList.add("to-noire");
-      }
-      // Card titles
-      var titles = document.querySelectorAll(".card h1");
-      for (var i = 0; i < titles.length; i++) {
-        var title = titles[i];
-        title.classList.add("to-noire");
-      }
+      body.classList.add("noire");
     } else {
-      // Change EON logo
-      logo.style.backgroundImage = "url(../img/eon-logo.svg)";
-      // DOM elements theme
-      for (var i = 0; i < elms.length; i++) {
-        var elm = document.querySelector(elms[i]);
-       
-        if(window.getComputedStyle(elm).boxShadow) {
-          elm.style.boxShadow = "0px 0px 10px #d8d8d8";
-        }
-        elm.classList.remove("to-noire");
-      }
-      // Card titles
-      var titles = document.querySelectorAll(".card h1");
-      for (var i = 0; i < titles.length; i++) {
-        var title = titles[i];
-        title.classList.remove("to-noire");
-      }
+      body.classList.remove("noire");
     }
   });
 }
