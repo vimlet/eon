@@ -2,12 +2,7 @@
 // DEBUG
 // ############################################################################################
 
-eon.debug = eon.debug || {};
-
-eon.debug.polyfill = eon.debug.polyfill || false;
-
 eon.warn = eon.warn || {};
-
 eon.error = eon.error || {};
 
 eon.debug.log = function(condition, message) {

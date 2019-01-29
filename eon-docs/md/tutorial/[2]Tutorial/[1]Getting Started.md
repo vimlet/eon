@@ -2,12 +2,12 @@
 
 This tutorial assumes you are familiarized with the basics of HTML, CSS and JavaScript.
 
-## Downloading eon
-They are several ways to get the latest eon release.
+## Downloading Eon
+They are several ways to get the latest Eon release.
 
 - NPM:
 
-    This is the recommended method since it provides a painless way to keep eon up to date on all your projects.
+    This is the recommended method since it provides a painless way to keep Eon up to date on all your projects.
 
     First install [NodeJS](https://nodejs.org), then run on the terminal
 
@@ -15,12 +15,17 @@ They are several ways to get the latest eon release.
     npm install @vimlet/eon-cli -g   
     ```
 
-    Once eon-cli is done installing, simply open the terminal on the desired working directory and type
+    Once eon-cli is done installing, you have two ways available to get Eon:
+
+    Running the install command will get you the latest version of Eon and extract it in the desired folder
     ```
     eon-cli install
     ```
 
-    This will download the latest version of eon and extract it for you.
+    You also have the init command, that, besides of providing you an extracted version of the framework in its latest release, it also offers the option the get you a basic template with a working server to start right away.
+    ```
+    eon-cli init
+    ```
 
 - BROWSER: 
         
@@ -29,7 +34,7 @@ They are several ways to get the latest eon release.
 
 ## Creating a project
 
-Once eon is downloaded to our working directory, simply add to the `head` of your html file:
+Once Eon is downloaded to our working directory, simply add to the `head` of your html file:
 
 ```[html]
 <head>
@@ -41,7 +46,7 @@ Note eon/eon.js is the default location but you can use any other path if you wi
 
 ## Importing components
 
-Now we can start importing components, you can think of components as the parts of what your application would be made of. This "parts" can be built by others or by you, by default eon comes with a rich library of UI components that will fulfill most of your needs.
+Now we can start importing components, you can think of components as the parts of what your application would be made of. This "parts" can be built by others or by you, by default Eon comes with a rich library of UI components that will fulfill most of your needs.
 
 For now, we will use a simple button component as an example, but you can read more about custom components creation on the [Components Creation tutorial](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries/Component%20Creation.md).
 
@@ -63,8 +68,8 @@ Once a component is imported it can be used as any other html element.
 </body>
 ``` 
 
-## eon Asynchronism
-Due to the super fast asynchronous nature of eon, in order to use it programmatically we need to wait for the component to be initialized with all its features. Although eon provides many callbacks that you can hook to, the easiest one to get started is `eon.onReady`
+## Eon Asynchronism
+Due to the super fast asynchronous nature of Eon, in order to use it programmatically we need to wait for the component to be initialized with all its features. Although Eon provides many callbacks that you can hook to, the easiest one to get started is `eon.onReady`
 
 ```[javascript]
 eon.onReady(function () {
@@ -75,7 +80,7 @@ eon.onReady(function () {
 
 ## Learn more...
 
-You can keep learning more about using eon components in the To-Do List Tutorial and more about creating your own and managing state in the Game of Life Tutorial.
+You can keep learning more about using Eon components in the To-Do List Tutorial and more about creating your own and managing state in the Game of Life Tutorial.
 
- You can also learn about the guts of eon components and its patterns in the Core Introduction.
+ You can also learn about the guts of Eon components and its patterns in the Core Introduction.
 
