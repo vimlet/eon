@@ -1,5 +1,10 @@
 var eon = eon || {};
 
+eon.debug = eon.debug || {};
+eon.debug.polyfill = eon.debug.polyfill || false;
+
+eon.polyfills = eon.polyfills || {};
+
 (function () {
     var eon = this;
 
@@ -8,12 +13,7 @@ var eon = eon || {};
 // DEBUG
 // ############################################################################################
 
-eon.debug = eon.debug || {};
-
-eon.debug.polyfill = eon.debug.polyfill || false;
-
 eon.warn = eon.warn || {};
-
 eon.error = eon.error || {};
 
 eon.debug.log = function(condition, message) {
@@ -102,16 +102,8 @@ if (eon.addViewportMeta) {
     document.write(
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     );
-}
-
-// ############################################################################################
-// DEFAULT THEME
-// ############################################################################################
-if (!eon.theme) {
-    eon.theme = "noire";
 }    
-    eon.polyfills = eon.polyfills || {};
-
+    
 // ############################################################################################
 // POLYFILL DETECTION
 // ############################################################################################
@@ -4313,6 +4305,59 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
   }
 }
 
+eon.createCallback("onThemeChanged", eon);
+
+document.addEventListener("DOMContentLoaded", function (event) {
+
+    var theme = eon.theme;
+    var themeDescriptor = {};
+
+    // Default theme
+    if (!theme) {
+        theme = "noire";
+    }
+    
+    // If there is no theme specified to the body we set the default one, 
+    // otherwise we take that theme as the default one
+    if (!document.body.dataset.theme && !document.body.hasAttribute("theme")) {
+
+      document.body.setAttribute("theme", theme);
+
+    } else {
+
+        theme = document.body.dataset.theme ? document.body.dataset.theme : theme;
+        theme = document.body.hasAttribute("theme") ? document.body.getAttribute("theme") : theme;
+
+    }
+  
+    eon.__theme = theme;
+    
+    // Theme property descriptor, that will notify the theme change triggering onThemeChanged, 
+    // import new Main theme and set the new theme body attribute
+    themeDescriptor.get = function () {
+        return eon.__theme;
+    };
+
+    themeDescriptor.set = function (value) {
+
+      eon.domReady(function(){
+
+        document.body.setAttribute("theme", value);
+
+        if (!eon.registry.isThemeRegistered("main", value)) {
+            eon.importMainTheme(value);
+        }
+
+        eon.triggerCallback("onThemeChanged", eon, null, [eon.__theme, value]);
+        eon.__theme = value;
+      });
+
+    };
+  
+    Object.defineProperty(eon, "theme", themeDescriptor);
+  
+  }); 
+
 eon.constructClass = function (baseElement) {
   // Class adpater
   var classAdapter = function () {
@@ -4926,7 +4971,7 @@ eon.transform = function (el, config) {
 
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
         // We pass the config so that if the element has themed: "false" but the element has a theme specified by the user it turns it into "true"
-        var theme = eon.getElementTheme(el, config);
+        var theme = eon.initElementTheme(el, config);
         var name = el.nodeName.toLowerCase();
 
         // Imports the template of the element
@@ -4938,6 +4983,9 @@ eon.transform = function (el, config) {
         // If the element has not yet registered its theme it will proceed on importing it
         eon.importElementTheme(config, name, theme);
 
+        // Prepares th element to change its theme in case eon theme changes
+        eon.setupEonThemeListener(el, config)
+
         // Adds the element to the transformQueue
         setTimeout(function () {
             eon.triggerTransformed(el, config);
@@ -4947,10 +4995,11 @@ eon.transform = function (el, config) {
 
 };
 
-eon.getElementTheme = function (el, config) {
+eon.initElementTheme = function (el, config) {
 
-    var userSpecifiedTheme = el.hasAttribute("theme") || el.theme ? true : false;
     var theme = eon.theme;
+
+    el.__specificTheme = el.hasAttribute("theme") || el.theme ? true : false;
 
     theme = document.body.dataset.theme ? document.body.dataset.theme : theme;
     theme = document.body.hasAttribute("theme") ? document.body.getAttribute("theme") : theme;
@@ -4959,12 +5008,37 @@ eon.getElementTheme = function (el, config) {
 
     // If the user has specified a theme but the element is not themeable then we turn themed: "true" so
     // that it can now import a theme
-    config.themed = userSpecifiedTheme && !config.themed ? true : config.themed;
+    config.themed = el.__specificTheme && !config.themed ? true : config.themed;
 
     // Whether it has the attribute or not, we set it
     el.setAttribute("theme", theme);
 
     return theme;
+}
+
+eon.setupEonThemeListener = function (el, config) {
+
+    // When eon theme changes it also changes the element's theme attribute and 
+    // if the theme file is not imported it also imports it
+    eon.onThemeChanged(function (previousTheme, newTheme) {
+      
+        var elementName = el.nodeName.toLowerCase();
+        var elementTheme = document.body.hasAttribute("theme") != "" ? document.body.getAttribute("theme") : el.theme;
+        
+        // It will only change and attempt to import the new elements theme if matches the body one and 
+        // if it is not strictly specified by the user
+        if (elementTheme && !el.__specificTheme) {
+
+            el.setAttribute("theme", newTheme);
+
+            if (!eon.registry.isThemeRegistered(elementName, newTheme)) {
+                eon.importElementTheme(config, elementName, newTheme);
+            }
+
+        }
+
+    });
+
 }
 
 eon.slot = function (el) {
@@ -5175,7 +5249,7 @@ eon.initializeDisplay = function (el, config) {
 
     if (!eon.rules[name]) {
 
-        ruleIndex = eon.style.sheet.insertRule(name + " { display: " + display + "; }", 0);
+        ruleIndex = eon.style.sheet.insertRule(name + " { display: " + display + "; -webkit-tap-highlight-color: transparent;}", 0);
         eon.rules[name] = eon.style.sheet.cssRules[ruleIndex];
 
     }
@@ -5624,145 +5698,360 @@ eon.time.defaultLocale = {
 
 
 // Creates a namespace for requirejs
-eon.resizeObserver = eon.resizeObserver || {};
+eon.resize = eon.resize || {};
 
 (function () {
   
-  eon.resizeObserver = function (callback) {
-  var elm = this;
+  /*!
+ * ResizeListener
+ * Detect when HTML elements change in size
+ * https://github.com/ShimShamSam/ResizeListener
+ *
+ * Copyright 2016 Samuel Hodge
+ * Released under the GPL license
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+(function scope(root) {
+	'use strict';
 
-  elm.observe = function (el) {
-    if (elm.observables.some(function (observable) {
-      return observable.el === el;
-    })) {
-      return;
-    }
-    var newObservable = {
-      el: el,
-      size: {
-        height: el.clientHeight,
-        width: el.clientWidth
-      }
-    }
-    elm.observables.push(newObservable);
-  }
+	var name        = 'ResizeListener';
+	var _private    = typeof Symbol === 'function' ? Symbol(name) : '__' + name +'__';
+	var tag_name    = name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase() + '-element';
+	var massive     = 999999;
+	var dirty_frame = null;
+	var dirty       = [];
 
-  elm.unobserve = function (el) {
-    elm.observables = elm.observables.filter(function (obj) {
-      return obj.el !== el;
-    });
-  }
+	var requestAnimationFrame =
+		window.requestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.webkitRequestAnimationFrame ||
+		function requestAnimationFrame(callback) {
+			return window.setTimeout(callback, 16);
+		};
 
-  elm.disconnect = function () {
-    elm.observables = [];
-  }
+	// Sensor template setup
+	var sensor_template = document.createElement(tag_name);
+	var sizer_template  = sensor_template.cloneNode(true);
+	var shared_css      = 'position:absolute;top:0;left:0;z-index:-' + massive + ';visibility:hidden;overflow:hidden;';
 
-  elm.check = function () {
-    var changedEntries = elm.observables.filter(function (obj) {
-      var currentHeight = obj.el.clientHeight;
-      var currentWidth = obj.el.clientWidth;
-      if (obj.size.height !== currentHeight || obj.size.width !== currentWidth) {
-        obj.size.height = currentHeight;
-        obj.size.width = currentWidth;
-        return true;
-      }
-    }).map(function (obj) {
-      return obj.el;
-    });
-    if (changedEntries.length > 0) {
-      elm.callback(changedEntries);
-    }
-    window.requestAnimationFrame(elm.boundCheck);
-  }
-  //  class ResizeObserver {
-  function constructor(callback) {
-    elm.observables = [];
-    // Array of observed elements that looks like el:
-    // [{
-    //   el: domNode,
-    //   size: {height: x, width: y}
-    // }]
-    elm.boundCheck = elm.check.bind(elm);
-    elm.boundCheck();
-    elm.callback = callback;
-  }
-  constructor(callback);
-}
-}).apply(eon);
+	sensor_template.style.cssText = shared_css + 'width:100%;height:100%';
+	sizer_template.style.cssText  = shared_css + 'width:' + massive + 'px;height:' + massive + 'px';
+
+	var expand_sensor = sensor_template.cloneNode(true);
+	var shrink_sensor = sensor_template.cloneNode(true);
+	var expand_sizer  = sizer_template.cloneNode(true);
+	var shrink_sizer  = sizer_template.cloneNode(true);
+
+	shrink_sizer.style.width = shrink_sizer.style.height = '200%';
+
+	sensor_template.appendChild(expand_sensor);
+	sensor_template.appendChild(shrink_sensor);
+	expand_sensor.appendChild(expand_sizer);
+	shrink_sensor.appendChild(shrink_sizer);
+
+	// API export
+	var api = {
+		add : function add(elements, callbacks) {
+			elements  = wrapInArray(elements);
+			callbacks = wrapInArray(callbacks);
+
+			for(var i = 0; i < elements.length; ++i) {
+				for(var j = 0; j < callbacks.length; ++j) {
+					addResizeListener(elements[i], callbacks[j]);
+				}
+			}
+		},
+
+		remove : function remove(elements, callbacks) {
+			elements  = wrapInArray(elements);
+			callbacks = wrapInArray(callbacks);
+
+			for(var i = 0; i < elements.length; ++i) {
+				for(var j = 0; j < callbacks.length; ++j) {
+					removeResizeListener(elements[i], callbacks[j]);
+				}
+			}
+		}
+	};
+
+	if(typeof define === 'function' && define.amd) {
+		define(api);
+	}
+	else if(typeof exports === 'object') {
+		module.exports = api;
+	}
+	else {
+		root[name] = api;
+	}
+
+	/**
+	 * Attaches a resize callback to an element
+	 * @param {HTMLElement} element
+	 * @param {Function}    callback
+	 */
+	function addResizeListener(element, callback) {
+		var listener = getListener(element);
+
+		if(listener) {
+			listener.callbacks.push(callback);
+
+			return;
+		}
+
+		var sensor        = sensor_template.cloneNode(true);
+		var expand_sensor = sensor.childNodes[0];
+		var shrink_sensor = sensor.childNodes[1];
+
+		// Convert the element to relative positioning if it's currently static
+		var position =
+			element.currentStyle    ? element.currentStyle.position :
+			window.getComputedStyle ? window.getComputedStyle(element, null).getPropertyValue('position') :
+			element.style.position;
+
+		if(position === 'static') {
+			element.style.position = 'relative';
+		}
+
+		element.appendChild(sensor);
+
+		sensor[_private]        =
+		expand_sensor[_private] =
+		shrink_sensor[_private] = {
+			sensor        : sensor,
+			expand_sensor : expand_sensor,
+			shrink_sensor : shrink_sensor,
+			last_width    : element.offsetWidth,
+			last_height   : element.offsetHeight,
+			callbacks     : [callback],
+			dirty         : false
+		};
+
+		expand_sensor.scrollLeft =
+		expand_sensor.scrollTop  =
+		shrink_sensor.scrollLeft =
+		shrink_sensor.scrollTop  = massive;
+
+		expand_sensor.onscroll =
+		shrink_sensor.onscroll = scrollHandler;
+	}
+
+	/**
+	 * Removes a resize callback from an element
+	 * If no callback is defined, all callbacks are removed
+	 * @param {HTMLElement} element
+	 * @param {Function}    callback
+	 */
+	function removeResizeListener(element, callback) {
+		var listener = getListener(element);
+
+		if(!listener) {
+			return;
+		}
+
+		// If a specific callback was passed in, remove it
+		if(callback) {
+			var callbacks = listener.callbacks;
+
+			for(var i = 0; i < callbacks.length; ++i) {
+				if(callbacks[i] === callback) {
+					callbacks.splice(i, 1);
+					--i;
+				}
+			}
+
+			// If there are still callbacks, we're done
+			if(callbacks.length) {
+				return;
+			}
+		}
+
+		// If we've made it this far, remove the entire listener
+		element.removeChild(listener.sensor);
+	}
+
+	/**
+	 * Scroll event handler
+	 * @param {Event} e
+	 */
+	function scrollHandler(e) {
+		if(!e) {
+			e = window.event;
+		}
+
+		var target = e.target || e.srcElement;
+
+		if(!target) {
+			return;
+		}
+
+		var listener = target[_private];
+
+		if(listener.dirty) {
+			return;
+		}
+
+		listener.dirty = true;
+		dirty.push(listener);
+
+		// Queue up a frame to check dirty listeners
+		if(!dirty_frame) {
+			dirty_frame = requestAnimationFrame(checkDirtyListeners);
+		}
+	};
+
+	/**
+	 * Checks all possibly resized listeners for changes in dimensions
+	 */
+	function checkDirtyListeners() {
+		for(var i = 0; i < dirty.length; ++i) {
+			var listener = dirty[i];
+			var element  = listener.sensor.parentNode;
+
+			listener.dirty = false;
+
+			listener.expand_sensor.scrollLeft =
+			listener.expand_sensor.scrollTop  =
+			listener.shrink_sensor.scrollLeft =
+			listener.shrink_sensor.scrollTop  = massive;
+
+			if(!element) {
+				continue;
+			}
+
+			var width    = element.offsetWidth;
+			var height   = element.offsetHeight;
+
+			if(listener.last_width === width && listener.last_height === height) {
+				continue;
+			}
+
+			var data = {
+				width       : width,
+				height      : height,
+				last_width  : listener.last_width,
+				last_height : listener.last_height
+			};
+
+			listener.last_width  = width;
+			listener.last_height = height;
+
+			for(var j = 0; j < listener.callbacks.length; ++j) {
+				listener.callbacks[j].call(listener.sensor.parentNode, data);
+			}
+		}
+
+		dirty.length = 0;
+		dirty_frame  = null;
+	}
+
+	/**
+	 * Gets the listener object for a given element
+	 * @param  {HTMLElement} element The element to get the listener for
+	 * @return {Object|null}         The listener or null if one was not found
+	 */
+	function getListener(element) {
+		if(element[_private]) {
+			return element[_private];
+		}
+
+		for(var i = 0; i < element.childNodes.length; ++i) {
+			var child = element.childNodes[i];
+
+			if(child[_private]) {
+				return child[_private];
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Wraps a value in an array if it isn't one
+	 * @param  {*} value The value to wrap
+	 * @return {*}       The wrapped value
+	 */
+	function wrapInArray(value) {
+		if(!value || typeof value !== 'object' || typeof value.length === 'undefined') {
+			return [value];
+		}
+
+		return value;
+	}
+}(this));
+
+}).apply(eon.resize);
 
 
 /**
-*
-* @param {[type]} element [description]
-* @param {[type]} key [description]
-* @param {Function} callback [description]
-* @return {[type]} [description]
-*/
+ *
+ * @param  {[type]} element [description]
+ * @param  {[type]} key      [description]
+ * @param  {Function} callback     [description]
+ * @return {[type]}            [description]
+ */
 eon.addResizeListener = function (element, key, fn) {
 
-if ('ResizeObserver' in window) {
+  if ('ResizeObserver' in window) {
 
-element.__resizeObservers = element.__resizeObservers || {};
+    element.__resizeObservers = element.__resizeObservers || {};
 
-// If there is already a resizeObserver with that key,
-// we disconnect/delete it, and create a new one with the provided callback
-if (element.__resizeObservers[key]) {
-element.__resizeObservers[key].disconnect();
-delete element.__resizeObservers[key];
-}
+    // If there is already a resizeObserver with that key, 
+    // we disconnect/delete it, and create a new one with the provided callback
+    if (element.__resizeObservers[key]) {
+      element.__resizeObservers[key].disconnect();
+      delete element.__resizeObservers[key];
+    }
 
-// Creates the resizeObserver for the element with the provided callback
-element.__resizeObservers[key] = new ResizeObserver(fn);
-element.__resizeObservers[key].observe(element);
+    // Creates the resizeObserver for the element with the provided callback
+    element.__resizeObservers[key] = new ResizeObserver(fn);
+    element.__resizeObservers[key].observe(element);
 
-} else {
+  } else {
 
-eon.onReady(function () {
+    eon.onReady(function () {
 
-element._resizeMutationObservers = element._resizeMutationObservers || {};
+      element.__resizeListeners = element.__resizeListeners || {};
 
-// If there is already a resizeListener with that key,
-// we remove it, and create a new one with the provided callback
-if (element._resizeMutationObservers[key]) {
-element._resizeMutationObservers[key].disconnect();
-delete element._resizeMutationObservers[key]; 
-}
+      // If there is already a resizeListener with that key, 
+      // we remove it, and create a new one with the provided callback
+      if (element.__resizeListeners[key]) {
+        eon.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
+      }
 
-// Creates the resizeObserver for the element with the provided callback
-element._resizeMutationObservers[key] = new eon.resizeObserver(fn);
-element._resizeMutationObservers[key].observe(element);
+      // Creates the resizeObserver for the element with the provided callback
+      element.__resizeListeners[key] = fn;
+      eon.resize.ResizeListener.add(element, element.__resizeListeners[key]);
 
-});
+    });
 
-}
+  }
 
 };
 
 /**
-*
-* @param {[type]} element [description]
-* @param {[type]} key [description]
-* @return {[type]} [description]
-*/
+ *
+ * @param  {[type]} element [description]
+ * @param  {[type]} key      [description]
+ * @return {[type]}            [description]
+ */
 eon.removeResizeListener = function (element, key) {
 
-if ('ResizeObserver' in window) {
+  if ('ResizeObserver' in window) {
 
-// Checks if the key already exists and disconnects/deletes it
-if (element.__resizeObservers[key]) {
-element.__resizeObservers[key].disconnect();
-delete element.__resizeObservers[key];
-}
+    // Checks if the key already exists and disconnects/deletes it
+    if (element.__resizeObservers[key]) {
+      element.__resizeObservers[key].disconnect();
+      delete element.__resizeObservers[key];
+    }
 
-} else {
+  } else {
 
-// Checks if there is a resizeListener with that key and removes it
-if (element._resizeMutationObservers[key]) {
-element._resizeMutationObservers[key].disconnect();
-delete element._resizeMutationObservers[key];
-}
+    // Checks if there is a resizeListener with that key and removes it
+    if (element.__resizeListeners[key]) {
+      eon.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
+    }
 
-}
+  }
 
 };
 
