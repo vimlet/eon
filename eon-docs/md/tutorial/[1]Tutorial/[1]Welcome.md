@@ -21,5 +21,5 @@ The framework is divided into three main parts:
 
 Other parts of the framework include:
 
-- data - Handles data manipulation and communication between client and endpoints.
+- modules - Multiple utils for things like cache, data manipulation and communication.
 - polyfill - Provides backward compatibility for older browsers.

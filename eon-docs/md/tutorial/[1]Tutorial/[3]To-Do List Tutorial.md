@@ -18,7 +18,7 @@ To create the To-Do List we are going to use 4 components only:  `eon-text`, `eo
 Since we need to import multiple components we are passing an `Array` with their paths, but you can also pass a single `String` path if you only want to import one.
 
  ## Declare components
- We are going to declare components that will be loaded with the document, that is, those that are not created by the user interaction. In order To-Do this, we are going to use HTML tags, but with Eon nomenclature.
+ We are going to start by adding the static components that will be loaded with the document, that is, those that are not created dynamically by the user interaction.
 
 ```[html]
 <div class="main">
