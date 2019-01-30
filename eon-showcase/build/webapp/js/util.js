@@ -6,42 +6,46 @@ function setUpSearch(selector) {
   });
 }
 function setUpTheme(selector) {
-  // Search listener
-  document.querySelector(selector).onSelected(function (item) {
-    eon.theme = item.value;
-    if(item.value == "noire") {
-      document.querySelector(".tStickyClass").classList.add("to-noire");
-      document.querySelector(".tMenuBtn").classList.add("to-noire");
-      document.querySelector(".tViewContainer").classList.add("to-noire");
-      document.querySelector(".card h1").classList.add("to-noire");
-      document.querySelector(".tTreeContainer").classList.add("to-noire");
+  var themeSelector = document.querySelector(selector);
+  // Set themes selector responsive
+  setUpSelector(themeSelector);
+  // Non EON components theme switching 
+  switchThemeListener(themeSelector);
+}
 
-      var titles = document.querySelectorAll(".card h1");
-      for (var i = 0; i < titles.length; i++) {
-        var title = titles[i];  
-        title.classList.add("to-noire");
-      }
-      // .tStickyClass
-      // .tMenuBtn
-      // .tViewContainer
-      // .card h1
-      // eon-viewer set theme claro
-      // .tTreeContainer set background-color to #2d2d2d
+function setUpSelector(themeSelector) {
+  var selectorContainer = themeSelector.parentNode;
+  var selectorContainerParent = themeSelector.parentNode.parentNode;
+  var content = document.querySelector(".tContent");
+  //
+  window.addEventListener("resize", function () {
+    checkResponsive();
+  });
+  function checkResponsive() {
+    if (this.innerWidth >= 1301) {
+      document.body.appendChild(selectorContainer);
+      selectorContainer.style.width = content.offsetWidth + "px";
     } else {
-      document.querySelector(".tStickyClass").classList.remove("to-noire");
-      document.querySelector(".tMenuBtn").classList.remove("to-noire");
-      document.querySelector(".tViewContainer").classList.remove("to-noire");
-      document.querySelector(".card h1").classList.remove("to-noire");
-      document.querySelector(".tTreeContainer").classList.remove("to-noire");
-      var titles = document.querySelectorAll(".card h1");
-      for (var i = 0; i < titles.length; i++) {
-        var title = titles[i];  
-        title.classList.remove("to-noire");
-      }
+      selectorContainerParent.appendChild(selectorContainer);
+    }
+  }
+  checkResponsive();
+}
+function switchThemeListener(themeSelector) {
+  // Get themed showcase DOM elements
+  var logo = document.querySelector(".tIcon");
+  var body = document.body;
+  
+  // Search listener
+  themeSelector.onSelected(function (item) {
+    eon.theme = item.value;
+    if (item.value == "noire") {
+      body.classList.add("noire");
+    } else {
+      body.classList.remove("noire");
     }
   });
 }
-
 function loadEonExamples() {
   var anchor, activePanel, groupId;
   // Configure tree
@@ -51,10 +55,10 @@ function loadEonExamples() {
   var rootNodes = [].slice.call(refs.tree._refs.tree.children);
   // Load vComet element example
   refs.tree.onNodeSelected(function (node) {
-    if(!refs.cancelTreeSelection) {
+    if (!refs.cancelTreeSelection) {
       // Go to group file
       groupId = node._refs.parentNode.tagName == "EON-TREENODE" ? node._refs.parentNode.id : node.id;
-  
+
       refs.view.swapToPanel(groupId);
       // Get active panel
       activePanel = refs.view.getActivePanel();
@@ -83,7 +87,7 @@ function loadEonExamples() {
   });
   // Initialize forms
   eon.onReady(function () {
-    refs.view.onReady(function(){
+    refs.view.onReady(function () {
       refs.view._misc.activePanel.onLoad(function () {
         // Set up scroll anchor activation
         anchorScrolling(this);
@@ -113,7 +117,7 @@ function initializeShowcase(sectionsClass, pgClass) {
     var sections = document.querySelector(sectionsClass).content.children;
     var pg = document.querySelector(pgClass);
     // var renderingDelay = eon.util.isTouchScreen() ? 1600 : 500;
-    
+
     // Set showcase content
     pg.onReady(function () {
       var pgObj = {
@@ -204,7 +208,7 @@ function fullScreenListeners(pg) {
 }
 
 function loadNextSections() {
-  
+
   setTimeout(function () {
     eon.onReady(function () {
       refs.view._misc.panels.containers.onLoad(function () {
@@ -225,7 +229,7 @@ function loadNextSections() {
           // Fix Togglemenu displaying
         }
       });
-
+      refs.view._misc.panels.forms.content.parentNode.scrollTop = 0;
       refs.mask.hide();
     });
   }, 600);
@@ -240,9 +244,9 @@ function anchorScrolling(panel) {
       var name;
       // On anchor activated
       for (var i = 0; i < anchors.length; i++) {
-        anchors[i].onReached(function(){
+        anchors[i].onReached(function () {
           name = this.state;
-          refs.tree.onReady(function(){
+          refs.tree.onReady(function () {
             //
             refs.cancelTreeSelection = true;
             refs.tree.selectNode(refs.tree.nodes[panel.name + "/" + name]);
