@@ -17,111 +17,155 @@ To create the To-Do List we are going to use 4 components only:  `eon-text`, `eo
 
 Since we need to import multiple components we are passing an `Array` with their paths, but you can also pass a single `String` path if you only want to import one.
 
- ## Setting up the main structure
+ ## Declare components
  We are going to start by adding the static components that will be loaded with the document, that is, those that are not created dynamically by the user interaction.
 
 ```[html]
-<body>
-  <!-- Input text where we will type the new items text -->
-  <eon-text type="text" label="To-Do list" placeholder="New Item"></eon-text>
+<div class="main">
+    <div class="absoluteContainer">
+            <div class="todoContainer">
+                <span class="title">To-Do list</span>
 
-  <!-- Button to add items. In the onclick attribute we name the function to add new items -->
-  <eon-button expand="inline" value="Add" onclick="addItem();"></eon-button>
+                <!-- Scroll component that will allow us to scroll through our list -->
+                <eon-scroll thickness="5" fill="false">
+                    <!-- It will contain the elements to the list that are added. -->
+                    <div class="listContainer"></div>
+                </eon-scroll>
 
-  <!-- Scroll component that will allow us to scroll through our list -->
-  <eon-scroll thickness="5" fill="false">
-    <!-- Our items list -->
-    <div class="list"></div>
-  </eon-scroll>
-</body>
+                <!-- Sending data section container-->
+                <div class="setNewContainer">
+                    <!-- Component to input the text we want to add into the list -->
+                    <eon-text class="addItem" name="addItem" type="text" placeholder="New Item"></eon-text>
+                    
+                    <!-- Button to add the text to the list. In the onclick we name the function to add the text. -->
+                    <eon-button class="addButton" value="Add" expand="inline" onclick="addItem();"></eon-button>
+                </div>
+            </div>
+    </div>
+</div>
 ```
 
 As you can see we have prepared a basic structure for our `To-Do List` and we have included a `scroll` component that will let us scroll through our list, we also have a `text` component so that the user can type any text that will be added to the list when our `button` component is triggered.
 
-As you can see we have prepared a basic structure for our `To-Do List` including the next elements:
-. a `scroll` component to let us scroll through out list
-. a `text` component where the user will type the new items text
-. a `button` component to add the new items to the list
+If you take a closer look you might find some `attributes` you have never seen before, these are `exclusive` for each type of components that will let us configure the behavior we want for the components, for instance, you can see that in the scroll element there are two attributes we are using, `thickness` and `fill`; the value of `thickness` will determine the size of the scroll bars, while the value of `fill` will tell the scroll if we want it to fill the size of its parent or it will have its own size.
 
+ ## Dynamic components
+ Once the static components are declared, we establish dynamic functionality in order to add the list items.
 
-If you take a closer look you might find some `attributes` you have never seen before, these are `exclusive` for each type of components and will let us configure the behavior we want for the components, for instance, you can see that in the scroll element we have added two attributes: `thickness` and `fill`; the value of `thickness` will determine the size of the scroll bars, while the value of `fill` will tell the scroll if we want it to fill the size of its parent or it will have its own size.
-
- ## The logic
- Once our main structure is built, it's time to establish the logic that will let us add the list items.
-
- The button for adding the new items will trigger the `addItem()` function, which will store the eon-text input value, create the new item and append it to the list.
+ The button for adding the new item will trigger the `addItem()` function, which will store the eon-text input value and send it to the `setValue()` function.
 ``` [javascript]
-  function addItem() {
-    // Store the eon-text input value
-    var text = document.querySelector("eon-text");
-    var textValue = text.value;
+function addItem() {
+    var textbox = document.querySelector("eon-text");
+    var textboxValue = textbox.value;
 
-    // Denied empty values
-    if (textValue != "") {
-      // Create item
-      var item = createItem(textValue);
+    if (textboxValue != "") {
+        // Call function to set the new list item
+        setItem(textboxValue);
 
-      // Append item to the list
-      appendItem(item);
-
-      // Reset the eon-text value
-      text.reset();
+        // Reestablishes the eon-text value
+        textbox.setValue("");
+        textbox.value = "";
     }
-  }
+
 }
 ```
-Let's going deep into the previous function operations to see things clearly:
 
-. First, we are calling the `createItem` function that will dynamically create two components that will shape the list item, as well
-as their interaction logic: an `eon-button` which will allow us to remove an item and a `eon-checkbox` which will let us mark an item as done.
-To use Eon programmatically we will do it inside the onReady event, ensuring that all the functionalities are loaded in the document:
-
+With this function we dinamically create the required components that will shape the list item. 
+To use Eon programmatically we will do it inside the `onReady` event, ensuring that all 
+the functionalities are loaded in the document.
 ``` [javascript]
-function createItem(itemText) {
-  // Make sure all eon elements are ready
-  eon.onReady(function () {
-    var item = document.createElement("div");
-    // Create item status checkbox
-    var statusCheck = document.createElement("eon-checkbox");
-    // Set up checkbox
-    statusCheck.classList.add("checkboxItem");
-    statusCheck.label = itemText;
-    statusCheck.inline = true;
+function setItem(newItem) {
+    eon.onReady(function () {
+        // We create a checkbox that will be the item in the list 
+        var newCheckbox = document.createElement("eon-checkbox");
+        // We add a button to edit the item
+        var newEdit = document.createElement("eon-button");
+        // We add a button to delete the item from the list
+        var newDelete = document.createElement("eon-button");
+        // newItemContainer is the node that will be contain the item
+        var newItemContainer = document.createElement("div");
+        var listContainer = document.querySelector(".listContainer");
+        // This node will contain the default view of the item 
+        var defaultContainer = document.createElement("div");
 
-    // Create the button that will delete the item
-    var removeBtn = document.createElement("eon-button");
-    removeBtn.vicon = "vicon-bin";
-    // Button click listener
-    removeBtn.onclick = function(){
-      // Remove item
-      item.parentNode.removeChild(item);
-    };
-    
-    // Append content
-    item.appendChild(statusCheck);
-    item.appendChild(removeBtn);
-    return item;
-  });
+        // Set properties of checkbox item
+        newCheckbox.classList.add("checkboxItem");
+        newCheckbox.label = newItem;
+        newCheckbox.value = newItem;
+
+        // Edit item button
+        newEdit.classList.add("editButton");
+        newEdit.icon = '<i class="material-icons">mode_edit</i>';
+        // Set the call to function to edit the value of the checkbox item
+        newEdit.setOnClick("editItem(this.parentNode.parentNode);");
+
+        // Delete item button properties
+        newDelete.classList.add("deleteButton");
+        newDelete.icon = '<i class="material-icons">close</i>';
+        // Set the call to function to delete the node that contains the item
+        newDelete.setOnClick("deleteItem(this.parentNode.parentNode);");
+
+        // Inserts the newItemContainer to listContainer in the first position
+        listContainer.insertBefore(newItemContainer, listContainer.children[0]);
+
+        newItemContainer.classList.add("newItemContainer");
+        // Append newCheckbox, newEdit and newDelete to newItemContainer 
+        defaultContainer.appendChild(newCheckbox);
+        defaultContainer.appendChild(newEdit);
+        defaultContainer.appendChild(newDelete);
+
+        newItemContainer.appendChild(defaultContainer);
+
+        // Register newItemContainer node to be aware if it is on the click path by giving `isOnPath` property
+        eon.registerPathListener(newItemContainer);
+    });
 }
 ```
 
-In this function we are going to insert the new item at the beginning of the list:
-``` [javascript]
-function appendItem(item) {
-  var list = document.querySelector(".list");
-  // Inserts the new item at the beginning of the list
-  list.insertBefore(item, list.children[0]);
-}
-```
-To conclude let's add the basic style to represent correctly the scrolling list and the items checked as done:
+This function will create a `text` and `button` components so that the user can type the new value for the list item and accept the changes.
+```[javascript]
+function editItem(item) {
+    // Stores the item current value
+    var itemValue = item.querySelector(".checkboxItem").value;
 
-```[html]
-<style>
-  eon-scroll {
-    height: 500px;
-  }
-  .list eon-checkbox[checked="true"] {
-    text-decoration: line-through;
-  }
-</style>
+    item.classList.add("visibleEditor");
+
+    // Editing node does not exist yet
+    if (!item.querySelector(".editContainer")) {
+        eon.onReady(function () {
+            // We create a new input text to sent the new item value
+            var newItemEdit = document.createElement("eon-text");
+            var newSave = document.createElement("eon-button");
+            // This node will contain the edit view of the item 
+            var editContainer = document.createElement("div");
+
+            editContainer.classList.add("editContainer");
+
+            // Set input text properties
+            newItemEdit.classList.add("editText");
+            newItemEdit.placeholder = itemValue;
+
+            // Save item button properties
+            newSave.classList.add("saveButton");
+            newSave.value = 'Save';
+            // Call the function for establish the new item valie
+            newSave.setOnClick("setEditItem(this.parentNode.parentNode);");
+
+            //  Append newItemEdit and newSave to editContainer
+            editContainer.appendChild(newItemEdit);
+            editContainer.appendChild(newSave);
+
+            // Append editContainer to the item wrapper
+            item.appendChild(editContainer);
+
+            // When you click outside the item, it loses focus and leaves the edit view 
+            document.body.addEventListener("click", function (event) {
+                // If the click event does not goes through this item the isOnPath property returns false
+                if (item.isOnPath != true) {
+                    item.classList.remove("visibleEditor");
+                }
+            }, false);
+        });
+    }
+}
 ```
