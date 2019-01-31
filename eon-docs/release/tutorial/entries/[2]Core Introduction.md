@@ -2,7 +2,7 @@
 
 ## What are eon components?
 
-Eon components are the individual parts of what your application is composed of, providing both functionality and visuals. With eon components you can develop an application by composing it of small parts that can be built one at a time, this foments a encapsulated and reusable architecture.
+Eon components are the individual parts of what your application is composed of, providing both functionality and visuals. With Eon components you can develop an application by composing it of small parts that can be built one at a time, this foments a encapsulated and reusable architecture.
 
 ## What can I build with them?
 
@@ -15,7 +15,7 @@ About anything indeed, but most of them fall in one of this three categories, fu
 - Mixed components - this are by far the most common scenario, where you would like to provide a tied relation between behaviour logic and visual elements.
 An example could be a dialog.
 
-Please note this are conceptual definitions, all components are handled in the same way by eon.
+Please note this are conceptual definitions, all components are handled in the same way by Eon.
 
 ## Advantages of composition
 
@@ -27,7 +27,7 @@ Eon imported components can be added **declaratively** using html tags or **prog
 
 ## Import
 
-In order to be able to use eon components, first they must be imported, since this operation is fully asynchronous its recommended to declare component imports on the `head` section. You may access to the wide library of components under the `ui` directory or any other custom element in a directory of your choice.
+In order to be able to use Eon components, first they must be imported, since this operation is fully asynchronous its recommended to declare component imports on the `head` section. You may access to the wide library of components under the `ui` directory or any other custom element in a directory of your choice.
 
 ```[html]
 <!DOCTYPE html>
@@ -63,7 +63,7 @@ Although the import function can be called multiple times its recommend to follo
 
 ## Declarative
 
-To use eon components declaratively simply use their name tag as any other regular html element eg. `<div>, <span>, etc...`
+To use Eon components declaratively simply use their name tag as any other regular html element eg. `<div>, <span>, etc...`
 
 ```[html]
 <body>
@@ -78,7 +78,7 @@ To use eon components declaratively simply use their name tag as any other regul
 
 ## Programmatically
 
-The programmatic approach is preferred when eon components need to be added or modified on the fly, to achieve this simply create them using the vanilla DOM API.
+The programmatic approach is preferred when Eon components need to be added or modified on the fly, to achieve this simply create them using the vanilla DOM API.
 
 ```[html]
 <script>
@@ -87,7 +87,7 @@ The programmatic approach is preferred when eon components need to be added or m
 </script>
 ```
 
-Since imports are asynchronous eon components properties and functions are declare dynamically and in order to ensure they are accessible we need use a `onCreated` callback.
+Since imports are asynchronous Eon components properties and functions are declare dynamically and in order to ensure they are accessible we need use a `onCreated` callback.
 
 ```[html]
 <script>
@@ -103,8 +103,8 @@ Since imports are asynchronous eon components properties and functions are decla
 
 [Creation]<>
 
-Creating your own custom eon components is a piece of cake!
-eon comes with a full set of well tested and flexible components that will cover most of your needs, but you can easily create your own components too.
+Creating your own custom Eon components is a piece of cake!
+Eon comes with a full set of well tested and flexible components that will cover most of your needs, but you can easily create your own components too.
 
 
 ## Basic structure
@@ -161,11 +161,11 @@ The resultant file `ui-custom/my-element.html` will look something like this:
 
 ```
 
-Now you can use your custom eon component importing in a declaratively or programmatically way.
+Now you can use your custom Eon component importing in a declaratively or programmatically way.
 
 ## Advanced config
 
-Now we have mastered the basics of eon component creation, we can play with components configuration.
+Now we have mastered the basics of Eon component creation, we can play with components configuration.
 
 When declaring a new component through `eon.element` function you can pass an config object as parameter, where the name, style, properties and functions can be declared and callbacks to element life-cycle can be used to add additional behaviour.
 
@@ -304,7 +304,7 @@ the same code could be written like so without the shorthand:
 </template>
 ```
 
-This is possible because eon template engine treats interpolated code as plain javascript, but provides handy functions like bind(data) and echo(string) as well as its respective shorthands which speeds daily development.
+This is possible because Eon template engine treats interpolated code as plain javascript, but provides handy functions like bind(data) and echo(string) as well as its respective shorthands which speeds daily development.
 
 ## Understanding echo "="
 
@@ -332,7 +332,7 @@ Hello I'm a text!
 
 ## Scripting
 
-Since eon template engine treats interpolated code as plain sanboxed javascript you can exploit it to your own advantage and create logic based content.
+Since Eon template engine treats interpolated code as plain sanboxed javascript you can exploit it to your own advantage and create logic based content.
 
 ```[html]
 <template>  
@@ -362,9 +362,9 @@ Its also important to note interpolated code will render only once per element t
 
 [Slotting]<>
 
-Many eon elements can act like containers for other elements and some of this elements need to be placed on a specific part of its container structure.
+Many Eon elements can act like containers for other elements and some of this elements need to be placed on a specific part of its container structure.
 Placing things on a specific place might be easy programmatically through JavaScript but things get messy quickly when we try to do the same declaratively.
-Slotting aims to provide a simple solution to place any element inside its eon container through the attribute `slot` and CSS selectors.
+Slotting aims to provide a simple solution to place any element inside its Eon container through the attribute `slot` and CSS selectors.
 
 For example, imagine we had simple container element named 'eon-container':
 
@@ -399,11 +399,11 @@ Eon takes care of the element placement so you can stay focus on other important
 
 [Theming]<>
 
-For the visual aspect of the element eon offers a wide and easy way to customize themes, having themes is really usefull as it provides a way of standardize colors, borders and all the visual related CSS. Since all the rules are scoped by the theme attribute, you can have several themes active in the same web application avoiding any troubles or conflicts. 
+For the visual aspect of the element Eon offers a wide and easy way to customize themes, having themes is really usefull as it provides a way of standardize colors, borders and all the visual related CSS. Since all the rules are scoped by the theme attribute, you can have several themes active in the same web application avoiding any troubles or conflicts. 
 
 By default, if no theme is specified, Eon will work with the "noire" dark theme, but you have multiple options to change it depending on what you wish to do.
 
-If you want to change the default eon theme for all your components the easiest way to do so is to change it directly at the start, after importing eon:
+If you want to change the default Eon theme for all your components the easiest way to do so is to change it directly at the start, after importing Eon:
 
 ```[javascript]
 <script src="/eon/eon.js"></script>
@@ -419,7 +419,7 @@ If what you want to do is have a different theme for a specific component you ju
 <eon-component theme="myTheme"></eon-component>
 ```
 
-Once you have specified your themes, eon will import them as needed, you can also specify more themes to have them loaded for the future, that can be done with Eon's theme schema:
+Once you have specified your themes, Eon will import them as needed, you can also specify more themes to have them loaded for the future, that can be done with Eon's theme schema:
 
 ```[javascript]
 <script>

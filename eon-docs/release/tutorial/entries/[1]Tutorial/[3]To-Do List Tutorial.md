@@ -1,5 +1,5 @@
 # Using Components
-In this tutorial we are going to make a simple To-Do List to teach you about some of the most basic components eon offers, and to show you how easy it is getting used to them.
+In this tutorial we are going to make a simple To-Do List to teach you about some of the most basic components Eon offers, and to show you how easy it is getting used to them.
 
 ## Import components
 To create the To-Do List we are going to use 4 components only:  `eon-text`, `eon-button`, `eon-checkbox` and `eon-scroll`. The first thing do is import them into the html file:
@@ -18,7 +18,7 @@ To create the To-Do List we are going to use 4 components only:  `eon-text`, `eo
 Since we need to import multiple components we are passing an `Array` with their paths, but you can also pass a single `String` path if you only want to import one.
 
  ## Declare components
- We are going to declare components that will be loaded with the document, that is, those that are not created by the user interaction. In order To-Do this, we are going to use HTML tags, but with eon nomenclature.
+ We are going to start by adding the static components that will be loaded with the document, that is, those that are not created dynamically by the user interaction.
 
 ```[html]
 <div class="main">
@@ -71,7 +71,7 @@ function addItem() {
 ```
 
 With this function we dinamically create the required components that will shape the list item. 
-To use eon programmatically we will do it inside the `onReady` event, ensuring that all 
+To use Eon programmatically we will do it inside the `onReady` event, ensuring that all 
 the functionalities are loaded in the document.
 ``` [javascript]
 function setItem(newItem) {
