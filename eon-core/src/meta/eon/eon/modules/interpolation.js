@@ -77,6 +77,17 @@ eon.interpolation.handleInterpolationVariables = function (el, config) {
   sources.global = {};
 
   el.__interpolations = el.__interpolations || {};
+  
+  // First of all checks if there is a data specified in the element config, if so, it creates the source
+  if (el.data) {
+
+    sources.element.data = {};
+    sources.element.data.scope = el;
+    sources.element.data.obj = el.data;
+    sources.element.data.isGlobal = false;
+    sources.element.data.isLang = false;
+
+  }
 
   // Loops all the inner element variables
   for (var i = 0; i < variables.length; i++) {

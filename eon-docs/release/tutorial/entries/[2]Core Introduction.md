@@ -399,13 +399,12 @@ Eon takes care of the element placement so you can stay focus on other important
 
 [Theming]<>
 
-For the visual aspect of the element Eon offers a wide and easy way to customize themes, having themes is really usefull as it provides a way of standardize colors, borders and all the visual related CSS. Since all the rules are scoped by the theme attribute, you can have several themes active in the same web application avoiding any troubles or conflicts. 
+For the visual aspect of the element, Eon offers a wide and easy way to customize themes, having themes is really useful as it provides a way of standardizing colors, borders and all the visual related CSS. Since all the rules are scoped by the theme attribute, you can have several themes active in the same web application avoiding any troubles or conflicts. 
 
-By default, if no theme is specified, Eon will work with the "noire" dark theme, but you have multiple options to change it depending on what you wish to do.
 
-If you want to change the default Eon theme for all your components the easiest way to do so is to change it directly at the start, after importing Eon:
+By default, if no theme is specified, Eon will work with the `noire` dark theme, but you have multiple options to change it depending on what you wish to do. If you want to change the default Eon theme for all your components the easiest way to do so is to change it directly at the start, after importing Eon:
 
-```[javascript]
+```[html]
 <script src="/eon/eon.js"></script>
 
 <script>
@@ -413,18 +412,34 @@ If you want to change the default Eon theme for all your components the easiest 
 </script>
 ```
 
-If what you want to do is have a different theme for a specific component you just have to change it like so:
+If what you want is having a different theme for a specific component you just have to specify it like so:
 
 ```[html]
 <eon-component theme="myTheme"></eon-component>
 ```
 
-Once you have specified your themes, Eon will import them as needed, you can also specify more themes to have them loaded for the future, that can be done with Eon's theme schema:
+Even though these features are probably enough to get you going theming related, Eon still has some really cool options to offer you an even wider range of possibilities.
 
-```[javascript]
+You can use Eon's `themeSchema` property to import even more themes in case you want to have them loaded for the future, just specify the theme, and all the component you want to import that theme:
+
+```[html]
 <script>
   eon.themeSchema = {
       "claro": ["eon-component"],
   };
+</script>
+```
+
+You can also change the theme dynamically whenever you want, this will change all the components matching Eon's theme if their theme was assigned by default, if the component theme was strictly specified by the user this will not change on Eon's theme change.
+
+
+Changing Eon's theme will also trigger the `onThemeChanged` callback, which gives you access to useful information:
+
+```[html]
+<script>
+  eon.onThemeChanged(function (previousTheme, newTheme) {
+    console.log("Previous theme:", previousTheme);
+    console.log("New theme:", newTheme);
+  })
 </script>
 ```

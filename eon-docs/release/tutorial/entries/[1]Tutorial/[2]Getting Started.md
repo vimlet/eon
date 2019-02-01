@@ -7,32 +7,32 @@ They are several ways to get the latest Eon release.
 
 - NPM:
 
-    This is the recommended method since it provides a painless way to keep Eon up to date on all your projects.
+This is the recommended method since it provides a painless way to keep Eon up to date on all your projects.
 
-    First install [NodeJS](https://nodejs.org), then run on the terminal
+First install [NodeJS](https://nodejs.org), then run on the terminal
 
-    ```
-    npm install @vimlet/eon-cli -g   
-    ```
+```
+npm install @vimlet/eon-cli -g   
+```
 
-    Once eon-cli is done installing, running the init command will get you the latest version of Eon in the current working directory and provide you with a template project if you choose so.
+Once eon-cli is done installing, running the init command will get you the latest version of Eon in the current working directory and provide you with a template project if you choose so.
 
-    ```
-    eon-cli init
-    ```
+```
+eon-cli init
+```
 
 - Github Releases: 
-        
-    You can download it directly from the project repository releases section:
-    [ https://github.com/vimlet/eon/releases ](https://github.com/vimlet/eon/releases)
-     
+    
+You can download it directly from the project repository releases section:
+[ https://github.com/vimlet/eon/releases ](https://github.com/vimlet/eon/releases)
+    
 - CDN: 
         
-    You can also use it through the provided CDN:
+You can also use it through the provided CDN:
     
-    ```[html]
-    <script src="https://cdn.jsdelivr.net/gh/vimlet/eon-cdn/build/eon/eon-bundle.min.js"></script>
-    ```
+```[html]
+<script src="https://cdn.jsdelivr.net/gh/vimlet/eon-cdn/build/eon/eon-bundle.min.js"></script>
+```
 
 ## Your firsts steps
 
@@ -104,7 +104,7 @@ To use Eon components declaratively simply use their name tag as any other regul
 
 The programmatic way requires some Javascript knowledge, this approach is preferred when Eon components need to be created on the fly, to achieve this simply create them using the vanilla DOM API. 
 
-```[js]
+```[html]
 <script>
   var button = document.createElement("eon-button");
   document.body.appendChild(button);
@@ -113,7 +113,7 @@ The programmatic way requires some Javascript knowledge, this approach is prefer
 
 Although you can create/append your component at any point, if you want to initialize it with different values or modify it later on it is strictly recommended to take advantage of Eon's onReady callback, since this callback ensures everything is initialized with all its features and ready to be tampered with.
 
-```[js]
+```[html]
 <script>
   eon.onReady(function () {
     var button = document.createElement("eon-button");
