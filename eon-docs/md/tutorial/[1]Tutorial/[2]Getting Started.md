@@ -34,10 +34,9 @@ They are several ways to get the latest Eon release.
     <script src="https://cdn.jsdelivr.net/gh/vimlet/eon-cdn/build/eon/eon-bundle.min.js"></script>
     ```
 
+## Your firsts steps
 
-## Creating a project
-
-Once Eon is downloaded to our working directory, simply add to the `head` of your html file:
+Once Eon is downloaded to our working directory, go inside your head tag and import eon.js as you would import any other javascript file, this will bring you access to Eon and all its functionality.
 
 ```[html]
 <head>
@@ -47,9 +46,37 @@ Once Eon is downloaded to our working directory, simply add to the `head` of you
 
 Note eon/eon.js is the default location but you can use any other path if you wish.
 
-## Importing your first component
+## Importing your components
 
-Now we can start importing components, you can think of components as the parts of what your application would be made of. This "parts" can be built by others or by you, by default Eon comes with a rich library of UI components that will fulfill most of your needs.
+Now we can start importing components, you can think of components as the parts of what your application would be made of. These "parts" can be built by others or by you, by default Eon comes with a rich library of UI components that will fulfill most of your needs.
+
+
+Once you decided which components you want to work with, you just have to call Eon's import function providing the paths of these components, there are two ways for providing these paths.
+
+
+You can provide an array of path strings for the desired components like so:
+
+```[html]
+<head>
+    <script>
+        eon.import([
+            "eon/ui/eon-component-1.html"
+            "eon/ui/eon-component-2.html"
+            "eon/ui/eon-component-3.html"
+        ]);
+    </script>
+</head>
+``` 
+
+If you only want to import one component you can also privde an array with only one path, or you can just pass a single path string:
+
+```[html]
+<head>
+    <script>
+        eon.import("eon/ui/eon-component.html");
+    </script>
+</head>
+``` 
 
 For now, we will use a simple button component as an example, but you can read more about custom components creation on the [ Components Creation tutorial ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FCore%20Introduction.md&link=Creation).
 
@@ -63,25 +90,40 @@ For now, we will use a simple button component as an example, but you can read m
 </head>
 ``` 
 
-Once a component is imported it can be used as any other html element.
+## Using your components
+
+Once your components are imported you can you use them either declaratively using HTML tags or programmatically creating and appending elements to the DOM with Javascript.
+
+To use Eon components declaratively simply use their name tag as any other regular html element eg. `<div>, <span>, etc...`
 
 ```[html]
 <body>
-    <eon-button label="Button"><eon-button>
+  <eon-button label="Declarative"></eon-button>
 </body>
+```
+
+The programmatic way requires some Javascript knowledge, this approach is preferred when Eon components need to be created on the fly, to achieve this simply create them using the vanilla DOM API. 
+
+```[js]
+<script>
+  var button = document.createElement("eon-button");
+  document.body.appendChild(button);
+</script>
 ``` 
 
-## Dealing with asynchronism
-Due to the super fast asynchronous nature of Eon, in order to use it programmatically we need to wait for the component to be initialized with all its features. Although Eon provides many callbacks that you can hook to, the easiest one to get started is `eon.onReady`
+Although you can create/append your component at any point, if you want to initialize it with different values or modify it later on it is strictly recommended to take advantage of Eon's onReady callback, since this callback ensures everything is initialized with all its features and ready to be tampered with.
 
-```[javascript]
-eon.onReady(function () {
-    var el = document.querySelector("eon-button");
-    el.value = "Hello World";
-});
-```
+```[js]
+<script>
+  eon.onReady(function () {
+    var button = document.createElement("eon-button");
+    button.addAttribute("label", "Programmatic");
+    document.body.appendChild(button);
+  });
+</script>
+``` 
 
 ## Learn more...
 
-You can keep learning more about using Eon following the [ To-Do List Tutorial ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FTutorial%2FTo-Do%20List%20Tutorial.md) or by checking the [ Core Introduction Section ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FCore%20Introduction.md&link=Components).
+You can keep learning more about using Eon following the [ To-Do List Tutorial ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FTutorial%2FTo-Do%20List%20Tutorial.md) or by checking the [ Core Introduction Section ](/#!version=1.0.0&mode=tutorial&file=entries%2FCore%20Introduction.md&link=Components).
 
