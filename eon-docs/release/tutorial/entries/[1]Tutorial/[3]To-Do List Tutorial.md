@@ -18,7 +18,7 @@ To create the To-Do List we are going to use 4 components only:  `eon-text`, `eo
 Since we need to import multiple components we are passing an `Array` with their paths, but you can also pass a single `String` path if you only want to import one.
 
  ## Setting up the main structure
- We are going to start by adding the static components that will be loaded with the document, that is, those that are not created dynamically by the user interaction.
+ We are going to start by declaring the main `html` structure and the static Eon components that will be loaded with the document, that is, those that are not created dynamically by the user interaction.
 
 ```[html]
 <body>
@@ -36,12 +36,12 @@ Since we need to import multiple components we are passing an `Array` with their
 </body>
 ```
 
-As you can see we have prepared a basic structure for our `To-Do List` and we have included a `scroll` component that will let us scroll through our list, we also have a `text` component so that the user can type any text that will be added to the list when our `button` component is triggered.
+As you can see we have prepared a basic structure for our `To-Do List` including a `scroll` component that will let us scroll through our list, and also a `text` component so that the user can type any text that will be added to the list when our `button` component is triggered.
 
 As you can see we have prepared a basic structure for our `To-Do List` including the next elements:
-. a `scroll` component to let us scroll through out list
-. a `text` component where the user will type the new items text
-. a `button` component to add the new items to the list
+- a `scroll` component to let us scroll through out list
+- a `text` component where the user will type the new items text
+- a `button` component to add the new items to the list
 
 
 If you take a closer look you might find some `attributes` you have never seen before, these are `exclusive` for each type of components and will let us configure the behavior we want for the components, for instance, you can see that in the scroll element we have added two attributes: `thickness` and `fill`; the value of `thickness` will determine the size of the scroll bars, while the value of `fill` will tell the scroll if we want it to fill the size of its parent or it will have its own size.
@@ -72,7 +72,7 @@ If you take a closer look you might find some `attributes` you have never seen b
 ```
 Let's going deep into the previous function operations to see things clearly:
 
-. First, we are calling the `createItem` function that will dynamically create two components that will shape the list item, as well
+First, we are calling the `createItem` function that will dynamically create two components that will shape the list item, as well
 as their interaction logic: an `eon-button` which will allow us to remove an item and a `eon-checkbox` which will let us mark an item as done.
 To use Eon programmatically we will do it inside the onReady event, ensuring that all the functionalities are loaded in the document:
 
