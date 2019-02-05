@@ -109,7 +109,7 @@
         margin-left: 10px;
         cursor: pointer;
         font-size: 17.5px;
-    color: #444444;
+    color: #fff;
     }
 
     .app-doc-main-menuItemText {
@@ -122,9 +122,9 @@
         font-size: 17.5px;
         line-height: 21px;
     }
-
-    .app-doc-main-menuItem-selected{
-    border-bottom: 1px solid;
+ 
+    .app-doc-main-menuItem-selected .app-doc-main-menuItemText {
+    text-decoration: underline;
     }
 
     #app-doc-main-versionControl {
@@ -134,9 +134,9 @@
 
     #app-doc-main-versionControlSelect {
         cursor: pointer;
-    color: #444444;
+    color: #fff;
         border: none;
-        border-bottom: 1px solid;
+        /* border-bottom: 1px solid; */
         background-color: transparent;
         font-size: 16px;
     }
@@ -177,8 +177,8 @@
     app-doc-main .app-doc-main-menu-mobile .eon-combobox-wrapper{
         background-color: transparent !important;
     }
-    app-doc-main .app-doc-main-menu-mobile .eon-combobox-main, app-doc-main .app-doc-main-menu-mobile .eon-combobox-main input{
-        color:#444444 !important;
+    app-doc-main .app-doc-main-menu-mobile .eon-combobox-main, app-doc-main .app-doc-main-menu-mobile .eon-combobox-main input{        
+    color: #fff !important;
     }
 
 
@@ -260,7 +260,15 @@
             "../../eon/ui/eon-combobox"
         ],
 
+        properties: {
+            data: {
+                value: {}
+            }
+        },
         privateProperties: {
+            refs: { // References for quick access
+                value: {}
+            },
             misc: {
                 value: {},
                 reflect: false
@@ -273,7 +281,7 @@
                 var el = this;
                 if (!hasAlreadyChanged) { // When we came from handleHashChange we can not override hash again
                     el._urlOpenFirstView();
-                    el._setupMainView(el._misc.data.__config);
+                    el._setupMainView(el.data.__config);
                 }
                 el._setupCss();
                 el._deselectMenu();
@@ -338,7 +346,9 @@
             // @function (private) setupData [Set up view and data.] @param {object} data
             setupData: function (data) {
                 var el = this;
-                el._misc.data = data;
+                el._refs.data = data;
+                eon.triggerCallback("dataLoaded", el, el, []);
+                el.data = data;
 
                 if (window.location.href.indexOf("#") < 0) {
                     window.location.href = window.location.href.split('#')[0] + "#!version=" +
@@ -374,11 +384,11 @@
                 customCss = customCss || document.createElement("style");
                 customCss.id = "customCss";
                 var fullcss = "";
-                var colorBandClass = " .app-doc-colorBand{background-color:" + el._misc.data.__band +
+                var colorBandClass = " .app-doc-colorBand{background-color:" + el.data.__band +
                     " !important;} ";
                 fullcss += colorBandClass;
 
-                var mainMenu = " #app-doc-main-menuBack {background-color: " + el._misc.data.__band +
+                var mainMenu = " #app-doc-main-menuBack {background-color: " + el.data.__band +
                     " !important;} ";
                 fullcss += mainMenu;
 
@@ -591,6 +601,7 @@
         onRender: function () {
             var el = this;
             eon.createCallback("menuReady", this, "ready");
+            eon.createCallback("dataLoaded", this, "ready");
             // Get data from disk when rendered
             this._getRequest("config.json", function (data) {
                 el._misc.indexVersionOpened = data.__currentVersion; // Current version folder. Navigation between versions change current version but not this var
