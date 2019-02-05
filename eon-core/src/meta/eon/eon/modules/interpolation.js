@@ -351,7 +351,7 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
       } else {
         oldVal = checked ? checked[key] : "";
         // To only trigger variable change for properties that are not already checked/triggered
-        if ((checked && !checked[key]) || !checked) {
+        if ((checked && !checked.hasOwnProperty(key)) || !checked) {
           eon.interpolation.handleVariableChange(el, keyPath + "." + key, oldVal, data[key], config);
         }
       }

@@ -47,11 +47,11 @@ eon.store = function () {
     Object.assign(el, adapter.constructor.prototype);
   };
   /*
-      @function (private) _cloneFunctions
+      @function (private) _createDataDescriptor
       @description 
   */
   function createDataDescriptor() {
-    // Define property descriptor with custom get and set
+    // Define property descriptor with custom get and set 
     Object.defineProperty(
       el,
       "data",
