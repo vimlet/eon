@@ -125,5 +125,5 @@ Although you can create/append your component at any point, if you want to initi
 
 ## Learn more...
 
-You can keep learning more about using Eon following the [ To-Do List Tutorial ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FTutorial%2FTo-Do%20List%20Tutorial.md) or by checking the [ Core Introduction Section ](/#!version=1.0.0&mode=tutorial&file=entries%2FCore%20Introduction.md&link=Components).
+You can keep learning more about using Eon following the [ To-Do List Tutorial ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FTutorial%2FTo-Do%20List%20Tutorial.md) or by checking the [ Core Introduction Section ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FIntroduction.md&link=Creation).
 

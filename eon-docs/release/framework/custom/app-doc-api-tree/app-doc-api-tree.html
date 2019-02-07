@@ -121,8 +121,8 @@
         cursor: pointer;
         font-size: 36px;
         font-weight: bold;
-    color:#fff;
-    } 
+        color: #fff;
+    }
 
 
     #app-doc-api-tree-mobileFade {
@@ -807,14 +807,30 @@
             // @function onHash (private) [Hash change listener. If selected document does not match hash, it means that user is goig backward or forward in the browser. Handle it]
             onHash: function () {
                 window.onhashchange = function () {
+
                     var el = document.querySelector("app-doc-api-tree");
                     if (el && el._refs && el._refs.tree && el._refs.tree.nodes) { // As api tree is used at main, and not all views has tree (see first main view) it is mandatory to check all references before manage them
                         var currentDoc = decodeURIComponent(window.location.href.split("file=")[1]);
+                        var link = currentDoc.split("&link=")[1]
+                        var currentDoc = currentDoc.split("&link=")[0];
                         var selectedNode = null;
                         for (var tNodeKey in el._refs.tree.nodes) {
-                            if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
-                                selectedNode = el._refs.tree.nodes[tNodeKey];
-                                break;
+                            if (!link) {
+                                if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
+                                    selectedNode = el._refs.tree.nodes[tNodeKey];
+                                    break;
+                                }
+                            } else {
+                                if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
+                                    var parentNode = el._refs.tree.nodes[tNodeKey];
+                                    var childNodes = parentNode.querySelector(".eon-treenode-wrapper").childNodes;
+                                    childNodes.forEach(function (cNode) {
+                                        if (cNode.name && cNode.name == link) {
+                                            selectedNode = cNode;
+                                        }
+                                    });
+                                    break;
+                                }
                             }
                         }
                         if (selectedNode && selectedNode != el._refs.tree.selectedNode) {
