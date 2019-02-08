@@ -184,12 +184,10 @@
 
 
     @media only screen and (max-width: 1200px) {
-    #app-md-viewer-content {
-        padding: 0px 25px;
+        #app-md-viewer-content {
+            padding: 0px 25px;
+        }
     }
-    }
-
-
 </style>
 
 <template>
@@ -436,26 +434,26 @@
                     if (link != "" && link != el.link) {
                         if (el._misc.tree) {
                             var treeLinks = el._misc.tree.querySelectorAll("eon-treeNode");
-                            var currentLink = el._misc.treeLinks[0];                            
+                            var currentLink = el._misc.treeLinks[0];
                             for (var currentLinkIndex = 0; currentLinkIndex < el._misc.treeLinks
                                 .length; currentLinkIndex++) {
                                 if (el._misc.treeLinks[currentLinkIndex].getBoundingClientRect()
                                     .top <
-                                    905) {                                        
-                                    currentLink = el._misc.treeLinks[currentLinkIndex];                                        
+                                    905) {
+                                    currentLink = el._misc.treeLinks[currentLinkIndex];
                                 } else {
                                     break;
                                 }
                             }
                             treeLinks.forEach(function (tLink) {
                                 if (tLink.link && currentLink && tLink.link ===
-                                    currentLink.id) {                                      
+                                    currentLink.id) {
                                     el._misc.tree.markNode(tLink);
                                     window.location.href = window.location.href.split(
                                         '&link=')[0] + '&link=' + currentLink.id;
                                 }
                             });
-                        } 
+                        }
                     }
                 }
             },
@@ -571,8 +569,10 @@
                 var parsedResult = [];
                 if (matches) {
                     for (var i = 0; i < matches.length; i++) {
-                        var res = document.createElement("br");
-                        parsedResult.push(res);
+                        var res = document.createElement("div");                         
+                            var br = document.createElement("br");
+                            res.appendChild(br);
+                            parsedResult.push(res); 
                     }
                 }
                 var j = 0;
@@ -580,7 +580,7 @@
                     var count = el._parse.later.length;
                     el._parse.later[count] = parsedResult[j++];
                     return "@@[" + count + "]@@\n";
-                });
+                });                
                 return result;
             },
             // @function splitLanguage (private) {string} [Extract language from codeblock] @param data {string}
@@ -588,7 +588,6 @@
                 var el = this;
                 var result = "";
                 var matches = tag.match(el._regex.codeBlockLanguage);
-
                 if (matches) {
                     var language = el._cleanMatch(matches[0], "[", "]");
                     var cleanData = tag.replace(matches[0], "");
@@ -713,9 +712,9 @@
             parseTreeLink: function (data) {
                 var el = this;
                 var result = "";
+
                 var matches = data.match(el._regex.treeLink);
                 var parsedResult = [];
-
                 if (matches) {
                     for (var i = 0; i < matches.length; i++) {
                         var inner = el._getInner(matches[i]);
@@ -1135,13 +1134,13 @@
                 if (linkData[2]) {
                     link.setAttribute("Title", linkData[2]);
                 }
-                link.innerHTML = linkData[0];
+                link.innerHTML = linkData[0];             
                 return link;
             },
             // @function sanitizeLink (private) [Relative links are supposed to have version and mode in it. If they don't, they are fulfilled with current version and mode] #param link
             sanitizeLink: function (link) {
                 if (link && link.length > 0 && !link.includes("http")) {
-                    var version, mode, file;
+                    var version, mode, file, treeLink;
                     if (!link.includes("version")) {
                         version = decodeURIComponent(window.location.href.split("#!version=")[1]).split("&")[
                             0];
@@ -1155,6 +1154,9 @@
                     }
                     if (link.includes("file")) {
                         file = decodeURIComponent(link.split("file=")[1].split("&")[0]);
+                        if (link.includes("link")) {
+                            treeLink = decodeURIComponent(link.split("link=")[1].split("&")[0]);
+                        }
                     } else if (!link.includes("version") && !link.includes("mode")) {
                         file = link;
                     } else {
@@ -1162,6 +1164,9 @@
                     }
                     link = "#!version=" + encodeURIComponent(version) + "&mode=" + encodeURIComponent(mode) +
                         "&file=" + encodeURIComponent(file);
+                    if (treeLink) {
+                        link += "&link=" + encodeURIComponent(treeLink);
+                    }
                 }
                 return link;
             },
@@ -1182,6 +1187,7 @@
                     el._parse.later[count] = parsedResult[j++];
                     return "@@[" + count + "]@@";
                 });
+
                 return result;
             },
             // @function setImage (private) {html object} [Generate img element] @param tag
