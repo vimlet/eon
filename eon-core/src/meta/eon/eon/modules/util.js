@@ -202,14 +202,16 @@ eon.ajax = function (url, options, cb) {
   xhr.onreadystatechange = function () {
     if (this.readyState == 4) {
       var success = this.status >= 200 && this.status < 300;
-      cb(success, {
-        url: url,
-        method: options.method,
-        xhr: this,
-        status: this.status,
-        response: this.response,
-        responseText: this.responseText
-      });
+      if(cb) {
+        cb(success, {
+          url: url,
+          method: options.method,
+          xhr: this,
+          status: this.status,
+          response: this.response,
+          responseText: this.responseText
+        });
+      }
     }
   };
 
