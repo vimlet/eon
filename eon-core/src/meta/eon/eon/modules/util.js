@@ -241,6 +241,26 @@ eon.ajax = function (url, options, cb) {
   xhr.send(options.payload);
 };
 
+eon.setLocale = function (url, options) {
+
+  options = options ? options : {};
+
+  eon.ajax(url, options, function(success, obj) {
+    
+    if (success) {
+      
+      var jsonObj = JSON.parse(obj.responseText);
+
+      if (jsonObj) {
+        eon.interpolation.globalScope.locale = jsonObj;
+      }
+
+    }
+
+  });
+
+};
+
 /**
  * 
  * @param  {[type]}  [description]

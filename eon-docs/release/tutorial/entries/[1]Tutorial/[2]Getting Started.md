@@ -9,6 +9,7 @@ They are several ways to get the latest Eon release.
 
 This is the recommended method since it provides a painless way to keep Eon up to date on all your projects.
 
+
 First install [NodeJS](https://nodejs.org), then run on the terminal
 
 ```
@@ -94,6 +95,7 @@ For now, we will use a simple button component as an example, but you can read m
 
 Once your components are imported you can you use them either declaratively using HTML tags or programmatically creating and appending elements to the DOM with Javascript.
 
+
 To use Eon components declaratively simply use their name tag as any other regular html element eg. `<div>, <span>, etc...`
 
 ```[html]
@@ -125,5 +127,5 @@ Although you can create/append your component at any point, if you want to initi
 
 ## Learn more...
 
-You can keep learning more about using Eon following the [ To-Do List Tutorial ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FTutorial%2FTo-Do%20List%20Tutorial.md) or by checking the [ Core Introduction Section ](/#!version=1.0.0&mode=tutorial&file=entries%2FCore%20Introduction.md&link=Components).
+You can keep learning more about using Eon following the [ To-Do List Tutorial ](/docs/#!version=1.0.0&mode=tutorial&file=entries%2FTutorial%2FTo-Do%20List%20Tutorial.md) or by checking the [ Introduction Section ](/#!version=1.0.0&mode=tutorial&file=entries%2FIntroduction.md&link=Components).
 

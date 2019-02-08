@@ -242,9 +242,10 @@ Recurrent events might be triggered more than once:
 
 [State]<>
 
-Every Eon component may have its own data property, with consists of an object with keys specified by the user, these properties will be redefined to have `getters/setters` created with [Object.defineProperty](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) , and since this object is `immutable` its properties must be declared from the start and any new property assigned later on wont be taken into account. These setters will allow us to detect any changes on the properties and notify the user with our `onDataChanged` callback.
+Every Eon component may have its own `Data` property, which consists of an object with keys specified by the user, these properties will be redefined to have `getters/setters` created with [Object.defineProperty](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) , and since this object is `immutable` its properties must be declared from the start and any new property assigned later on won't be taken into account. These setters will allow us to detect any changes in the properties and notify the user with our `onDataChanged` callback.
 
-Lets set an eon component as an example with a basic and simple data declaration:
+
+Let's set an eon component as an example of a basic and simple data declaration:
 
 ```[html]
 <script>
@@ -267,7 +268,7 @@ eon.element({
 </script>
 ```
 
-If we then change the color property, our `onDataChanged` callback will get fired bringing us the next log:
+If we then change the color property, our `onDataChanged` callback will get fired, bringing us the next log:
 
 ```[html]
 <script>
@@ -279,7 +280,9 @@ component.data.color = "Red";
 Key: color , Previous: Blue , New: Red
 ```
 
-We have earlier said that the data object is immutable, but you can change the initial object declaration by setting and changing the whole Data property, this will restart the Data object and also trigger the onDataChanged callback for every property own by the previous data and the new ones given by the new one:
+## Data immutability
+
+We have earlier said that the data object is `immutable`, but you can change the initial object declaration by setting and changing the whole `Data` property, this will restart the `Data` object and also trigger the `onDataChanged` callback for every property own by the previous data and the new ones given by the new one:
 
 ```[html]
 <script>
@@ -297,7 +300,9 @@ Key: name , Previous: James , New: Charles
 Key: age , Previous: undefined , New: 21
 ```
 
-Since `setters/getters` cannot listen to changes made by pushing/removing new items to arrays or adding new properties to an object, in those cases the whole property must be changed, lets take the following data example:
+## Dealing with data properties
+
+Since `setters/getters` cannot listen to changes made by pushing/removing new items to arrays or adding new properties to an object, in those cases the whole property must be changed, let's take the following data example:
 
 ```[html]
 <script>
@@ -342,6 +347,8 @@ Key: pet.name , Previous: Boston , New: Boston
 Key: pet.color , Previous: undefined , New: White
 ```
 
+## Data key path
+
 The key provided by the onDataChanged is actually the path of the property that has changed, it may not be of much use by itself, but if you would like to use it you can provide it as an argument to eon.object.readFromPath() and eon.object.assignToPath.
 
 ```[html]
@@ -355,7 +362,7 @@ eon.object.assignToPath(yourObject, propertyPath, propertyNewValue);
 
 Eon template engine makes usage of interpolation in order to provide a powerful and handy way of data binding and scripting.
 This allows components to display changeable data in the right place without having to manually update each value. It also provides logic driven content such as conditional or loop based content, in fact it so powerful that any javascript logic can be written inside the interpolation tags and it will be executed in a safe sandboxed environment.
-
+ 
 
 ## Basic Usage
 

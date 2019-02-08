@@ -162,6 +162,7 @@ eon.parse = function (el, config) {
 
     // Imports Data and Public/Private properties and functions
     eon.importData(el, config);
+    eon.importLocale(el, config);
     eon.importPublic(el, config);
     eon.importPrivate(el, config);
 
@@ -456,7 +457,17 @@ eon.importData = function (el, config) {
     el.data = {};
 
     if (config.data) {
-        el.data = config.data;
+        el.data = Object.assign({}, config.data);
+    }
+
+}
+
+eon.importLocale = function (el, config) {
+
+    el.locale = {};
+
+    if (config.locale) {
+        el.locale = Object.assign({}, config.locale);
     }
 
 }
