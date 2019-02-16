@@ -191,14 +191,14 @@
           return el._getHorizontalScrollableSize();
         };
 
-        scrollLeftEndDescriptor.set = function (value) {};
+        scrollLeftEndDescriptor.set = function (value) { };
 
         // ScrollTopEnd property descriptor
         scrollTopEndDescriptor.get = function () {
           return el._getVerticalScrollableSize();
         };
 
-        scrollTopEndDescriptor.set = function (value) {};
+        scrollTopEndDescriptor.set = function (value) { };
 
         // Defines our public properties
         Object.defineProperty(el, "scrollTop", scrollTopDescriptor);
@@ -219,21 +219,30 @@
         el._setupOnScrolledEvent();
 
         // If the scrollbars take no space then we do not need to implement our custom behavior
-        if (eon.util.getBrowserScrollBarWidth() != 0) {
+        if (eon.util.getBrowserScrollBarWidth() != 0 || el._isChromeDevice()) {
 
           // By default we want smooth scrolling
           el.classList.add("eon-scroll-smooth");
 
+          // This class will hide the arrowsand the square to make it similar to webkits native
+          if (el._isChromeDevice()) {
+            el.classList.add("eon-scroll-chrome-device");
+          }
+
           // If the user allows us to have vertical scrolling, we set our overflow and margin to hide the native one
           if (el._isAllowedToHaveScroll("vertical")) {
             el.content.style.overflowY = "scroll";
-            el.content.style.marginRight = "-" + el._misc.scrollBarSpace + "px";
+            if (!el._isChromeDevice()) {
+              el.content.style.marginRight = "-" + el._misc.scrollBarSpace + "px";
+            }
           }
 
           // If the user allows us to have horizontal scrolling, we set our overflow and margin to hide the native one
           if (el._isAllowedToHaveScroll("horizontal")) {
             el.content.style.overflowX = "scroll";
-            el.content.style.marginBottom = "-" + el._misc.scrollBarSpace + "px";
+            if (!el._isChromeDevice()) {
+              el.content.style.marginBottom = "-" + el._misc.scrollBarSpace + "px";
+            }
           }
 
           // Creates basic events such as pointerenter/pointerleave, wheel...
@@ -249,6 +258,7 @@
         } else {
 
           el.content.style.overflow = "auto";
+          el.classList.add("eon-scroll-native");
 
         }
 
@@ -278,10 +288,7 @@
           }
 
           // Trigger our onScrolled callback returning an object with scrollTop/scrollLeft properties
-          eon.triggerCallback("onScrolled", el, el, [{
-            scrollTop: el.content.scrollTop,
-            scrollLeft: el.content.scrollLeft
-          }]);
+          eon.triggerCallback("onScrolled", el, el, [{ scrollTop: el.content.scrollTop, scrollLeft: el.content.scrollLeft }]);
 
         });
 
@@ -351,6 +358,16 @@
         this.content.classList.add("eon-scroll-content");
       },
       /*
+      @function (private) _createChromeDeviceRule
+      @description Creates a CSS Rule for the webkit device case
+      */
+      createChromeDeviceRule: function () {
+        if (!eon.rules.ChromeDevice && this._isChromeDevice()) {
+          var ChromeDeviceRuleIndex = eon.style.sheet.insertRule(".eon-scroll-chrome-device > .eon-scroll-content::-webkit-scrollbar { display: none; }", 0);
+          eon.rules.ChromeDevice = eon.style.sheet.cssRules[ChromeDeviceRuleIndex];
+        }
+      },
+      /*
       @function (private) _appendContent
       @description Takes the source content and moves it to our content node
       */
@@ -383,7 +400,7 @@
           // If the parent has a height given by flex then we also setup our element as flex
           if (containerComputedStyle.flexGrow == "1") {
 
-            el._refs.container.style.display = "flex";
+            el._refs.container.classList.add("eon-scroll-flexContainer");
 
             el.style.display = "flex";
             el.style.flexGrow = "1";
@@ -477,7 +494,9 @@
 
               // If the user allows us to have vertical scrolling, we set our overflow and margin to hide the native one
               if (el._isAllowedToHaveScroll("vertical")) {
-                el.content.style.marginRight = "-" + el._misc.scrollBarSpace + "px";
+                if (!el._isChromeDevice()) {
+                  el.content.style.marginRight = "-" + el._misc.scrollBarSpace + "px";
+                }
                 // We have to also update the content calc size if its done before
                 if (el._misc.calculatedContentSize) {
                   el.content.style.width = "calc(100% + " + el._misc.scrollBarSpace + "px)";
@@ -486,7 +505,9 @@
 
               // If the user allows us to have horizontal scrolling, we set our overflow and margin to hide the native one
               if (el._isAllowedToHaveScroll("horizontal")) {
-                el.content.style.marginBottom = "-" + el._misc.scrollBarSpace + "px";
+                if (!el._isChromeDevice()) {
+                  el.content.style.marginBottom = "-" + el._misc.scrollBarSpace + "px";
+                }
                 // We have to also update the content calc size if its done before
                 if (el._misc.calculatedContentSize) {
                   el.content.style.height = "calc(100% + " + el._misc.scrollBarSpace + "px)";
@@ -704,8 +725,7 @@
         var hasHorizontalScroll = (el.content.scrollWidth > el.content.offsetWidth);
 
         // If there is scrollable content on both sides and we are allowed to have those scrolls then we create the square separator
-        if ((hasVerticalScroll && el._isAllowedToHaveScroll("vertical")) && (hasHorizontalScroll && el._isAllowedToHaveScroll(
-            "horizontal"))) {
+        if ((hasVerticalScroll && el._isAllowedToHaveScroll("vertical")) && (hasHorizontalScroll && el._isAllowedToHaveScroll("horizontal"))) {
           el._setupSquare();
         }
 
@@ -737,8 +757,8 @@
         }
 
         //The square width and height depends on the vertical and horizontal scroll thickness
-        square.style.height = el.thickness + "px";
-        square.style.width = el.thickness + "px";
+        square.style.height = el._getThickness() + "px";
+        square.style.width = el._getThickness() + "px";
 
         // Saves the reference and appends it
         el._refs.square = square;
@@ -861,7 +881,7 @@
           scroll.classList.add("eon-scroll-static");
         }
 
-        scroll.style.width = el.thickness + "px";
+        scroll.style.width = el._getThickness() + "px";
 
         // If specified by the user then we create the arrow scrolls
         if (eon.util.isTrue(el.arrowScrolls)) {
@@ -913,7 +933,7 @@
           scroll.classList.add("eon-scroll-static");
         }
 
-        scroll.style.height = el.thickness + "px";
+        scroll.style.height = el._getThickness() + "px";
 
         // If specified by the user then we create the arrow scrolls
         if (eon.util.isTrue(el.arrowScrolls)) {
@@ -950,15 +970,15 @@
         var downIcon = document.createElement("i");
 
         upIcon.classList.add("vicon", "vicon-chevron-up", "eon-fg1");
-        upIcon.style.fontSize = el.thickness + "px";
+        upIcon.style.fontSize = el._getThickness() + "px";
 
         downIcon.classList.add("vicon", "vicon-chevron-down", "eon-fg1");
-        downIcon.style.fontSize = el.thickness + "px";
+        downIcon.style.fontSize = el._getThickness() + "px";
 
         upButton.appendChild(upIcon);
         upButton.classList.add("eon-scroll-arrowButton", "eon-bg6", "eon-bg8-hoverable", "eon-unselectable");
-        upButton.style.height = el.thickness + "px";
-        upButton.style.width = el.thickness + "px";
+        upButton.style.height = el._getThickness() + "px";
+        upButton.style.width = el._getThickness() + "px";
         upButton.onmousedown = function (e) {
           e.preventDefault();
           el._handleArrowScroll(e, "vertical", "up")
@@ -966,8 +986,8 @@
 
         downButton.appendChild(downIcon);
         downButton.classList.add("eon-scroll-arrowButton", "eon-bg6", "eon-bg8-hoverable", "eon-unselectable");
-        downButton.style.height = el.thickness + "px";
-        downButton.style.width = el.thickness + "px";
+        downButton.style.height = el._getThickness() + "px";
+        downButton.style.width = el._getThickness() + "px";
         downButton.addEventListener("pointerdown", function (e) {
           e.preventDefault();
           el._handleArrowScroll(e, "vertical", "down");
@@ -995,15 +1015,15 @@
         var rightIcon = document.createElement("i");
 
         leftIcon.classList.add("vicon", "vicon-chevron-left", "eon-fg1");
-        leftIcon.style.fontSize = el.thickness + "px";
+        leftIcon.style.fontSize = el._getThickness() + "px";
 
         rightIcon.classList.add("vicon", "vicon-chevron-right", "eon-fg1");
-        rightIcon.style.fontSize = el.thickness + "px";
+        rightIcon.style.fontSize = el._getThickness() + "px";
 
         leftButton.appendChild(leftIcon);
         leftButton.classList.add("eon-scroll-arrowButton", "eon-unselectable", "eon-bg6", "eon-bg8-hoverable");
-        leftButton.style.height = el.thickness + "px";
-        leftButton.style.width = el.thickness + "px";
+        leftButton.style.height = el._getThickness() + "px";
+        leftButton.style.width = el._getThickness() + "px";
         leftButton.addEventListener("pointerdown", function (e) {
           e.preventDefault();
           el._handleArrowScroll(e, "horizontal", "left");
@@ -1011,8 +1031,8 @@
 
         rightButton.appendChild(rightIcon);
         rightButton.classList.add("eon-scroll-arrowButton", "eon-unselectable", "eon-bg6", "eon-bg8-hoverable");
-        rightButton.style.height = el.thickness + "px";
-        rightButton.style.width = el.thickness + "px";
+        rightButton.style.height = el._getThickness() + "px";
+        rightButton.style.width = el._getThickness() + "px";
         rightButton.addEventListener("pointerdown", function (e) {
           e.preventDefault();
           el._handleArrowScroll(e, "horizontal", "right");
@@ -1045,8 +1065,7 @@
 
             arrowScrollFunction = function () {
               var previousScrollTop = el.content.scrollTop;
-              var newScrollTop = el.content.scrollTop + (direction == "up" ? -el._misc.arrowScrollAmount : el._misc
-                .arrowScrollAmount);
+              var newScrollTop = el.content.scrollTop + (direction == "up" ? -el._misc.arrowScrollAmount : el._misc.arrowScrollAmount);
 
               el._showScrollbars(el._misc.hideScrollbarsMs);
 
@@ -1060,8 +1079,7 @@
 
             arrowScrollFunction = function () {
               var previousScrollLeft = el.content.scrollLeft;
-              var newScrollLeft = el.content.scrollLeft + (direction == "left" ? -el._misc.arrowScrollAmount :
-                el._misc.arrowScrollAmount);
+              var newScrollLeft = el.content.scrollLeft + (direction == "left" ? -el._misc.arrowScrollAmount : el._misc.arrowScrollAmount);
 
               el._showScrollbars(el._misc.hideScrollbarsMs);
 
@@ -1112,8 +1130,7 @@
             railScrollFunction = function () {
 
               var barRect = el._refs.verticalBar.getBoundingClientRect();
-              var shouldStop = parseFloat(barRect.top) + barRect.height > e.clientY && e.clientY > parseFloat(
-                barRect.top);
+              var shouldStop = parseFloat(barRect.top) + barRect.height > e.clientY && e.clientY > parseFloat(barRect.top);
 
               // If it already reached the desired point then stop the scrolling 
               if (shouldStop) {
@@ -1125,11 +1142,9 @@
 
                 var railRect = el._refs.verticalRail.getBoundingClientRect();
                 var isMeantToScrollUp = (railRect.top < e.clientY && e.clientY < barRect.top);
-                var isMeantToScrollDown = ((railRect.top + railRect.height) > e.clientY && (barRect.top +
-                  barRect.height) < e.clientY);
+                var isMeantToScrollDown = ((railRect.top + railRect.height) > e.clientY && (barRect.top + barRect.height) < e.clientY);
                 var previousScrollTop = el.content.scrollTop;
-                var newScrollTop = isMeantToScrollUp ? el.content.scrollTop - el._misc.railScrollAmount : el.content
-                  .scrollTop + el._misc.railScrollAmount;
+                var newScrollTop = isMeantToScrollUp ? el.content.scrollTop - el._misc.railScrollAmount : el.content.scrollTop + el._misc.railScrollAmount;
 
                 // If the scroll has changed we scroll
                 if (previousScrollTop != newScrollTop) {
@@ -1145,8 +1160,7 @@
             railScrollFunction = function () {
 
               var barRect = el._refs.horizontalBar.getBoundingClientRect();
-              var shouldStop = parseFloat(barRect.left) + barRect.width > e.clientX && e.clientX > parseFloat(
-                barRect.left);
+              var shouldStop = parseFloat(barRect.left) + barRect.width > e.clientX && e.clientX > parseFloat(barRect.left);
 
               // If it already reached the desired point then stop the scrolling 
               if (shouldStop) {
@@ -1158,11 +1172,9 @@
 
                 var railRect = el._refs.horizontalRail.getBoundingClientRect();
                 var isMeantToScrollLeft = (railRect.left < e.clientX && e.clientX < barRect.left);
-                var isMeantToScrollRight = ((railRect.left + railRect.width) > e.clientX && (barRect.left +
-                  barRect.width) < e.clientX);
+                var isMeantToScrollRight = ((railRect.left + railRect.width) > e.clientX && (barRect.left + barRect.width) < e.clientX);
                 var previousScrollLeft = el.content.scrollLeft;
-                var newScrollLeft = isMeantToScrollLeft ? el.content.scrollLeft - el._misc.railScrollAmount :
-                  el.content.scrollLeft + el._misc.railScrollAmount;
+                var newScrollLeft = isMeantToScrollLeft ? el.content.scrollLeft - el._misc.railScrollAmount : el.content.scrollLeft + el._misc.railScrollAmount;
 
                 // If the scroll has changed we scroll
                 if (previousScrollLeft != newScrollLeft) {
@@ -1202,16 +1214,14 @@
       @description Handles the height of the vertical scroll
       */
       assignVerticalScrollSize: function () {
-        this._refs.verticalScroll.style.height = (this._misc.square.created && this._refs.square.classList.contains(
-          "eon-scroll-active")) ? "calc(100% - " + this.thickness + "px)" : "100%";
+        this._refs.verticalScroll.style.height = (this._misc.square.created && this._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + this._getThickness() + "px)" : "100%";
       },
       /*
       @function (private) _assignVerticalScrollSize
       @description Handles the height of the horizontal scroll
       */
       assignHorizontalScrollSize: function () {
-        this._refs.horizontalScroll.style.width = (this._misc.square.created && this._refs.square.classList.contains(
-          "eon-scroll-active")) ? "calc(100% - " + this.thickness + "px)" : "100%";
+        this._refs.horizontalScroll.style.width = (this._misc.square.created && this._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + this._getThickness() + "px)" : "100%";
       },
       /*
       @function (private) _updateVerticalScrollStatus
@@ -1223,8 +1233,7 @@
 
         if (el._misc.vertical.created) {
 
-          if ((el._refs.verticalBar.getBoundingClientRect().height > el._refs.verticalRail.getBoundingClientRect()
-              .height) && !eon.util.isTrue(el.static)) {
+          if ((el._refs.verticalBar.getBoundingClientRect().height > el._refs.verticalRail.getBoundingClientRect().height) && !eon.util.isTrue(el.static)) {
             el._refs.verticalScroll.classList.remove("eon-scroll-active");
           } else {
             el._refs.verticalScroll.classList.add("eon-scroll-active");
@@ -1243,8 +1252,7 @@
 
         if (el._misc.horizontal.created) {
 
-          if ((el._refs.horizontalBar.getBoundingClientRect().width > el._refs.horizontalRail.getBoundingClientRect()
-              .width) && !eon.util.isTrue(el.static)) {
+          if ((el._refs.horizontalBar.getBoundingClientRect().width > el._refs.horizontalRail.getBoundingClientRect().width) && !eon.util.isTrue(el.static)) {
             el._refs.horizontalScroll.classList.remove("eon-scroll-active");
           } else {
             el._refs.horizontalScroll.classList.add("eon-scroll-active");
@@ -1282,32 +1290,28 @@
       @description Handles the length of the vertical bar
       */
       assignVerticalScrollBarSize: function () {
-        this._refs.verticalBar.style.height = Math.ceil(this._refs.verticalRail.getBoundingClientRect().height /
-          (this.content.scrollHeight / this.content.getBoundingClientRect().height)) + "px";
+        this._refs.verticalBar.style.height = Math.ceil(this._refs.verticalRail.getBoundingClientRect().height / (this.content.scrollHeight / this.content.getBoundingClientRect().height)) + "px";
       },
       /*
       @function (private) _assignVerticalScrollSize
       @description Handles the length of the horizontal bar
       */
       assignHorizontalScrollBarSize: function () {
-        this._refs.horizontalBar.style.width = Math.ceil(this._refs.horizontalRail.getBoundingClientRect().width /
-          (this.content.scrollWidth / this.content.getBoundingClientRect().width)) + "px";
+        this._refs.horizontalBar.style.width = Math.ceil(this._refs.horizontalRail.getBoundingClientRect().width / (this.content.scrollWidth / this.content.getBoundingClientRect().width)) + "px";
       },
       /*
       @function (private) _updateVerticalBarPosition
       @description Updates the vertical bar position based on the content scrollTop
       */
       updateVerticalScrollBarPosition: function () {
-
         var el = this;
 
         var scrollableSize = el._getVerticalScrollableSize();
         var scrollTopProportion = el.content.scrollTop / scrollableSize;
-        var proportionalScrollBarTop = Math.ceil(scrollTopProportion * (el._refs.verticalRail.offsetHeight - el._refs
-          .verticalBar.offsetHeight));
+        var proportionalScrollBarTop = Math.ceil(scrollTopProportion * (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight));
 
-        el._misc.vertical.position = proportionalScrollBarTop;
         el._refs.verticalBar.style.transform = "translate3d( 0, " + proportionalScrollBarTop + "px, 0)";
+
       },
       /*
       @function (private) _updateHorizontalScrollBarPosition
@@ -1318,8 +1322,7 @@
 
         var scrollableSize = el._getHorizontalScrollableSize();
         var scrollLeftProportion = el.content.scrollLeft / scrollableSize;
-        var proportionalScrollBarLeft = Math.ceil(scrollLeftProportion * (el._refs.horizontalRail.offsetWidth -
-          el._refs.horizontalBar.offsetWidth));
+        var proportionalScrollBarLeft = Math.ceil(scrollLeftProportion * (el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth));
 
         el._refs.horizontalBar.style.transform = "translate3d(" + proportionalScrollBarLeft + "px, 0, 0)";
 
@@ -1373,8 +1376,7 @@
           var scrollableSize = el._getVerticalScrollableSize();
           var verticalRailRect = el._refs.verticalRail.getBoundingClientRect();
           var verticalBarRect = el._refs.verticalBar.getBoundingClientRect();
-          var bottomDragLimit = (verticalRailRect.top + verticalRailRect.height - verticalBarRect.height +
-            parseFloat(el._misc.vertical.drag.start));
+          var bottomDragLimit = (verticalRailRect.top + verticalRailRect.height - verticalBarRect.height + parseFloat(el._misc.vertical.drag.start));
           var scrollbarPosition, scrollbarProportion;
 
           //Show the scrollbars when dragging, event if the mouse is outside of the scroll container
@@ -1388,8 +1390,7 @@
 
             // If it exceeds either the superior or the inferior limit we update the value
             scrollbarPosition = scrollbarPosition < 0 ? 0 : scrollbarPosition;
-            scrollbarPosition = e.clientY > bottomDragLimit ? verticalRailRect.height - verticalBarRect.height :
-              scrollbarPosition;
+            scrollbarPosition = e.clientY > bottomDragLimit ? verticalRailRect.height - verticalBarRect.height : scrollbarPosition;
 
             //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
             scrollbarProportion = scrollbarPosition / (verticalRailRect.height - verticalBarRect.height);
@@ -1417,8 +1418,7 @@
           var scrollableSize = el._getHorizontalScrollableSize();
           var horizontalRailRect = el._refs.horizontalRail.getBoundingClientRect();
           var horizontalBarRect = el._refs.horizontalBar.getBoundingClientRect();
-          var rightDragLimit = (horizontalRailRect.left + horizontalRailRect.width - horizontalBarRect.width +
-            parseFloat(el._misc.horizontal.drag.start));
+          var rightDragLimit = (horizontalRailRect.left + horizontalRailRect.width - horizontalBarRect.width + parseFloat(el._misc.horizontal.drag.start));
           var scrollbarPosition, scrollbarProportion;
 
           //Show the scrollbars when dragging, event if the mouse is outside of the scroll container
@@ -1432,8 +1432,7 @@
 
             // If it exceeds either the left or the right limit we update the value
             scrollbarPosition = scrollbarPosition < 0 ? 0 : scrollbarPosition;
-            scrollbarPosition = e.clientX > rightDragLimit ? horizontalRailRect.width - horizontalBarRect.width :
-              scrollbarPosition;
+            scrollbarPosition = e.clientX > rightDragLimit ? horizontalRailRect.width - horizontalBarRect.width : scrollbarPosition;
 
             //Here we calculate the proportional scroll that we have to make according of the scrollbar movement
             scrollbarProportion = scrollbarPosition / (horizontalRailRect.width - horizontalBarRect.width);
@@ -1500,20 +1499,18 @@
         clearTimeout(el._misc.hideScrollbarsTimeout);
 
         // Displays the vertical scroll if its created, active and its not static (Since this means its always displayed)
-        if (el._misc.vertical.created && el._refs.verticalScroll.classList.contains("eon-scroll-active") && !eon.util
-          .isTrue(el.static)) {
-          el._refs.verticalScroll.style.opacity = 1;
+        if (el._misc.vertical.created && el._refs.verticalScroll.classList.contains("eon-scroll-active") && !eon.util.isTrue(el.static)) {
+          el._refs.verticalScroll.classList.add("eon-scroll-visible");
         }
 
         // Displays the horizontal scroll if its created, active and its not static (Since this means its always displayed)
-        if (el._misc.horizontal.created && el._refs.horizontalScroll.classList.contains("eon-scroll-active") && !
-          eon.util.isTrue(el.static)) {
-          el._refs.horizontalScroll.style.opacity = 1;
+        if (el._misc.horizontal.created && el._refs.horizontalScroll.classList.contains("eon-scroll-active") && !eon.util.isTrue(el.static)) {
+          el._refs.horizontalScroll.classList.add("eon-scroll-visible");
         }
 
         // Displays the square if its created, active and its not static (Since this means its always displayed)
         if (el._misc.square.created && !eon.util.isTrue(el.static)) {
-          el._refs.square.style.opacity = 1;
+          el._refs.square.classList.add("eon-scroll-visible");
         }
 
         // If we recieve the hideScrollbarsMs parameter we pass the parameter to the hideScrollbars function to hide all on the requested time
@@ -1541,17 +1538,17 @@
 
           // Hides the vertical scroll if its created, active and its not static (Since this means its always displayed)
           if (el._misc.vertical.created && !eon.util.isTrue(el.static)) {
-            el._refs.verticalScroll.style.opacity = 0;
+            el._refs.verticalScroll.classList.remove("eon-scroll-visible");
           }
 
           // Hides the vertical scroll if its created, active and its not static (Since this means its always displayed)
           if (el._misc.horizontal.created && !eon.util.isTrue(el.static)) {
-            el._refs.horizontalScroll.style.opacity = 0;
+            el._refs.horizontalScroll.classList.remove("eon-scroll-visible");
           }
 
           // Hides the square if its created, active and its not static (Since this means its always displayed)
           if (el._misc.square.created && !eon.util.isTrue(el.static)) {
-            el._refs.square.style.opacity = 0;
+            el._refs.square.classList.remove("eon-scroll-visible");
           }
 
         }, miliseconds);
@@ -1576,6 +1573,13 @@
         return returnBoolean;
       },
       /*
+      @function (private) {Number} _getThickness
+      @description Returns the proper thickness depending on the scenario
+      */
+      getThickness: function () {
+        return !this._isChromeDevice() ? this.thickness : parseInt(this.thickness) / 3;
+      },
+      /*
       @function (private) {Number} _getVerticalScrollableSize
       @description Returns the vertical scrollable amount
       */
@@ -1586,8 +1590,7 @@
 
         if (Math.ceil(el.content.scrollHeight) != el.content.clientHeight) {
           scrollable = Math.ceil(el.content.scrollHeight) - Math.ceil(el.content.getBoundingClientRect().height);
-          scrollable = el._isAllowedToHaveScroll("horizontal") ? scrollable + el._misc.scrollBarSpace :
-            scrollable;
+          scrollable = el._isAllowedToHaveScroll("horizontal") ? scrollable + el._misc.scrollBarSpace : scrollable;
         }
 
         return Math.floor(scrollable);
@@ -1657,7 +1660,7 @@
         var initial = el.content.scrollTop;
         var advance = top - initial;
         var duration = Math.min(1200, Math.abs(advance) * 1.2);
-        var endTime = +new Date() + duration;
+        var endTime = + new Date() + duration;
         var finished, rate, proportion;
 
         // Removes the smooth scroll class
@@ -1695,8 +1698,7 @@
 
           // Keeps running the animation frame until it finishes
           if (!finished) {
-            el._misc.smoothScroll.vertical.animationFrame = requestAnimationFrame(el._misc.smoothScroll.vertical
-              .fn);
+            el._misc.smoothScroll.vertical.animationFrame = requestAnimationFrame(el._misc.smoothScroll.vertical.fn);
           } else {
             cancelAnimationFrame(el._misc.smoothScroll.vertical.animationFrame);
           }
@@ -1704,8 +1706,7 @@
         };
 
         // Inits the requestAnimationFrame
-        el._misc.smoothScroll.vertical.animationFrame = window.requestAnimationFrame(el._misc.smoothScroll.vertical
-          .fn);
+        el._misc.smoothScroll.vertical.animationFrame = window.requestAnimationFrame(el._misc.smoothScroll.vertical.fn);
 
       },
       /*
@@ -1739,13 +1740,11 @@
             // If its scrolling down and it hasn reach its destination
             if ((positive && el.content.scrollLeft < left)) {
               // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
-              el.content.scrollLeft = (left - el.content.scrollLeft) > el._misc.smoothScroll.amount ? el.content
-                .scrollLeft + el._misc.smoothScroll.amount : left;
+              el.content.scrollLeft = (left - el.content.scrollLeft) > el._misc.smoothScroll.amount ? el.content.scrollLeft + el._misc.smoothScroll.amount : left;
               // If its scrolling up and it hasn reach its destination
             } else if (!positive && el.content.scrollLeft > left) {
               // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
-              el.content.scrollLeft = (el.content.scrollLeft - left) > el._misc.smoothScroll.amount ? el.content
-                .scrollLeft - el._misc.smoothScroll.amount : 0;
+              el.content.scrollLeft = (el.content.scrollLeft - left) > el._misc.smoothScroll.amount ? el.content.scrollLeft - el._misc.smoothScroll.amount : 0;
             }
 
             // Once it finishes sets the finished variable to true
@@ -1757,8 +1756,7 @@
 
           // Keeps running the animation frame until it finishes
           if (!finished) {
-            el._misc.smoothScroll.horizontal.animationFrame = requestAnimationFrame(el._misc.smoothScroll.horizontal
-              .fn);
+            el._misc.smoothScroll.horizontal.animationFrame = requestAnimationFrame(el._misc.smoothScroll.horizontal.fn);
           } else {
             cancelAnimationFrame(el._misc.smoothScroll.horizontal.animationFrame);
           }
@@ -1766,9 +1764,15 @@
         };
 
         // Inits the requestAnimationFrame
-        el._misc.smoothScroll.horizontal.animationFrame = window.requestAnimationFrame(el._misc.smoothScroll.horizontal
-          .fn);
+        el._misc.smoothScroll.horizontal.animationFrame = window.requestAnimationFrame(el._misc.smoothScroll.horizontal.fn);
 
+      },
+      /*
+      @function (private) _isChromeDevice
+      @description Triggered when thickness has changed, updates everything according to the new one
+      */
+      isChromeDevice: function () {
+        return eon.util.getBrowserScrollBarWidth() == 0 && eon.util.getBrowser() == "Chrome";
       },
       /*
       @function (private) _updateThickness
@@ -1779,52 +1783,48 @@
         var el = this;
 
         if (el._misc.square.created) {
-          el._refs.square.style.height = el.thickness + "px";
-          el._refs.square.style.width = el.thickness + "px";
+          el._refs.square.style.height = el._getThickness() + "px";
+          el._refs.square.style.width = el._getThickness() + "px";
         }
 
         if (el._refs.upArrowButton) {
-          el._refs.upArrowButton.style.height = el.thickness + "px";
-          el._refs.upArrowButton.style.width = el.thickness + "px";
-          el._refs.upArrowButton.style.fontSize = el.thickness + "px";
-          el._refs.upArrowButton.querySelector("i").style.fontSize = el.thickness + "px";
+          el._refs.upArrowButton.style.height = el._getThickness() + "px";
+          el._refs.upArrowButton.style.width = el._getThickness() + "px";
+          el._refs.upArrowButton.style.fontSize = el._getThickness() + "px";
+          el._refs.upArrowButton.querySelector("i").style.fontSize = el._getThickness() + "px";
         }
 
         if (el._refs.downArrowButton) {
-          el._refs.downArrowButton.style.height = el.thickness + "px";
-          el._refs.downArrowButton.style.width = el.thickness + "px";
-          el._refs.downArrowButton.style.fontSize = el.thickness + "px";
-          el._refs.downArrowButton.querySelector("i").style.fontSize = el.thickness + "px";
+          el._refs.downArrowButton.style.height = el._getThickness() + "px";
+          el._refs.downArrowButton.style.width = el._getThickness() + "px";
+          el._refs.downArrowButton.style.fontSize = el._getThickness() + "px";
+          el._refs.downArrowButton.querySelector("i").style.fontSize = el._getThickness() + "px";
         }
 
         if (el._refs.leftArrowButton) {
-          el._refs.leftArrowButton.style.height = el.thickness + "px";
-          el._refs.leftArrowButton.style.width = el.thickness + "px";
-          el._refs.leftArrowButton.style.fontSize = el.thickness + "px";
-          el._refs.leftArrowButton.querySelector("i").style.fontSize = el.thickness + "px";
+          el._refs.leftArrowButton.style.height = el._getThickness() + "px";
+          el._refs.leftArrowButton.style.width = el._getThickness() + "px";
+          el._refs.leftArrowButton.style.fontSize = el._getThickness() + "px";
+          el._refs.leftArrowButton.querySelector("i").style.fontSize = el._getThickness() + "px";
         }
 
         if (el._refs.rightArrowButton) {
-          el._refs.rightArrowButton.style.height = el.thickness + "px";
-          el._refs.rightArrowButton.style.width = el.thickness + "px";
-          el._refs.rightArrowButton.style.fontSize = el.thickness + "px";
-          el._refs.rightArrowButton.querySelector("i").style.fontSize = el.thickness + "px";
+          el._refs.rightArrowButton.style.height = el._getThickness() + "px";
+          el._refs.rightArrowButton.style.width = el._getThickness() + "px";
+          el._refs.rightArrowButton.style.fontSize = el._getThickness() + "px";
+          el._refs.rightArrowButton.querySelector("i").style.fontSize = el._getThickness() + "px";
         }
 
         if (el._refs.verticalScroll) {
-          el._refs.verticalScroll.style.width = el.thickness + "px";
-          el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains(
-            "eon-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
-          el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content
-            .scrollHeight / el.offsetHeight))) + "px";
+          el._refs.verticalScroll.style.width = el._getThickness() + "px";
+          el._refs.verticalScroll.style.height = (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + el._getThickness() + "px)" : "100%";
+          el._refs.verticalBar.style.height = Math.ceil(parseFloat(el._refs.verticalRail.offsetHeight / (el.content.scrollHeight / el.offsetHeight))) + "px";
         }
 
         if (el._refs.horizontalScroll) {
-          el._refs.horizontalScroll.style.height = el.thickness + "px";
-          el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains(
-            "eon-scroll-active")) ? "calc(100% - " + el.thickness + "px)" : "100%";
-          el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth /
-            el.offsetWidth))) + "px";
+          el._refs.horizontalScroll.style.height = el._getThickness() + "px";
+          el._refs.horizontalScroll.style.width = (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + el._getThickness() + "px)" : "100%";
+          el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth))) + "px";
         }
 
 
@@ -1855,6 +1855,8 @@
       el._setupMisc();
       el._createContent();
 
+      el._createChromeDeviceRule();
+
     },
 
     onInit: function () {
@@ -1882,4 +1884,5 @@
     }
 
   });
+
 </script>

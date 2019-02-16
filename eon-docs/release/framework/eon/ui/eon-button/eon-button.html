@@ -1,5 +1,7 @@
 <template>
-  <div class="eon-button-button eon-bg2-border eon-bg2-hoverable eon-fg2 eon-fg2-hoverable eon-unselectable"></div>
+  <a>
+    <div class="eon-button-button eon-bg2-border eon-bg2-hoverable eon-fg2 eon-fg2-hoverable eon-unselectable"></div>
+  </a>
 </template>
 
 <!-- <script data-src="eon-button.js"></script> -->
@@ -10,7 +12,7 @@
     name: "eon-button",
     style: "eon-button.css",
 
-    themed: true,
+    themed: false,
 
     properties: {
       /*
@@ -26,6 +28,22 @@
         @description Button text
       */
       value: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} href 
+        @description Href
+      */
+      href: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} target 
+        @description Target
+      */
+      target: {
         value: "",
         reflect: true
       },
@@ -79,6 +97,10 @@
         value: "left",
         reflect: true
       },
+      /*
+        @property {String} vicon 
+        @description Vimlet icon
+      */
       vicon: {
         value: "",
         reflect: true
@@ -189,6 +211,26 @@
       },
 
       /*
+        @function (private) _setupLink
+        @description Assigns an href and target to the link element
+      */
+
+      setupLink: function () {
+
+        var el = this;
+        var a = el.querySelector("a");
+
+        if (el.href != "") {
+          a.href = el.href; 
+        }
+        
+        if (el.target != "") {
+          a.setAttribute("target", el.target);
+        }
+
+      },
+
+      /*
         @function (private) _updateDisabled
         @description Update disabled status
         @param {String} newVal [New value of disabled]
@@ -218,6 +260,9 @@
       el._setLabel();
       el._updateDisabled();
       el._setupIcon(el.icon);
+
+      el._setupLink();
+
       // When the button is a type form submit
       (el.type) ? button.setAttribute("type", el.type) : null;
 

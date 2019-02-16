@@ -1,0 +1,105 @@
+<!-- @header This component should be within a position set component -->
+<style>
+</style>
+<template>
+</template>
+
+<script>
+    eon.element({
+        name: "app-fading",
+        style: "app-fading.css",
+        dependencies: [],
+        properties: {
+            // @html-attribute in (public) [Fade in time in seconds]
+            in: {
+                value: "0.5",
+                reflect: true
+            },
+            // @html-attribute out (public) [Fade out time in seconds]
+            out: {
+                value: "0.5",
+                reflect: true
+            },
+            // @html-attribute color (public) [Fade layer color]
+            color: {
+                value: "rgba(255,255,255,1)",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {}
+            }
+        },
+
+        functions: {
+            // @function start (public) [Start all fade process, in and out]
+            start: function () {                
+                var el = this;
+                el.fadeIn(function () {
+                    el.fadeOut();
+                });
+            },
+            // @function stop (public) [Stop fading and hide]
+            stop: function () {
+                var el = this;
+                el.style.transitionDuration = 0 + "s";
+                el.classList.add("app-fading-hidden");
+            },
+            // @function fadeIn (public) [Start only fade in and hide] @param callback
+            fadeIn: function (callback) {
+                var el = this;
+                el.style.transitionDuration = el.in + "s";
+                el.classList.remove("app-fading-hidden");                
+                setTimeout(function () {
+                    if (callback) {
+                        callback();
+                    }
+                }, el.in * 1000);
+            },
+            // @function fadeOut (public) [Start only fade out and hide] @param callback
+            fadeOut: function (callback) {
+                var el = this;
+                el.style.transitionDuration = el.out + "s";
+                el.classList.add("app-fading-hidden");
+                setTimeout(function () {
+                    if (callback) {
+                        callback();
+                    }
+                }, el.out * 1000);
+            }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUpRefs();
+                el._setUp();
+            },
+            // @function _setUpRefs (private) [Set up references]
+            setUpRefs: function () {
+                var el = this;
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                el.style.backgroundColor = el.color;
+                el.classList.add("app-fading-hidden");
+            }
+        },
+
+        onCreated: function () {},
+
+        onReady: function () {
+            var el = this;
+            el._init();
+        },
+
+
+    });
+</script>

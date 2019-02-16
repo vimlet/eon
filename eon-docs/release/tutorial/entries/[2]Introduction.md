@@ -362,7 +362,7 @@ eon.object.assignToPath(yourObject, propertyPath, propertyNewValue);
 
 Eon template engine makes usage of interpolation in order to provide a powerful and handy way of data binding and scripting.
 This allows components to display changeable data in the right place without having to manually update each value. It also provides logic driven content such as conditional or loop based content, in fact it so powerful that any javascript logic can be written inside the interpolation tags and it will be executed in a safe sandboxed environment.
-
+ 
 
 ## Basic Usage
 

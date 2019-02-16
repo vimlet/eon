@@ -1,5 +1,10 @@
 var eon = eon || {};
 
+eon.debug = eon.debug || {};
+eon.debug.polyfill = eon.debug.polyfill || false;
+
+eon.polyfills = eon.polyfills || {};
+
 (function () {
     var eon = this;
 
@@ -8,12 +13,7 @@ var eon = eon || {};
 // DEBUG
 // ############################################################################################
 
-eon.debug = eon.debug || {};
-
-eon.debug.polyfill = eon.debug.polyfill || false;
-
 eon.warn = eon.warn || {};
-
 eon.error = eon.error || {};
 
 eon.debug.log = function(condition, message) {
@@ -103,22 +103,17 @@ if (eon.addViewportMeta) {
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     );
 }
-
+    
+    
 // ############################################################################################
-// DEFAULT THEME
-// ############################################################################################
-if (!eon.theme) {
-    eon.theme = "noire";
-}    
-    // ############################################################################################
 // POLYFILL DETECTION
 // ############################################################################################
 
-eon.injectPolyfill = function (url) {
+eon.polyfills.injectPolyfill = function (url) {
   document.write('<script type="text/javascript" src="' + url + '"></script>');
 };
 
-eon.needCustomElementsPolyfill = function () {
+eon.polyfills.needCustomElementsPolyfill = function () {
   var __customElements = window.hasOwnProperty("customElements");
   if (eon.debug.polyfill) {
     console.log("Polyfill custom-elements", !__customElements);
@@ -126,7 +121,7 @@ eon.needCustomElementsPolyfill = function () {
   return !__customElements;
 };
 
-eon.needTemplatePolyfill = function () {
+eon.polyfills.needTemplatePolyfill = function () {
   var __template = "content" in document.createElement("template") === true;
   if (eon.debug.polyfill) {
     console.log("Polyfill template", !__template);
@@ -134,7 +129,7 @@ eon.needTemplatePolyfill = function () {
   return !__template;
 };
 
-eon.needCSSScopePolyfill = function () {
+eon.polyfills.needCSSScopePolyfill = function () {
   var needPolyfill = false;
   try {
     doc.querySelector(":scope body");
@@ -147,7 +142,7 @@ eon.needCSSScopePolyfill = function () {
   return needPolyfill;
 };
 
-eon.needObjectAssignPolyfill = function () {
+eon.polyfills.needObjectAssignPolyfill = function () {
   var needPolyfill = !Object.assign;
   if (eon.debug.polyfill) {
     console.log("Polyfill Object Assign", needPolyfill);
@@ -155,17 +150,17 @@ eon.needObjectAssignPolyfill = function () {
   return needPolyfill;
 };
 
-eon.needLocalStringPolyfill = function () {
+eon.polyfills.needLocaleStringPolyfill = function () {
   return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
 }
 
-eon.needPromisesPolyfill = function () {
+eon.polyfills.needPromisesPolyfill = function () {
   if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
     return false;
   }
   return true;
 }
-eon.needClassListAddPolyfill = function () {
+eon.polyfills.needClassListAddPolyfill = function () {
   var div = document.createElement("div");
   div.classList.add("class1", "class2");
 
@@ -177,88 +172,45 @@ eon.needClassListAddPolyfill = function () {
 // ############################################################################################
 
 // Custom Elements - https://github.com/webcomponents/custom-elements
-if (eon.needCustomElementsPolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/custom-elements/custom-elements.min.js");
+if (!eon.polyfills.customElements && eon.polyfills.needCustomElementsPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/custom-elements/custom-elements.min.js");
 }
 
 // Template - https://github.com/webcomponents/template
-if (eon.needTemplatePolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/template/template.js");
+if (!eon.polyfills.template && eon.polyfills.needTemplatePolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/template/template.js");
 }
 
 // CSS :scope
-if (eon.needCSSScopePolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/css/scope.js");
+if (!eon.polyfills.CSSScope && eon.polyfills.needCSSScopePolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/css/scope.js");
 }
 
 // Object.assign
-if (eon.needObjectAssignPolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/object/assign.js");
+if (!eon.polyfills.assign && eon.polyfills.needObjectAssignPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/object/assign.js");
 }
 
-// Pointer events (Must run always)
-eon.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
-
 // Promises
-if (eon.needPromisesPolyfill()) {
-  eon.injectPolyfill(eon.basePath + "/polyfill/promises/promises.js");
+if (!eon.polyfills.promises && eon.polyfills.needPromisesPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/promises/promises.js");
 }
 
 // Date locale polyfill
-if (eon.needLocalStringPolyfill()) {
-  
-  (function (proxied) {
-    Date.prototype.toLocaleString = function (locale, options) {
-
-      if (options.month && Object.keys(options).length == 1) {
-        return eon.time.defaultLocale.months[options.month][this.getMonth()];
-      } else if (options.weekday && Object.keys(options).length == 1) {
-        return eon.time.defaultLocale.weekdays[options.weekday][this.getDay()];
-      }
-
-      return proxied.apply(this, arguments);
-    };
-  })(Date.prototype.toLocaleString);
-
+if (!eon.polyfills.localeString && eon.polyfills.needLocaleStringPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/locale-string/locale-string.js");
 }
+
 //
-if (eon.needClassListAddPolyfill()) {
-  
-  (function (proxied) {
-
-    DOMTokenList.prototype.add = function () {
-      
-      if(arguments.length > 1) {
-        
-        for (var i = 0; i < arguments.length; i++) {
-          proxied.apply(this, [arguments[i]]);
-        }
-        
-      } else {
-        return proxied.apply(this, arguments);
-      }
-
-    };
-  })(DOMTokenList.prototype.add);
-  
-  (function (proxied) {
-
-    DOMTokenList.prototype.remove = function () {
-
-      if (arguments.length > 1) {
-
-        for (var i = 0; i < arguments.length; i++) {
-          proxied.apply(this, [arguments[i]]);
-        }
-
-      } else {
-        return proxied.apply(this, arguments);
-      }
-
-    };
-  })(DOMTokenList.prototype.remove);
-
+if (!eon.polyfills.classList && eon.polyfills.needClassListAddPolyfill()) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/class-list/class-list.js");
 }
+
+// Pointer events (Must run always)
+if (!eon.polyfills.pep) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
+}
+
 
 
     
@@ -3323,7 +3275,7 @@ eon.import = function (param) {
 };
 
 eon.insertImport = function (href) {
-
+    
     var elementName;
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
@@ -3345,6 +3297,7 @@ eon.insertImport = function (href) {
     eon.imports.templates = eon.imports.templates || {};
     eon.imports.paths = eon.imports.paths || {};
     eon.imports.config = eon.imports.config || {};
+    eon.imports.errors = eon.imports.errors || {};
 
     if (!(elementName in eon.imports.templates)) {
 
@@ -3365,7 +3318,21 @@ eon.insertImport = function (href) {
         xhttp.onreadystatechange = function () {
 
             if (this.readyState == 4 && this.status == 200) {
+
                 eon.insertFragment(elementName, this.responseText);
+
+            } else if (this.readyState == 4) {
+
+                // Since this element can't be imported, we reduce the total components amount so that the execution may continue
+                eon.imports.total--;
+
+                // Removes it from the already saved objects
+                delete eon.imports.templates[elementName];
+                delete eon.imports.paths[elementName];
+
+                // Saves it into the erros object
+                eon.imports.errors[elementName] = this.status;
+
             }
         };
 
@@ -4083,6 +4050,17 @@ eon.interpolation.handleInterpolationVariables = function (el, config) {
   sources.global = {};
 
   el.__interpolations = el.__interpolations || {};
+  
+  // First of all checks if there is a data specified in the element config, if so, it creates the source
+  if (el.data) {
+
+    sources.element.data = {};
+    sources.element.data.scope = el;
+    sources.element.data.obj = el.data;
+    sources.element.data.isGlobal = false;
+    sources.element.data.isLang = false;
+
+  }
 
   // Loops all the inner element variables
   for (var i = 0; i < variables.length; i++) {
@@ -4346,13 +4324,66 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
       } else {
         oldVal = checked ? checked[key] : "";
         // To only trigger variable change for properties that are not already checked/triggered
-        if ((checked && !checked[key]) || !checked) {
+        if ((checked && !checked.hasOwnProperty(key)) || !checked) {
           eon.interpolation.handleVariableChange(el, keyPath + "." + key, oldVal, data[key], config);
         }
       }
     }
   }
 }
+
+eon.createCallback("onThemeChanged", eon);
+
+document.addEventListener("DOMContentLoaded", function (event) {
+
+    var theme = eon.theme;
+    var themeDescriptor = {};
+
+    // Default theme
+    if (!theme) {
+        theme = "noire";
+    }
+    
+    // If there is no theme specified to the body we set the default one, 
+    // otherwise we take that theme as the default one
+    if (!document.body.dataset.theme && !document.body.hasAttribute("theme")) {
+
+      document.body.setAttribute("theme", theme);
+
+    } else {
+
+        theme = document.body.dataset.theme ? document.body.dataset.theme : theme;
+        theme = document.body.hasAttribute("theme") ? document.body.getAttribute("theme") : theme;
+
+    }
+  
+    eon.__theme = theme;
+    
+    // Theme property descriptor, that will notify the theme change triggering onThemeChanged, 
+    // import new Main theme and set the new theme body attribute
+    themeDescriptor.get = function () {
+        return eon.__theme;
+    };
+
+    themeDescriptor.set = function (value) {
+
+      eon.domReady(function(){
+
+        document.body.setAttribute("theme", value);
+
+        if (!eon.registry.isThemeRegistered("main", value)) {
+            eon.importMainTheme(value);
+        }
+
+        eon.triggerCallback("onThemeChanged", eon, null, [eon.__theme, value]);
+        eon.__theme = value;
+      });
+
+    };
+  
+    Object.defineProperty(eon, "theme", themeDescriptor);
+  
+  }); 
 
 eon.constructClass = function (baseElement) {
   // Class adpater
@@ -4967,7 +4998,7 @@ eon.transform = function (el, config) {
 
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
         // We pass the config so that if the element has themed: "false" but the element has a theme specified by the user it turns it into "true"
-        var theme = eon.getElementTheme(el, config);
+        var theme = eon.initElementTheme(el, config);
         var name = el.nodeName.toLowerCase();
 
         // Imports the template of the element
@@ -4979,6 +5010,9 @@ eon.transform = function (el, config) {
         // If the element has not yet registered its theme it will proceed on importing it
         eon.importElementTheme(config, name, theme);
 
+        // Prepares th element to change its theme in case eon theme changes
+        eon.setupEonThemeListener(el, config)
+
         // Adds the element to the transformQueue
         setTimeout(function () {
             eon.triggerTransformed(el, config);
@@ -4988,10 +5022,11 @@ eon.transform = function (el, config) {
 
 };
 
-eon.getElementTheme = function (el, config) {
+eon.initElementTheme = function (el, config) {
 
-    var userSpecifiedTheme = el.hasAttribute("theme") || el.theme ? true : false;
     var theme = eon.theme;
+
+    el.__specificTheme = el.hasAttribute("theme") || el.theme ? true : false;
 
     theme = document.body.dataset.theme ? document.body.dataset.theme : theme;
     theme = document.body.hasAttribute("theme") ? document.body.getAttribute("theme") : theme;
@@ -5000,12 +5035,37 @@ eon.getElementTheme = function (el, config) {
 
     // If the user has specified a theme but the element is not themeable then we turn themed: "true" so
     // that it can now import a theme
-    config.themed = userSpecifiedTheme && !config.themed ? true : config.themed;
+    config.themed = el.__specificTheme && !config.themed ? true : config.themed;
 
     // Whether it has the attribute or not, we set it
     el.setAttribute("theme", theme);
 
     return theme;
+}
+
+eon.setupEonThemeListener = function (el, config) {
+
+    // When eon theme changes it also changes the element's theme attribute and 
+    // if the theme file is not imported it also imports it
+    eon.onThemeChanged(function (previousTheme, newTheme) {
+
+        var elementName = el.nodeName.toLowerCase();
+        var elementTheme = document.body.hasAttribute("theme") != "" ? document.body.getAttribute("theme") : el.theme;
+        
+        // It will only change and attempt to import the new elements theme if matches the body one and 
+        // if it is not strictly specified by the user
+        if (elementTheme && !el.__specificTheme) {
+
+            el.setAttribute("theme", newTheme);
+
+            if (!eon.registry.isThemeRegistered(elementName, newTheme)) {
+                eon.importElementTheme(config, elementName, newTheme);
+            }
+
+        }
+
+    });
+
 }
 
 eon.slot = function (el) {
@@ -5216,7 +5276,7 @@ eon.initializeDisplay = function (el, config) {
 
     if (!eon.rules[name]) {
 
-        ruleIndex = eon.style.sheet.insertRule(name + " { display: " + display + "; }", 0);
+        ruleIndex = eon.style.sheet.insertRule(name + " { display: " + display + "; -webkit-tap-highlight-color: transparent;}", 0);
         eon.rules[name] = eon.style.sheet.cssRules[ruleIndex];
 
     }
@@ -5665,360 +5725,145 @@ eon.time.defaultLocale = {
 
 
 // Creates a namespace for requirejs
-eon.resize = eon.resize || {};
+eon.resizeObserver = eon.resizeObserver || {};
 
 (function () {
   
-  /*!
- * ResizeListener
- * Detect when HTML elements change in size
- * https://github.com/ShimShamSam/ResizeListener
- *
- * Copyright 2016 Samuel Hodge
- * Released under the GPL license
- * http://www.gnu.org/copyleft/gpl.html
- */
-(function scope(root) {
-	'use strict';
+  eon.resizeObserver = function (callback) {
+  var elm = this;
 
-	var name        = 'ResizeListener';
-	var _private    = typeof Symbol === 'function' ? Symbol(name) : '__' + name +'__';
-	var tag_name    = name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase() + '-element';
-	var massive     = 999999;
-	var dirty_frame = null;
-	var dirty       = [];
+  elm.observe = function (el) {
+    if (elm.observables.some(function (observable) {
+      return observable.el === el;
+    })) {
+      return;
+    }
+    var newObservable = {
+      el: el,
+      size: {
+        height: el.clientHeight,
+        width: el.clientWidth
+      }
+    }
+    elm.observables.push(newObservable);
+  }
 
-	var requestAnimationFrame =
-		window.requestAnimationFrame ||
-		window.mozRequestAnimationFrame ||
-		window.webkitRequestAnimationFrame ||
-		function requestAnimationFrame(callback) {
-			return window.setTimeout(callback, 16);
-		};
+  elm.unobserve = function (el) {
+    elm.observables = elm.observables.filter(function (obj) {
+      return obj.el !== el;
+    });
+  }
 
-	// Sensor template setup
-	var sensor_template = document.createElement(tag_name);
-	var sizer_template  = sensor_template.cloneNode(true);
-	var shared_css      = 'position:absolute;top:0;left:0;z-index:-' + massive + ';visibility:hidden;overflow:hidden;';
+  elm.disconnect = function () {
+    elm.observables = [];
+  }
 
-	sensor_template.style.cssText = shared_css + 'width:100%;height:100%';
-	sizer_template.style.cssText  = shared_css + 'width:' + massive + 'px;height:' + massive + 'px';
-
-	var expand_sensor = sensor_template.cloneNode(true);
-	var shrink_sensor = sensor_template.cloneNode(true);
-	var expand_sizer  = sizer_template.cloneNode(true);
-	var shrink_sizer  = sizer_template.cloneNode(true);
-
-	shrink_sizer.style.width = shrink_sizer.style.height = '200%';
-
-	sensor_template.appendChild(expand_sensor);
-	sensor_template.appendChild(shrink_sensor);
-	expand_sensor.appendChild(expand_sizer);
-	shrink_sensor.appendChild(shrink_sizer);
-
-	// API export
-	var api = {
-		add : function add(elements, callbacks) {
-			elements  = wrapInArray(elements);
-			callbacks = wrapInArray(callbacks);
-
-			for(var i = 0; i < elements.length; ++i) {
-				for(var j = 0; j < callbacks.length; ++j) {
-					addResizeListener(elements[i], callbacks[j]);
-				}
-			}
-		},
-
-		remove : function remove(elements, callbacks) {
-			elements  = wrapInArray(elements);
-			callbacks = wrapInArray(callbacks);
-
-			for(var i = 0; i < elements.length; ++i) {
-				for(var j = 0; j < callbacks.length; ++j) {
-					removeResizeListener(elements[i], callbacks[j]);
-				}
-			}
-		}
-	};
-
-	if(typeof define === 'function' && define.amd) {
-		define(api);
-	}
-	else if(typeof exports === 'object') {
-		module.exports = api;
-	}
-	else {
-		root[name] = api;
-	}
-
-	/**
-	 * Attaches a resize callback to an element
-	 * @param {HTMLElement} element
-	 * @param {Function}    callback
-	 */
-	function addResizeListener(element, callback) {
-		var listener = getListener(element);
-
-		if(listener) {
-			listener.callbacks.push(callback);
-
-			return;
-		}
-
-		var sensor        = sensor_template.cloneNode(true);
-		var expand_sensor = sensor.childNodes[0];
-		var shrink_sensor = sensor.childNodes[1];
-
-		// Convert the element to relative positioning if it's currently static
-		var position =
-			element.currentStyle    ? element.currentStyle.position :
-			window.getComputedStyle ? window.getComputedStyle(element, null).getPropertyValue('position') :
-			element.style.position;
-
-		if(position === 'static') {
-			element.style.position = 'relative';
-		}
-
-		element.appendChild(sensor);
-
-		sensor[_private]        =
-		expand_sensor[_private] =
-		shrink_sensor[_private] = {
-			sensor        : sensor,
-			expand_sensor : expand_sensor,
-			shrink_sensor : shrink_sensor,
-			last_width    : element.offsetWidth,
-			last_height   : element.offsetHeight,
-			callbacks     : [callback],
-			dirty         : false
-		};
-
-		expand_sensor.scrollLeft =
-		expand_sensor.scrollTop  =
-		shrink_sensor.scrollLeft =
-		shrink_sensor.scrollTop  = massive;
-
-		expand_sensor.onscroll =
-		shrink_sensor.onscroll = scrollHandler;
-	}
-
-	/**
-	 * Removes a resize callback from an element
-	 * If no callback is defined, all callbacks are removed
-	 * @param {HTMLElement} element
-	 * @param {Function}    callback
-	 */
-	function removeResizeListener(element, callback) {
-		var listener = getListener(element);
-
-		if(!listener) {
-			return;
-		}
-
-		// If a specific callback was passed in, remove it
-		if(callback) {
-			var callbacks = listener.callbacks;
-
-			for(var i = 0; i < callbacks.length; ++i) {
-				if(callbacks[i] === callback) {
-					callbacks.splice(i, 1);
-					--i;
-				}
-			}
-
-			// If there are still callbacks, we're done
-			if(callbacks.length) {
-				return;
-			}
-		}
-
-		// If we've made it this far, remove the entire listener
-		element.removeChild(listener.sensor);
-	}
-
-	/**
-	 * Scroll event handler
-	 * @param {Event} e
-	 */
-	function scrollHandler(e) {
-		if(!e) {
-			e = window.event;
-		}
-
-		var target = e.target || e.srcElement;
-
-		if(!target) {
-			return;
-		}
-
-		var listener = target[_private];
-
-		if(listener.dirty) {
-			return;
-		}
-
-		listener.dirty = true;
-		dirty.push(listener);
-
-		// Queue up a frame to check dirty listeners
-		if(!dirty_frame) {
-			dirty_frame = requestAnimationFrame(checkDirtyListeners);
-		}
-	};
-
-	/**
-	 * Checks all possibly resized listeners for changes in dimensions
-	 */
-	function checkDirtyListeners() {
-		for(var i = 0; i < dirty.length; ++i) {
-			var listener = dirty[i];
-			var element  = listener.sensor.parentNode;
-
-			listener.dirty = false;
-
-			listener.expand_sensor.scrollLeft =
-			listener.expand_sensor.scrollTop  =
-			listener.shrink_sensor.scrollLeft =
-			listener.shrink_sensor.scrollTop  = massive;
-
-			if(!element) {
-				continue;
-			}
-
-			var width    = element.offsetWidth;
-			var height   = element.offsetHeight;
-
-			if(listener.last_width === width && listener.last_height === height) {
-				continue;
-			}
-
-			var data = {
-				width       : width,
-				height      : height,
-				last_width  : listener.last_width,
-				last_height : listener.last_height
-			};
-
-			listener.last_width  = width;
-			listener.last_height = height;
-
-			for(var j = 0; j < listener.callbacks.length; ++j) {
-				listener.callbacks[j].call(listener.sensor.parentNode, data);
-			}
-		}
-
-		dirty.length = 0;
-		dirty_frame  = null;
-	}
-
-	/**
-	 * Gets the listener object for a given element
-	 * @param  {HTMLElement} element The element to get the listener for
-	 * @return {Object|null}         The listener or null if one was not found
-	 */
-	function getListener(element) {
-		if(element[_private]) {
-			return element[_private];
-		}
-
-		for(var i = 0; i < element.childNodes.length; ++i) {
-			var child = element.childNodes[i];
-
-			if(child[_private]) {
-				return child[_private];
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Wraps a value in an array if it isn't one
-	 * @param  {*} value The value to wrap
-	 * @return {*}       The wrapped value
-	 */
-	function wrapInArray(value) {
-		if(!value || typeof value !== 'object' || typeof value.length === 'undefined') {
-			return [value];
-		}
-
-		return value;
-	}
-}(this));
-
-}).apply(eon.resize);
+  elm.check = function () {
+    var changedEntries = elm.observables.filter(function (obj) {
+      var currentHeight = obj.el.clientHeight;
+      var currentWidth = obj.el.clientWidth;
+      if (obj.size.height !== currentHeight || obj.size.width !== currentWidth) {
+        obj.size.height = currentHeight;
+        obj.size.width = currentWidth;
+        return true;
+      }
+    }).map(function (obj) {
+      return obj.el;
+    });
+    if (changedEntries.length > 0) {
+      elm.callback(changedEntries);
+    }
+    window.requestAnimationFrame(elm.boundCheck);
+  }
+  //  class ResizeObserver {
+  function constructor(callback) {
+    elm.observables = [];
+    // Array of observed elements that looks like el:
+    // [{
+    //   el: domNode,
+    //   size: {height: x, width: y}
+    // }]
+    elm.boundCheck = elm.check.bind(elm);
+    elm.boundCheck();
+    elm.callback = callback;
+  }
+  constructor(callback);
+}
+}).apply(eon);
 
 
 /**
- *
- * @param  {[type]} element [description]
- * @param  {[type]} key      [description]
- * @param  {Function} callback     [description]
- * @return {[type]}            [description]
- */
+*
+* @param {[type]} element [description]
+* @param {[type]} key [description]
+* @param {Function} callback [description]
+* @return {[type]} [description]
+*/
 eon.addResizeListener = function (element, key, fn) {
 
-  if ('ResizeObserver' in window) {
+if ('ResizeObserver' in window) {
 
-    element.__resizeObservers = element.__resizeObservers || {};
+element.__resizeObservers = element.__resizeObservers || {};
 
-    // If there is already a resizeObserver with that key, 
-    // we disconnect/delete it, and create a new one with the provided callback
-    if (element.__resizeObservers[key]) {
-      element.__resizeObservers[key].disconnect();
-      delete element.__resizeObservers[key];
-    }
+// If there is already a resizeObserver with that key,
+// we disconnect/delete it, and create a new one with the provided callback
+if (element.__resizeObservers[key]) {
+element.__resizeObservers[key].disconnect();
+delete element.__resizeObservers[key];
+}
 
-    // Creates the resizeObserver for the element with the provided callback
-    element.__resizeObservers[key] = new ResizeObserver(fn);
-    element.__resizeObservers[key].observe(element);
+// Creates the resizeObserver for the element with the provided callback
+element.__resizeObservers[key] = new ResizeObserver(fn);
+element.__resizeObservers[key].observe(element);
 
-  } else {
+} else {
 
-    eon.onReady(function () {
+eon.onReady(function () {
 
-      element.__resizeListeners = element.__resizeListeners || {};
+element._resizeMutationObservers = element._resizeMutationObservers || {};
 
-      // If there is already a resizeListener with that key, 
-      // we remove it, and create a new one with the provided callback
-      if (element.__resizeListeners[key]) {
-        eon.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
-      }
+// If there is already a resizeListener with that key,
+// we remove it, and create a new one with the provided callback
+if (element._resizeMutationObservers[key]) {
+element._resizeMutationObservers[key].disconnect();
+delete element._resizeMutationObservers[key]; 
+}
 
-      // Creates the resizeObserver for the element with the provided callback
-      element.__resizeListeners[key] = fn;
-      eon.resize.ResizeListener.add(element, element.__resizeListeners[key]);
+// Creates the resizeObserver for the element with the provided callback
+element._resizeMutationObservers[key] = new eon.resizeObserver(fn);
+element._resizeMutationObservers[key].observe(element);
 
-    });
+});
 
-  }
+}
 
 };
 
 /**
- *
- * @param  {[type]} element [description]
- * @param  {[type]} key      [description]
- * @return {[type]}            [description]
- */
+*
+* @param {[type]} element [description]
+* @param {[type]} key [description]
+* @return {[type]} [description]
+*/
 eon.removeResizeListener = function (element, key) {
 
-  if ('ResizeObserver' in window) {
+if ('ResizeObserver' in window) {
 
-    // Checks if the key already exists and disconnects/deletes it
-    if (element.__resizeObservers[key]) {
-      element.__resizeObservers[key].disconnect();
-      delete element.__resizeObservers[key];
-    }
+// Checks if the key already exists and disconnects/deletes it
+if (element.__resizeObservers[key]) {
+element.__resizeObservers[key].disconnect();
+delete element.__resizeObservers[key];
+}
 
-  } else {
+} else {
 
-    // Checks if there is a resizeListener with that key and removes it
-    if (element.__resizeListeners[key]) {
-      eon.resize.ResizeListener.remove(element, element.__resizeListeners[key]);
-    }
+// Checks if there is a resizeListener with that key and removes it
+if (element._resizeMutationObservers[key]) {
+element._resizeMutationObservers[key].disconnect();
+delete element._resizeMutationObservers[key];
+}
 
-  }
+}
 
 };
 
@@ -6135,7 +5980,7 @@ eon.util.getBrowser = function () {
     browserName = "Edge";
   }
   // Chrome 1+
-  if (window.chrome && window.chrome.webstore) {
+  if (window.chrome && navigator.userAgent.indexOf("Chrome") > -1 && browserName !== "Edge") {
     browserName = "Chrome";
   }
   // Firefox 1.0+
@@ -6345,7 +6190,7 @@ eon.cache.config = eon.cache.config || {};
 
       // Register eon service worker
       navigator.serviceWorker
-        .register(eon.basePath + '/data/eon-cache/service-worker.js')
+        .register(eon.basePath + '/modules/cache-sw.js')
         .then(function () {
           console.log('[ServiceWorker] Registered');
       });
@@ -6446,79 +6291,76 @@ eon.history.getURLInformation = function () {
     : window.location.pathname.substring(1);
 };
 
-
 eon.store = function () {
-    var el = this;
-    /* Resources representation */
-    this.data = {};
-    
-    // Create useful callbacks
-    createCallbacks();
+  var el = this;
+  /* Resources representation */
+  this.data = {};
 
-    // Import Memory Adapter
-    importAdapter();
+  // Create useful callbacks
+  createCallbacks();
 
-    /* 
-        ##########
-        Private Functions
-        ##########
-    */
-    /*
-        @function _createCallbacks
-        @description 
-    */
-    function createCallbacks() {
-        eon.createCallback("onLoaded", el, "ready");
-        eon.createCallback("onDataChanged", el);
-    }
-    /*
-        ** TO BE REMOVED
-        @function importAdapter
-        @description 
-    */
-    function importAdapter() {
-        // Import vpa memory adapter
-       eon.amd.require([eon.basePath + "/data/eon-newstore/adapters/MemoryAdapter.js"], function (adapter) {
-            // Clone adapter functions
-            cloneFunctions(adapter());
-            //
-            createDataDescriptor();
-            // Trigger user callback once VPA has been loaded
-            eon.triggerCallback("onLoaded", el, el, [el]);
-        });
-    };
-    /*
-        @function (private) _cloneFunctions
-        @description 
-    */
-    function cloneFunctions(adapter) {
-        // Clone adapter data object
-        Object.assign(el, adapter);
-        // Get BaseAdapter prototype functions
-        Object.assign(el, adapter.constructor.prototype);
-    };
-    /*
-        @function (private) _cloneFunctions
-        @description 
-    */
-    function createDataDescriptor() {
-        // Define property descriptor with custom get and set
-        Object.defineProperty(
-            el,
-            "data",
-            {
-                get: function () {
-                    return el._memory.data;
-                },
-                set: function (value) {
-                    // Update property value
-                    el._memory.data = value;
-                    // Fire data changed event
-                    eon.triggerCallback("onDataChanged", el, el, [el.data]);
-                }
-            }
-        );
-    }
+  // Import Memory Adapter
+  importAdapter();
+  
+  /* 
+      ##########
+      Private Functions
+      ##########
+  */
+  /*
+      @function _createCallbacks
+      @description 
+  */
+  function createCallbacks() {
+    eon.createCallback("onLoaded", el, "ready");
+    eon.createCallback("onDataChanged", el);
+  }
+  /*
+      ** TO BE REMOVED
+      @function importAdapter
+      @description 
+  */
+  function importAdapter() {
+    // Clone adapter functions
+    cloneFunctions(new eon.data.MemoryAdapter());
+    // Store data access
+    createDataDescriptor();
+    // Trigger user callback once VPA has been loaded
+    eon.triggerCallback("onLoaded", el, el, [el]);
+
+  };
+  /*
+      @function (private) _cloneFunctions
+      @description 
+  */
+  function cloneFunctions(adapter) {
+    // Clone adapter data object
+    Object.assign(el, adapter);
+    // Get BaseAdapter prototype functions
+    Object.assign(el, adapter.constructor.prototype);
+  };
+  /*
+      @function (private) _createDataDescriptor
+      @description 
+  */
+  function createDataDescriptor() {
+    // Define property descriptor with custom get and set 
+    Object.defineProperty(
+      el,
+      "data",
+      {
+        get: function () {
+          return el._memory.data;
+        },
+        set: function (value) {
+          // Update property value
+          el._memory.data = value;
+          // Fire data changed event
+          eon.triggerCallback("onDataChanged", el, el, [el.data]);
+        }
+      }
+    );
+  }
 }
 
 
@@ -6696,6 +6538,263 @@ eon.endpoint = function (type, url) {
     el.socket.send("subscription:" + queryString);
   }
 }
+
+eon.data = eon.data || {};
+
+eon.data.MemoryAdapter = function () {
+  // eon.vpa.declareAdapter("MemoryAdapter", function (config) {
+  var memory = {}; // Memory itself
+  memory.data = new Map(); // Where data will be stored
+  var counter = 0;
+
+  // @function create (private) [Create a new entry to the memory object with given data] @param query
+  function create(query) {
+    return new Promise(function (resolve, reject) {
+      if (query.data) {
+        var id;
+        if (query.data.id) {
+          id = query.data.id;
+        }
+        else {
+          // ** Check if some data has already been inserted
+          counter = memory.data.size ? memory.data.size + 1 : 0;
+          id = counter;
+          query.data.id = "" + id;
+          counter++;
+        }
+        var validated = validate(query);
+        if (validated) {
+          memory.data.set(id, validated);
+          resolve(validated);
+        }
+        else {
+          reject(new Error("Validation error"));
+        }
+      }
+      else {
+        reject(new Error("Data not found"));
+      }
+    });
+  }
+  // @function read (private) [Read from memory or list if no id given] @param query
+  function read(query) {
+    return new Promise(function (resolve, reject) {
+      // Check id value
+      if (query.id) {
+        if (memory.data.get(query.id)) {
+          console.log('memory.data.get(query.id)', memory.data.get(query.id));
+          resolve(memory.data.get(query.id));
+        } else {
+          reject(new Error("Not found"));
+        }
+      } else {
+        var keys;
+        var result = new Map();
+        // Sort data before get range
+        if (query.sortField) {
+          var asc = 1;
+          if (query.sortRule && ~["descending", "desc"].indexOf(query.sortRule)) {
+            asc = -1;
+          }
+          keys = sortArray(memory.data, query.sortField, asc);
+        }
+        // Check ranges
+        var start = query.limitStart || 0;
+        var end = (query.limitAmount + query.limitStart) || memory.data.size;
+        end = end > memory.data.size ? memory.data.size : end;
+
+        if (!keys) {
+          keys = [];
+          // Store map keys
+          memory.data.forEach(function (value, key, map) {
+            keys.push(key);
+          });
+        }
+        // Build sorted map
+        for (var i = start; i < end; i++) {
+          // Check keys sorted 
+          if (query.sortField) {
+            result.set(keys[i].key, memory.data.get(keys[i].key));
+          } else {
+            result.set(keys[i], memory.data.get(keys[i]));
+          }
+        }
+        resolve(result);
+      }
+    });
+  }
+  // @function update (private) [Update an existing entry from memory] @param query
+  function update(query) {
+    return new Promise(function (resolve, reject) {
+      // Check null values
+      if (query.id) {
+        if (query.data) {
+          // Check update target
+          if (memory.data.get(query.id)) {
+            // Merge current and new data
+            query.data = deepMerge(memory.data.get(query.id), query.data);
+            var validated = validate(query);
+            if (validated) {
+              // Set new validated data entry
+              memory.data.set(query.id, validated);
+              resolve(validated);
+            }
+            else {
+              reject(new Error("Validation error"));
+            }
+          }
+          else {
+            reject(new Error("Id doesn't exist"));
+          }
+        }
+        else {
+          reject(new Error("Data not found"));
+        }
+      }
+      else {
+        reject(new Error("Id not found"));
+      }
+    });
+  }
+  // @function delete (private) [Delete from memory] @param query
+  function remove(query) {
+    return new Promise(function (resolve, reject) {
+      // Check null values
+      if (query.id) {
+        // Check remove target
+        if (memory.data.get(query.id)) {
+          var result = memory.data.get(query.id);
+          memory.data.delete(query.id);
+          resolve(result);
+        }
+        else {
+          reject("Id not found");
+        }
+      }
+      else {
+        // Remove all entries
+        var result = memory;
+        // Safe clear object and its copy baseAdapter._memory
+        memory.data.forEach(function (value, key, map) {
+          memory.data.delete(key);
+        });
+        resolve(result);
+      }
+    });
+  }
+  // @function sortArray (private) [Sort an array of objects] @param array @param key @param asc (number) [1 if ascendant, -1 if descendant]
+  function sortArray(data, field, asc) {
+    // ** IMPROVE
+    var array = [];
+    // Store map keys
+    data.forEach(function (value, key, map) {
+      array.push({
+        key: key,
+        field: data.get(key)[field]
+      });
+    });
+    // Check ascending value
+    asc = asc || 1;
+    // Sort comparing function
+    function compare(a, b) {
+      if (a.field < b.field) {
+        return -1 * asc;
+      }
+      else if (a.field > b.field) {
+        return 1 * asc;
+      }
+      else {
+        return 0;
+      }
+    }
+    // Sort map keys
+    array.sort(compare);
+    return array;
+  }
+  // @function validate(private) [Not implemented yet] @param query
+  function validate(query) {
+    if (query.validate) {
+      // Do something
+    }
+    return query.data;
+  }
+  // @function deepMerge (private) [Merge two objects] @param args
+  var deepMerge = function () {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+      args[_i] = arguments[_i];
+    }
+    var merged = {};
+    var merge = function (obj) {
+      for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+          if (obj[prop] && typeof obj[prop] == 'object') {
+            merged[prop] = deepMerge(merged[prop], obj[prop]);
+          }
+          else {
+            merged[prop] = obj[prop];
+          }
+        }
+      }
+    };
+    for (var i = 0; i < arguments.length; i++) {
+      var obj = arguments[i];
+      merge(obj);
+    }
+    return merged;
+  };
+  var queryHandler = function (adapterData) {
+    var baseQuery = eon.vpa.createBaseQuery(adapterData);
+    baseQuery.result = function (cb) {
+      var query = baseQuery.query;
+      var result;
+      var error;
+      switch (query.action) {
+        case "create":
+          create(query).then(function (data) {
+            result = data;
+            cb(error, result);
+          }).catch(function (er) {
+            error = er;
+            cb(error, result);
+          });
+          break;
+        case "read":
+          read(query).then(function (data) {
+            result = data;
+            cb(error, result);
+          }).catch(function (er) {
+            error = er;
+            cb(error, result);
+          });
+          break;
+        case "update":
+          update(query).then(function (data) {
+            result = data;
+            cb(error, result);
+          }).catch(function (er) {
+            error = er;
+            cb(error, result);
+          });
+          break;
+        case "delete":
+          remove(query).then(function (data) {
+            result = data;
+            cb(error, result);
+          }).catch(function (er) {
+            error = er;
+            cb(error, result);
+          });
+          break;
+      }
+    };
+    return baseQuery;
+  };
+  var baseAdapter = eon.vpa.createBaseAdapter(queryHandler);
+  baseAdapter._memory = memory;
+  return baseAdapter;
+}
+
 
 
 eon.validator = eon.validator || {};
@@ -7116,5 +7215,6 @@ if (vpa.allowAmdRequire) {
 
 }.apply(eon));
   
+
 
 

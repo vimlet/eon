@@ -1,0 +1,73 @@
+<style>
+</style>
+<template>
+    <div class="app-showcase-title"></div>
+    <div class="app-showcase-content"></div>
+</template>
+
+<script>
+    eon.element({
+        name: "app-showcase",
+        style: "app-showcase.css",
+        dependencies: [],
+        properties: {},
+
+        privateProperties: {
+            refs: {
+                value: {
+                    title: {
+                        value: "",
+                        reflect: true
+                    }
+                }
+            },
+            misc: {
+                value: {}
+            }
+        },
+
+        functions: {
+            // @function setTitle (public) [Set showcase title]
+            setTitle: function (title) {
+                var el = this;
+                el._refs.title.innerHTML = title ? title : el.title;
+            }},
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUpRefs();
+                el._setUp();
+            },
+            // @function _setUpRefs (private) [Set up references]
+            setUpRefs: function () {
+                var el = this;
+                el._refs.title = el.querySelector(".app-showcase-title");
+                el._refs.content = el.querySelector(".app-showcase-content");
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                el._refs.content.appendChild(el._misc.content);
+                el.setTitle();
+            }
+        },
+
+        onInit: function () {
+            var el = this;
+            var srcNodes = el.getSourceElements();
+            el._misc.content = document.createDocumentFragment();
+            while (srcNodes.length) {
+                el._misc.content.appendChild(srcNodes.shift());
+            }
+        },
+
+        onReady: function () {
+            var el = this;
+            el._init();
+        },
+
+
+    });
+</script>

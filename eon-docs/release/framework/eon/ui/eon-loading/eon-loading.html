@@ -1,5 +1,6 @@
 
 <template>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <div id="eon-loading-content"></div>
 </template>
 
@@ -14,6 +15,11 @@
             animation: {
                 value: "dots",
                 reflect: true
+            },
+            // 
+            color: {
+                value: "",
+                reflect: true
             }
         },
 
@@ -27,7 +33,7 @@
             // @function show (public) [Shows animation]
             show: function () {
                 var el = this;
-                el.setAttribute("style", "display:block;");
+                el.setAttribute("style", "display:flex;");
             },
             // @function hide (public) [Hides animation]
             hide: function () {
@@ -39,10 +45,12 @@
         privateFunctions: {
             // @function setDots (private) [Set up dots animation]
             setDots: function () {
+              var el = this;
                 var fragment = document.createDocumentFragment();
                 for (var i = 0; i < 3; i++) {
                     var dot = document.createElement("div");
                     dot.classList.add("eon-loading-loading-dots--dot");
+                    dot.style.backgroundColor = !el.color ?  dot.style.backgroundColor : el.color;
                     fragment.appendChild(dot);
                 }
                 return fragment;
@@ -62,6 +70,10 @@
                 default:
                     el._refs.content.appendChild(el._setDots());
                     break;
+            }
+            // FIX
+            if(el.querySelector("svg")) {
+              el.querySelector("svg").style.display = "block"
             }
         },
 
