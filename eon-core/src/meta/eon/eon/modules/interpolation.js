@@ -77,7 +77,7 @@ eon.interpolation.handleInterpolationVariables = function (el, config) {
 
   sources.element = {};
   sources.global = {};
-
+  
   eon.interpolation.globalScope.__interpolations = eon.interpolation.globalScope.__interpolations || {};
   el.__interpolations = el.__interpolations || {};
 
@@ -252,7 +252,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
       if (obj[key] && obj[key].constructor === Object) {
 
         bind = bind ? bind + "." + key : key;
-        interpolations[key] = {};
+        interpolations[key] = interpolations[key] ? interpolations[key] : {};
 
         eon.interpolation.interpolate(el, source, obj[key], interpolations[key], bind);
 
@@ -260,14 +260,14 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
 
         variableBind = bind ? bind + "." + key : key;
         variableBind = source.isLocale ? "locale." + variableBind : variableBind;
-        
+
         interpolations[key] = interpolations[key] ? interpolations[key] : [];
         
         // Looks for the variables matching the binding
         Array.prototype.push.apply(interpolations[key], el.template.querySelectorAll(
           'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
         ));
-
+          
         // For each variable found previously sets its value
         for (i = 0; i < interpolations[key].length; i++) {
           variable = interpolations[key][i];
