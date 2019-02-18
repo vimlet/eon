@@ -58,6 +58,11 @@
                 value: "",
                 reflect: true
             },
+            // @html-attribute format (public) [Format code]
+            format: {
+                value: "false",
+                reflect: true
+            },
             // @html-attribute scripts (public) [Scripts to import in result header without show them. Strings separated with comas]
             scripts: {
                 value: "",
@@ -239,10 +244,11 @@
                 el._misc.editorSet = false;
                 el._refs.editor.readonly = el.readonly;
                 el._misc.isFullscreen = false;
-                el.scripts = el.scripts ? Array.isArray(el.scripts.split(",")) ? el.scripts.split(",") : [] :
-                    [];
-                el.components = el.components ? Array.isArray(el.components.split(",")) ? el.components.split(
-                    ",") : [] : [];
+                el.scripts = el.scripts ? Array.isArray(el.getAttribute("scripts").split(",")) ? el.getAttribute(
+                    "scripts").split(",") : [] : "";
+                el.components = el.components ? Array.isArray(el.getAttribute("components").split(",")) ? el.getAttribute(
+                    "components").split(
+                    ",") : [] : "";
                 el.setTitle();
                 el.setIframe();
                 el.setLinks();
@@ -424,7 +430,9 @@
                 el._misc.selectedTab = tab;
                 el._misc.selectedTab.classList.add("app-playground-menu-tabs-bttn-selected");
                 setTimeout(function () {
-                    el._refs.editor.format();
+                    if (eon.util.isTrue(el.format)) {
+                        el._refs.editor.format();
+                    }
                 }, 0);
             },
             // @function _goToResult (private) [Show result view]

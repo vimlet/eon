@@ -347,6 +347,18 @@
                         "\\[selector\\](?:(?!\\[css\\])[\\s\\S])*\\[\\/selector\\]",
                         "g"
                     ),
+                    playgroundSCRIPTS: new RegExp(
+                        "\\[scripts\\](?:(?!\\[css\\])[\\s\\S])*\\[\\/scripts\\]",
+                        "g"
+                    ),
+                    playgroundCOMPONENTS: new RegExp(
+                        "\\[components\\](?:(?!\\[css\\])[\\s\\S])*\\[\\/components\\]",
+                        "g"
+                    ),
+                    playgroundLINKS: new RegExp(
+                        "\\[links\\](?:(?!\\[css\\])[\\s\\S])*\\[\\/links\\]",
+                        "g"
+                    ),
                     laterReplace: new RegExp(
                         "@@\\[\\d+\\]@@",
                         "g"
@@ -786,26 +798,23 @@
                 el = this;
                 var html = el._getCode(tag, el._regex.playgroundHTML, "[html]", "[/html]");
 
-                // var htmlSplit = el._splitHeadBody(html);
                 var js = el._getCode(tag, el._regex.playgroundJS, "[js]", "[/js]");                
                 var css = el._getCode(tag, el._regex.playgroundCSS, "[css]", "[/css]");                
                 var selector = el._getCode(tag, el._regex.playgroundSELECTOR, "[selector]", "[/selector]");
+                var scripts = el._getCode(tag, el._regex.playgroundSCRIPTS, "[scripts]", "[/scripts]");
+                var components = el._getCode(tag, el._regex.playgroundCOMPONENTS, "[components]", "[/components]");
+                var links = el._getCode(tag, el._regex.playgroundLINKS, "[links]", "[/links]");
                 
                 var playground = document.createElement("app-playground");
                 playground.setAttribute("selector", selector);
- 
+                playground.setAttribute("scripts", scripts);
+                playground.setAttribute("components", components);
+                playground.setAttribute("links", links);
+
                 el._misc.ondrawnCont++;
                 playground.onReady(function () {
                     el._ondrawnCb();
                 });
-
-                // if (htmlSplit.head) {
-                //     playground.head = htmlSplit.head;
-                // }
-                // playground.body = htmlSplit.body;
-
-                // playground.js = js;
-                // playground.css = css;
 
                 playground.setAttribute("html", html);
                 playground.setAttribute("js", js);
