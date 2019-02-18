@@ -1,16 +1,16 @@
 <template>
-  <div class="eon-loader-bar">
-    <div class="eon-loader-rail eon-bg8"></div>
-    <div class="eon-loader-loadingBar"></div>
+  <div class="eon-progressbar-bar">
+    <div class="eon-progressbar-rail eon-bg8"></div>
+    <div class="eon-progressbar-loadingBar"></div>
   </div>
-  <div class="eon-fg1 eon-loader-indicator"></div>
+  <div class="eon-fg1 eon-progressbar-indicator"></div>
 </template>
 
 <script>
   eon.element({
 
-    name: "eon-loader",
-    style: "eon-loader.css",
+    name: "eon-progressbar",
+    style: "eon-progressbar.css",
 
     privateProperties:{
       /*
@@ -31,7 +31,7 @@
     properties: {
       /*
         @property {String} type
-        @description Loader type
+        @description Progressbar type
         Values: loading, progress
         Default: loading
       */
@@ -41,7 +41,7 @@
       },
       /*
         @property {String} effect
-        @description Loader animation type
+        @description Progressbar animation type
         Values: linear, easeInOut
         Default: linear
       */
@@ -51,7 +51,7 @@
       },
       /*
         @property {Number} duration
-        @description Loader animation duration
+        @description Progressbar animation duration
       */
       duration:{
         value: 100,
@@ -59,7 +59,7 @@
       },
       /*
         @property {Number} limit
-        @description Maximum progress value the loader could reach
+        @description Maximum progress value the progressbar could reach
         Values: 0 to 1
       */
       limit:{
@@ -92,8 +92,8 @@
       */
       animate: function(limit, time){
         var el = this;
-        var bar = el.querySelector(".eon-loader-bar");
-        var loadBar = el.querySelector(".eon-loader-loadingBar");
+        var bar = el.querySelector(".eon-progressbar-bar");
+        var loadBar = el.querySelector(".eon-progressbar-loadingBar");
         var cancel = false;
         // Set animation duration
         el.limit = !limit && limit !== 0 ? 1 : limit;
@@ -136,7 +136,7 @@
       */
       runEffect: function(rate){
         var el = this;
-        // Check loader selected effect
+        // Check progressbar selected effect
         switch (el.effect) {
           case "linear":
             // -- LINEAR FORMULA --
@@ -159,7 +159,7 @@
       */
       runReverseAnimation: function(rate, bar, loadBar){
         var el = this;
-        var indicator = el.querySelector(".eon-loader-indicator");
+        var indicator = el.querySelector(".eon-progressbar-indicator");
         // Get start and end animation points
         var end = bar.offsetWidth;
         var start = !el._lastLoad ? 0 : (end * el._lastLoad);
@@ -240,7 +240,7 @@
       */
       updateIndicator: function(rate){
         var el = this;
-        var indicator = el.querySelector(".eon-loader-indicator");
+        var indicator = el.querySelector(".eon-progressbar-indicator");
         // Load bar is a progress bar
         if(el.type == "progress" && (el.indicator || el.indicator === "true")){
           // Check if loading is completed
@@ -259,7 +259,7 @@
       /*
         @function animate
         @description Trigger progress loading
-        @param {Number} limit [Maximum progress value the loader could reach]
+        @param {Number} limit [Maximum progress value the progressbar could reach]
         @param {Number} duration [Progress animation duration]
       */
       animate: function(limit, duration){
@@ -269,7 +269,7 @@
       /*
         @function reverse
         @description Trigger reverse progress loading
-        @param {Number} limit [Maximum progress value the loader could reach]
+        @param {Number} limit [Maximum progress value the progressbar could reach]
         @param {Number} duration [Progress animation duration]
       */
       reverse: function(limit, duration){
@@ -285,12 +285,12 @@
     },
     onRender: function(){
       var el = this;
-      var rail = el.querySelector(".eon-loader-rail");
-      var barColor = el.querySelector(".eon-loader-loadingBar");
-      // Check loader type
+      var rail = el.querySelector(".eon-progressbar-rail");
+      var barColor = el.querySelector(".eon-progressbar-loadingBar");
+      // Check progressbar type
       if(el.type == "progress"){
         // Set progress styling
-        el.classList.add("eon-loader-progress");
+        el.classList.add("eon-progressbar-progress");
         // Show load bar rail
         rail.style.opacity = 1;
       }
