@@ -1,17 +1,17 @@
 <template>
-  <div class="eon-treenode-head eon-unselectable">
-    <i class="vicon vicon-chevron-down eon-treenode-expand eon-fg2"></i>
-    <i class="vicon vicon-folder eon-treenode-icon eon-fg2"></i>
-    <div class="eon-treenode-name eon-fg2 eon-unselectable"></div>
+  <div class="eon-tree-node-head eon-unselectable">
+    <i class="vicon vicon-chevron-down eon-tree-node-expand eon-fg2"></i>
+    <i class="vicon vicon-folder eon-tree-node-icon eon-fg2"></i>
+    <div class="eon-tree-node-name eon-fg2 eon-unselectable"></div>
   </div>
-  <div class="eon-treenode-wrapper">
+  <div class="eon-tree-node-wrapper">
   </div>
 </template>
 <script type="text/javascript">
   eon.element({
 
-    name: "eon-treenode",
-    style: "eon-treenode.css",
+    name: "eon-tree-node",
+    style: "eon-tree-node.css",
 
     themed: true,
     properties: {
@@ -145,7 +145,7 @@
       */
       toggleExpand: function (expandIcon) {
         var el = this;
-        var expandIcon = !expandIcon ? el._refs.head.querySelector(".eon-treenode-expand") : expandIcon;
+        var expandIcon = !expandIcon ? el._refs.head.querySelector(".eon-tree-node-expand") : expandIcon;
         // Check expandable property
         if (!eon.util.isTrue(el.expanded) && eon.util.isTrue(el._misc.expandable)) {
           // Expand node
@@ -243,8 +243,8 @@
       setUpNode: function () {
         var el = this;
         var ext, name;
-        var icon = el.template.querySelector(".eon-treenode-icon");
-        var expandIcon = el._refs.head.querySelector(".eon-treenode-expand");
+        var icon = el.template.querySelector(".eon-tree-node-icon");
+        var expandIcon = el._refs.head.querySelector(".eon-tree-node-expand");
         var tree = el._refs.hostTree;
 
         // Set sorting order
@@ -336,10 +336,10 @@
         var el = this;
         var parent = el._refs.parentNode;
         // Check expandable parent
-        if (parent && parent.tagName.toLowerCase() === "eon-treenode") {
+        if (parent && parent.tagName.toLowerCase() === "eon-tree-node") {
           // Parent node is a tree node
           if (!parent._misc.expandFunction && !parent._misc.expandable) {
-            var expandIcon = parent._refs.head.querySelector(".eon-treenode-expand");
+            var expandIcon = parent._refs.head.querySelector(".eon-tree-node-expand");
             // Make expandable
             parent._makeExpandable(expandIcon);
             // Check configurable initial state
@@ -362,7 +362,7 @@
         var el = this;
         var tree = el._refs.hostTree;
         var children = el._refs.wrapper.children;
-        expandIcon = !expandIcon ? el._refs.head.querySelector(".eon-treenode-expand") : expandIcon;
+        expandIcon = !expandIcon ? el._refs.head.querySelector(".eon-tree-node-expand") : expandIcon;
         var icon = expandIcon.nextSibling.nextSibling;
         el._misc.expandable = true;
         el.expanded = true;
@@ -396,7 +396,7 @@
       */
       makeNoExpandable: function (index) {
         var el = this;
-        var icon = el._refs.head.querySelector(".eon-treenode-expand");
+        var icon = el._refs.head.querySelector(".eon-tree-node-expand");
         var wrapper = el._refs.wrapper;
         // Check if this node have children nodes
         if (!wrapper.children[!index ? 0 : index]) {
@@ -468,7 +468,7 @@
         // Necessary for allowing drop
         evt.preventDefault();
         if (!eon.util.isTrue(el.selected)) {
-          el.head.classList.add("eon-treenode-selected");
+          el.head.classList.add("eon-tree-node-selected");
         }
       },
       /*
@@ -478,7 +478,7 @@
       handleDragLeave: function () {
         var el = this;
         if (!eon.util.isTrue(el.selected)) {
-          el.head.classList.remove("eon-treenode-selected");
+          el.head.classList.remove("eon-tree-node-selected");
         }
       },
       /*
@@ -496,7 +496,7 @@
           path = event.dataTransfer.getData("text");
         }
         dragNode = el._refs.hostTree.nodes[path];
-        el.head.classList.remove("eon-treenode-selected");
+        el.head.classList.remove("eon-tree-node-selected");
         el._refs.hostTree.moveNode(dragNode, el);
       }
     },
@@ -521,17 +521,17 @@
         }
 
         var parentPath = el.path.substring(0, el.path.length - (parentStr.length + 1));
-        var parentNode = el._refs.hostTreeWrapper.querySelector("eon-treenode[path='" + parentPath + "']");
+        var parentNode = el._refs.hostTreeWrapper.querySelector("eon-tree-node[path='" + parentPath + "']");
         el._refs.parent = parentPath;
 
         // Tree node shell quick access
-        el._refs.head = el.head = el.template.querySelector(".eon-treenode-head");
-        el._refs.nameNode = el._refs.head.querySelector(".eon-treenode-name");
-        el._refs.wrapper = el.template.querySelector(".eon-treenode-wrapper");
+        el._refs.head = el.head = el.template.querySelector(".eon-tree-node-head");
+        el._refs.nameNode = el._refs.head.querySelector(".eon-tree-node-name");
+        el._refs.wrapper = el.template.querySelector(".eon-tree-node-wrapper");
         // Parent node not exists
         if (parentPath && !parentNode) {
           // Create parent node
-          var node = document.createElement("eon-treenode");
+          var node = document.createElement("eon-tree-node");
           node.path = parentPath;
 
           // Check if the path contains escaped characters
@@ -574,7 +574,7 @@
       var expandIcon, icon;
       var tree = el._refs.hostTree;
 
-      expandIcon = el._refs.head.querySelector(".eon-treenode-expand");
+      expandIcon = el._refs.head.querySelector(".eon-tree-node-expand");
       // Monitor _expandable property
       if (prop == "_expandable") {
         // Hide or show expandable icon
@@ -606,10 +606,10 @@
       } else if (prop == "selected" || prop == "marked") {
         if (eon.util.isTrue(value)) {
           // Select node style
-          el._refs.head.classList.add("eon-treenode-selected");
+          el._refs.head.classList.add("eon-tree-node-selected");
         } else {
           // Deselect node style
-          el._refs.head.classList.remove("eon-treenode-selected");
+          el._refs.head.classList.remove("eon-tree-node-selected");
         }
       }
     }
