@@ -7,13 +7,14 @@
     }
 
     #app-doc-api-tree {
-    margin-top: -40px;
-    height: calc(100% + 40px);
+        margin-top: -40px;
+        height: calc(100% + 40px);
         width: 300px;
         background-color: #ffffff;
-        border-right: 1px solid;
+        /* border-right: 1px solid; */
         z-index: 300;
-        max-width:90%;
+        max-width: 90%;
+        box-shadow: 0px 0px 21px 0px rgb(197, 204, 216);
     }
 
     eon-tree {
@@ -173,17 +174,17 @@
         font-size: 24px;
     }
 
-.eon-treenode-head::before {
-    content: "";
-    height: 25px;
-    margin-top: -3px;
-    position: absolute;
-    left: 0;
-    right: 0;
-}
+    .eon-treenode-head::before {
+        content: "";
+        height: 25px;
+        margin-top: -3px;
+        position: absolute;
+        left: 0;
+        right: 0;
+    }
 
 
-app-doc-api-tree eon-tree eon-treenode .eon-treenode-name {
+    app-doc-api-tree eon-tree eon-treenode .eon-treenode-name {
         font-weight: normal;
     }
 
@@ -289,6 +290,10 @@ app-doc-api-tree eon-tree eon-treenode .eon-treenode-name {
             },
             waitUntilTreeSetUp: {
                 value: 0
+            },
+            pauseHashChange: {
+                value: "false",
+                reflect: false
             }
         },
 
@@ -813,37 +818,42 @@ app-doc-api-tree eon-tree eon-treenode .eon-treenode-name {
             // @function onHash (private) [Hash change listener. If selected document does not match hash, it means that user is goig backward or forward in the browser. Handle it]
             onHash: function () {
                 window.onhashchange = function () {
-
-                    var el = document.querySelector("app-doc-api-tree");
-                    if (el && el._refs && el._refs.tree && el._refs.tree.nodes) { // As api tree is used at main, and not all views has tree (see first main view) it is mandatory to check all references before manage them
-                        var currentDoc = decodeURIComponent(window.location.href.split("file=")[1]);
-                        var link = currentDoc.split("&link=")[1]
-                        var currentDoc = currentDoc.split("&link=")[0];
-                        var selectedNode = null;
-                        for (var tNodeKey in el._refs.tree.nodes) {
-                            if (!link) {
-                                if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
-                                    selectedNode = el._refs.tree.nodes[tNodeKey];
-                                    break;
-                                }
-                            } else {
-                                if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
-                                    var parentNode = el._refs.tree.nodes[tNodeKey];
-                                    var childNodes = parentNode.querySelector(".eon-treenode-wrapper").childNodes;
-                                    childNodes.forEach(function (cNode) {
-                                        if (cNode.name && cNode.name == link) {
-                                            selectedNode = cNode;
-                                        }
-                                    });
-                                    break;
+                        var el = document.querySelector("app-doc-api-tree");
+                    if (!eon.util.isTrue(el._pauseHashChange)) {
+                        if (el && el._refs && el._refs.tree && el._refs.tree.nodes) { // As api tree is used at main, and not all views has tree (see first main view) it is mandatory to check all references before manage them
+                            var currentDoc = decodeURIComponent(window.location.href.split("file=")[1]);
+                            var link = currentDoc.split("&link=")[1]
+                            var currentDoc = currentDoc.split("&link=")[0];
+                            var selectedNode = null;
+                            for (var tNodeKey in el._refs.tree.nodes) {
+                                if (!link) {
+                                    if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
+                                        selectedNode = el._refs.tree.nodes[tNodeKey];
+                                        break;
+                                    }
+                                } else {
+                                    if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
+                                        var parentNode = el._refs.tree.nodes[tNodeKey];
+                                        var childNodes = parentNode.querySelector(
+                                            ".eon-treenode-wrapper").childNodes;
+                                        childNodes.forEach(function (cNode) {
+                                            if (cNode.name && cNode.name == link) {
+                                                selectedNode = cNode;
+                                            }
+                                        });
+                                        break;
+                                    }
                                 }
                             }
+                            if (selectedNode && selectedNode != el._refs.tree.selectedNode) {
+                                selectedNode.select();
+                            }
                         }
-                        if (selectedNode && selectedNode != el._refs.tree.selectedNode) {
-                            selectedNode.select();
-                        }
+                    } else {
+setTimeout(() => {
+    el._pauseHashChange = false;
+}, 0);
                     }
-
                 };
             }
         },

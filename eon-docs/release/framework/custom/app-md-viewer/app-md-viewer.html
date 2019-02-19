@@ -114,10 +114,16 @@
         cursor: pointer;
         padding: 10px;
         border-radius: 50%;
-        -webkit-box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
-        -moz-box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
-        box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.75);
+        height: 50px;
+        width: 50px;
+        transition: 0.5s ease all;
     }
+
+#app-md-viewer-goToTop:hover {
+    -webkit-box-shadow: 0px 5px 10px 0px rgb(71, 204, 226);
+    -moz-box-shadow: 0px 5px 10px 0px rgb(71, 204, 226);
+    box-shadow: 0px 5px 10px 0px rgb(71, 204, 226);
+}
 
     .app-md-viewer-showGoToTop {
         -webkit-animation: app-md-viewer-showGoToTopAnim 0.7s forwards;
@@ -391,6 +397,9 @@
             },
             misc: {
                 value: {}
+            },
+            refs:{
+                value:{}
             }
         },
 
@@ -411,13 +420,11 @@
                     if (marginTop) {
                         marginTop = parseInt(marginTop) || 0;
                     }
-                    // scroll.scrollTo(el.querySelector("#" + id).offsetTop - (marginTop), null, 0.1);
                     scroll.scrollTo(el.querySelector("#" + id).offsetTop - (marginTop), null, 0.0);
                 }
             },
             // @function goToTop (public) [Scroll to top]
             goToTop() { // Scroll to top
-                // this.querySelector("eon-scroll").scrollTo(0, null, 0.05);
                 this.querySelector("eon-scroll").scrollTo(0, null, 0.00);
             }
         },
@@ -469,6 +476,7 @@
                                 if (tLink.link && currentLink && tLink.link ===
                                     currentLink.id) {
                                     el._misc.tree.markNode(tLink);
+                                    el._refs.apiTree._pauseHashChange = true;
                                     window.location.href = window.location.href.split(
                                         '&link=')[0] + '&link=' + currentLink.id;
                                 }
@@ -624,7 +632,9 @@
                 if (matches) {
                     for (var i = 0; i < matches.length; i++) {
                         var cleanMatch = el._cleanMatch(matches[i], "```", "```");
+                        
                         var splitted = el._splitLanguage(cleanMatch);
+                        
                         var appEditor = document.createElement("app-code");
                         appEditor.value = splitted[1];
                         appEditor.language = splitted[0];
@@ -798,13 +808,14 @@
                 el = this;
                 var html = el._getCode(tag, el._regex.playgroundHTML, "[html]", "[/html]");
 
-                var js = el._getCode(tag, el._regex.playgroundJS, "[js]", "[/js]");                
-                var css = el._getCode(tag, el._regex.playgroundCSS, "[css]", "[/css]");                
+                var js = el._getCode(tag, el._regex.playgroundJS, "[js]", "[/js]");
+                var css = el._getCode(tag, el._regex.playgroundCSS, "[css]", "[/css]");
                 var selector = el._getCode(tag, el._regex.playgroundSELECTOR, "[selector]", "[/selector]");
                 var scripts = el._getCode(tag, el._regex.playgroundSCRIPTS, "[scripts]", "[/scripts]");
-                var components = el._getCode(tag, el._regex.playgroundCOMPONENTS, "[components]", "[/components]");
+                var components = el._getCode(tag, el._regex.playgroundCOMPONENTS, "[components]",
+                    "[/components]");
                 var links = el._getCode(tag, el._regex.playgroundLINKS, "[links]", "[/links]");
-                
+
                 var playground = document.createElement("app-playground");
                 playground.setAttribute("selector", selector);
                 playground.setAttribute("scripts", scripts);
@@ -1481,6 +1492,7 @@
             el._misc.nested.current = null;
             el._misc.nested.previous = null;
             el._misc.nested.list = [];
+            el._refs.apiTree = document.querySelector("app-doc-api-tree");
             this._onScrolled();
         }
     });
