@@ -768,7 +768,7 @@
 
                 var el = this;
 
-                if (!el._refs.dropDown.classList.contains("hidden")) {
+                if (el.classList.contains("eon-combobox-focus")) {
                     // el.shrink();
                 } else {
                     el.expand();
@@ -804,6 +804,35 @@
                     el._refs.dropDown.style.width = el._refs.main.offsetWidth + "px";
 
                 }
+
+            },
+            /*
+            @function animateExpand
+            @description Expands the items dropdown
+            */
+            animateExpand: function () {
+
+                var el = this;
+
+                setTimeout(function () {
+                    el._refs.overlay.removeEventListener("transitionend", el._misc.dropdownShrinkFn);
+                    el._refs.overlay.classList.add("eon-combobox-opaque");
+                }, 0);
+
+            },
+            /*
+            @function animateShrink
+            @description Expands the items dropdown
+            */
+            animateShrink: function () {
+
+                var el = this;
+
+                el._refs.overlay.addEventListener("transitionend", el._misc.dropdownShrinkFn);
+
+                // setTimeout(function () {
+                el._refs.overlay.classList.remove("eon-combobox-opaque");
+                // }, 0);
 
             },
             /*
@@ -969,16 +998,18 @@
 
                 el._refs.scroll.scrollTop = 0;
 
-                el._refs.dropDown.classList.remove("hidden");
-                el._refs.underline.classList.add("animate");
 
-                el.classList.add("focus");
+                // el._refs.underline.classList.add("animate");
+
+                el.classList.add("eon-combobox-focus");
 
                 el._undoFilter();
 
                 document.body.appendChild(el._refs.overlay);
 
                 el._misc.modal.active = true;
+
+                el._animateExpand();
 
             },
             /*
@@ -989,21 +1020,26 @@
 
                 var el = this;
 
-                if (el.classList.contains("focus")) {
+                if (el.classList.contains("eon-combobox-focus")) {
 
-                    el.classList.remove("focus")
+                    el._misc.dropdownShrinkFn = el._misc.dropdownShrinkFn || function () {
 
-                    el._refs.dropDown.classList.add("hidden");
-                    el._refs.underline.classList.remove("animate");
+                        el.classList.remove("eon-combobox-focus");
 
-                    if (el._refs.overlay.parentNode) {
-                        el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+                        if (el._refs.overlay.parentNode) {
+                            el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+                        }
+
+                        el._filterItems();
+
+                        el._misc.modal.active = false;
+                        el._misc.modal.inputFocus = false;
+
+                        el._refs.dropDown.removeEventListener("transitionend", el._misc.dropdownShrinkFn);
+
                     }
 
-                    el._filterItems();
-
-                    el._misc.modal.active = false;
-                    el._misc.modal.inputFocus = false;
+                    el._animateShrink();
 
                 }
 
