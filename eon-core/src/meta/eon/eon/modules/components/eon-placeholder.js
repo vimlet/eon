@@ -1,7 +1,11 @@
-<template></template>
 
-<script type="text/javascript">
-  eon.element({
+eon.imports.total++;
+eon.imports.count++;
+
+// Declare element
+eon.declare("eon-placeholder");
+
+eon.element({
 
     name: "eon-placeholder",
 
@@ -33,4 +37,3 @@
     }
 
   });
-</script>

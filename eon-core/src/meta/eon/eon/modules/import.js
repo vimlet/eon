@@ -6,6 +6,21 @@
 eon.createCallback("onImportsReady", eon, "ready");
 eon.createCallback("onScriptsReady", eon, "ready");
 
+eon.imports = eon.imports || {
+    count: 0,
+    total: 0,
+    ready: false
+};
+
+eon.imports.style = eon.imports.style || "";
+
+eon.imports.scripts = eon.imports.scripts || {};
+eon.imports.links = eon.imports.links || {};
+eon.imports.templates = eon.imports.templates || {};
+eon.imports.paths = eon.imports.paths || {};
+eon.imports.config = eon.imports.config || {};
+eon.imports.errors = eon.imports.errors || {};
+
 // Imports the requested custom element file, admits arrays and strings
 eon.import = function (param) {
 
@@ -32,21 +47,6 @@ eon.insertImport = function (href) {
 
     // Cache
     eon.cache.add(href, { name: elementName });
-
-    eon.imports = eon.imports || {
-        count: 0,
-        total: 0,
-        ready: false
-    };
-
-    eon.imports.style = eon.imports.style || "";
-
-    eon.imports.scripts = eon.imports.scripts || {};
-    eon.imports.links = eon.imports.links || {};
-    eon.imports.templates = eon.imports.templates || {};
-    eon.imports.paths = eon.imports.paths || {};
-    eon.imports.config = eon.imports.config || {};
-    eon.imports.errors = eon.imports.errors || {};
 
     if (!(elementName in eon.imports.templates)) {
 
