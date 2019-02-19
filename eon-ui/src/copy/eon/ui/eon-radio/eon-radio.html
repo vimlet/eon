@@ -89,6 +89,13 @@
       */
       refs: {
         value: {}
+      },
+      /*
+        @property (private) {Object} _misc 
+        @description 
+      */
+      misc: {
+        value: {}
       }
     },
     functions: {
@@ -286,8 +293,18 @@
       el._setCheck();
       el.querySelector(".eon-radio-labelText").innerHTML = el.label;
 
+      // Needed to avoid ripple bad performance
+      el._misc.firstInteraction = true;
+
       // Checking a radio option
       el._refs.label.addEventListener("click", function (e) {
+        // Needed to avoid ripple bad performance
+        if (el._misc.firstInteraction) {
+          // Set up ripple animation
+          el.classList.add("eon-ripple");
+          el._misc.firstInteraction = false;
+        }
+
         if ((!eon.util.isTrue(el.disabled) && !eon.util.isTrue(el.readonly)) || el.disabled == null) {
           el.checked = true;
         }

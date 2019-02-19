@@ -112,6 +112,13 @@
             */
             refs: {
                 value: {}
+            },
+            /*
+              @property (private) {Object} _misc 
+              @description 
+            */
+            misc: {
+                value: {}
             }
         },
         functions: {
@@ -128,7 +135,7 @@
             */
             reset: function () {
                 var el = this;
-               
+
                 if (eon.util.isTrue(el.default)) {
                     el.checked = el.default;
                 } else {
@@ -246,9 +253,16 @@
             el._currentValue = el.value;
             el._refs.labelText.innerHTML = el.label;
             el.checked = el.default != "" && el.checked == "" ? el.default : el.checked;
-            
+            // Needed to avoid ripple bad performance
+            el._misc.firstInteraction = true;
             // Checking or unchecking the checkbox
             el._refs.label.addEventListener("click", function (e) {
+                // Needed to avoid ripple bad performance
+                if (el._misc.firstInteraction) {
+                    // Set up ripple animation
+                    el.classList.add("eon-ripple");
+                    el._misc.firstInteraction = false;
+                }
                 // The click event is triggered by two elements, the real input and the
                 // visual custom element. So it is necessary to control one of the two elements
                 // fot not activate the action twice.

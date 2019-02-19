@@ -69,7 +69,7 @@
               Values can be: true or false
             */
             checked: {
-                value: "",
+                value: false,
                 reflect: true
             },
             /*
@@ -120,6 +120,13 @@
               @description Object with  references
             */
             refs: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _misc 
+              @description 
+            */
+            misc: {
                 value: {}
             }
         },
@@ -227,10 +234,19 @@
             // el._refs.input.setAttribute("name", el.name);
             el.checked = el.default != "" && el.checked == "" ? el.default : el.checked;
             el._refs.nameLabel.innerHTML = el.label;
-
+            
+             // Needed to avoid ripple bad performance
+            el._misc.firstInteraction = true;
 
             // Checking or unchecking the checkbox
             el._refs.label.addEventListener("click", function (e) {
+                // Needed to avoid ripple bad performance
+                if(el._misc.firstInteraction) {
+                    // Set up ripple animation
+                    el.classList.add("eon-ripple");
+                    el._misc.firstInteraction = false;
+                }
+
                 // The click event is triggered by two elements, the real input and the
                 // visual custom element. So it is necessary to control one of the two elements
                 // fot not activate the action twice.
@@ -243,7 +259,7 @@
             el._updateDisabled();
             el._updateReadonly();
             el._updateCheck();
-
+            
         },
 
         onPropertyChanged: function (attrName, oldVal, newVal) {
