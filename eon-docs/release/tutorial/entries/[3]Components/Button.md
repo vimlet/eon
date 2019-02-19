@@ -44,6 +44,9 @@ This component can have icons, which by default is located to the left of the eo
 <eon-button label="CLICK" icon='<i class="material-icons">star</i>' onclick="alert('Hello!');" icon-position="right"></eon-button>
 ```
 
+<eon-playground>
+</eon-playground>
+
 ### Change icon dynamically
 In this example, the eon-button has no text, only an icon and when the eon-button is clicked the icon changes dynamically.
 
