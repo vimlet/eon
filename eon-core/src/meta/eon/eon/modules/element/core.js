@@ -1,6 +1,6 @@
 
 eon.element = function (param1, param2) {
-
+    
     var config, stylePath, name;
 
     if (param2) {
@@ -145,7 +145,7 @@ eon.generateSourceFragment = function (el) {
 };
 
 eon.prepareElement = function (el, callback) {
-
+    
     // Mark element as first attach
     el.isFirstAttach = true;
 
@@ -559,9 +559,9 @@ eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 };
 
 eon.transform = function (el, config) {
-
+    
     if (!eon.registry.isTransformed(el)) {
-
+        
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
         // We pass the config so that if the element has themed: "false" but the element has a theme specified by the user it turns it into "true"
         var theme = eon.initElementTheme(el, config);
