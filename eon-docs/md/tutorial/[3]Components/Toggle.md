@@ -1,54 +1,8 @@
 # Toggle
 
-## Introduction
-This component is a simple on/off switch. It is also possible to use it as a form component.
+This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two 'checked' boolean values.  
 
-To use it import eon-toggle in the head of the HTML document:
-``` [html]
-<head>
-  <script>
-    eon.import("/eon/ui/eon-toggle.html");
-  </script>
-<head>
-```
+<app-playground vtitle="Common Usage" html ="<head><script src='framework/eon/eon.js'></script><script>eon.import(['framework/eon/ui/eon-toggle','framework/custom/app-playground/app-showcase']);</script></head><body><app-showcase title='Toggle'><eon-toggle class='d-top-margin' label='Uncheck toggle' value='toggle2' name='toggleOptions' id='option2'></eon-toggle></app-showcase><app-showcase title='Disabled'><eon-toggle class='d-top-margin' label='Disabled toggle' value='toggle3' name='toggleOptions' id='option3 'disabled='true'></eon-toggle></app-showcase></body>" js="function test(){alert('soy JS');}" css="#main{background-color:red; cursor:pointer;}" selector="body">
+</app-playground>
 
-## Declarative usage
-``` [html]
-<eon-toggle label="Toggle" name"toggleOption" value="myToggle"></eon-toggle>
-```
-
-## Programmatic usage
-
-``` [javascript]
-eon.onReady(function () {
-    // Create eon-toggle
-    var myToggle = document.createElement("eon-toggle");
-
-    // Set properties and append eon-toggle
-    myToggle.label = "Toggle";
-    myToggle.name = "toggleOption";
-    myToggle.value = "myToggle";
-    myToggle.checked = true;
-    document.querySelector("body").appendChild(myToggle);
-});
-```
-
-## Examples
-
-### Enable dynamically
-In this example the eon-toggle is disabled, but after a second it will be enabled.
-``` [html]
-<!-- Initially disabled toggle -->
-<eon-toggle label="Toggle" disabled="true"></eon-toggle>
-```
-
-``` [javascript]
-eon.onReady(function () {
-    var myToggle = document.querySelector("eon-toggle");
-
-    setTimeout(function () {
-        // Enables the spinner
-        myToggle.disabled = false;
-    }, 1000);
-});
-```
+It can be used as a specific state switcher which some logic blocks will depend on or as a form component as well.
