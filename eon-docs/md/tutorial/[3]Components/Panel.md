@@ -25,6 +25,10 @@ Declare panel as any other HTML element:
     <div> content </div>
 </eon-panel>
 ```
+<app-playground vtitle="eon-button" html ="<head><script src='framework/eon/eon.js'></script><script>eon.import(['framework/eon/ui/eon-button','framework/custom/app-playground/app-showcase']);</script></head><body><app-showcase title='Button'><eon-button value='Alert' onclick='alert('Hi! ^_^')' icon='<i class='vicon vicon-build'></i></eon-button></app-showcase><app-showcase title='Disabled'><eon-button value='Disabled' disabled='true'></eon-button></app-showcase></body>" js="function test(){alert('soy JS');}" css="#main{background-color:red; cursor:pointer;}" links='{"eon":{"link":"http://www.eonjs.org","icon":"link"},"vimlet":{"link":"http://www.vimlet.com","icon":"bin"},"buttonIcon":{"link":"http://www.vimlet.com","icon":"bin", "text":"buttonIcon"},"button":{"link":"http://www.vimlet.com", "text":"button"}}' selector="body">
+</app-playground>
+
+
 ## Programmatic usage
 ``` [javascript]
 eon.ready(function () {
