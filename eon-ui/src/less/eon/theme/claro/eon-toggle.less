@@ -2,9 +2,9 @@
 @import "variables.less";
 @element: eon-toggle;
 
-eon-toggle[theme="claro"],
-div[data-theme="claro"] eon-toggle,
-body[data-theme="claro"] eon-toggle {
+eon-toggle[theme="@{theme}"],
+div[data-theme="@{theme}"] eon-toggle,
+body[data-theme="@{theme}"] eon-toggle {
   
   .@{element}-circle {
     background: @fg1;
@@ -26,5 +26,63 @@ body[data-theme="claro"] eon-toggle {
   }
   .@{element}-input[type="checkbox"]:disabled ~ .@{element}-label .@{element}-circle{
     background: @bg6-disabled2;
-  }                         
+  }      
+  
+  & .@{element}-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  & .@{element}-circle::before {
+    content: '';
+    border-radius: 50px;
+    position: absolute;
+    box-sizing: border-box;
+    transform: translate(-50%, -50%) scale(0);
+    width: 1.5px;
+    height: 1.5px;
+    visibility: hidden;
+  }
+  
+  &[checked="true"] .@{element}-circle::before {
+    background-color: @ripple-outer-bg1;
+    animation: ripple .5s ease-out;
+  }
+  &[checked="false"] .@{element}-circle::before {
+    background-color: @ripple-outer-bg2;
+    animation: ripple-deactive .5ss ease-out;
+  }
+
+  &.eon-ripple .@{element}-circle::before {
+    visibility: visible;
+  }
+  
+  @keyframes ripple {
+    0% {
+      transform: scale(0, 0);
+      opacity: 1;
+    }
+    20% {
+      transform: scale(15, 15);
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(22, 22);
+    }
+  }
+  @keyframes ripple-deactive {
+    0% {
+      transform: scale(0, 0);
+      opacity: 1;
+    }
+    20% {
+      transform: scale(15, 15);
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(22, 22);
+    }
+  }  
 }

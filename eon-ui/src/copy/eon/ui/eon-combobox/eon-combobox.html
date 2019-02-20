@@ -40,13 +40,13 @@
         privateProperties: {
             /*
             @property (private) {string} _formElement 
-            @description Necessary property for a form
+            @description Necessary property to be recognized by a form
             */
             formElement: {
                 value: "combobox"
             },
             /*
-            @property {object} _refs
+            @property (private) {object} _refs
             @description Object with references to relevant element nodes
             */
             refs: {
@@ -54,7 +54,7 @@
                 reflect: false
             },
             /*
-            @property (private) {Object} _misc
+            @property (private) (private) {Object} _misc
             @description Object with useful information
             */
             misc: {
@@ -83,7 +83,7 @@
             },
             /*
             @property {string} placeholder
-            @description Sets the placeholder for the input
+            @description Sets the placeholder for the input while there is no value
             */
             placeholder: {
                 value: "",
@@ -91,7 +91,7 @@
             },
             /*
             @property {string} label
-            @description Sets the placeholder for the input
+            @description Text that appears at the top of the element to identify the component
             */
             label: {
                 value: "",
@@ -116,7 +116,7 @@
             },
             /*
             @property {string} displayValue
-            @description The displayValue of the item
+            @description The displayValue of the selected item
             */
             displayValue: {
                 value: "",
@@ -174,8 +174,8 @@
                 reflectDefault: false
             },
             /*
-            @property {Boolean} ** New store: store
-            @description 
+            @property {Boolean} store
+            @description Reference to the inner store
             */
             store: {
                 value: false,
@@ -185,8 +185,8 @@
 
         privateFunctions: {
             /*
-            @function setupRefs
-            @description Creates some fast access elements so that theres no need for calling the QuerySelector all the time.
+            @function (private) setupRefs
+            @description Creates some references to nodes that are used frecuently
             */
             setupRefs: function () {
 
@@ -206,7 +206,7 @@
 
             },
             /*
-            @function _setupDropdown
+            @function (private) _setupDropdown
             @description Prepares the dropdown to hold the items
             */
             setupDropdown: function () {
@@ -267,19 +267,14 @@
 
             },
             /*
-            @function _setupType
-            @description Depending on user specifications we will prepare the element
+            @function (private) _setupStore
+            @description Creates a store if specified by the user
             */
             setupStore: function () {
-
-                var el = this;
-
-                // ** New store
-                el.store = eon.util.isTrue(el.store) ? new eon.store() : "";
-
+                this.store = eon.util.isTrue(this.store) ? new eon.store() : "";
             },
             /*
-            @function _setupType
+            @function (private) _setupType
             @description Depending on user specifications we will prepare the element
             */
             setupType: function () {
@@ -340,8 +335,8 @@
 
             },
             /*
-            @function _setupMisc
-            @description Sets up the listener to the click events
+            @function (private) _setupMisc
+            @description Basic information for inner usage
             */
             setupMisc: function () {
 
@@ -354,7 +349,7 @@
             },
             /*
             @function (private) {String} _setupDescription
-            @description Creates the touch blur
+            @description Creates the initial element description
             */
             setupDescription: function () {
 
@@ -366,8 +361,8 @@
 
             },
             /*
-            @function setupTriggers
-            @description Sets up the listener to the click events
+            @function (private) setupTriggers
+            @description Creates the listeners to the click events
             */
             setupTriggers: function () {
 
@@ -387,8 +382,8 @@
 
             },
             /*
-            @function setupAnimations
-            @description Here we will setup the animations for the input
+            @function (private) setupAnimations
+            @description Creates the focus/blur events for the input animation
             */
             setupAnimations: function () {
 
@@ -405,7 +400,7 @@
             },
             /*
             @function (private) _setupOverlay
-            @description Sets up basic properties for the data object
+            @description Creates the overlay and all the events for its optimal crossbrowser performance
             */
             setupOverlay: function () {
 
@@ -468,14 +463,12 @@
 
             },
             /*
-            @function setupItems
-            @description Takes all the items and moves them
+            @function (private) setupItems
+            @description Initializes the items provided by the user
             */
             setupItems: function () {
 
                 var el = this;
-
-                // ** New store
 
                 if (el.store) {
 
@@ -517,8 +510,9 @@
 
             },
             /*
-            @function setupItem
+            @function (private) setupItem
             @description Takes a single item, adds its events and assigns its properties
+            @param {object} item
             */
             setupItem: function (item) {
 
@@ -528,7 +522,7 @@
 
                     var span = document.createElement("span");
 
-                    this.classList.add("result", "eon-bg1-hoverable", "eon-fg1-hoverable");
+                    this.classList.add("result", "eon-bg2-hoverable", "eon-unselectable", "eon-fg1-hoverable");
                     this.dataset.matches = true;
                     this.value = this.getAttribute("value");
                     this.displayValue = this.getAttribute("display-value") || this.value;
@@ -548,8 +542,8 @@
 
             },
             /*
-            @function setupStoreItems
-            @description Here we setup our items depending on the store data
+            @functio (private)n setupStoreItems
+            @description Loops the store to take all the items
             */
             setupStoreItems: function () {
 
@@ -558,15 +552,14 @@
                 var dropdown = el._refs.dropDown;
                 var itemsDocFragment = document.createDocumentFragment();
                 var displayProperty = (el.displayProperty != "") ? el.displayProperty : el.store.idProperty;
-                // ** New store
+                
                 var storeData = el.store.data;
-                // ** var storeData = el._refs.store.data.asObject();
                 var item;
-                // ** New store
+                
                 storeData.forEach(function (value, key, map) {
                     item = document.createElement("eon-item");
 
-                    item.classList.add("eon-bg1-hoverable", "eon-fg1-hoverable");
+                    item.classList.add("eon-bg2-hoverable", "eon-unselectable", "eon-fg1-hoverable");
                     item.dataset.matches = true;
                     item.value = storeData.get(key)[el.store.idProperty];
                     item.displayValue = storeData.get(key)[displayProperty];
@@ -594,7 +587,7 @@
             },
             /*
             @function (private) {String} _setupTouchBlur
-            @description Creates the touch blur
+            @description Creates the touch blur event
             */
             setupTouchBlur: function () {
 
@@ -614,7 +607,7 @@
             },
             /*
             @function (private) _setupMatchingErrorItem
-            @description Creates the touch blur
+            @description Creates the matching error message to be displayed when filtering causes no results
             */
             setupMatchingErrorItem: function () {
 
@@ -761,7 +754,7 @@
 
             },
             /*
-            @function toggleDropdown
+            @functio (private) _toggleDropdown
             @description Toggles the dropdown when clicking on the dropdown button
             */
             toggleDropdown: function () {
@@ -776,7 +769,7 @@
             },
             /*
             @function (private) _assignDropdownStyle
-            @description Assigns the dropdown's width and position relative to the datebox
+            @description Assigns the dropdown's width and position relative to the combobox
             */
             assignDropdownStyle: function () {
 
@@ -807,8 +800,8 @@
 
             },
             /*
-            @function animateExpand
-            @description Expands the items dropdown
+            @function (private) _animateExpand
+            @description Expands the items dropdown with transition
             */
             animateExpand: function () {
 
@@ -821,18 +814,15 @@
 
             },
             /*
-            @function animateShrink
-            @description Expands the items dropdown
+            @function (private) _animateShrink
+            @description Expands the items dropdown with transitions
             */
             animateShrink: function () {
 
                 var el = this;
 
                 el._refs.overlay.addEventListener("transitionend", el._misc.dropdownShrinkFn);
-
-                // setTimeout(function () {
                 el._refs.overlay.classList.remove("eon-combobox-opaque");
-                // }, 0);
 
             },
             /*
@@ -957,7 +947,7 @@
                 item.onRender(function () {
                     var span = document.createElement("span");
                     span.innerHTML = this.displayValue;
-                    this.classList.add("result", "eon-bg1-hoverable", "eon-fg1-hoverable")
+                    this.classList.add("result", "eon-bg2-hoverable", "eon-unselectable", "eon-fg1-hoverable");
                     this.appendChild(span);
                     this.dataset.matches = true;
                     this.addEventListener("click", function () { el.select(this) });
@@ -983,7 +973,9 @@
 
                 eon.triggerCallback("onSelected", el, el, [item]);
 
-                el.shrink();
+                setTimeout(function () {
+                    el.shrink();
+                }, 150);
 
             },
             /*
@@ -997,9 +989,6 @@
                 el._assignDropdownStyle();
 
                 el._refs.scroll.scrollTop = 0;
-
-
-                // el._refs.underline.classList.add("animate");
 
                 el.classList.add("eon-combobox-focus");
 
@@ -1069,6 +1058,7 @@
             /*
             @function updateDescription
             @description Updates the description value for the
+            @param {String} text
             */
             updateDescription: function (text) {
                 this._misc.descriptionText = text;

@@ -3,57 +3,8 @@
 ## Introduction
 The combobox element is a component meant for selecting an option between the given ones.
 
-For its use, it is necessary to import `eon-combobox` in the head of the HTML document:
-``` [html]
-<head>
-  <script>
-    eon.import("/eon/ui/eon-combobox.html");
-  </script>
-<head>
-```
-
-## Declarative usage
-
-``` [html]
-    <eon-combobox name="myCombobox" placeholder="Pick a color">
-        <eon-item value="r" display-value="Red"></eon-item>
-        <eon-item value="p" display-value="Pink"></eon-item>
-        <eon-item value="pu" display-value="Purple"></eon-item>
-    </eon-combobox>
-```
-
-## Programmatic usage
-
-``` [javascript]
-    eon.onReady(function () {
-
-            // Create eon-combobox and the items we want
-            var myCombobox = document.createElement("eon-combobox");
-            var item1 = document.createElement('eon-item');
-            var item2 = document.createElement('eon-item');
-            
-            // Specify its attributes/properties at convenience
-            myCombobox.name = "myText";
-            myCombobox.placeholder = "Programatic";
-
-            // Sets attributes/properties for the item #1
-            item1.value = "prog1";
-            item1.displayValue = "Programatic Item #1";
-
-            // Sets attributes/properties for the item #2
-            item2.value = "prog2";
-            item2.displayValue = "Programatic Item #2";
-
-            myCombobox.appendChild(item1);
-            myCombobox.appendChild(item2);
-            
-            // Append the element to the desire parent
-            document.querySelector("body").appendChild(myCombobox);
-
-    });
-```
-
-## Examples
+<app-playground vtitle="eon-button" html ="<head><script src='framework/eon/eon.js'></script><script>eon.import(['framework/eon/ui/eon-button','framework/custom/app-playground/app-showcase']);</script></head><body><app-showcase title='Button'><eon-button value='Alert' onclick='alert('Hi! ^_^')' icon='<i class='vicon vicon-build'></i></eon-button></app-showcase><app-showcase title='Disabled'><eon-button value='Disabled' disabled='true'></eon-button></app-showcase></body>" js="function test(){alert('soy JS');}" css="#main{background-color:red; cursor:pointer;}" links='{"eon":{"link":"http://www.eonjs.org","icon":"link"},"vimlet":{"link":"http://www.vimlet.com","icon":"bin"},"buttonIcon":{"link":"http://www.vimlet.com","icon":"bin", "text":"buttonIcon"},"button":{"link":"http://www.vimlet.com", "text":"button"}}' selector="body">
+</app-playground>
 
 ### Working with a remote data source
 
