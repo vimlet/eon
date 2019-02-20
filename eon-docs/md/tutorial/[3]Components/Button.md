@@ -1,79 +1,11 @@
 # Button
 
 ## Introduction
-The eon-button component is a button with different facilities. It can be used as a form button using the property `type="submit"`, or as a button that activates a functionality.
+The eon-button component is a button with different facilities. It can be used as a form button using the property `type="submit"`, or as a button that activates a functionality. Also it has different styles and the option to add icons.
 
-To use it import eon-button in the head of the HTML document:
-``` [html]
-<head>
-  <script>
-    eon.import("/eon/ui/eon-button.html");
-  </script>
-<head>
-```
+### Button styles
+By default the button style is outline, but they can be flat and filled using the property `design`. In addition, it is possible to make buttons with icons, with or without text.
 
-## Declarative usage
-Create a eon-button as any other HTML element. The attribute `label` is equivalent to the text of the button. 
+<app-playground vtitle="eon-button" html ="<head><script src='framework/eon/eon.js'></script><script>eon.import(['framework/eon/ui/eon-button','framework/custom/app-playground/app-showcase']);</script></head><body><app-showcase title='Outline'><eon-button value='Button'></eon-button><eon-button value='Disabled' disabled='true'></eon-button><eon-button value='Button' vicon='vicon-cog'></eon-button></app-showcase><app-showcase title='Flat'><eon-button value='Button' design='flat'></eon-button><eon-button value='Disabled' disabled='true' design='flat'></eon-button><eon-button vicon='vicon-build' design='flat'></eon-button></app-showcase><app-showcase title='Filled'><eon-button value='Button' design='filled'></eon-button><eon-button value='Disabled' disabled='true' design='filled'></eon-button><eon-button vicon='vicon-build' design='filled'></eon-button></app-showcase></body>" js="function test(){alert('soy JS');}" css="#main{background-color:red; cursor:pointer;}" selector="body">
+</app-playground>
 
-``` [html]
-<eon-button label="CLICK" onclick="alert('Hello!');"></eon-button>
-```
-
-## Programmatic usage
-
-``` [javascript]
-eon.onReady(function () {
-  // Create eon-button
-  var myButton = document.createElement("eon-button");
-
-  myButton.label = "CLICK";
-  // Set button onclick functionality
-  myButton.setOnClick("alert('Hello!');");
-
-  // Append eon-button where necessary
-  document.querySelector("body").appendChild(myButton);
-});
-```
-
-## Examples
-
-### Button with icon
-This component can have icons, which by default is located to the left of the eon-button text, but it can be modified with the `icon-position` attribute declaratively and with the `iconPosition` property programmatically.
-
-``` [html]
-<eon-button label="CLICK" icon='<i class="material-icons">star</i>' onclick="alert('Hello!');" icon-position="right"></eon-button>
-```
-
-<eon-playground>
-</eon-playground>
-
-### Change icon dynamically
-In this example, the eon-button has no text, only an icon and when the eon-button is clicked the icon changes dynamically.
-
-``` [html]
-<eon-button icon='<i class="material-icons">content_cut</i>' onclick="changeIcon(this);"></eon-button>
-```
-``` [javascript]
-function changeIcon(button) {
-  // Set the new icon to the eon-button property icon
-  button.icon = '<i class="material-icons">content_paste</i>';
-}
-```
-
-### Disabled Button
-A eon-button can be disabled and enabled before a specified event.
-
-``` [html]
-<!-- Click to enable the disabled button -->
-<eon-button label="Click me!"  onclick="enableButton();"></eon-button>
-<eon-button id="disabled" label="Disabled" disabled="true"></eon-button>
-```
-``` [javascript]
-function enableButton() {
-  var disButton = document.querySelector("#disabled");
-
-  // Enable de button and change its value
-  disButton.disabled = "false";
-  disButton.setValue("Enable");
-}
-```
