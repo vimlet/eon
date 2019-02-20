@@ -1,9 +1,9 @@
 @import "variables.less";
 @element: eon-radio;
 
-eon-radio[theme="claro"],
-div[data-theme="claro"] eon-radio,
-body[data-theme="claro"] eon-radio {
+eon-radio[theme="@{theme}"],
+div[data-theme="@{theme}"] eon-radio,
+body[data-theme="@{theme}"] eon-radio {
   /* Change the radio style when it's checked */
   .@{element}-input:checked + .@{element}-label .@{element}-outspan {
     border-color: @eonFrontColor;
@@ -27,4 +27,44 @@ body[data-theme="claro"] eon-radio {
     border-color: @fg2-disabled;
     background-color: @fg2-disabled;
   }
+  & .@{element}-inspan {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  & .@{element}-inspan::before {
+    content: '';
+    border-radius: 50px;
+    position: absolute;
+    box-sizing: border-box;
+    transform: translate(-50%, -50%) scale(0);
+    width: 1.5px;
+    height: 1.5px;
+    visibility: hidden;
+  }
+  
+  &[checked="true"] .@{element}-inspan::before {
+    background-color: @ripple-outer-bg1;
+    animation: ripple .5s ease-out;
+  }
+
+  &.eon-ripple .@{element}-inspan::before {
+    visibility: visible;
+  }
+  
+  @keyframes ripple {
+    0% {
+      transform: scale(0, 0);
+      opacity: 1;
+    }
+    20% {
+      transform: scale(15, 15);
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(22, 22);
+    }
+  }        
 }
