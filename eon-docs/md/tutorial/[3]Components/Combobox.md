@@ -6,7 +6,7 @@ The combobox element is a component meant for selecting an option between the gi
     <template type="html">
         <head>
             <script src='framework/eon/eon.js'></script>
-            <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/custom/app-playground/doc-showcase']);</script>
+            <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
         </head>
         <body>
         <div id="content" style="width:100%;">
@@ -45,7 +45,7 @@ Enables the user to type in the input so that the options provided by the dropdo
     <template type="html">
         <head>
             <script src='framework/eon/eon.js'></script>
-            <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/custom/app-playground/doc-showcase']);</script>
+            <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
         </head>
         <body>
         <div id="content" style="width: 100%;">
