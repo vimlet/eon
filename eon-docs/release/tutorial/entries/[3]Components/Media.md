@@ -7,7 +7,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
 <doc-playground label="Simple Video" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
     <head>
-      <script src='framework/eon/eon.js'></script>
+      <script src='framework/doc-eon/eon/eon.js'></script>
       <script>
         eon.theme = "claro";
         eon.themeSchema = {
