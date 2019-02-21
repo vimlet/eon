@@ -18,7 +18,12 @@ The eon-checkbox is a form component very easy to use. It can be used inside a e
         <eon-checkbox label="checkbox" value='checkbox1' checked="true" name='checkboxOptions'></eon-checkbox>
       </doc-showcase>
       <doc-showcase label="Disabled">
+<<<<<<< HEAD
         <eon-checkbox label='Disabled checked' value='checkbox2' checked="true" name='checkboxOptions' disabled='true'></eon-checkbox>
+=======
+        <eon-checkbox label='Disabled checked' value='checkbox3' checked="true" name='checkboxOptions' disabled='true'></eon-checkbox>
+        <eon-checkbox label='Disabled unchecked' value='checkbox4' name='checkboxOptions' disabled='true'></eon-checkbox>
+>>>>>>> 5eb89e06dc115a96453931bc9584754c06984dc3
       </doc-showcase>
     </doc-body>
   </template>
