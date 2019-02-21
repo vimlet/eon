@@ -14,8 +14,8 @@ This component is a simple on/off switch. It works almost the same way as an eon
       </script>
     </doc-head>
     <doc-body>
-    <doc-showcase label="Uncheck">
-      <eon-toggle label='Uncheck label' value='toggle2' name='toggleOptions'></eon-toggle>
+    <doc-showcase label="Standard">
+      <eon-toggle label='Toggle label' value='toggle2' name='toggleOptions'></eon-toggle>
     </doc-showcase>
     <doc-showcase label="Disabled">
       <eon-toggle label='Disabled label' value='toggle3' name='toggleOptions' disabled='true'></eon-toggle>
