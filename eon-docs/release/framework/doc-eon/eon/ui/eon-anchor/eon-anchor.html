@@ -1,0 +1,314 @@
+<script>
+    eon.element({
+
+        name: "eon-anchor",
+
+        privateProperties: {
+            /*
+                @property (private) {Object} _misc 
+                @description Internal used data
+            */
+            misc: {
+                value: {}
+            }
+        },
+        properties: {
+            /*
+                @property {String} type
+                @description Viewport relative activation position
+                Values: visible, top, mid, bottom
+                Default: visible
+            */
+            type: {
+                value: "visible",
+                reflect: true
+            },
+            /*
+                @property {String} state
+                @description Browser history indicator
+            */
+            state: {
+                value: "",
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+                @property {String} ghost
+                @description 
+                Values: true, false
+                Default: false
+            */
+            ghost: {
+                value: false,
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+                @property {Boolean}
+                @description Whether or not a state should be added to the browser history
+            */
+            history: {
+                value: false,
+                reflect: true
+            },
+            /*
+                @property {String} eon-scroll element query selector
+                @description eon-scroll element query selector
+            */
+            eonScroll: {
+                value: "",
+                reflect: true
+            },
+            /*
+                @property {String} offsetActive
+                @description
+            */
+            offsetActive: {
+                value: 0,
+                reflect: true
+            },
+            /*
+                @property {Number} offsetPosition
+                @description Element offset position
+            */
+            offsetPosition: {
+                value: 0
+            },
+            /*
+                @property {Number} offsetSpacing
+                @description Spacing applied to the offset position 
+            */
+            offsetSpacing: {
+                value: 0,
+                reflect: true
+            }
+        },
+        privateFunctions: {
+            /*
+                @function (private) getOffsetProp
+                @description Get the distance in pixels between the element and its parent border
+            */
+            getOffsetProp: function () {
+                var el = this;
+                var prop = el.offsetTop;
+                switch (el.side) {
+                    case "right":
+                        prop = eon.dom.offsetRight(el);
+                        break;
+                    case "left":
+                        prop = el.offsetLeft;
+                        break;
+                    case "bottom":
+                        prop = eon.dom.offsetBottom(el);
+                        break;
+                }
+                return prop;
+            },
+            /*
+              @function (private) _monitorAnchorVisibility
+              @description Monitor anchor visibility and update location state
+            */
+            monitorAnchorVisibility: function () {
+                var el = this;
+                // On scroll
+                var throttled = false;
+                var delay = 15;
+
+                el._misc.activeAnchorFn = function () {
+                    if (!throttled) {
+                        // ** To be improved
+                        var prevReachedValue = el._misc.marginReached;
+                        if (el.offsetParent && el._isInViewport()) {
+                            // ** TODO
+                            if (el._misc.marginReached && !prevReachedValue) {
+                                // ** Should be onVisible
+                                eon.triggerCallback("onReached", el, el);
+                            }
+                            prevReachedValue = el._misc.marginReached;
+
+                            // Store scroll container position
+                            el._misc.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+
+                            if (!el._misc.reached) {
+                                el._misc.reached = true;
+                                eon.triggerCallback("onVisible", el, el);
+
+                            } else if (!el._misc.activated) {
+                                el._misc.activated = true;
+                                eon.triggerCallback("onActivated", el, el);
+                            }
+
+                        } else if (el._misc.activated) {
+                            el._misc.activated = false;
+                            // ** OPTIONAL
+                            eon.triggerCallback("onDeactivated", el, el);
+
+                        }
+                    }
+                    // Throttle
+                    throttled = true;
+                    // Set a timeout to un-throttle
+                    setTimeout(function () {
+                        throttled = false;
+                    }, delay);
+                };
+                // Check parent scroll container
+                if (el.eonScroll) {
+                  var eonScrollEl = document.querySelector(el.eonScroll);
+                  eonScrollEl.onScrolled(el._misc.activeAnchorFn);
+                } else {
+                    window.addEventListener('scroll', el._misc.activeAnchorFn, false);
+                }
+            },
+            /*
+              @function (private) _isInViewport
+              @description Check if the anchor is in window viewport
+              @return {Boolean} [Condition check result]
+            */
+            isInViewport: function () {
+                var el = this;
+                var rect = el.getBoundingClientRect();
+
+                // Is on the top of the viewport
+                if (el.type == "top") {
+                    return el._isOnTop(rect);
+                    // Is in the bottom of the viewport
+                } else if (el.type == "bottom") {
+                    return el._isInBottom(rect);
+                    // Is in the middle of the viewport
+                } else if (el.type == "mid") {
+                    return el._isInMid(rect);
+                    // Is in viewport
+                } else {
+                    return el._isVisible(rect);
+                }
+            },
+            /*
+              @function (private) _isInMid
+              @description Whehter or not the anchor is in the middle of the viewport
+              @return {Boolean} [Condition check result]
+            */
+            isInMid: function (rect) {
+                var el = this;
+                var innerMidHeight = (window.innerHeight || document.documentElement.clientHeight) / 2;
+                innerMidHeight = el.offsetActive ? innerMidHeight + Math.abs(parseInt(el.offsetActive)) : innerMidHeight;
+               
+                if((rect.top + el.offsetActive < innerMidHeight)) {
+                  el._misc.marginReached = true;
+                  return true;
+                } else {
+                  el._misc.marginReached = false;
+                  return false;
+                }
+                // return (rect.top >= (innerMidHeight - 40) && rect.top <= (innerMidHeight + 40));
+            },
+            /*
+              @function (private) _isOnTop
+              @description Whether or not the anchor is on the top of the viewport
+              @return {Boolean} [Condition check result]
+            */
+            isOnTop: function (rect) {
+                var el = this;
+                // var limit = el.offsetActive ? Math.abs(parseInt(el.offsetActive)) : 0;
+                if (rect.top <= (40 + el.offsetActive) && rect.top >= 0) {
+                    el._misc.marginReached = true;
+                } else {
+                    el._misc.marginReached = false;
+                }
+                return (rect.top <= (40 + el.offsetActive));
+            },
+            /*
+              @function (private) _isInBottom
+              @description Whether or not the anchor is in the bottom of the viewport
+              @return {Boolean} [Condition check result]
+            */
+            isInBottom: function (rect) {
+                var el = this;
+                var innerHeight = window.innerHeight || document.documentElement.clientHeight;
+                return rect.bottom <= innerHeight;
+            },
+            /*
+              @function (private) _isVisible
+              @description Whether or not the anchor is in the viewport
+              @param {Object} rect [The size of an element and its position relative to the viewport]
+              @return {Boolean} [Condition check result]
+            */
+            isVisible: function (rect) {
+                var el = this;
+                if (eon.util.isTrue(el.ghost)) {
+                    return ((rect.top >= 0 || rect.top < 0) &&
+                        rect.left >= 0 &&
+                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                    );
+                } else {
+                    return (rect.top >= 0 &&
+                        rect.left >= 0 &&
+                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                    );
+                }
+            }
+        },
+        functions: {
+            /*
+              @function refresh
+              @description 
+            */
+            refresh: function () {
+                this.offsetPosition = Math.abs(this._getOffsetProp()) - parseInt(this.offsetSpacing);
+            },
+            /*
+              @function getOffsetPosition
+              @description 
+            */
+            getOffsetPosition: function () {
+                return Math.abs(this._getOffsetProp()) - parseInt(this.offsetSpacing);
+            }
+        },
+        onCreated: function () {
+            eon.createCallback("onVisible", this);
+            eon.createCallback("onReached", this);
+            eon.createCallback("onActivated", this);
+            eon.createCallback("onDeactivated", this);
+        },
+        onTransformed: function () {
+            var el = this;
+            // ** Move to function
+            el.offsetActive = parseInt(el.offsetActive);
+            el._monitorAnchorVisibility();
+        },
+        onRender: function () {
+            var el = this;
+            // Store scroll container position
+            el._misc.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
+
+            // Check anchor visibility
+            el._misc.activeAnchorFn();
+
+            // TO BE REMOVED
+            // if (el.eonScroll) {
+            //     document.querySelector(el.eonScroll).onBubbleRender(function(){
+            //         el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
+            //     });
+            // }
+        },
+        onResize: function () {
+            var el = this;
+            // Trigger anchor resize event only if it is needed
+            var throttled = false;
+            var delay = 15;
+            if (!throttled) {
+                // Update offset position
+                el.offsetPosition = Math.abs(el._getOffsetProp()) - parseInt(el.offsetSpacing);
+            }
+            // Throttle
+            throttled = true;
+            // Set a timeout to un-throttle
+            setTimeout(function () {
+                throttled = false;
+            }, delay);
+        }
+    });
+</script>

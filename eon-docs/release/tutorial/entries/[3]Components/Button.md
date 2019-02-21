@@ -9,7 +9,7 @@ By default the button style is outline, but they can be flat and filled using th
     <template type="html">
         <head>
             <script src='framework/eon/eon.js'></script>
-            <script>eon.import(['framework/eon/ui/eon-button','framework/custom/app-playground/app-showcase']);</script>
+            <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/app-playground/app-showcase']);</script>
         </head>
         <body>
             <app-showcase title='Outline'>

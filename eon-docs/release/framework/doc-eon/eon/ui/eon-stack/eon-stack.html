@@ -1,0 +1,197 @@
+<template>
+  </template>
+  
+  <script>
+    eon.element({
+
+      name: "eon-stack",
+      style: "eon-stack.css",
+
+      dependencies: [
+        "../eon-panel"
+      ],
+      privateProperties: {
+        /*
+        @property (private) {Object} _misc
+        @description Object with useful information
+        */
+        misc: {
+          value: {},
+          reflect: false
+        }
+      },
+  
+      privateFunctions: {
+        /*
+        @function (private) _setup
+        @description Here we setup everything we need for the element
+        */
+        setup: function () {
+  
+          var el = this;
+          var children = el.children;
+  
+          el._misc.panels = {};
+          el._misc.indexedPanels = [];
+  
+          for (var i = 0; i < children.length; i++) {
+  
+            // Only eon-panel will be taken into account
+            if (children[i].nodeName.toLowerCase() == "eon-panel") {
+              el._misc.indexedPanels.push(children[i]);
+              children[i].name = el._generateName(children[i].name);
+              el._misc.panels[children[i].name] = children[i];
+            }
+  
+          }
+  
+          // If there are panels, then we show/render the first one
+          if (el._misc.indexedPanels.length > 0) {
+  
+            el._misc.activePanel = el._misc.indexedPanels[0];
+  
+            el._misc.activePanel.onReady(function () {
+              el._misc.activePanel.classList.add("eon-stack-visible");
+              el._misc.activePanel.render();
+            })
+  
+          }
+  
+        },
+        /*
+        @function (private) _assignSize
+        @description Depending on our container we will add some style
+        */
+        assignSize: function () {
+  
+          var el = this;
+          var container = el.parentNode;
+          var containerComputedStyle = window.getComputedStyle(container);
+  
+          if (containerComputedStyle.flexGrow == "1") {
+  
+            container.style.display = "flex";
+            el.classList.add("eon-stack-flex");
+  
+          }
+  
+        },
+        /*
+        @function (private) _generateName
+        @description Generates an unique id for the tab based on the name
+        */
+        generateName: function (name) {
+  
+          var el = this;
+  
+          name = name == "" ? "Untitled" : name;
+  
+          var tempId = name;
+          var definitiveName = name;
+          var differentiatorNumber = 2;
+  
+          if (tempId in el._misc.panels) {
+  
+            while (tempId in el._misc.panels) {
+  
+              tempId = name + "_" + differentiatorNumber;
+              definitiveName = name + "_" + differentiatorNumber;
+              differentiatorNumber++;
+            }
+          }
+  
+          return definitiveName;
+        },
+        /*
+        @function (private) _swapToPanel
+        @description Hides the current container and shows the requested one
+        @param {Object} targetContainer
+        */
+        swapToPanel: function (targetContainer) {
+          var el = this;
+          var previousContainer = this.getActivePanel();
+  
+          previousContainer.classList.remove("eon-stack-visible");
+  
+          if (targetContainer) {
+            el._misc.activePanel = targetContainer;
+            el._misc.activePanel.classList.add("eon-stack-visible");
+            el._misc.activePanel.render();
+          }
+  
+          eon.triggerCallback("onSwapped", this, this, [previousContainer, el._misc.activePanel]);
+        },
+      },
+  
+      functions: {
+        /*
+        @function addPanel
+        @description Adds the provided panel to the element
+        @param {Object} panel
+        */
+        addPanel: function (panel) {
+  
+          var el = this;
+  
+          el._misc.indexedPanels.push(panel);
+          panel.name = el._generateName(panel.name);
+          el._misc.panels[panel.name] = panel;
+  
+          el.appendChild(panel);
+  
+        },
+        /*
+        @function swapToPanelById
+        @description Swaps to a container with the requested id
+        @param {String} id
+        */
+        swapToPanel: function (name) {
+          this._swapToPanel(this._misc.panels[name]);
+        },
+        /*
+        @function swapToPanelByIndex
+        @description Swaps to a container with the requested index
+        @param {String} index
+        */
+        swapToPanelByIndex: function (index) {
+          this._swapToPanel(this._misc.indexedPanels[index]);
+        },
+        /*
+        @function {Object} getActivePanel
+        @description Returns the current selected container
+        */
+        getActivePanel: function () {
+          return this._misc.activePanel;
+        },
+        /*
+        @function {Object} getPanel
+        @description Returns the requested panel
+        @param {String} name
+        */
+        getPanel: function (name) {
+          return this._misc.panels[name];
+        },
+        /*
+        @function {Object} getActivePanel
+        @description Returns the current selected container
+        */
+        wipeout: function (name) {
+  
+          var el = this;
+          var panel = el._misc.panels[name];
+  
+          panel.parentNode.removeChild(panel);
+          delete el._misc.panels[name];
+  
+        }
+      },
+      onCreated: function () {
+        eon.createCallback("onSwapped", this);
+      },
+      onTransformed: function () {
+        this._setup();
+        this._assignSize();
+      }
+    });
+  
+  </script>
