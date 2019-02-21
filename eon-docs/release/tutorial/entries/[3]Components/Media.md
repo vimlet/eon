@@ -15,12 +15,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
         }
       </script>
       <script>eon.import(['framework/doc-eon/eon/ui/eon-video','framework/doc-eon/custom/doc-playground/doc-showcase'])</script>
-      <style>
-        doc-showcase .doc-showcase-content {
-            height: 420px;
-            overflow: hidden;
-        }
-      </style>
+     
   </head>
   <body>
     <doc-showcase title='Snowy day'>
