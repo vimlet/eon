@@ -1,4 +1,5 @@
-# Button
+[Button]<>
+
 The eon-button component is a button with different facilities. It can be used as a form button using the property `type="submit"`, or as a button that activates a functionality.
 
 ## Button styles
@@ -66,4 +67,3 @@ To display buttons with icons just use the `vicon` property passing any of the i
     </template>
 </doc-playground>
 )*
-
