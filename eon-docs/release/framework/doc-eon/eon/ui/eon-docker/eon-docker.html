@@ -1,0 +1,692 @@
+<template>
+  <div class="dropIndicator"></div>
+  <div class="tabsIndicator"></div>
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-docker",
+    style: "eon-docker.css",
+
+    privateProperties: {
+      /*
+      @property {string} minSegmentSize
+      @description Limit for the segment when resizing by gutter
+      */
+      minSegmentSize: {
+        value: 150,
+        reflect: false
+      },
+      /*
+      @property {object} _misc
+      @description Object with useful information
+      */
+      misc: {
+        value: {},
+        reflect: false
+      }
+    },
+
+    properties: {
+      /*
+      @property {string} direction
+      @description Handles the location of its segment childs
+      */
+      direction: {
+        value: "horizontal",
+        reflect: true
+      },
+    },
+
+    privateFunctions: {
+      /*
+      @function setupContent
+      @description Moves the content from the dockers root to a new content node
+      */
+      setupContent: function() {
+
+        var el = this;
+
+        var docFragment = document.createDocumentFragment();
+        var content = document.createElement("div");
+        var sourceNodes = el.getSourceElements();
+
+        for (var i = 0; i < sourceNodes.length; i++) {
+          docFragment.appendChild(sourceNodes[i]);
+        }
+
+        content.classList.add("content");
+        el.content = content;
+
+        content.appendChild(docFragment);
+        el.appendChild(content);
+
+      },
+      /*
+      @function setupBookmarks
+      @description Sets up the nodes in which we will move the bookmarks when needed
+      */
+      setupBookmarks: function() {
+
+        var el = this;
+        var bookmarks = document.createElement("div");
+        var bookmarksArea = document.createElement("div");
+
+        bookmarks.classList.add("bookmarks");
+        bookmarksArea.classList.add("bookmarksArea");
+
+        el.appendChild(bookmarks);
+        el.bookmarks = bookmarks;
+
+      },
+      /*
+      @function setupGutterResizeEvents
+      @description Creates the mouse move/release events to resize the gutter segments
+      */
+      setupGutterResizeEvents: function() {
+
+        var el = this;
+
+        document.addEventListener("mousemove", function(e) {
+
+          if (el._misc.isResizing == true) {
+            
+            var rect = el._misc.source.getBoundingClientRect();
+            var source = el._misc.source;
+            var holder = el._misc.source._getHolder();
+            var isGrowing, difference, finalBasis, percentage, siblingPercentage;
+
+            if (el._misc.gutter.dataset.direction == "horizontal") {
+              
+              isGrowing = e.clientX > rect.right ? true : false;
+              difference = isGrowing ? e.clientX - rect.right : rect.right - e.clientX;
+              finalBasis = isGrowing ? parseInt(source.offsetWidth) + parseInt(difference) : parseInt(source.offsetWidth) - parseInt(difference);
+              siblingFinalBasis = isGrowing ? parseInt(source.nextSibling.offsetWidth) - parseInt(difference) : parseInt(source.nextSibling.offsetWidth) + parseInt(difference);
+
+            } else {
+
+              isGrowing = e.clientY > rect.bottom ? true : false;
+              difference = isGrowing ? e.clientY - rect.bottom : rect.bottom - e.clientY;
+              finalBasis = isGrowing ? parseInt(source.offsetHeight) + parseInt(difference) : parseInt(source.offsetHeight) - parseInt(difference);
+              siblingFinalBasis = isGrowing ? parseInt(source.nextSibling.offsetHeight) - parseInt(difference) : parseInt(source.nextSibling.offsetHeight) + parseInt(difference);
+
+            }
+            // This ensures a size limit when resizing
+            if (finalBasis > el._minSegmentSize && siblingFinalBasis > el._minSegmentSize) {
+
+              percentage = el._misc.gutter.dataset.direction == "horizontal" ? (finalBasis / holder.offsetWidth) * 100 : (finalBasis / holder.offsetHeight) * 100;
+              siblingPercentage = el._misc.gutter.dataset.direction == "horizontal" ? (siblingFinalBasis / holder.offsetWidth) * 100 : (siblingFinalBasis / holder.offsetHeight) * 100;
+
+              source.style.flexBasis = percentage + "%";
+              source.nextSibling.style.flexBasis = siblingPercentage + "%";
+
+            }
+
+          }
+
+          // When moving the mouse if we are resizing we want the gutter to be visible even if we are not hovering it
+          if (el._misc.gutter) {
+            el._misc.isResizing ? el._misc.gutter.classList.add("visible") : el._misc.gutter.classList.remove("visible");
+          }
+
+        })
+
+        document.addEventListener("mouseup", function() {
+
+          if (el._misc.isResizing == true) {
+            el._misc.isResizing = false;
+          }
+
+        })
+
+      },
+      /*
+      @function setupFullscreen
+      @description Sets up the fullscreen nodes
+      */
+      setupFullscreen: function() {
+
+        var el = this;
+
+        var fullscreen = document.createElement("div");
+        var header = document.createElement("div");
+        var title = document.createElement("div");
+        var titleSpan = document.createElement("span");
+        var fullscreenExitButton = document.createElement("div");
+        var fullscreenExitIcon = document.createElement("i");
+
+        fullscreen.classList.add("fullscreen");
+        header.classList.add("header");
+        title.classList.add("title");
+
+        title.appendChild(titleSpan);
+
+        fullscreenExitIcon.classList.add("vicon", "vicon-fullscreen-exit");
+
+        fullscreenExitButton.classList.add("fullscreenExit")
+        fullscreenExitButton.appendChild(fullscreenExitIcon);
+
+        fullscreenExitButton.addEventListener("click", function () {
+          el._fullscreenExit();
+        })
+
+        header.appendChild(title);
+        header.appendChild(fullscreenExitButton);
+
+        fullscreen.appendChild(header);
+
+        el.appendChild(fullscreen);
+
+        el.fullscreenNode = fullscreen;
+
+      },
+      /*
+      @function {array} getChildSegments
+      @description We iterate through the content children and add the segments found to the array
+      @param {object} holder [Docker/segment which childs we are trying to get]
+      */
+      getChildSegments: function(holder) {
+
+        var childSegments = [];
+
+        for (var i = 0; i < holder.content.children.length; i++) {
+          if (holder.content.children[i].tagName == "eon-SEGMENT") {
+            childSegments.push(holder.content.children[i]);
+          }
+        }
+
+        return childSegments;
+      },
+      /*
+      @function removeHolderIfRequired
+      @description Removes the segment depending on the situation, it also handles its childs when the segment is removed
+      @param {object} segment [Element we want to check if it has to be removed]
+      */
+      removeHolderIfRequired: function(segment) {
+
+        var el = this;
+        var childSegments = el._getChildSegments(segment);
+        var holder, holderChildSegments;
+
+        if (segment.tagName == "eon-SEGMENT") {
+
+          segment.onRender(function() {
+
+            holder = segment._getHolder();
+
+            if (segment.type != "content" && childSegments.length == 0) {
+
+              // If its not a content type segment and has 0 child segments we just remove it from the dom
+              segment.parentNode.removeChild(segment);
+
+              holderChildSegments = el._getChildSegments(holder);
+
+              el._redistributeContentSpace(holder);
+
+              // If the holder has one child or none, we call this same function for the holder
+              if (holderChildSegments.length <= 1) {
+                el._removeHolderIfRequired(holder);
+              }
+
+            } else if (segment.tagName == "eon-SEGMENT" && segment.type != "content" && childSegments.length == 1) {
+
+              // Why onRender? : becouse in case the holder segment is something we have just created we have to make sure it has its content node created
+              holder.onRender(function() {
+
+                // If the segment was resized we have to transfer the resize to the child thats going to take his position
+                // If its resized but the parent has a different direction it doesnt make sense to keep the size
+                if (segment._isResized() && segment.direction == holder.direction) {
+
+                  childSegments[0]._transferSize(segment);
+
+                } else {
+
+                  childSegments[0]._resetSize();
+
+                }
+
+                // We append the child before his holder so that when we remove the holder it seems like it replaced its position on the dom
+                holder.content.insertBefore(childSegments[0], segment);
+                segment.parentNode.removeChild(segment);
+
+                // If the new place of the child is on the first level of segments then we create its outer detection and its own tab in case its needed
+                childSegments[0]._createOuterDetectionIfRequired();
+                childSegments[0]._generateOwnTabIfRequired();
+                childSegments[0]._handleGutterExistence();
+
+                el._removeHolderIfRequired(childSegments[0]);
+
+              });
+
+            } else if (segment.type == "wrapper" && segment.direction == holder.direction) {
+
+              el._removeWrapper(segment);
+
+            }
+
+          });
+
+        }
+
+      },
+      /*
+      @function removeWrapper
+      @description Removes the segment and handles its child
+      @param {object} segment
+      */
+      removeWrapper: function(segment) {
+
+        var el = this;
+
+        var holder = segment._getHolder();
+        var docFragment = document.createDocumentFragment();
+        var childSegments = el._getChildSegments(segment);
+
+        for (var i = 0; i < childSegments.length; i++) {
+          docFragment.appendChild(childSegments[i]);
+        }
+
+        holder.content.insertBefore(docFragment, segment);
+        holder.content.removeChild(segment);
+
+        for (var j = 0; j < childSegments.length; j++) {
+          childSegments[j]._createOuterDetectionIfRequired();
+          childSegments[j]._generateOwnTabIfRequired();
+          childSegments[j]._handleGutterExistence();
+        }
+
+        el._redistributeContentSpace(holder);
+
+      },/*
+      @function handleDragStart
+      @description Handles the first step of dragging a segment tab
+      @param {object} e [event]
+      @param {object} segment
+      */
+      handleDragStart: function(e, segment) {
+
+        var el = this;
+        
+        // If its wrapper/tabs we dont want it to dragg it
+        if (segment.type == "content") {
+
+          el._misc.source = segment;
+
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text', '');
+
+          el._misc.isDragging = true;
+
+          if (e.dataTransfer.setDragImage) {
+            e.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
+          }
+
+        }
+
+      },
+      /*
+      @function handleDragEnter
+      @description Shows the detection area to drop the segment
+      @param {object} e [event]
+      @param {object} segment
+      */
+      handleDragEnter: function(e, segment) {
+
+        var el = this;
+
+        // When the parent is a tabs segment we just want its detection to be shown and ignore its children detection
+        if (el._misc.isDragging == true && segment._getHolder().type != "tabs") {
+
+          el._showDetectionArea(segment);
+
+        }
+
+      },
+      /*
+      @function handleDragOver
+      @description Allows the dropping
+      @param {object} e [event]
+      @param {object} segment
+      */
+      handleDragOver: function(e, segment) {
+
+        var el = this;
+
+        if (el._misc.isDragging == true) {
+
+          if (e.preventDefault) {
+            e.preventDefault(); // Necessary. Allows us to drop.
+          }
+
+          e.dataTransfer.dropEffect = 'move';
+
+        }
+
+      },
+      /*
+      @function handleDragEnd
+      @description When releasing the event outside of any droppable area we will drop in the last detected
+      @param {object} e [event]
+      @param {object} segment
+      */
+      handleDragEnd: function(e, segment) {
+
+        var el = this;
+
+        if (el._misc.isDragging == true) {
+          
+          el._handleDrop(e, segment);
+          
+          el._misc.isDragging = false;
+
+        }
+
+      },
+      /*
+      @function handleDrop
+      @description Handles the drop
+      @param {object} e [event]
+      @param {object} segment
+      */
+      handleDrop: function(e, segment) {
+
+        var el = this;
+        
+        el._misc.sourceHolder = el._misc.source._getHolder();
+        
+        // Here we call one of our drop function depending on the situation
+        el._handleDropSituation();
+        // Hide the drop indicator
+        el._hideDropIndicator();
+        // Hide the tabs indicator
+        el._hideTabsIndicator();
+        // Hide all the detection areas that have been shown
+        el._hideDetectionAreas();
+
+        el._misc.isDragging = false;
+
+        e.stopPropagation();
+        e.preventDefault();
+
+      },
+      /*
+      @function handleDropSituation
+      @description Depending on where we are hovering and different requeriments we will trigger the corresponding drop function
+      */
+      handleDropSituation: function() {
+
+        var el = this;
+        var segment = el._misc.target; 
+        
+        if (el._misc.isDragging == true && !el.preventDefaultDrop) {
+
+          if (el._misc.isOuter == false && segment._misc.hasInnerDetection == true) {
+
+            if (el._shouldRedirectToOuterDrop(segment)) {
+
+              segment._handleOuterDrop();
+
+            } else {
+
+              segment._handleInnerDrop();
+
+            }
+
+          } else if (el._misc.isOuter == true && segment._misc.hasOuterDetection == true) {
+
+            segment._handleOuterDrop();
+
+          }
+
+        } else if (el._misc.isDragging == true && !el.preventTabsDrop) {
+          
+          segment._handleTabsRegionDrop();
+
+        }
+
+      },
+      /*
+      @function {boolean} shouldRedirectToOuterDrop
+      @description Checks if we can avoid the inner dropping and the creation of the wrapper when it has the same direction as its holder
+      @param {object} segment
+      */
+      shouldRedirectToOuterDrop: function(segment) {
+
+        var el = this;
+
+        var holder = segment._getHolder();
+        var meetsHorizontalRequirements = (holder.direction == "horizontal" && (el._misc.position == "left" || el._misc.position == "right"));
+        var meetsVerticalRequirements = (holder.direction == "vertical" && (el._misc.position == "top" || el._misc.position == "bottom"));
+
+        return (segment._misc.hasOuterDetection == true && (meetsHorizontalRequirements || meetsVerticalRequirements));
+
+      },
+      /*
+      @function redistributeContentSpace
+      @description Resets all the sizes of its segment childs
+      @param {object} holder
+      */
+      redistributeContentSpace: function(holder) {
+
+        var el = this;
+
+        if (holder.type != "tabs") {
+
+          var childSegments = el._getChildSegments(holder);
+
+          for (var i = 0; i < childSegments.length; i++) {
+            childSegments[i]._resetSize();
+          }
+
+        }
+
+      },
+      /*
+      @function addBookmark
+      @description Adds the bookmark to the bookmarks container
+      @param {object} bookmark
+      */
+      addBookmark: function(bookmark) {
+
+        var el = this;
+
+        bookmark.style.transform = "translateX(0)";
+        bookmark.style.opacity = 0;
+
+        setTimeout(function() {
+          bookmark.style.opacity = "";
+        }, 100);
+
+        setTimeout(function() {
+          bookmark.style.transform = "";
+        }, 1000);
+
+        el.bookmarks.insertBefore(bookmark, el.bookmarks.lastChild)
+
+      },
+      /*
+      @function removeBookmark
+      @description Removes the bookmark to the bookmarks container
+      @param {object} bookmark
+      */
+      removeBookmark: function(bookmark) {
+
+        var el = this;
+
+        bookmark.style.opacity = 0;
+
+        setTimeout(function() {
+          el.bookmarks.removeChild(bookmark);
+        }, 400);
+
+      },
+      /*
+      @function moveDropIndicator
+      @description Moves to drop indicator
+      @param {int} top
+      @param {int} left
+      @param {int} height
+      @param {int} width
+      */
+      moveDropIndicator: function(top, left, height, width) {
+
+        var el = this;
+
+        el.dropIndicator.style.display = "flex";
+
+        el.dropIndicator.style.top = top + "px";
+        el.dropIndicator.style.left = left + "px";
+
+        el.dropIndicator.style.height = height + "px";
+        el.dropIndicator.style.width = width + "px";
+
+      },
+      /*
+      @function showDetectionArea
+      @description Activates the detection areas to interact with them
+      @param {object} segment
+      */
+      showDetectionArea: function(segment) {
+
+        var el = this;
+
+        if (segment._misc.hasInnerDetection && segment.content && segment._misc.dropAreas.inner.wrapper) {
+          segment.content.appendChild(segment._misc.dropAreas.inner.wrapper);
+          el._misc.active[segment.uid] = segment;
+        }
+
+        if (segment._misc.hasOuterDetection && segment._misc.dropAreas.outer.wrapper) {
+          segment.appendChild(segment._misc.dropAreas.outer.wrapper);
+          el._misc.active[segment.uid] = segment;
+        }
+
+        if (segment._misc.hasTabsDropDetector && segment.querySelector(".tabs")) {
+          segment._misc.dropAreas.tabs.style.visibility = "visible";
+          el._misc.active[segment.uid] = segment;
+        }
+
+      },
+      /*
+      @function hideDetectionAreas
+      @description Hides all the active detection areas
+      */
+      hideDetectionAreas: function() {
+
+        var el = this;
+        var uids = Object.keys(el._misc.active);
+
+        var segment;
+
+        for (var i = 0; i < uids.length; i++) {
+
+          segment = el._misc.active[uids[i]];
+
+          var innerWrapper = segment.content.querySelector(".innerWrapper");
+          var outerWrapper = segment.querySelector(".outerWrapper");
+          var dropDetector = segment.querySelector(".tabs .dropDetector");
+
+          if (segment.content && innerWrapper && segment._misc.dropAreas.inner.wrapper) {
+            segment.content.removeChild(segment._misc.dropAreas.inner.wrapper);
+          }
+
+          if (outerWrapper && segment._misc.dropAreas.outer.wrapper) {
+            segment.removeChild(segment._misc.dropAreas.outer.wrapper);
+          }
+
+          if (dropDetector && segment._misc.dropAreas.tabs) {
+            segment._misc.dropAreas.tabs.style.visibility = "hidden";
+          }
+
+          delete el._misc.active[uids[i]];
+
+        }
+
+      },
+      /*
+      @function hideDropIndicator
+      @description Hides the drop indicator
+      */
+      hideDropIndicator: function() {
+
+        this.dropIndicator.style.display = "none";
+
+      },
+      /*
+      @function hideTabsIndicator
+      @description Hides the tabs indicator
+      */
+      hideTabsIndicator: function() {
+
+        this.tabsIndicator.style.visibility = "hidden";
+
+      },
+      /*
+      @function fullscreen
+      @description Makes the segment passed as parameter to be on cover al the docker
+      @param {object} segment
+      */
+      fullscreen: function(segment) {
+
+        var el = this;
+
+        segment = segment.type == "tabs" ? segment._misc.contents[segment.tabs.wrapper.querySelector(".selected").segmentUid] : segment;
+
+        var dockerRect = el.getBoundingClientRect();
+        var segmentRect = segment.content.getBoundingClientRect();
+
+        el.fullscreenNode.querySelector(".title span").innerHTML = segment.name;
+        el.fullscreenNode.appendChild(segment.content);
+
+        el.fullscreenNode.style.visibility = "visible";
+
+        el._misc.fullscreen = {};
+        el._misc.fullscreen.segment = segment;
+        el._misc.fullscreen.content = segment.content;
+
+      },
+      /*
+      @function fullscreenExit
+      @description Exists the current fullscreen
+      */
+      fullscreenExit: function () {
+
+        var el = this;
+
+        el._misc.fullscreen.segment.appendChild(el._misc.fullscreen.content);
+        el.fullscreenNode.style.visibility = "hidden";
+
+      }
+    },
+    onInit: function() {
+
+      // Set font color
+      this.classList.add("eon-fg1");
+
+      this._setupContent();
+      this._setupBookmarks();
+      this._setupFullscreen();
+
+    },
+    onRender: function() {
+
+      var el = this;
+
+      el._data = {};
+      el._misc.active = {};
+      el._misc.targetTab = document.createElement("div");
+
+      el._misc.bookmarks = {};
+
+      el.storage = document.createDocumentFragment();
+
+      el.dropIndicator = el.querySelector(".dropIndicator");
+      el.tabsIndicator = el.querySelector(".tabsIndicator");
+
+      el._setupGutterResizeEvents();
+
+      console.log(el._data);
+
+    }
+  });
+</script>

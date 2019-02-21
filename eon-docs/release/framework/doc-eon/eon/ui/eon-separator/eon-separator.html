@@ -1,0 +1,135 @@
+<template>
+
+  <div class="eon-separator-bar"></div>
+  
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-separator",
+    style: "eon-separator.css",
+
+    properties: {
+      /*
+        @property {String} type
+        @description Seprator position type
+        Values: full, mid, start, end
+        Default: full
+      */
+      type: {
+        value: "full",
+        reflect: true
+      },
+      /*
+        @property {String} direction
+        @description Separator direction
+        Values: horizontal, vertical
+        Default: horizontal
+      */
+      direction: {
+        value: "horizontal",
+        reflect: true
+      },
+      /*
+        @property {Number} border
+        @description Separator bar thickness
+      */
+      border: {
+        value: 1,
+        reflect: true
+      },
+      /*
+        @property {String} length
+        @description Separator bar length
+        Values: (percentage), (pixels)
+      */
+      length: {
+        value: "", 
+        reflect: true
+      },
+      /*
+        @property {String} color
+        @description Separator bar color code
+      */
+      color: {
+        value: "",
+        reflect: true
+      },
+    },
+    privateFunctions: {
+      /*
+        @function (private) setUpSeparator
+        @description Separator positioning and dimensions
+      */
+      setUpSeparator: function() {
+        var el = this;
+        // Shortcut for relevant separator elements
+        el.bar = el.querySelector(".eon-separator-bar");
+        // Set separator type positioning
+        el.bar.classList.add("eon-separator-bar-" + el.type);
+        // Set separator bar color
+        el._setColor();
+        // Check separator direction
+        if(el.direction == "vertical"){
+          // Vertical style
+          el.classList.add("eon-separator-vertical");
+          // Set custom size
+          el._setSize("width", "height");
+        }else{
+          // Set custom size
+          el._setSize("height", "width");
+        }
+      },
+      /*
+        @function (private) setSize
+        @description Set separator size
+        @param {String} thickness [CSS style property]
+        @param {String} width [CSS style property]
+      */
+      setSize: function(thickness, width) {
+        var el = this;
+        // Apply custom separator thickness
+        if(el.border > 1) el.style[thickness] = el.border + "px";
+        // Apply custom separator length
+        var length = el.length;
+        if(length){
+          // Check units
+          length = length.indexOf("%") > -1 ? length : length + "px";
+          el.bar.style[width] = length;
+        }
+      },
+      /*
+        @function (private) setColor
+        @description Set separator color
+      */
+      setColor: function() {
+        var el = this;
+        if(el.color) {
+          el.bar.style.backgroundColor = el.color;
+        } else {
+          el.bar.classList.add("eon-bg8");
+        }
+      },
+      /*
+        @function (private) makeParentRelative
+        @description Set position relative to the separator parent node
+      */
+      makeParentRelative: function() {
+        var el = this;
+        // Make separator container position relative
+        var parentPosition = el.parentNode.style.position;
+        // Absolute and relative previous positions are allowed
+        el.parentNode.style.position = !parentPosition || parentPosition == "static"
+          ? "relative" : parentPosition;
+      },
+    },
+    onRender: function() {
+      var el = this;
+      // Ensure positioning by setting position relative to the separator parent node
+      el._makeParentRelative();
+      // Configure separator
+      el._setUpSeparator();
+    }
+  });
+</script>

@@ -1,0 +1,414 @@
+<script>
+    eon.element({
+  
+      name: "eon-panel",
+      style: "eon-panel.css",
+  
+      dependencies: [
+        "../eon-scroll"
+      ],
+      privateProperties: {
+        /*
+          @property (private) {Object} _refs 
+          @description Quick access to the panel structure nodes references
+        */
+        refs: {
+          value: {}
+        },
+        /*
+          @property (private) {Object} _misc 
+          @description Internal used data
+        */
+        misc: {
+          value: {}
+        }
+      },
+      properties: {
+        /*
+          @property {String} href
+          @description External panel content URL
+        */
+        href: {
+          value: "",
+          reflect: true
+        },
+        /*
+          @property {String} lazyLoad
+          @description Import href content on demand
+          Values true, false
+          Default: false
+        */
+        lazyLoad: {
+          value: false,
+          reflect: true
+        },
+        /*
+          @property {Boolean} allowScroll
+          @description Allow or denied scroll
+        */
+        allowScroll: {
+          value: true,
+          reflect: true
+        },
+        /*
+          @property {Object} content
+          @description Content container node reference
+        */
+        content: {
+          value: {}
+        },
+        /*
+          @property {Object} fill
+          @description Indicates whether the eon-scroll will autofill its container or grow according to its content until it fills its container
+          Values true, false
+          Default: true
+        */
+        fill: {
+          value: true,
+          reflect: true
+        },
+        /*
+          @property {Boolean} arrowScrolls
+          @description Indicates the eon-scroll whether it needs arrow scrolls or not
+          Values true, false
+          Default: false
+        */
+        arrowScrolls: {
+          value: false,
+          reflect: true
+        },
+        /*
+          @property {Number} thickness
+          @description Indicates the thickness for the eon-scroll rails
+          Default: 15
+        */
+        thickness: {
+          value: 15,
+          reflect: true
+        },
+        /*
+        @property {String} name
+        @description In case of being used in eon-tabs it will be used internally to link a tab to its panel
+        */
+        name: {
+          value: "",
+          reflect: true
+        },
+        /*
+        @property {String} tabTitle
+        @description In case of being used in eon-tabs , it will be used as a visual text for the tab
+        */
+        tabTitle: {
+          value: "",
+          reflect: true
+        },
+        /*
+        @property {String} scrollType
+        @description Sets the type of the scroll
+        */
+        scrollType: {
+          value: "auto",
+          reflect: true
+        },
+        /*
+          @property {Boolean} defaultStyle 
+          @description Wether or not the default style should be applied
+          Values: true, false
+          Default: true
+        */
+        defaultStyle: {
+            value: true,
+            reflect: true
+        }
+      },
+      privateFunctions: {
+        /*
+          @function (private) _setDefaultStyle
+          @description Check if the default element style should be applied
+        */
+        setDefaultStyle: function () {
+            var el = this;
+            // Check default style configuration
+            if(!eon.util.isTrue(el.defaultStyle)) {
+                // Remove default style
+                el.content.classList.remove("eon-spaced-container");
+            } else {
+                // Spaced items container
+                el.content.classList.add("eon-spaced-container");
+            }
+            // Check fill behavior
+            if(eon.util.isTrue(el.fill)) {
+                el.classList.add("eon-fill");
+            }
+        },
+        /*
+          @function (private) importContent
+          @description Set panel content local or from remote html
+        */
+        importContent: function () {
+          var el = this;
+          // Get panel elements
+          var documentFragment = document.createDocumentFragment();
+          // Check href property
+          if (el.href && !eon.util.isTrue(el.lazyLoad)) {
+            // Request content file
+            el.importContent(documentFragment);
+          } else if (!el.href) {
+            // Extract script nodes that belong to template elements for deferring their execution
+            var nodes = el._deferScripts(el);
+            el._appendContent(nodes);
+            el._misc.loaded = true;
+          }
+        },
+        /*
+          @function {Array} (private) _deferScripts
+          @description Store scripts to be executed later
+          @param {Object} dataNode [Node containing imported content]
+          @return {Array} [Nodes to be appended]
+        */
+        deferScripts: function (dataNode) {
+          var el = this;
+          var nodes, scripts, script, scriptKey;
+          // ** IE do not support 'children' property
+          if (eon.util.getBrowser() === "IE") {
+            // Avoid empty element template on programmatic cases
+            nodes = !dataNode.childNodes[0] ? dataNode.template.childNodes : dataNode.childNodes;
+            // From node list to js array
+          } else {
+            // Avoid empty element template on programmatic cases
+            nodes = !dataNode.children[0] && dataNode.template ? dataNode.template.children : dataNode.children;
+          }
+          // Cast to js array 
+          nodes = [].slice.call(nodes);
+  
+          for (var i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            // Check template node
+            if (node.tagName === "TEMPLATE") {
+              // Get template script nodes
+              scripts = node.content ? node.content.querySelectorAll("script") : node.querySelectorAll("script");
+              for (var j = 0; j < scripts.length; j++) {
+                script = scripts[j];
+                scriptKey = Object.keys(el._refs.scripts).length;
+                // Label script node
+                script.setAttribute("_positionId", scriptKey);
+                // Extract script content and store it
+                el._refs.scripts[scriptKey] = script.text;
+                // Empty script
+                script.text = "";
+              }
+            }
+          }
+          return nodes;
+        },
+        /*
+          @function (private) appendContent
+          @description Append content to the panel or the scroll container if exists 
+          @param {Object} nodes [Node element containing the panel content]
+        */
+        appendContent: function (nodes) {
+          var el = this;
+          var fragment = document.createDocumentFragment();
+          var i;
+          var t = 0;
+          var reAppend = el.href || eon.util.isTrue(el.allowScroll);
+          // Get first generation template children
+          while (nodes.length) {
+            // Build nodes structure
+            child = nodes.shift();
+            if (child.nodeType == 1) {
+              // Append remote source child
+              if (reAppend) {
+                fragment.appendChild(child);
+              }
+              if (child.tagName.toLowerCase() === "template" && !child.hasAttribute("hidden")) {
+                // Store templates references
+                el._refs.templates[t] = child;
+                t++
+              }
+            }
+          }
+          // Move templates to the assigned body container 
+          if (reAppend) {
+            el.content.appendChild(fragment);
+          }
+          // Wait until the element is ready
+          el.onReady(function () {
+            eon.triggerCallback("onLoad", el, el, []);
+          });
+  
+        },
+        /*
+          @function (private) _removeTemplate
+          @description Extract content and remove the template node
+          @param {Object} tmp [Node element containing the panel content]
+        */
+        removeTemplate: function (tmp) {
+          var el = this;
+          var fragment = document.createDocumentFragment();
+          var child, scrpt;
+          var children = !tmp.children[0] ? tmp.content.children : tmp.children;
+          children = [].slice.call(children);
+          // Move nodes to the tree container safely
+          while (children.length) {
+            // Build nodes structure
+            child = children.shift();
+            childScripts = child.querySelectorAll("script");
+            // Check scripts
+            if (child.tagName == "SCRIPT") {
+              // Inject deferred script text from stored ones
+              positionId = child.getAttribute("_positionId");
+              child.text = positionId ? el._refs.scripts[positionId] : child.text;
+            } else if(childScripts[0]) {
+              for (var i = 0; i < childScripts.length; i++) {
+                scrpt = childScripts[i];
+                // Inject deferred script text from stored ones
+                positionId = scrpt.getAttribute("_positionId");
+                scrpt.text = positionId ? el._refs.scripts[positionId] : scrpt.text;
+              }
+            }
+            fragment.appendChild(child);
+          }
+          // Insert template content just before the template node
+          el.content.insertBefore(fragment, tmp);
+          // Remove empty template
+          el.content.removeChild(tmp);
+        },
+        /*
+          @function (private) _setUpScroll
+          @description Set scroll configuration parameters
+        */
+        setUpScroll: function () {
+          var el = this;
+          // Set passed scroll parameters
+          el._refs.wrapper.fill = el.fill;
+          el._refs.wrapper.arrowScrolls = el.arrowScrolls;
+          el._refs.wrapper.thickness = el.thickness;
+          el._refs.wrapper.type = el.scrollType;
+        },
+        /*
+          @function (private) _resetCallback
+          @description Remove event callbacks and reset its state
+          @param {String} eventName [Element event name]
+        */
+        resetCallback: function (eventName) {
+          var el = this;
+          el["__" + eventName] = [];
+          el["__" + eventName + "__triggered"] = false;
+        }
+      },
+      functions: {
+        /*
+          @function render
+          @description Extract content from template and remove it from DOM
+          @param {Number} index [Template identifier]
+        */
+        render: function (index) {
+          var el = this;
+          var tmp, i;
+          var tmps = el._refs.templates;
+          // Partial render
+          if (index === 0 || index) {
+            tmp = tmps[index];
+            // Remove template
+            el._removeTemplate(tmp);
+            delete tmps[index];
+          } else {
+            var keys = Object.keys(tmps);
+            for (i = 0; i < keys.length; i++) {
+              tmp = tmps[keys[i]];
+              // Remove template
+              el._removeTemplate(tmp);
+              delete tmps[keys[i]];
+            }
+          }
+        },
+        /*
+          @function importContent
+          @description Import remote content
+          @param {Object} fragment [Document fragment used to append imported content into]
+        */
+        importContent: function (fragment) {
+          var el = this;
+          fragment = !fragment ? document.createDocumentFragment() : fragment;
+          // Import content if not loaded yet.
+          if (el.href && !el._misc.loaded) {
+            // Request content file
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", el.href, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            // Callback
+            xhr.onload = function (e) {
+              // If operation has been completed - ready state 4
+              if (this.readyState !== 4) { return };
+              // Response status successfully completed - status 200
+              if (this.status !== 200) { return };
+              // Allow execute imported html scripts
+              fragment = eon.fragmentFromString(xhr.responseText);
+              // Extract script nodes that belong to template elements for deferring their execution
+              var nodes = el._deferScripts(fragment);
+              el._appendContent(nodes);
+              el._misc.loaded = true;
+            };
+            // Execute request
+            xhr.send();
+          }
+  
+        },
+        /*
+          @function refresh
+          @description Remove current content and re-import content
+        */
+        refresh: function () {
+          var el = this;
+          // Remove previous content 
+          el._refs.wrapper.content.innerHTML = "";
+          // Import panel content from specific source
+          el._importContent();
+        }
+      },
+      onCreated: function () {
+        var el = this;
+        // Create content related callbacks
+        eon.createCallback("onLoad", this, "ready");
+        eon.createCallback("onContent", this);
+      },
+      onInit: function () {
+        var el = this;
+        el._refs.templates = {};
+        el._refs.scripts = {};
+        el._misc = {};
+        // Get body container
+        if (eon.util.isTrue(el.allowScroll)) {
+          el._refs.wrapper = document.createElement("eon-scroll");
+          // Configure scroll
+          el._setUpScroll();
+        } else {
+          el._refs.wrapper = el;
+        }
+        // Get body container
+        el.content = eon.util.isTrue(el.allowScroll) ? el._refs.wrapper.content : el;
+        // Check the default style configuration
+      },
+      onTransformed: function () {
+        var el = this;
+        // Import panel content from specific source
+        el._importContent();
+        // Append content wrapper if the element is not the root
+        if (!el._refs.wrapper.isEqualNode(el)) { el.appendChild(el._refs.wrapper) }
+        // ** Apply default items positioning style
+        el._setDefaultStyle();
+        
+      },
+      onPropertyChanged: function (attrName, oldVal, newVal) {
+        var el = this;
+        switch (attrName) {
+          case "href":
+            el._resetCallback("onLoad");
+            // Reset content load state
+            el._misc.loaded = false;
+            break;
+        }
+      }
+    });
+  </script>

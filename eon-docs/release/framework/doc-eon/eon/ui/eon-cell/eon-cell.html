@@ -1,0 +1,117 @@
+<template>
+  <div class="eon-grid-cellContent eon-bg1-outline"></div>
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-cell",
+
+    properties: {
+      /*
+      @property {string} value
+      @description String to be inserted in a span
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {string} column
+      @description Name of the column in which the cell is
+      */
+      column: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {string} type
+      @description Cell type, it can be header or entry
+      */
+      type: {
+        value: "entry",
+        reflect: true
+      },
+      /*
+      @property {string} content
+      @description Reference to the content node
+      */
+      content: {
+        value: "",
+        reflect: false
+      }
+    },
+
+    privateFunctions: {
+      /*
+      @function generateContent
+      @description Generates the content with the given value
+      */
+      generateContent: function () {
+
+        var el = this;
+
+        if (el.type == "header") {
+
+          var headerCellIcon = document.createElement("i");
+
+          el.classList.add("eon-unselectable");
+
+          headerCellIcon.classList.add("vicon");
+          headerCellIcon.classList.add("eon-grid-sortIcon");
+
+          if (document.documentMode) {
+            el._createHeaderStyleForIE(headerCellIcon)
+          }
+
+          el.appendChild(headerCellIcon);
+        }
+
+      },
+      /*
+      @function createCellContentStyleForIE
+      @description CSS changes for the content on IE
+      */
+      createHeaderStyleForIE: function (icon) {
+
+        var el = this;
+
+        el.content.style.position = "absolute";
+        el.content.style.left = "0";
+        el.content.style.top = "0";
+        el.content.style.right = "0";
+        el.content.style.bottom = "0";
+        el.content.style.display = "flex";
+        el.content.style.justifyContent = "center";
+        el.content.style.alignItems = "center";
+
+        icon.style.position = "absolute";
+        icon.style.top = "0";
+        icon.style.bottom = "0";
+        icon.style.display = "flex";
+        icon.style.justifyContent = "center";
+        icon.style.alignItems = "center";
+
+      }
+    },
+
+    onCreated: function () {
+
+      this.content = this.template.querySelector(".eon-grid-cellContent");
+      
+      // Since in the declarative creation eon-cell will not get to exists as it will be
+      // part of its eon-row parent, it will not transform and wont have its source appended
+      // since we want the provided cell innerHTML to be part of the component, we append 
+      // it manually in case it exists
+      if (this.source) {
+        this.appendChild(this.source);
+      }
+
+    },
+
+    onRender: function () {
+      this._generateContent();
+    }
+
+  });
+</script>
