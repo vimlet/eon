@@ -71,6 +71,7 @@
         background-color: rgba(0, 0, 0, .1);
         border-radius: 2px;
         padding: 2px 4px;
+        overflow: visible !important;
     }
 
     app-md-viewer ol {
@@ -117,6 +118,15 @@
         height: 50px;
         width: 50px;
         transition: 0.5s ease all;
+<<<<<<< HEAD
+=======
+    }
+
+    #app-md-viewer-goToTop:hover {
+        -webkit-box-shadow: 0px 5px 10px 0px rgb(71, 204, 226);
+        -moz-box-shadow: 0px 5px 10px 0px rgb(71, 204, 226);
+        box-shadow: 0px 5px 10px 0px rgb(71, 204, 226);
+>>>>>>> 301b4e24242bd28301640a46f5a9f6f4bedac74c
     }
 
 #app-md-viewer-goToTop:hover {
@@ -392,14 +402,23 @@
                     whiteLines: new RegExp(
                         "^[ \\t]+$",
                         "gm"
+                    ),
+                    plainCode: new RegExp(
+                        "\\*\\((?:(?!\\*\\()[\\s\\S])*\\)\\*",
+                        "g"
                     )
                 }
             },
             misc: {
                 value: {}
             },
+<<<<<<< HEAD
             refs:{
                 value:{}
+=======
+            refs: {
+                value: {}
+>>>>>>> 301b4e24242bd28301640a46f5a9f6f4bedac74c
             }
         },
 
@@ -623,7 +642,7 @@
                 }
                 return [null, tag];
             },
-            // @function parseCodeBlock (private) {string} @param data {string}
+            // @function _parseCodeBlock (private) {string} @param data {string}
             parseCodeBlock: function (data) {
                 var el = this;
                 var result = "";
@@ -632,9 +651,15 @@
                 if (matches) {
                     for (var i = 0; i < matches.length; i++) {
                         var cleanMatch = el._cleanMatch(matches[i], "```", "```");
+<<<<<<< HEAD
                         
                         var splitted = el._splitLanguage(cleanMatch);
                         
+=======
+
+                        var splitted = el._splitLanguage(cleanMatch);
+
+>>>>>>> 301b4e24242bd28301640a46f5a9f6f4bedac74c
                         var appEditor = document.createElement("app-code");
                         appEditor.value = splitted[1];
                         appEditor.language = splitted[0];
@@ -650,6 +675,27 @@
                 result = data.replace(el._regex.codeBlock, function () {
                     var count = el._parse.later.length;
                     el._parse.later[count] = codeBlockResults[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function _parsePlainCode (private) {string} @param data {string}
+            parsePlainCode: function (data) {
+                var el = this;
+                var result = "";
+
+                var matches = data.match(el._regex.plainCode);
+                var plainCode = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var cleanMatch = el._cleanMatch(matches[i], "*(", ")*");
+                        plainCode.push(cleanMatch);
+                    }
+                }
+                var j = 0;
+                result = data.replace(el._regex.plainCode, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = plainCode[j++];
                     return "@@[" + count + "]@@";
                 });
                 return result;
@@ -816,7 +862,11 @@
                     "[/components]");
                 var links = el._getCode(tag, el._regex.playgroundLINKS, "[links]", "[/links]");
 
+<<<<<<< HEAD
                 var playground = document.createElement("app-playground");
+=======
+                var playground = document.createElement("doc-playground");
+>>>>>>> 301b4e24242bd28301640a46f5a9f6f4bedac74c
                 playground.setAttribute("selector", selector);
                 playground.setAttribute("scripts", scripts);
                 playground.setAttribute("components", components);
@@ -862,6 +912,7 @@
                 data = el._parseTreeLink(data);
                 data = el._parsePlayground(data);
                 data = el._parseCodeBlock(data);
+                data = el._parsePlainCode(data);
                 data = el._parseTip(data);
                 data = el._parseCode(data); // Order mathers, code must be parsed first because its content must not be parsed    
                 data = el._parseBr(data);
@@ -1100,7 +1151,14 @@
                                 docFragment.appendChild(firstSpan);
                             }
                             var count = el._cleanMatch(matches[i], "@@[", "]@@");
-                            docFragment.appendChild(el._parse.later[count]);
+                                // docFragment.appendChild(el._parse.later[count]);
+                            try {
+                                docFragment.appendChild(el._parse.later[count]);
+                            } catch (e) {
+                                var div = document.createElement("div");
+                                div.innerHTML = el._parse.later[count];
+                                docFragment.appendChild(div);
+                            }
                         } else {
                             var currentText = str.substring(str.indexOf(matches[i - 1]) + matches[i - 1].length,
                                 str.indexOf(matches[i]));
@@ -1108,7 +1166,14 @@
                             currentSpan.innerHTML = currentText;
                             docFragment.appendChild(currentSpan);
                             var count = el._cleanMatch(matches[i], "@@[", "]@@");
-                            docFragment.appendChild(el._parse.later[count]);
+                            // docFragment.appendChild(el._parse.later[count]);
+                            try {
+                                docFragment.appendChild(el._parse.later[count]);
+                            } catch (e) {
+                                var div = document.createElement("div");
+                                div.innerHTML = el._parse.later[count];
+                                docFragment.appendChild(div);
+                            }
                         }
                         if (i === matches.length - 1) {
                             var last = str.substring(str.indexOf(matches[i]) + matches[i].length);

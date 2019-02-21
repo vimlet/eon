@@ -1,54 +1,28 @@
 # Toggle
 
-## Introduction
-This component is a simple on/off switch. It is also possible to use it as a form component.
+This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two `checked` boolean values.  
 
-To use it import eon-toggle in the head of the HTML document:
-``` [html]
-<head>
-  <script>
-    eon.import("/eon/ui/eon-toggle.html");
-  </script>
-<head>
-```
+*(
+<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/eon/eon.js"></script>
+      <script> 
+        eon.import([
+          "framework/eon/ui/eon-toggle", "framework/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+    </doc-head>
+    <doc-body>
+      <doc-showcase label="Button">
+        <eon-toggle label='Uncheck toggle' value='toggle2' name='toggleOptions'></eon-toggle>
+      </doc-showcase>
+      <doc-showcase label="Button">
+        <eon-toggle label='Disabled toggle' value='toggle3' name='toggleOptions' disabled='true'></eon-toggle>
+      </doc-showcase>
+    </doc-body>
+  </template>
+</doc-playground>
+)*
 
-## Declarative usage
-``` [html]
-<eon-toggle label="Toggle" name"toggleOption" value="myToggle"></eon-toggle>
-```
-
-## Programmatic usage
-
-``` [javascript]
-eon.onReady(function () {
-    // Create eon-toggle
-    var myToggle = document.createElement("eon-toggle");
-
-    // Set properties and append eon-toggle
-    myToggle.label = "Toggle";
-    myToggle.name = "toggleOption";
-    myToggle.value = "myToggle";
-    myToggle.checked = true;
-    document.querySelector("body").appendChild(myToggle);
-});
-```
-
-## Examples
-
-### Enable dynamically
-In this example the eon-toggle is disabled, but after a second it will be enabled.
-``` [html]
-<!-- Initially disabled toggle -->
-<eon-toggle label="Toggle" disabled="true"></eon-toggle>
-```
-
-``` [javascript]
-eon.onReady(function () {
-    var myToggle = document.querySelector("eon-toggle");
-
-    setTimeout(function () {
-        // Enables the spinner
-        myToggle.disabled = false;
-    }, 1000);
-});
-```
+It can be used as a specific state switcher which some logic blocks will depend on or as a form component as well.
