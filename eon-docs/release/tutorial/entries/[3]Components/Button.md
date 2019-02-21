@@ -66,3 +66,4 @@ To display buttons with icons just use the `vicon` property passing any of the i
     </template>
 </doc-playground>
 )*
+
