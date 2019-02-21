@@ -3,13 +3,14 @@
 This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two `checked` boolean values.  
 
 *(
-<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
+<doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
+        eon.theme = "claro";
         eon.import([
-          "framework/eon/ui/eon-toggle", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-toggle", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
     </doc-head>
