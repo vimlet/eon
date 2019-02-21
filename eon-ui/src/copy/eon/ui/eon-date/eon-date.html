@@ -81,16 +81,16 @@
         reflect: false
       },
       /*
-      @property (private) {Object} _refs
-      @description Object with usefull information
+      @property (private) {object} _refs
+      @description Object with references to relevant element nodes
       */
       refs: {
         value: {},
         reflect: false
       },
       /*
-      @property (private) {String} _formElement 
-      @description Necessary property for a form
+      @property (private) {string} _formElement 
+      @description Necessary property to be recognized by a form
       */
       formElement: {
         value: "date"
@@ -423,9 +423,9 @@
 
       },
       /*
-            @function (private) _setupOverlay
-            @description Sets up basic properties for the data object
-            */
+      @function (private) _setupOverlay
+      @description Sets up basic properties for the data object
+      */
       setupOverlay: function () {
 
         var el = this;
@@ -1716,9 +1716,11 @@
 
           el._refs.previous.dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
           el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+          el._refs.previous.classList[el._refs.previous.dataset.disabled != "true" ? "add" : "remove"]("eon-fg1-hoverable");
 
           el._refs.next.dataset.disabled = (el._isMaxMonth(year, month)) ? "true" : "false";
           el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+          el._refs.next.classList[el._refs.next.dataset.disabled != "true" ? "add" : "remove"]("eon-fg1-hoverable");
 
         } else if (headerType == "monthsGrid") {
 
@@ -1786,12 +1788,13 @@
       /*
       @function (private) _highlight
       @description Highlights the button and removes highlight in the previous one
-      @param {Object} dayButton
+      @param {Object} selected
+      @param {Object} previous
       */
       highlight: function (selected, previous) {
 
         var el = this;
-
+        
         if (previous) {
           previous.classList.remove("eon-date-current", "eon-bg2-active");
           previous.classList.add("eon-bg2-hoverable");
@@ -2265,6 +2268,7 @@
             row.children[j].dataset.year = year;
             row.children[j].classList.remove("eon-date-current");
             row.children[j].classList.remove("eon-bg2-active");
+            row.children[j].classList.add("eon-bg2-hoverable");
 
             disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
             disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
@@ -2313,7 +2317,7 @@
       @param {Object} monthButton
       */
       selectMonth: function (monthButton) {
-
+        
         var el = this;
 
         if (monthButton.dataset.disabled != "true") {
@@ -2333,12 +2337,13 @@
             var dateObj = el._formatObj({ day: undefined, month: (parseInt(monthButton.dataset.index) + 1), year: el._misc.current.year });
             var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
 
-            el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
-
             el._misc.preventUpdate = true;
             el.value = formattedValue;
 
           }
+
+          el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+
         }
       },
       /*
@@ -2379,14 +2384,15 @@
             var dateObj = el._formatObj({ day: undefined, month: undefined, year: yearButton.dataset.year });
             var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
 
-            el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
-
             el._misc.preventUpdate = true;
 
             el.value = formattedValue;
 
           }
         }
+
+        el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+
       },
       /*
       @function (private) _showDaysGrid
