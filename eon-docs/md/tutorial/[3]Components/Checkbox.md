@@ -9,7 +9,7 @@ The checkbox element allows to select multiple options of . It can be used insid
       <script src="framework/eon/eon.js"></script>
       <script> 
         eon.import([
-          "framework/eon/ui/eon-checkbox", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-checkbox", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
     </doc-head>
