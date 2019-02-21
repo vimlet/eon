@@ -1,12 +1,12 @@
 # Checkbox
-The checkbox element allows to select multiple options of . It can be used inside a eon-form component or inside an HTML form.
+The checkbox element allows selecting multiple options of a group of choices. It can be used inside a eon-form component or inside an HTML form.
 
 
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
         eon.import([
           "framework/doc-eon/eon/ui/eon-checkbox", "framework/doc-eon/custom/doc-playground/doc-showcase"
