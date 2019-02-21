@@ -1,5 +1,4 @@
 [Button]<>
-
 The eon-button component is a button with different facilities. It can be used as a form button using the property `type="submit"`, or as a button that activates a functionality.
 
 ## Button styles
@@ -65,5 +64,32 @@ To display buttons with icons just use the `vicon` property passing any of the i
         .doc-showcase-content{display:flex;}
         .doc-showcase-content eon-button{margin:0 5px;}
     </template>
+</doc-playground>
+)*
+
+[Checkbox]<>
+The checkbox element allows selecting multiple options of a group of choices. It can be used inside a eon-form component or inside an HTML form.
+
+
+*(
+<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-checkbox", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+    </doc-head>
+    <doc-body>
+      <doc-showcase label="Standard">
+        <eon-checkbox label="Checkbox" value='checkbox1' checked="true" name='checkboxOptions'></eon-checkbox>
+      </doc-showcase>
+      <doc-showcase label="Disabled">
+        <eon-checkbox label='Disabled checked' value='checkbox2' checked="true" name='checkboxOptions' disabled='true'></eon-checkbox>
+      </doc-showcase>
+    </doc-body>
+  </template>
 </doc-playground>
 )*
