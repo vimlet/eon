@@ -95,9 +95,8 @@ The checkbox element allows selecting multiple options of a group of choices. It
 )*
 
 [Radio]<>
-The radio element allows selecting one option of a group of choices.
+The radio element allows selecting one option of a group of choices, for this, the radio elements have to be included within the `eon-group`, having to import only this component.
 
-If this component was to be used alone it would be needed to import it. But if it would be used among other eon-radio components inside a eon-group it won't be necessary to import this components as eon-group will take care of that.
 
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
