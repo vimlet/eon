@@ -14,7 +14,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
           claro: ["eon-video"]
         }
       </script>
-      <script>eon.import(['framework/doc-eon/eon/ui/eon-video','framework/doc-eon/custom/doc-playground/doc-showcase'])</script>
+      <script>eon.import(['framework/doc-eon/eon/ui/eon-swiper','framework/doc-eon/custom/doc-playground/doc-showcase'])</script>
   </head>
   <body>
     <doc-showcase label='Snowy day'>
@@ -43,31 +43,65 @@ This element is a combination of the well known slider and image gallery compone
       </script>
       <script>
         eon.import([
-          'framework/doc-eon/eon/ui/eon-video',
+          'framework/doc-eon/eon/ui/eon-swiper',
           'framework/doc-eon/custom/doc-playground/doc-showcase'
         ]);
       </script>
+      <style>
+        doc-showcase .doc-showcase-content {
+          height: 350px;
+        }
+      </style>
   </head>
   <body>
     <doc-showcase label='Slider'>
-       <eon-swiper pagination="true">
-          <eon-slide class="blue"></eon-slide>
-          <eon-slide class="red"></eon-slide>
-          <eon-slide class="green"></eon-slide>
-          <eon-slide class="yellow"></eon-slide>
-        </eon-swiper>
+      <eon-swiper pagination="true">
+        <eon-slide class="blue"></eon-slide>
+        <eon-slide class="red"></eon-slide>
+        <eon-slide class="green"></eon-slide>
+        <eon-slide class="yellow"></eon-slide>
+      </eon-swiper>
     </doc-showcase>
+  </body>
+  </template>
+</doc-playground>
+)*
+
+*(
+<doc-playground label="Slider" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <head>
+      <script src='framework/doc-eon/eon/eon.js'></script>
+      <script>
+        eon.theme = "claro";
+        eon.themeSchema = {
+          claro: ["eon-swiper"]
+        }
+      </script>
+      <script>
+        eon.import([
+          'framework/doc-eon/eon/ui/eon-swiper',
+          'framework/doc-eon/custom/doc-playground/doc-showcase'
+        ]);
+      </script>
+      <style>
+        doc-showcase .doc-showcase-content {
+          height: 350px;
+        }
+      </style>
+  </head>
+  <body>
     <doc-showcase label='Gallery'>
-       <eon-swiper id="s3" class="d-swiper" direction="horizontal" pagination="true" navigation="true" type="gallery"
-          full-screen="true">
-          <eon-slide image="img/view-5.jpeg"></eon-slide>
-          <eon-slide image="img/view-2.jpeg"></eon-slide>
-          <eon-slide image="img/view-6.jpeg"></eon-slide>
-          <eon-slide image="img/view-4.jpeg"></eon-slide>
-          <eon-slide image="img/view-1.jpeg"></eon-slide>
-          <eon-slide image="img/view-5.jpeg"></eon-slide>
-          <eon-slide image="img/view-2.jpeg"></eon-slide>
-        </eon-swiper>
+      <eon-swiper id="s3" class="d-swiper" direction="horizontal" pagination="true" navigation="true" type="gallery"
+        full-screen="true">
+        <eon-slide image="img/view-5.jpeg"></eon-slide>
+        <eon-slide image="img/view-2.jpeg"></eon-slide>
+        <eon-slide image="img/view-6.jpeg"></eon-slide>
+        <eon-slide image="img/view-4.jpeg"></eon-slide>
+        <eon-slide image="img/view-1.jpeg"></eon-slide>
+        <eon-slide image="img/view-5.jpeg"></eon-slide>
+        <eon-slide image="img/view-2.jpeg"></eon-slide>
+      </eon-swiper>
     </doc-showcase>
   </body>
   </template>
