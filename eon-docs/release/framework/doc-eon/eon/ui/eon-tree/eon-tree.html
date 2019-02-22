@@ -1,5 +1,5 @@
 <script type="text/javascript">
-  //@header A hierarchical data representation
+
   eon.element({
 
     name: "eon-tree",
@@ -37,11 +37,11 @@
         reflect: true
       },
       /*
-        @property {Object} store
-        @description
+        @property {Boolean} store
+        @description Whether or not the data source is provided by a store
       */
       store: {
-        value: {},
+        value: false,
         reflect: false
       },
       /*
@@ -62,7 +62,7 @@
       },
       /*
         @property {Object} drag
-        @description
+        @description Whether or not the nodes are draggable
       */
       drag: {
         value: false,
@@ -70,7 +70,7 @@
       },
       /*
         @property {Boolean} joinDirs
-        @description
+        @description Whether or not the children with the same parent name should be joined under the same parent node
         Values true, false
         Default: true
       */
@@ -363,23 +363,6 @@
         }
       },
       /*
-        @function (private) _setupStore
-        @description Set up store integration
-      */
-      // setupStore: function () {
-      //   var el = this;
-      //   // Make sure the store has been initialized
-      //   el.store.onCreated(function () {
-      //     el.store.onLoaded(function (store) {
-      //       // Get store data
-      //       store.fetch(function () {
-      //         // Build tree from store data
-      //         el.buildStoreTree();
-      //       });
-      //     });
-      //   });
-      // },
-      /*
         @function (private) _build
         @description Build tree nodes
         @param {Object} data [Tree nodes information to be created]
@@ -399,20 +382,13 @@
           // Append tree node
           tree.appendChild(treeNode);
         });
-        // for (var index in data) {
-        // node = data[index];
-        // Create tree node
-        // treeNode = document.createElement("eon-tree-node");
-        // el._copyProperties(node, treeNode);
-        // Append tree node
-        // tree.appendChild(treeNode);
-        // }
         // Return the last node for events purposes
         return treeNode;
       },
       /*
         @function (private) _clean
         @description Remove tree nodes and their references
+        @param {Object} cleanRefs [Whether or not the tree nodes should be removed]
       */
       clean: function (cleanRefs) {
         var el = this;
@@ -749,9 +725,7 @@
       };
       tree.classList.add("eon-tree-tree");
       // Data store quick access
-      // ** New store
       el.store = eon.util.isTrue(el.store) ? new eon.store() : "";
-      // el._refs.store = el.source.querySelector("eon-store");
     },
     onInit: function () {
       var el = this;
