@@ -6997,7 +6997,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     // Default theme
     if (!theme) {
-        theme = "noire";
+        theme = "claro";
     }
     
     // If there is no theme specified to the body we set the default one, 
