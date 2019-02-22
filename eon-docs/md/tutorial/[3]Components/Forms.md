@@ -7,11 +7,18 @@ By default the button style is outline, but they can be flat and filled using th
 *(
 <doc-playground label="Regular Buttons" html="true" js="true" css="true" selector="body">
     <template type="html">
-        <head>
+        <doc-head>
             <script src='framework/doc-eon/eon/eon.js'></script>
-            <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-        </head>
-        <body>
+            <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);
+            </script>
+            <style>
+              body {
+                display: flex;
+                flex-wrap: wrap;
+              }
+            </style>
+        </doc-head>
+        <doc-body>
             <doc-showcase label='Outline'>
                 <eon-button value='Button'></eon-button>
                 <eon-button value='Disabled' disabled='true'></eon-button>
@@ -23,7 +30,7 @@ By default the button style is outline, but they can be flat and filled using th
                 <doc-showcase label='Filled'><eon-button value='Button' design='filled'></eon-button>
                 <eon-button value='Disabled' disabled='true' design='filled'></eon-button>
             </doc-showcase>
-        </body>
+        </doc-body>
     </template>
     <template type="css">
         .doc-showcase-content{display:flex;}
@@ -38,11 +45,17 @@ To display buttons with icons just use the `vicon` property passing any of the i
 *(
 <doc-playground label="Icon Buttons" html="true" js="true" css="true" selector="body">
     <template type="html">
-        <head>
+        <doc-head>
             <script src='framework/doc-eon/eon/eon.js'></script>
             <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-        </head>
-        <body>
+            <style>
+              body {
+                display: flex;
+                flex-wrap: wrap;
+              }
+            </style>
+        </doc-head>
+        <doc-body>
             <doc-showcase label='Outline'>
                 <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>'></eon-button>
                 <eon-button vicon='vicon-build'></eon-button>
@@ -58,7 +71,7 @@ To display buttons with icons just use the `vicon` property passing any of the i
                 <eon-button vicon='vicon-build' design='filled'></eon-button>
                 <eon-button vicon='vicon-build' disabled='true' design='filled'></eon-button>
             </doc-showcase>
-        </body>
+        </doc-body>
     </template>
     <template type="css">
         .doc-showcase-content{display:flex;}
@@ -81,6 +94,12 @@ The checkbox element allows selecting multiple options of a group of choices. It
           "framework/doc-eon/eon/ui/eon-checkbox", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      </style>
     </doc-head>
     <doc-body>
       <doc-showcase label="Standard">
@@ -97,20 +116,23 @@ The checkbox element allows selecting multiple options of a group of choices. It
 [Radio]<>
 The radio element allows selecting one option of a group of choices, for this, the radio elements have to be included within the `eon-group`, having to import only this component.
 
-
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
     <template type="html">
-        <head>
+        <doc-head>
             <script src='framework/doc-eon/eon/eon.js'></script>
             <script>eon.import(['framework/doc-eon/eon/ui/eon-group', 'framework/doc-eon/eon/ui/eon-radio','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
             <style>
                 .eon-group-label {
                     display:none;
                 }
+                body {
+                  display: flex;
+                  flex-wrap: wrap;
+                }
             </style>
-        </head>
-        <body>
+        </doc-head>
+        <doc-body>
             <doc-showcase label='Standard'>
                 <eon-group class="d-radio-group" name="radioOptions">
                   <eon-radio class="d-top-margin" label="Orange" checked="true" value="Orange"></eon-radio>
@@ -125,7 +147,7 @@ The radio element allows selecting one option of a group of choices, for this, t
                   <eon-radio class="d-top-margin" label="Desktop" value="desktop" disabled="true"></eon-radio>
               </eon-group>
             </doc-showcase>
-        </body>
+        </doc-body>
     </template>
     <template type="css">
         .doc-showcase-content{display:flex;}
@@ -182,6 +204,12 @@ This component is a simple on/off switch. It works almost the same way as an eon
           "framework/doc-eon/eon/ui/eon-toggle", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      </style>
     </doc-head>
     <doc-body>
     <doc-showcase label="Standard">
@@ -203,11 +231,17 @@ The combobox element is a component meant for selecting an option between the gi
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="#content">
     <template type="html">
-        <head>
+        <doc-head>
             <script src='framework/eon/eon.js'></script>
             <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-        </head>
-        <body>
+            <style>
+              body {
+                display: flex;
+                flex-wrap: wrap;
+              }
+            </style>
+        </doc-head>
+        <doc-body>
         <div id="content" style="width:100%;">
             <doc-showcase label='Active'>
               <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
@@ -227,7 +261,7 @@ The combobox element is a component meant for selecting an option between the gi
           </doc-showcase>
           </div>
           <div style="height:150px;"></div>
-        </body>
+        </doc-body>
     </template>
     <template type="css">
         .doc-showcase-content{display:flex;}
@@ -242,11 +276,17 @@ Enables the user to type in the input so that the options provided by the dropdo
 *(
 <doc-playground label="Filtering" html="true" js="true" css="true" selector="#content">
     <template type="html">
-        <head>
-            <script src='framework/eon/eon.js'></script>
-            <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-        </head>
-        <body>
+        <doc-head>
+          <script src='framework/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <style>
+            body {
+              display: flex;
+              flex-wrap: wrap;
+            }
+          </style>
+        </doc-head>
+        <doc-body>
         <div id="content" style="width: 100%;">
         <doc-showcase>
               <eon-combobox label="Colors" name='myCombobox' placeholder='Pick a color' filter='true'>
@@ -257,7 +297,7 @@ Enables the user to type in the input so that the options provided by the dropdo
           </doc-showcase>
         </div>
         <div style="height:150px;"></div>
-        </body>
+        </doc-body>
     </template>
     <template type="css">
         .doc-showcase-content{display:flex;}
@@ -275,11 +315,17 @@ Classic input type date where you can either `type` the desired date or you can 
 *(
 <doc-playground label="Input Type" html="true" js="true" css="true" selector="#content">
     <template type="html">
-        <head>
-            <script src='framework/doc-eon/eon/eon.js'></script>
-            <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-        </head>
-        <body>
+        <doc-head>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <style>
+            body {
+              display: flex;
+              flex-wrap: wrap;
+            }
+          </style>
+        </doc-head>
+        <doc-body>
         <div id="content" style="width:100%;">
             <doc-showcase label='Active'>
               <eon-date min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" 
@@ -294,7 +340,7 @@ Classic input type date where you can either `type` the desired date or you can 
           </doc-showcase>
           </div>
           <div style="height:150px;"></div>
-        </body>
+        </doc-body>
     </template>
     <template type="css">
         .doc-showcase-content{display:flex;}
@@ -309,11 +355,17 @@ This type of date will only allow you to have a `calendar` directly leaving the 
 *(
 <doc-playground label="Calendar Type" html="true" js="true" css="true" selector="#content">
     <template type="html">
-        <head>
-            <script src='framework/eon/eon.js'></script>
-            <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-        </head>
-        <body>
+        <doc-head>
+          <script src='framework/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <style>
+            body {
+              display: flex;
+              flex-wrap: wrap;
+            }
+          </style>
+        </doc-head>
+        <doc-body>
         <div id="content" style="width: 100%;">
         <doc-showcase label="Default">
               <eon-date selectable="dmy" type="calendar" name="defaultCalendar"></eon-date>
@@ -328,7 +380,7 @@ This type of date will only allow you to have a `calendar` directly leaving the 
               <eon-date disabled="true" selectable="dmy" type="calendar" name="disabledCalendar"></eon-date>
           </doc-showcase>
         </div>
-        </body>
+        </doc-body>
     </template>
     <template type="css">
         .doc-showcase-content{display:flex;}

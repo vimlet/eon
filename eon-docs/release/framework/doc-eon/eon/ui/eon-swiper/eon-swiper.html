@@ -1,5 +1,4 @@
 <script>
-  //@header A container made to swipe eon-swiper-slide elements
   eon.element({
 
     name: "eon-swiper",
@@ -214,8 +213,6 @@
       */
       setUp: function () {
         var el = this;
-        // Save a reference of the parent node for fullscreen purposes
-        el._refs.parent = el.parentNode;
         // Check swiper type
         if (el.type == "gallery") {
           el.classList.add("eon-swiper-gallery");
@@ -499,24 +496,23 @@
       decreaseNavButtonHeight: function (btn) {
         var el = this;
         // Make sure the paging node has been rendered
-        setTimeout(function () {
+        el.onPagingReady(function(){
           // Get pagination node size
           var pagingSize = el._misc.sizeProperty == "offsetHeight"
             ? el.pagingNode["offsetWidth"] : el.pagingNode["offsetHeight"];
           // Get button node size
-          var btnSize;
+          var btnSize = btn.node[el._misc.sizeProperty] > el._misc.sizeProperty 
+            ? el[el._misc.sizeProperty] : btn.node[el._misc.sizeProperty];
           if (el.direction == "horizontal") {
-            btnSize = btn.node.offsetHeight;
             // Subtract pagination height to button height for centering purposes
             var value = (btnSize - pagingSize);
             btn.node.style.height = value < btn.minSize ? btn.minSize + "px" : value + "px";
           } else {
-            btnSize = btn.node.offsetWidth;
             // Subtract pagination width to button width for centering purposes
             var value = (btnSize - pagingSize);
             btn.node.style.width = value < btn.minSize ? btn.minSize + "px" : value + "px";
           }
-        }, 0);
+        });
       },
       /*
         @function (private) _updateNavButtonSize
@@ -1054,12 +1050,12 @@
       */
       isEdgeElement: function (position, slide) {
         var el = this;
-        var sibling = !slide ? el.currentSlide.el.nextSibling : slide.el.nextSibling;
+        var sibling = !slide && el.currentSlide ? el.currentSlide.el.nextSibling : slide.el.nextSibling;
         // Get the current swiper element
         if (position == "start") {
           return (sibling && sibling.tagName === "EON-SWIPER-SLIDE") ? false : true;
         } else {
-          sibling = !slide ? el.currentSlide.el.previousSibling : slide.el.previousSibling;
+          sibling = !slide && el.currentSlide ? el.currentSlide.el.previousSibling : slide.el.previousSibling;
           return (sibling && sibling.tagName === "EON-SWIPER-SLIDE") ? false : true;
         }
       },
@@ -1112,6 +1108,10 @@
         var el = this;
         var slideObj = el._createSlide(slide);
         el._createThumbnail(slide, slideObj);
+        // Check if all initial slides have been appended
+        if (el.getSourceElements().length == el.slides.length) {
+          eon.triggerCallback("onSlidesReady", el, el, [el.slides]);
+        }
         // Update max slide value
         el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
       },
@@ -1207,10 +1207,10 @@
         @function (private) {Boolean} _keepInPlace
         @description Called when the element is resized, keeps the current slide in its corresponding position
       */
-      keepInPlace: function () {
+      keepInPlace: function (currentIndex) {
         var el = this;
         // Get current slide index
-        var currentIndex = el.slides.indexOf(el.currentSlide);
+        // var currentIndex = el.slides.indexOf(el.currentSlide);
         // Get new y/z position
         var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
         var newPos = swiperHeight * (currentIndex);
@@ -1275,56 +1275,59 @@
       createResizeFunction: function () {
         var el = this;
         el._misc.resizeFn = function () {
-          // Update maximum translation value
-          el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+          el.onSlidesReady(function () {
+            // Update maximum translation value
+            el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
 
-          // Update slides ranges
-          for (i = 0; i < el.slides.length; i++) {
-            el.slides[i] = el._updateSlideRange(el.slides[i], i);
-          }
-          //
-          el._updateThumbnailsSize();
+            // Update slides ranges
+            for (i = 0; i < el.slides.length; i++) {
+              el.slides[i] = el._updateSlideRange(el.slides[i], i);
+            }
+            //
+            el._updateThumbnailsSize();
 
-          // Translate current slide to its new centered position
-          el.currentSlide = el.currentSlide && !el.currentSlide.el ? el.slides[0] : el.currentSlide;
-          currentIndex = el.slides.indexOf(el.currentSlide);
+            // Translate current slide to its new centered position
+            el.currentSlide = el.currentSlide && !el.currentSlide.el ? el.slides[0] : el.currentSlide;
+            currentIndex = el.currentSlide ? el.slides.indexOf(el.currentSlide) : 0;
 
-          // TODO: This was triggering slide change every time the swiper was being resized
-          // el.slideTo(currentIndex);
-          el._keepInPlace();
+            // TODO: This was triggering slide change every time the swiper was being resized
+            el._keepInPlace(currentIndex);
 
-          if (el.type == "gallery" && el.pagination != "hidden") {
-            el.onPagingReady(function () {
-              // Update thumbnail size reference
-              el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
-
-              // Update minimum paging translation
-              el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
-              // Update thumbnails ranges
-              if (el.thumbnails[0]) {
+            if (el.type == "gallery" && el.pagination != "hidden") {
+              el.onPagingReady(function () {
+                // Update thumbnail size reference
                 el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
-                for (i = 0; i < el.thumbnails.length; i++) {
-                  el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+
+                // Update minimum paging translation
+                el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
+                // Update thumbnails ranges
+                if (el.thumbnails[0]) {
+                  el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
+                  for (i = 0; i < el.thumbnails.length; i++) {
+                    el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+                  }
                 }
-              }
-              // Translate slide thumbnail to its new centered position
-              currentThumbnail = el.thumbnails[currentIndex];
-              if (el.type === "gallery") {
-                el._translate(el.pagingNode, currentThumbnail.range[0]);
-              }
+                // Translate slide thumbnail to its new centered position
+                currentThumbnail = el.thumbnails[currentIndex];
+                if (el.type === "gallery") {
+                  el._translate(el.pagingNode, currentThumbnail.range[0]);
+                }
 
-              if (eon.util.isTrue(el.navigation)) {
-                // Update navigation buttons position
-                el._updateNavButtonSize();
-              }
+                if (eon.util.isTrue(el.navigation)) {
+                  // Update navigation buttons position
+                  el._updateNavButtonSize();
+                }
 
-
-
-              el._decreaseNavButtonHeight(el.backBtn);
-              el._decreaseNavButtonHeight(el.nextBtn);
-
-            });
-          }
+                el._decreaseNavButtonHeight(el.backBtn);
+                el._decreaseNavButtonHeight(el.nextBtn);
+              });
+            }
+            // Restore the parent reference avoiding parent nodes like document fragments
+            var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
+            if(!activated && el._refs.parent && el._refs.parent.nodeType == 11) {
+              el._refs.parent = el.parentNode;
+            }
+          });
         }
       }
     },
@@ -1337,7 +1340,6 @@
         var el = this;
         // Current child has a next sibling
         if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("start")) {
-
           // Update current element
           var currentIndex = el.slides.indexOf(el.currentSlide);
           el.currentSlide = el.slides[currentIndex + 1];
@@ -1498,6 +1500,7 @@
       // Create on paging ready event
       // ** Internally used for thumbnails translation calculation
       eon.createCallback("onPagingReady", el, "ready");
+      eon.createCallback("onSlidesReady", el, "ready");
       // Event target path monitor
       eon.registerPathListener(el);
     },
@@ -1516,13 +1519,15 @@
       el._setUp();
       // Swiper elements container
       var fragment = document.createDocumentFragment();
-      // Build main swiper structure
-      el._buildWrapper(fragment);
-      // Build swiper pagination controller
-      el._buildPagination(fragment);
-      // Insert gallery navigation
-      el._setUpNavigation(fragment);
-      el.appendChild(fragment);
+      setTimeout(() => {
+        // Build main swiper structure
+        el._buildWrapper(fragment);
+        // Build swiper pagination controller
+        el._buildPagination(fragment);
+        // Insert gallery navigation
+        el._setUpNavigation(fragment);
+        el.appendChild(fragment);
+      }, 0);
 
     },
     onTransformed: function () {
@@ -1532,10 +1537,11 @@
       // Configure full screen mode
       el._addFullScreenListener();
       // Make sure slides are created before the initial slide translation
-      setTimeout(function () {
+      el.onSlidesReady(function () {
+        el.currentSlide = el.slides[el.initialSlide];
         el.slideTo(el.initialSlide);
-        el._misc.loaded = true;
-      }, 0);
+      });
+      el._misc.loaded = true;
       el._createResizeFunction();
     },
     onBubbleRender: function () {
@@ -1543,6 +1549,8 @@
       // Set up auto functionality
       el._initAuto();
       el._misc.resizeFn();
+      // Get swiper parent node for fullscreen purposes
+      el._refs.parent = el.parentNode;
     },
     onResize: function () {
       var el = this;
@@ -1563,12 +1571,14 @@
     onPropertyChanged: function (prop, oldValue, value) {
       var el = this;
       if (prop == "currentSlide") {
-        // Select related thumbnail
-        var thumbnail = el.thumbnails[el.slides.indexOf(value)];
-        // Activate thumbnail on swiper current slide change
-        el._activateThumbnail(thumbnail);
-        // Disable navigation button on limit reached
-        el._hideNavBtn(value);
+        el.onSlidesReady(function () {
+          // Select related thumbnail
+          var thumbnail = el.thumbnails[el.slides.indexOf(value)];
+          // Activate thumbnail on swiper current slide change
+          el._activateThumbnail(thumbnail);
+          // Disable navigation button on limit reached
+          el._hideNavBtn(value);
+        });
       };
     }
   });

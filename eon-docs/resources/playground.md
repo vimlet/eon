@@ -1,10 +1,10 @@
 *(
 <doc-playground label="Regular Button" html="true" js="true" css="true" selector="body">
 <template type="html">
-<head>
+<doc-head>
     <script src='framework/eon/eon.js'></script>
     <script>eon.import(['framework/eon/ui/eon-button','framework/custom/app-playground/app-showcase']);</script>
-</head>
+</doc-head>
 <body>
     <app-showcase title='Outline'>
         <eon-button value='Button'></eon-button>
