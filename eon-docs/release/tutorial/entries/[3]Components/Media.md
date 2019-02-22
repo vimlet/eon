@@ -30,10 +30,11 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
 )*
 
 [Swiper]<>
-This element is a combination of the well known slider and image gallery components. It is supported on any device and only needs a single configuration to work on each one, without compromising its flexible behavior and options.
+This element is a combination of the well known slider and image gallery components. It is supported on any device and only needs a single configuration to work on each one, without compromising its flexible behavior and options. The swiper needs the collaboration of another Eon element to work correctly, the `eon-swiper-slide`.
+
 
 *(
-<doc-playground label="Slider" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Simple slider" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
     <head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -52,12 +53,12 @@ This element is a combination of the well known slider and image gallery compone
       <style>
         doc-showcase .doc-showcase-content {
           height: 350px;
+          width: 500px;
         }
-        
       </style>
   </head>
   <body>
-    <doc-showcase label='Slider'>
+    <doc-showcase>
       <eon-swiper pagination="true">
         <eon-swiper-slide class="blue"></eon-swiper-slide>
         <eon-swiper-slide class="red"></eon-swiper-slide>
@@ -87,9 +88,52 @@ This element is a combination of the well known slider and image gallery compone
 </doc-playground>
 )*
 
+The swiper gallery type provides a full bunch of options to build the images layout the way you want, like the dynamic displayed paging node, navigation controllers, full-screen mode and many others.
+
+*(
+<doc-playground label="Gallery" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <head>
+      <script src='framework/doc-eon/eon/eon.js'></script>
+      <script>
+        eon.theme = "claro";
+        eon.themeSchema = {
+          claro: ["eon-swiper"]
+        }
+      </script>
+      <script>
+        eon.import([
+          'framework/doc-eon/eon/ui/eon-swiper',
+          'framework/doc-eon/custom/doc-playground/doc-showcase'
+        ]);
+      </script>
+      <style>
+        doc-showcase .doc-showcase-content {
+          height: 350px;
+          width: 500px;
+        }
+      </style>
+  </head>
+  <body>
+    <doc-showcase>
+      <eon-swiper direction="horizontal" pagination="true" navigation="true" type="gallery"
+        full-screen="true">
+        <eon-swiper-slide image="img/view-5.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="img/view-2.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="img/view-6.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="img/view-4.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="img/view-1.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="img/view-5.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="img/view-2.jpeg"></eon-swiper-slide>
+      </eon-swiper>
+    </doc-showcase>
+  </body>
+  </template>
+</doc-playground>
+)*
+
+One can be assured that the swiper support nested instances to build a more complex layout.
 
 
 
-
-Swiper needs the collaboration of another eon element to work correctly, the [eon-swiper-slide]
 
