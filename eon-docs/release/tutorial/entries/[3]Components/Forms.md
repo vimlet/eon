@@ -94,6 +94,47 @@ The checkbox element allows selecting multiple options of a group of choices. It
 </doc-playground>
 )*
 
+[Radio]<>
+The radio element allows selecting one option of a group of choices.
+
+If this component was to be used alone it would be needed to import it. But if it would be used among other eon-radio components inside a eon-group it won't be necessary to import this components as eon-group will take care of that.
+
+*(
+<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
+    <template type="html">
+        <head>
+            <script src='framework/doc-eon/eon/eon.js'></script>
+            <script>eon.import(['framework/doc-eon/eon/ui/eon-group', 'framework/doc-eon/eon/ui/eon-radio','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+            <style>
+                .eon-group-label {
+                    display:none;
+                }
+            </style>
+        </head>
+        <body>
+            <doc-showcase label='Standard'>
+                <eon-group class="d-radio-group" name="radioOptions">
+                  <eon-radio class="d-top-margin" label="Orange" checked="true" value="Orange"></eon-radio>
+                  <eon-radio class="d-top-margin" label="Red" value="Red"></eon-radio>
+                  <eon-radio class="d-top-margin" label="Blue" value="Blue"></eon-radio>
+                </eon-group>
+            </doc-showcase>
+            <doc-showcase label='Disabled'>
+                <eon-group class="d-radio-group" name="disabledRadio">
+                  <eon-radio class="d-top-margin" label="Mobile" checked="true" value="mobile" disabled="true"></eon-radio>
+                  <eon-radio class="d-top-margin" label="Tablet" value="tablet" disabled="true"></eon-radio>
+                  <eon-radio class="d-top-margin" label="Desktop" value="desktop" disabled="true"></eon-radio>
+              </eon-group>
+            </doc-showcase>
+        </body>
+    </template>
+    <template type="css">
+        .doc-showcase-content{display:flex;}
+        .doc-showcase-content eon-button{margin:0 5px;}
+    </template>
+</doc-playground>
+)*
+
 [Toggle]<>
 This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two `checked` boolean values.  
 
