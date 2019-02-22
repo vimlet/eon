@@ -397,6 +397,10 @@
                     plainCode: new RegExp(
                         "\\*\\((?:(?!\\*\\()[\\s\\S])*\\)\\*",
                         "g"
+                    ),
+                    script: new RegExp(
+                        "\\*\\[(?:(?!\\*\\[)[\\s\\S])*\\]\\*",
+                        "g"
                     )
                 }
             },
@@ -502,7 +506,7 @@
                     el._misc.goToTop.classList.add("app-md-viewer-hideGoToTop");
                 }
             },
-            //@function parse (private) [Parse markdown file and show within app-md-viewer] @param data {string}
+            //@function _parse (private) [Parse markdown file and show within app-md-viewer] @param data {string}
             parse: function (data) {
                 var el = this;
                 el._misc.drawn = false;
@@ -616,7 +620,7 @@
                 });
                 return result;
             },
-            // @function splitLanguage (private) {string} [Extract language from codeblock] @param data {string}
+            // @function _splitLanguage (private) {string} [Extract language from codeblock] @param data {string}
             splitLanguage: function (tag) {
                 var el = this;
                 var result = "";
@@ -659,7 +663,7 @@
                 });
                 return result;
             },
-            // @function _parsePlainCode (private) {string} @param data {string}
+            // @function _parsePlainCode (private) {string} [Parse html code] @param data {string}
             parsePlainCode: function (data) {
                 var el = this;
                 var result = "";
@@ -677,6 +681,26 @@
                     var count = el._parse.later.length;
                     el._parse.later[count] = plainCode[j++];
                     return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function _parseScript (private) {string} [Add script tag] @param data {string}
+            parseScript: function (data) {
+                var el = this;
+                var result = "";
+
+                var matches = data.match(el._regex.script);
+                var script = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var cleanMatch = el._cleanMatch(matches[i], "*[", "]*");
+                        var scrpt = document.createElement("script");
+                        scrpt.innerHTML = cleanMatch;
+                        el._parseData.docFrag.appendChild(scrpt);
+                    }
+                }
+                result = data.replace(el._regex.script, function () {
+                    return "";
                 });
                 return result;
             },
@@ -889,6 +913,7 @@
                 data = el._parsePlayground(data);
                 data = el._parseCodeBlock(data);
                 data = el._parsePlainCode(data);
+                data = el._parseScript(data);
                 data = el._parseTip(data);
                 data = el._parseCode(data); // Order mathers, code must be parsed first because its content must not be parsed    
                 data = el._parseBr(data);
@@ -911,13 +936,13 @@
                 }
                 return false;
             },
-            // @function preParseParagraph (private) [Parse blockquotes before check paragraph itself] @param paragraph
+            // @function _preParseParagraph (private) [Parse blockquotes before check paragraph itself] @param paragraph
             preParseParagraph: function (paragraph) {
                 var el = this;
                 el._parseData.indented = el._isIndented(paragraph);
                 return el._getQuotes(0, paragraph);
             },
-            // @function getQuotes (private) [Recursive function to parse nested blockquotes] @param deep {int} [Nested deep] @param paragraph
+            // @function _getQuotes (private) [Recursive function to parse nested blockquotes] @param deep {int} [Nested deep] @param paragraph
             getQuotes: function (deep, paragraph) {
                 var matches = paragraph.match(el._regex.quotes);
                 if (matches) {
@@ -952,7 +977,7 @@
                     }
                 }
             },
-            // @function parseParagraph (private) [Parse a paragraph]
+            // @function _parseParagraph (private) [Parse a paragraph]
             parseParagraph: function (paragraph, recursive) {
                 var el = this;
                 var docFragment = document.createDocumentFragment();
@@ -1098,7 +1123,7 @@
                 }
                 return appended;
             },
-            // @function parseText (private) [Parse plain text. It may contain emphasis tags and it also replace tags before append]
+            // @function _parseText (private) [Parse plain text. It may contain emphasis tags and it also replace tags before append]
             parseText: function (str) {
                 el = this;
 
@@ -1108,7 +1133,7 @@
 
                 return str;
             },
-            // @function replaceLaterTags (private) [Append components to document fragment by searching custom tag withing data string]
+            // @function _replaceLaterTags (private) [Append components to document fragment by searching custom tag withing data string]
             replaceLaterTags: function (str) {
                 el = this;
                 var matches = str.match(el._regex.laterReplace);
@@ -1467,7 +1492,7 @@
                 }
                 return result;
             },
-            // @function splitParagraph (private) {string} @param data
+            // @function _splitParagraph (private) {string} @param data
             splitParagraph: function (data) {
                 var el = this;
                 el._misc.lines = data.match(el._regex.paragraph);
