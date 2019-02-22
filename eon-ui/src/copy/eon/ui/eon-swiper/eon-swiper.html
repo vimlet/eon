@@ -1,5 +1,4 @@
 <script>
-    //@header A container made to swipe eon-swiper-slide elements
     eon.element({
   
       name: "eon-swiper",
@@ -57,7 +56,7 @@
           reflect: true
         },
         /*
-          @property {Boolean} autoType
+          @property {String} autoType
           @description 
         */
         autoType: {
@@ -437,7 +436,7 @@
         },
         /*
           @function (private) _paginationHideAnim
-          @description Hideable pagination animation
+          @description Hidable pagination animation
         */
         paginationHideAnim: function () {
           var el = this;
@@ -904,6 +903,7 @@
         /*
           @function (private) _resizeFullScreenHandler
           @description Update the full screen handler button dimensions
+          @param {Object} btn [Navigation button target]
         */
         resizeFullScreenHandler: function (btn) {
           var el = this;
@@ -951,7 +951,6 @@
             el._refs.wrapper.addEventListener("pointermove", function (e) {
               if (mousedown) {
                 if (slideCounter > 1) {
-                  // if (!throttled) {
                   // Get y/z translate pixels
                   translatePixels = moveValue - e[axis];
                   // Process position with the new movement values
@@ -963,13 +962,6 @@
                   }
                   // Update initial move value
                   moveValue = e[axis];
-                  // Throttle
-                  // throttled = true;
-                  // Set a timeout to un-throttle
-                  // setTimeout(function () {
-                  //   throttled = false;
-                  // }, delay);
-                  // }
                 }
               }
             });
@@ -1170,7 +1162,7 @@
         */
         formatArrayProperty: function (prop) {
           var el = this;
-          // Check preventclose property value
+          // Check preventClose property value
           if (typeof prop == "string") {
             // Convert value into an array
             prop = el._getValueAsArray(prop);
@@ -1196,9 +1188,8 @@
         },
         /*
           @function (private) {Boolean} _isTrickyBrowser
-          @description 
-          @param {String} value [Array or String value to be processed]
-          @return {Boolean} [Whether or not the system is running on a non standard behavior browser]
+          @description Get browsers with specific or unstandardized behavior
+          @return {Boolean} [Whether or not the system is running on a unstandardized behavior browser]
         */
         isTrickyBrowser: function () {
           var browser = eon.util.getBrowser();
@@ -1207,11 +1198,11 @@
         /*
           @function (private) {Boolean} _keepInPlace
           @description Called when the element is resized, keeps the current slide in its corresponding position
+          @param {Object} currentIndex [The index of the slide to translate to]
         */
         keepInPlace: function (currentIndex) {
           var el = this;
           // Get current slide index
-          // var currentIndex = el.slides.indexOf(el.currentSlide);
           // Get new y/z position
           var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
           var newPos = swiperHeight * (currentIndex);
@@ -1219,12 +1210,11 @@
           el._translate(el._refs.wrapper, -newPos);
         },
         /*
-          @function (private) {Boolean} _initAuto
-          @description 
+          @function (private) _initAuto
+          @description Set up the automatic playing behavior 
         */
         initAuto: function () {
           var el = this;
-  
           if (eon.util.isTrue(el.auto)) {
   
             // Get number of slides that fit into the wrapper size
@@ -1258,7 +1248,8 @@
         },
         /*
           @function (private) {Boolean} _allInView
-          @description 
+          @description Check if the slides is inside the swiper boundaries
+          @return {Boolean} [Whether or not the slide is inside the swiper boundaries]
         */
         allInView: function () {
           var el = this;
@@ -1270,8 +1261,8 @@
           }
         },
         /*
-          @function (private) {Boolean} _createResizeFunction
-          @description 
+          @function (private)  _createResizeFunction
+          @description Initialize de swiper resize function
         */
         createResizeFunction: function () {
           var el = this;
@@ -1486,20 +1477,14 @@
       },
       onCreated: function () {
         var el = this;
-        // Create on slide change event callback
+        // Swiper events
         eon.createCallback("onSlideChange", el);
-        // 
         eon.createCallback("onDragStarted", el);
-        // 
         eon.createCallback("onDragStoped", el);
-        // 
         eon.createCallback("onPrevCalled", el);
-        // 
         eon.createCallback("onNextCalled", el);
-        // 
         eon.createCallback("onSwipeEnd", el);
-        // Create on paging ready event
-        // ** Internally used for thumbnails translation calculation
+        // ** Internally used
         eon.createCallback("onPagingReady", el, "ready");
         eon.createCallback("onSlidesReady", el, "ready");
         // Event target path monitor
@@ -1529,7 +1514,6 @@
           el._setUpNavigation(fragment);
           el.appendChild(fragment);
         }, 0);
-  
       },
       onTransformed: function () {
         var el = this;

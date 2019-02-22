@@ -88,7 +88,9 @@ This element is a combination of the well known slider and image gallery compone
 </doc-playground>
 )*
 
+
 The swiper gallery type provides a full bunch of options to build the images layout the way you want, like the dynamic displayed paging node, navigation controllers, full-screen mode and many others.
+
 
 *(
 <doc-playground label="Gallery" format="true" html="true" js="true" css="true" selector="body">
