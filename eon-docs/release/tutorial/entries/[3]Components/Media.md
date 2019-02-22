@@ -5,7 +5,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
 *(
 <doc-playground label="Simple Video" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
-    <head>
+    <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
       <script>
         eon.themeSchema = {
@@ -18,13 +18,19 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
         'framework/doc-eon/custom/doc-playground/doc-showcase'
         ])
       </script>
-  </head>
-  <body>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      </style>
+  </doc-head>
+  <doc-body>
     <doc-showcase label='Snowy day'>
       <eon-video type="video/mp4" controls="true" src="video/snow.mp4" poster="img/snow.jpg" volume="0.5">
       </eon-video>
     </doc-showcase>
-  </body>
+  </doc-body>
   </template>
 </doc-playground>
 )*
@@ -36,7 +42,7 @@ This element is a combination of the well known slider and image gallery compone
 *(
 <doc-playground label="Simple slider" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
-    <head>
+    <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
       <script>
         eon.theme = "claro";
@@ -51,13 +57,17 @@ This element is a combination of the well known slider and image gallery compone
         ]);
       </script>
       <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
         doc-showcase .doc-showcase-content {
           height: 350px;
           width: 500px;
         }
       </style>
-  </head>
-  <body>
+  </doc-head>
+  <doc-body>
     <doc-showcase>
       <eon-swiper pagination="true">
         <eon-swiper-slide class="blue"></eon-swiper-slide>
@@ -66,7 +76,7 @@ This element is a combination of the well known slider and image gallery compone
         <eon-swiper-slide class="yellow"></eon-swiper-slide>
       </eon-swiper>
     </doc-showcase>
-  </body>
+  </doc-body>
   </template>
    <template type="css">
    .blue {
@@ -95,7 +105,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
 *(
 <doc-playground label="Gallery" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
-    <head>
+    <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
       <script>
         eon.theme = "claro";
@@ -110,13 +120,17 @@ The swiper gallery type provides a full bunch of options to build the images lay
         ]);
       </script>
       <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
         doc-showcase .doc-showcase-content {
           height: 350px;
           width: 500px;
         }
       </style>
-  </head>
-  <body>
+  </doc-head>
+  <doc-body>
     <doc-showcase>
       <eon-swiper direction="horizontal" pagination="true" navigation="true" type="gallery"
         full-screen="true">
@@ -129,12 +143,12 @@ The swiper gallery type provides a full bunch of options to build the images lay
         <eon-swiper-slide image="img/view-2.jpeg"></eon-swiper-slide>
       </eon-swiper>
     </doc-showcase>
-  </body>
+  </doc-body>
   </template>
 </doc-playground>
 )*
 
-One can be assured that the swiper support nested instances to build a more complex layout.
+One can be assured that the swiper supports nested instances to build a more complex layout.
 
 
 
