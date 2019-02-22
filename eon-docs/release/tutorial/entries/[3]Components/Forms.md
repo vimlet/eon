@@ -12,15 +12,15 @@ By default the button style is outline, but they can be flat and filled using th
             <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
         </head>
         <body>
-            <doc-showcase title='Outline'>
+            <doc-showcase label='Outline'>
                 <eon-button value='Button'></eon-button>
                 <eon-button value='Disabled' disabled='true'></eon-button>
             </doc-showcase>
-                <doc-showcase title='Flat'>
+                <doc-showcase label='Flat'>
                 <eon-button value='Button' design='flat'></eon-button>
                 <eon-button value='Disabled' disabled='true' design='flat'></eon-button>
             </doc-showcase>
-                <doc-showcase title='Filled'><eon-button value='Button' design='filled'></eon-button>
+                <doc-showcase label='Filled'><eon-button value='Button' design='filled'></eon-button>
                 <eon-button value='Disabled' disabled='true' design='filled'></eon-button>
             </doc-showcase>
         </body>
@@ -43,17 +43,17 @@ To display buttons with icons just use the `vicon` property passing any of the i
             <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
         </head>
         <body>
-            <doc-showcase title='Outline'>
+            <doc-showcase label='Outline'>
                 <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>'></eon-button>
                 <eon-button vicon='vicon-build'></eon-button>
                 <eon-button vicon='vicon-build' disabled='true'></eon-button>
             </doc-showcase>
-            <doc-showcase title='Flat'>
+            <doc-showcase label='Flat'>
                 <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>' design='flat' icon-position="right"></eon-button>
                 <eon-button vicon='vicon-build' design='flat'></eon-button>
                 <eon-button vicon='vicon-build' disabled='true' design='flat'></eon-button>
             </doc-showcase>
-            <doc-showcase title='Filled'>
+            <doc-showcase label='Filled'>
                 <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>' design='filled'></eon-button>
                 <eon-button vicon='vicon-build' design='filled'></eon-button>
                 <eon-button vicon='vicon-build' disabled='true' design='filled'></eon-button>
