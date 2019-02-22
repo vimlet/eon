@@ -5,7 +5,7 @@
         <div class="doc-playground-menu-title"></div>
         <div class="doc-playground-menu-tabs doc-playground-hidden"></div>
         <div class="doc-playground-filler"></div>
-        <app-vicon class="doc-playground-toggle" vicon="div" label="go to code" background="rgba(0,0,0,0.1)"></app-vicon>
+        <app-vicon class="doc-playground-toggle" vicon="div" label="toggle code" background="rgba(0,0,0,0.1)"></app-vicon>
         <app-vicon class="doc-playground-fullscreen" vicon="fullscreen" label="fullscreen" background="rgba(0,0,0,0.1)"></app-vicon>
         <div class="doc-playground-menu-links"></div>
     </div>
@@ -89,6 +89,10 @@
             codeMaxHeight: {
                 value: "800",
                 reflect: true
+            },
+            // @html-attribute onResultReady (public) [Callback when the result view is ready]
+            onResultReady: {
+                value: {}
             }
         },
 
@@ -116,11 +120,11 @@
             // @function setHeaderButtons (public) [Set header buttons]
             setHeaderButtons: function (title) {
                 var el = this;
-                if (el._misc.header) {                    
+                if (el._misc.header) {
                     var links = JSON.parse(el._misc.header);
                     var fragment = document.createDocumentFragment();
                     for (var key in links) {
-                        var link = links[key];    
+                        var link = links[key];
                         if (link.icon && !link.text) {
                             var vicon = document.createElement("app-vicon");
                             vicon.vicon = link.icon;
@@ -129,10 +133,10 @@
                             vicon.link = link.link;
                             vicon.action = link.action;
                             vicon.playground = el;
-                            vicon.addEventListener("click", function (e) {                                
-                                if(this.link){
-                                window.open(this.link, '_blank');
-                                }else if(this.action){
+                            vicon.addEventListener("click", function (e) {
+                                if (this.link) {
+                                    window.open(this.link, '_blank');
+                                } else if (this.action) {
                                     eval(this.action)(this.playground, this);
                                 }
                             });
@@ -144,27 +148,27 @@
                             button.link = link.link;
                             button.action = link.action;
                             button.playground = el;
-                            button.addEventListener("click", function (e) {                               
-                                if(this.link){
-                                window.open(this.link, '_blank');
-                                }else if(this.action){
+                            button.addEventListener("click", function (e) {
+                                if (this.link) {
+                                    window.open(this.link, '_blank');
+                                } else if (this.action) {
                                     eval(this.action)(this.playground, this);
                                 }
                             });
                             fragment.appendChild(button);
                         }
-                    }    
+                    }
                     el._refs.header.appendChild(fragment);
                 }
             },
             // @function setFooterButtons (public) [Set footer buttons]
             setFooterButtons: function (title) {
                 var el = this;
-                if (el._misc.footer) {                    
+                if (el._misc.footer) {
                     var links = JSON.parse(el._misc.footer);
                     var fragment = document.createDocumentFragment();
                     for (var key in links) {
-                        var link = links[key];    
+                        var link = links[key];
                         if (link.icon && !link.text) {
                             var vicon = document.createElement("app-vicon");
                             vicon.vicon = link.icon;
@@ -173,10 +177,10 @@
                             vicon.link = link.link;
                             vicon.action = link.action;
                             vicon.playground = el;
-                            vicon.addEventListener("click", function (e) {                                 
-                                if(this.link){
-                                window.open(this.link, '_blank');
-                                }else if(this.action){
+                            vicon.addEventListener("click", function (e) {
+                                if (this.link) {
+                                    window.open(this.link, '_blank');
+                                } else if (this.action) {
                                     eval(this.action)(this.playground, this);
                                 }
                             });
@@ -188,16 +192,16 @@
                             button.link = link.link;
                             button.action = link.action;
                             button.playground = el;
-                            button.addEventListener("click", function (e) {                               
-                                if(this.link){
-                                window.open(this.link, '_blank');
-                                }else if(this.action){
+                            button.addEventListener("click", function (e) {
+                                if (this.link) {
+                                    window.open(this.link, '_blank');
+                                } else if (this.action) {
                                     eval(this.action)(this.playground, this);
                                 }
                             });
                             fragment.appendChild(button);
                         }
-                    }                        
+                    }
                     el._refs.footer.appendChild(fragment);
                 }
             },
@@ -218,14 +222,16 @@
                 el.result.close();
                 el.result.head.appendChild(el._iframeGenericCss());
 
-                setTimeout(function() {
-                    el._refs.iframe.onload = el._iframeLoaded(el.result);
-                }, 500);
+                el._refs.iframe.onload = el._iframeLoaded(el.result);
 
                 // TODO This function load scripts async which could result into a bottle neck
                 el._appendScriptsToIframe(el.result);
 
-                eon.triggerCallback("onReady", el, el, [el._refs.iframe]);
+
+                if (typeof (el.onResultReady) != "object") {
+                    eval(el.onResultReady)(el, el.result);
+                }
+
                 el._refs.iframe.classList.remove("doc-playground-hidden");
                 el._refs.loading.hide();
             },
@@ -348,27 +354,27 @@
             storeCode: function () {
                 var el = this;
                 var sourceCode = el.getSourceElements();
-                el._misc.code = {};                
+                el._misc.code = {};
                 sourceCode.forEach(function (code) {
-                        switch (code.getAttribute("type")) {
-                            case "html":
-                                var content = code.innerHTML.replace(/doc-head/g, 'head');
-                                content = content.replace(/doc-body/g, 'body');
-                                el._misc.code.html = content;
-                                break;
-                            case "js":
-                                el._misc.code.js = code.innerHTML;
-                                break;
-                            case "css":
-                                el._misc.code.css = code.innerHTML;
-                                break;
-                            case "header":
-                                el._misc.header = code.innerHTML;
-                                break;
-                            case "footer":
-                                el._misc.footer = code.innerHTML;
-                                break;
-                        }
+                    switch (code.getAttribute("type")) {
+                        case "html":
+                            var content = code.innerHTML.replace(/doc-head/g, 'head');
+                            content = content.replace(/doc-body/g, 'body');
+                            el._misc.code.html = content;
+                            break;
+                        case "js":
+                            el._misc.code.js = code.innerHTML;
+                            break;
+                        case "css":
+                            el._misc.code.css = code.innerHTML;
+                            break;
+                        case "header":
+                            el._misc.header = code.innerHTML;
+                            break;
+                        case "footer":
+                            el._misc.footer = code.innerHTML;
+                            break;
+                    }
                     code.parentNode.removeChild(code);
                 });
             },
@@ -541,7 +547,7 @@
                     }
                 }
                 el._refs.tabs.classList.add("doc-playground-hidden");
-                el._refs.toggle.label = "go to code";
+                el._refs.toggle.label = "toggle code";
                 el._refs.footer.classList.remove("doc-playground-hidden");
                 el.setIframe();
             },
@@ -553,7 +559,7 @@
                 el._misc.activeView = "code";
                 el._refs.tabs.classList.remove("doc-playground-hidden");
                 el._refs.footer.classList.add("doc-playground-hidden");
-                el._refs.toggle.label = "go to result";
+                el._refs.toggle.label = "toggle result";
                 el._loadEditor();
             },
             // @function _htmlFilter (private) [Filter html if selector attribute is set]
@@ -639,21 +645,38 @@
             // @function _iframeLoaded (private) [Function called when iframe is loaded. Calculate iframe height]
             iframeLoaded: function (iframeContent) {
                 var el = this;
-                setTimeout(function() {
-                var height = iframeContent.body.scrollHeight;
-                el._refs.iframe.style.height = height + "px";
-                var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
-                el._refs.editor.style.minHeight = codeMinHeight + "px";
-                var codeMaxHeight = parseInt(el.codeMaxHeight) < height ? height : el.codeMaxHeight;
-                el._refs.editor.style.maxHeight = codeMaxHeight + "px";
-                }, 0);
+                if (!iframeContent.body) {
+                    setTimeout(function () { // TODO the only way to wait for iframe content to be ready
+                        el._iframeLoaded(iframeContent);
+                    }, 200);
+                } else {
+                    var height = iframeContent.body.scrollHeight;
+                    el._refs.iframe.style.height = height + "px";
+                    var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
+                    el._refs.editor.style.minHeight = codeMinHeight + "px";
+                    var codeMaxHeight = parseInt(el.codeMaxHeight) < height ? height : el.codeMaxHeight;
+                    el._refs.editor.style.maxHeight = codeMaxHeight + "px";
+                    eon.triggerCallback("onResultReady", el, el, [el._refs.iframe]);
+
+                    if (el._misc.interval) {
+                        clearInterval(el._misc.interval);
+                    }
+                    el._misc.interval = setInterval(function () {
+                        var height = iframeContent.body.scrollHeight;
+                        el._refs.iframe.style.height = height + "px";
+                        var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
+                        el._refs.editor.style.minHeight = codeMinHeight + "px";
+                        var codeMaxHeight = parseInt(el.codeMaxHeight) < height ? height : el.codeMaxHeight;
+                        el._refs.editor.style.maxHeight = codeMaxHeight + "px";
+                    }, 200);
+                }
             }
         },
 
         onCreated: function () {
             var el = this;
             el._storeCode();
-            eon.createCallback("onReady", this, "ready");
+            eon.createCallback("onResultReady", this, "ready");
             eon.createCallback("onFullScreenActivated", this);
             eon.createCallback("onFullScreenDeactivated", this);
         },

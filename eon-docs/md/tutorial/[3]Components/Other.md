@@ -1,6 +1,6 @@
 
 [Tree]<>
-The eon tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that covers this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
+The eon-tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that covers this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
 
 *(
 <doc-playground label="Tree" format="true" html="true" js="true" css="true" selector="body">
@@ -18,8 +18,8 @@ The eon tree element is the best ally to represent hierarchical data, it is base
       ])</script>
   </head>
   <body>
-    <doc-showcase title='Directories'>
-      <eon-tree id="d-tree" icons="all" drag="true">
+    <doc-showcase label='Directories'>
+      <eon-tree icons="all" drag="true">
         <eon-tree-node name="dir" path="dir"></eon-tree-node>
         <eon-tree-node type="file" name="file1" path="file1"></eon-tree-node>
         <eon-tree-node path="dir2/dir2.1/dir2.1.1"></eon-tree-node>
