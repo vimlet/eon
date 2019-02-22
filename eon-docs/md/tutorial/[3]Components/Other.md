@@ -1,6 +1,6 @@
 
 [Tree]<>
-The eon tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that covers this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
+The eon-tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that cover this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
 
 *(
 <doc-playground label="Tree" format="true" html="true" js="true" css="true" selector="body">
@@ -18,22 +18,18 @@ The eon tree element is the best ally to represent hierarchical data, it is base
       ])</script>
   </head>
   <body>
-    <doc-showcase title='Directories'>
-      <eon-tree id="d-tree" icons="all" drag="true">
+    <doc-showcase label='File manager'>
+      <eon-tree icons="all" drag="true">
         <eon-tree-node name="dir" path="dir"></eon-tree-node>
         <eon-tree-node type="file" name="file1" path="file1"></eon-tree-node>
         <eon-tree-node path="dir2/dir2.1/dir2.1.1"></eon-tree-node>
-        <eon-tree-node path="dir2/dir2.1/dir2.1.2"></eon-tree-node>
-        <eon-tree-node type="file" path="dir2/dir2.1/dir2.1.1/dir2.1.1.1/file2"></eon-tree-node>
-        <eon-tree-node name="dir2.1.2.1.1" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.1"></eon-tree-node>
-        <eon-tree-node name="dir2.1.2.1.2" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.2"></eon-tree-node>
-        <eon-tree-node type="file" extension=".js" path="dir2/dir2.1/dir2.1.2/dir2.1.2.1/dir2.1.2.1.2/file3"></eon-tree-node>
-      </eon-tree>
+        <eon-tree-node type="file" path="dir3/dir2.1/dir2.1.1/dir2.1.1.1/file2"></eon-tree-node>
+     </eon-tree>
     </doc-showcase>
   </body>
   </template>
 </doc-playground>
 )*
 
-The tree element functionality depends on the `eon-tree-node` element as structural element,so it is imported while eon-tree does.
+The tree element functionality depends on the `eon-tree-node` element as structural element, so it is imported while eon-tree does.
 

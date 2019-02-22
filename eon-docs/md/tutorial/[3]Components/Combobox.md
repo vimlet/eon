@@ -10,7 +10,7 @@ The combobox element is a component meant for selecting an option between the gi
         </head>
         <body>
         <div id="content" style="width:100%;">
-            <doc-showcase title='Active'>
+            <doc-showcase label='Active'>
               <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
                   <eon-item value='red' display-value='Red'></eon-item>
                   <eon-item value='green' display-value='Green'></eon-item>
@@ -18,7 +18,7 @@ The combobox element is a component meant for selecting an option between the gi
                   <eon-item value='grey' display-value='Grey'></eon-item>
               </eon-combobox>
           </doc-showcase>
-          <doc-showcase title='Disabled'>
+          <doc-showcase label='Disabled'>
               <eon-combobox disabled='true' label='States' name='comboTest2' placeholder='Ohio'>
                   <eon-item value='tomato' display-value='Tomato'></eon-item>
                   <eon-item value='avocado' display-value='Avocado'></eon-item>
