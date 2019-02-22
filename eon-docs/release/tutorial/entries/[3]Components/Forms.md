@@ -116,7 +116,6 @@ The checkbox element allows selecting multiple options of a group of choices. It
 [Radio]<>
 The radio element allows selecting one option of a group of choices, for this, the radio elements have to be included within the `eon-group`, having to import only this component.
 
-
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
     <template type="html">
