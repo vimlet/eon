@@ -54,7 +54,6 @@ The Date element is a component meant for typing or selecting a specific date, y
               <eon-date disabled="true" selectable="dmy" type="calendar" name="disabledCalendar"></eon-date>
           </doc-showcase>
         </div>
-        <div style="height:150px;"></div>
         </body>
     </template>
     <template type="css">
