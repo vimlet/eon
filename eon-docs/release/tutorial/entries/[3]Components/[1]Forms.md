@@ -260,7 +260,7 @@ The text element is a component meant for typing and it has multiple uses depend
     </doc-head>
     <doc-body>
       <doc-showcase>
-        <eon-text label="Text field" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
+        <eon-text label="Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
       </doc-showcase>
       <doc-showcase>
         <eon-text value="Initial value" class="margin-top" inline="false" name="text" max-length="18"></eon-text>

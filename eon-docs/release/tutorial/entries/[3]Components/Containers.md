@@ -159,3 +159,77 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 </doc-playground>
 )*
 
+[Header Panel]<>
+The Headerpanel element works as a simple container but provides a bunch of properties to simulate a card layout with a title header, action and remove buttons and scrollable content.
+
+*(
+<doc-playground label="Flexible behavior" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src='framework/doc-eon/eon/eon.js'></script>
+      <script>
+        eon.themeSchema = {
+          claro: ["eon-headerpanel"]
+        }
+      </script>
+      <script>
+        eon.import([
+          'framework/doc-eon/eon/ui/eon-headerpanel',
+          'framework/doc-eon/custom/doc-playground/doc-showcase'
+        ])
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      </style>
+  </doc-head>
+  <doc-body>
+    <doc-showcase label="Growing header">
+        <eon-headerpanel id="growing-headerpanel" default-style="false" header="grow" class="headerpanel" header-content="Custom" action-button="changeSquaresColor('growing-headerpanel')" close-button="none" close-button-class="d-black-close">
+          <div class="headerpanel-square red"></div>
+          <div class="headerpanel-square red"></div>
+          <div class="headerpanel-square red"></div>
+          <div class="headerpanel-square red"></div>
+        </eon-headerpanel>
+      </doc-showcase>
+      <doc-showcase label="Simple panel">
+        <eon-headerpanel class="headerpanel" default-style="false">
+        </eon-headerpanel>
+      </doc-showcase>
+    </doc-showcase>
+  </doc-body>
+  </template>
+   <template type="css">
+      .red {
+        background-color: #b36a6a;
+      }
+      .headerpanel {
+        width: 200px;
+        height: 200px;
+        transition: all .2s;
+      }
+      .headerpanel-square {
+        width: 100%;
+        height: 100px;
+        margin-top: 12px;
+        transition: all .2s;
+      }
+  </template>
+  <template type="js">
+    var colors = ["", "#b78f47", "#2a9a9a", "#8c47b7", "#795829", "#b1616f", "#2b4b94"];
+
+    function changeSquaresColor(id) {
+      var squares = document.querySelector("#" + id).querySelectorAll(".headerpanel-square");
+      var color = Math.floor((Math.random() * 6) + 1);
+      // Change squares color
+      for (var index in squares) {
+        squares[index].style.backgroundColor = colors[color];
+      }
+    }
+  </template>
+</doc-playground>
+)*
+
+

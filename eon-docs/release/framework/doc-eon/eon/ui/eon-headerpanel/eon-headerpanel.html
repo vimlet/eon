@@ -2,7 +2,7 @@
   <i class="eon-headerpanel-closeButton eon-fg1 eon-fg1-hoverable vicon-close"></i>
   <div class="eon-headerpanel-header eon-fg1 eon-sect1"></div>
   <div class="eon-headerpanel-panel eon-bg1">
-    <eon-scroll> </eon-scroll>
+    <eon-scroll></eon-scroll>
     <div class="eon-headerpanel-shadowDrop eon-boxshadow3"></div>
     <div class="eon-headerpanel-actionButton eon-sect1 eon-boxshadow2"></div>
   </div>
@@ -27,15 +27,14 @@
       },
     },
     properties: {
-      // ** MANUAL: Content top could be shadowed emulating header overlapping
       /*
-        @property {String} Panel class
+        @property {String} panelClass
         @description Element standard CSS class name
         Values: standard, shadowed
         Default: standard
       */
       panelClass: {
-        value: "",
+        value: "standard",
         reflect: true
       },
       /*
@@ -83,10 +82,10 @@
       /*
         @property {String} actionButton
         @description Weather or not a floating action button must be displayed
-        Value: (function name), (other: default behaviour)
+        Value: (function name), (other: default behavior)
       */
       actionButton: {
-        value: "", // function (click behaviour), other: default behaviour
+        value: "", // function (click behavior), other: default behavior
         reflect: true
       },
       /*
@@ -107,9 +106,8 @@
         reflect: true
       },
       /*
-        @property {String} closeButton
+        @property {String} closeButtonClass
         @description  Close button CSS class name
-        Value: (function name), (other: delete panel)
       */
       closeButtonClass: {
         value: "",
@@ -119,13 +117,13 @@
     privateFunctions: {
       /*
         @function (private) _createRefs
-        @description
+        @description Store useful headerpanel structure references
       */
       createRefs: function () {
-          var el = this;
-          el._refs.header = el.template.querySelector(".eon-headerpanel-header");
-          el._refs.panel = el.template.querySelector(".eon-headerpanel-panel");
-          el._refs.scroll = el.template.querySelector("eon-scroll");
+        var el = this;
+        el._refs.header = el.template.querySelector(".eon-headerpanel-header");
+        el._refs.panel = el.template.querySelector(".eon-headerpanel-panel");
+        el._refs.scroll = el.template.querySelector("eon-scroll");
       },
       /*
         @function (private) _importContent
@@ -142,8 +140,14 @@
           currentEl = children.shift();
           documentFragment.appendChild(currentEl);
         }
-        
-        el._refs.scroll.content.appendChild(documentFragment);
+        // Check eon children parsing
+        if(el._refs.scroll.onCreated) {
+          el._refs.scroll.content.appendChild(documentFragment);
+        } else {
+          el.onReady(function(){
+            el._refs.scroll.content.appendChild(documentFragment);
+          });
+        }
       },
       /*
         @function (private) _setPanelStyle
@@ -202,7 +206,7 @@
             // Execute button function
             eval(callback);
           } catch (e) {
-            // Default button behaviour - do nothing
+            // Default button behavior - do nothing
           }
         });
       },
@@ -267,14 +271,18 @@
             eon.removeCallback("onScrolled", el._refs.scroll, growingHeaderListener);
           } else {
             // Scroll content listener
-            el._refs.scroll.onScrolled(growingHeaderListener);
+            if(el._refs.scroll.onCreated) {
+              el._refs.scroll.onScrolled(growingHeaderListener);
+            } else {
+              el.onReady(function(){
+                el._refs.scroll.onScrolled(growingHeaderListener);
+              });
+            }
           }
           /**
            * Growing header listener
-           * @return {[type]} [description]
            */
           function growingHeaderListener(obj) {
-            
             if (obj.trigger !== "resize") {
               var padding = window.getComputedStyle(el._refs.panel, null)
                 .getPropertyValue("padding").split("px")[0];
