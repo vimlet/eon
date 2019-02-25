@@ -1,3 +1,9 @@
+*[
+  function changeTheme(playground){
+    var eon = playground._refs.iframe.contentWindow.eon;
+    eon.theme= eon.theme == "claro" ? "noire" : "claro";
+  }
+]*
 [Gutter]<>
 The gutter element is a container with the ability to separate its content in two sections divided with a draggable splitter, providing a flexible manipulation over the size of the sections and displaying. This kind of components is frequently used on code editor programs.
 

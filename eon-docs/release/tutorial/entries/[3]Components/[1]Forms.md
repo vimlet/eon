@@ -267,13 +267,10 @@ The text element is a component meant for typing and it has multiple uses depend
         ]);
       </script>
       <style>
-<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
-=======
         body {
           display: flex;
           flex-wrap: wrap;
         }
->>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
         doc-showcase {
           max-width: 300px;
         }
@@ -287,11 +284,6 @@ The text element is a component meant for typing and it has multiple uses depend
     </doc-head>
     <doc-body>
       <doc-showcase>
-<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
-        <eon-text label="Text field" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
-        <eon-text value="Initial value" inline="false" name="text" max-length="18"></eon-text>
-        <eon-text value="Disabled" inline="false" name="disabled" disabled="true"></eon-text>
-=======
         <eon-text label="Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
       </doc-showcase>
       <doc-showcase>
@@ -299,7 +291,6 @@ The text element is a component meant for typing and it has multiple uses depend
       </doc-showcase>
       <doc-showcase>
         <eon-text value="Disabled" class="margin-top" inline="false" name="disabled" disabled="true"></eon-text>
->>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
       </doc-showcase>
     </doc-body>
   </template>
@@ -325,13 +316,10 @@ The area type text enables the user to write large amount of characters in multi
         ]);
       </script>
       <style>
-<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
-=======
         body {
           display: flex;
           flex-wrap: wrap;
         }
->>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
         doc-showcase {
           max-width: 300px;
         }
@@ -345,19 +333,12 @@ The area type text enables the user to write large amount of characters in multi
       </style>
     </doc-head>
     <doc-body>
-<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
-        <doc-showcase>
-            <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
-            <eon-text placeholder="Disabled Textarea" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
-        </doc-showcase>
-=======
       <doc-showcase>
         <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
       </doc-showcase>
       <doc-showcase>
         <eon-text placeholder="Disabled Textarea" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
       </doc-showcase>
->>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
     </doc-body>
   </template>
   <template type="footer">
@@ -382,13 +363,10 @@ The password text is pretty similar to the text type but it shows asterisks inst
         ]);
       </script>
       <style>
-<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
-=======
         body {
           display: flex;
           flex-wrap: wrap;
         }
->>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
         doc-showcase {
           max-width: 300px;
         }

@@ -1,4 +1,9 @@
-
+*[
+    function changeTheme(playground){
+      var eon = playground._refs.iframe.contentWindow.eon;
+      eon.theme= eon.theme == "claro" ? "noire" : "claro";
+    }
+]*
 [Tree]<>
 The eon-tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that cover this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
 
