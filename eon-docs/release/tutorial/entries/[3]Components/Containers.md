@@ -68,6 +68,9 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
         background-color: #b36a6a;
       }
   </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
+  </template>
 </doc-playground>
 )*
 
@@ -156,6 +159,9 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
         background-color: #b36a6a;
       }
   </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
+  </template>
 </doc-playground>
 )*
 
@@ -228,6 +234,9 @@ The Headerpanel element works as a simple container but provides a bunch of prop
         squares[index].style.backgroundColor = colors[color];
       }
     }
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
   </template>
 </doc-playground>
 )*
