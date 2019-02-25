@@ -2,6 +2,13 @@
 [Video]<>
 The video component is an HTML5 `<video>` wrap. It provides an extra layer of compatibility and some capabilities to deal with the annoying browsers and devices unstandardized behavior (fullscreen mode, source types, auto-play functionality).
 
+*[
+    function changeTheme(playground){
+      var eon = playground._refs.iframe.contentWindow.eon;
+      eon.theme= eon.theme == "claro" ? "noire" : "claro";
+    }
+]*
+
 *(
 <doc-playground label="Simple Video" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
@@ -31,6 +38,9 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
       </eon-video>
     </doc-showcase>
   </doc-body>
+  </template>
+  <template type="footer">
+     {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
   </template>
 </doc-playground>
 )*

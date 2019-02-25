@@ -37,6 +37,9 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
     </doc-showcase>
   </doc-body>
   </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
+  </template>
 </doc-playground>
 )*
 
