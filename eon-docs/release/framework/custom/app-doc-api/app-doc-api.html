@@ -65,14 +65,12 @@
 
     #app-doc-api-content {
         box-sizing: border-box;
-        margin-bottom: 300px;
-        margin-top: 50px;
-        height: calc(100% - 55px);
         min-width: 400px;
         padding: 0px 16px;
         padding-top: 20px;
         max-width: 1100px;
         margin: 0 auto;
+        margin-bottom: 80px;
     }
 
     .app-doc-api-t1 {
@@ -154,16 +152,15 @@
         font-weight: bold;
         cursor: pointer;
         text-decoration: underline;
-        /* border:1px solid;
-        padding: 5px;
-        border-radius: 20px; */
+    }
+    #app-doc-api-togglePrivate-mobile{
+        margin-right: 10px;
+        cursor: pointer;
+        display:none;
+    margin-left: auto;
     }
 
     #app-doc-api-togglePrivate:hover {
-        /* background-color:#bcf2ff; */
-        /* -webkit-box-shadow: 0px 0.1px 1px 0px rgba(0, 0, 0, 0.75);
-        -moz-box-shadow: 0px 0.1px 1px 0px rgba(0, 0, 0, 0.75);
-        box-shadow: 0px 0.1px 1px 0px rgba(0, 0, 0, 0.75); */
         color: #c7c7c7;
     }
 
@@ -247,16 +244,14 @@
     }
 
 
-    /* @media only screen and (max-width: 1200px) {
-        #app-doc-api-content {
-        padding: 0px 25px;
-    }
-    } */
-
     @media only screen and (max-width: 700px) {
-        .app-doc-api-menu {
-            padding-left: 50px;
-        }
+        
+    #app-doc-api-togglePrivate {
+        display:none;
+    }
+    #app-doc-api-togglePrivate-mobile{
+        display:block;
+    }
     }
 </style>
 
@@ -269,6 +264,7 @@
                 <app-doc-api-menu-item label="Functions" id="functionsMenu"></app-doc-api-menu-item>
                 <div id="app-doc-api-togglePrivate" onclick="document.querySelector('app-doc-api').togglePrivate(this);">Show
                     Private</div>
+                <i class="material-icons" id="app-doc-api-togglePrivate-mobile" onclick="document.querySelector('app-doc-api').togglePrivate(this);">visibility_off</i>
             </div>
         </div>
 
@@ -352,6 +348,7 @@
         functions: {
             // @function setData (public) [Set up document] @param data @param config
             setData(data, config) {
+                document.querySelector("#app-doc-api-togglePrivate").innerText = "Show Private";
                 this._setupData(data, config);
             },
             // @function togglePrivate (public) [Toggle private api] @param el [Toggle button]
@@ -367,6 +364,7 @@
                 });
 
                 var button = document.querySelector("#app-doc-api-togglePrivate");
+                var buttonMobile = document.querySelector("#app-doc-api-togglePrivate-mobile");
                 if (isPrivate) {
                     document.querySelector("#propertiesMenu").onReady(function () {
                         document.querySelector("#propertiesMenu").togglePrivate(true);
@@ -375,6 +373,7 @@
                         document.querySelector("#functionsMenu").togglePrivate(true);
                     });
                     button.innerText = "Show Private";
+                    buttonMobile.innerHTML ="visibility_off"
                 } else {
                     document.querySelector("#propertiesMenu").onReady(function () {
                         document.querySelector("#propertiesMenu").togglePrivate();
@@ -383,14 +382,8 @@
                         document.querySelector("#functionsMenu").togglePrivate();
                     });
                     button.innerText = "Hide Private";
-                }
-                if (el) {
-                    if (el.vicon === "visibility") {
-                        el.vicon = "visibility-off";
-                    } else {
-                        el.vicon = "visibility";
-                    }
-                }
+                    buttonMobile.innerHTML ="visibility"
+                } 
                 var tables = document.querySelectorAll("app-doc-table");
                 if (tables) {
                     tables.forEach(function (table) {
@@ -446,7 +439,6 @@
                 privateElements.forEach(function (privateElement) {
                     privateElement.classList.add("app-doc-api-hidePrivate");
                 });
-                document.querySelector("#app-doc-api-togglePrivate").vicon = "visibility-off";
             },
             // @function createDiv (private) {html object} @param options
             createDiv: function (options) {
