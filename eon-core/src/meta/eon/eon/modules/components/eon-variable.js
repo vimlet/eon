@@ -1,18 +1,22 @@
 
-eon.imports.total++;
-eon.imports.count++;
+eon.domReady(function () {
 
-// Declare element
-eon.declare("eon-variable");
+    eon.imports.total++;
+    eon.imports.count++;
 
-eon.element({
+    // Declare element
+    eon.declare("eon-variable");
 
-    name: "eon-variable",
+    eon.element({
 
-    display: "inline-block",
+        name: "eon-variable",
 
-    properties: {},
+        display: "inline-block",
 
-    privateFunctions: {},
+        properties: {},
+
+        privateFunctions: {},
+
+    });
 
 });
