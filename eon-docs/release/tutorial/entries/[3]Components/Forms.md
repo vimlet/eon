@@ -113,6 +113,40 @@ The checkbox element allows selecting multiple options of a group of choices. It
 </doc-playground>
 )*
 
+[Number]<>
+This form component consists of an entry field for numerical values with `up` and `down` buttons. 
+
+*(
+<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-number", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        doc-showcase {
+          max-width: 300px;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+    <doc-showcase label="Standard">
+      <eon-number label="Number field" name="numberField" default="15" max="111">
+            </eon-number>
+    </doc-showcase>
+    <doc-showcase label="Disabled">
+      <eon-number label="Number field disabled" name="numberFieldDis" disabled="true">
+            </eon-number>
+    </doc-showcase>
+    </doc-body>
+  </template>
+</doc-playground>
+)*
+
 [Radio]<>
 The radio element allows selecting one option of a group of choices, for this, the radio elements have to be included within the `eon-group`, having to import only this component.
 
@@ -189,6 +223,109 @@ Form component that allows selecting a value from a range of values by moving th
   </template>
 </doc-playground>
 )*
+
+[Text]<>
+The text element is a component meant for typing and it has multiple uses depending on the type specified by the user (text , password and area). 
+
+*(
+<doc-playground label="Regular Text" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        doc-showcase {
+          max-width: 300px;
+        }
+        .doc-showcase-content eon-text {
+          margin: 0 0 20px 0;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+      <doc-showcase>
+        <eon-text label="Text field" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
+        <eon-text value="Initial value" inline="false" name="text" max-length="18"></eon-text>
+        <eon-text value="Disabled" inline="false" name="disabled" disabled="true"></eon-text>
+      </doc-showcase>
+    </doc-body>
+  </template>
+</doc-playground>
+)*
+
+
+## Textarea type 
+The area type text enables the user to write large amount of characters in multiple lines, for this example the counter was also enabled as well as an area-height were specified.
+
+*(
+<doc-playground label="Textarea" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        doc-showcase {
+          max-width: 300px;
+        }
+        .doc-showcase-content eon-text {
+          margin: 0 0 20px 0;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+        <doc-showcase>
+            <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
+            <eon-text placeholder="Disabled Textarea" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
+        </doc-showcase>
+    </doc-body>
+  </template>
+</doc-playground>
+)*
+
+
+## Password type 
+The password text is pretty similar to the text type but it shows asterisks instead of the written text.
+
+*(
+<doc-playground label="Password" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        doc-showcase {
+          max-width: 300px;
+        }
+        .doc-showcase-content eon-text {
+          margin: 0 0 20px 0;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+    <doc-showcase>
+      <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
+      <eon-text label="Disabled" default="password" inline="false" type="password" disabled="true"></eon-text>
+    </doc-showcase>
+    </doc-body>
+  </template>
+</doc-playground>
+)*
+
 
 [Toggle]<>
 This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two `checked` boolean values.  
