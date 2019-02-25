@@ -4,48 +4,80 @@
 
 The gutter element is a container with the ability to separate its content in two sections divided with a draggable splitter, providing a flexible manipulation over the sections size and displaying. This kind of components are frequently used on code editor programs.
 
-## Declarative usage 
+*(
+<doc-playground label="Simple Gutter" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src='framework/doc-eon/eon/eon.js'></script>
+      <script>
+        eon.themeSchema = {
+          claro: ["eon-gutter"]
+        }
+      </script>
+      <script>
+        eon.import([
+        'framework/doc-eon/eon/ui/eon-gutter',
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        ])
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      </style>
+  </doc-head>
+  <doc-body>
+    <doc-showcase label='Vertical gutter'>
+    <eon-gutter type="vertical" collapsible="true">
+        <eon-section>
+          <eon-gutter collapsible="false">
+            <eon-section class="section">
+              <div class="gutter-box blue"></div>
+              <div class="gutter-box blue"></div>
+              <div class="gutter-box blue"></div>
+              <div class="gutter-box blue"></div>
+            </eon-section>
+            <eon-section>
+              <div class="gutter-box orange"></div>
+              <div class="gutter-box orange"></div>
+              <div class="gutter-box orange"></div>
+              <div class="gutter-box orange"></div>
+            </eon-section>
+          </eon-gutter>
+        </eon-section>
+        <eon-section>
+          <div class="gutter-box red"></div>
+          <div class="gutter-box red"></div>
+          <div class="gutter-box red"></div>
+          <div class="gutter-box red"></div>
+        </eon-section>
+      </eon-gutter>
+    </doc-showcase>
+  </doc-body>
+  </template>
+   <template type="css">
+      .gutter-box {
+          height: 50px;
+          width: 50px;
+          min-width: 50px;
+          margin: 8px;
+          background: #76bb72;
+      }
+      .blue {
+        background-color: #7296bb !important;
+      }
 
-Gutter use the [eon-section](/vimlet/VimletComet/master/docs/release/index.html#!version=1.0.0&mode=tutorial&file=entries%2FComponents%2FSection.md) element to represent its content sections:
+      .orange {
+        background-color: #bb9772;
+      }
 
-``` [html]
-<head>
-  <script>
-    // Imports eon-gutter element and its dependencies (eon-section)
-    eon.import("/eon/ui/eon-gutter.html");
-  </script>
-<head>
-```
-
-Declare gutter the same way you declare any other HTML element:
-
-``` [html]
-<eon-gutter>
-    <!-- Sections -->
-    <eon-section> section </eon-section>
-    <eon-section> section </eon-section>
-</eon-gutter>
-```
-
-## Programmatic usage
-
-``` [javascript]
-eon.ready(function () {
-
-  // Create eon-gutter
-  var gutter = document.createElement("eon-gutter");
-
-  // Create some sections
-  var section = document.createElement("eon-section");
-  var section2 = document.createElement("eon-section");
-  gutter.appendChild(section);  
-  gutter.appendChild(section2);  
-
-  // Append wherever you need it
-  document.querySelector("body").appendChild(gutter);
-
-});
-```
+      .red {
+        background-color: #b36a6a;
+      }
+  </template>
+</doc-playground>
+)*
 
 ## Examples
 ### Collapsible sections
