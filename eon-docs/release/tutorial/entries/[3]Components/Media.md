@@ -26,7 +26,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
       </style>
   </doc-head>
   <doc-body>
-    <doc-showcase label='Snowy day'>
+    <doc-showcase>
       <eon-video type="video/mp4" controls="true" src="video/snow.mp4" poster="img/snow.jpg" volume="0.5">
       </eon-video>
     </doc-showcase>
@@ -64,6 +64,9 @@ This element is a combination of the well known slider and image gallery compone
         doc-showcase .doc-showcase-content {
           height: 350px;
           width: 500px;
+        }
+        .doc-showcase-title {
+            display: none;
         }
       </style>
   </doc-head>
@@ -127,6 +130,9 @@ The swiper gallery type provides a full bunch of options to build the images lay
         doc-showcase .doc-showcase-content {
           height: 350px;
           width: 500px;
+        }
+        .doc-showcase-title {
+            display: none;
         }
       </style>
   </doc-head>

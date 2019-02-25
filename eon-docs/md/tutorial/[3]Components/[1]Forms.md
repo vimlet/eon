@@ -422,19 +422,14 @@ Classic input type date where you can either `type` the desired date or you can 
           </style>
         </doc-head>
         <doc-body>
-        <div id="content" style="width:100%;">
-            <doc-showcase label='Active'>
-              <eon-date min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" 
-            value-format="YYYY-MM-DD">
+          <doc-showcase label='Active'>
+            <eon-date min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" value-format="YYYY-MM-DD">
           </eon-date>
           </doc-showcase>
           <doc-showcase label='Disabled'>
-              <eon-date type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" disabled="true"
-            week-start=
-            "monday" value-format="YYYY/MM/DD" >
+              <eon-date type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" disabled="true" week-start="monday" value-format="YYYY/MM/DD">
           </eon-date>
           </doc-showcase>
-          </div>
           <div style="height:150px;"></div>
         </doc-body>
     </template>

@@ -4,7 +4,7 @@ The gutter element is a container with the ability to separate its content in tw
 Gutter sections can be collapsible for dynamic behavior. On the contrary, the gutter provides other properties like allowDrag to reflect a static content layout.
 
 *(
-<doc-playground label="Simple Gutter" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Vertical gutter" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -34,7 +34,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
       </style>
   </doc-head>
   <doc-body>
-    <doc-showcase label='Vertical gutter'>
+    <doc-showcase>
       <eon-gutter type="horizontal" collapsible="true">
         <eon-section class="section">
           <div class="gutter-box blue"></div>
@@ -76,7 +76,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 
 
 *(
-<doc-playground label="Simple Gutter" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Nested gutter" format="true" html="true" js="true" css="true" selector="body">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -103,10 +103,13 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
           height: 350px;
           width: 100%;
         }
+        .doc-showcase-title {
+            display: none;
+        }
       </style>
   </doc-head>
   <doc-body>
-    <doc-showcase label='Vertical gutter'>
+    <doc-showcase>
     <eon-gutter type="vertical" collapsible="true">
         <eon-section>
           <eon-gutter collapsible="false">
