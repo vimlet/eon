@@ -239,12 +239,9 @@ The text element is a component meant for typing and it has multiple uses depend
         ]);
       </script>
       <style>
-<<<<<<< HEAD
         doc-showcase {
           max-width: 300px;
         }
-=======
->>>>>>> 65e64e48d2a1e81d75415c285c425da78068e432
         .doc-showcase-content eon-text {
           margin: 0 0 20px 0;
         }
@@ -252,16 +249,9 @@ The text element is a component meant for typing and it has multiple uses depend
     </doc-head>
     <doc-body>
       <doc-showcase>
-<<<<<<< HEAD
         <eon-text label="Text field" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
         <eon-text value="Initial value" inline="false" name="text" max-length="18"></eon-text>
         <eon-text value="Disabled" inline="false" name="disabled" disabled="true"></eon-text>
-=======
-        <eon-text label="Type" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
-        <eon-text value="Initial value" inline="false" name="text" max-length="18"></eon-text>
-        <eon-text value="Disabled" inline="false" name="disabled" disabled="true"></eon-text>
-        <eon-text value="Readonly" inline="false" name="readonly" readonly="true""></eon-text>
->>>>>>> 65e64e48d2a1e81d75415c285c425da78068e432
       </doc-showcase>
     </doc-body>
   </template>
@@ -284,30 +274,19 @@ The area type text enables the user to write large amount of characters in multi
         ]);
       </script>
       <style>
-<<<<<<< HEAD
         doc-showcase {
           max-width: 300px;
         }
-=======
->>>>>>> 65e64e48d2a1e81d75415c285c425da78068e432
         .doc-showcase-content eon-text {
           margin: 0 0 20px 0;
         }
       </style>
     </doc-head>
     <doc-body>
-<<<<<<< HEAD
         <doc-showcase>
             <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
             <eon-text placeholder="Disabled Textarea" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
         </doc-showcase>
-=======
-    <doc-showcase>
-      <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
-      <eon-text placeholder="Disabled Textarea" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
-      <eon-text placeholder="Readonly Textarea" inline="false" name="readonly" type="area" area-height="100" readonly="true"></eon-text>
-    </doc-showcase>
->>>>>>> 65e64e48d2a1e81d75415c285c425da78068e432
     </doc-body>
   </template>
 </doc-playground>
@@ -329,12 +308,9 @@ The password text is pretty similar to the text type but it shows asterisks inst
         ]);
       </script>
       <style>
-<<<<<<< HEAD
         doc-showcase {
           max-width: 300px;
         }
-=======
->>>>>>> 65e64e48d2a1e81d75415c285c425da78068e432
         .doc-showcase-content eon-text {
           margin: 0 0 20px 0;
         }
