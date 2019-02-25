@@ -128,6 +128,10 @@ This form component consists of an entry field for numerical values with `up` an
         ]);
       </script>
       <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
         doc-showcase {
           max-width: 300px;
         }
@@ -239,19 +243,39 @@ The text element is a component meant for typing and it has multiple uses depend
         ]);
       </script>
       <style>
+<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
+=======
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+>>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
         doc-showcase {
           max-width: 300px;
         }
         .doc-showcase-content eon-text {
           margin: 0 0 20px 0;
         }
+        eon-text.margin-top{
+          margin-top: 23px;
+        }
       </style>
     </doc-head>
     <doc-body>
       <doc-showcase>
+<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
         <eon-text label="Text field" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
         <eon-text value="Initial value" inline="false" name="text" max-length="18"></eon-text>
         <eon-text value="Disabled" inline="false" name="disabled" disabled="true"></eon-text>
+=======
+        <eon-text label="Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
+      </doc-showcase>
+      <doc-showcase>
+        <eon-text value="Initial value" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
+      </doc-showcase>
+      <doc-showcase>
+        <eon-text value="Disabled" class="margin-top" inline="false" name="disabled" disabled="true"></eon-text>
+>>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
       </doc-showcase>
     </doc-body>
   </template>
@@ -274,19 +298,39 @@ The area type text enables the user to write large amount of characters in multi
         ]);
       </script>
       <style>
+<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
+=======
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+>>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
         doc-showcase {
           max-width: 300px;
         }
         .doc-showcase-content eon-text {
           margin: 0 0 20px 0;
+          min-width: 212px; 
+        }
+        eon-text.margin-top{
+          margin-top: 23px;
         }
       </style>
     </doc-head>
     <doc-body>
+<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
         <doc-showcase>
             <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
             <eon-text placeholder="Disabled Textarea" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
         </doc-showcase>
+=======
+      <doc-showcase>
+        <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
+      </doc-showcase>
+      <doc-showcase>
+        <eon-text placeholder="Disabled Textarea" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
+      </doc-showcase>
+>>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
     </doc-body>
   </template>
 </doc-playground>
@@ -308,6 +352,13 @@ The password text is pretty similar to the text type but it shows asterisks inst
         ]);
       </script>
       <style>
+<<<<<<< HEAD:eon-docs/release/tutorial/entries/[3]Components/Forms.md
+=======
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+>>>>>>> 7cb3f4dcc6e8afecd34ae74ee0d87b58d1b99be6:eon-docs/release/tutorial/entries/[3]Components/[1]Forms.md
         doc-showcase {
           max-width: 300px;
         }
@@ -317,10 +368,12 @@ The password text is pretty similar to the text type but it shows asterisks inst
       </style>
     </doc-head>
     <doc-body>
-    <doc-showcase>
-      <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
-      <eon-text label="Disabled" default="password" inline="false" type="password" disabled="true"></eon-text>
-    </doc-showcase>
+      <doc-showcase>
+        <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
+      </doc-showcase>
+      <doc-showcase>
+        <eon-text label="Disabled" default="password" inline="false" type="password" disabled="true"></eon-text>
+      </doc-showcase>
     </doc-body>
   </template>
 </doc-playground>
@@ -379,25 +432,23 @@ The combobox element is a component meant for selecting an option between the gi
             </style>
         </doc-head>
         <doc-body>
-        <div id="content" style="width:100%;">
-            <doc-showcase label='Active'>
-              <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
-                  <eon-item value='red' display-value='Red'></eon-item>
-                  <eon-item value='green' display-value='Green'></eon-item>
-                  <eon-item value='pink' display-value='Pink'></eon-item>
-                  <eon-item value='grey' display-value='Grey'></eon-item>
-              </eon-combobox>
+          <doc-showcase label='Active'>
+            <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
+                <eon-item value='red' display-value='Red'></eon-item>
+                <eon-item value='green' display-value='Green'></eon-item>
+                <eon-item value='pink' display-value='Pink'></eon-item>
+                <eon-item value='grey' display-value='Grey'></eon-item>
+            </eon-combobox>
           </doc-showcase>
           <doc-showcase label='Disabled'>
-              <eon-combobox disabled='true' label='States' name='comboTest2' placeholder='Ohio'>
-                  <eon-item value='tomato' display-value='Tomato'></eon-item>
-                  <eon-item value='avocado' display-value='Avocado'></eon-item>
-                  <eon-item value='strawberry' display-value='Strawberry'></eon-item>
-                  <eon-item value='onion' display-value='Onion'></eon-item>
-              </eon-combobox>
+            <eon-combobox disabled='true' label='States' name='comboTest2'              placeholder='Ohio'>
+                <eon-item value='tomato' display-value='Tomato'></eon-item>
+                <eon-item value='avocado' display-value='Avocado'></eon-item>
+                <eon-item value='strawberry' display-value='Strawberry'></eon-item>
+                <eon-item value='onion' display-value='Onion'></eon-item>
+            </eon-combobox>
           </doc-showcase>
-          </div>
-          <div style="height:150px;"></div>
+          <div style="height:284px;"></div>
         </doc-body>
     </template>
     <template type="css">
@@ -408,7 +459,7 @@ The combobox element is a component meant for selecting an option between the gi
 )*
 
 ## Filters
-Enables the user to type in the input so that the options provided by the dropdown are filtered, this is usefull when there are large amounts of options, like countries for instance.
+Enables the user to type in the input so that the options provided by the dropdown are filtered, this is useful when there are large amounts of options, like countries for instance.
 
 *(
 <doc-playground label="Filtering" html="true" js="true" css="true" selector="#content">
@@ -433,7 +484,7 @@ Enables the user to type in the input so that the options provided by the dropdo
               </eon-combobox>
           </doc-showcase>
         </div>
-        <div style="height:150px;"></div>
+        <div style="height:284px;"></div>
         </doc-body>
     </template>
     <template type="css">
@@ -463,20 +514,15 @@ Classic input type date where you can either `type` the desired date or you can 
           </style>
         </doc-head>
         <doc-body>
-        <div id="content" style="width:100%;">
-            <doc-showcase label='Active'>
-              <eon-date min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" 
-            value-format="YYYY-MM-DD">
+          <doc-showcase label='Active'>
+            <eon-date min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" value-format="YYYY-MM-DD">
           </eon-date>
           </doc-showcase>
           <doc-showcase label='Disabled'>
-              <eon-date type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" disabled="true"
-            week-start=
-            "monday" value-format="YYYY/MM/DD" >
+              <eon-date type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" disabled="true" week-start="monday" value-format="YYYY/MM/DD">
           </eon-date>
           </doc-showcase>
-          </div>
-          <div style="height:150px;"></div>
+          <div style="height: 284px;"></div>
         </doc-body>
     </template>
     <template type="css">
@@ -503,20 +549,18 @@ This type of date will only allow you to have a `calendar` directly leaving the 
           </style>
         </doc-head>
         <doc-body>
-        <div id="content" style="width: 100%;">
         <doc-showcase label="Default">
               <eon-date selectable="dmy" type="calendar" name="defaultCalendar"></eon-date>
-          </doc-showcase>
+        </doc-showcase>
         <doc-showcase label="Months/Years">
               <eon-date selectable="my"  type="calendar" name="monthsCalendar"></eon-date>
-          </doc-showcase>
+        </doc-showcase>
         <doc-showcase label="Years">
               <eon-date selectable="y"  type="calendar" name="yearsCalendar"></eon-date>
-          </doc-showcase>
+        </doc-showcase>
         <doc-showcase label="Disabled">
               <eon-date disabled="true" selectable="dmy" type="calendar" name="disabledCalendar"></eon-date>
-          </doc-showcase>
-        </div>
+        </doc-showcase>
         </doc-body>
     </template>
     <template type="css">

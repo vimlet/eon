@@ -422,6 +422,14 @@ the same code could be written like so without the shorthand:
 </template>
 ```
 
+or as stated, using the shorthand
+
+```[html]
+<template>
+  Hello {{@ name }}!
+</template>
+```
+
 This is possible because Eon template engine treats interpolated code as plain javascript, but provides handy functions like bind(data) and echo(string) as well as its respective shorthands which speeds daily development.
 
 ## Understanding echo "="
@@ -438,7 +446,7 @@ or simply using its shorthand
 
 ```[html]
 <template>
-  Hello {{@ "I'm a text" }}!
+  Hello {{= "I'm a text" }}!
 </template>
 ```
 
