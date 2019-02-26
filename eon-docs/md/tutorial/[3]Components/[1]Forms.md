@@ -43,7 +43,7 @@ By default the button style is outline, but they can be flat and filled using th
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
   </template>
 </doc-playground>
 )*
@@ -437,7 +437,7 @@ The combobox element is a component meant for selecting an option between the gi
   <template type="html">
       <doc-head>
           <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             body {
               display: flex;

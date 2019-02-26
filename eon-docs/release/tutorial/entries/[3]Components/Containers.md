@@ -171,7 +171,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 </doc-playground>
 )*
 
-[Header Panel]<>
+[Headerpanel]<>
 The Headerpanel element works as a simple container but provides a bunch of properties to simulate a card layout with a title header, action and remove buttons and scrollable content.
 
 *(
