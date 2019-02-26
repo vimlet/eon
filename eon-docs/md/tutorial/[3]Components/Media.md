@@ -38,7 +38,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
   </doc-body>
   </template>
   <template type="footer">
-     {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
+     {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
   </template>
 </doc-playground>
 )*
@@ -106,6 +106,9 @@ This element is a combination of the well known slider and image gallery compone
       background-color: #b36a6a;
     }
   </template>
+  <template type="footer">
+     {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+  </template>
 </doc-playground>
 )*
 
@@ -158,6 +161,9 @@ The swiper gallery type provides a full bunch of options to build the images lay
       </eon-swiper>
     </doc-showcase>
   </doc-body>
+  </template>
+  <template type="footer">
+     {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
   </template>
 </doc-playground>
 )*

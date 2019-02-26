@@ -184,13 +184,6 @@
     display:none;
     }
 
-    app-doc-main .app-doc-main-menu-mobile-mode{
-        position:absolute;
-        right:10px;
-        display:none;
-        text-decoration: underline;
-    }
-
 
     @media only screen and (max-width: 800px) and (min-width:480px) {
         .app-doc-main-itemRow {
@@ -211,15 +204,17 @@
         #app-doc-main-menuItems{
             display:none;
         }
-        #app-doc-main-versionControl{
-            display:none !important;
-        }
-    app-doc-main .app-doc-main-menu-mobile-mode{
+    app-doc-main .app-doc-main-menu-mobile{
         display:inline-block !important;
     }
     }
 
 
+    @media only screen and (max-width: 700px) {
+        #app-doc-main-versionControl{
+            display:none !important;
+        }
+    }
     @media only screen and (max-width: 480px) {
         .app-doc-main-itemRow {
             display: block !important;
@@ -239,10 +234,7 @@
         #app-doc-main-menuItems{
             display:none;
         }
-        #app-doc-main-versionControl{
-            display:none !important;
-        }
-    app-doc-main .app-doc-main-menu-mobile-mode{
+    app-doc-main .app-doc-main-menu-mobile{
         display:inline-block !important;
     }
     }
@@ -254,8 +246,7 @@
     <eon-layout type="column">
         <eon-layout id="app-doc-main-menu">
             <div class="app-doc-main-separator"></div>
-            <eon-combobox class="app-doc-main-menu-mobile" style="display:none;"></eon-combobox>
-            <div class="app-doc-main-menu-mobile-mode" style="display:none;">Mode</div>
+            <eon-combobox class="app-doc-main-menu-mobile" style="display:none !important;"></eon-combobox>
             <div id="app-doc-main-menuItems"></div>
             <div id="app-doc-main-versionControl"></div>
         </eon-layout>
@@ -299,9 +290,7 @@
                 el._deselectMenu();
                 document.querySelector(".app-doc-main-menu-mobile").style.setProperty('display', 'none',
                     'important');
-                document.querySelector(".app-doc-main-menu-mobile-mode").style.setProperty('display', 'none',
-                    'important');
-            }, 
+            },
             // @function openView (public) [Open given view] @param path @param clean
             openView: function (path, clean) {
                 var el = this;
@@ -320,7 +309,6 @@
                 docFragment.appendChild(apiTree);
                 view.appendChild(docFragment);
                 document.querySelector(".app-doc-main-menu-mobile").style.setProperty('display', '');
-                document.querySelector(".app-doc-main-menu-mobile-mode").style.setProperty('display', '');
             },
             // @function changeVersion (public) [Go to another version]
             changeVersion: function () {
@@ -617,12 +605,6 @@
             var el = this;
             eon.createCallback("menuReady", this, "ready");
             eon.createCallback("dataLoaded", this, "ready");
-
-            document.querySelector(".app-doc-main-menu-mobile-mode").addEventListener("click", function (e) {
-                document.querySelector(".app-doc-main-menu-mobile").expand();
-            });
-
-
             // Get data from disk when rendered
             this._getRequest("config.json", function (data) {
                 el._misc.indexVersionOpened = data.__currentVersion; // Current version folder. Navigation between versions change current version but not this var
