@@ -200,6 +200,11 @@ Panel is the basic container element. It has no associated style so it is comple
           display: flex;
           flex-wrap: wrap;
         }
+        @media (max-width: 430px) {
+          doc-showcase {
+            width: 100%;
+          }
+        }
       </style>
   </doc-head>
   <doc-body>
