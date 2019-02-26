@@ -180,8 +180,6 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 </doc-playground>
 )*
 
-<<<<<<< HEAD
-=======
 [Panel]<>
 Panel is the basic container element. It has no associated style so it is completely customizable in terms of layout. Provides a huge control over its content elements rendering, allowing on demand content or partial content loading.
 
@@ -204,7 +202,7 @@ Panel is the basic container element. It has no associated style so it is comple
         }
         @media (max-width: 430px) {
           doc-showcase {
-            width: 100%;
+            width: calc(100% - 40px);
           }
         }
       </style>
@@ -287,7 +285,6 @@ All the elements not surrounded by the template tag will render normally.
 For further implementation, you can use as many templates as you need to manage lazy content inside a single eon-panel.
 
 
->>>>>>> 90a26e8dc3472c179e52b2d11c1b509cdfe00b6a
 [Headerpanel]<>
 The Headerpanel element works as a simple container but provides a bunch of properties to simulate a card layout with a title header, action and remove buttons and scrollable content.
 
