@@ -1,8 +1,17 @@
 *[
-    function changeTheme(playground){
-      var eon = playground._refs.iframe.contentWindow.eon;
-      eon.theme= eon.theme == "claro" ? "noire" : "claro";
+  function changeTheme(playground, btn){
+    var eon = playground._refs.iframe.contentWindow.eon;
+    eon.theme= eon.theme == "claro" ? "noire" : "claro";
+    if(eon.theme == "claro") {
+      // TO NOIRE
+      eon.theme = "noire"
+      btn.classList.add("app-vicon-noire");
+    } else {
+      // TO CLARO
+      eon.theme = "claro";
+      btn.classList.remove("app-vicon-noire");
     }
+  }
 ]*
 [Video]<>
 The video component is an HTML5 `<video>` wrap. It provides an extra layer of compatibility and some capabilities to deal with the annoying browsers and devices unstandardized behavior (fullscreen mode, source types, auto-play functionality).

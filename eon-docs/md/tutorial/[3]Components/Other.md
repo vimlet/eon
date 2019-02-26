@@ -1,8 +1,17 @@
 *[
-    function changeTheme(playground){
-      var eon = playground._refs.iframe.contentWindow.eon;
-      eon.theme= eon.theme == "claro" ? "noire" : "claro";
+  function changeTheme(playground, btn){
+    var eon = playground._refs.iframe.contentWindow.eon;
+    eon.theme= eon.theme == "claro" ? "noire" : "claro";
+    if(eon.theme == "claro") {
+      // TO NOIRE
+      eon.theme = "noire"
+      btn.classList.add("app-vicon-noire");
+    } else {
+      // TO CLARO
+      eon.theme = "claro";
+      btn.classList.remove("app-vicon-noire");
     }
+  }
 ]*
 [Tree]<>
 The eon-tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that cover this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 

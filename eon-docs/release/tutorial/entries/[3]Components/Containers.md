@@ -1,7 +1,16 @@
 *[
-  function changeTheme(playground){
+  function changeTheme(playground, btn){
     var eon = playground._refs.iframe.contentWindow.eon;
     eon.theme= eon.theme == "claro" ? "noire" : "claro";
+    if(eon.theme == "claro") {
+      // TO NOIRE
+      eon.theme = "noire"
+      btn.classList.add("app-vicon-noire");
+    } else {
+      // TO CLARO
+      eon.theme = "claro";
+      btn.classList.remove("app-vicon-noire");
+    }
   }
 ]*
 [Gutter]<>
