@@ -369,68 +369,6 @@ Also known as `table`, displays a large number of data using rows and columns.
       </head>
       <body>
           <doc-showcase label="Default">
-              <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80" column-min-width="200"
-                  columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">John</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                      <eon-grid-cell column="age">27</eon-grid-cell>
-                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">Jill</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Smith</eon-grid-cell>
-                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">Joseph</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                      <eon-grid-cell column="age">16</eon-grid-cell>
-                      <eon-grid-cell column="phone">3345</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">Charles</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                      <eon-grid-cell column="age">27</eon-grid-cell>
-                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">Jaime</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                      <eon-grid-cell column="age">16</eon-grid-cell>
-                      <eon-grid-cell column="phone">3345</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">Johan</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">David</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                      <eon-grid-cell column="age">27</eon-grid-cell>
-                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">Samuel</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                      <eon-grid-cell column="age">16</eon-grid-cell>
-                      <eon-grid-cell column="phone">3345</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">Vera</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                  </eon-grid-row>
-                  <eon-grid-row>
-                      <eon-grid-cell column="name">Janine</eon-grid-cell>
-                      <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
-                      <eon-grid-cell column="age">27</eon-grid-cell>
-                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                  </eon-grid-row>
-                  </eon-grid>
-          </doc-showcase>
-          <doc-showcase label="Resizable">
               <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200"
                   columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
                   <eon-grid-row>
