@@ -78,7 +78,7 @@ eon.declare = function (name, baseElement) {
                 eon.triggerAllCallbackEvents(el, config, "onInit");
 
                 // Interpolation data bind
-                eon.interpolation.handleInterpolationVariables(el, config);
+                eon.interpolation.init(el, config);
 
                 // Creates the on resize callbacks handler for the element
                 eon.registerResizeListeners(el, config);

@@ -1,7 +1,16 @@
 *[
-  function changeTheme(playground){
+  function changeTheme(playground, btn){
     var eon = playground._refs.iframe.contentWindow.eon;
     eon.theme= eon.theme == "claro" ? "noire" : "claro";
+    if(eon.theme == "claro") {
+      // TO NOIRE
+      eon.theme = "noire"
+      btn.classList.add("app-vicon-noire");
+    } else {
+      // TO CLARO
+      eon.theme = "claro";
+      btn.classList.remove("app-vicon-noire");
+    }
   }
 ]*
 [Gutter]<>
@@ -75,7 +84,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
       }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
   </template>
 </doc-playground>
 )*
@@ -166,11 +175,114 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
       }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
   </template>
 </doc-playground>
 )*
 
+<<<<<<< HEAD
+=======
+[Panel]<>
+Panel is the basic container element. It has no associated style so it is completely customizable in terms of layout. Provides a huge control over its content elements rendering, allowing on demand content or partial content loading.
+
+*(
+<doc-playground label="Panels" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src='framework/doc-eon/eon/eon.js'></script>
+      <script>
+        eon.import([
+          'framework/doc-eon/eon/ui/eon-button',
+          'framework/doc-eon/eon/ui/eon-panel',
+          'framework/doc-eon/custom/doc-playground/doc-showcase'
+        ])
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      </style>
+  </doc-head>
+  <doc-body>
+    <doc-showcase label="On demand import">
+      <eon-button class="panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
+      <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" allow-scroll="false" href="data/panel/lazyContent.html"
+        lazy-load="true">
+        <div class="panel-content place-holder" style="box-shadow: none;">No content here</div>
+      </eon-panel>
+    </doc-showcase>
+    <doc-showcase label="On demand rendering">
+      <eon-button class="panel-button" inline="true" value="Render lazy" onclick="renderLazy()"></eon-button>
+      <eon-panel id="lazy-content" class="panel" default-style="false" fill="false" allow-scroll="false">
+        <div class="panel-content place-holder">I'm a hidden div!</div>
+        <template>
+          <div class="panel-content" style="background-color: #7296bb;">
+            I'm an on demand rendered div!
+          </div>
+        </template>
+      </eon-panel>
+    </doc-showcase>
+  </doc-body>
+  </template>
+  <template type="css">
+    .panel {
+      flex-direction: column;
+      min-width: 228px;
+    }
+    .panel-content {
+      height: 100px;
+      width: 350px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      text-align: center;
+      padding: 6px;
+      color: #ffffff;
+      box-sizing: border-box;
+    }
+    .place-holder {
+      background-color: #76bb72;
+      -moz-box-shadow: inset 0 0 10px #ffffff;
+      -webkit-box-shadow: inset 0 0 10px #ffffff;
+      box-shadow: inset 0 0 10px #ffffff;
+    }
+    .panel-button {
+      width: 150px;
+      margin-bottom: 10px;
+    }
+    #lazy-remote {
+      -webkit-box-shadow: 0px 0px 10px #d8d8d8;
+      -moz-box-shadow: 0px 0px 10px #d8d8d8;
+      box-shadow: 0px 0px 10px #d8d8d8;
+    }
+  </template>
+  <template type="js">
+    //**
+    function renderLazy() {
+      document.querySelector("#lazy-content").render();
+      // Remove place holder
+      document.querySelector("#lazy-content .place-holder").style.display = "none";
+    }
+    function importRemote() {
+      document.querySelector("#lazy-remote").importContent();
+      // Remove place holder
+      document.querySelector("#lazy-remote .place-holder").style.display = "none";
+    }
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+  </template>
+</doc-playground>
+)*
+
+
+All the elements not surrounded by the template tag will render normally. 
+For further implementation, you can use as many templates as you need to manage lazy content inside a single eon-panel.
+
+
+>>>>>>> 90a26e8dc3472c179e52b2d11c1b509cdfe00b6a
 [Headerpanel]<>
 The Headerpanel element works as a simple container but provides a bunch of properties to simulate a card layout with a title header, action and remove buttons and scrollable content.
 
@@ -198,24 +310,34 @@ The Headerpanel element works as a simple container but provides a bunch of prop
       </style>
   </doc-head>
   <doc-body>
+    <doc-showcase label="Simple panel">
+      <eon-headerpanel header="static" header-content="Squares"  class="headerpanel" default-style="false">
+      <div class="headerpanel-square blue"></div>
+        <div class="headerpanel-square blue"></div>
+        <div class="headerpanel-square blue"></div>
+        <div class="headerpanel-square blue"></div>
+      </eon-headerpanel>
+    </doc-showcase>
     <doc-showcase label="Growing header">
-        <eon-headerpanel id="growing-headerpanel" default-style="false" header="grow" class="headerpanel" header-content="Custom" action-button="changeSquaresColor('growing-headerpanel')" close-button="none" close-button-class="d-black-close">
-          <div class="headerpanel-square red"></div>
-          <div class="headerpanel-square red"></div>
-          <div class="headerpanel-square red"></div>
-          <div class="headerpanel-square red"></div>
-        </eon-headerpanel>
-      </doc-showcase>
-      <doc-showcase label="Simple panel">
-        <eon-headerpanel class="headerpanel" default-style="false">
-        </eon-headerpanel>
-      </doc-showcase>
+      <eon-headerpanel id="growing-headerpanel" default-style="false" header="grow" class="headerpanel" header-content="More squares" action-button="changeSquaresColor('growing-headerpanel')" close-button="none" close-button-class="d-black-close">
+        <div class="headerpanel-square red"></div>
+        <div class="headerpanel-square red"></div>
+        <div class="headerpanel-square red"></div>
+        <div class="headerpanel-square red"></div>
+      </eon-headerpanel>
+    </doc-showcase>
+    <doc-showcase label="Simple panel">
+      <eon-headerpanel class="headerpanel" default-style="false">
+      </eon-headerpanel>
     </doc-showcase>
   </doc-body>
   </template>
    <template type="css">
       .red {
         background-color: #b36a6a;
+      }
+      .blue {
+        background-color: #7296bb;
       }
       .headerpanel {
         width: 200px;
@@ -230,7 +352,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
       }
   </template>
   <template type="js">
-    var colors = ["", "#b78f47", "#2a9a9a", "#8c47b7", "#795829", "#b1616f", "#2b4b94"];
+    var colors = ["", "#b78f47", "#2a9a9a", "#8c47b7", "#bb9772", "#b36a6a", "#7296bb"];
 
     function changeSquaresColor(id) {
       var squares = document.querySelector("#" + id).querySelectorAll(".headerpanel-square");
@@ -242,7 +364,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
     }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "text":"theme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
   </template>
 </doc-playground>
 )*
@@ -252,142 +374,83 @@ Also known as `table`, displays a large number of data using rows and columns.
 
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
-    <template type="html">
-        <head>
-            <script src='framework/doc-eon/eon/eon.js'></script>
-            <script>eon.import(['framework/doc-eon/eon/ui/eon-grid','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-        </head>
-        <body>
-            <doc-showcase label="Default">
-                <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80" column-min-width="200"
-                    columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">John</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Jill</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Smith</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Joseph</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Charles</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Jaime</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Johan</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">David</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Samuel</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Vera</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Janine</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    </eon-grid>
-            </doc-showcase>
-            <doc-showcase label="Resizable">
-                <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200"
-                    columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">John</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Jill</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Smith</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Joseph</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Charles</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Jaime</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Johan</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">David</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Samuel</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Vera</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Janine</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    </eon-grid>
-            </doc-showcase>
-        </body>
-    </template>
-    <template type="css">
-        .doc-showcase-content{display:flex;}
-        .doc-showcase-content eon-button{margin:0 5px;}
-    </template>
+  <template type="html">
+      <head>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-grid','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+      </head>
+      <body>
+          <doc-showcase label="Default">
+              <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200"
+                  columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">John</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Jill</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Smith</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Joseph</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Charles</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Jaime</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Johan</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">David</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Samuel</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Vera</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Janine</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  </eon-grid>
+          </doc-showcase>
+      </body>
+  </template>
+  <template type="css">
+      .doc-showcase-content{display:flex;}
+      .doc-showcase-content eon-button{margin:0 5px;}
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+  </template>
 </doc-playground>
 )*
 
@@ -397,142 +460,145 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
 
 *(
 <doc-playground label="Autofit" html="true" js="true" css="true" selector="body">
-    <template type="html">
-        <head>
-            <script src='framework/doc-eon/eon/eon.js'></script>
-            <script>eon.import(['framework/doc-eon/eon/ui/eon-grid','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-        </head>
-        <body>
-            <doc-showcase label='Smaller Space'>
-                <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80" column-min-width="200" autofit="true"
-                    columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:260px">
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">John</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Jill</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Smith</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Joseph</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Charles</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Jaime</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Johan</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">David</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Samuel</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Vera</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Janine</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    </eon-grid>
-            </doc-showcase>
-            <doc-showcase label='Larger Space'>
-                <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80" column-min-width="200" autofit="true"
-                    columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:580px">
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">John</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Jill</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Smith</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Joseph</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Charles</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Jaime</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Johan</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">David</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Samuel</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="age">16</eon-grid-cell>
-                        <eon-grid-cell column="phone">3345</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Vera</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-                        <eon-grid-cell column="phone">666676666</eon-grid-cell>
-                    </eon-grid-row>
-                    <eon-grid-row>
-                        <eon-grid-cell column="name">Janine</eon-grid-cell>
-                        <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
-                        <eon-grid-cell column="age">27</eon-grid-cell>
-                        <eon-grid-cell column="phone">766565454</eon-grid-cell>
-                    </eon-grid-row>
-                    </eon-grid>
-            </doc-showcase>
-        </body>
-    </template>
-    <template type="css">
-        .doc-showcase-content{display:flex;}
-        .doc-showcase-content eon-button{margin:0 5px;}
-    </template>
+  <template type="html">
+      <head>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-grid','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+      </head>
+      <body>
+          <doc-showcase label='Smaller Space'>
+              <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80" column-min-width="200" autofit="true"
+                  columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:260px">
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">John</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Jill</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Smith</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Joseph</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Charles</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Jaime</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Johan</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">David</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Samuel</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Vera</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Janine</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  </eon-grid>
+          </doc-showcase>
+          <doc-showcase label='Larger Space'>
+              <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80" column-min-width="200" autofit="true"
+                  columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:580px">
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">John</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Jill</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Smith</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Joseph</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Charles</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Jaime</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Johan</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">David</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Samuel</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="age">16</eon-grid-cell>
+                      <eon-grid-cell column="phone">3345</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Vera</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+                      <eon-grid-cell column="phone">666676666</eon-grid-cell>
+                  </eon-grid-row>
+                  <eon-grid-row>
+                      <eon-grid-cell column="name">Janine</eon-grid-cell>
+                      <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
+                      <eon-grid-cell column="age">27</eon-grid-cell>
+                      <eon-grid-cell column="phone">766565454</eon-grid-cell>
+                  </eon-grid-row>
+                  </eon-grid>
+          </doc-showcase>
+      </body>
+  </template>
+  <template type="css">
+      .doc-showcase-content{display:flex;}
+      .doc-showcase-content eon-button{margin:0 5px;}
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+  </template>
 </doc-playground>
 )*
 
