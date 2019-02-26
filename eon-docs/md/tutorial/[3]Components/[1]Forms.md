@@ -446,7 +446,7 @@ The combobox element is a component meant for selecting an option between the gi
   <template type="html">
       <doc-head>
           <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             body {
               display: flex;
@@ -529,7 +529,7 @@ The Date element is a component meant for typing or selecting a specific date, y
 Classic input type date where you can either `type` the desired date or you can just open the `calendar` that will appear as a dropdown, which will allow you to easily select it.
 
 *(
-<doc-playground label="Input Type" html="true" js="true" css="true" selector="#content">
+<doc-playground label="Input Type" html="true" js="true" css="true" selector="body">
     <template type="html">
         <doc-head>
           <script src='framework/doc-eon/eon/eon.js'></script>
@@ -564,7 +564,7 @@ Classic input type date where you can either `type` the desired date or you can 
 This type of date will only allow you to have a `calendar` directly leaving the input behind.
 
 *(
-<doc-playground label="Calendar Type" html="true" js="true" css="true" selector="#content">
+<doc-playground label="Calendar Type" html="true" js="true" css="true" selector="body">
     <template type="html">
         <doc-head>
           <script src='framework/eon/eon.js'></script>
