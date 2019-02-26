@@ -446,7 +446,7 @@ The combobox element is a component meant for selecting an option between the gi
   <template type="html">
       <doc-head>
           <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             body {
               display: flex;
@@ -455,6 +455,7 @@ The combobox element is a component meant for selecting an option between the gi
           </style>
       </doc-head>
       <doc-body>
+        <div id="content" style="width: 100%;">
         <doc-showcase label='Active'>
           <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
               <eon-item value='red' display-value='Red'></eon-item>
@@ -464,13 +465,14 @@ The combobox element is a component meant for selecting an option between the gi
           </eon-combobox>
         </doc-showcase>
         <doc-showcase label='Disabled'>
-          <eon-combobox disabled='true' label='States' name='comboTest2'              placeholder='Ohio'>
+          <eon-combobox disabled='true' label='States' placeholder='Ohio'>
               <eon-item value='tomato' display-value='Tomato'></eon-item>
               <eon-item value='avocado' display-value='Avocado'></eon-item>
               <eon-item value='strawberry' display-value='Strawberry'></eon-item>
               <eon-item value='onion' display-value='Onion'></eon-item>
           </eon-combobox>
         </doc-showcase>
+        </div>
         <div style="height:284px;"></div>
       </doc-body>
   </template>
