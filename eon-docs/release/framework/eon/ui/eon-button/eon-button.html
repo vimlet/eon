@@ -1,10 +1,8 @@
 <template>
   <a>
-    <div class="eon-button-button eon-bg2-border eon-bg2-hoverable eon-fg2 eon-fg2-hoverable eon-unselectable"></div>
+    <div class="eon-button-button eon-bg2-border eon-bg2-hoverable eon-fg2-filled eon-unselectable"></div>
   </a>
 </template>
-
-<!-- <script data-src="eon-button.js"></script> -->
 
 <script>
   eon.element({
@@ -12,7 +10,7 @@
     name: "eon-button",
     style: "eon-button.css",
 
-    themed: false,
+    themed: true, 
 
     properties: {
       /*
@@ -33,15 +31,25 @@
       },
       /*
         @property {String} href 
-        @description Href
+        @description Button href
       */
       href: {
         value: "",
         reflect: true
       },
       /*
+        @property {String} design 
+        @description Button design
+        Values can be: filled, outline and flat
+        Default: outline
+      */
+      design: {
+        value: "outline",
+        reflect: true
+      },
+      /*
         @property {String} target 
-        @description Target
+        @description Specifies where to open links
       */
       target: {
         value: "",
@@ -106,6 +114,15 @@
         reflect: true
       }
     },
+    privateProperties: {
+      /*
+        @property (private) {Object} _refs 
+        @description Object with  references
+      */
+      refs: {
+        value: {}
+      }
+    },
 
     functions: {
       /*
@@ -122,13 +139,22 @@
 
     privateFunctions: {
       /*
+        @function (private) _createRefs
+        @description Creates fast access to elements
+      */
+      createRefs: function () {
+        var el = this;
+
+        el._refs.button = el.template.querySelector(".eon-button-button");
+
+      },
+      /*
         @function (private) _setLabel
         @description Set new button text
         @param {String} newVal [New button text]
       */
       setLabel: function () {
         var el = this;
-        var button = el.querySelector(".eon-button-button");
         var buttonText = document.createElement("div");
 
         var label = el.label || (el.label && el.value) ? el.label : el.value;
@@ -138,23 +164,23 @@
           if (!el.hasAttribute("text")) {
 
             buttonText.innerHTML = label;
-            button.appendChild(buttonText);
+            el._refs.button.appendChild(buttonText);
             buttonText.classList.add("eon-button-buttonText");
 
             // When the button text is dynamically changed
           } else {
-            var oldText = button.querySelector(".eon-button-buttonText");
+            var oldText = el._refs.button.querySelector(".eon-button-buttonText");
 
             if (!oldText) {
               buttonText.innerHTML = label;
-              button.appendChild(buttonText);
+              el._refs.button.appendChild(buttonText);
               buttonText.classList.add("eon-button-buttonText");
 
             } else {
               buttonText.innerHTML = label;
               var newText = buttonText;
               newText.classList.add("eon-button-buttonText");
-              button.replaceChild(newText, oldText);
+              el._refs.button.replaceChild(newText, oldText);
             }
 
           }
@@ -165,6 +191,22 @@
         // so if the button has icon it will be placed centered
         (!label) ? el.setAttribute("text", "false") : el.setAttribute("text", "true");
       },
+
+      /*
+       @function (private) _setDesign
+       @description Set button design
+     */
+      setDesign: function () {
+        var el = this;
+
+        if (el.design == "filled") {
+          el._refs.button.classList.add("eon-bg2-filled", "eon-bg2-filled-hoverable");
+          el._refs.button.classList.remove("eon-bg2-hoverable");
+        } else if (el.design == "flat") {
+          el._refs.button.classList.remove("eon-bg2-border");
+        }
+      },
+
       /*
         @function (private) _setupIcon
         @description Set new button icon
@@ -174,22 +216,19 @@
         var el = this;
 
         if (el.vicon) {
-
-          var button = el.querySelector(".eon-button-button");
           var vicon = document.createElement("i");
           vicon.classList.add("vicon", el.vicon, "eon-button-buttonIcon");
-          button.appendChild(vicon);
+          el._refs.button.appendChild(vicon);
 
         } else if (el.icon) {
-          var button = el.querySelector(".eon-button-button");
           var iconAttribute = el.icon;
           var icon;
 
           // When change the icon dynamically is necessary delete old icon
-          if (button.classList.contains("eon-button-addedIcon")) {
+          if (el._refs.button.classList.contains("eon-button-addedIcon")) {
             var oldIcon = el.querySelector(".eon-button-buttonIcon");
 
-            button.removeChild(oldIcon);
+            el._refs.button.removeChild(oldIcon);
           }
 
           if (iconAttribute.indexOf("</i>") !== -1) {
@@ -205,8 +244,8 @@
             icon.classList.add("eon-button-buttonIcon");
           }
 
-          button.appendChild(icon);
-          button.classList.add("eon-button-addedIcon");
+          el._refs.button.appendChild(icon);
+          el._refs.button.classList.add("eon-button-addedIcon");
         }
       },
 
@@ -216,14 +255,13 @@
       */
 
       setupLink: function () {
-
         var el = this;
         var a = el.querySelector("a");
 
         if (el.href != "") {
-          a.href = el.href; 
+          a.href = el.href;
         }
-        
+
         if (el.target != "") {
           a.setAttribute("target", el.target);
         }
@@ -236,35 +274,49 @@
         @param {String} newVal [New value of disabled]
       */
       updateDisabled: function () {
-        var button = this.querySelector(".eon-button-button");
+        var el = this;
 
         if (!eon.util.isTrue(this.disabled)) {
-          button.removeAttribute("disabled");
-          button.classList.remove("eon-fg2-disabled");
+          el._refs.button.removeAttribute("disabled");
+          el._refs.button.classList.remove("eon-fg2-disabled");
           this.style.pointerEvents = "auto";
+
+          if (el.design == "filled") {
+            el._refs.button.classList.add("eon-bg2-filled");
+            el._refs.button.classList.remove("eon-bg2-filled-disabled", "eon-fg2-filled-disabled");
+          } 
 
         } else {
 
-          button.setAttribute("disabled", "true");
-          button.classList.add("eon-fg2-disabled");
+          el._refs.button.setAttribute("disabled", "true");
+          el._refs.button.classList.add("eon-fg2-disabled");
           this.style.pointerEvents = "none";
 
+          if (el.design == "filled") {
+            el._refs.button.classList.remove("eon-bg2-filled");
+            el._refs.button.classList.add("eon-bg2-filled-disabled", "eon-fg2-filled-disabled");
+          } 
         }
       }
     },
 
+    onCreated: function () {
+      var el = this;
+
+      el._createRefs();
+    },
+
     onRender: function () {
       var el = this;
-      var button = el.querySelector(".eon-button-button");
 
       el._setLabel();
+      el._setDesign();
       el._updateDisabled();
       el._setupIcon(el.icon);
-
       el._setupLink();
 
       // When the button is a type form submit
-      (el.type) ? button.setAttribute("type", el.type) : null;
+      (el.type) ? el._refs.button.setAttribute("type", el.type) : null;
 
       el.setAttribute("icon-position", el.iconPosition);
 

@@ -21,7 +21,6 @@
 <script>
     eon.element({
         name: "doc-playground",
-        name: "doc-playground",
         style: "doc-playground.css",
         dependencies: [
             "../../eon/ui/eon-editor",
@@ -52,11 +51,6 @@
                 reflect: true
             },
             selector: {
-                value: "",
-                reflect: true
-            },
-            // @html-attribute headerButtons (public) [Custom header buttons]
-            headerButtons: {
                 value: "",
                 reflect: true
             },
@@ -570,9 +564,9 @@
             htmlFilter: function () {
                 var el = this;
                 if (el.selector && el.selector != "") {
-                    var html = document.createElement('html');
-                    html.innerHTML = el._misc.code.html;
-                    return html.querySelector(el.selector).innerHTML;
+                    var template = document.createElement('template');
+                    template.innerHTML = el._misc.code.html;
+                    return template.content.querySelector(el.selector).innerHTML;
                 }
                 return el._misc.code.html;
             },
@@ -593,7 +587,7 @@
                 var genericCss = document.createElement("style");
                 genericCss.id = "genericCss";
                 var fullcss = "";
-                var htmlBody = " html,body{height:100%; width:100%; margin: 0px;";
+                var htmlBody = " html,body{height:100%; width:100%; margin: 0px; overflow: hidden;}";
                 fullcss += htmlBody;
                 genericCss.innerHTML = fullcss;
                 return genericCss;
@@ -655,6 +649,12 @@
                     }, 200);
                 } else {
                     var height = iframeContent.body.scrollHeight;
+                    if (el._misc.footer) {
+                        var footerPusher = document.createElement("div");
+                        footerPusher.style.height = "50px";
+                        footerPusher.style.width = "100%";
+                        iframeContent.body.appendChild(footerPusher);
+                    }
                     el._refs.iframe.style.height = height + "px";
                     var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
                     el._refs.editor.style.minHeight = codeMinHeight + "px";
@@ -667,11 +667,14 @@
                     }
                     el._misc.interval = setInterval(function () {
                         var height = iframeContent.body.scrollHeight;
-                        el._refs.iframe.style.height = height + "px";
-                        var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
-                        el._refs.editor.style.minHeight = codeMinHeight + "px";
-                        var codeMaxHeight = parseInt(el.codeMaxHeight) < height ? height : el.codeMaxHeight;
-                        el._refs.editor.style.maxHeight = codeMaxHeight + "px";
+                        if (height + "px" != el._refs.iframe.style.height && el._misc.activeView ==
+                            "result") {
+                            el._refs.iframe.style.height = height + "px";
+                            var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
+                            el._refs.editor.style.minHeight = codeMinHeight + "px";
+                            var codeMaxHeight = parseInt(el.codeMaxHeight) < height ? height : el.codeMaxHeight;
+                            el._refs.editor.style.maxHeight = codeMaxHeight + "px";
+                        }
                     }, 200);
                 }
             }

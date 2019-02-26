@@ -1,7 +1,7 @@
-<template>
+<template class="eon-sect1">
 
   <div class="eon-grid-header">
-    <div class="eon-grid-wrapper eon-sect1"></div>
+    <div class="eon-grid-wrapper"></div>
   </div>
 
   <div class="eon-grid-rows">
@@ -11,7 +11,7 @@
     </eon-scroll>
   </div>
 
-  <div class="eon-grid-footer eon-fg1 eon-sect1 eon-unselectable">
+  <div class="eon-grid-footer eon-fg1 eon-unselectable">
     <div class="eon-grid-pagControls eon-fg5">
       <i class="vicon vicon-first eon-grid-pagIcon eon-fg1-hoverable" data-navigation="first"></i>
       <i class="vicon vicon-chevron-left eon-grid-pagIcon eon-fg1-hoverable" data-navigation="previous"></i>
@@ -33,8 +33,8 @@
     themed: true,
 
     dependencies: [
-      "../eon-row",
-      "../eon-cell",
+      "../eon-grid-row",
+      "../eon-grid-cell",
       "../eon-overlay",
       "../eon-scroll"
     ],
@@ -265,9 +265,9 @@
       setupResize: function () {
 
         var el = this;
-        
-        eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
-          
+
+        eon.addResizeListener(el._refs.rowsWrapper, el.nodeName.toLowerCase(), function () {
+
           if (el._misc.pagingType == "auto") {
             el._handleRowsLayout(el._misc.entriesCount);
           }
@@ -290,19 +290,22 @@
 
         el._refs.headersWrapper.classList.add("headers");
 
-        el._refs.scroll.onScrolled(function (e) {
-          el._refs.header.style.transform = "translate3d(" + -e.scrollLeft + "px, 0, 0)";
-        });
+        el.onReady(function () {
+          el._refs.scroll.onScrolled(function (e) {
+            el._refs.header.style.transform = "translate3d(" + -e.scrollLeft + "px, 0, 0)";
+          });
+        })
+
 
         //Create header for each column
         for (var i = 0; i < columnsKeys.length; i++) {
-          headerCell = document.createElement("eon-cell");
+          headerCell = document.createElement("eon-grid-cell");
 
           if (el._misc.columns[columnsKeys[i]].class) {
             headerCell.classList.add(el._misc.columns[columnsKeys[i]].class);
           }
 
-          headerCell.classList.add("eon-grid-" + columnsKeys[i] + "Column");
+          headerCell.classList.add("eon-grid-" + columnsKeys[i] + "Column", "eon-bg2-hoverable");
 
           //Adding Attributes to the header
           headerCell.setAttribute("type", "header");
@@ -375,7 +378,7 @@
 
           // Layout related, creates the column rule
           rulePosition = eon.style.sheet.cssRules.length;
-          eon.style.sheet.insertRule("eon-grid[uid='" + el.uid + "'] eon-cell.eon-grid-" + columnName + "Column {}", rulePosition);
+          eon.style.sheet.insertRule("eon-grid[uid='" + el.uid + "'] eon-grid-cell.eon-grid-" + columnName + "Column {}", rulePosition);
           columnRule = eon.style.sheet.cssRules[rulePosition];
           columnRule.style.minWidth = columnMinWidth + "px";
           layoutWidth = layoutWidth + parseInt(columnMinWidth);
@@ -470,9 +473,12 @@
 
         if (eon.util.isTrue(el.autofit)) {
 
-          el._refs.scroll.onRender(function () {
-            el._refs.scroll.content.style.display = "flex";
+          el.onReady(function () {
+            el._refs.scroll.onRender(function () {
+              el._refs.scroll.content.style.display = "flex";
+            });
           });
+
         }
 
         if (el._misc.pagingType == "auto") {
@@ -672,9 +678,9 @@
 
             counter++;
 
-            // Since in the declarative creation eon-row will not get to exists as it will be
+            // Since in the declarative creation eon-grid-row will not get to exists as it will be
             // part of eon-grids template, it will not transform and wont have its source appended,
-            // since we want eon-row to have its eon-cells to be part of the component, we append 
+            // since we want eon-grid-row to have its eon-grid-cells to be part of the component, we append 
             // it manually in case it exists
             if (row.source) {
               row.appendChild(row.source);
@@ -682,10 +688,11 @@
 
             for (var m = 0; m < row.children.length; m++) {
 
-              if (row.children[m].tagName.toLowerCase() == "eon-cell") {
+              if (row.children[m].tagName.toLowerCase() == "eon-grid-cell") {
+                
                 data[row.children[m].getAttribute("column")] = row.children[m].innerHTML;
 
-              } else if (row.children[m].tagName.toLowerCase() == "eon-row") {
+              } else if (row.children[m].tagName.toLowerCase() == "eon-grid-row") {
 
                 var childData;
 
@@ -753,8 +760,8 @@
 
           dataObject = value;
 
-          row = document.createElement("eon-row");
-          row.classList.add("eon-grid-entryRow", "eon-bg1-border2");
+          row = document.createElement("eon-grid-row");
+          row.classList.add("eon-grid-entryRow");
           row.dataset.entryId = dataObject[el.keyProperty];
 
           el._createChildRows(row, dataObject);
@@ -762,7 +769,7 @@
           //For each column we have in the grid we will look for its value on the dataObject
           // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
           for (var i = 0; i < columnsKeys.length; i++) {
-            cell = el._createCell(columnsKeys[i], dataObject, data);
+            cell = el._createCell(columnsKeys[i], dataObject);
             row.content.appendChild(cell);
           }
 
@@ -810,14 +817,14 @@
 
           for (var i = 0; i < children.length; i++) {
 
-            childRow = document.createElement("eon-row");
-            childRow.classList.add("eon-grid-entryRow", "eon-bg1-hoverable3", "eon-bg1-border2");
+            childRow = document.createElement("eon-grid-row");
+            childRow.classList.add("eon-grid-entryRow");
             childRow.dataset.entryId = dataObject[el.keyProperty];
 
             //For each column we have in the grid we will look for its value on the dataObject
             // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
             for (var j = 0; j < columnsKeys.length; j++) {
-              cell = el._createCell(columnsKeys[j], dataObject[el.childProperty][i], data);
+              cell = el._createCell(columnsKeys[j], dataObject[el.childProperty][i]);
               childRow.content.appendChild(cell);
             }
 
@@ -834,7 +841,7 @@
 
           row.dropdown.appendChild(childrenDocFragment);
 
-          row.addEventListener("click", function () {
+          row.content.addEventListener("click", function () {
             el[eon.util.isTrue(el.autofit) ? "_handleAutofitRowDropdown" : "_handleRowDropdown"].apply(el, [row]);
           });
 
@@ -862,6 +869,11 @@
           row.removeChild(row.dropdown);
           el._misc.dropdowns.rows.splice(rowIndex, 1);
 
+          row.classList.remove("eon-grid-expandedRow");
+          row.content.classList.remove("eon-bg2-active");
+          row.content.classList.add("eon-bg2-hoverable");
+          row.dropdown.classList.remove("eon-sect3");
+
         } else {
 
           var rowHeight = row.content.offsetHeight;
@@ -873,6 +885,11 @@
           row.appendChild(row.dropdown);
 
           el._misc.dropdowns.rows.push(row);
+
+          row.classList.add("eon-grid-expandedRow");
+          row.content.classList.add("eon-bg2-active");
+          row.content.classList.remove("eon-bg2-hoverable");
+          row.dropdown.classList.add("eon-sect3");
 
         }
 
@@ -903,9 +920,16 @@
 
           if (el._misc.browser == "IE") {
             row.style.minHeight = el.rowMinHeight + "px";
+            row.content.style.minHeight = el.rowMinHeight + "px";
+            row.content.style.flexGrow = 1;
           }
 
           el._misc.dropdowns.rows.splice(rowIndex, 1);
+
+          row.classList.remove("eon-grid-expandedRow");
+          row.content.classList.remove("eon-bg2-active");
+          row.content.classList.add("eon-bg2-hoverable");
+          row.dropdown.classList.remove("eon-sect3");
 
         } else {
           // Add the dropdown to be opened children to the global childs amount
@@ -918,11 +942,19 @@
           } else {
             row.style.flexGrow = 0;
             row.style.minHeight = rowHeight * (1 + row.dropdown.children.length) + "px";
+            row.content.style.minHeight = "" + 100 / (subRowsCount + 1) + "%";
+            row.content.style.flexGrow = 0;
+            row.dropdown.style.flexGrow = 1;
           }
 
           row.dropdown.style.flexGrow = row.dropdown.children.length;
 
           el._misc.dropdowns.rows.push(row);
+
+          row.classList.add("eon-grid-expandedRow");
+          row.content.classList.add("eon-bg2-active");
+          row.content.classList.remove("eon-bg2-hoverable");
+          row.dropdown.classList.add("eon-sect3");
 
         }
 
@@ -938,12 +970,11 @@
       @description Handles the cell creation and if the user has specified the grid as editable it will add its corresponding events
       @param {String} columnKey
       @param {Object} dataObject
-      @param {Object} storeData
       */
-      createCell: function (columnKey, dataObject, storeData) {
+      createCell: function (columnKey, dataObject) {
 
         var el = this;
-        var cell = document.createElement("eon-cell");
+        var cell = document.createElement("eon-grid-cell");
         var editableColumns, eventObject;
 
         if (el._misc.columns[columnKey].class) {
@@ -1040,12 +1071,14 @@
         var newPageToSelect = pageSelector.querySelector('[data-page="' + page + '"]');
 
         if (previousSelectedPage) {
-          previousSelectedPage.classList.remove("eon-grid-currentPage", "eon-sect2-hoverable", "eon-fg1");
+          previousSelectedPage.classList.remove("eon-grid-currentPage", "eon-bg2-active");
+          previousSelectedPage.classList.add("eon-bg2-hoverable", "eon-fg1-hoverable");
           previousSelectedPage.setAttribute("selected", "false");
         }
 
         if (newPageToSelect) {
-          newPageToSelect.classList.add("eon-grid-currentPage", "eon-sect2-hoverable", "eon-fg1");
+          newPageToSelect.classList.add("eon-grid-currentPage", "eon-bg2-active");
+          previousSelectedPage.classList.remove("eon-bg2-hoverable", "eon-fg1-hoverable");
           newPageToSelect.setAttribute("selected", "true");
         }
 
@@ -1063,12 +1096,12 @@
         var lastPage = el._getLastAvailablePage();
 
         var disableNavigationbutton = function (button) {
-          button.classList.add("eon-grid-disabled");
+          button.classList.add("eon-fg2-disabled");
           button.dataset.enabled = "false";
         };
 
         var enableNavigationButton = function (button) {
-          button.classList.remove("eon-grid-disabled");
+          button.classList.remove("eon-fg2-disabled");
           button.dataset.enabled = "true";
         };
 
@@ -1119,7 +1152,7 @@
 
         if (el._misc.resize.firstTime == true) {
 
-          el._misc.resize.headers = el._refs.headersWrapper.querySelectorAll("eon-cell");
+          el._misc.resize.headers = el._refs.headersWrapper.querySelectorAll("eon-grid-cell");
           el._misc.resize.firstTime = false;
 
           var headerWidth;
@@ -1236,10 +1269,10 @@
         //add the remainingSpace to the last column
         if (headersWrapperWidth <= contentWidth) {
 
-          var sibling = el._refs.headersWrapper.querySelector('eon-cell[order="' + nextSiblingOrder + '"]');
+          var sibling = el._refs.headersWrapper.querySelector('eon-grid-cell[order="' + nextSiblingOrder + '"]');
 
           if (!sibling) {
-            sibling = el._refs.headersWrapper.querySelector('eon-cell[order="' + previousSiblingOrder + '"]');
+            sibling = el._refs.headersWrapper.querySelector('eon-grid-cell[order="' + previousSiblingOrder + '"]');
           }
 
           el._misc.columns[sibling.column].rule.style.minWidth = parseInt(sibling.offsetWidth) + parseInt(remainingSpace) + "px";
@@ -1351,7 +1384,7 @@
         if (el._misc.pagingType == "all" && dataLength > 0) {
           return 1;
         }
-        
+
         return Math.ceil(parseInt(dataLength) / parseInt(el._misc.pageSize));
       },
       /*
@@ -1479,7 +1512,7 @@
 
         var el = this;
 
-        var sortedHeaders = el._refs.headersWrapper.querySelectorAll('eon-cell[sort="descending"], eon-cell[sort="ascending"]');
+        var sortedHeaders = el._refs.headersWrapper.querySelectorAll('eon-grid-cell[sort="descending"], eon-grid-cell[sort="ascending"]');
         var upIcon = "vicon-chevron-up";
         var downIcon = "vicon-chevron-down";
 
@@ -1530,6 +1563,9 @@
         var el = this;
 
         el._misc.currentPage = page;
+        // Resets the childs rows wrapper height in case a childRow is open
+        el._misc.dropdowns.childRowsCount = 0;
+        el._refs.rowsWrapper.style.height = "auto";
 
         if (eon.util.isTrue(el.pagination)) {
 
@@ -1561,9 +1597,9 @@
         var pageSelector = el.querySelector(".eon-grid-stripPageSelector");
 
         pageSelector.innerHTML = "";
-        
+
         if (pageCount > 5) {
-          
+
           if (currentPage == pageCount) {
 
             loopStart = parseInt(currentPage) - 4;
@@ -1605,7 +1641,7 @@
 
           pageItem = document.createElement("div");
 
-          pageItem.classList.add("eon-grid-stripPage", "eon-sect2-border-hoverable");
+          pageItem.classList.add("eon-grid-stripPage", "eon-fg1-hoverable", "eon-bg2-hoverable");
           pageItem.dataset.page = pagesToCreate[i];
           pageItem.innerHTML = pagesToCreate[i];
           pageItem.onclick = function () {
@@ -1615,7 +1651,7 @@
 
           if (currentPage == pagesToCreate[i]) {
             pageItem.id = "currentPage";
-            pageItem.classList.add("eon-grid-currentPage", "eon-sect2-hoverable", "eon-fg1");
+            pageItem.classList.add("eon-grid-currentPage", "eon-sect2-hoverable", "eon-fg1-hoverable", "eon-bg2-hoverable");
             pageItem.setAttribute("selected", "true");
           }
           pageItemsDocFragment.appendChild(pageItem);
