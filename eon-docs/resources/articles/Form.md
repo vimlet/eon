@@ -12,6 +12,7 @@ This component deals with the data management of the different form elements.
           "framework/doc-eon/eon/ui/eon-text", 
           "framework/doc-eon/eon/ui/eon-form",
           "framework/doc-eon/eon/ui/eon-toggle", 
+          "framework/doc-eon/eon/ui/eon-number", 
           "framework/doc-eon/eon/ui/eon-group", 
           "framework/doc-eon/eon/ui/eon-button",
           "framework/doc-eon/custom/doc-playground/doc-showcase"
@@ -34,14 +35,15 @@ This component deals with the data management of the different form elements.
     </doc-head>
     <doc-body>
     <doc-showcase label="Demo form">
-        <eon-form action="#" method="get">
-          <eon-text class="d-form-marginTop" inline="false" name="text" type="text" placeholder="Name and last name" label="Client name"
-            max-length="18"></eon-text>
+        <eon-form action="#" method="get" schema="form/schema.json">
+          <eon-text name="name" type="text" label="First and last name" placeholder="Client name"
+            max-length="30"></eon-text>
           <eon-group name="gender" class="d-form-marginTop" label="Gender">
             <eon-radio class="d-radio-radioSpacing" label="Female" value="female"></eon-radio>
             <eon-radio class="d-radio-radioSpacing" label="Male" value="male"></eon-radio>
           </eon-group>
-          <eon-toggle class="d-form-marginTop" label="Accept policy" checked="true" value="toggle1" name="toggleOptions" id="option1">
+          <eon-number tooltip="Age" label="Age" name="age"></eon-number>
+          <eon-toggle class="d-form-marginTop" label="Accept policy" value="toggle1" name="toggleOptions" id="option1">
           </eon-toggle>
           <eon-button class="margin" onclick="validate();" value="Schema Validation"> </eon-button>
         </eon-form>
