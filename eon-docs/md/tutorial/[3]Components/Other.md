@@ -52,7 +52,7 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
   </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -143,7 +143,7 @@ The loader element is a useful mask for your application processes and page load
     }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*

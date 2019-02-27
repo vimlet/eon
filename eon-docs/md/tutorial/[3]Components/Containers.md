@@ -84,7 +84,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
       }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -175,7 +175,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
       }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -204,14 +204,21 @@ Panel is the basic container element. It has no associated style so it is comple
           doc-showcase {
             width: calc(100% - 40px);
           }
+          eon-panel{
+            width: 100%;
+            min-width: 100%;
+          }
+          .panel-content {
+            width: 100%;
+          }
         }
       </style>
   </doc-head>
   <doc-body>
     <doc-showcase label="On demand import">
       <eon-button class="panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
-      <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" allow-scroll="false" href="data/panel/lazyContent.html"
-        lazy-load="true">
+      <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" 
+                allow-scroll="false" href="data/panel/lazyContent.html" lazy-load="true">
         <div class="panel-content place-holder" style="box-shadow: none;">No content here</div>
       </eon-panel>
     </doc-showcase>
@@ -231,7 +238,8 @@ Panel is the basic container element. It has no associated style so it is comple
   <template type="css">
     .panel {
       flex-direction: column;
-      min-width: 228px;
+        min-width: 350px;
+        height: 100px;
     }
     .panel-content {
       height: 100px;
@@ -275,7 +283,7 @@ Panel is the basic container element. It has no associated style so it is comple
     }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -312,7 +320,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
       </style>
   </doc-head>
   <doc-body>
-    <doc-showcase label="Simple panel">
+    <doc-showcase label="Header panel">
       <eon-headerpanel header="static" header-content="Squares"  class="headerpanel" default-style="false">
       <div class="headerpanel-square blue"></div>
         <div class="headerpanel-square blue"></div>
@@ -366,7 +374,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
     }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -451,7 +459,7 @@ Also known as `table`, displays a large number of data using rows and columns.
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -599,7 +607,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
