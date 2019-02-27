@@ -84,7 +84,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
       }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -175,7 +175,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
       }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -275,7 +275,7 @@ Panel is the basic container element. It has no associated style so it is comple
     }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -366,7 +366,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
     }
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -451,7 +451,7 @@ Also known as `table`, displays a large number of data using rows and columns.
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -599,7 +599,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*

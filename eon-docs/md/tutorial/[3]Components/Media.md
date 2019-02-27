@@ -47,7 +47,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
   </doc-body>
   </template>
   <template type="footer">
-     {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+     {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -127,7 +127,7 @@ This element is a combination of the well known slider and image gallery compone
     }
   </template>
   <template type="footer">
-     {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+     {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -194,7 +194,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
   </doc-body>
   </template>
   <template type="footer">
-     {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+     {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*

@@ -52,7 +52,7 @@ By default the button style is outline, but they can be flat and filled using th
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -96,7 +96,7 @@ To display buttons with icons just use the `vicon` property passing any of the i
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -132,7 +132,7 @@ The checkbox element allows selecting multiple options of a group of choices. It
     </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -173,7 +173,7 @@ This form component consists of an entry field for numerical values with `up` an
     </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -219,7 +219,7 @@ The radio element allows selecting one option of a group of choices, for this, t
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -256,7 +256,7 @@ Form component that allows selecting a value from a range of values by moving th
     </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -304,7 +304,7 @@ The text element is a component meant for typing and it has multiple uses depend
     </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -351,7 +351,7 @@ The area type text enables the user to write large amount of characters in multi
     </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -394,7 +394,7 @@ The password text is pretty similar to the text type but it shows asterisks inst
     </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -431,7 +431,7 @@ This component is a simple on/off switch. It works almost the same way as an eon
     </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -481,7 +481,7 @@ The combobox element is a component meant for selecting an option between the gi
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
