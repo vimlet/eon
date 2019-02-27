@@ -4,8 +4,10 @@
     eon.theme = eon.theme == "claro" ? "noire" : "claro";
   }
 ]*
-<<<<<<< HEAD
 [Dialog]<>
+^[API](#!&mode=api&file=ui%2Feon-dialog%2Feon-dialog.html)
+
+
 The emerging component eon-dialog can contain text and other eon components or HTML components.
 The basic dialog consists of a container, but it is possible to add header and footer.
 
@@ -13,7 +15,7 @@ Also, it has different properties to give it different functionality such as res
 
 
 *(
-<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="#content">
+<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -26,9 +28,10 @@ Also, it has different properties to give it different functionality such as res
         ])
       </script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
+          width: 100%;
         }   
         #content {
           display:flex;
@@ -67,8 +70,7 @@ Also, it has different properties to give it different functionality such as res
         }
       </style>
   </doc-head>
-  <doc-body>
-    <div id="content"> 
+  <doc-body> <div class="content">
       <doc-showcase label="Interactive">
           <eon-button value="Show" onclick="document.querySelector('#textDialog').open()"></eon-button>
           <eon-dialog id="textDialog" class="d-dialog" heading="Interactive dialog" blur="true" closable="true" maximize="true"
@@ -131,7 +133,10 @@ Also, it has different properties to give it different functionality such as res
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
-=======
+  </template>
+</doc-playground>
+)*
+
 [Grid]<>
 ^[API](#!&mode=api&file=ui%2Feon-grid%2Feon-grid.html)
 
@@ -139,13 +144,14 @@ Also, it has different properties to give it different functionality such as res
 Also known as `table`, displays a large number of data using rows and columns.
 
 *(
-<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
+<doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
       <head>
           <script src='framework/doc-eon/eon/eon.js'></script>
           <script>eon.import(['framework/doc-eon/eon/ui/eon-grid','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
       </head>
       <body>
+      <div class="content">
           <doc-showcase label="Default">
               <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200"
                   columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
@@ -208,6 +214,7 @@ Also known as `table`, displays a large number of data using rows and columns.
                   </eon-grid-row>
                   </eon-grid>
           </doc-showcase>
+        </div>
       </body>
   </template>
   <template type="css">
@@ -216,25 +223,23 @@ Also known as `table`, displays a large number of data using rows and columns.
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
->>>>>>> bdddd61d4c9634e73319effd9c598738ce2cf995
   </template>
 </doc-playground>
 )*
 
-<<<<<<< HEAD
-=======
 ## Autofit Type
 
 This type of grid is meant to reduce the amount of headaches when dealing with grid pages as it completely removes the need of scrolling vertically, it only shows the amount of rows that fit the in the available space.
 
 *(
-<doc-playground label="Autofit" html="true" js="true" css="true" selector="body">
+<doc-playground label="Autofit" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
       <head>
           <script src='framework/doc-eon/eon/eon.js'></script>
           <script>eon.import(['framework/doc-eon/eon/ui/eon-grid','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
       </head>
       <body>
+      <div class="content">
           <doc-showcase label='Smaller Space'>
               <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80" column-min-width="200" autofit="true"
                   columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:260px">
@@ -359,6 +364,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
                   </eon-grid-row>
                   </eon-grid>
           </doc-showcase>
+        </div>
       </body>
   </template>
   <template type="css">
@@ -372,7 +378,6 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
 )*
 
 
->>>>>>> bdddd61d4c9634e73319effd9c598738ce2cf995
 [Gutter]<>
 ^[API](#!&mode=api&file=ui%2Feon-gutter%2Feon-gutter.html)
 
@@ -382,7 +387,7 @@ The gutter element is a container with the ability to separate its content in tw
 Gutter sections can be collapsible for dynamic behavior. On the contrary, the gutter provides other properties like allowDrag to reflect a static content layout.
 
 *(
-<doc-playground label="Vertical gutter" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Vertical gutter" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -401,6 +406,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
         .content {
           display: flex;
           flex-wrap: wrap;
+          width: 100%;
         }
         doc-showcase {
            width: 100%;
@@ -457,7 +463,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 
 
 *(
-<doc-playground label="Nested gutter" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Nested gutter" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -476,6 +482,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
         .content {
           display: flex;
           flex-wrap: wrap;
+          width: 100%;
         }
         doc-showcase {
            width: 100%;
@@ -551,7 +558,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 The Headerpanel element works as a simple container but provides a bunch of properties to simulate a card layout with a title header, action and remove buttons and scrollable content.
 
 *(
-<doc-playground label="Flexible behavior" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Flexible behavior" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -570,6 +577,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
         .content {
           display: flex;
           flex-wrap: wrap;
+          width: 100%;
         }
       </style>
   </doc-head>
@@ -640,7 +648,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
 Panel is the basic container element. It has no associated style so it is completely customizable in terms of layout. Provides a huge control over its content elements rendering, allowing on demand content or partial content loading.
 
 *(
-<doc-playground label="Panels" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Panels" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -655,6 +663,7 @@ Panel is the basic container element. It has no associated style so it is comple
         .content {
           display: flex;
           flex-wrap: wrap;
+          width: 100%;
         }
         @media (max-width: 430px) {
           doc-showcase {
@@ -726,7 +735,6 @@ Panel is the basic container element. It has no associated style so it is comple
     }
   </template>
   <template type="js">
-    //**
     function renderLazy() {
       document.querySelector("#lazy-content").render();
       // Remove place holder

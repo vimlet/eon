@@ -12,7 +12,7 @@ This element is a combination of the well known slider and image gallery compone
 
 
 *(
-<doc-playground label="Simple slider" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Simple slider" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -32,6 +32,7 @@ This element is a combination of the well known slider and image gallery compone
         .content {
           display: flex;
           flex-wrap: wrap;
+          width: 100%;
         }
         doc-showcase .doc-showcase-content {
           height: 350px;
@@ -92,7 +93,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
 
 
 *(
-<doc-playground label="Gallery" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Gallery" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -112,6 +113,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
         .content {
           display: flex;
           flex-wrap: wrap;
+          width: 100%;
         }
         doc-showcase .doc-showcase-content {
           height: 350px;
@@ -164,7 +166,7 @@ One can be assured that the swiper supports nested instances to build a more com
 The video component is an HTML5 `<video>` wrap. It provides an extra layer of compatibility and some capabilities to deal with the annoying browsers and devices unstandardized behavior (fullscreen mode, source types, auto-play functionality).
 
 *(
-<doc-playground label="Simple Video" format="true" html="true" js="true" css="true" selector="body">
+<doc-playground label="Simple Video" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
       <script src='framework/doc-eon/eon/eon.js'></script>
@@ -183,6 +185,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
         .content {
           display: flex;
           flex-wrap: wrap;
+          width: 100%;
         }
       </style>
   </doc-head>
