@@ -1,19 +1,13 @@
 *[
   function changeTheme(playground, btn){
     var eon = playground._refs.iframe.contentWindow.eon;
-    eon.theme= eon.theme == "claro" ? "noire" : "claro";
-    if(eon.theme == "claro") {
-      // TO NOIRE
-      eon.theme = "noire"
-      btn.classList.add("app-vicon-noire");
-    } else {
-      // TO CLARO
-      eon.theme = "claro";
-      btn.classList.remove("app-vicon-noire");
-    }
+    eon.theme = eon.theme == "claro" ? "noire" : "claro";
   }
 ]*
 [Button]<>
+^[API](#!&mode=api&file=ui%2Feon-button%2Feon-button.html)
+
+
 The eon-button component is a button with different facilities. It can be used as a form button using the property `type="submit"`, or as a button that activates a functionality.
 
 ## Button styles
@@ -52,7 +46,7 @@ By default the button style is outline, but they can be flat and filled using th
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -96,12 +90,15 @@ To display buttons with icons just use the `vicon` property passing any of the i
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
 
 [Checkbox]<>
+^[API](#!&mode=api&file=ui%2Feon-checkbox%2Feon-checkbox.html)
+
+
 The checkbox element allows selecting multiple options of a group of choices. It can be used inside a eon-form component or inside an HTML form.
 
 
@@ -132,313 +129,15 @@ The checkbox element allows selecting multiple options of a group of choices. It
     </doc-body>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
-
-[Number]<>
-This form component consists of an entry field for numerical values with `up` and `down` buttons. 
-
-*(
-<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body">
-  <template type="html">
-    <doc-head>
-      <script src="framework/doc-eon/eon/eon.js"></script>
-      <script> 
-        eon.theme = "claro";
-        eon.import([
-          "framework/doc-eon/eon/ui/eon-number", "framework/doc-eon/custom/doc-playground/doc-showcase"
-        ]);
-      </script>
-      <style>
-        body {
-          display: flex;
-          flex-wrap: wrap;
-        }
-        doc-showcase {
-          max-width: 300px;
-        }
-      </style>
-    </doc-head>
-    <doc-body>
-    <doc-showcase label="Standard">
-      <eon-number label="Number field" name="numberField" default="15" max="111">
-            </eon-number>
-    </doc-showcase>
-    <doc-showcase label="Disabled">
-      <eon-number label="Number field disabled" name="numberFieldDis" disabled="true">
-            </eon-number>
-    </doc-showcase>
-    </doc-body>
-  </template>
-  <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
-  </template>
-</doc-playground>
-)*
-
-[Radio]<>
-The radio element allows selecting one option of a group of choices, for this, the radio elements have to be included within the `eon-group`, having to import only this component.
-
-*(
-<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
-  <template type="html">
-      <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-group', 'framework/doc-eon/eon/ui/eon-radio','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-          <style>
-              .eon-group-label {
-                  display:none;
-              }
-              body {
-                display: flex;
-                flex-wrap: wrap;
-              }
-          </style>
-      </doc-head>
-      <doc-body>
-          <doc-showcase label='Standard'>
-              <eon-group class="d-radio-group" name="radioOptions">
-                <eon-radio class="d-top-margin" label="Orange" checked="true" value="Orange"></eon-radio>
-                <eon-radio class="d-top-margin" label="Red" value="Red"></eon-radio>
-                <eon-radio class="d-top-margin" label="Blue" value="Blue"></eon-radio>
-              </eon-group>
-          </doc-showcase>
-          <doc-showcase label='Disabled'>
-              <eon-group class="d-radio-group" name="disabledRadio">
-                <eon-radio class="d-top-margin" label="Mobile" checked="true" value="mobile" disabled="true"></eon-radio>
-                <eon-radio class="d-top-margin" label="Tablet" value="tablet" disabled="true"></eon-radio>
-                <eon-radio class="d-top-margin" label="Desktop" value="desktop" disabled="true"></eon-radio>
-            </eon-group>
-          </doc-showcase>
-      </doc-body>
-  </template>
-  <template type="css">
-      .doc-showcase-content{display:flex;}
-      .doc-showcase-content eon-button{margin:0 5px;}
-  </template>
-  <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
-  </template>
-</doc-playground>
-)*
-
-[Slider]<>
-Form component that allows selecting a value from a range of values by moving the slider thumb of the eon-slider. This can be horizontal or vertical and the value can be visible or not.
-
-*(
-<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
-  <template type="html">
-    <doc-head>
-      <script src="framework/doc-eon/eon/eon.js"></script>
-      <script> 
-        eon.import([
-          "framework/doc-eon/eon/ui/eon-slider", "framework/doc-eon/custom/doc-playground/doc-showcase"
-        ]);
-      </script>
-      <style>
-        doc-showcase {
-          max-width: 500px;
-        }
-        doc-showcase eon-slider{
-          width: auto !important;
-        }
-      </style>
-    </doc-head>
-    <doc-body>
-      <doc-showcase label="Standard">
-        <eon-slider display-visibility="true"></eon-slider>
-      </doc-showcase>
-      <doc-showcase label="Disabled">
-        <eon-slider display-visibility="true" disabled="true"></eon-slider>
-      </doc-showcase>
-    </doc-body>
-  </template>
-  <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
-  </template>
-</doc-playground>
-)*
-
-[Text]<>
-The text element is a component meant for typing and it has multiple uses depending on the type specified by the user (text , password and area). 
-
-*(
-<doc-playground label="Regular Text" format="true" html="true" js="true" css="true" selector="body">
-  <template type="html">
-    <doc-head>
-      <script src="framework/doc-eon/eon/eon.js"></script>
-      <script> 
-        eon.theme = "claro";
-        eon.import([
-          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
-        ]);
-      </script>
-      <style>
-        body {
-          display: flex;
-          flex-wrap: wrap;
-        }
-        doc-showcase {
-          max-width: 300px;
-        }
-        .doc-showcase-content eon-text {
-          margin: 0 0 20px 0;
-        }
-        eon-text.margin-top{
-          margin-top: 23px;
-        }
-      </style>
-    </doc-head>
-    <doc-body>
-      <doc-showcase>
-        <eon-text label="Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
-      </doc-showcase>
-      <doc-showcase>
-        <eon-text value="Initial value" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
-      </doc-showcase>
-      <doc-showcase>
-        <eon-text value="Disabled" class="margin-top" inline="false" name="disabled" disabled="true"></eon-text>
-      </doc-showcase>
-    </doc-body>
-  </template>
-  <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
-  </template>
-</doc-playground>
-)*
-
-
-## Textarea type 
-The area type text enables the user to write large amount of characters in multiple lines, for this example the counter was also enabled as well as an area-height were specified.
-
-*(
-<doc-playground label="Textarea" format="true" html="true" js="true" css="true" selector="body">
-  <template type="html">
-    <doc-head>
-      <script src="framework/doc-eon/eon/eon.js"></script>
-      <script> 
-        eon.theme = "claro";
-        eon.import([
-          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
-        ]);
-      </script>
-      <style>
-        body {
-          display: flex;
-          flex-wrap: wrap;
-        }
-        doc-showcase {
-          max-width: 300px;
-        }
-        .doc-showcase-content eon-text {
-          margin: 0 0 20px 0;
-          min-width: 212px; 
-        }
-        eon-text.margin-top{
-          margin-top: 23px;
-        }
-      </style>
-    </doc-head>
-    <doc-body>
-      <doc-showcase>
-        <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
-      </doc-showcase>
-      <doc-showcase>
-        <eon-text placeholder="Disabled Textarea" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
-      </doc-showcase>
-    </doc-body>
-  </template>
-  <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
-  </template>
-</doc-playground>
-)*
-
-
-## Password type 
-The password text is pretty similar to the text type but it shows asterisks instead of the written text.
-
-*(
-<doc-playground label="Password" format="true" html="true" js="true" css="true" selector="body">
-  <template type="html">
-    <doc-head>
-      <script src="framework/doc-eon/eon/eon.js"></script>
-      <script> 
-        eon.theme = "claro";
-        eon.import([
-          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
-        ]);
-      </script>
-      <style>
-        body {
-          display: flex;
-          flex-wrap: wrap;
-        }
-        doc-showcase {
-          max-width: 300px;
-        }
-        .doc-showcase-content eon-text {
-          margin: 0 0 20px 0;
-        }
-      </style>
-    </doc-head>
-    <doc-body>
-      <doc-showcase>
-        <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
-      </doc-showcase>
-      <doc-showcase>
-        <eon-text label="Disabled" default="password" inline="false" type="password" disabled="true"></eon-text>
-      </doc-showcase>
-    </doc-body>
-  </template>
-  <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
-  </template>
-</doc-playground>
-)*
-
-
-[Toggle]<>
-This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two `checked` boolean values.  
-
-*(
-<doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector="body">
-  <template type="html">
-    <doc-head>
-      <script src="framework/doc-eon/eon/eon.js"></script>
-      <script> 
-        eon.theme = "claro";
-        eon.import([
-          "framework/doc-eon/eon/ui/eon-toggle", "framework/doc-eon/custom/doc-playground/doc-showcase"
-        ]);
-      </script>
-      <style>
-        body {
-          display: flex;
-          flex-wrap: wrap;
-        }
-      </style>
-    </doc-head>
-    <doc-body>
-    <doc-showcase label="Standard">
-      <eon-toggle label='Toggle label' value='toggle2' name='toggleOptions'></eon-toggle>
-    </doc-showcase>
-    <doc-showcase label="Disabled">
-      <eon-toggle label='Disabled label' value='toggle3' name='toggleOptions' disabled='true'></eon-toggle>
-    </doc-showcase>
-    </doc-body>
-  </template>
-  <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
-  </template>
-</doc-playground>
-)*
-
-It can be used as a specific state switcher which some logic blocks will depend on or as a form component as well.
 
 [Combobox]<>
+^[API](#!&mode=api&file=ui%2Feon-combobox%2Feon-combobox.html)
+
+
 The combobox element is a component meant for selecting an option between the given ones, a dropdown with the available options appears giving the users the ability to choose among the different items.
 
 *(
@@ -481,7 +180,7 @@ The combobox element is a component meant for selecting an option between the gi
       .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -523,6 +222,9 @@ Enables the user to type in the input so that the options provided by the dropdo
 )*
 
 [Date]<>
+^[API](#!&mode=api&file=ui%2Feon-date%2Feon-date.html)
+
+
 The Date element is a component meant for typing or selecting a specific date, you have a wide variety of options such as being able to specify any format, output and locale among many others.
 
 ## Input Date
@@ -597,5 +299,323 @@ This type of date will only allow you to have a `calendar` directly leaving the 
     </template>
 </doc-playground>
 )*
+
+[Number]<>
+^[API](#!&mode=api&file=ui%2Feon-number%2Feon-number.html)
+
+
+This form component consists of an entry field for numerical values with `up` and `down` buttons. 
+
+*(
+<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-number", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+        doc-showcase {
+          max-width: 300px;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+    <doc-showcase label="Standard">
+      <eon-number label="Number field" name="numberField" default="15" max="111">
+            </eon-number>
+    </doc-showcase>
+    <doc-showcase label="Disabled">
+      <eon-number label="Number field disabled" name="numberFieldDis" disabled="true">
+            </eon-number>
+    </doc-showcase>
+    </doc-body>
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+[Radio]<>
+^[API](#!&mode=api&file=ui%2Feon-radio%2Feon-radio.html)
+
+
+The radio element allows selecting one option of a group of choices, for this, the radio elements have to be included within the `eon-group`, having to import only this component.
+
+*(
+<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
+  <template type="html">
+      <doc-head>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-group', 'framework/doc-eon/eon/ui/eon-radio','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <style>
+              .eon-group-label {
+                  display:none;
+              }
+              body {
+                display: flex;
+                flex-wrap: wrap;
+              }
+          </style>
+      </doc-head>
+      <doc-body>
+          <doc-showcase label='Standard'>
+              <eon-group class="d-radio-group" name="radioOptions">
+                <eon-radio class="d-top-margin" label="Orange" checked="true" value="Orange"></eon-radio>
+                <eon-radio class="d-top-margin" label="Red" value="Red"></eon-radio>
+                <eon-radio class="d-top-margin" label="Blue" value="Blue"></eon-radio>
+              </eon-group>
+          </doc-showcase>
+          <doc-showcase label='Disabled'>
+              <eon-group class="d-radio-group" name="disabledRadio">
+                <eon-radio class="d-top-margin" label="Mobile" checked="true" value="mobile" disabled="true"></eon-radio>
+                <eon-radio class="d-top-margin" label="Tablet" value="tablet" disabled="true"></eon-radio>
+                <eon-radio class="d-top-margin" label="Desktop" value="desktop" disabled="true"></eon-radio>
+            </eon-group>
+          </doc-showcase>
+      </doc-body>
+  </template>
+  <template type="css">
+      .doc-showcase-content{display:flex;}
+      .doc-showcase-content eon-button{margin:0 5px;}
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+[Slider]<>
+^[API](#!&mode=api&file=ui%2Feon-slider%2Feon-slider.html)
+
+
+Form component that allows selecting a value from a range of values by moving the slider thumb of the eon-slider. This can be horizontal or vertical and the value can be visible or not.
+
+*(
+<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-slider", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        doc-showcase {
+          max-width: 500px;
+        }
+        doc-showcase eon-slider{
+          width: auto !important;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+      <doc-showcase label="Standard">
+        <eon-slider display-visibility="true"></eon-slider>
+      </doc-showcase>
+      <doc-showcase label="Disabled">
+        <eon-slider display-visibility="true" disabled="true"></eon-slider>
+      </doc-showcase>
+    </doc-body>
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+[Text]<>
+^[API](#!&mode=api&file=ui%2Feon-text%2Feon-text.html)
+
+
+The text element is a component meant for typing and it has multiple uses depending on the type specified by the user (text , password and area). 
+
+*(
+<doc-playground label="Regular Text" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+        doc-showcase {
+          max-width: 300px;
+        }
+        .doc-showcase-content eon-text {
+          margin: 0 0 20px 0;
+        }
+        eon-text.margin-top{
+          margin-top: 23px;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+      <doc-showcase>
+        <eon-text label="Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
+      </doc-showcase>
+      <doc-showcase>
+        <eon-text value="Initial value" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
+      </doc-showcase>
+      <doc-showcase>
+        <eon-text value="Disabled" class="margin-top" inline="false" name="disabled" disabled="true"></eon-text>
+      </doc-showcase>
+    </doc-body>
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+
+## Textarea type 
+The area type text enables the user to write large amount of characters in multiple lines, for this example the counter was also enabled as well as an area-height were specified.
+
+*(
+<doc-playground label="Textarea" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+        doc-showcase {
+          max-width: 300px;
+        }
+        .doc-showcase-content eon-text {
+          margin: 0 0 20px 0;
+          min-width: 212px; 
+        }
+        eon-text.margin-top{
+          margin-top: 23px;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+      <doc-showcase>
+        <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
+      </doc-showcase>
+      <doc-showcase>
+        <eon-text placeholder="Disabled Textarea" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
+      </doc-showcase>
+    </doc-body>
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+
+## Password type 
+The password text is pretty similar to the text type but it shows asterisks instead of the written text.
+
+*(
+<doc-playground label="Password" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+        doc-showcase {
+          max-width: 300px;
+        }
+        .doc-showcase-content eon-text {
+          margin: 0 0 20px 0;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+      <doc-showcase>
+        <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
+      </doc-showcase>
+      <doc-showcase>
+        <eon-text label="Disabled" default="password" inline="false" type="password" disabled="true"></eon-text>
+      </doc-showcase>
+    </doc-body>
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+
+[Toggle]<>
+^[API](#!&mode=api&file=ui%2Feon-toggle%2Feon-toggle.html)
+
+
+This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two `checked` boolean values.  
+
+*(
+<doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src="framework/doc-eon/eon/eon.js"></script>
+      <script> 
+        eon.theme = "claro";
+        eon.import([
+          "framework/doc-eon/eon/ui/eon-toggle", "framework/doc-eon/custom/doc-playground/doc-showcase"
+        ]);
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      </style>
+    </doc-head>
+    <doc-body>
+    <doc-showcase label="Standard">
+      <eon-toggle label='Toggle label' value='toggle2' name='toggleOptions'></eon-toggle>
+    </doc-showcase>
+    <doc-showcase label="Disabled">
+      <eon-toggle label='Disabled label' value='toggle3' name='toggleOptions' disabled='true'></eon-toggle>
+    </doc-showcase>
+    </doc-body>
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+It can be used as a specific state switcher which some logic blocks will depend on or as a form component as well.
+
+
 
 

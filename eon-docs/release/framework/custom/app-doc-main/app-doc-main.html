@@ -127,26 +127,29 @@
 
     #app-doc-main-versionControl {
         margin-right: 10px;
-        /* margin-left:auto; */
     }
 
     #app-doc-main-versionControlSelect {
-        cursor: pointer;
-    color: inherit;
-        border: none;
-        /* border-bottom: 1px solid; */
-        background-color: transparent;
-        font-size: 16px;
+    display: flex;
+    align-items: center;
+    width:50px;
+    }
+    #app-doc-main-versionControlSelect .eon-combobox-dropButton{
+        display:none
+    }
+    #app-doc-main-versionControlSelect .eon-combobox-main{
+        border:none;
+    }
+    #app-doc-main-versionControlSelect input{
+        text-decoration:underline;
+        padding:0;
+    /* color: inherit; */
     }
 
-    #app-doc-main-versionControlSelect:focus {
-        outline: none;
-        background-color: transparent;
+    #app-doc-main-versionControlSelect .eon-combobox-main:focus {
+        /* color:#9c9c9c !important; */
     }
 
-    #app-doc-main-versionControlSelect option {
-        /* background-color: #333333; */
-    }
 
     #app-doc-main-colorBand {
         position: absolute;
@@ -191,6 +194,10 @@
         text-decoration: underline;
     }
 
+    .app-doc-main-version-dropdown{
+        left: auto !important;
+        right:4px !important;
+    }
 
     @media only screen and (max-width: 800px) and (min-width:480px) {
         .app-doc-main-itemRow {
@@ -302,7 +309,7 @@
                     'important');
                 document.querySelector(".app-doc-main-menu-mobile-mode").style.setProperty('display', 'none',
                     'important');
-            }, 
+            },
             // @function openView (public) [Open given view] @param path @param clean
             openView: function (path, clean) {
                 var el = this;
@@ -328,8 +335,8 @@
                 var el = this;
                 var selectVersion = document.querySelector("#app-doc-main-versionControlSelect");
 
-                var pathTo = window.location.href.split('#')[0] + selectVersion.options[selectVersion.selectedIndex]
-                    .getAttribute("src");
+                var pathTo = window.location.href.split('#')[0] + selectVersion.value;
+
                 pathTo = pathTo.replace(new RegExp("(?<!\:)\\/\\/", "g"), "/"); // There are situations where "/" can be stacked
                 window.location.href = pathTo;
             },
@@ -359,7 +366,7 @@
         },
 
         privateFunctions: {
-            // @function (private) setupData [Set up view and data.] @param {object} data
+            // @function (private) _setupData [Set up view and data.] @param {object} data
             setupData: function (data) {
                 var el = this;
                 el._refs.data = data;
@@ -373,6 +380,9 @@
                 } else {
                     var currentVersion = decodeURIComponent(window.location.href.split("#!version=")[1]).split(
                         "&")[0];
+                    if (currentVersion == "undefined") {
+                        currentVersion = data.__currentVersion;
+                    }
                     var currentMode = decodeURIComponent(window.location.href.split("mode=")[1]).split(
                         "&")[0];
                     if (data.__currentVersion != currentVersion) { // If version doesn't match, change version and go to first view
@@ -524,29 +534,45 @@
                     combobox.reset();
                 }
             },
-            // @function setupVersionControl (private) [Set up version control dropdown] @param data {object}
+            // @function _setupVersionControl (private) [Set up version control dropdown] @param data {object}
             setupVersionControl: function (data) {
-                if (!document.querySelector("#app-doc-main-versionControlSelect")) { // Version control is just generated once. We can not change version paths because we never change index.html so references will to different versions will be always the same
+                if (!document.querySelector("#app-doc-main-versionControlSelect")) { // Version control is just generated once. We can not change version paths because we never change index.html so references to different versions will be always the same
                     var docFragment = document.createDocumentFragment();
 
-                    var select = document.createElement("select");
+                    var select = document.createElement("eon-combobox");
                     select.id = "app-doc-main-versionControlSelect";
-                    select.setAttribute("onchange",
-                        "document.querySelector('app-doc-main').changeVersion();");
+
+
                     for (versionKey in data.__version) {
-                        var option = document.createElement("option");
-                        option.value = versionKey;
-                        option.innerHTML = versionKey;
+                        var option = document.createElement("eon-item");
+
+                        option.value = (data.__version[data.__currentVersion].from + data.__version[
+                            versionKey].to).replace(/[/\\*]/g, "/");
+                        option.displayValue = versionKey;
+
                         if (versionKey === data.__currentVersion) {
-                            option.selected = "selected";
+                            select.default = (data.__version[data.__currentVersion].from + data.__version[
+                                versionKey].to).replace(/[/\\*]/g, "/");
                         }
-                        option.setAttribute("src", (data.__version[data.__currentVersion].from + data.__version[
-                            versionKey].to).replace(/[/\\*]/g, "/"));
+
                         select.appendChild(option);
                     }
                     docFragment.appendChild(select);
+
+                    setTimeout(() => {
+                        select.onReady(function () {
+                            select._refs.dropDown.classList.add("app-doc-main-version-dropdown");
+                            select.onSelected(function () {
+                                document.querySelector('app-doc-main').changeVersion();
+                            });
+                        });
+                    }, 0);
                     document.querySelector("#app-doc-main-versionControl").appendChild(docFragment);
                 }
+
+
+
+
             },
             // @function getRequest (private) [Get json via ajax] @param path @param callback
             getRequest: function (path, callback) { // Generic html get request
@@ -572,7 +598,7 @@
                 } else { // If we have a version in the url load given version
                     var currentVersion = decodeURIComponent(window.location.href.split("#!version=")[
                         1]).split("&")[0];
-                    if (data.__currentVersion != currentVersion) { // If versions does not match, load version given via url
+                    if ((currentVersion != "undefined") && data.__currentVersion != currentVersion) { // If versions does not match, load version given via url
                         el._getRequest((data.__version[data.__currentVersion].from + data.__version[
                                 currentVersion].to).replace(/[/\\*]/g, "/") + "/config.json",
                             function (data) {
