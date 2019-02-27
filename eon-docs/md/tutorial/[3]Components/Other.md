@@ -31,7 +31,7 @@ The loader element is a useful mask for your application processes and page load
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
      <doc-showcase label="Loader">
       <eon-progressbar id="d-l1" class="loader page-loader" duration="1000" effect="linear">
       </eon-progressbar>
@@ -46,7 +46,7 @@ The loader element is a useful mask for your application processes and page load
         <eon-button class="btn" value="Run progress bar" onclick="runEaseProgress()"></eon-button>
       </div>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
   <template type="js">
      eon.onReady(function () {
@@ -120,7 +120,7 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
         'framework/doc-eon/eon/ui/eon-tree','framework/doc-eon/custom/doc-playground/doc-showcase'
       ])</script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
         }
@@ -129,7 +129,7 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
     <doc-showcase>
       <eon-tree icons="all" drag="true">
         <eon-tree-node name="dir" path="dir"></eon-tree-node>
@@ -138,7 +138,7 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
         <eon-tree-node type="file" path="dir3/dir2.1/dir2.1.1/dir2.1.1.1/file2"></eon-tree-node>
      </eon-tree>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}

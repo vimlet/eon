@@ -266,7 +266,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
         ])
       </script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
         }
@@ -279,7 +279,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
     <doc-showcase>
       <eon-gutter type="horizontal" collapsible="true">
         <eon-section class="section">
@@ -296,7 +296,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
         </eon-section>
       </eon-gutter>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
    <template type="css">
       .gutter-box {
@@ -341,7 +341,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
         ])
       </script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
         }
@@ -357,7 +357,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
     <doc-showcase>
     <eon-gutter type="vertical" collapsible="true">
         <eon-section>
@@ -384,7 +384,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
         </eon-section>
       </eon-gutter>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
    <template type="css">
       .gutter-box {
@@ -435,13 +435,13 @@ The Headerpanel element works as a simple container but provides a bunch of prop
         ])
       </script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
     <doc-showcase label="Header panel">
       <eon-headerpanel header="static" header-content="Squares"  class="headerpanel" default-style="false">
       <div class="headerpanel-square blue"></div>
@@ -462,7 +462,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
       <eon-headerpanel class="headerpanel" default-style="false">
       </eon-headerpanel>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
    <template type="css">
       .red {
@@ -520,7 +520,7 @@ Panel is the basic container element. It has no associated style so it is comple
         ])
       </script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
         }
@@ -538,7 +538,7 @@ Panel is the basic container element. It has no associated style so it is comple
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
     <doc-showcase label="On demand import">
       <eon-button class="panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
       <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" 
@@ -557,7 +557,7 @@ Panel is the basic container element. It has no associated style so it is comple
         </template>
       </eon-panel>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
   <template type="css">
     .panel {

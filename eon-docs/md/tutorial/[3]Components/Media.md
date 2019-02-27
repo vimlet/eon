@@ -29,7 +29,7 @@ This element is a combination of the well known slider and image gallery compone
         ]);
       </script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
         }
@@ -53,7 +53,7 @@ This element is a combination of the well known slider and image gallery compone
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
     <doc-showcase>
       <eon-swiper pagination="true">
         <eon-swiper-slide class="blue"></eon-swiper-slide>
@@ -62,7 +62,7 @@ This element is a combination of the well known slider and image gallery compone
         <eon-swiper-slide class="yellow"></eon-swiper-slide>
       </eon-swiper>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
    <template type="css">
    .blue {
@@ -109,7 +109,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
         ]);
       </script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
         }
@@ -133,7 +133,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
     <doc-showcase>
       <eon-swiper direction="horizontal" pagination="true" navigation="true" type="gallery"
         full-screen="true">
@@ -146,7 +146,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
         <eon-swiper-slide image="img/view-2.jpeg"></eon-swiper-slide>
       </eon-swiper>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
   <template type="footer">
      {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -180,18 +180,18 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
         ])
       </script>
       <style>
-        body {
+        .content {
           display: flex;
           flex-wrap: wrap;
         }
       </style>
   </doc-head>
-  <doc-body>
+  <doc-body><div class="content">
     <doc-showcase>
       <eon-video type="video/mp4" controls="true" src="video/snow.mp4" poster="img/snow.jpg" volume="0.5">
       </eon-video>
     </doc-showcase>
-  </doc-body>
+  </div></doc-body>
   </template>
   <template type="footer">
      {"button":{"action":"changeTheme", "icon":"theme"}}
