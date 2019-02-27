@@ -1,58 +1,13 @@
 *[
   function changeTheme(playground, btn){
     var eon = playground._refs.iframe.contentWindow.eon;
-    eon.theme= eon.theme == "claro" ? "noire" : "claro";
-    if(eon.theme == "claro") {
-      // TO NOIRE
-      eon.theme = "noire"
-      btn.classList.add("app-vicon-noire");
-    } else {
-      // TO CLARO
-      eon.theme = "claro";
-      btn.classList.remove("app-vicon-noire");
-    }
+    eon.theme = eon.theme == "claro" ? "noire" : "claro";
   }
 ]*
-[Video]<>
-The video component is an HTML5 `<video>` wrap. It provides an extra layer of compatibility and some capabilities to deal with the annoying browsers and devices unstandardized behavior (fullscreen mode, source types, auto-play functionality).
-
-*(
-<doc-playground label="Simple Video" format="true" html="true" js="true" css="true" selector="body">
-  <template type="html">
-    <doc-head>
-      <script src='framework/doc-eon/eon/eon.js'></script>
-      <script>
-        eon.themeSchema = {
-          claro: ["eon-video"]
-        }
-      </script>
-      <script>
-        eon.import([
-        'framework/doc-eon/eon/ui/eon-video',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
-        ])
-      </script>
-      <style>
-        body {
-          display: flex;
-          flex-wrap: wrap;
-        }
-      </style>
-  </doc-head>
-  <doc-body>
-    <doc-showcase>
-      <eon-video type="video/mp4" controls="true" src="video/snow.mp4" poster="img/snow.jpg" volume="0.5">
-      </eon-video>
-    </doc-showcase>
-  </doc-body>
-  </template>
-  <template type="footer">
-     {"button":{"action":"changeTheme", "icon":"theme"}}
-  </template>
-</doc-playground>
-)*
-
 [Swiper]<>
+^[API](#!&mode=api&file=ui%2Feon-swiper%2Feon-swiper.html)
+
+
 This element is a combination of the well known slider and image gallery components. It is supported on any device and only needs a single configuration to work on each one, without compromising its flexible behavior and options. The swiper needs the collaboration of another Eon element to work correctly, the `eon-swiper-slide`.
 
 
@@ -202,5 +157,46 @@ The swiper gallery type provides a full bunch of options to build the images lay
 One can be assured that the swiper supports nested instances to build a more complex layout.
 
 
+[Video]<>
+^[API](#!&mode=api&file=ui%2Feon-video%2Feon-video.html)
+
+
+The video component is an HTML5 `<video>` wrap. It provides an extra layer of compatibility and some capabilities to deal with the annoying browsers and devices unstandardized behavior (fullscreen mode, source types, auto-play functionality).
+
+*(
+<doc-playground label="Simple Video" format="true" html="true" js="true" css="true" selector="body">
+  <template type="html">
+    <doc-head>
+      <script src='framework/doc-eon/eon/eon.js'></script>
+      <script>
+        eon.themeSchema = {
+          claro: ["eon-video"]
+        }
+      </script>
+      <script>
+        eon.import([
+        'framework/doc-eon/eon/ui/eon-video',
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        ])
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      </style>
+  </doc-head>
+  <doc-body>
+    <doc-showcase>
+      <eon-video type="video/mp4" controls="true" src="video/snow.mp4" poster="img/snow.jpg" volume="0.5">
+      </eon-video>
+    </doc-showcase>
+  </doc-body>
+  </template>
+  <template type="footer">
+     {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
 
 

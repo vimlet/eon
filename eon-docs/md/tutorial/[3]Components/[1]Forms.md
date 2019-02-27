@@ -1,21 +1,12 @@
 *[
   function changeTheme(playground, btn){
     var eon = playground._refs.iframe.contentWindow.eon;
-    eon.theme= eon.theme == "claro" ? "noire" : "claro";
-    if(eon.theme == "claro") {
-      // TO NOIRE
-      eon.theme = "noire"
-      btn.classList.add("app-vicon-noire");
-    } else {
-      // TO CLARO
-      eon.theme = "claro";
-      btn.classList.remove("app-vicon-noire");
-    }
+    eon.theme = eon.theme == "claro" ? "noire" : "claro";
   }
 ]*
 [Button]<>
+^[API](#!&mode=api&file=ui%2Feon-button%2Feon-button.html)
 
-[test](https://eonjs.org/docs/#!version=1.0.0&mode=api&file=ui%2Feon-button%2Feon-button.html)
 
 The eon-button component is a button with different facilities. It can be used as a form button using the property `type="submit"`, or as a button that activates a functionality.
 
@@ -105,6 +96,9 @@ To display buttons with icons just use the `vicon` property passing any of the i
 )*
 
 [Checkbox]<>
+^[API](#!&mode=api&file=ui%2Feon-checkbox%2Feon-checkbox.html)
+
+
 The checkbox element allows selecting multiple options of a group of choices. It can be used inside a eon-form component or inside an HTML form.
 
 
@@ -140,7 +134,176 @@ The checkbox element allows selecting multiple options of a group of choices. It
 </doc-playground>
 )*
 
+[Combobox]<>
+^[API](#!&mode=api&file=ui%2Feon-combobox%2Feon-combobox.html)
+
+
+The combobox element is a component meant for selecting an option between the given ones, a dropdown with the available options appears giving the users the ability to choose among the different items.
+
+*(
+<doc-playground label="Common Usage" html="true" js="true" css="true" selector="#content">
+  <template type="html">
+      <doc-head>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <style>
+            body {
+              display: flex;
+              flex-wrap: wrap;
+            }
+          </style>
+      </doc-head>
+      <doc-body>
+        <div id="content" style="width: 100%;">
+        <doc-showcase label='Active'>
+          <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
+              <eon-item value='red' display-value='Red'></eon-item>
+              <eon-item value='green' display-value='Green'></eon-item>
+              <eon-item value='pink' display-value='Pink'></eon-item>
+              <eon-item value='grey' display-value='Grey'></eon-item>
+          </eon-combobox>
+        </doc-showcase>
+        <doc-showcase label='Disabled'>
+          <eon-combobox disabled='true' label='States' placeholder='Ohio'>
+              <eon-item value='tomato' display-value='Tomato'></eon-item>
+              <eon-item value='avocado' display-value='Avocado'></eon-item>
+              <eon-item value='strawberry' display-value='Strawberry'></eon-item>
+              <eon-item value='onion' display-value='Onion'></eon-item>
+          </eon-combobox>
+        </doc-showcase>
+        </div>
+        <div style="height:284px;"></div>
+      </doc-body>
+  </template>
+  <template type="css">
+      .doc-showcase-content{display:flex;}
+      .doc-showcase-content eon-button{margin:0 5px;}
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+## Filters
+Enables the user to type in the input so that the options provided by the dropdown are filtered, this is useful when there are large amounts of options, like countries for instance.
+
+*(
+<doc-playground label="Filtering" html="true" js="true" css="true" selector="#content">
+    <template type="html">
+        <doc-head>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <style>
+            body {
+              display: flex;
+              flex-wrap: wrap;
+            }
+          </style>
+        </doc-head>
+        <doc-body>
+        <div id="content" style="width: 100%;">
+        <doc-showcase>
+              <eon-combobox label="Colors" name='myCombobox' placeholder='Pick a color' filter='true'>
+                  <eon-item value='r' display-value='Red'></eon-item>
+                  <eon-item value='p' display-value='Pink'></eon-item>
+                  <eon-item value='pu' display-value='Purple'></eon-item>
+              </eon-combobox>
+          </doc-showcase>
+        </div>
+        <div style="height:284px;"></div>
+        </doc-body>
+    </template>
+    <template type="css">
+        .doc-showcase-content{display:flex;}
+        .doc-showcase-content eon-button{margin:0 5px;}
+    </template>
+</doc-playground>
+)*
+
+[Date]<>
+^[API](#!&mode=api&file=ui%2Feon-date%2Feon-date.html)
+
+
+The Date element is a component meant for typing or selecting a specific date, you have a wide variety of options such as being able to specify any format, output and locale among many others.
+
+## Input Date
+Classic input type date where you can either `type` the desired date or you can just open the `calendar` that will appear as a dropdown, which will allow you to easily select it.
+
+*(
+<doc-playground label="Input Type" html="true" js="true" css="true" selector="body">
+    <template type="html">
+        <doc-head>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <style>
+            body {
+              display: flex;
+              flex-wrap: wrap;
+            }
+          </style>
+        </doc-head>
+        <doc-body>
+          <doc-showcase label='Active'>
+            <eon-date min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" value-format="YYYY-MM-DD">
+          </eon-date>
+          </doc-showcase>
+          <doc-showcase label='Disabled'>
+              <eon-date type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" disabled="true" week-start="monday" value-format="YYYY/MM/DD">
+          </eon-date>
+          </doc-showcase>
+          <div style="height: 284px;"></div>
+        </doc-body>
+    </template>
+    <template type="css">
+        .doc-showcase-content{display:flex;}
+        .doc-showcase-content eon-button{margin:0 5px;}
+    </template>
+</doc-playground>
+)*
+
+## Calendar Date
+This type of date will only allow you to have a `calendar` directly leaving the input behind.
+
+*(
+<doc-playground label="Calendar Type" html="true" js="true" css="true" selector="body">
+    <template type="html">
+        <doc-head>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
+          <style>
+            body {
+              display: flex;
+              flex-wrap: wrap;
+            }
+          </style>
+        </doc-head>
+        <doc-body>
+        <doc-showcase label="Default">
+              <eon-date selectable="dmy" type="calendar" name="defaultCalendar"></eon-date>
+        </doc-showcase>
+        <doc-showcase label="Months/Years">
+              <eon-date selectable="my"  type="calendar" name="monthsCalendar"></eon-date>
+        </doc-showcase>
+        <doc-showcase label="Years">
+              <eon-date selectable="y"  type="calendar" name="yearsCalendar"></eon-date>
+        </doc-showcase>
+        <doc-showcase label="Disabled">
+              <eon-date disabled="true" selectable="dmy" type="calendar" name="disabledCalendar"></eon-date>
+        </doc-showcase>
+        </doc-body>
+    </template>
+    <template type="css">
+        .doc-showcase-content{display:flex;}
+        .doc-showcase-content eon-button{margin:0 5px;}
+    </template>
+</doc-playground>
+)*
+
 [Number]<>
+^[API](#!&mode=api&file=ui%2Feon-number%2Feon-number.html)
+
+
 This form component consists of an entry field for numerical values with `up` and `down` buttons. 
 
 *(
@@ -182,6 +345,9 @@ This form component consists of an entry field for numerical values with `up` an
 )*
 
 [Radio]<>
+^[API](#!&mode=api&file=ui%2Feon-radio%2Feon-radio.html)
+
+
 The radio element allows selecting one option of a group of choices, for this, the radio elements have to be included within the `eon-group`, having to import only this component.
 
 *(
@@ -228,6 +394,9 @@ The radio element allows selecting one option of a group of choices, for this, t
 )*
 
 [Slider]<>
+^[API](#!&mode=api&file=ui%2Feon-slider%2Feon-slider.html)
+
+
 Form component that allows selecting a value from a range of values by moving the slider thumb of the eon-slider. This can be horizontal or vertical and the value can be visible or not.
 
 *(
@@ -265,6 +434,9 @@ Form component that allows selecting a value from a range of values by moving th
 )*
 
 [Text]<>
+^[API](#!&mode=api&file=ui%2Feon-text%2Feon-text.html)
+
+
 The text element is a component meant for typing and it has multiple uses depending on the type specified by the user (text , password and area). 
 
 *(
@@ -404,6 +576,9 @@ The password text is pretty similar to the text type but it shows asterisks inst
 
 
 [Toggle]<>
+^[API](#!&mode=api&file=ui%2Feon-toggle%2Feon-toggle.html)
+
+
 This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two `checked` boolean values.  
 
 *(
@@ -441,164 +616,6 @@ This component is a simple on/off switch. It works almost the same way as an eon
 
 It can be used as a specific state switcher which some logic blocks will depend on or as a form component as well.
 
-[Combobox]<>
-The combobox element is a component meant for selecting an option between the given ones, a dropdown with the available options appears giving the users the ability to choose among the different items.
 
-*(
-<doc-playground label="Common Usage" html="true" js="true" css="true" selector="#content">
-  <template type="html">
-      <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-          <style>
-            body {
-              display: flex;
-              flex-wrap: wrap;
-            }
-          </style>
-      </doc-head>
-      <doc-body>
-        <div id="content" style="width: 100%;">
-        <doc-showcase label='Active'>
-          <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
-              <eon-item value='red' display-value='Red'></eon-item>
-              <eon-item value='green' display-value='Green'></eon-item>
-              <eon-item value='pink' display-value='Pink'></eon-item>
-              <eon-item value='grey' display-value='Grey'></eon-item>
-          </eon-combobox>
-        </doc-showcase>
-        <doc-showcase label='Disabled'>
-          <eon-combobox disabled='true' label='States' placeholder='Ohio'>
-              <eon-item value='tomato' display-value='Tomato'></eon-item>
-              <eon-item value='avocado' display-value='Avocado'></eon-item>
-              <eon-item value='strawberry' display-value='Strawberry'></eon-item>
-              <eon-item value='onion' display-value='Onion'></eon-item>
-          </eon-combobox>
-        </doc-showcase>
-        </div>
-        <div style="height:284px;"></div>
-      </doc-body>
-  </template>
-  <template type="css">
-      .doc-showcase-content{display:flex;}
-      .doc-showcase-content eon-button{margin:0 5px;}
-  </template>
-  <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"theme"}}
-  </template>
-</doc-playground>
-)*
-
-## Filters
-Enables the user to type in the input so that the options provided by the dropdown are filtered, this is useful when there are large amounts of options, like countries for instance.
-
-*(
-<doc-playground label="Filtering" html="true" js="true" css="true" selector="#content">
-    <template type="html">
-        <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-          <style>
-            body {
-              display: flex;
-              flex-wrap: wrap;
-            }
-          </style>
-        </doc-head>
-        <doc-body>
-        <div id="content" style="width: 100%;">
-        <doc-showcase>
-              <eon-combobox label="Colors" name='myCombobox' placeholder='Pick a color' filter='true'>
-                  <eon-item value='r' display-value='Red'></eon-item>
-                  <eon-item value='p' display-value='Pink'></eon-item>
-                  <eon-item value='pu' display-value='Purple'></eon-item>
-              </eon-combobox>
-          </doc-showcase>
-        </div>
-        <div style="height:284px;"></div>
-        </doc-body>
-    </template>
-    <template type="css">
-        .doc-showcase-content{display:flex;}
-        .doc-showcase-content eon-button{margin:0 5px;}
-    </template>
-</doc-playground>
-)*
-
-[Date]<>
-The Date element is a component meant for typing or selecting a specific date, you have a wide variety of options such as being able to specify any format, output and locale among many others.
-
-## Input Date
-Classic input type date where you can either `type` the desired date or you can just open the `calendar` that will appear as a dropdown, which will allow you to easily select it.
-
-*(
-<doc-playground label="Input Type" html="true" js="true" css="true" selector="body">
-    <template type="html">
-        <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-          <style>
-            body {
-              display: flex;
-              flex-wrap: wrap;
-            }
-          </style>
-        </doc-head>
-        <doc-body>
-          <doc-showcase label='Active'>
-            <eon-date min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" value-format="YYYY-MM-DD">
-          </eon-date>
-          </doc-showcase>
-          <doc-showcase label='Disabled'>
-              <eon-date type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" disabled="true" week-start="monday" value-format="YYYY/MM/DD">
-          </eon-date>
-          </doc-showcase>
-          <div style="height: 284px;"></div>
-        </doc-body>
-    </template>
-    <template type="css">
-        .doc-showcase-content{display:flex;}
-        .doc-showcase-content eon-button{margin:0 5px;}
-    </template>
-</doc-playground>
-)*
-
-## Calendar Date
-This type of date will only allow you to have a `calendar` directly leaving the input behind.
-
-*(
-<doc-playground label="Calendar Type" html="true" js="true" css="true" selector="body">
-    <template type="html">
-        <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-          <style>
-            body {
-              display: flex;
-              flex-wrap: wrap;
-            }
-          </style>
-        </doc-head>
-        <doc-body>
-        <doc-showcase label="Default">
-              <eon-date selectable="dmy" type="calendar" name="defaultCalendar"></eon-date>
-        </doc-showcase>
-        <doc-showcase label="Months/Years">
-              <eon-date selectable="my"  type="calendar" name="monthsCalendar"></eon-date>
-        </doc-showcase>
-        <doc-showcase label="Years">
-              <eon-date selectable="y"  type="calendar" name="yearsCalendar"></eon-date>
-        </doc-showcase>
-        <doc-showcase label="Disabled">
-              <eon-date disabled="true" selectable="dmy" type="calendar" name="disabledCalendar"></eon-date>
-        </doc-showcase>
-        </doc-body>
-    </template>
-    <template type="css">
-        .doc-showcase-content{display:flex;}
-        .doc-showcase-content eon-button{margin:0 5px;}
-    </template>
-</doc-playground>
-)*
 
 
