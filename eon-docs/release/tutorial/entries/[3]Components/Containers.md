@@ -13,6 +13,136 @@
     }
   }
 ]*
+[Dialog]<>
+The emerging component eon-dialog can contain text and other eon components or HTML components.
+The basic dialog consists of a container, but it is possible to add header and footer.
+
+Also, it has different properties to give it different functionality such as resizing.
+
+
+*(
+<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="#content">
+  <template type="html">
+    <doc-head>
+      <script src='framework/doc-eon/eon/eon.js'></script>
+      <script>
+        eon.import([
+          'framework/doc-eon/eon/ui/eon-dialog',
+          'framework/doc-eon/eon/ui/eon-text',
+          'framework/doc-eon/eon/ui/eon-button',
+          'framework/doc-eon/custom/doc-playground/doc-showcase'
+        ])
+      </script>
+      <style>
+        body {
+          display: flex;
+          flex-wrap: wrap;
+        }   
+        #content {
+          display:flex;
+          flex-wrap: wrap;
+          width: 100%;
+        }     
+        #textDialog {
+          max-width: 700px;
+          max-height: 300px;
+        }
+        .d-dialog-form {
+          display:flex;
+          flex-direction: column;
+          padding: 0;
+        }
+        .d-dialog-placeholder {
+          height: 200px;
+          width: 100%;
+        }
+        .d-top-margin {
+          margin-top: 10px;
+        }
+        .d-right-margin {
+          margin-right: 10px;
+        }
+        #myDialog.eon-dialog-dialog .eon-dialog-content {
+          padding: 0 25px 25px 25px;
+        }
+        .d-dialog-form eon-text {
+          margin: 5px 0;
+        }
+        @media (max-width: 460px) {
+          .d-dialog-form eon-text {
+            width: 100% !important;
+          }
+        }
+      </style>
+  </doc-head>
+  <doc-body>
+    <div id="content"> 
+      <doc-showcase label="Interactive">
+          <eon-button value="Show" onclick="document.querySelector('#textDialog').open()"></eon-button>
+          <eon-dialog id="textDialog" class="d-dialog" heading="Interactive dialog" blur="true" closable="true" maximize="true"
+            minimize="true" resize="true" drag="true" default-style="false">
+            <eon-section type="content">
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                incididunt ut labore et dolore magna aliqua.
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                aliquip
+                ex ea commodo
+                consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum
+                dolore eu fugiat
+                nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                qui
+                officia deserunt
+                mollit anim id est laborum.
+                <br>
+                <br> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                tempor incididunt ut labore
+                et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco
+                laboris nisi ut
+                aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+                voluptate velit esse cillum
+                dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+                proident,
+                sunt in culpa qui
+                officia deserunt mollit anim id est laborum.
+                <br>
+                <br> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                tempor incididunt ut labore
+                et dolore magna aliqua.
+                <br>
+              </p>
+            </eon-section>
+            <eon-section type="footer" location="right">
+              <eon-button class="d-right-margin" value="Cancel" design="flat" onclick="document.querySelector('#textDialog').close()">
+              </eon-button>
+            </eon-section>
+          </eon-dialog>
+      </doc-showcase>
+      <doc-showcase label="Login">
+          <eon-button value="Show" onclick="document.querySelector('#myDialog').open()">
+          </eon-button>
+          <eon-dialog id="myDialog" modal="true" blur="true" resize="true" heading="Login" default-style="false">
+            <eon-section type="content">
+              <eon-form class="d-dialog-form" action="#" method="get">
+                <eon-text name="userName" type="text" placeholder="User name" label="User name"></eon-text>
+                <eon-text name="userPass" type="Password" placeholder="Password" label="Password"></eon-text>
+                <eon-button class="d-top-margin" type="submit" value="Sign in" expand="full" design="flat"></eon-button>
+              </eon-form>
+            </eon-section>
+          </eon-dialog>
+      </doc-showcase>
+    </div>
+  <div style="height: 350px;"></div>
+  </doc-body>
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+  </template>
+</doc-playground>
+)*
+
 [Gutter]<>
 The gutter element is a container with the ability to separate its content in two sections divided with a draggable splitter, providing a flexible manipulation over the size of the sections and displaying. This kind of components is frequently used on code editor programs.
 
