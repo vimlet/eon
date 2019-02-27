@@ -204,12 +204,12 @@ Panel is the basic container element. It has no associated style so it is comple
           doc-showcase {
             width: calc(100% - 40px);
           }
-          eon-panel{
+          eon-panel {
             width: 100%;
-            min-width: 100%;
+            min-width: 100% !important;
           }
           .panel-content {
-            width: 100%;
+            width: 100% !important;
           }
         }
       </style>

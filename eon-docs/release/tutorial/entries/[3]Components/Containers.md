@@ -204,11 +204,12 @@ Panel is the basic container element. It has no associated style so it is comple
           doc-showcase {
             width: calc(100% - 40px);
           }
-          eon-panel{
+          eon-panel {
             width: 100%;
+            min-width: 100% !important;
           }
           .panel-content {
-            width: 100%;
+            width: 100% !important;
           }
         }
       </style>
@@ -319,7 +320,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
       </style>
   </doc-head>
   <doc-body>
-    <doc-showcase label="Simple panel">
+    <doc-showcase label="Header panel">
       <eon-headerpanel header="static" header-content="Squares"  class="headerpanel" default-style="false">
       <div class="headerpanel-square blue"></div>
         <div class="headerpanel-square blue"></div>
