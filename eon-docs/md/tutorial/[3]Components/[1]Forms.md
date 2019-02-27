@@ -32,7 +32,7 @@ By default the button style is outline, but they can be flat and filled using th
               <eon-button value='Button'></eon-button>
               <eon-button value='Disabled' disabled='true'></eon-button>
           </doc-showcase>
-              <doc-showcase label='Flat'>
+          <doc-showcase label='Flat'>
               <eon-button value='Button' design='flat'></eon-button>
               <eon-button value='Disabled' disabled='true' design='flat'></eon-button>
           </doc-showcase>
