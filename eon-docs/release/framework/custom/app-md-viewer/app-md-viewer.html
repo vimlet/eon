@@ -147,6 +147,19 @@
         align-items: center;
     }
 
+    .app-md-viewer-badge{
+    text-decoration: none;
+    color: white;
+    cursor:pointer;
+    background-color:#888888;
+    padding: 5px 10px;
+    border-radius: 2px;
+    margin-right:5px;
+    }
+    .app-md-viewer-badge:hover{
+    background-color:#a4a4a4;
+    }
+
 
     /* Safari 4.0 - 8.0 */
 
@@ -333,9 +346,13 @@
                         "\\((?:(?!\\()[\\s\\S])+\\)",
                         "g"
                     ),
-                    badges: new RegExp(
+                    // badge: new RegExp(
+                    //     "\\^\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])+\\)(\\r\\n|\\r|\\n){1}",
+                    //     "g"
+                    // ),
+                    badge: new RegExp(
                         "\\^\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])+\\)",
-                        "g"
+                        "gm"
                     ),
                     playground: new RegExp(
                         "@\\((?:(?!@\\()[\\s\\S])*\\)@(\\r\\n|\\r|\\n){0,1}",
@@ -373,6 +390,10 @@
                         "@@\\[\\d+\\]@@",
                         "g"
                     ),
+                    // br: new RegExp(
+                    //     "^(\\r\\n|\\r|\\n)$",
+                    //     "gm"
+                    // ),
                     br: new RegExp(
                         "(\\r\\n|\\r|\\n)$",
                         "gm"
@@ -602,12 +623,12 @@
                 });
                 return result;
             },
-            // @function parseBr (private) {string} [Parse horizontal rules] @param data {string}
+            // @function _parseBr (private) {string} [Parse horizontal rules] @param data {string}
             parseBr: function (data) {
                 var el = this;
                 var result = "";
                 var matches = data.match(el._regex.br);
-                var parsedResult = [];
+                var parsedResult = [];                
                 if (matches) {
                     for (var i = 0; i < matches.length; i++) {
                         var res = document.createElement("div");
@@ -757,9 +778,8 @@
                     //   return el._replaceSpecial(el._cleanMatch(videoSrcMatches[0], "(", ")"));
                 }
             },
-            // @function parseVideo (private) {string} @param data {string}
+            // @function _parseVideo (private) {string} @param data {string}
             parseVideo: function (data) {
-
                 el = this;
                 var result = "";
                 var matches = data.match(el._regex.video);
@@ -788,6 +808,27 @@
                 result = data.replace(el._regex.video, function () {
                     var count = el._parse.later.length;
                     el._parse.later[count] = videoResults[j++];
+                    return "@@[" + count + "]@@";
+                });
+                return result;
+            },
+            // @function _parseBadge (private) {string} @param data {string}
+            parseBadge: function (data) {
+                el = this;
+                var result = "";                
+                var matches = data.match(el._regex.badge);                
+                var parsedResult = [];
+                if (matches) {
+                    for (var i = 0; i < matches.length; i++) {
+                        var a = el._setLink(matches[i]);
+                        a.classList.add("app-md-viewer-badge");
+                        parsedResult.push(a);
+                    }
+                }
+                var j = 0;
+                result = data.replace(el._regex.badge, function () {
+                    var count = el._parse.later.length;
+                    el._parse.later[count] = parsedResult[j++];
                     return "@@[" + count + "]@@";
                 });
                 return result;
@@ -922,6 +963,7 @@
                 data = el._parseCode(data); // Order mathers, code must be parsed first because its content must not be parsed    
                 data = el._parseBr(data);
                 data = el._parseVideo(data);
+                data = el._parseBadge(data);                
                 data = el._parseImageLink(data); // Images with link must be parsed before images and before links
                 data = el._parseImages(data); // Images must be parsed before links, structure is the same                
                 data = el._parseLinks(data);
@@ -1278,7 +1320,7 @@
                 }
                 return link;
             },
-            // @function parseLinks (private) {string} @param str
+            // @function _parseLinks (private) {string} @param str
             parseLinks: function (str) {
                 el = this;
                 var result = "";
