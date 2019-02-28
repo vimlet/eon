@@ -356,9 +356,16 @@
                 sourceCode.forEach(function (code) {
                     switch (code.getAttribute("type")) {
                         case "html":
-                            var content = code.innerHTML.replace(/doc-head/g, 'head');
-                            content = content.replace(/doc-body/g, 'body');
-                            el._misc.code.html = content;
+                            // var content = code.innerHTML.replace(/doc-head/g, 'head');
+                            // content = content.replace(/doc-body/g, 'body');
+                            // el._misc.code.body = content;
+                            el._misc.code.body = code.innerHTML;
+                            break;
+                        case "html-body":
+                            el._misc.code.body = code.innerHTML;
+                            break;
+                        case "html-head":
+                            el._misc.code.head = code.innerHTML;
                             break;
                         case "js":
                             el._misc.code.js = code.innerHTML;
@@ -379,13 +386,8 @@
             // @function _getIframeString (private) [Format code into a string to be written at iframe]
             getIframeString: function () {
                 var el = this;
-                var headReg = new RegExp("<head>([\\s\\S])*<\\/head>", "gm");
-                var bodyReg = new RegExp("<body>([\\s\\S])*<\\/body>", "gm");
-                var headMatches = el._misc.code.html ? el._misc.code.html.match(headReg) : "";
-                var bodyMatches = el._misc.code.html ? el._misc.code.html.match(bodyReg) : "";
-                var head = headMatches ? el._cleanMatch(headMatches[0], "<head>", "</head>") : null;
-                var body = bodyMatches ? el._cleanMatch(bodyMatches[0], "<body>", "</body>") :
-                    null || el._misc.code.html;
+                var head = el._misc.code.head;
+                var body = el._misc.code.body;
                 var iframeSrc = "<!DOCTYPE html><html><head>";
                 if (head) {
                     iframeSrc += head;
@@ -423,7 +425,8 @@
             setupEditor: function () {
                 var el = this;
                 var tabsCount = el._tabsCount();
-                if (el._misc.code.html && eon.util.isTrue(el.html)) {
+                if ((el._misc.code.body && eon.util.isTrue(el.html)) || (el._misc.code.head && eon.util.isTrue(
+                        el.html))) {
                     var htmlTabBttn = document.createElement("div");
                     htmlTabBttn.classList.add("doc-playground-menu-tabs-bttn");
                     htmlTabBttn.type = "html";
@@ -443,7 +446,7 @@
                 if (el._misc.code.js && eon.util.isTrue(el.js)) {
                     var jsTabBttn = document.createElement("div");
                     jsTabBttn.classList.add("doc-playground-menu-tabs-bttn");
-                    if (!el._misc.code.html) {
+                    if (!el._misc.code.body && !el._misc.code.head) {
                         jsTabBttn.classList.add("doc-playground-menu-tabs-bttn-selected");
                         el._selectTab(jsTabBttn);
                     }
@@ -475,7 +478,8 @@
             tabsCount: function () {
                 var el = this;
                 var count = 0;
-                if (el._misc.code.html && eon.util.isTrue(el.html)) {
+                if ((el._misc.code.body && eon.util.isTrue(el.html)) || (el._misc.code.head && eon.util.isTrue(
+                        el.html))) {
                     count++;
                 }
                 if (el._misc.code.js && eon.util.isTrue(el.js)) {
@@ -492,7 +496,10 @@
                 if (el._misc.selectedTab) {
                     switch (el._misc.selectedTab.type) {
                         case "html":
-                            el._misc.code.html = el._htmlFilterReverse();
+                            // el._misc.code.html = el._htmlFilterReverse();
+                            var sanitizeHtml = el._htmlFilterReverse();
+                            el._misc.code.head = sanitizeHtml.head;
+                            el._misc.code.body = sanitizeHtml.body;
                             break;
                         case "js":
                             el._misc.code.js = el._refs.editor.getValue();
@@ -534,7 +541,10 @@
                 if (el._misc.selectedTab) {
                     switch (el._misc.selectedTab.type) {
                         case "html":
-                            el._misc.code.html = el._htmlFilterReverse();
+                            // el._misc.code.html = el._htmlFilterReverse();
+                            var sanitizeHtml = el._htmlFilterReverse();
+                            el._misc.code.head = sanitizeHtml.head;
+                            el._misc.code.body = sanitizeHtml.body;
                             break;
                         case "js":
                             el._misc.code.js = el._refs.editor.getValue();
@@ -564,42 +574,58 @@
             htmlFilter: function () {
                 var el = this;
                 if (el.selector && el.selector != "") {
-
-                    var template = document.createElement('template');
-                    template.innerHTML = el._misc.code.html;                    
-                    return template.content.querySelector(el.selector).innerHTML;
-
-
-// console.log(el.selector);
-// console.log(el._misc.code.html);
-
-// html.innerHTML = document.createRange().createContextualFragment(strHTML);
-
-
-                    // var html = document.createElement("html");
-                    // html.innerHTML = el._misc.code.html;  
-                    // return html.querySelector(el.selector).innerHTML;
-
-                    
-
-                    // var fragment = eon.fragmentFromString(el._misc.code.html);
-                    // console.log(fragment); 
-                    // return fragment.querySelector(el.selector).innerHTML;
-
-
+                    if (el.selector === "head") {
+                        return el._misc.code.head;
+                    } else if (el.selector === "body") {
+                        return el._misc.code.body;
+                    } else {
+                        var template = document.createElement('template');
+                        template.innerHTML = el._misc.code.body;                        
+                        return template.content.querySelector(el.selector).innerHTML;
+                    }
+                } else {
+                    var result = "";
+                    result += el._misc.code.head ? "<head>" + el._misc.code.head + "</head>\n" : "";
+                    result += el._misc.code.body ? "<body>" + el._misc.code.body + "</body>" : "";
+                    return result;
                 }
-                return el._misc.code.html;
             },
             // @function _htmlFilterReverse (private) [Reverse filtered html to set at the iframe]
             htmlFilterReverse: function () {
                 var el = this;
                 if (el.selector && el.selector != "") {
-                    var html = document.createElement('html');
-                    html.innerHTML = el._misc.code.html;
-                    html.querySelector(el.selector).innerHTML = el._refs.editor.getValue();
-                    return html.innerHTML;
+                    if (el.selector === "head") {
+                        return {
+                            head: el._refs.editor.getValue(),
+                            body: el._misc.code.body
+                        };
+                    } else if (el.selector === "body") {
+                        return {
+                            head: el._misc.code.head,
+                            body: el._refs.editor.getValue()
+                        };
+                    } else {
+                        var template = document.createElement('template');
+                        template.innerHTML = el._misc.code.body;                        
+                        template.content.querySelector(el.selector).innerHTML = el._refs.editor.getValue();
+                        return {
+                            head: el._misc.code.head,
+                            body: template.innerHTML
+                        };
+                    }
+                } else {
+                    var code = el._refs.editor.getValue();
+                    var headReg = new RegExp("<head>([\\s\\S])*<\\/head>", "gm");
+                    var bodyReg = new RegExp("<body>([\\s\\S])*<\\/body>", "gm");
+                    var headMatches = code.match(headReg) ? el._cleanMatch(code.match(headReg)[0], "<head>",
+                        "</head>") : "";
+                    var bodyMatches = code.match(bodyReg) ? el._cleanMatch(code.match(bodyReg)[0], "<body>",
+                        "</body>") : "";                        
+                    return {
+                        head: headMatches,
+                        body: bodyMatches
+                    };
                 }
-                return el._refs.editor.getValue();
             },
             // @function _iframeGenericCss (private) [Css code added to any iframe]
             iframeGenericCss: function () {
@@ -611,6 +637,12 @@
                 fullcss += htmlBody;
                 genericCss.innerHTML = fullcss;
                 return genericCss;
+            },
+            // @function _cleanMatch (private) {string} @param match @param open [Open tag] @param close [Close tag]
+            cleanMatch: function (match, open, close) {
+                match = match.trim();
+                match = match.substring(open.length, match.length - close.length).trim();
+                return match;
             },
             // @function _appendScriptsToIframe (private) [Append scripts to iframe head] @param iframeContent
             appendScriptsToIframe: function (iframeContent) {

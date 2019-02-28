@@ -105,9 +105,13 @@
 
     .app-doc-main-menuItem {
         margin-left: 10px;
+    /* padding: 5px 10px; */
         cursor: pointer;
         font-size: 17.5px;
     color: inherit;
+    }
+    .app-doc-main-menuItem:hover {
+    color: #828282;
     }
 
     .app-doc-main-menuItemText {
@@ -127,12 +131,19 @@
 
     #app-doc-main-versionControl {
         margin-right: 10px;
-    }
+    } 
 
     #app-doc-main-versionControlSelect {
     display: flex;
     align-items: center;
-    width:50px;
+    width:40px;
+    }
+    
+    #app-doc-main-versionControlSelect input:hover {
+    color: #828282;
+    }
+    #app-doc-main-versionControlSelect .eon-combobox-wrapper {
+    background-color: transparent;
     }
     #app-doc-main-versionControlSelect .eon-combobox-dropButton{
         display:none
@@ -141,14 +152,9 @@
         border:none;
     }
     #app-doc-main-versionControlSelect input{
-        text-decoration:underline;
         padding:0;
-    /* color: inherit; */
     }
 
-    #app-doc-main-versionControlSelect .eon-combobox-main:focus {
-        /* color:#9c9c9c !important; */
-    }
 
 
     #app-doc-main-colorBand {
@@ -348,7 +354,8 @@
                     if (el._misc.menu) {
                         // Update fixed
                         el._misc.menu.fixed.forEach(function (item) {
-                            if (item.value == path) {
+                            if (item.value.replace(/[/\\*]/g, "/") == path.replace(
+                                    /[/\\*]/g, "/")) {
                                 item.classList.add("app-doc-main-menuItem-selected");
                             }
                         });
@@ -371,8 +378,12 @@
                 var el = this;
                 el._refs.data = data;
                 eon.triggerCallback("dataLoaded", el, el, []);
-                el.data = data;
 
+                setTimeout(function () {
+                    document.querySelector(".app-doc-main-loader").hide();
+                }, 1000);
+
+                el.data = data;
                 if (window.location.href.indexOf("#") < 0) {
                     window.location.href = window.location.href.split('#')[0] + "#!version=" +
                         encodeURIComponent(data.__currentVersion);
@@ -380,8 +391,9 @@
                 } else {
                     var currentVersion = decodeURIComponent(window.location.href.split("#!version=")[1]).split(
                         "&")[0];
-                    if (currentVersion == "undefined") {
-                        currentVersion = data.__currentVersion;
+                    if (currentVersion == "latest") {
+                        // currentVersion = data.__currentVersion;
+                        currentVersion = data.__latest;
                     }
                     var currentMode = decodeURIComponent(window.location.href.split("mode=")[1]).split(
                         "&")[0];
@@ -561,7 +573,8 @@
 
                     setTimeout(() => {
                         select.onReady(function () {
-                            select._refs.dropDown.classList.add("app-doc-main-version-dropdown");
+                            select._refs.dropDown.classList.add(
+                                "app-doc-main-version-dropdown");
                             select.onSelected(function () {
                                 document.querySelector('app-doc-main').changeVersion();
                             });
@@ -590,7 +603,7 @@
                 httpRequest.open('GET', path);
                 httpRequest.send();
             },
-            // @function urlOnLoad (private) [Set up url when first load] @param data {object}
+            // @function _urlOnLoad (private) [Set up url when first load] @param data {object}
             urlOnLoad: function (data) {
                 var el = this;
                 if (window.location.href.indexOf("#") < 0) { // If we don't have version in the url go to standard load
@@ -598,6 +611,10 @@
                 } else { // If we have a version in the url load given version
                     var currentVersion = decodeURIComponent(window.location.href.split("#!version=")[
                         1]).split("&")[0];
+                    if (currentVersion == "latest") {
+                        // currentVersion = data.__currentVersion;
+                        currentVersion = data.__latest;
+                    }
                     if ((currentVersion != "undefined") && data.__currentVersion != currentVersion) { // If versions does not match, load version given via url
                         el._getRequest((data.__version[data.__currentVersion].from + data.__version[
                                 currentVersion].to).replace(/[/\\*]/g, "/") + "/config.json",

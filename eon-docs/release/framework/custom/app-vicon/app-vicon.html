@@ -28,6 +28,10 @@
             label: {
                 value: "",
                 reflect: true
+            },
+            titleRight:{
+                value: "",
+                reflect: true
             }
         },
 
@@ -44,29 +48,34 @@
             // @function setVicon (public) [Set up vicon] @param-optional vicon
             setVicon: function (vicon) {
                 var el = this;
+                el.onReady(function(){
                 el._refs.vicon.classList.remove("vicon-" + el._misc.currentVicon);
                 el._misc.currentVicon = vicon ? vicon : el.vicon;
                 if (el._misc.currentVicon && el._misc.currentVicon != "") {
                     el._refs.vicon.classList.add("vicon-" + el._misc.currentVicon);
                 }
-            },
+                });
+            }, 
             // @function setTitle (public) [Set playground title]
             setTitle: function (title) {
-                var el = this;                
+                var el = this;    
+                el.onReady(function(){            
                 el._misc.title = title ? title : el.label;
                 if (el._misc.title) {
                     el._refs.title.innerHTML = el._misc.title;
                 }
                 el.onBubbleRender(function () {
                     setTimeout(() => {
-                        // var iconHalfWidth = el.offsetWidth / 2;  // TODO widht is not well measured
                         var iconHalfWidth = 18;
-                        var titleHalfWidth = el._refs.title.offsetWidth / 2;
+                        var titleHalfWidth = el._refs.title.offsetWidth / 2;                        
+                        if(el.titleRight){
+                        el._refs.title.style.right = 0 + "px";
+                        }else{
                         el._refs.title.style.left = iconHalfWidth - titleHalfWidth + "px";
+                        }
                     }, 100);
                 });
-
-
+                });
             }
         },
 

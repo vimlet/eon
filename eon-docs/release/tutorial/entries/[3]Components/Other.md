@@ -128,6 +128,9 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
         .doc-showcase-title {
             display: none;
         }
+        .doc-showcase-content {
+            width: 100%;
+        }
       </style>
   </doc-head>
   <doc-body><div class="content">
