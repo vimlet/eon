@@ -1,0 +1,613 @@
+<script>
+    //@header A collapsible side container
+    eon.element({
+  
+      name: "eon-drawer",
+      style: "eon-drawer.css",
+  
+      properties: {
+        /*
+          @property {String} type
+          @description Drawer side position type
+          Values: left, right, top, bottom
+          Default: left
+        */
+        type: {
+          value: "left",
+          reflect: true
+        },
+        /*
+          @property {Boolean} static
+          @description Drawer position type
+          Values: false, true
+          Default: false
+        */
+        static: {
+          value: false,
+          reflect: true
+        },
+        /*
+          @property {Number} staticLimit
+          @description Turning point for static or absolute behaviour
+          Default: 1024
+        */
+        staticLimit: {
+          value: 0,
+          reflect: true
+        },
+        /*
+          @property {Boolean} drag
+          @description Manage drawer drag in/out functionality
+          Values: false, true
+          Default: false
+        */
+        drag: {
+          value: true,
+          reflect: true
+        },
+        /*
+          @property {Number} dragLimit
+          @description Pixels the drawer have to exceed to trigger translation
+          Default: 10
+        */
+        dragLimit: {
+          value: 10,
+          reflect: true
+        },
+        /*
+          @property {Boolean} closable
+          @description Make drawer closable
+          Values: false, true
+          Default: false
+        */
+        closable: {
+          value: true,
+          reflect: true,
+          observed: true
+        },
+        /*
+          @property {Boolean} hide
+          @description Initial drawer displaying
+          Values: false, true
+          Default: false
+        */
+        hide: {
+          value: true,
+          reflect: true
+        },
+        /*
+          @property {Array} preventCloseNodes
+          @description Includes the elements that should not trigger drawer hide
+        */
+        preventCloseNodes: {
+          value: "",
+          reflect: true
+        },
+        /*
+          @property {Array} preventDragNodes
+          @description Includes the drawer inner elements that should not trigger drawer drag
+        */
+        preventDragNodes: {
+          value: "",
+          reflect: true
+        },
+        /*
+          @property {Array} spacing
+          @description Margin to be left from viewport edges
+        */
+        spacing: {
+          value: 0,
+          reflect: true
+        }
+      },
+      privateProperties: {
+        /*
+          @property (private) {Object} _refs
+          @description
+        */
+        refs: {
+          value: {}
+        },
+        /*
+          @property (private) {Object} _misc
+          @description Internal used data
+        */
+        misc: {
+          value: {}
+        }
+      },
+      privateFunctions: {
+        /*
+          @function (private) _initMisc
+          @description Initialize miscellaneous private properties
+        */
+        initMisc: function () {
+          var el = this;
+          el._misc.dragCallbacks = {};
+          // Get size property from drawer type
+          el._misc.offsetProperty = el.type == "left" || el.type == "right" ? "offsetWidth" : "offsetHeight";
+          el._misc.sizeProperty = el.type == "left" || el.type == "right" ? "height" : "width";
+          el._refs.styleSheet = {};
+        },
+        /*
+          @function (private) _initialDisplay
+          @description Manage initial drawer display configuration
+        */
+        initialDisplay: function () {
+          var el = this;
+  
+          var ruleName = ".eon-drawer-absolute";
+  
+          if(!eon.dom.classExists(ruleName)) {
+            // console.log('TODO - el.spacing other drawer conlficts');
+            // Set up static css rule
+            var marginPosition = el.type == "right" || el.type == "left" ? "top" : "left";
+            var clss = ruleName + "{" + marginPosition + ":" + el.spacing + "px;\n\
+                      " + el._misc.sizeProperty + ":calc(100% - " + el.spacing + "px); \n\
+                    }";
+            // Insert and save rule
+            eon.style.sheet.insertRule(clss, 0);
+            el._refs.styleSheet["drawer"] = eon.style.sheet.cssRules[0];
+  
+          }
+          // Static and no collapsible drawer
+          if (eon.util.isTrue(el.static) && (el.staticLimit > 0 && window.innerWidth > el.staticLimit)) {
+            el.classList.remove("eon-drawer-absolute");
+            el.classList.add("eon-drawer-static");
+            el.closable = false;
+            el._translate(0);
+            el.style.opacity = 1;
+          } else {
+            el.classList.add("eon-drawer-absolute");
+            // Drawer initial displaying
+            if (!eon.util.isTrue(el.hide)) {
+              el.style.opacity = 1;
+              el._translate(0);
+            } else {
+              setTimeout(function() {
+                el._translate();
+              }, 0);
+              el._misc.displayed = false;
+            }
+          }
+        },
+        /*
+          @function (private) _addBlurListener
+          @description Close drawer on blur functionality
+        */
+        addBlurListener: function () {
+          var el = this;
+          var dropdParentElement, preventCloseElms, preventClose;
+          el._misc.close = eon.util.isTrue(el.closable) ? true: false;
+          // 
+          function documentBlurDown(e) {
+            el._misc.close = eon.util.isTrue(el.closable) ? true: false;
+            if (eon.util.isTrue(el.closable)) {
+              // Prevent drawer from being closed during drag transition
+              if (el._misc.close && !el.isOnPath) {
+                preventClose = false;
+                // Loop through nodes that should not trigger drawer displaying
+                for (var i = 0; i < el.preventCloseNodes.length; i++) {
+                  preventCloseElms = document.querySelectorAll(el.preventCloseNodes[i]);
+                  // Check query result amount
+                  if(preventCloseElms[1]) {
+                    // Multiple nodes
+                    for (var j = 0; j < preventCloseElms.length; j++) {
+                      if (preventCloseElms[j].isEqualNode(e.target)) {
+                        preventClose = true;
+                        break;
+                      }
+                    }
+                  } else if (preventCloseElms[0].isEqualNode(e.target)){
+                    preventClose = true;
+                  }
+                }
+                // Whether or not the drawer must be closed
+                if (!preventClose) {
+                  el.close();
+                }
+              }
+            }
+          }
+          el._misc.blurCallback = "documentBlurDown";
+          // On document click, detect elements path
+          document.addEventListener("pointerdown", documentBlurDown);
+        },
+        /*
+          @function (private) _addBlurListener
+          @description Drawer draggable functionality
+        */
+        addDragListener: function () {
+          var el = this;
+          var mousedown, dragLimitExceeded, throttled, position, pixels, middlePosition, sign;
+          var allowDrag = true;
+          var initialValue = 0, moveValue = 0 , slideCounter = 0;
+          var axis = el.type == "left" || el.type == "right" ? "clientX" : "clientY";
+          // A minimum delay must be set to make it works on Firefox but non on Edge or IE
+          var browser = eon.util.getBrowser();
+          var delay = browser === "IE" || browser === "Edge" ? 0 : 60;
+          // May drawer be opened by dragging
+          if (eon.util.isTrue(el.drag) && eon.util.isTrue(el.closable)) {
+            function documentDragDown(e) {
+              // Detect mouse down only outside drawer
+              if (!el.isOnPath) {
+                mousedown = true;
+                dragLimitExceeded = false;
+                // Check prevent drag nodes array
+                allowDrag = el._isOnArray(e.target, el.preventDragNodes) ? false : true;
+                // Slide complete trigger interval
+                el._misc.slideTimeInterval = setInterval(function () {
+                  slideCounter++;
+                }, 1);
+                // Get x/y value
+                initialValue = moveValue = e[axis];
+              }
+            }
+            el._misc.dragCallbacks.pointerdown = "documentDragDown";
+            // On document mouse down, detect elements target and mouse information
+            document.body.addEventListener("pointerdown", documentDragDown);
+  
+            function documentDragMove(e) {
+              if (mousedown && allowDrag) {
+                // Check movement limits
+                dragLimitExceeded = el._isDragLimitExceeded(initialValue, moveValue);
+                if (!throttled) {
+                  // Set drawer loaded property to true
+                  el.style.opacity = 1;
+                  // Get transform axis value
+                  position = eon.dom.getTransformAxis(el, axis.substring(axis.length - 1));
+                  // Calculate movement pixels from initial position
+                  pixels = moveValue - e[axis];
+                  // Check limits
+                  position = el._processPosition(position, pixels);
+                  // Translate element
+                  if (dragLimitExceeded) {
+                    eon.dom.translate(el, axis.substring(axis.length - 1), position);
+                  }
+                  // Update initial value
+                  moveValue = e[axis];
+                  // Throttle
+                  throttled = true;
+                  // Set a timeout to un-throttle
+                  setTimeout(function () {
+                    throttled = false;
+                  }, delay);
+                }
+              }
+            }
+            el._misc.dragCallbacks.pointermove = "documentDragMove";
+            // On document mouse move, drag in/out drawer
+            document.body.addEventListener("pointermove", documentDragMove);
+  
+            function documentDragUp(e) {
+              if (mousedown) {
+                mousedown = false;
+                // Check value sign (related to drawer side position)
+                sign = el.type == "left" || el.type == "top" ? -1 : 1;
+                // Complete slide trigger functionality
+                clearInterval(el._misc.slideTimeInterval);
+                if ((slideCounter < 100 && allowDrag) && dragLimitExceeded) {
+                  // Trigger complete slide only over move value limit
+                  el._triggerCompleteSlide(initialValue, moveValue, sign);
+                } else {
+                  // Get transform axis value
+                  position = eon.dom.getTransformAxis(el, axis.substring(axis.length - 1));
+                  // Get middle drawer position
+                  middlePosition = sign == -1 ? -Math.abs(el[el._misc.offsetProperty] / 2) : el[el._misc.offsetProperty] / 2;
+                  if ((sign == -1 && position > middlePosition) || (sign == 1 && position < middlePosition)) {
+                    el.show();
+                  } else {
+                    el.close();
+                  }
+                }
+                // Prevent drawer from being closed on document click
+                el._misc.close = moveValue != initialValue && slideCounter > 100 ? false : true;
+                allowDrag = true;
+                slideCounter = 0;
+              }
+            }
+            el._misc.dragCallbacks.pointerup = "documentDragUp";
+            // On document mouse up, stop dragging
+            document.body.addEventListener("pointerup", documentDragUp);
+            // On document mouse leave, stop dragging
+            document.body.addEventListener("pointerleave", documentDragUp);
+          }
+        },
+        /*
+          @function {Number} (private) _isOnArray
+          @description Check if a node is inside an array
+          @param node [Node to be checked]
+          @param array [Nodes array]
+          @return {Boolean} [Whether or not the node exists on the array]
+        */
+        isOnArray: function (node, array) {
+          var el = this;
+          var exists = false;
+          // Loop through nodes excluded from triggering drawer displaying
+          for (var i = 0; i < array.length; i++) {
+            if (document.querySelector(array[i]).isEqualNode(node)) {
+              exists = true;
+              break;
+            }
+          }
+          return exists;
+        },
+        /*
+          @function {Boolean} (private) _isDragLimitExceeded
+          @description Check if drag configuration limit value is exceeded
+          @param {Number} initialValue [Current drawer position value]
+          @param {Number} moveValue [Translate pixels value]
+          @return {Boolean} [Whether or not the drag limit is exceeded]
+        */
+        isDragLimitExceeded: function (initialValue, moveValue) {
+          var el = this;
+          var exceeded = false;
+          // Check drag direction
+          if (initialValue > moveValue) {
+            exceeded = (initialValue - moveValue) >= el.dragLimit ? true : false;
+          } else {
+            exceeded = (moveValue - initialValue) >= el.dragLimit ? true : false;
+          }
+          return exceeded;
+        },
+        /*
+          @function {Number} (private) _processPosition
+          @description Process a position value and add the new translation distance
+          @param {Number} position [Current drawer slide position]
+          @param {Number} pixels [Mouse moved pixels]
+          @return {Number} [New processed position value]
+        */
+        processPosition: function (position, pixels) {
+          var el = this;
+          var limitValue = el[el._misc.offsetProperty];
+          // Monitor node first position null value
+          position = !position ? 0 : position;
+          // Set translate x/y new value
+          position -= pixels;
+          // Check min and max translate limit values
+          var min = el.type == "left" || el.type == "top" ? -limitValue : 0;
+          var max = el.type == "left" || el.type == "top" ? 0 : limitValue;
+          position = position < min ? min : position;
+          position = position > max ? max : position;
+          return position;
+        },
+        /*
+          @function (private) _translate
+          @description Translate drawer type a specific distance
+          @param {number} value [Translate pixel value]
+        */
+        translate: function (value) {
+          var el = this;
+          // Check drawer position
+          switch (el.type) {
+            case "left":
+              value = !value && value != 0 ? -el[el._misc.offsetProperty] : -Math.abs(value);
+              el.style.transform = "translate3d(" + value + "px,0px,0px)";
+              break;
+            case "right":
+              value = !value && value != 0 ? el[el._misc.offsetProperty] : value;
+              el.style.transform = "translate3d(" + value + "px,0px,0px)";
+              break;
+            case "top":
+                value = !value && value != 0 ? -el[el._misc.offsetProperty] : -Math.abs(value);
+                el.style.transform = "translate3d(0px, " + value + "px, 0px)";
+              break;
+            case "bottom":
+                value = !value && value != 0 ? el[el._misc.offsetProperty] : value;
+                el.style.transform = "translate3d(0px, " + value + "px, 0px)";
+              break;
+          }
+        },
+        /*
+          @function (private) _triggerCompleteSlide
+          @description Close/show drawer if a quick slide is performed
+          @param {number} initialValue [Position value before move]
+          @param {number} moveValue [Translate movement value]
+          @param {number} sign [Movement direction]
+        */
+        triggerCompleteSlide: function (initialValue, moveValue, sign) {
+          var el = this;
+          // Top or left drawer
+          if (sign == -1) {
+            if (moveValue < initialValue) {
+              // Set a limit slide movement value from triggering total slide
+              if ((moveValue + 50) < initialValue) {
+                el.close();
+              } else {
+                // If complete slide is not trigger, keep drawer open
+                el.toggle();
+              }
+            } else if (moveValue > initialValue) {
+              // Set a limit slide movement value from triggering total slide
+              if ((moveValue - 50) > initialValue) {
+                el.show();
+              } else {
+                // If complete slide is not trigger, keep drawer open
+                el.toggle();
+              }
+            }
+            // Bottom or right drawer
+          } else {
+            if (moveValue < initialValue) {
+              // Set a limit slide movement value from triggering total slide
+              if ((moveValue + 50) < initialValue) {
+                el.show();
+              } else {
+                // If complete slide is not trigger, keep drawer open
+                el.toggle();
+              }
+            } else if (moveValue > initialValue) {
+              // Set a limit slide movement value from triggering total slide
+              if ((moveValue - 50) > initialValue) {
+                el.close();
+              } else {
+                // If complete slide is not trigger, keep drawer open
+                el.toggle();
+              }
+            }
+          }
+        },
+        /*
+          @function {Array} (private) _formatArrayProperty
+          @description Format array property
+          @return {Array} [Property value as array]
+        */
+        formatArrayProperty: function (prop) {
+          var el = this;
+          // Check preventClose property value
+          if (typeof prop == "string") {
+            // Convert value into an array
+            prop = el._getValueAsArray(prop);
+          }
+          return prop;
+        },
+        /*
+          @function {Array} (private) _getValueAsArray
+          @description Get value as array
+          @param value [Value to be checked]
+          @return {Array} [Array resulted]
+        */
+        getValueAsArray: function (value) {
+          var el = this;
+          var array = [];
+          // Check preventClose property value
+          if (typeof value == "string") {
+            // Convert value into an array
+            value = value.replace(/\s/g, '');
+            array = value.split(",");
+          }
+          return array[0] ? array : [];
+        }
+      },
+      functions: {
+        /*
+          @function show
+          @description Make drawer visible
+        */
+        show: function () {
+          var el = this;
+          // Force drawer to not be displayed before the first show call
+          if (!el._misc.loaded) {
+            el.style.opacity = 1;
+            // Show drawer
+            el._translate(0);
+            el._misc.displayed = true;
+            el._misc.loaded = true;
+          } else {
+            // Show drawer
+            el._translate(0);
+            el._misc.displayed = true;
+          }
+        },
+        /*
+          @function close
+          @description Hide drawer
+        */
+        close: function (cancelAnimation) {
+          var el = this;
+          if(el.closable) {
+            // Remove drawer transition effect
+            if(cancelAnimation) {
+              el.style.transition = "none";
+            }
+            el._translate();
+            el._misc.displayed = false;
+            // Add transition effect again after closing the drawer
+            if(cancelAnimation) {
+              setTimeout(function () {
+                el.style.transition = "transform .2s";
+              }, 150);
+            }
+          }
+        },
+        /*
+          @function toggle
+          @description Toggle drawer displaying
+        */
+        toggle: function () {
+          var el = this;
+          // Show or close drawer
+          if (el._misc.displayed) {
+            el._translate(0);
+            el._misc.displayed = false;
+          } else {
+            el._translate()
+            el._misc.displayed = true;
+          }
+        }
+      },
+      onResize: function () {
+        var el = this;
+        var throttled = false;
+        var delay = 10;
+        // Prevent resize functionality from trigger before element css styling
+        setTimeout(function () {
+          if (!el._misc.displayed && eon.util.isTrue(el.closable)) {
+            el._translate();
+          }
+          // Throttle
+          throttled = true;
+          // Set a timeout to un-throttle
+          setTimeout(function () {
+            throttled = false;
+          }, delay);
+        }, 0);
+      },
+      onWindowResize: function () {
+        var el = this;
+        var throttled = false;
+        var delay = 10;
+  
+        setTimeout(function () {
+          // Monitor drawer static behaviour on window resize
+          if (el.staticLimit > 0) {
+            if (window.innerWidth < el.staticLimit && !eon.util.isTrue(el.closable)) {
+              el.closable = true;
+              // Make absolute
+              el.classList.remove("eon-drawer-static");
+              el.classList.add("eon-drawer-absolute");
+            } else if(window.innerWidth > el.staticLimit && eon.util.isTrue(el.closable)){
+              el.closable = false;
+              // Avoid drawer from resize blinking 
+              if(el._misc.displayed == false){
+                el.style.transition="none";
+              }
+              el.classList.remove("eon-drawer-absolute");
+              el.classList.add("eon-drawer-static");
+              el.show();
+              if(el.style.transition == "none"){
+                // Reset transform animation
+                setTimeout(function() {
+                  el.style.transition="transform .2s, width .2s";
+                }, 200);
+              }
+            }
+            // Throttle
+            throttled = true;
+            // Set a timeout to un-throttle
+            setTimeout(function () {
+              throttled = false;
+            }, delay);
+          }
+        }, 0);
+      },
+      onInit: function () {
+        var el = this;
+        // Initialize miscellaneous private properties
+        el._initMisc();
+        // Initial element displaying configuration
+        el._initialDisplay();
+        // Events nodes path configuration
+        eon.registerPathListener(el);
+        // Pointer events attribute required
+        document.body.setAttribute("touch-action", "none");
+        // Format the excluded nodes array properties
+        el.preventCloseNodes = el._formatArrayProperty(el.preventCloseNodes);
+        el.preventDragNodes = el._formatArrayProperty(el.preventDragNodes);
+        // On drawer blur Listener
+        el._addBlurListener();
+        // On drag Listener
+        el._addDragListener();
+      }
+    });
+  </script>
