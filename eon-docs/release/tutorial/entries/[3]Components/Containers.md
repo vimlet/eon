@@ -126,7 +126,7 @@ Also, it has different properties to give it different functionality such as res
     <div style="height: 350px;"></div>
   </template>
   <template type="footer">
-    {"button":{"action":"changeTheme", "icon":"bubble-chart"}}
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -149,7 +149,7 @@ Also known as `table`, displays a large number of data using rows and columns.
     </script>
   </template>
   <template type="html-body">
-    <doc-showcase label="Default">
+    <doc-showcase label="Scrollable grid">
       <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200"
         columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
         <eon-grid-row>
@@ -377,10 +377,10 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
 
 The gutter element is a container with the ability to separate its content in two sections divided with a draggable splitter, providing a flexible manipulation over the size of the sections and displaying. This kind of components is frequently used on code editor programs.
 
-Gutter sections can be collapsible for dynamic behavior. On the contrary, the gutter provides other properties like allowDrag to reflect a static content layout.
+Gutter sections can be collapsible for dynamic behavior. On the contrary, the gutter provides other properties like `allowDrag` to reflect a static content layout.
 
 *(
-<doc-playground label="Vertical gutter" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Horizontal gutter" format="true" html="true" js="true" css="true" selector="body" format="true">
  <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
@@ -489,7 +489,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
     <doc-showcase>
       <eon-gutter type="vertical" collapsible="true">
         <eon-section>
-          <eon-gutter collapsible="false">
+          <eon-gutter collapsible="true">
             <eon-section class="section">
               <div class="gutter-box blue"></div>
               <div class="gutter-box blue"></div>

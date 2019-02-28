@@ -232,6 +232,9 @@ Enables the user to type in the input so that the options provided by the dropdo
     .doc-showcase-content{display:flex;}
     .doc-showcase-content eon-button{margin:0 5px;}
   </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
 </doc-playground>
 )*
 
@@ -279,6 +282,9 @@ Classic input type date where you can either `type` the desired date or you can 
     .doc-showcase-content{display:flex;}
     .doc-showcase-content eon-button{margin:0 5px;}
   </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
 </doc-playground>
 )*
 
@@ -319,6 +325,9 @@ This type of date will only allow you to have a `calendar` directly leaving the 
   <template type="css">
     .doc-showcase-content{display:flex;}
     .doc-showcase-content eon-button{margin:0 5px;}
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
