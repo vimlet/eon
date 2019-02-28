@@ -57,28 +57,33 @@
             }
         },
 
-        onCreated: function () {},
-
-        onReady: function () {
-            var el = this;
-            el._refs.content = el.querySelector("#eon-loading-content");
-            switch (el.animation) {
-                case "dots":
-                    el._refs.content.appendChild(el._setDots());
-                    break;
-
-                default:
-                    el._refs.content.appendChild(el._setDots());
-                    break;
-            }
-            // FIX
-            if(el.querySelector("svg")) {
-              el.querySelector("svg").style.display = "block"
-            }
+        onCreated: function () {
+          var el = this;
+          el._refs.svg = el.getSourceElements()[0];
+          // Hide svg for better layout performance purposes
+          if(el._refs.svg) {
+            el._refs.svg.style.display = "none" ;
+          }
         },
 
-        onRender: function () {}
+        onReady: function () {
+          var el = this;
+          el._refs.content = el.querySelector("#eon-loading-content");
+          switch (el.animation) {
+            case "dots":
+                el._refs.content.appendChild(el._setDots());
+                break;
 
-
+            default:
+                el._refs.content.appendChild(el._setDots());
+                break;
+          }
+          // Svg lazy display to avoid bad layout
+          setTimeout(function() {
+            if(el._refs.svg) {
+              el._refs.svg.style.display = "block";
+            }
+          }, 0);
+        }
     });
 </script>
