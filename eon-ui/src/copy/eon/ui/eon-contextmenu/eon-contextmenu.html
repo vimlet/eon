@@ -1,6 +1,6 @@
 <template>
     <div class="eon-contextmenu-wrapper eon-fg2">
-        <div class="eon-contextmenu-container eon-bg1 eon-boxshadow1">
+        <div class="eon-contextmenu-container eon-bg1">
             <!-- Only small devices -->
             <div class="eon-contextmenu-close eon-bg1">
                 <i class="eon-contextmenu-closeIcon vicon vicon-close"></i>
@@ -34,7 +34,7 @@
             },
             /*
              @property {Boolean} defaultStyle 
-             @description 
+             @description Sets spacers to the content section.
              Values: true, false
              Default: true
            */
@@ -47,31 +47,10 @@
         privateProperties: {
             /*
               @property (private) {Object} _triggerNode 
-              @description Store contextmenu trigger node
+              @description Stores contextmenu trigger nodes
             */
             triggerNode: {
                 value: {}
-            },
-            /*
-              @property (private) {Object} _contextmenuEvent
-              @description Store contextmenu event
-            */
-            contextmenuEvent: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _clickContextmenuEvent
-              @description Store contextmenu small devices event
-            */
-            clickContextmenuEvent: {
-                value: {}
-            },
-            /*
-              @property (private) {Object} _lastDevice
-              @description Store last device
-            */
-            lastDevice: {
-                value: ""
             },
             /*
               @property (private) {Object} _refs 
@@ -103,10 +82,14 @@
             */
             setContextmenuEvent: function (triggerElement) {
                 var el = this;
+                
+                if (el._refs.wrapper.dataset.version == "desktop") {
+                    el._setDesktopEvents(triggerElement);
 
-                el._setDesktopEvents(triggerElement)
-                el._setDeviceEvents(triggerElement);
+                } else {
+                    el._setDeviceEvents(triggerElement);
 
+                }
             },
 
             /*
@@ -115,28 +98,26 @@
               @param {Object} triggerElement
             */
             setDesktopEvents: function (triggerElement) {
-
                 var el = this;
-
                 var posX;
                 var posY;
 
                 triggerElement.addEventListener("contextmenu", contextmenuEvent);
 
                 function contextmenuEvent(e) {
+                    // if (el._refs.wrapper.dataset.version == "desktop") {
+                    posX = e.clientX;
+                    posY = e.clientY;
 
-                    if (el._refs.wrapper.dataset.version == "desktop") {
+                    el._refs.container.classList.remove("eon-boxshadow6");
+                    el._refs.container.classList.add("eon-boxshadow1");
 
-                        posX = e.clientX;
-                        posY = e.clientY;
+                    el.show(posX, posY);
 
-                        el.show(posX, posY);
+                    var exceedsObject = el._exceedsWindow();
 
-                        var exceedsObject = el._exceedsWindow();
-
-                        (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
-
-                    }
+                    (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
+                    // }
 
                 };
 
@@ -148,13 +129,15 @@
               @param {Object} triggerElement
             */
             setDeviceEvents: function (triggerElement) {
-
                 var el = this;
 
                 // Long touch event functionality
                 var onLongTouch;
                 var timer, lockerTimer;
                 var touchDuration = 800;
+
+                el._refs.container.classList.remove("eon-boxshadow1");
+                el._refs.container.classList.add("eon-boxshadow6");
 
                 function touchStart(event) {
                     event.stopPropagation();
@@ -171,9 +154,9 @@
                 }
 
                 onLongTouch = function () {
-                    if (el._refs.wrapper.dataset.version == "device") {
-                        el.show();
-                    }
+                    // if (el._refs.wrapper.dataset.version == "device") {
+                    el.show();
+                    // }
                 }
 
                 // Events for small devices
@@ -226,7 +209,7 @@
 
             /* 
               @function (private) _relocateContextmenu
-              @description Relocate contextmenu correctly without exceed window limits
+              @description Relocates contextmenu correctly without exceed window limits
               @param {Number} posX [Position X of mouse event click]
               @param {Number} posY [Position Y of mouse event click]
               @param {Object} exceedsObject [Side where contextmenu exceed window limits]
@@ -238,7 +221,7 @@
 
             /*
              @function (private) _setupItems
-             @description Set up declarative user contextmenu items
+             @description Sets up declarative user contextmenu items
              @param {Object} sourceNodes [Contextmenu node items]
            */
             setupItems: function (sourceNodes) {
@@ -264,7 +247,7 @@
 
             /*
               @function (private) _setupSpan
-              @description Set up span with name of app
+              @description Sets up span with name of app
               @param {Object} item [Contextmenu node icon]
            */
             setupSpan: function (item) {
@@ -277,7 +260,7 @@
 
             /*
               @function (private) _setupIcon
-              @description Set up contextmenu icon
+              @description Sets up contextmenu icon
               @param {Object} item [Contextmenu node icon]
            */
             setupIcon: function (item) {
@@ -309,7 +292,7 @@
 
             /*
               @function (private) _setResponsiveClose
-              @description Set close button for opening by click version for small devices
+              @description Sets close button for opening by click version for small devices
            */
             setResponsiveClose: function () {
                 var el = this;
@@ -326,7 +309,7 @@
 
             /*
               @function (private) _verifyScreenResolution
-              @description Set device type
+              @description Sets device type
             */
             verifyScreenResolution: function () {
                 var el = this;
@@ -335,26 +318,9 @@
 
             },
 
-
-            /*
-              @function (private) _updateDeviceOptions
-              @description Update device options and set events
-            */
-            updateDeviceOptions: function () {
-                var el = this;
-                var triggerLength = el._triggerNode.length;
-
-                for (var i = 0; i < triggerLength; i++) {
-
-                    el._triggerNode[i].setAttribute("oncontextmenu", "return false");
-                    el._setContextmenuEvent(el._triggerNode[i]);
-
-                }
-            },
-
             /*
               @function (private) _verifyOpenContextmenu
-              @description Check if there is already a contextmenu open and close it
+              @description Checks if there is already a contextmenu open and close it
               @param {Array} openContextmenu [Stores the node of open contextmenu]
             */
             verifyOpenContextmenu: function (openContextmenu) {
@@ -372,7 +338,7 @@
         functions: {
             /*
               @function show
-              @description Show contextmenu at position where clicked
+              @description Shows contextmenu at position where clicked
               @param {Number} posX [Position X of mouse event click]
               @param {Number} posY [Position Y of mouse event click]
             */
@@ -406,7 +372,7 @@
 
             /*
              @function hide
-             @description Hide contextmenu
+             @description Hides contextmenu
             */
             hide: function (el) {
                 var el = this;
@@ -426,7 +392,7 @@
 
             /*
               @function addItem
-              @description Add new contextmenu node item programmatically
+              @description Adds new contextmenu node item programmatically
               @param {Object} item [Node to add to contextmenu]
             */
             addItem: function (item) {
@@ -441,7 +407,7 @@
 
             /*
               @function removeItem 
-              @description Remove node item passed as parameter
+              @description Removes node item passed as parameter
               @param {Object} item [Node to removes from contextmenu] 
              */
             removeItem: function (item) {
@@ -450,7 +416,7 @@
 
             /*
               @function replaceItem 
-              @description Replace old node item with a new one
+              @description Replaces old node item with a new one
               @param {Object} newItem [Node that replaces old one]
               @param {Object} oldItem [Node to be replaced]
              */
@@ -463,8 +429,17 @@
 
                 this._refs.contextmenu.replaceChild(newItem, oldItem);
 
-            }
+            },
 
+            /*
+              @function addTrigger 
+              @description Adds a new contextmenu trigger node
+              @param {Object} newTrigger
+             */
+            addTrigger: function (newTrigger) {
+                newTrigger.setAttribute("oncontextmenu", "return false");
+                this._setContextmenuEvent(newTrigger);
+            }
         },
 
         onCreated: function () {
@@ -485,12 +460,13 @@
         onBubbleRender: function () {
             var el = this;
             var sourceNodes = el.getSourceElements();
-
-            el._triggerNode = document.querySelectorAll('[eon-contextmenu]');
-            triggerLength = el._triggerNode.length;
+            var triggers = document.querySelectorAll('[eon-contextmenu=' + el.name + ']');
 
             el._verifyScreenResolution();
-            el._updateDeviceOptions();
+            for (var i = 0; i < triggers.length; i++) {
+                el.addTrigger(triggers[i]);
+            }
+
             el._setupItems(sourceNodes);
 
             el._refs.scroll.onVerticalScrollCreated(function (verticalScroll) {

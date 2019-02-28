@@ -17,8 +17,8 @@ By default the button style is outline, but they can be flat and filled using th
 <doc-playground label="Regular Buttons" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
       <doc-head>
-          <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/eon/ui/eon-button','framework/custom/doc-playground/doc-showcase']);
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);
           </script>
           <style>
             .content {
@@ -59,8 +59,8 @@ To display buttons with icons just use the `vicon` property passing any of the i
 <doc-playground label="Icon Buttons" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
       <doc-head>
-          <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/eon/ui/eon-button','framework/custom/doc-playground/doc-showcase']);</script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             .content {
               display: flex;
@@ -108,10 +108,10 @@ The checkbox element allows selecting multiple options of a group of choices. It
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
         eon.import([
-          "framework/eon/ui/eon-checkbox", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-checkbox", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
       <style>
@@ -147,8 +147,8 @@ The combobox element is a component meant for selecting an option between the gi
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
       <doc-head>
-          <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/eon/ui/eon-combobox','framework/eon/ui/eon-item','framework/custom/doc-playground/doc-showcase']);</script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             .content {
               display: flex;
@@ -196,8 +196,8 @@ Enables the user to type in the input so that the options provided by the dropdo
 <doc-playground label="Filtering" html="true" js="true" css="true" selector=".content" format="true">
     <template type="html">
         <doc-head>
-          <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/eon/ui/eon-combobox','framework/eon/ui/eon-item','framework/custom/doc-playground/doc-showcase']);</script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             .content {
               display: flex;
@@ -238,8 +238,8 @@ Classic input type date where you can either `type` the desired date or you can 
 <doc-playground label="Input Type" html="true" js="true" css="true" selector=".content" format="true">
     <template type="html">
         <doc-head>
-          <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/eon/ui/eon-date','framework/custom/doc-playground/doc-showcase']);</script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             .content {
               display: flex;
@@ -274,8 +274,8 @@ This type of date will only allow you to have a `calendar` directly leaving the 
 <doc-playground label="Calendar Type" html="true" js="true" css="true" selector=".content" format="true">
     <template type="html">
         <doc-head>
-          <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/eon/ui/eon-date','framework/custom/doc-playground/doc-showcase']);</script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             .content {
               display: flex;
@@ -316,11 +316,11 @@ This form component consists of an entry field for numerical values with `up` an
 <doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
         eon.theme = "claro";
         eon.import([
-          "framework/eon/ui/eon-number", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-number", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
       <style>
@@ -361,8 +361,8 @@ The radio element allows selecting one option of a group of choices, for this, t
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
       <doc-head>
-          <script src='framework/eon/eon.js'></script>
-          <script>eon.import(['framework/eon/ui/eon-group', 'framework/eon/ui/eon-radio','framework/custom/doc-playground/doc-showcase']);</script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
+          <script>eon.import(['framework/doc-eon/eon/ui/eon-group', 'framework/doc-eon/eon/ui/eon-radio','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
               .eon-group-label {
                   display:none;
@@ -411,10 +411,10 @@ Form component that allows selecting a value from a range of values by moving th
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
         eon.import([
-          "framework/eon/ui/eon-slider", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-slider", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
       <style>
@@ -451,11 +451,11 @@ The text element is a component meant for typing and it has multiple uses depend
 <doc-playground label="Regular Text" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
         eon.theme = "claro";
         eon.import([
-          "framework/eon/ui/eon-text", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
       <style>
@@ -501,11 +501,11 @@ The area type text enables the user to write large amount of characters in multi
 <doc-playground label="Textarea" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
         eon.theme = "claro";
         eon.import([
-          "framework/eon/ui/eon-text", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
       <style>
@@ -549,11 +549,11 @@ The password text is pretty similar to the text type but it shows asterisks inst
 <doc-playground label="Password" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
         eon.theme = "claro";
         eon.import([
-          "framework/eon/ui/eon-text", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-text", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
       <style>
@@ -596,11 +596,11 @@ This component is a simple on/off switch. It works almost the same way as an eon
 <doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html">
     <doc-head>
-      <script src="framework/eon/eon.js"></script>
+      <script src="framework/doc-eon/eon/eon.js"></script>
       <script> 
         eon.theme = "claro";
         eon.import([
-          "framework/eon/ui/eon-toggle", "framework/custom/doc-playground/doc-showcase"
+          "framework/doc-eon/eon/ui/eon-toggle", "framework/doc-eon/custom/doc-playground/doc-showcase"
         ]);
       </script>
       <style>
