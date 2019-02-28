@@ -1,0 +1,521 @@
+<template>
+    <div class="eon-contextmenu-wrapper eon-fg2">
+        <div class="eon-contextmenu-container eon-bg1 eon-boxshadow1">
+            <!-- Only small devices -->
+            <div class="eon-contextmenu-close eon-bg1">
+                <i class="eon-contextmenu-closeIcon vicon vicon-close"></i>
+            </div>
+            <eon-scroll arrowScrolls="true" thickness="6" fill-container="false">
+                <div class="eon-contextmenu-contextmenu eon-bg1 eon-unselectable"></div>
+            </eon-scroll>
+        </div>
+    </div>
+</template>
+
+<script>
+    eon.element({
+
+        name: "eon-contextmenu",
+        style: "eon-contextmenu.css",
+
+        dependencies: [
+            "../eon-item",
+            "../eon-scroll"
+        ],
+
+        properties: {
+            /*
+              @property {String} name 
+              @description Contextmenu name that associates it with trigger component
+            */
+            name: {
+                value: "",
+                reflect: true
+            },
+            /*
+             @property {Boolean} defaultStyle 
+             @description 
+             Values: true, false
+             Default: true
+           */
+            defaultStyle: {
+                value: true,
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            /*
+              @property (private) {Object} _triggerNode 
+              @description Store contextmenu trigger node
+            */
+            triggerNode: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _contextmenuEvent
+              @description Store contextmenu event
+            */
+            contextmenuEvent: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _clickContextmenuEvent
+              @description Store contextmenu small devices event
+            */
+            clickContextmenuEvent: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _lastDevice
+              @description Store last device
+            */
+            lastDevice: {
+                value: ""
+            },
+            /*
+              @property (private) {Object} _refs 
+              @description Object with  references
+            */
+            refs: {
+                value: {}
+            }
+        },
+
+        privateFunctions: {
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.contextmenu = el.template.querySelector(".eon-contextmenu-contextmenu");
+                el._refs.wrapper = el.template.querySelector(".eon-contextmenu-wrapper");
+                el._refs.container = el.template.querySelector(".eon-contextmenu-container");
+                el._refs.close = el.template.querySelector(".eon-contextmenu-close");
+                el._refs.closeIcon = el.template.querySelector(".eon-contextmenu-closeIcon");
+                el._refs.scroll = el.template.querySelector("eon-scroll");
+            },
+            /*
+              @function (private) _setContextmenuEvent
+              @description Set event to open contextmenu
+            */
+            setContextmenuEvent: function (triggerElement) {
+                var el = this;
+
+                el._setDesktopEvents(triggerElement)
+                el._setDeviceEvents(triggerElement);
+
+            },
+
+            /*
+              @function (private) {Object} _setDesktopEvents
+              @description Creates the desktop related events
+              @param {Object} triggerElement
+            */
+            setDesktopEvents: function (triggerElement) {
+
+                var el = this;
+
+                var posX;
+                var posY;
+
+                triggerElement.addEventListener("contextmenu", contextmenuEvent);
+
+                function contextmenuEvent(e) {
+
+                    if (el._refs.wrapper.dataset.version == "desktop") {
+
+                        posX = e.clientX;
+                        posY = e.clientY;
+
+                        el.show(posX, posY);
+
+                        var exceedsObject = el._exceedsWindow();
+
+                        (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
+
+                    }
+
+                };
+
+            },
+
+            /*
+              @function (private) {Object} _setDeviceEvents
+              @description Creates the device related events
+              @param {Object} triggerElement
+            */
+            setDeviceEvents: function (triggerElement) {
+
+                var el = this;
+
+                // Long touch event functionality
+                var onLongTouch;
+                var timer, lockerTimer;
+                var touchDuration = 800;
+
+                function touchStart(event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    timer = setTimeout(onLongTouch, touchDuration);
+                }
+
+                function touchEnd() {
+                    // Stops short touches from firing the event
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+
+                }
+
+                onLongTouch = function () {
+                    if (el._refs.wrapper.dataset.version == "device") {
+                        el.show();
+                    }
+                }
+
+                // Events for small devices
+                if (navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i)) {
+                    triggerElement.addEventListener("touchstart", touchStart, false);
+                    triggerElement.addEventListener("touchend", touchEnd, false);
+
+                    // Events for small resized screens
+                } else {
+                    triggerElement.addEventListener("pointerdown", touchStart, false);
+                    triggerElement.addEventListener("pointerup", touchEnd, false);
+                }
+
+            },
+
+            /*
+              @function (private) {Object} _exceedsWindow
+              @description Check if contextmenu is going to exceed window limits
+            */
+            exceedsWindow: function () {
+                var el = this;
+                var elementRect = el._refs.wrapper.getBoundingClientRect();
+                var returnObject = {};
+
+                returnObject.exceeds = false;
+                returnObject.sides = {};
+
+                if (elementRect.left < 0) {
+                    returnObject.sides["left"] = true;
+                    returnObject.exceeds = true;
+                }
+
+                if ((elementRect.left + elementRect.width) > window.innerWidth) {
+                    returnObject.sides["right"] = true;
+                    returnObject.exceeds = true;
+                }
+
+                if (elementRect.top < 0) {
+                    returnObject.sides["top"] = true;
+                    returnObject.exceeds = true;
+                }
+
+                if (elementRect.top + elementRect.height > window.innerHeight) {
+                    returnObject.sides["bottom"] = true;
+                    returnObject.exceeds = true;
+                }
+
+                return returnObject;
+            },
+
+            /* 
+              @function (private) _relocateContextmenu
+              @description Relocate contextmenu correctly without exceed window limits
+              @param {Number} posX [Position X of mouse event click]
+              @param {Number} posY [Position Y of mouse event click]
+              @param {Object} exceedsObject [Side where contextmenu exceed window limits]
+            */
+            relocateContextmenu: function (posX, posY, exceedsObject) {
+                this.style.left = (exceedsObject.sides.right) ? posX - (this.clientWidth - 1) + "px" : this.style.left;
+                this.style.top = (exceedsObject.sides.bottom) ? posY - (this.clientHeight - 1) + "px" : this.style.top;
+            },
+
+            /*
+             @function (private) _setupItems
+             @description Set up declarative user contextmenu items
+             @param {Object} sourceNodes [Contextmenu node items]
+           */
+            setupItems: function (sourceNodes) {
+                var el = this;
+                var itemsDocFragment = document.createDocumentFragment();
+                var length = sourceNodes.length;
+                var item;
+
+                while (sourceNodes.length) {
+                    item = sourceNodes.shift();
+
+                    (item.value) ? this._setupSpan(item) : null;
+                    item.classList.add("eon-bg1-hoverable2");
+                    (item.getAttribute("icon")) ? el._setupIcon(item) : null;
+
+                    itemsDocFragment.appendChild(item);
+                }
+
+                // Move documentFragment to shadowRoot
+                el._refs.contextmenu.appendChild(itemsDocFragment);
+
+            },
+
+            /*
+              @function (private) _setupSpan
+              @description Set up span with name of app
+              @param {Object} item [Contextmenu node icon]
+           */
+            setupSpan: function (item) {
+                var itemSpan = document.createElement("span");
+
+                itemSpan.innerHTML = item.value;
+                itemSpan.classList.add("eon-contextmenu-itemSpan");
+                item.appendChild(itemSpan)
+            },
+
+            /*
+              @function (private) _setupIcon
+              @description Set up contextmenu icon
+              @param {Object} item [Contextmenu node icon]
+           */
+            setupIcon: function (item) {
+                var iconAttribute = item.icon;
+                var iconPosition = item.iconPosition;
+                var icon;
+
+                if (iconAttribute.indexOf("</i>") !== -1) {
+                    var tempDiv = document.createElement("div");
+
+                    tempDiv.innerHTML = iconAttribute;
+                    icon = tempDiv.querySelector("i");
+                    icon.classList.add("eon-contextmenu-itemIcon");
+
+                } else {
+                    icon = document.createElement("div");
+                    icon.style.backgroundImage = "url('" + iconAttribute + "')";
+                    icon.classList.add("eon-contextmenu-icon");
+                }
+
+                if (iconPosition == "left") {
+                    item.insertBefore(icon, item.childNodes[0]);
+
+                } else {
+                    item.appendChild(icon);
+                    item.style.justifyContent = "space-between";
+                }
+            },
+
+            /*
+              @function (private) _setResponsiveClose
+              @description Set close button for opening by click version for small devices
+           */
+            setResponsiveClose: function () {
+                var el = this;
+
+                if (!el.classList.contains("eon-contextmenu-responsive")) {
+                    el._refs.close.classList.add("eon-contextmenu-closeVisible");
+
+                    el._refs.closeIcon.addEventListener("click", function () {
+                        el.hide();
+                    });
+                }
+
+            },
+
+            /*
+              @function (private) _verifyScreenResolution
+              @description Set device type
+            */
+            verifyScreenResolution: function () {
+                var el = this;
+
+                el._refs.wrapper.dataset.version = (window.innerWidth <= eon.tabletWidth) ? "device" : "desktop";
+
+            },
+
+
+            /*
+              @function (private) _updateDeviceOptions
+              @description Update device options and set events
+            */
+            updateDeviceOptions: function () {
+                var el = this;
+                var triggerLength = el._triggerNode.length;
+
+                for (var i = 0; i < triggerLength; i++) {
+
+                    el._triggerNode[i].setAttribute("oncontextmenu", "return false");
+                    el._setContextmenuEvent(el._triggerNode[i]);
+
+                }
+            },
+
+            /*
+              @function (private) _verifyOpenContextmenu
+              @description Check if there is already a contextmenu open and close it
+              @param {Array} openContextmenu [Stores the node of open contextmenu]
+            */
+            verifyOpenContextmenu: function (openContextmenu) {
+                var el = this;
+
+                if (openContextmenu.length == 1) {
+                    openContextmenu[0].element.classList.remove("eon-contextmenu-wrapper-visible");
+                    openContextmenu.splice(0);
+                }
+
+            },
+
+        },
+
+        functions: {
+            /*
+              @function show
+              @description Show contextmenu at position where clicked
+              @param {Number} posX [Position X of mouse event click]
+              @param {Number} posY [Position Y of mouse event click]
+            */
+            show: function (posX, posY) {
+                var el = this;
+
+                // Contextmenu opened by a click event for the responsive functionality
+                if (typeof posX == "undefined" && typeof posY == "undefined") {
+                    el._refs.wrapper.classList.add("eon-contextmenu-wrapper-visible", "eon-bg1-modal");
+
+                    document.body.appendChild(el._refs.wrapper);
+                    el._setResponsiveClose();
+
+                } else {
+                    var openContextmenu = eon.contextmenu.openContextmenu;
+                    var openContextmenuObject = {};
+
+                    el._verifyOpenContextmenu(openContextmenu);
+                    openContextmenuObject.element = el._refs.wrapper;
+                    eon.contextmenu.openContextmenu.push(openContextmenuObject);
+                    el._refs.wrapper.style.top = posY + "px";
+                    el._refs.wrapper.style.left = posX + "px";
+                    // Appends the wrapper node to the body to control when it is in an absolute container
+                    document.body.appendChild(el._refs.wrapper);
+                    el._refs.wrapper.classList.add("eon-contextmenu-wrapper-visible");
+                }
+
+                eon.triggerCallback("onShow", this);
+
+            },
+
+            /*
+             @function hide
+             @description Hide contextmenu
+            */
+            hide: function (el) {
+                var el = this;
+                var verticalScroll = el.querySelector(".eon-contextmenu-wrapper .eon-scroll-verticalScroll");
+
+                if ((!verticalScroll && el._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible")) || (el._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible") && (verticalScroll.isOnPath == false))) {
+                    el._refs.wrapper.classList.remove("eon-contextmenu-wrapper-visible", "eon-bg1-modal");
+                    el._refs.close.classList.remove("eon-contextmenu-closeVisible");
+                    el._refs.wrapper.style.top = "0";
+                    el._refs.wrapper.style.left = "0";
+                    el.appendChild(el._refs.wrapper);
+                    document.body.removeEventListener("click", el._hideEvent);
+                }
+
+                eon.triggerCallback("onHide", this);
+            },
+
+            /*
+              @function addItem
+              @description Add new contextmenu node item programmatically
+              @param {Object} item [Node to add to contextmenu]
+            */
+            addItem: function (item) {
+                var itemSpan = item.querySelector("span");
+
+                (item.icon) ? this._setupIcon(item) : null;
+                (item.value) ? this._setupSpan(item) : null;
+                item.classList.add("eon-bg1-hoverable2");
+
+                this._refs.contextmenu.appendChild(item);
+            },
+
+            /*
+              @function removeItem 
+              @description Remove node item passed as parameter
+              @param {Object} item [Node to removes from contextmenu] 
+             */
+            removeItem: function (item) {
+                this._refs.contextmenu.removeChild(item);
+            },
+
+            /*
+              @function replaceItem 
+              @description Replace old node item with a new one
+              @param {Object} newItem [Node that replaces old one]
+              @param {Object} oldItem [Node to be replaced]
+             */
+            replaceItem: function (newItem, oldItem) {
+                var itemSpan = newItem.querySelector("span");
+
+                (newItem.value) ? this._setupSpan(newItem) : null;
+                (newItem.icon) ? this._setupIcon(newItem) : null;
+                newItem.classList.add("eon-bg1-hoverable2");
+
+                this._refs.contextmenu.replaceChild(newItem, oldItem);
+
+            }
+
+        },
+
+        onCreated: function () {
+            var el = this;
+
+            // Create callbacks
+            eon.createCallback("onShow", this);
+            eon.createCallback("onHide", this);
+
+            // Global contextmenu variables
+            eon.contextmenu = eon.contextmenu || {
+                openContextmenu: []
+            };
+
+            el._createRefs();
+        },
+
+        onBubbleRender: function () {
+            var el = this;
+            var sourceNodes = el.getSourceElements();
+
+            el._triggerNode = document.querySelectorAll('[eon-contextmenu]');
+            triggerLength = el._triggerNode.length;
+
+            el._verifyScreenResolution();
+            el._updateDeviceOptions();
+            el._setupItems(sourceNodes);
+
+            el._refs.scroll.onVerticalScrollCreated(function (verticalScroll) {
+                eon.registerPathListener(verticalScroll);
+            });
+
+            window.addEventListener("blur", function () {
+                if (el._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible")) {
+                    el.hide();
+                }
+            });
+
+            document.body.addEventListener("click", function () {
+                if (el._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible")) {
+                    el.hide();
+                }
+            });
+        },
+
+        onWindowResize: function (event) {
+            if (this._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible") && this._refs.wrapper.dataset.version == "desktop") {
+                this.hide();
+            }
+        }
+
+    });
+
+</script>

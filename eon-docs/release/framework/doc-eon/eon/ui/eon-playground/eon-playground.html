@@ -1,0 +1,453 @@
+<style>
+  eon-playground eon-panel {
+    height: 100%;
+    width: 100%;
+    overflow: hidden !important;
+    position: relative;
+  }
+
+  eon-playground .eon-playground-htmlTags-button {
+    cursor: pointer
+  }
+
+  eon-playground .eon-playground-htmlTags-enabled {
+    color: white !important;
+  }
+
+  eon-playground .eon-playground-editor-hidden {
+    display: none !important;
+  }
+</style>
+<template>
+  <eon-loading></eon-loading>
+  <div id="eon-playground-content" class="eon-playground-until-render"></div>
+</template>
+
+<script>
+  eon.element({
+    name: "eon-playground",
+    style: "eon-playground.css",
+    dependencies: [
+      "../eon-editor",
+      "../eon-tabs",
+      "../eon-gutter",
+      "../eon-scroll",
+      "../eon-panel",
+      "../eon-loading"
+    ],
+    properties: {
+      head: {
+        value: "",
+        reflect: false
+      },
+      body: {
+        value: "",
+        reflect: false
+      },
+      js: {
+        value: "",
+        reflect: false
+      },
+      css: {
+        value: "",
+        reflect: false
+      },
+      htmlView: { // Single (one view at a time) Multiple (head and body at the same time)
+        value: "single",
+        reflect: true
+      }
+    },
+
+    privateProperties: {
+      refs: {
+        value: {}
+      },
+      misc: {
+        value: {}
+      }
+    },
+
+    privateFunctions: {
+      // @function init (private) [Set up playground]
+      init: function () {
+        var el = this;
+        el._setStructure();
+      },
+      // @function setTabs (private) [Generate eon-tabs]
+      setTabs: function () {
+        var el = this;
+        el._refs.tabs = document.createElement("eon-tabs");
+        el._refs.tabs.dragging = false;
+        el._refs.tabs.closable = false;
+        el._refs.tabs.onTabSelected(function (tab) {
+          switch (tab.name) {
+            case "result":
+              el._showResult();
+              break;
+            case "html":
+              if (!el._refs.html) {
+                el._setHtmlEditor();
+              }
+              if (el.htmlView != "single") {
+                el._refs.htmlPanel.querySelector("eon-gutter").resize();
+              }
+              break;
+            case "css":
+              if (!el._refs.css) {
+                el._setCssEditor();
+              }
+              break;
+            case "js":
+              if (!el._refs.js) {
+                el._setJsEditor();
+              }
+              break;
+          }
+        });
+      },
+      // @function setResultTab (private) [Set up result tab]
+      setResultTab: function () {
+        var el = this;
+        var resultTab = document.createElement("eon-panel");
+        resultTab.allowScroll = false;
+        resultTab.scrollType = "none"
+        resultTab.name = "result";
+        resultTab.title = "Result";
+        el._refs.result = resultTab;
+        return resultTab;
+      },
+      // @function setHtmlTab (private) [Set up html tab, it contains head and body editors]
+      setHtmlTab: function () {
+        var el = this;
+        el._refs.htmlTab = document.createElement("eon-panel");
+        el._refs.htmlTab.allowScroll = false;
+        el._refs.htmlTab.name = "html";
+        el._refs.htmlTab.title = "Html";
+        return el._refs.htmlTab;
+      },
+      setHtmlEditor: function () {
+        var el = this;
+        if (el.htmlView != "single") {
+          el._setHmlMultipleEditor();
+        } else {
+          el._setHmlSingleEditor();
+        }
+      },
+      // @function setHmlMultipleEditor (private) [Set up multiple html view]
+      setHmlMultipleEditor: function () {
+        var el = this;
+        var htmlGutter = document.createElement("eon-gutter");
+        htmlGutter.collapsable = true;
+        htmlGutter.type = "vertical";
+        var headSection = document.createElement("eon-section");
+        var bodySection = document.createElement("eon-section");
+        el._refs.html = {};
+        el._refs.html.head = document.createElement("eon-editor");
+        el._refs.html.head.oneditorready(function (currentEditor) {
+          el._refs.html.head.setValue(el.head);
+        });
+        el._refs.html.head.onchange(function () {
+          el.head = el._refs.html.head.getValue();
+        });
+        el._refs.html.head.language = "html";
+        var headTag = document.createElement("div");
+        headTag.classList.add("eon-playground-htmlTags");
+        headTag.innerHTML = "head";
+        headSection.appendChild(headTag);
+        el._refs.html.head.readonly = false;
+        el._refs.html.body = document.createElement("eon-editor");
+        el._refs.html.body.oneditorready(function () {
+          el._refs.html.body.setValue(el.body);
+        });
+        el._refs.html.body.onchange(function () {
+          el.body = el._refs.html.body.getValue();
+        });
+        el._refs.html.body.language = "html";
+        var bodyTag = document.createElement("div");
+        bodyTag.classList.add("eon-playground-htmlTags");
+        bodyTag.innerHTML = "body";
+        bodySection.appendChild(bodyTag);
+        el._refs.html.body.readonly = false;
+        headSection.appendChild(el._refs.html.head);
+        bodySection.appendChild(el._refs.html.body);
+        htmlGutter.appendChild(headSection);
+        htmlGutter.appendChild(bodySection);
+
+        // ** Check panel default style configuration
+        el._refs.htmlPanel = document.createElement("eon-panel");
+        el._refs.htmlPanel.allowScroll = false;
+        el._refs.htmlPanel.setAttribute("allow-scroll", false);
+        el._refs.htmlPanel.appendChild(htmlGutter);
+        el._refs.htmlTab.appendChild(el._refs.htmlPanel);
+      },
+      // @function setHmlSingleEditor (private) [Set up single html view]
+      setHmlSingleEditor: function () {
+        var el = this;
+        el._refs.html = {};
+        el._refs.html.head = document.createElement("eon-editor");
+        el._refs.html.head.oneditorready(function (currentEditor) {
+          el._refs.html.head.setValue(el.head);
+        });
+        el._refs.html.head.onchange(function () {
+          el.head = el._refs.html.head.getValue();
+        });
+        el._refs.html.head.language = "html";
+        var headTag = document.createElement("div");
+        headTag.classList.add("eon-playground-htmlTags", "eon-playground-htmlTags-button");
+        headTag.innerHTML = "head";
+        headTag.parent = el;
+        headTag.setAttribute("onclick", "this.parent.toggleSingleHtmlView('head');");
+        headTag.style.marginRight = "55px";
+        el._refs.html.head.classList.add("eon-playground-editor-hidden");
+        el._refs.html.head.readonly = false;
+        el._refs.html.body = document.createElement("eon-editor");
+        el._refs.html.body.oneditorready(function () {
+          el._refs.html.body.setValue(el.body);
+        });
+        el._refs.html.body.onchange(function () {
+          el.body = el._refs.html.body.getValue();
+        });
+        el._refs.html.body.language = "html";
+        var bodyTag = document.createElement("div");
+        bodyTag.classList.add("eon-playground-htmlTags", "eon-playground-htmlTags-button", "eon-playground-htmlTags-enabled");
+        el._refs.html.enabledView = "body";
+        bodyTag.innerHTML = "body";
+        bodyTag.parent = el;
+        bodyTag.setAttribute("onclick", "this.parent.toggleSingleHtmlView('body');");
+        el._refs.html.body.readonly = false;
+        // ** Append section to the panel content (Spaced container if default style is active)
+        el._refs.htmlTab.content.appendChild(headTag);
+        el._refs.htmlTab.content.appendChild(bodyTag);
+        el._refs.htmlTab.content.appendChild(el._refs.html.head);
+        el._refs.htmlTab.content.appendChild(el._refs.html.body);
+
+      },
+      // @function setJsTab (private) [Set up js tab]
+      setJsTab: function () {
+        var el = this;
+        el._refs.jsTab = document.createElement("eon-panel");
+        el._refs.jsTab.allowScroll = false;
+        el._refs.jsTab.name = "js";
+        el._refs.jsTab.title = "Js";
+        return el._refs.jsTab;
+      },
+      setJsEditor: function () {
+        var el = this;
+        var jsValue, rgx;
+        el._refs.js = document.createElement("eon-editor");
+        el._refs.js.minheight = 564;
+        el._refs.js.oneditorready(function () {
+          el._refs.js.setValue(el.js);
+        });
+        el._refs.js.onchange(function () {
+          if (!el._misc.loaded) {
+            // Hide playground internal used code
+            rgx = /(\/\/\*\*)[^\*\*]*(\*\*)/mg;
+            jsValue = el.js.replace(rgx, "");
+            el._misc.loaded = true;
+            el._refs.js.setValue(jsValue);
+          } else {
+            jsValue = el._refs.js.getValue();
+          }
+          el.js = jsValue;
+        });
+        el._refs.js.language = "javascript";
+        el._refs.js.readonly = false;
+        // ** Append section to the panel content (Spaced container if default style is active)
+        el._refs.jsTab.content.appendChild(el._refs.js);
+      },
+      // @function setCssTab (private) [Set up css tab]
+      setCssTab: function () {
+        var el = this;
+        el._refs.cssTab = document.createElement("eon-panel");
+        el._refs.cssTab.allowScroll = false;
+        el._refs.cssTab.name = "css";
+        el._refs.cssTab.title = "Css";
+        return el._refs.cssTab;
+      },
+      // @function setCssEditor (private) [Set up css editor]
+      setCssEditor: function () {
+        var el = this;
+        el._refs.css = document.createElement("eon-editor");
+        el._refs.css.minheight = 564;
+        el._refs.css.oneditorready(function () {
+          el._refs.css.setValue(el.css);
+        });
+        el._refs.css.onchange(function () {
+          el.css = el._refs.css.getValue();
+        });
+        el._refs.css.language = "css";
+        el._refs.css.readonly = false;
+        // ** Append section to the panel content (Spaced container if default style is active)
+        el._refs.cssTab.content.appendChild(el._refs.css);
+      },
+      // @function setStructure (private) [Set up playground content]
+      setStructure: function () {
+        var el = this;
+        el._setTabs();
+        var resultTab = el._setResultTab();
+        var htmlTab = el._setHtmlTab();
+        var jsTab = el._setJsTab();
+        var cssTab = el._setCssTab();
+        el._refs.tabs.appendChild(resultTab);
+        el._refs.tabs.appendChild(htmlTab);
+        el._refs.tabs.appendChild(jsTab);
+        el._refs.tabs.appendChild(cssTab);
+        el.querySelector("#eon-playground-content").appendChild(el._refs.tabs);
+        el.querySelector("#eon-playground-content").querySelector(".eon-tabs-tabsSection").appendChild(
+          el._setFullSCreenBttn());
+        setTimeout(function () {
+          el._showResult();
+          el._show();
+        }, 0);
+      },
+      setFullSCreenBttn: function () {
+        var el = this;
+        el._misc.fullscreen = false;
+        var fullScreenBtt = document.createElement("div");
+        fullScreenBtt.classList.add("eon-playground-fullScreenBttn", "eon-fg1-hoverable");
+        el._refs.fullScreenIcon = document.createElement("i");
+        el._refs.fullScreenIcon.classList.add("vicon", "vicon-fullscreen");
+        fullScreenBtt.appendChild(el._refs.fullScreenIcon);
+        fullScreenBtt.setAttribute("onclick",
+          "this.parentNode.parentNode.parentNode.parentNode.toggleFullScreen();");
+        return fullScreenBtt;
+      },
+      // @function refresh (private) [Update stored data to eon-editor]
+      refresh: function () {
+        var el = this;
+        if (el._refs.html && el._refs.html.head) {
+          el._refs.html.head.setValue(el.head);
+        }
+        if (el._refs.html && el._refs.html.body) {
+          el._refs.html.body.setValue(el.body);
+        }
+        if (el._refs.js) {
+          el._refs.js.setValue(el.js);
+        }
+        if (el._refs.css) {
+          el._refs.css.setValue(el.css);
+        }
+        el._showResult();
+      },
+      // @function showResult (private) [Show result at iframe]
+      showResult: function () {
+        var el = this;
+        el._refs.result.innerHTML = "";
+        var iframe = document.createElement("iframe");
+        iframe.onload = function () {
+          var iframeContent = iframe.contentWindow.document || iframe.contentDocument;
+          var iframeSrc = el._getResultString();
+          iframeContent.open();
+          iframeContent.write(iframeSrc);
+          iframeContent.close();
+          el._refs.resizable = iframeContent;
+          // Trigger on content set callback
+          eon.triggerCallback("onContentSet", el, el, [iframe]);
+        }
+        el._refs.result.appendChild(iframe);
+      },
+      // @function getResultString (private) [Format result into a string to be written at iframe]
+      getResultString: function () {
+        var el = this;
+        var iframeSrc = "<!DOCTYPE html><html><head>";
+        iframeSrc += el.head;
+        iframeSrc += "<style>";
+        iframeSrc += el.css;
+        iframeSrc += "</style>";
+        iframeSrc += "</head><body>" + el.body;
+        iframeSrc += "<script>";
+        iframeSrc += el.js;
+        iframeSrc += "<\/script>";
+        iframeSrc += "</body></html>";
+        return iframeSrc;
+      },
+      // @function show (private) [Hides loading mask and shows playground]
+      show: function () {
+        var el = this;
+        el.querySelector("#eon-playground-content").classList.remove("eon-playground-until-render");
+        el.querySelector("eon-loading").hide();
+      }
+    },
+    functions: {
+      // @function setData (public) [Set data to the playground]
+      setData: function (data) {
+        var el = this;
+        if (data.js) {
+          el.js = data.js;
+        }
+        if (data.css) {
+          el.css = data.css;
+        }
+        if (data.head) {
+          el.head = data.head;
+        }
+        if (data.body) {
+          el.body = data.body;
+        }
+        el._refresh();
+      },
+      // @function toggleFullScreen (public) [Toggle full screen mode]
+      toggleFullScreen: function () {
+        var el = this;
+        el._misc.fullscreen = !el._misc.fullscreen;
+        if (el._misc.fullscreen) {
+          el._refs.fullScreenIcon.classList.add("vicon-fullscreen-exit");
+          el._refs.fullScreenIcon.classList.remove("vicon-fullscreen");
+          el.style.height = "100%";
+          el.style.width = "100%";
+          el.style.position = "fixed";
+          el.style.top = "0px";
+          el.style.left = "0px";
+          el.style.zIndex = "9999";
+          el._misc.parent = el.parentNode;
+          el._misc.nextSibling = el.nextSibling;
+          document.body.appendChild(el);
+          // Fire full screen activated event
+          eon.triggerCallback("onFullScreenActivated", el, el);
+        } else {
+          el._refs.fullScreenIcon.classList.add("vicon-fullscreen");
+          el._refs.fullScreenIcon.classList.remove("vicon-fullscreen-exit");
+          el.style = "";
+          if (el._misc.nextSibling) {
+            el._misc.parent.insertBefore(el, el._misc.nextSibling);
+          } else {
+            el._misc.parent.appendChild(el);
+          }
+          // Fire full screen deactivated event
+          eon.triggerCallback("onFullScreenDeactivated", el, el);
+        }
+        el._showResult();
+        if (el._refs.htmlPanel && el.htmlView != "single") {
+          el._refs.htmlPanel.querySelector("eon-gutter").resize();
+        }
+      },
+      // @function toggleSingleHtmlView (private) [Toggle between head and body in single html view]
+      toggleSingleHtmlView: function (toggleTo) {
+        var el = this;
+        if (el._refs.html.enabledView != toggleTo) {
+          var tags = el._refs.htmlTab.querySelectorAll(".eon-playground-htmlTags");
+          tags.forEach(function (tag) {
+            tag.classList.toggle("eon-playground-htmlTags-enabled");
+          });
+          el._refs.html.body.classList.toggle("eon-playground-editor-hidden");
+          el._refs.html.head.classList.toggle("eon-playground-editor-hidden");
+          el._refs.html.enabledView = toggleTo;
+        }
+      }
+    },
+
+    onCreated: function () {
+      eon.createCallback("onContentSet", this);
+      eon.createCallback("onFullScreenActivated", this);
+      eon.createCallback("onFullScreenDeactivated", this);
+    },
+
+    onReady: function () {
+      var el = this;
+      el._init();
+    },
+
+
+  });
+</script>

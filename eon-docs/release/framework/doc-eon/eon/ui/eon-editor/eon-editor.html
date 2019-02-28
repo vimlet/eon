@@ -1,0 +1,187 @@
+<template>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <div class="eon-editor-padding eon-editor-until-render">
+    <div id="eon-editor-content"></div>
+  </div>
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-editor",
+    style: "eon-editor.css",
+
+    dependencies: [
+      "../eon-loading"
+    ],
+
+    properties: {
+      value: {
+        value: "",
+        observe: true
+      },
+      language: {
+        value: "html",
+        reflect: true
+      },
+      readonly: {
+        value: "readonly",
+        reflect: true
+      },
+      format: {
+        value: true,
+        reflect: true
+      },
+      loadingColor: {
+        value: "",
+        reflect: true
+      }
+    },
+
+    privateProperties: {
+      refs: {
+        value: {}
+      },
+      misc: {
+        value: {}
+      }
+    },
+
+    functions: {
+      // @function setValue (public) @param value {string}
+      setValue: function (value) {
+        var el = this;
+        el.value = value;
+        el._refs.editor.setValue(value);
+        // Format editor
+        if (eon.util.isTrue(el.format)) {
+          el._refs.editor.getAction('editor.action.formatDocument').run();
+          // Fix to the under construction appearance after during formatting editor
+          setTimeout(function () {
+            el.querySelector("eon-loading").hide();
+          }, 300);
+        }
+      },
+      // @function getValue (public) {string}
+      getValue: function () {
+        var el = this;
+        return el._refs.editor.getValue();
+      },
+      // @function clear (public) [Empty editor]
+      clear: function () {
+        var el = this;
+        el.value = "";
+        el._refs.editor.setValue("");
+      }
+    },
+
+    privateFunctions: {
+      // @function init (private) create monaco editor
+      init: function () {
+        var el = this;
+        var readonly = false;
+        if (el.readonly === "readonly") {
+          readonly = true;
+        }
+        if (el.language === "js") {
+          el.language = "javascript";
+        }
+        require.config({
+          paths: {
+            'vs': eon.basePath + '/ui/eon-editor/vs'
+          }
+        });
+
+        require(['vs/editor/editor.main'], function () {
+          el._refs.editor = monaco.editor.create(el.querySelector("#eon-editor-content"), {
+            value: el.value,
+            language: el.language,
+            theme: 'vs-dark',
+            automaticLayout: true,
+            readOnly: readonly,
+            scrollBeyondLastLine: false, // Remove scrollbar when it is not needed
+            minimap: {
+              enabled: false
+            }
+          });
+
+          // Ugly solution to know when monaco is ready because there is not an onReady function implemented yet
+          var didScrollChangeDisposable = el._refs.editor.onDidScrollChange(function (
+            event) {
+            didScrollChangeDisposable.dispose();
+            el._editorReady();
+          });
+
+          el._refs.editor.model.onDidChangeContent(function (event) {
+            try {
+              eon.triggerCallback("onchange", el, el, [el]);
+              el.value = el._refs.editor.getValue();
+            } catch (e) { }
+          });
+
+          el._refs.editor.onDidFocusEditor(function (event) {
+            eon.triggerCallback("onFocus", el, el, [el]);
+          });
+          el._refs.editor.onDidBlurEditor(function (event) {
+            eon.triggerCallback("onBlur", el, el, [el]);
+          });
+
+        });
+      },
+      // @function editorReady (private) [Fires when monaco editor is loaded]
+      editorReady: function () {
+        var el = this;
+        el._show();
+        eon.triggerCallback("oneditorready", el, el, [el]);
+      },
+      // @function show (private) [Hides loading mask and shows editor]
+      show: function () {
+        var el = this;
+        el.querySelector("#eon-editor-content").parentNode.classList.remove("eon-editor-until-render");
+        // Hide loading mask (instead of hiding it after formatting editor)
+        if (!eon.util.isTrue(el.format)) {
+          el.querySelector("eon-loading").hide();
+        }
+      }
+    },
+
+    onCreated: function () {
+      var el = this;
+      eon.amd.require([eon.basePath + "/ui/eon-editor/vs/loader.js"], function () {
+        eon.triggerCallback("onloader", el, el, [el]);
+      });
+
+      // Custom callback to know when monaco editor is ready to be used
+      eon.createCallback("oneditorready", this, "ready");
+      eon.createCallback("onchange", this);
+      eon.createCallback("onFocus", this);
+      eon.createCallback("onBlur", this);
+      eon.createCallback("onloader", this, "ready");
+    },
+
+    onInit: function () {
+      var el = this;
+      // Set loading mask color
+      el._refs.mask = document.createElement("eon-loading");
+      el._refs.mask.color = el.loadingColor;
+      el.appendChild(el._refs.mask);
+    },
+
+    onReady: function () {
+      var el = this;
+      el.onloader(function () {
+        el._init();
+      });
+      el._misc.paddingOffset = 20;
+    },
+
+    onPropertyChanged: function (key, oldVal, newVal) {
+      switch (key) {
+        case "value":
+          // Do nothing
+          break;
+      }
+    }
+  });
+</script>
