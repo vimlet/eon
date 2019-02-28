@@ -85,6 +85,17 @@ This element is a combination of the well known slider and image gallery compone
         .doc-showcase-title {
             display: none;
         }
+        @media (max-width: 630px) {
+          doc-showcase,
+          doc-showcase .doc-showcase-content{
+            width: 100%
+          }
+        }
+        @media (max-width: 480px) {
+          doc-showcase .doc-showcase-content{
+            height: 200px;
+          }
+        }
       </style>
   </doc-head>
   <doc-body>
@@ -153,6 +164,17 @@ The swiper gallery type provides a full bunch of options to build the images lay
         }
         .doc-showcase-title {
             display: none;
+        }
+        @media (max-width: 630px) {
+          doc-showcase,
+          doc-showcase .doc-showcase-content{
+            width: 100%
+          }
+        }
+        @media (max-width: 480px) {
+          doc-showcase .doc-showcase-content{
+            height: 200px;
+          }
         }
       </style>
   </doc-head>

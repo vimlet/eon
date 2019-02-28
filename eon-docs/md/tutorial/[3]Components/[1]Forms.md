@@ -445,7 +445,7 @@ The combobox element is a component meant for selecting an option between the gi
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="#content">
   <template type="html">
       <doc-head>
-          <script src='framework/eon/eon.js'></script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
           <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             body {
@@ -493,7 +493,7 @@ Enables the user to type in the input so that the options provided by the dropdo
 <doc-playground label="Filtering" html="true" js="true" css="true" selector="#content">
     <template type="html">
         <doc-head>
-          <script src='framework/eon/eon.js'></script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
           <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             body {
@@ -567,7 +567,7 @@ This type of date will only allow you to have a `calendar` directly leaving the 
 <doc-playground label="Calendar Type" html="true" js="true" css="true" selector="body">
     <template type="html">
         <doc-head>
-          <script src='framework/eon/eon.js'></script>
+          <script src='framework/doc-eon/eon/eon.js'></script>
           <script>eon.import(['framework/doc-eon/eon/ui/eon-date','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
           <style>
             body {
