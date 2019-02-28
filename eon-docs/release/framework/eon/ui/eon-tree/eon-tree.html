@@ -1,12 +1,12 @@
 <script type="text/javascript">
-  //@header A hierarchical data representation
+
   eon.element({
 
     name: "eon-tree",
     style: "eon-tree.css",
 
     dependencies: [
-      "../eon-treenode"
+      "../eon-tree-node"
     ],
     properties: {
       /*
@@ -37,11 +37,11 @@
         reflect: true
       },
       /*
-        @property {Object} store
-        @description
+        @property {Boolean} store
+        @description Whether or not the data source is provided by a store
       */
       store: {
-        value: {},
+        value: false,
         reflect: false
       },
       /*
@@ -62,7 +62,7 @@
       },
       /*
         @property {Object} drag
-        @description
+        @description Whether or not the nodes are draggable
       */
       drag: {
         value: false,
@@ -70,7 +70,7 @@
       },
       /*
         @property {Boolean} joinDirs
-        @description
+        @description Whether or not the children with the same parent name should be joined under the same parent node
         Values true, false
         Default: true
       */
@@ -153,7 +153,7 @@
               filterNodes[cNode.path] = cNode;
             } else if (!filter) {
               // Append node belonging to a tree node
-              if (parentNode.tagName.toLowerCase() == "eon-treenode") {
+              if (parentNode.tagName.toLowerCase() == "eon-tree-node") {
                 parentNode._refs.wrapper.appendChild(cNode);
                 // Append root node
               } else {
@@ -363,23 +363,6 @@
         }
       },
       /*
-        @function (private) _setupStore
-        @description Set up store integration
-      */
-      // setupStore: function () {
-      //   var el = this;
-      //   // Make sure the store has been initialized
-      //   el.store.onCreated(function () {
-      //     el.store.onLoaded(function (store) {
-      //       // Get store data
-      //       store.fetch(function () {
-      //         // Build tree from store data
-      //         el.buildStoreTree();
-      //       });
-      //     });
-      //   });
-      // },
-      /*
         @function (private) _build
         @description Build tree nodes
         @param {Object} data [Tree nodes information to be created]
@@ -394,25 +377,18 @@
         data.forEach(function (value, key, map) {
           node = data.get(key);
           // Create tree node
-          treeNode = document.createElement("eon-treenode");
+          treeNode = document.createElement("eon-tree-node");
           el._copyProperties(node, treeNode);
           // Append tree node
           tree.appendChild(treeNode);
         });
-        // for (var index in data) {
-        // node = data[index];
-        // Create tree node
-        // treeNode = document.createElement("eon-treenode");
-        // el._copyProperties(node, treeNode);
-        // Append tree node
-        // tree.appendChild(treeNode);
-        // }
         // Return the last node for events purposes
         return treeNode;
       },
       /*
         @function (private) _clean
         @description Remove tree nodes and their references
+        @param {Object} cleanRefs [Whether or not the tree nodes should be removed]
       */
       clean: function (cleanRefs) {
         var el = this;
@@ -579,7 +555,7 @@
         if (!el.nodes[node.path]) {
           var parent = el.nodes[node.parent] ? el.nodes[node.parent] : el._refs.tree;
           // Create new tree node
-          var nodeEl = document.createElement("eon-treenode");
+          var nodeEl = document.createElement("eon-tree-node");
           nodeEl.name = node.name;
           nodeEl.path = node.path;
           nodeEl.parent = node.parent;
@@ -670,7 +646,7 @@
           // Denied append node with a name of an existing node
           if (!el.nodes[newPath]) {
             // Make old container no expandable
-            if (dragNode._refs.parentNode.tagName.toLowerCase() === "eon-treenode") {
+            if (dragNode._refs.parentNode.tagName.toLowerCase() === "eon-tree-node") {
               dragNode._refs.parentNode._makeNoExpandable(1);
             }
             // Update tree nodes object
@@ -749,9 +725,7 @@
       };
       tree.classList.add("eon-tree-tree");
       // Data store quick access
-      // ** New store
       el.store = eon.util.isTrue(el.store) ? new eon.store() : "";
-      // el._refs.store = el.source.querySelector("eon-store");
     },
     onInit: function () {
       var el = this;

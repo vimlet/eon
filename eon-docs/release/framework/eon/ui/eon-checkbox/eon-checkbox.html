@@ -42,7 +42,7 @@
             },
             /*
               @property {Boolean} disabled 
-              @description Checkbox deactivation
+              @description Checkbox deactivation.
               Values can be: true or false
               Default: false
             */
@@ -52,7 +52,7 @@
             },
             /*
               @property {Boolean} readonly 
-              @description Toggles the readonly status of the checkbox
+              @description Toggles the readonly status of the checkbox.
               Default: false
             */
             readonly: {
@@ -61,7 +61,7 @@
             },
             /*
               @property {Boolean} checked 
-              @description Checkbox checked status
+              @description Checkbox checked status.
               Values can be: true or false
             */
             checked: {
@@ -70,7 +70,7 @@
             },
             /*
             @property {Boolean} default
-            @description Sets checked status by default when the element is reset
+            @description Sets checked status by default when the element is reset.
             Values can be: true or false
             */
             default: {
@@ -80,7 +80,7 @@
             /*
              @property {Boolean} inline 
              @description Space that occupy the checkbox inside parent container.
-             By default, its size adapts to its content
+             By default, its size adapts to its content.
              Values can be: true or false
              Default: true
            */
@@ -93,7 +93,7 @@
         privateProperties: {
             /*
               @property (private) {String} _formElement 
-              @description Set that  checkbox is a form element
+              @description Set that  checkbox is a form element.
               Value: checkbox
             */
             formElement: {
@@ -108,9 +108,16 @@
             },
             /*
               @property (private) {Object} _refs 
-              @description Object with  references
+              @description Object with references
             */
             refs: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _misc 
+              @description Object with usefull information
+            */
+            misc: {
                 value: {}
             }
         },
@@ -128,7 +135,7 @@
             */
             reset: function () {
                 var el = this;
-               
+
                 if (eon.util.isTrue(el.default)) {
                     el.checked = el.default;
                 } else {
@@ -246,9 +253,16 @@
             el._currentValue = el.value;
             el._refs.labelText.innerHTML = el.label;
             el.checked = el.default != "" && el.checked == "" ? el.default : el.checked;
-            
+            // Needed to avoid ripple bad performance
+            el._misc.firstInteraction = true;
             // Checking or unchecking the checkbox
             el._refs.label.addEventListener("click", function (e) {
+                // Needed to avoid ripple bad performance
+                if (el._misc.firstInteraction) {
+                    // Set up ripple animation
+                    el.classList.add("eon-ripple");
+                    el._misc.firstInteraction = false;
+                }
                 // The click event is triggered by two elements, the real input and the
                 // visual custom element. So it is necessary to control one of the two elements
                 // fot not activate the action twice.

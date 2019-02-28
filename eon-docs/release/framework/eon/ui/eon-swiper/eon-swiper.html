@@ -1,13 +1,12 @@
 <script>
-    //@header A container made to swipe eon-slide elements
     eon.element({
+  
+      name: "eon-swiper",
+      style: "eon-swiper.css",
+  
       themed: true,
-
-      name:"eon-swiper",
-      style:"eon-swiper.css",
-
       dependencies: [
-          "../ui/eon-slide"
+        "../eon-swiper-slide"
       ],
       privateProperties: {
         /*
@@ -44,7 +43,8 @@
         */
         direction: {
           value: "horizontal",
-          reflect: true
+          reflect: true,
+          reflectDefault: true
         },
   
         /*
@@ -56,7 +56,7 @@
           reflect: true
         },
         /*
-          @property {Boolean} autoType
+          @property {String} autoType
           @description 
         */
         autoType: {
@@ -64,19 +64,11 @@
           reflect: true
         },
         /*
-          @property {String} autoStylePref
-          @description 
-        */
-        autoStylePref: {
-          value: "",
-          reflect: true
-        },
-        /*
           @property {Number} duration
           @description 
         */
         duration: {
-          value: 2000,
+          value: 1000,
           reflect: true
         },
         /*
@@ -90,12 +82,12 @@
   
         /*
           @property {Boolean} externalSlide
-          @description Allow slide by touching
+          @description Denied slide by touching
           Values: false, true
           Default: false
         */
         externalSlide: {
-          value: true,
+          value: false,
           reflect: true
         },
         /*
@@ -192,14 +184,6 @@
           reflect: true
         },
         /*
-          @property {Number} responsiveLimit 
-          @description 
-        */
-        responsiveLimit: {
-          value: 0,
-          reflect: true
-        },
-        /*
           @property {Boolean} fill 
           @description 
           Values: true, false
@@ -229,8 +213,6 @@
         */
         setUp: function () {
           var el = this;
-          // Save a reference of the parent node for fullscreen purposes
-          el._refs.parent = el.parentNode;
           // Check swiper type
           if (el.type == "gallery") {
             el.classList.add("eon-swiper-gallery");
@@ -270,6 +252,7 @@
           el._refs.wrapper = wrapper;
           // Get axis
           if (el.direction == "horizontal") {
+            el.classList.add("eon-swiper-horizontal");
             el._misc.sizeProperty = "offsetWidth";
             el._misc.styleSizeProperty = "width";
           } else {
@@ -329,7 +312,7 @@
               el._paginationHideAnim();
             } else if (el.pagination) {
               // Make pagination static
-              // TO BE REMOVED el.style.flexDirection = el.direction == "horizontal" ? "column" : "row";
+              el.style.flexDirection = el.direction == "horizontal" ? "column" : "row";
               pagingNode.classList.add("eon-swiper-paginationStatic");
             }
           }
@@ -389,7 +372,7 @@
           var throttled, mousedown, thumbnailClicked, initialValue, moveValue, translatePixels, position;
           var delay = el._isTrickyBrowser() ? 10 : 60;
           // Movement information
-          el._misc.axis = el.direction == "horizontal" ? "clientX" : "clientY";
+          var axis = el.direction == "horizontal" ? "clientX" : "clientY";
           // Thumbnail size information
           var thumbnailSize = el._misc.thumbnailSize;
           var thumbnailMidSize = thumbnailSize / 2;
@@ -399,6 +382,7 @@
           el._translate(paging, el._misc.minPagingTranslation);
           // Start slide on mouse down event
           pagingParent.addEventListener("pointerdown", function (e) {
+            e.preventDefault();
             // ** Fix bad rendering while sliding bug on tricky browsers
             paging.style.transition = el._isTrickyBrowser() ? "none" : "transform " + el.transition + "ms";
             // Prevent mouse down functionality on secondary mouse button is clicked
@@ -408,7 +392,7 @@
               }
               mousedown = true;
               // Get x/y value
-              initialValue = moveValue = e[el._misc.axis];
+              initialValue = moveValue = e[axis];
             }
           }, false);
           // Slide element on mouse move
@@ -416,13 +400,13 @@
             if (mousedown) {
               if (!throttled) {
                 // Get y/z translate pixels
-                translatePixels = moveValue - e[el._misc.axis];
+                translatePixels = moveValue - e[axis];
                 // Process position with the new movement values
                 position = el._processPosition(paging, translatePixels, "thumbnails");
                 // Translate element
                 el._translate(paging, position);
                 // Update move value
-                moveValue = e[el._misc.axis];
+                moveValue = e[axis];
                 // Throttle
                 throttled = true;
                 // Set a timeout to un-throttle
@@ -452,7 +436,7 @@
         },
         /*
           @function (private) _paginationHideAnim
-          @description Hideable pagination animation
+          @description Hidable pagination animation
         */
         paginationHideAnim: function () {
           var el = this;
@@ -512,24 +496,23 @@
         decreaseNavButtonHeight: function (btn) {
           var el = this;
           // Make sure the paging node has been rendered
-          setTimeout(function () {
+          el.onPagingReady(function(){
             // Get pagination node size
             var pagingSize = el._misc.sizeProperty == "offsetHeight"
               ? el.pagingNode["offsetWidth"] : el.pagingNode["offsetHeight"];
             // Get button node size
-            var btnSize;
+            var btnSize = btn.node[el._misc.sizeProperty] > el._misc.sizeProperty 
+              ? el[el._misc.sizeProperty] : btn.node[el._misc.sizeProperty];
             if (el.direction == "horizontal") {
-              btnSize = btn.node.offsetHeight;
               // Subtract pagination height to button height for centering purposes
               var value = (btnSize - pagingSize);
               btn.node.style.height = value < btn.minSize ? btn.minSize + "px" : value + "px";
             } else {
-              btnSize = btn.node.offsetWidth;
               // Subtract pagination width to button width for centering purposes
               var value = (btnSize - pagingSize);
               btn.node.style.width = value < btn.minSize ? btn.minSize + "px" : value + "px";
             }
-          }, 0);
+          });
         },
         /*
           @function (private) _updateNavButtonSize
@@ -576,7 +559,7 @@
         /*
           @function (private) _createThumbnail
           @description Create and configure a new thumbnail
-          @param {Object} slide [eon-slide element]
+          @param {Object} slide [eon-swiper-slide element]
           @param {Object} slideObj [eon-swiper slide object reference ]
         */
         createThumbnail: function (slide, slideObj) {
@@ -654,6 +637,7 @@
             // Update size rule
             if (el._refs.styleSheet.thumbnail) {
               el._refs.styleSheet.thumbnail.style[el._misc.styleSizeProperty] = size + "px";
+              el._refs.styleSheet.thumbnail.style[invertSizeProp] = "calc(100% - 10px)";
             }
           });
         },
@@ -765,13 +749,13 @@
           // Create slide element
           var slideObj = {};
           var newSlideIndex = el.slides.length;
-          slide.classList.add("eon-swiper-child");
+          slide.classList.add("eon-swiper-child", "eon-unselectable");
+          slide.setAttribute("draggable", false);
           // Store swiper elements object
           slideObj.el = slide;
           // Set auto animation
           if (eon.util.isTrue(el.auto)) {
-            slide.style.transition = "width " + el.transition + "ms, " + "transform " + el.transition + "ms, height " 
-                                      + el.transition +  "ms, margin " + el.transition + "ms, filter .3s";
+            slide.style.transition = "width " + el.transition + "ms";
           }
           // Set slide range values
           el.slides.push(el._updateSlideRange(slideObj, newSlideIndex));
@@ -919,6 +903,7 @@
         /*
           @function (private) _resizeFullScreenHandler
           @description Update the full screen handler button dimensions
+          @param {Object} btn [Navigation button target]
         */
         resizeFullScreenHandler: function (btn) {
           var el = this;
@@ -944,11 +929,11 @@
           var index, slideLimitValue, minTranslValue, elementTranslateMiddle, slide;
           var delay = el._isTrickyBrowser() ? 10 : 0;
           var axis = el.direction == "horizontal" ? "clientX" : "clientY";
-          if (eon.util.isTrue(el.externalSlide)) {
+          if (!eon.util.isTrue(el.externalSlide)) {
             // Start slide on mouse down event
             el._refs.wrapper.addEventListener("pointerdown", function (e) {
               // Fix pointerup stacked bug
-              e.preventDefault();
+              // e.preventDefault();
               // Check slide policy
               mousedown = el._allowSlide(e.button, e.target);
               // Slide complete trigger interval
@@ -966,7 +951,6 @@
             el._refs.wrapper.addEventListener("pointermove", function (e) {
               if (mousedown) {
                 if (slideCounter > 1) {
-                  // if (!throttled) {
                   // Get y/z translate pixels
                   translatePixels = moveValue - e[axis];
                   // Process position with the new movement values
@@ -978,13 +962,6 @@
                   }
                   // Update initial move value
                   moveValue = e[axis];
-                  // Throttle
-                  // throttled = true;
-                  // Set a timeout to un-throttle
-                  // setTimeout(function () {
-                  //   throttled = false;
-                  // }, delay);
-                  // }
                 }
               }
             });
@@ -1031,6 +1008,7 @@
                   }
                 }
               }
+              mousedown = false;
               slideCounter = 0;
               eon.triggerCallback("onDragStoped", el, el);
             });
@@ -1065,13 +1043,13 @@
         */
         isEdgeElement: function (position, slide) {
           var el = this;
-          var sibling = !slide ? el.currentSlide.el.nextSibling : slide.el.nextSibling;
+          var sibling = !slide && el.currentSlide ? el.currentSlide.el.nextSibling : slide.el.nextSibling;
           // Get the current swiper element
           if (position == "start") {
-            return (sibling && sibling.tagName === "VC-SLIDE") ? false : true;
+            return (sibling && sibling.tagName === "EON-SWIPER-SLIDE") ? false : true;
           } else {
-            sibling = !slide ? el.currentSlide.el.previousSibling : slide.el.previousSibling;
-            return (sibling && sibling.tagName === "VC-SLIDE") ? false : true;
+            sibling = !slide && el.currentSlide ? el.currentSlide.el.previousSibling : slide.el.previousSibling;
+            return (sibling && sibling.tagName === "EON-SWIPER-SLIDE") ? false : true;
           }
         },
         /*
@@ -1081,7 +1059,6 @@
           @param {Number} distance [Translate pixel value]
         */
         translate: function (node, distance) {
-          
           var el = this;
           // Set the new node translate position
           if (el.direction == "horizontal") {
@@ -1124,6 +1101,10 @@
           var el = this;
           var slideObj = el._createSlide(slide);
           el._createThumbnail(slide, slideObj);
+          // Check if all initial slides have been appended
+          if (el.getSourceElements().length == el.slides.length) {
+            eon.triggerCallback("onSlidesReady", el, el, [el.slides]);
+          }
           // Update max slide value
           el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
         },
@@ -1181,7 +1162,7 @@
         */
         formatArrayProperty: function (prop) {
           var el = this;
-          // Check preventclose property value
+          // Check preventClose property value
           if (typeof prop == "string") {
             // Convert value into an array
             prop = el._getValueAsArray(prop);
@@ -1207,9 +1188,8 @@
         },
         /*
           @function (private) {Boolean} _isTrickyBrowser
-          @description 
-          @param {String} value [Array or String value to be processed]
-          @return {Boolean} [Whether or not the system is running on a non standard behavior browser]
+          @description Get browsers with specific or unstandardized behavior
+          @return {Boolean} [Whether or not the system is running on a unstandardized behavior browser]
         */
         isTrickyBrowser: function () {
           var browser = eon.util.getBrowser();
@@ -1218,62 +1198,58 @@
         /*
           @function (private) {Boolean} _keepInPlace
           @description Called when the element is resized, keeps the current slide in its corresponding position
+          @param {Object} currentIndex [The index of the slide to translate to]
         */
-        keepInPlace: function () {
+        keepInPlace: function (currentIndex) {
           var el = this;
-          if(!eon.util.isTrue(el.auto)) {
-            // Get current slide index
-            var currentIndex = el.slides.indexOf(el.currentSlide);
-            // Get new y/z position
-            var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
-            var newPos = swiperHeight * (currentIndex);
-            // Translate element
-            el._translate(el._refs.wrapper, -newPos);
-          }
+          // Get current slide index
+          // Get new y/z position
+          var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
+          var newPos = swiperHeight * (currentIndex);
+          // Translate element
+          el._translate(el._refs.wrapper, -newPos);
         },
         /*
-          @function (private) {Boolean} _initAuto
-          @description 
+          @function (private) _initAuto
+          @description Set up the automatic playing behavior 
         */
         initAuto: function () {
           var el = this;
-  
           if (eon.util.isTrue(el.auto)) {
   
-            var slide = el.slides[0].el;
-            var margin = el.direction == "horizontal" 
-            ? parseInt(window.getComputedStyle(slide).marginRight) + parseInt(window.getComputedStyle(slide).marginLeft)
-            : parseInt(window.getComputedStyle(slide).marginBottom) + parseInt(window.getComputedStyle(slide).marginTop);
+            // Get number of slides that fit into the wrapper size
+            el._misc.containingSlides = el._refs.wrapper[el._misc.sizeProperty] / el.slides[0].el[el._misc.sizeProperty];
+            el._misc.containingSlides = Math.round(el._misc.containingSlides);
   
-            // Set up slider size change css rule
-            var ruleName = ".eon-swiper-auto-size";
-            var rule = el.autoStylePref + ".eon-swiper-child" + ruleName;
-            var cls = rule + "{ " + el._misc.styleSizeProperty + ": 0; margin: 0; }";
+            // Ge first and last shown
+            if (el.autoType == "prev") {
+              el._refs.lastVisible = el.currentSlide;
+              el._refs.firstVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
   
-            el._refs.styleSheet = el._refs.styleSheet || {};
-            el._refs.styleSheet["swiper"] = el._refs.styleSheet["swiper"] || {}
-            // Check if the rule exists
-            if(eon.style.sheet.cssRules[0].selectorText !== rule) {
-              // Insert and save rule
-              eon.style.sheet.insertRule(cls, 0);
-              el._refs.styleSheet["swiper"].cssRule = eon.style.sheet.cssRules[0];
-              el._refs.styleSheet["swiper"].name = ruleName.split(".")[1];
+              // Trigger onSlideChange event
+              eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
+              // Init movement
+              setTimeout(function () {
+                el.prev();
+              }, el.duration);
+  
             } else {
-              el._refs.styleSheet["swiper"].cssRule = eon.style.sheet.cssRules[0];
-              el._refs.styleSheet["swiper"].name = ruleName.split(".")[1];
+              el._refs.firstVisible = el.currentSlide;
+              el._refs.lastVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
+  
+              // Trigger onSlideChange event
+              eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
+              // Init movement
+              setTimeout(function () {
+                el.next();
+              }, el.duration);
             }
-  
-            // Check initial slide visibility
-            slide.classList.add(el._refs.styleSheet["swiper"].name);
-            if(el.direction == "horizontal") {
-              el._translate(el._refs.wrapper, -(el.initialSlide * (slide[el._misc.sizeProperty] + margin)));
-            } 
-  
           }
         },
         /*
           @function (private) {Boolean} _allInView
-          @description 
+          @description Check if the slides is inside the swiper boundaries
+          @return {Boolean} [Whether or not the slide is inside the swiper boundaries]
         */
         allInView: function () {
           var el = this;
@@ -1285,65 +1261,65 @@
           }
         },
         /*
-          @function (private) {Boolean} _responsive
-          @description 
+          @function (private)  _createResizeFunction
+          @description Initialize de swiper resize function
         */
-        responsive: function (direction) {
+        createResizeFunction: function () {
           var el = this;
-          
-          // Check if a swipe direction change is needed
-          if(el.direction !== direction && eon.util.isTrue(el.auto)) {
-            el.direction = direction;
-            var slide = el.slides[0].el;
-            var margin;
+          el._misc.resizeFn = function () {
+            el.onSlidesReady(function () {
+              // Update maximum translation value
+              el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
   
-            el._translate(el._refs.wrapper, 0);
-  
-            if (el.direction == "horizontal") {
-              // -- HORIZONTAL
-              // Main configuration
-              el.classList.remove("eon-swiper-vertical");
-              el._misc.sizeProperty = "offsetWidth";
-              el._misc.styleSizeProperty = "width";
-              margin = parseInt(window.getComputedStyle(slide).marginRight) + parseInt(window.getComputedStyle(slide).marginLeft);
-              
-              // Position absolute slides to prevent wierd view scrolling behavior
-              for (var i = 0; i < el.slides.length; i++) {
-                var sld = el.slides[i].el;
-                el._translate(sld, 0);
-                // sld.classList.remove("customHover");
+              // Update slides ranges
+              for (i = 0; i < el.slides.length; i++) {
+                el.slides[i] = el._updateSlideRange(el.slides[i], i);
               }
+              //
+              el._updateThumbnailsSize();
   
-            } else {
-              // -- VERTICAL
-              // Main configuration
-              el.classList.add("eon-swiper-vertical");
-              el._misc.sizeProperty = "offsetHeight";
-              el._misc.styleSizeProperty = "height";
-              margin = parseInt(window.getComputedStyle(slide).marginBottom) + parseInt(window.getComputedStyle(slide).marginTop);
-              
-              // Position absolute slides to prevent wierd view scrolling behavior
-              for (var i = 0; i < el.slides.length; i++) {
-                var sld = el.slides[i].el;
-                el._translate(sld, (i - 1) * sld[el._misc.sizeProperty]);
+              // Translate current slide to its new centered position
+              el.currentSlide = el.currentSlide && !el.currentSlide.el ? el.slides[0] : el.currentSlide;
+              currentIndex = el.currentSlide ? el.slides.indexOf(el.currentSlide) : 0;
+  
+              // TODO: This was triggering slide change every time the swiper was being resized
+              el._keepInPlace(currentIndex);
+  
+              if (el.type == "gallery" && el.pagination != "hidden") {
+                el.onPagingReady(function () {
+                  // Update thumbnail size reference
+                  el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
+  
+                  // Update minimum paging translation
+                  el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
+                  // Update thumbnails ranges
+                  if (el.thumbnails[0]) {
+                    el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
+                    for (i = 0; i < el.thumbnails.length; i++) {
+                      el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+                    }
+                  }
+                  // Translate slide thumbnail to its new centered position
+                  currentThumbnail = el.thumbnails[currentIndex];
+                  if (el.type === "gallery") {
+                    el._translate(el.pagingNode, currentThumbnail.range[0]);
+                  }
+  
+                  if (eon.util.isTrue(el.navigation)) {
+                    // Update navigation buttons position
+                    el._updateNavButtonSize();
+                  }
+  
+                  el._decreaseNavButtonHeight(el.backBtn);
+                  el._decreaseNavButtonHeight(el.nextBtn);
+                });
               }
-              el._translate(el._refs.wrapper, 0);
-  
-            }
-            slide.classList.remove(el._refs.styleSheet["swiper"].name);
-            
-            
-            // Change auto-size rule
-            el._refs.styleSheet["swiper"].cssRule.style= "";
-            el._refs.styleSheet["swiper"].cssRule.style[el._misc.styleSizeProperty] = 0;
-            el._refs.styleSheet["swiper"].cssRule.style.margin = 0;
-  
-            if(el.autoType == "prev" && el.direction != "vertical") {
-              slide.classList.add(el._refs.styleSheet["swiper"].name);
-            }
-            
-            // el._translate(el._refs.wrapper, -(el.initialSlide * (slide[el._misc.sizeProperty] + margin)));
-  
+              // Restore the parent reference avoiding parent nodes like document fragments
+              var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
+              if(!activated && el._refs.parent && el._refs.parent.nodeType == 11) {
+                el._refs.parent = el.parentNode;
+              }
+            });
           }
         }
       },
@@ -1354,7 +1330,6 @@
         */
         next: function (cb) {
           var el = this;
-  
           // Current child has a next sibling
           if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("start")) {
             // Update current element
@@ -1379,37 +1354,21 @@
         */
         nextAuto: function () {
           var el = this;
+          // Trigger onNextCalled event
+          eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
   
-          var slide = el.slides[0].el;
-  
-          // Get current translate value
-          if(el.direction == "horizontal") {
-            slide.classList.add(el._refs.styleSheet["swiper"].name);
-          } else {
-            // Position absolute slides to prevent wierd view scrolling behavior
-            for (var i = 0; i < el.slides.length; i++) {
-              var sld = el.slides[i].el;
-              el._translate(sld, (i-1) * sld[el._misc.sizeProperty]);
-              // if(~[2, 3].indexOf(i)) {
-              //   sld.classList.add("customHover");
-              // } else {
-              //   sld.classList.remove("customHover");
-              // }
-            }
-          }
+          var slide = s3.slides[0];
+          slide.el.style.width = 0;
   
           setTimeout(function () {
             // Move element to the las of the queue
-            el.slides.push(el.slides.shift());
-            el._refs.wrapper.appendChild(slide);
+            s3.slides.push(s3.slides.shift());
+            s3._refs.wrapper.appendChild(slide.el);
+            slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
   
-            if(el.direction == "horizontal") {
-              slide.classList.remove(el._refs.styleSheet["swiper"].name);
-            } else {
-              el._translate(slide, 1000);
-            }
-            // Trigger onSlideChange event
-            eon.triggerCallback("onNextCalled", el, el, [el.slides[el.slides.length - 1].el]);
+            // Update first and last shown
+            el._refs.firstVisible = el.slides[0];
+            el._refs.lastVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
           }, el.transition);
   
           setTimeout(function () {
@@ -1446,42 +1405,21 @@
         */
         prevAuto: function () {
           var el = this;
-          var firstSlide = el.slides[0].el;
-          var lastSlide = el.slides[el.slides.length - 1].el;
-          
-          // Get current translate value
-          if(el.direction == "horizontal") {
-            // Increase first hidden slide size
-            firstSlide.classList.remove(el._refs.styleSheet["swiper"].name);
-          } else {
-            // Position absolute slides to prevent wierd view scrolling behavior
-            for (var i = 0; i < el.slides.length; i++) {
-                var sld = el.slides[i].el;
-                el._translate(sld, (i - 1) * sld[el._misc.sizeProperty]);
+          // Trigger onNextCalled event
+          eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
   
-                // if(~[2, 3].indexOf(i)) {
-                //   sld.classList.add("customHover");
-                // } else {
-                //   sld.classList.remove("customHover");
-                // }
-              }
-          }
+          var slide = s3.slides[0];
+          slide.el.style.width = 0;
   
           setTimeout(function () {
-            // Move element to the first position of the queue
-            el._refs.wrapper.insertBefore(lastSlide, firstSlide);
-            el.slides.unshift(el.slides.pop());
-            firstSlide = el.slides[0].el;
-            
-            if(el.direction == "horizontal") {
-              // Increase first hidden slide size
-              firstSlide.classList.add(el._refs.styleSheet["swiper"].name);
-            } else {
-              el._translate(firstSlide, -200);
-            }
+            // Move element to the las of the queue
+            s3.slides.unshift(s3.slides.pop());
+            s3._refs.wrapper.appendChild(slide.el);
+            slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
   
-            // Trigger onPrevCalled event
-            eon.triggerCallback("onPrevCalled", el, el, [firstSlide]);
+            // Update first and last shown
+            el._refs.lastVisible = el.slides[0];
+            el._refs.firstVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
           }, el.transition);
   
           setTimeout(function () {
@@ -1493,7 +1431,7 @@
           @description Slide to the previous slide element
           @param {Number} index [Translate target slide index]
         */
-        slideTo: function (index) {
+        slideTo: function (index, cancelAnim) {
           var el = this;
           // Get current slide index
           var currentIndex = el.slides.indexOf(el.currentSlide);
@@ -1502,8 +1440,18 @@
           // Get new y/z position
           var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
           var newPos = swiperHeight * (index);
+          // Cancel animation 
+          if (cancelAnim) {
+            var currentTransition = el._refs.wrapper.style.transition;
+            el._refs.wrapper.style.transition = "none";
+          }
           // Translate element
           el._translate(el._refs.wrapper, -newPos);
+          if (cancelAnim) {
+            setTimeout(function () {
+              el._refs.wrapper.style.transition = currentTransition;
+            }, 0);
+          }
           // Activate slide related thumbnail
           el._activateThumbnail(el.thumbnails[index]);
           // Trigger onSlideChange event
@@ -1529,21 +1477,16 @@
       },
       onCreated: function () {
         var el = this;
-        // Create on slide change event callback
+        // Swiper events
         eon.createCallback("onSlideChange", el);
-        // 
         eon.createCallback("onDragStarted", el);
-        // 
         eon.createCallback("onDragStoped", el);
-        // 
         eon.createCallback("onPrevCalled", el);
-        // 
         eon.createCallback("onNextCalled", el);
-        // 
         eon.createCallback("onSwipeEnd", el);
-        // Create on paging ready event
-        // ** Internally used for thumbnails translation calculation
+        // ** Internally used
         eon.createCallback("onPagingReady", el, "ready");
+        eon.createCallback("onSlidesReady", el, "ready");
         // Event target path monitor
         eon.registerPathListener(el);
       },
@@ -1562,13 +1505,15 @@
         el._setUp();
         // Swiper elements container
         var fragment = document.createDocumentFragment();
-        // Build main swiper structure
-        el._buildWrapper(fragment);
-        // Build swiper pagination controller
-        el._buildPagination(fragment);
-        // Insert gallery navigation
-        el._setUpNavigation(fragment);
-        el.appendChild(fragment);
+        setTimeout(() => {
+          // Build main swiper structure
+          el._buildWrapper(fragment);
+          // Build swiper pagination controller
+          el._buildPagination(fragment);
+          // Insert gallery navigation
+          el._setUpNavigation(fragment);
+          el.appendChild(fragment);
+        }, 0);
       },
       onTransformed: function () {
         var el = this;
@@ -1577,27 +1522,20 @@
         // Configure full screen mode
         el._addFullScreenListener();
         // Make sure slides are created before the initial slide translation
-        setTimeout(function () {
-          if(eon.util.isTrue(el.auto)) {
-            el.currentSlide = el.slides[el.initialSlide];
-          } else {
-            el.slideTo(el.initialSlide);
-          }
-          el._misc.loaded = true;
-        }, 0);
+        el.onSlidesReady(function () {
+          el.currentSlide = el.slides[el.initialSlide];
+          el.slideTo(el.initialSlide);
+        });
+        el._misc.loaded = true;
+        el._createResizeFunction();
       },
       onBubbleRender: function () {
         var el = this;
         // Set up auto functionality
         el._initAuto();
-        if (el.responsiveLimit > 0) {
-          if (window.innerWidth <= 768) {
-            el._responsive("vertical");
-          } else {
-            el._responsive("horizontal");
-          }
-        }
-        
+        el._misc.resizeFn();
+        // Get swiper parent node for fullscreen purposes
+        el._refs.parent = el.parentNode;
       },
       onResize: function () {
         var el = this;
@@ -1606,66 +1544,7 @@
         var delay = 20;
         var currentIndex, currentThumbnail, i;
         if (!throttled) {
-  
-          // CHECK AUTO
-          if (!eon.util.isTrue(el.auto)) {
-            // Update maximum translation value
-            el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
-  
-            // Update slides ranges
-            for (i = 0; i < el.slides.length; i++) {
-              el.slides[i] = el._updateSlideRange(el.slides[i], i);
-            }
-            //
-            el._updateThumbnailsSize();
-  
-            // Translate current slide to its new centered position
-            el.currentSlide = !el.currentSlide.el ? el.slides[0] : el.currentSlide;
-            currentIndex = el.slides.indexOf(el.currentSlide);
-  
-            // TODO: This was triggering slide change everytime the swiper was being resized
-            // el.slideTo(currentIndex);
-            el._keepInPlace();
-  
-            if (el.type == "gallery" && el.pagination != "hidden") {
-              el.onPagingReady(function () {
-                // Update thumbnail size reference
-                el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
-  
-                // Update minimum paging translation
-                el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
-                // Update thumbnails ranges
-                if (el.thumbnails[0]) {
-                  el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
-                  for (i = 0; i < el.thumbnails.length; i++) {
-                    el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
-                  }
-                }
-                // Translate slide thumbnail to its new centered position
-                currentThumbnail = el.thumbnails[currentIndex];
-                if (el.type === "gallery") {
-                  el._translate(el.pagingNode, currentThumbnail.range[0]);
-                }
-  
-                if (eon.util.isTrue(el.navigation)) {
-                  // Update navigation buttons position
-                  el._updateNavButtonSize();
-                }
-              });
-            }
-          } else {
-            // Update wrapper translate position
-            var slide = el.slides[2].el;
-            var margin;
-            if(el.direction == "horizontal") {
-              margin = parseInt(window.getComputedStyle(slide).marginRight) + parseInt(window.getComputedStyle(slide).marginLeft);
-            } else {
-              margin = parseInt(window.getComputedStyle(slide).marginBottom) + parseInt(window.getComputedStyle(slide).marginTop);
-            }
-            setTimeout(function() {
-              el._translate(el._refs.wrapper, -(el.initialSlide * (slide[el._misc.sizeProperty] + margin)));
-            }, parseInt(el.transition + 100));
-          }
+          el._misc.resizeFn();
           // Throttle
           throttled = true;
           // Set a timeout to un-throttle
@@ -1674,50 +1553,18 @@
           }, delay);
         }
       },
-      onWindowResize: function(){
-        var el = this;
-        var throttled = false;
-        var delay = 10;
-  
-        setTimeout(function () {
-          // Monitor swiper
-          if (el.responsiveLimit > 0) {
-            if (window.innerWidth <= 768) {
-              el._responsive("vertical");
-            } else {
-              el._responsive("horizontal");
-            }
-            var slide = el.slides[2].el;
-            var margin;
-            if(el.direction == "horizontal") {
-              margin = parseInt(window.getComputedStyle(slide).marginRight) + parseInt(window.getComputedStyle(slide).marginLeft);
-            } else {
-              margin = parseInt(window.getComputedStyle(slide).marginBottom) + parseInt(window.getComputedStyle(slide).marginTop);
-            }
-            setTimeout(function() {
-              if(el.direction == "horizontal") {
-                el._translate(el._refs.wrapper, -(el.initialSlide * (slide[el._misc.sizeProperty] + margin)));
-              }
-            }, parseInt(el.transition));
-            // Throttle
-            throttled = true;
-            // Set a timeout to un-throttle
-            setTimeout(function () {
-              throttled = false;
-            }, delay);
-          }
-        }, 0);
-      },
       onPropertyChanged: function (prop, oldValue, value) {
         var el = this;
         if (prop == "currentSlide") {
-          // Select related thumbnail
-          var thumbnail = el.thumbnails[el.slides.indexOf(value)];
-          // Activate thumbnail on swiper current slide change
-          el._activateThumbnail(thumbnail);
-          // Disable navigation button on limit reached
-          el._hideNavBtn(value);
-        }
+          el.onSlidesReady(function () {
+            // Select related thumbnail
+            var thumbnail = el.thumbnails[el.slides.indexOf(value)];
+            // Activate thumbnail on swiper current slide change
+            el._activateThumbnail(thumbnail);
+            // Disable navigation button on limit reached
+            el._hideNavBtn(value);
+          });
+        };
       }
     });
   </script>

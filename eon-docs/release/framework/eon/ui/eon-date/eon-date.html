@@ -81,16 +81,16 @@
         reflect: false
       },
       /*
-      @property (private) {Object} _refs
-      @description Object with usefull information
+      @property (private) {object} _refs
+      @description Object with references to relevant element nodes
       */
       refs: {
         value: {},
         reflect: false
       },
       /*
-      @property (private) {String} _formElement 
-      @description Necessary property for a form
+      @property (private) {string} _formElement 
+      @description Necessary property to be recognized by a form
       */
       formElement: {
         value: "date"
@@ -381,7 +381,7 @@
 
         el._refs.calendarButton.addEventListener('click', function (e) {
           if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
-            el._showCalendar();
+            el._expand();
           }
         }, false);
 
@@ -423,9 +423,9 @@
 
       },
       /*
-            @function (private) _setupOverlay
-            @description Sets up basic properties for the data object
-            */
+      @function (private) _setupOverlay
+      @description Sets up basic properties for the data object
+      */
       setupOverlay: function () {
 
         var el = this;
@@ -446,14 +446,14 @@
           if (el._misc.modal.active && !el._refs.calendar.isOnPath) {
             e.preventDefault();
             e.stopPropagation();
-            el._hideCalendar();
+            el._shrink();
           }
         });
 
         // If the user scrolls the window scrollbar we hide the calendar
         window.addEventListener("scroll", function (e) {
           if (el._misc.modal.active) {
-            el._hideCalendar();
+            el._shrink();
           }
         });
 
@@ -944,7 +944,7 @@
             for (var j = 1; j <= 7; j++) {
 
               day = document.createElement("div");
-              day.classList.add("eon-date-day", "eon-bg1-hoverable", "eon-fg1-hoverable");
+              day.classList.add("eon-date-day", "eon-bg2-hoverable", "eon-fg1-hoverable");
               day.addEventListener(el._misc.downTrigger, function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -989,7 +989,7 @@
           for (var i = 0; i < months.length; i++) {
 
             month = document.createElement("div");
-            month.classList.add("eon-date-month", "eon-bg1-hoverable", "eon-fg1-hoverable");
+            month.classList.add("eon-date-month", "eon-bg2-hoverable", "eon-fg1-hoverable");
             month.innerHTML = months[i];
             month.dataset.index = i;
 
@@ -1049,7 +1049,7 @@
           for (var i = 0; i < years.length; i++) {
 
             year = document.createElement("div");
-            year.classList.add("eon-date-year", "eon-bg1-hoverable", "eon-fg1-hoverable");
+            year.classList.add("eon-date-year", "eon-bg2-hoverable", "eon-fg1-hoverable");
 
             year.addEventListener(el._misc.downTrigger, function (e) {
               e.preventDefault();
@@ -1131,10 +1131,10 @@
 
       },
       /*
-      @function (private) _showCalendar
+      @function (private) _expand
       @description Shows the calendar
       */
-      showCalendar: function () {
+      expand: function () {
 
         var el = this;
 
@@ -1150,22 +1150,56 @@
 
         el._misc.modal.active = true;
 
+        el._animateExpand();
+
       },
       /*
-      @function (private) _hideCalendar
-      @description Hides the calendar
+      @function (private) _animateExpand
+      @description Expands the items dropdown with transition
       */
-      hideCalendar: function () {
+      animateExpand: function () {
 
         var el = this;
 
-        el._revertFocusStyle();
+        setTimeout(function () {
+          el._refs.overlay.removeEventListener("transitionend", el._misc.calendarShrinkFn);
+          el._refs.overlay.classList.add("eon-date-opaque");
+        }, 0);
 
-        if (el._refs.overlay.parentNode) {
-          el._refs.overlay.parentNode.removeChild(el._refs.overlay);
-        }
+      },
+      /*
+      @function (private) _shrink
+      @description Hides the calendar
+      */
+      shrink: function () {
+
+        var el = this;
+
+        el._misc.calendarShrinkFn = el._misc.calendarShrinkFn || function () {
+
+          el._revertFocusStyle();
+
+          if (el._refs.overlay.parentNode) {
+            el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+          }
+
+        };
 
         el._misc.modal.active = false;
+
+        el._animateShrink();
+
+      },
+      /*
+      @function (private) _animateShrink
+      @description Expands the items dropdown with transitions
+      */
+      animateShrink: function () {
+
+        var el = this;
+
+        el._refs.overlay.addEventListener("transitionend", el._misc.calendarShrinkFn);
+        el._refs.overlay.classList.remove("eon-date-opaque");
 
       },
       /*
@@ -1716,9 +1750,11 @@
 
           el._refs.previous.dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
           el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+          el._refs.previous.classList[el._refs.previous.dataset.disabled != "true" ? "add" : "remove"]("eon-fg1-hoverable");
 
           el._refs.next.dataset.disabled = (el._isMaxMonth(year, month)) ? "true" : "false";
           el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+          el._refs.next.classList[el._refs.next.dataset.disabled != "true" ? "add" : "remove"]("eon-fg1-hoverable");
 
         } else if (headerType == "monthsGrid") {
 
@@ -1786,7 +1822,8 @@
       /*
       @function (private) _highlight
       @description Highlights the button and removes highlight in the previous one
-      @param {Object} dayButton
+      @param {Object} selected
+      @param {Object} previous
       */
       highlight: function (selected, previous) {
 
@@ -1794,9 +1831,11 @@
 
         if (previous) {
           previous.classList.remove("eon-date-current", "eon-bg2-active");
+          previous.classList.add("eon-bg2-hoverable", "eon-fg1-hoverable");
         }
 
         selected.classList.add("eon-date-current", "eon-bg2-active");
+        selected.classList.remove("eon-bg2-hoverable", "eon-fg1-hoverable");
       },
       /*
       @function (private) {Object} _formatObj
@@ -2263,6 +2302,7 @@
             row.children[j].dataset.year = year;
             row.children[j].classList.remove("eon-date-current");
             row.children[j].classList.remove("eon-bg2-active");
+            row.children[j].classList.add("eon-bg2-hoverable");
 
             disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
             disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
@@ -2299,7 +2339,7 @@
           el._misc.selected.year = parseInt(dayButton.getAttribute("year"));
 
           el._highlight(dayButton, el._refs.calendar.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
-          el._hideCalendar();
+          el._shrink();
 
           el.value = formattedValue;
 
@@ -2331,12 +2371,13 @@
             var dateObj = el._formatObj({ day: undefined, month: (parseInt(monthButton.dataset.index) + 1), year: el._misc.current.year });
             var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
 
-            el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
-
             el._misc.preventUpdate = true;
             el.value = formattedValue;
 
           }
+
+          el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+
         }
       },
       /*
@@ -2377,14 +2418,15 @@
             var dateObj = el._formatObj({ day: undefined, month: undefined, year: yearButton.dataset.year });
             var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
 
-            el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
-
             el._misc.preventUpdate = true;
 
             el.value = formattedValue;
 
           }
         }
+
+        el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+
       },
       /*
       @function (private) _showDaysGrid
@@ -2645,7 +2687,7 @@
             el._refs.data.classList.add("eon-fg2-disabled");
             el._refs.main.classList.add("eon-fg2-disabled");
 
-            el._hideCalendar();
+            el._shrink();
 
           } else {
 
@@ -2687,7 +2729,7 @@
           el._refs.calendarButton.classList.add("eon-fg2-hoverable");
 
           if (el.type != "calendar") {
-            el._hideCalendar();
+            el._shrink();
           }
 
         }
@@ -2874,7 +2916,7 @@
       var el = this;
 
       if (el._misc.modal.active) {
-        el._hideCalendar();
+        el._shrink();
       }
 
     }

@@ -105,9 +105,13 @@
 
     .app-doc-main-menuItem {
         margin-left: 10px;
+    /* padding: 5px 10px; */
         cursor: pointer;
         font-size: 17.5px;
     color: inherit;
+    }
+    .app-doc-main-menuItem:hover {
+    color: #828282;
     }
 
     .app-doc-main-menuItemText {
@@ -127,26 +131,31 @@
 
     #app-doc-main-versionControl {
         margin-right: 10px;
-        /* margin-left:auto; */
-    }
+    } 
 
     #app-doc-main-versionControlSelect {
-        cursor: pointer;
-    color: inherit;
-        border: none;
-        /* border-bottom: 1px solid; */
-        background-color: transparent;
-        font-size: 16px;
+    display: flex;
+    align-items: center;
+    width:40px;
+    }
+    
+    #app-doc-main-versionControlSelect input:hover {
+    color: #828282;
+    }
+    #app-doc-main-versionControlSelect .eon-combobox-wrapper {
+    background-color: transparent;
+    }
+    #app-doc-main-versionControlSelect .eon-combobox-dropButton{
+        display:none
+    }
+    #app-doc-main-versionControlSelect .eon-combobox-main{
+        border:none;
+    }
+    #app-doc-main-versionControlSelect input{
+        padding:0;
     }
 
-    #app-doc-main-versionControlSelect:focus {
-        outline: none;
-        background-color: transparent;
-    }
 
-    #app-doc-main-versionControlSelect option {
-        /* background-color: #333333; */
-    }
 
     #app-doc-main-colorBand {
         position: absolute;
@@ -185,12 +194,16 @@
     }
 
     app-doc-main .app-doc-main-menu-mobile-mode{
-        position:absolute;
-        right:10px;
+        cursor:pointer;
         display:none;
+        margin-right:10px;
         text-decoration: underline;
     }
 
+    .app-doc-main-version-dropdown{
+        left: auto !important;
+        right:4px !important;
+    }
 
     @media only screen and (max-width: 800px) and (min-width:480px) {
         .app-doc-main-itemRow {
@@ -211,9 +224,9 @@
         #app-doc-main-menuItems{
             display:none;
         }
-        #app-doc-main-versionControl{
+        /* #app-doc-main-versionControl{
             display:none !important;
-        }
+        } */
     app-doc-main .app-doc-main-menu-mobile-mode{
         display:inline-block !important;
     }
@@ -239,9 +252,10 @@
         #app-doc-main-menuItems{
             display:none;
         }
-        #app-doc-main-versionControl{
+        /* #app-doc-main-versionControl{
+
             display:none !important;
-        }
+        } */
     app-doc-main .app-doc-main-menu-mobile-mode{
         display:inline-block !important;
     }
@@ -301,7 +315,7 @@
                     'important');
                 document.querySelector(".app-doc-main-menu-mobile-mode").style.setProperty('display', 'none',
                     'important');
-            }, 
+            },
             // @function openView (public) [Open given view] @param path @param clean
             openView: function (path, clean) {
                 var el = this;
@@ -327,8 +341,8 @@
                 var el = this;
                 var selectVersion = document.querySelector("#app-doc-main-versionControlSelect");
 
-                var pathTo = window.location.href.split('#')[0] + selectVersion.options[selectVersion.selectedIndex]
-                    .getAttribute("src");
+                var pathTo = window.location.href.split('#')[0] + selectVersion.value;
+
                 pathTo = pathTo.replace(new RegExp("(?<!\:)\\/\\/", "g"), "/"); // There are situations where "/" can be stacked
                 window.location.href = pathTo;
             },
@@ -340,7 +354,8 @@
                     if (el._misc.menu) {
                         // Update fixed
                         el._misc.menu.fixed.forEach(function (item) {
-                            if (item.value == path) {
+                            if (item.value.replace(/[/\\*]/g, "/") == path.replace(
+                                    /[/\\*]/g, "/")) {
                                 item.classList.add("app-doc-main-menuItem-selected");
                             }
                         });
@@ -358,13 +373,17 @@
         },
 
         privateFunctions: {
-            // @function (private) setupData [Set up view and data.] @param {object} data
+            // @function (private) _setupData [Set up view and data.] @param {object} data
             setupData: function (data) {
                 var el = this;
                 el._refs.data = data;
                 eon.triggerCallback("dataLoaded", el, el, []);
-                el.data = data;
 
+                setTimeout(function () {
+                    document.querySelector(".app-doc-main-loader").hide();
+                }, 1000);
+
+                el.data = data;
                 if (window.location.href.indexOf("#") < 0) {
                     window.location.href = window.location.href.split('#')[0] + "#!version=" +
                         encodeURIComponent(data.__currentVersion);
@@ -372,6 +391,10 @@
                 } else {
                     var currentVersion = decodeURIComponent(window.location.href.split("#!version=")[1]).split(
                         "&")[0];
+                    if (currentVersion == "latest") {
+                        // currentVersion = data.__currentVersion;
+                        currentVersion = data.__latest;
+                    }
                     var currentMode = decodeURIComponent(window.location.href.split("mode=")[1]).split(
                         "&")[0];
                     if (data.__currentVersion != currentVersion) { // If version doesn't match, change version and go to first view
@@ -523,29 +546,46 @@
                     combobox.reset();
                 }
             },
-            // @function setupVersionControl (private) [Set up version control dropdown] @param data {object}
+            // @function _setupVersionControl (private) [Set up version control dropdown] @param data {object}
             setupVersionControl: function (data) {
-                if (!document.querySelector("#app-doc-main-versionControlSelect")) { // Version control is just generated once. We can not change version paths because we never change index.html so references will to different versions will be always the same
+                if (!document.querySelector("#app-doc-main-versionControlSelect")) { // Version control is just generated once. We can not change version paths because we never change index.html so references to different versions will be always the same
                     var docFragment = document.createDocumentFragment();
 
-                    var select = document.createElement("select");
+                    var select = document.createElement("eon-combobox");
                     select.id = "app-doc-main-versionControlSelect";
-                    select.setAttribute("onchange",
-                        "document.querySelector('app-doc-main').changeVersion();");
+
+
                     for (versionKey in data.__version) {
-                        var option = document.createElement("option");
-                        option.value = versionKey;
-                        option.innerHTML = versionKey;
+                        var option = document.createElement("eon-item");
+
+                        option.value = (data.__version[data.__currentVersion].from + data.__version[
+                            versionKey].to).replace(/[/\\*]/g, "/");
+                        option.displayValue = versionKey;
+
                         if (versionKey === data.__currentVersion) {
-                            option.selected = "selected";
+                            select.default = (data.__version[data.__currentVersion].from + data.__version[
+                                versionKey].to).replace(/[/\\*]/g, "/");
                         }
-                        option.setAttribute("src", (data.__version[data.__currentVersion].from + data.__version[
-                            versionKey].to).replace(/[/\\*]/g, "/"));
+
                         select.appendChild(option);
                     }
                     docFragment.appendChild(select);
+
+                    setTimeout(() => {
+                        select.onReady(function () {
+                            select._refs.dropDown.classList.add(
+                                "app-doc-main-version-dropdown");
+                            select.onSelected(function () {
+                                document.querySelector('app-doc-main').changeVersion();
+                            });
+                        });
+                    }, 0);
                     document.querySelector("#app-doc-main-versionControl").appendChild(docFragment);
                 }
+
+
+
+
             },
             // @function getRequest (private) [Get json via ajax] @param path @param callback
             getRequest: function (path, callback) { // Generic html get request
@@ -563,7 +603,7 @@
                 httpRequest.open('GET', path);
                 httpRequest.send();
             },
-            // @function urlOnLoad (private) [Set up url when first load] @param data {object}
+            // @function _urlOnLoad (private) [Set up url when first load] @param data {object}
             urlOnLoad: function (data) {
                 var el = this;
                 if (window.location.href.indexOf("#") < 0) { // If we don't have version in the url go to standard load
@@ -571,7 +611,11 @@
                 } else { // If we have a version in the url load given version
                     var currentVersion = decodeURIComponent(window.location.href.split("#!version=")[
                         1]).split("&")[0];
-                    if (data.__currentVersion != currentVersion) { // If versions does not match, load version given via url
+                    if (currentVersion == "latest") {
+                        // currentVersion = data.__currentVersion;
+                        currentVersion = data.__latest;
+                    }
+                    if ((currentVersion != "undefined") && data.__currentVersion != currentVersion) { // If versions does not match, load version given via url
                         el._getRequest((data.__version[data.__currentVersion].from + data.__version[
                                 currentVersion].to).replace(/[/\\*]/g, "/") + "/config.json",
                             function (data) {

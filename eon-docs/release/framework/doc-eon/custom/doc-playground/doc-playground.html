@@ -5,7 +5,7 @@
         <div class="doc-playground-menu-title"></div>
         <div class="doc-playground-menu-tabs doc-playground-hidden"></div>
         <div class="doc-playground-filler"></div>
-        <app-vicon class="doc-playground-toggle" vicon="div" label="go to code" background="rgba(0,0,0,0.1)"></app-vicon>
+        <app-vicon class="doc-playground-toggle" vicon="div" label="toggle code" background="rgba(0,0,0,0.1)"></app-vicon>
         <app-vicon class="doc-playground-fullscreen" vicon="fullscreen" label="fullscreen" background="rgba(0,0,0,0.1)"></app-vicon>
         <div class="doc-playground-menu-links"></div>
     </div>
@@ -20,7 +20,6 @@
 
 <script>
     eon.element({
-        name: "doc-playground",
         name: "doc-playground",
         style: "doc-playground.css",
         dependencies: [
@@ -55,11 +54,6 @@
                 value: "",
                 reflect: true
             },
-            // @html-attribute headerButtons (public) [Custom header buttons]
-            headerButtons: {
-                value: "",
-                reflect: true
-            },
             // @html-attribute format (public) [Format code]
             format: {
                 value: "false",
@@ -89,6 +83,10 @@
             codeMaxHeight: {
                 value: "800",
                 reflect: true
+            },
+            // @html-attribute onResultReady (public) [Callback when the result view is ready]
+            onResultReady: {
+                value: {}
             }
         },
 
@@ -116,23 +114,25 @@
             // @function setHeaderButtons (public) [Set header buttons]
             setHeaderButtons: function (title) {
                 var el = this;
-                if (el._misc.header) {                    
+                if (el._misc.header) {
                     var links = JSON.parse(el._misc.header);
                     var fragment = document.createDocumentFragment();
                     for (var key in links) {
-                        var link = links[key];    
+                        var link = links[key];
                         if (link.icon && !link.text) {
                             var vicon = document.createElement("app-vicon");
                             vicon.vicon = link.icon;
-                            vicon.label = key;
+                            if (link.title) {
+                                vicon.label = link.title;
+                            }
                             vicon.background = "rgba(0,0,0,0.1)";
                             vicon.link = link.link;
                             vicon.action = link.action;
                             vicon.playground = el;
-                            vicon.addEventListener("click", function (e) {                                
-                                if(this.link){
-                                window.open(this.link, '_blank');
-                                }else if(this.action){
+                            vicon.addEventListener("click", function (e) {
+                                if (this.link) {
+                                    window.open(this.link, '_blank');
+                                } else if (this.action) {
                                     eval(this.action)(this.playground, this);
                                 }
                             });
@@ -144,39 +144,41 @@
                             button.link = link.link;
                             button.action = link.action;
                             button.playground = el;
-                            button.addEventListener("click", function (e) {                               
-                                if(this.link){
-                                window.open(this.link, '_blank');
-                                }else if(this.action){
+                            button.addEventListener("click", function (e) {
+                                if (this.link) {
+                                    window.open(this.link, '_blank');
+                                } else if (this.action) {
                                     eval(this.action)(this.playground, this);
                                 }
                             });
                             fragment.appendChild(button);
                         }
-                    }    
+                    }
                     el._refs.header.appendChild(fragment);
                 }
             },
             // @function setFooterButtons (public) [Set footer buttons]
             setFooterButtons: function (title) {
                 var el = this;
-                if (el._misc.footer) {                    
+                if (el._misc.footer) {
                     var links = JSON.parse(el._misc.footer);
                     var fragment = document.createDocumentFragment();
                     for (var key in links) {
-                        var link = links[key];    
+                        var link = links[key];
                         if (link.icon && !link.text) {
                             var vicon = document.createElement("app-vicon");
                             vicon.vicon = link.icon;
-                            vicon.label = key;
+                            if (link.title) {
+                                vicon.label = link.title;
+                            }
                             vicon.background = "rgba(0,0,0,0.1)";
                             vicon.link = link.link;
                             vicon.action = link.action;
                             vicon.playground = el;
-                            vicon.addEventListener("click", function (e) {                                 
-                                if(this.link){
-                                window.open(this.link, '_blank');
-                                }else if(this.action){
+                            vicon.addEventListener("click", function (e) {
+                                if (this.link) {
+                                    window.open(this.link, '_blank');
+                                } else if (this.action) {
                                     eval(this.action)(this.playground, this);
                                 }
                             });
@@ -188,16 +190,16 @@
                             button.link = link.link;
                             button.action = link.action;
                             button.playground = el;
-                            button.addEventListener("click", function (e) {                               
-                                if(this.link){
-                                window.open(this.link, '_blank');
-                                }else if(this.action){
+                            button.addEventListener("click", function (e) {
+                                if (this.link) {
+                                    window.open(this.link, '_blank');
+                                } else if (this.action) {
                                     eval(this.action)(this.playground, this);
                                 }
                             });
                             fragment.appendChild(button);
                         }
-                    }                        
+                    }
                     el._refs.footer.appendChild(fragment);
                 }
             },
@@ -218,14 +220,16 @@
                 el.result.close();
                 el.result.head.appendChild(el._iframeGenericCss());
 
-                setTimeout(function() {
-                    el._refs.iframe.onload = el._iframeLoaded(el.result);
-                }, 500);
+                el._refs.iframe.onload = el._iframeLoaded(el.result);
 
                 // TODO This function load scripts async which could result into a bottle neck
                 el._appendScriptsToIframe(el.result);
 
-                eon.triggerCallback("onReady", el, el, [el._refs.iframe]);
+
+                if (typeof (el.onResultReady) != "object") {
+                    eval(el.onResultReady)(el, el.result);
+                }
+
                 el._refs.iframe.classList.remove("doc-playground-hidden");
                 el._refs.loading.hide();
             },
@@ -348,40 +352,42 @@
             storeCode: function () {
                 var el = this;
                 var sourceCode = el.getSourceElements();
-                el._misc.code = {};                
+                el._misc.code = {};
                 sourceCode.forEach(function (code) {
-                        switch (code.getAttribute("type")) {
-                            case "html":
-                                var content = code.innerHTML.replace(/doc-head/g, 'head');
-                                content = content.replace(/doc-body/g, 'body');
-                                el._misc.code.html = content;
-                                break;
-                            case "js":
-                                el._misc.code.js = code.innerHTML;
-                                break;
-                            case "css":
-                                el._misc.code.css = code.innerHTML;
-                                break;
-                            case "header":
-                                el._misc.header = code.innerHTML;
-                                break;
-                            case "footer":
-                                el._misc.footer = code.innerHTML;
-                                break;
-                        }
+                    switch (code.getAttribute("type")) {
+                        case "html":
+                            // var content = code.innerHTML.replace(/doc-head/g, 'head');
+                            // content = content.replace(/doc-body/g, 'body');
+                            // el._misc.code.body = content;
+                            el._misc.code.body = code.innerHTML;
+                            break;
+                        case "html-body":
+                            el._misc.code.body = code.innerHTML;
+                            break;
+                        case "html-head":
+                            el._misc.code.head = code.innerHTML;
+                            break;
+                        case "js":
+                            el._misc.code.js = code.innerHTML;
+                            break;
+                        case "css":
+                            el._misc.code.css = code.innerHTML;
+                            break;
+                        case "header":
+                            el._misc.header = code.innerHTML;
+                            break;
+                        case "footer":
+                            el._misc.footer = code.innerHTML;
+                            break;
+                    }
                     code.parentNode.removeChild(code);
                 });
             },
             // @function _getIframeString (private) [Format code into a string to be written at iframe]
             getIframeString: function () {
                 var el = this;
-                var headReg = new RegExp("<head>([\\s\\S])*<\\/head>", "gm");
-                var bodyReg = new RegExp("<body>([\\s\\S])*<\\/body>", "gm");
-                var headMatches = el._misc.code.html ? el._misc.code.html.match(headReg) : "";
-                var bodyMatches = el._misc.code.html ? el._misc.code.html.match(bodyReg) : "";
-                var head = headMatches ? el._cleanMatch(headMatches[0], "<head>", "</head>") : null;
-                var body = bodyMatches ? el._cleanMatch(bodyMatches[0], "<body>", "</body>") :
-                    null || el._misc.code.html;
+                var head = el._misc.code.head;
+                var body = el._misc.code.body;
                 var iframeSrc = "<!DOCTYPE html><html><head>";
                 if (head) {
                     iframeSrc += head;
@@ -419,7 +425,8 @@
             setupEditor: function () {
                 var el = this;
                 var tabsCount = el._tabsCount();
-                if (el._misc.code.html && eon.util.isTrue(el.html)) {
+                if ((el._misc.code.body && eon.util.isTrue(el.html)) || (el._misc.code.head && eon.util.isTrue(
+                        el.html))) {
                     var htmlTabBttn = document.createElement("div");
                     htmlTabBttn.classList.add("doc-playground-menu-tabs-bttn");
                     htmlTabBttn.type = "html";
@@ -439,7 +446,7 @@
                 if (el._misc.code.js && eon.util.isTrue(el.js)) {
                     var jsTabBttn = document.createElement("div");
                     jsTabBttn.classList.add("doc-playground-menu-tabs-bttn");
-                    if (!el._misc.code.html) {
+                    if (!el._misc.code.body && !el._misc.code.head) {
                         jsTabBttn.classList.add("doc-playground-menu-tabs-bttn-selected");
                         el._selectTab(jsTabBttn);
                     }
@@ -471,7 +478,8 @@
             tabsCount: function () {
                 var el = this;
                 var count = 0;
-                if (el._misc.code.html && eon.util.isTrue(el.html)) {
+                if ((el._misc.code.body && eon.util.isTrue(el.html)) || (el._misc.code.head && eon.util.isTrue(
+                        el.html))) {
                     count++;
                 }
                 if (el._misc.code.js && eon.util.isTrue(el.js)) {
@@ -488,7 +496,10 @@
                 if (el._misc.selectedTab) {
                     switch (el._misc.selectedTab.type) {
                         case "html":
-                            el._misc.code.html = el._htmlFilterReverse();
+                            // el._misc.code.html = el._htmlFilterReverse();
+                            var sanitizeHtml = el._htmlFilterReverse();
+                            el._misc.code.head = sanitizeHtml.head;
+                            el._misc.code.body = sanitizeHtml.body;
                             break;
                         case "js":
                             el._misc.code.js = el._refs.editor.getValue();
@@ -530,7 +541,10 @@
                 if (el._misc.selectedTab) {
                     switch (el._misc.selectedTab.type) {
                         case "html":
-                            el._misc.code.html = el._htmlFilterReverse();
+                            // el._misc.code.html = el._htmlFilterReverse();
+                            var sanitizeHtml = el._htmlFilterReverse();
+                            el._misc.code.head = sanitizeHtml.head;
+                            el._misc.code.body = sanitizeHtml.body;
                             break;
                         case "js":
                             el._misc.code.js = el._refs.editor.getValue();
@@ -541,7 +555,7 @@
                     }
                 }
                 el._refs.tabs.classList.add("doc-playground-hidden");
-                el._refs.toggle.label = "go to code";
+                el._refs.toggle.label = "toggle code";
                 el._refs.footer.classList.remove("doc-playground-hidden");
                 el.setIframe();
             },
@@ -553,29 +567,65 @@
                 el._misc.activeView = "code";
                 el._refs.tabs.classList.remove("doc-playground-hidden");
                 el._refs.footer.classList.add("doc-playground-hidden");
-                el._refs.toggle.label = "go to result";
+                el._refs.toggle.label = "toggle result";
                 el._loadEditor();
             },
             // @function _htmlFilter (private) [Filter html if selector attribute is set]
             htmlFilter: function () {
                 var el = this;
                 if (el.selector && el.selector != "") {
-                    var html = document.createElement('html');
-                    html.innerHTML = el._misc.code.html;
-                    return html.querySelector(el.selector).innerHTML;
+                    if (el.selector === "head") {
+                        return el._misc.code.head;
+                    } else if (el.selector === "body") {
+                        return el._misc.code.body;
+                    } else {
+                        var template = document.createElement('template');
+                        template.innerHTML = el._misc.code.body;                        
+                        return template.content.querySelector(el.selector).innerHTML;
+                    }
+                } else {
+                    var result = "";
+                    result += el._misc.code.head ? "<head>" + el._misc.code.head + "</head>\n" : "";
+                    result += el._misc.code.body ? "<body>" + el._misc.code.body + "</body>" : "";
+                    return result;
                 }
-                return el._misc.code.html;
             },
             // @function _htmlFilterReverse (private) [Reverse filtered html to set at the iframe]
             htmlFilterReverse: function () {
                 var el = this;
                 if (el.selector && el.selector != "") {
-                    var html = document.createElement('html');
-                    html.innerHTML = el._misc.code.html;
-                    html.querySelector(el.selector).innerHTML = el._refs.editor.getValue();
-                    return html.innerHTML;
+                    if (el.selector === "head") {
+                        return {
+                            head: el._refs.editor.getValue(),
+                            body: el._misc.code.body
+                        };
+                    } else if (el.selector === "body") {
+                        return {
+                            head: el._misc.code.head,
+                            body: el._refs.editor.getValue()
+                        };
+                    } else {
+                        var template = document.createElement('template');
+                        template.innerHTML = el._misc.code.body;                        
+                        template.content.querySelector(el.selector).innerHTML = el._refs.editor.getValue();
+                        return {
+                            head: el._misc.code.head,
+                            body: template.innerHTML
+                        };
+                    }
+                } else {
+                    var code = el._refs.editor.getValue();
+                    var headReg = new RegExp("<head>([\\s\\S])*<\\/head>", "gm");
+                    var bodyReg = new RegExp("<body>([\\s\\S])*<\\/body>", "gm");
+                    var headMatches = code.match(headReg) ? el._cleanMatch(code.match(headReg)[0], "<head>",
+                        "</head>") : "";
+                    var bodyMatches = code.match(bodyReg) ? el._cleanMatch(code.match(bodyReg)[0], "<body>",
+                        "</body>") : "";                        
+                    return {
+                        head: headMatches,
+                        body: bodyMatches
+                    };
                 }
-                return el._refs.editor.getValue();
             },
             // @function _iframeGenericCss (private) [Css code added to any iframe]
             iframeGenericCss: function () {
@@ -583,10 +633,16 @@
                 var genericCss = document.createElement("style");
                 genericCss.id = "genericCss";
                 var fullcss = "";
-                var htmlBody = " html,body{height:100%; width:100%; margin: 0px;";
+                var htmlBody = " html,body{height:100%; width:100%; margin: 0px; overflow: hidden;}";
                 fullcss += htmlBody;
                 genericCss.innerHTML = fullcss;
                 return genericCss;
+            },
+            // @function _cleanMatch (private) {string} @param match @param open [Open tag] @param close [Close tag]
+            cleanMatch: function (match, open, close) {
+                match = match.trim();
+                match = match.substring(open.length, match.length - close.length).trim();
+                return match;
             },
             // @function _appendScriptsToIframe (private) [Append scripts to iframe head] @param iframeContent
             appendScriptsToIframe: function (iframeContent) {
@@ -639,21 +695,47 @@
             // @function _iframeLoaded (private) [Function called when iframe is loaded. Calculate iframe height]
             iframeLoaded: function (iframeContent) {
                 var el = this;
-                setTimeout(function() {
-                var height = iframeContent.body.scrollHeight;
-                el._refs.iframe.style.height = height + "px";
-                var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
-                el._refs.editor.style.minHeight = codeMinHeight + "px";
-                var codeMaxHeight = parseInt(el.codeMaxHeight) < height ? height : el.codeMaxHeight;
-                el._refs.editor.style.maxHeight = codeMaxHeight + "px";
-                }, 0);
+                if (!iframeContent.body) {
+                    setTimeout(function () { // TODO the only way to wait for iframe content to be ready
+                        el._iframeLoaded(iframeContent);
+                    }, 200);
+                } else {
+                    var height = iframeContent.body.scrollHeight;
+                    if (el._misc.footer) {
+                        var footerPusher = document.createElement("div");
+                        footerPusher.style.height = "50px";
+                        footerPusher.style.width = "100%";
+                        iframeContent.body.appendChild(footerPusher);
+                    }
+                    el._refs.iframe.style.height = height + "px";
+                    var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
+                    el._refs.editor.style.minHeight = codeMinHeight + "px";
+                    var codeMaxHeight = parseInt(el.codeMaxHeight) < height ? height : el.codeMaxHeight;
+                    el._refs.editor.style.maxHeight = codeMaxHeight + "px";
+                    eon.triggerCallback("onResultReady", el, el, [el._refs.iframe]);
+
+                    if (el._misc.interval) {
+                        clearInterval(el._misc.interval);
+                    }
+                    el._misc.interval = setInterval(function () {
+                        var height = iframeContent.body.scrollHeight;
+                        if (height + "px" != el._refs.iframe.style.height && el._misc.activeView ==
+                            "result") {
+                            el._refs.iframe.style.height = height + "px";
+                            var codeMinHeight = parseInt(el.codeMinHeight) < height ? height : el.codeMinHeight;
+                            el._refs.editor.style.minHeight = codeMinHeight + "px";
+                            var codeMaxHeight = parseInt(el.codeMaxHeight) < height ? height : el.codeMaxHeight;
+                            el._refs.editor.style.maxHeight = codeMaxHeight + "px";
+                        }
+                    }, 200);
+                }
             }
         },
 
         onCreated: function () {
             var el = this;
             el._storeCode();
-            eon.createCallback("onReady", this, "ready");
+            eon.createCallback("onResultReady", this, "ready");
             eon.createCallback("onFullScreenActivated", this);
             eon.createCallback("onFullScreenDeactivated", this);
         },
