@@ -5,7 +5,7 @@
   }
 ]*
 [Button]<>
-^[API](#!&mode=api&file=ui%2Feon-button%2Feon-button.html)
+^[eon-button API](#!version=latest&mode=api&file=ui%2Feon-button%2Feon-button.html)
 
 
 The eon-button component is a button with different facilities. It can be used as a form button using the property `type="submit"`, or as a button that activates a functionality.
@@ -14,33 +14,33 @@ The eon-button component is a button with different facilities. It can be used a
 By default the button style is outline, but they can be flat and filled using the property `design`.
 
 *(
-<doc-playground label="Regular Buttons" html="true" js="true" css="true" selector=".content" format="true">
-  <template type="html">
-      <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);
-          </script>
-          <style>
-            .content {
-              display: flex;
-              flex-wrap: wrap;
-              width: 100%;
-            }
-          </style>
-      </doc-head>
-      <doc-body><div class="content">
-          <doc-showcase label='Outline'>
-              <eon-button value='Button'></eon-button>
-              <eon-button value='Disabled' disabled='true'></eon-button>
-          </doc-showcase>
-          <doc-showcase label='Flat'>
-              <eon-button value='Button' design='flat'></eon-button>
-              <eon-button value='Disabled' disabled='true' design='flat'></eon-button>
-          </doc-showcase>
-              <doc-showcase label='Filled'><eon-button value='Button' design='filled'></eon-button>
-              <eon-button value='Disabled' disabled='true' design='filled'></eon-button>
-          </doc-showcase>
-      </div></doc-body>
+<doc-playground label="Regular Buttons" html="true" js="true" css="true" selector="body" format="true">
+  <template type="html-head">
+    <script src='framework/doc-eon/eon/eon.js'></script>
+    <script>
+      eon.import([
+        'framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase'
+      ]);
+    </script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <doc-showcase label='Outline'>
+        <eon-button value='Button'></eon-button>
+        <eon-button value='Disabled' disabled='true'></eon-button>
+    </doc-showcase>
+    <doc-showcase label='Flat'>
+        <eon-button value='Button' design='flat'></eon-button>
+        <eon-button value='Disabled' disabled='true' design='flat'></eon-button>
+    </doc-showcase>
+        <doc-showcase label='Filled'><eon-button value='Button' design='filled'></eon-button>
+        <eon-button value='Disabled' disabled='true' design='filled'></eon-button>
+    </doc-showcase>
   </template>
   <template type="css">
       .doc-showcase-content{display:flex;}
@@ -56,36 +56,37 @@ By default the button style is outline, but they can be flat and filled using th
 To display buttons with icons just use the `vicon` property passing any of the icons provided in the Vimlet library. If you prefer to use other icons library you can use the property `icon` passing an `i` element directly.
 
 *(
-<doc-playground label="Icon Buttons" html="true" js="true" css="true" selector=".content" format="true">
-  <template type="html">
-      <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-          <style>
-            .content {
-              display: flex;
-              flex-wrap: wrap;
-              width: 100%;
-            }
-          </style>
-      </doc-head>
-      <doc-body><div class="content">
-          <doc-showcase label='Outline'>
-              <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>'></eon-button>
-              <eon-button vicon='vicon-build'></eon-button>
-              <eon-button vicon='vicon-build' disabled='true'></eon-button>
-          </doc-showcase>
-          <doc-showcase label='Flat'>
-              <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>' design='flat' icon-position="right"></eon-button>
-              <eon-button vicon='vicon-build' design='flat'></eon-button>
-              <eon-button vicon='vicon-build' disabled='true' design='flat'></eon-button>
-          </doc-showcase>
-          <doc-showcase label='Filled'>
-              <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>' design='filled'></eon-button>
-              <eon-button vicon='vicon-build' design='filled'></eon-button>
-              <eon-button vicon='vicon-build' disabled='true' design='filled'></eon-button>
-          </doc-showcase>
-      </div></doc-body>
+<doc-playground label="Icon Buttons" html="true" js="true" css="true" selector="body" format="true">
+  <template type="html-head">
+    <script src='framework/doc-eon/eon/eon.js'></script>
+    <script>
+      eon.import([
+      'framework/doc-eon/eon/ui/eon-button','framework/doc-eon/custom/doc-playground/doc-showcase'
+    ]);
+    </script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <doc-showcase label='Outline'>
+        <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>'></eon-button>
+        <eon-button vicon='vicon-build'></eon-button>
+        <eon-button vicon='vicon-build' disabled='true'></eon-button>
+    </doc-showcase>
+    <doc-showcase label='Flat'>
+        <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>' design='flat' icon-position="right"></eon-button>
+        <eon-button vicon='vicon-build' design='flat'></eon-button>
+        <eon-button vicon='vicon-build' disabled='true' design='flat'></eon-button>
+    </doc-showcase>
+    <doc-showcase label='Filled'>
+        <eon-button value='Button' icon='<i class="vicon vicon-cog"></i>' design='filled'></eon-button>
+        <eon-button vicon='vicon-build' design='filled'></eon-button>
+        <eon-button vicon='vicon-build' disabled='true' design='filled'></eon-button>
+    </doc-showcase>
   </template>
   <template type="css">
       .doc-showcase-content{display:flex;}
@@ -98,38 +99,35 @@ To display buttons with icons just use the `vicon` property passing any of the i
 )*
 
 [Checkbox]<>
-^[API](#!&mode=api&file=ui%2Feon-checkbox%2Feon-checkbox.html)
+^[eon-checkbox API](#!&mode=api&file=ui%2Feon-checkbox%2Feon-checkbox.html)
 
 
 The checkbox element allows selecting multiple options of a group of choices. It can be used inside a eon-form component or inside an HTML form.
 
 
 *(
-<doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
-  <template type="html">
-    <doc-head>
-      <script src="framework/doc-eon/eon/eon.js"></script>
-      <script> 
-        eon.import([
-          "framework/doc-eon/eon/ui/eon-checkbox", "framework/doc-eon/custom/doc-playground/doc-showcase"
-        ]);
-      </script>
-      <style>
-        .content {
-          display: flex;
-          flex-wrap: wrap;
-          width: 100%;
-        }
-      </style>
-    </doc-head>
-    <doc-body><div class="content">
-      <doc-showcase label="Standard">
-        <eon-checkbox label="Checkbox" value='checkbox1' checked="true" name='checkboxOptions'></eon-checkbox>
-      </doc-showcase>
-      <doc-showcase label="Disabled">
-        <eon-checkbox label='Disabled checked' value='checkbox2' checked="true" name='checkboxOptions' disabled='true'></eon-checkbox>
-      </doc-showcase>
-    </div></doc-body>
+<doc-playground label="Common Usage" html="true" js="true" css="true" selector="body" format="true">
+  <template type="html-head">
+    <script src="framework/doc-eon/eon/eon.js"></script>
+    <script> 
+      eon.import([
+        "framework/doc-eon/eon/ui/eon-checkbox", "framework/doc-eon/custom/doc-playground/doc-showcase"
+      ]);
+    </script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <doc-showcase label="Standard">
+      <eon-checkbox label="Checkbox" value='checkbox1' checked="true" name='checkboxOptions'></eon-checkbox>
+    </doc-showcase>
+    <doc-showcase label="Disabled">
+      <eon-checkbox label='Disabled checked' value='checkbox2' checked="true" name='checkboxOptions' disabled='true'></eon-checkbox>
+    </doc-showcase>
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -138,50 +136,52 @@ The checkbox element allows selecting multiple options of a group of choices. It
 )*
 
 [Combobox]<>
-^[API](#!&mode=api&file=ui%2Feon-combobox%2Feon-combobox.html)
+^[eon-combobox API](#!&mode=api&file=ui%2Feon-combobox%2Feon-combobox.html)
 
 
 The combobox element is a component meant for selecting an option between the given ones, a dropdown with the available options appears giving the users the ability to choose among the different items.
 
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
-  <template type="html">
-      <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-          <style>
-            .content {
-              display: flex;
-              flex-wrap: wrap;
-              width: 100%;
-            }
-          </style>
-      </doc-head>
-      <doc-body>
-        <div class="content">
-          <doc-showcase label='Active'>
-            <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
-                <eon-item value='red' display-value='Red'></eon-item>
-                <eon-item value='green' display-value='Green'></eon-item>
-                <eon-item value='pink' display-value='Pink'></eon-item>
-                <eon-item value='grey' display-value='Grey'></eon-item>
-            </eon-combobox>
-          </doc-showcase>
-          <doc-showcase label='Disabled'>
-            <eon-combobox disabled='true' label='States' placeholder='Ohio'>
-                <eon-item value='tomato' display-value='Tomato'></eon-item>
-                <eon-item value='avocado' display-value='Avocado'></eon-item>
-                <eon-item value='strawberry' display-value='Strawberry'></eon-item>
-                <eon-item value='onion' display-value='Onion'></eon-item>
-            </eon-combobox>
-          </doc-showcase>
-        </div>
-        <div style="height:284px;"></div>
-      </doc-body>
+  <template type="html-head">
+    <script src='framework/doc-eon/eon/eon.js'></script>
+    <script>
+      eon.import([
+        'framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase'
+      ]);
+    </script>
+    <style>
+      .content {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <div class="content">
+      <doc-showcase label='Active'>
+        <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
+          <eon-item value='red' display-value='Red'></eon-item>
+          <eon-item value='green' display-value='Green'></eon-item>
+          <eon-item value='pink' display-value='Pink'></eon-item>
+          <eon-item value='grey' display-value='Grey'></eon-item>
+        </eon-combobox>
+      </doc-showcase>
+      <doc-showcase label='Disabled'>
+        <eon-combobox disabled='true' label='States' placeholder='Ohio'>
+          <eon-item value='tomato' display-value='Tomato'></eon-item>
+          <eon-item value='avocado' display-value='Avocado'></eon-item>
+          <eon-item value='strawberry' display-value='Strawberry'></eon-item>
+          <eon-item value='onion' display-value='Onion'></eon-item>
+        </eon-combobox>
+      </doc-showcase>
+    </div>
+    <div style="height:284px;"></div>
   </template>
   <template type="css">
-      .doc-showcase-content{display:flex;}
-      .doc-showcase-content eon-button{margin:0 5px;}
+    .doc-showcase-content{display:flex;}
+    .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -194,34 +194,37 @@ Enables the user to type in the input so that the options provided by the dropdo
 
 *(
 <doc-playground label="Filtering" html="true" js="true" css="true" selector=".content" format="true">
-    <template type="html">
-        <doc-head>
-          <script src='framework/doc-eon/eon/eon.js'></script>
-          <script>eon.import(['framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase']);</script>
-          <style>
-            .content {
-              display: flex;
-              flex-wrap: wrap;
-              width: 100%;
-            }
-          </style>
-        </doc-head>
-        <doc-body><div class="content">
-        <doc-showcase>
-              <eon-combobox label="Colors" name='myCombobox' placeholder='Pick a color' filter='true'>
-                  <eon-item value='r' display-value='Red'></eon-item>
-                  <eon-item value='p' display-value='Pink'></eon-item>
-                  <eon-item value='pu' display-value='Purple'></eon-item>
-              </eon-combobox>
-          </doc-showcase>
-        </div>
-        <div style="height:284px;"></div>
-        </doc-body>
-    </template>
-    <template type="css">
-        .doc-showcase-content{display:flex;}
-        .doc-showcase-content eon-button{margin:0 5px;}
-    </template>
+  <template type="html-body">
+    <script src='framework/doc-eon/eon/eon.js'></script>
+    <script>
+      eon.import([
+        'framework/doc-eon/eon/ui/eon-combobox','framework/doc-eon/eon/ui/eon-item','framework/doc-eon/custom/doc-playground/doc-showcase'
+      ]);
+    </script>
+    <style>
+      .content {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <div class="content">
+      <doc-showcase>
+        <eon-combobox label="Colors" name='myCombobox' placeholder='Pick a color' filter='true'>
+          <eon-item value='r' display-value='Red'></eon-item>
+          <eon-item value='p' display-value='Pink'></eon-item>
+          <eon-item value='pu' display-value='Purple'></eon-item>
+        </eon-combobox>
+      </doc-showcase>
+    </div>
+    <div style="height:284px;"></div>
+  </template>
+  <template type="css">
+    .doc-showcase-content{display:flex;}
+    .doc-showcase-content eon-button{margin:0 5px;}
+  </template>
 </doc-playground>
 )*
 
