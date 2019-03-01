@@ -698,7 +698,7 @@
 
             /*
               @function (private) _addMinimize
-              @description Adds maximize button and its functionality.
+              @description Adds minimize button and its functionality.
             */
             addMinimize: function () {
                 var el = this;
@@ -801,14 +801,14 @@
             */
             restore: function () {
                 var el = this;
-                
+
                 el._addOverlay();
-                
+
                 if (el.dataset.status == "maximized") {
                     el._refs.maximizeButton.classList.remove("vicon-restore");
                     el._refs.maximizeButton.classList.add("vicon-maximize");
                 } else if (el.dataset.status == "minimized") {
-                    
+
                     el.classList.remove("eon-dialog-minimized");
                 }
 
@@ -823,12 +823,10 @@
             */
             savePreviousStatus: function () {
                 var el = this;
-
                 el._misc.previousWidth = el.offsetWidth;
                 el._misc.previousHeight = el.offsetHeight;
                 el._misc.previousLeft = el.offsetLeft;
                 el._misc.previousTop = el.offsetTop;
-
             },
 
             /*
@@ -837,7 +835,7 @@
             */
             restorePreviousStatus: function () {
                 var el = this;
-
+                console.log('restore');
                 el.style.width = el._misc.previousWidth + "px";
                 el.style.height = el._misc.previousHeight + "px";
                 el.style.left = el._misc.previousLeft + "px";
@@ -883,10 +881,10 @@
             */
             addOverlay: function () {
                 var el = this;
+                console.log('addOverlay');
 
                 // If there is no overlay created yet, we create/prepare it
                 if (!el._refs.overlay) {
-
                     // Whether we have to add or remove the modal class
                     var classListFn = eon.util.isTrue(el.modal) ? "add" : "remove";
 
@@ -897,9 +895,7 @@
 
                     // If the dialog is blureable then we add an event listener to close the dialog on overlay touch
                     if (eon.util.isTrue(el.blur)) {
-
                         el._refs.overlay.addEventListener("click", function (e) {
-
                             // Hide the dialog only if its currently active
                             if (el.classList.contains("eon-dialog-visible")) {
                                 el.close();
@@ -908,9 +904,7 @@
                         }, false);
 
                     } else if (!eon.util.isTrue(el.modal)) {
-
                         el._refs.overlay.style.pointerEvents = "none";
-
                     }
 
                 }
@@ -1226,12 +1220,10 @@
             */
             close: function () {
                 var el = this;
-
                 // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
                 el._misc.firstOpen = false;
 
                 eon.triggerCallback("onClose", el);
-
 
                 el.classList.remove("eon-dialog-visible");
                 el.classList.remove("eon-dialog-scaled");
@@ -1242,17 +1234,20 @@
                     el._refs.placeholder.parentNode.removeChild(el._refs.placeholder);
                 }, 100);
 
+
                 if (el._refs.overlay && el._refs.overlay.parentNode) {
                     el._refs.overlay.parentNode.removeChild(el._refs.overlay);
                     el.style.opacity = 0;
                 }
 
                 if (el.dataset.status == "maximized") {
+                    el.classList.add("eon-dialog-hide");
                     el._refs.maximizeButton.classList.remove("vicon-restore");
                     el._refs.maximizeButton.classList.add("vicon-maximize");
                 }
 
                 if (el.dataset.status == "minimized") {
+                    el.classList.add("eon-dialog-hide");
                     el.classList.remove("eon-dialog-minimized");
                 }
 
