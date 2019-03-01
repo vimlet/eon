@@ -166,7 +166,7 @@ The combobox element is a component meant for selecting an option between the gi
   <template type="html-body">
     <div class="content">
       <doc-showcase label='Active'>
-        <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
+        <eon-combobox label='Colors' filter='true'>
           <eon-item value='red' display-value='Red'></eon-item>
           <eon-item value='green' display-value='Green'></eon-item>
           <eon-item value='pink' display-value='Pink'></eon-item>
@@ -174,7 +174,7 @@ The combobox element is a component meant for selecting an option between the gi
         </eon-combobox>
       </doc-showcase>
       <doc-showcase label='Disabled'>
-        <eon-combobox disabled='true' label='States' placeholder='Ohio'>
+        <eon-combobox disabled='true' label='Food' value='avocado'>
           <eon-item value='tomato' display-value='Tomato'></eon-item>
           <eon-item value='avocado' display-value='Avocado'></eon-item>
           <eon-item value='strawberry' display-value='Strawberry'></eon-item>
@@ -357,10 +357,10 @@ This form component consists of an entry field for numerical values with `up` an
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
-      <eon-number label="Number field" name="numberField" default="15" max="111"></eon-number>
+      <eon-number label="Age" name="numberField"></eon-number>
     </doc-showcase>
     <doc-showcase label="Disabled">
-      <eon-number label="Number field disabled" name="numberFieldDis" disabled="true"></eon-number>
+      <eon-number label="Amount" name="numberFieldDis" disabled="true" default="15" max="111"></eon-number>
     </doc-showcase>
   </template>
   <template type="footer">
@@ -496,13 +496,13 @@ The text element is a component meant for typing and it has multiple uses depend
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
-      <eon-text label="Name" value="John" name="text" max-length="18"></eon-text>
+      <eon-text label="Name" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
     </doc-showcase>
     <doc-showcase label="Counter">
-      <eon-text label="Description" placeholder="Type here" name="text" max-length="18" counter="true"></eon-text>
+      <eon-text label="Last Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
     </doc-showcase>
     <doc-showcase label="Disabled">
-      <eon-text class="margin-top" value="Surname" name="disabled" disabled="true"></eon-text>
+      <eon-text label="Middle Name" class="margin-top" inline="false" name="disabled" disabled="true" placeholder="Type here" value="Smith"></eon-text>
     </doc-showcase>
   </template>
   <template type="footer">
@@ -544,7 +544,7 @@ The area type text enables the user to write large amount of characters in multi
       <eon-text placeholder="Type here" name="Description" type="area" label="Description" counter="true" area-height="100"></eon-text>
     </doc-showcase>
     <doc-showcase label="Disabled">
-      <eon-text placeholder="Type here" class="margin-top" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
+      <eon-text placeholder="Type here" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true" label="Comments" value="None"></eon-text>
     </doc-showcase>
   </template>
   <template type="footer">
@@ -582,7 +582,7 @@ The password text is pretty similar to the text type but it shows asterisks inst
       <eon-text label="Password" default="password" type="password"></eon-text>
     </doc-showcase>
     <doc-showcase label="Disabled">
-      <eon-text label="Disabled" default="password" type="password" disabled="true"></eon-text>
+      <eon-text label="Old Password" default="password" inline="false" type="password" disabled="true"></eon-text>
     </doc-showcase>
   </template>
   <template type="footer">
