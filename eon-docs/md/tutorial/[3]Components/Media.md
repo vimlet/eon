@@ -12,7 +12,7 @@ This element is a combination of the well known slider and image gallery compone
 
 
 *(
-<doc-playground label="Simple slider" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Simple Slider" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>

@@ -1,7 +1,9 @@
 <template>
 
   <div class="eon-number-group eon-fg2 eon-unselectable">
-    <label class="eon-number-label"></label>
+    <div class="eon-number-data">
+        <label class="eon-number-label"></label>
+    </div>
     <div class="eon-number-number eon-bg2">
       <div class="eon-number-control eon-fg2-hoverable eon-number-controlDown">
         <i class="vicon vicon-minimize"></i>
@@ -79,7 +81,8 @@
       */
       disabled: {
         value: false,
-        reflect: true
+        reflect: true,
+        reflectDefault: true
       },
       /*
         @property {Boolean} readonly 
@@ -88,7 +91,8 @@
       */
       readonly: {
         value: false,
-        reflect: true
+        reflect: true,
+        reflectDefault: true
       },
       /*
         @property {Boolean} autofocus 
@@ -127,6 +131,15 @@
        Default: true
      */
       inline: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {String} labelAnim
+      @description Whether the label will have animation or not
+      */
+      labelAnim: {
         value: true,
         reflect: true
       },
@@ -234,6 +247,42 @@
 
     },
     privateFunctions: {
+      /*
+      @function (private) _setupLabelAnimation
+      @description Inits label animation classes and style
+      */
+      setupLabelAnimation: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.labelAnim)) {
+
+          if (el.value == "" && el.default == "") {
+            el._refs.label.classList.add("eon-number-movedLabel");
+          }
+
+        }
+
+      },
+      /*
+      @function (private)  _animateLabel
+      @description Depending on the focus state animates the label or not
+      */
+      animateLabel: function () {
+
+        var el = this;
+        
+        if (eon.util.isTrue(el.labelAnim)) {
+
+          if (el.classList.contains("eon-number-focus") || el.value != "") {
+            el._refs.label.classList.remove("eon-number-movedLabel");
+          } else {
+            el._refs.label.classList.add("eon-number-movedLabel");
+          }
+
+        }
+
+      },
       /*
         @function (private) _createRefs
         @description Creates fast access to elements
@@ -396,9 +445,9 @@
         eon.registerPathListener(el._refs.number);
 
         document.addEventListener(eventType, function (e) {
-          if (el._refs.number.isOnPath && !el._refs.label.classList.contains("eon-number-focusLabel")) {
+          if (el._refs.number.isOnPath && !el.classList.contains("eon-number-focus")) {
             el._inputFocus()
-          } else if (!el._refs.number.isOnPath && el._refs.label.classList.contains("eon-number-focusLabel")) {
+          } else if (!el._refs.number.isOnPath && el.classList.contains("eon-number-focus")) {
             el._inputBlur(e);
           }
 
@@ -457,8 +506,10 @@
       */
       inputFocus: function () {
         if (!eon.util.isTrue(this.readonly)) {
-          this._refs.label.classList.add("eon-number-focusLabel", "eon-fg1");
+          this.classList.add("eon-number-focus");
+          this._refs.label.classList.add("eon-fg1");
           this._refs.inputBar.classList.add("eon-number-animate");
+          this._animateLabel();
         }
       },
 
@@ -469,16 +520,19 @@
       */
       inputBlur: function (e) {
 
-        if (this._refs.label.classList.contains("eon-number-focusLabel")) {
+        if (this.classList.contains("eon-number-focus")) {
           this._updateNumber(e);
         }
 
-        this._refs.label.classList.remove("eon-number-focusLabel", "eon-fg1");
+        this.classList.remove("eon-number-focus");
+        this._refs.label.classList.remove("eon-fg1");
         this._refs.inputBar.classList.remove("eon-number-animate");
 
         // Trigger onChange callback
         this._currentValue = (this.value !== this._currentValue) ? this.value : this._currentValue;
         (this.value !== this._currentValue) ? eon.triggerCallback("onChange", this) : null;
+
+        this._animateLabel();
 
       },
 
@@ -528,6 +582,10 @@
       eon.createCallback("onEnter", this);
 
       el._createRefs();
+    },
+
+    onInit: function () {
+      this._setupLabelAnimation();
     },
 
     onRender: function () {

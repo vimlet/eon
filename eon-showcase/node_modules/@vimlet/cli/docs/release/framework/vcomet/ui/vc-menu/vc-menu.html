@@ -1,0 +1,359 @@
+<template>
+
+  <div class="vc-menu-wrapper vc-bg4 vc-unselectable">
+  </div>
+
+</template>
+
+<script>
+  vcomet.element("vc-menu", "vc-menu.css", {
+
+    dependencies: [
+      "../vc-item",
+      "../vc-combobox",
+      "../vc-scroll"
+    ],
+    properties: {
+      /*
+      @property {String} layout
+      @description Indicates the disposition of the menu items
+      */
+      layout: {
+        value: "horizontal",
+        reflect: true
+      },
+      /*
+      @property {Boolean} hover
+      @description 
+      */
+      hover: {
+        value: "false",
+        reflect: true
+      },
+      /*
+      @property separators
+      @description Indicates whether there will be indicators or not separating the menu items
+      */
+      separators: {
+        value: "false",
+        reflect: true
+      },
+      /*
+      @property direction
+      @description Indicates the direction that the dropdown will follow when opening
+      */
+      direction: {
+        value: "bottom-right",
+        reflect: true
+      }
+    },
+    privateFunctions: {
+      /*
+      @function _setup
+      @description Sets up the menu items and its dropdown recursively
+      */
+      setup: function () {
+
+        var el = this;
+
+        var fragment = document.createDocumentFragment();
+        var srcNodes = el.getSourceElements();
+        var menuItems = el.querySelectorAll("vc-item");
+        var i;
+
+        // Append source nodes
+        for (i = 0; i < srcNodes.length; i++) {
+          fragment.appendChild(srcNodes[i]);
+        }
+        // Set up vc-item elements
+        for (i = 0; i < menuItems.length; i++) {
+          el._setupItem(menuItems[i]);
+        }
+
+        el.querySelector(".vc-menu-wrapper").appendChild(fragment);
+
+      },
+      setupItem: function (item) {
+        var el = this;
+
+        if (item.getAttribute("type") == "dropdown") {
+
+          el._setupDropdownMenuItem(item);
+
+        } else {
+
+          item.addEventListener("click", function () {
+            el._hideVisibleMenuItems();
+          });
+
+          el._setupVisuals(item);
+
+        }
+
+      },
+      setupVisuals: function (item) {
+
+        var name = item.getAttribute("name");
+        var icon = item.getAttribute("icon");
+
+        if (name != "") {
+          var nameNode = document.createElement("span");
+          nameNode.innerHTML = name;
+          item.appendChild(nameNode);
+        }
+
+        if (icon != "") {
+          var iconNode = document.createElement("i");
+          iconNode.innerHTML = icon;
+          iconNode.classList.add("material-icons");
+          item.appendChild(iconNode);
+        }
+
+        item.classList.add("vc-menu-header");
+        item.classList.add("vc-bg4-hoverable");
+
+      },
+      /*
+      @function _setupDropdownMenuItem
+      @description Sets up the dropdowns with it direction, childs...
+      @param {object} item
+      @param {string} direction
+      */
+      setupDropdownMenuItem: function (item, direction) {
+
+        var el = this;
+        var innerItems = item.children;
+        var itemsDropdown = document.createElement("div");
+        var indicator = document.createElement("div");
+        var dropdownItemsFragment = document.createDocumentFragment();
+
+        var yAxisDirection = (el.direction.indexOf("top") > -1) ? "top" : "bottom";
+        var xAxisDirection = (el.direction.indexOf("left") > -1) ? "left" : "right";
+
+        var dropdownTrigger = document.createElement("vc-item");
+
+        var innerDropdownDirection;
+
+        while (innerItems.length > 0) {
+
+          // el._setupItem(innerItems[0]);
+          dropdownItemsFragment.appendChild(innerItems[0]);
+
+        }
+
+        dropdownTrigger.classList.add("dropdownTrigger");
+        dropdownTrigger.setAttribute("name", item.getAttribute("name"));
+        dropdownTrigger.setAttribute("icon", item.getAttribute("icon"));
+
+        el._setupVisuals(dropdownTrigger);
+        el._setupItemEvents(item, dropdownTrigger, itemsDropdown);
+
+        itemsDropdown.classList.add("vc-menu-dropdown");
+        itemsDropdown.classList.add("vc-bg4");
+        itemsDropdown.appendChild(dropdownItemsFragment);
+
+        item.appendChild(dropdownTrigger);
+        item.appendChild(itemsDropdown);
+
+      },
+      /*
+      @function setupItemEvents
+      @description Sets up the click events for the menu items
+      @param {object} item
+      */
+      setupItemEvents: function (item, dropdownTrigger, dropdown) {
+
+        var el = this;
+
+        vcomet.registerPathListener(item);
+        vcomet.registerPathListener(dropdownTrigger);
+
+        item.dataset.visible = false;
+
+        el._setupClickEvents(item, dropdownTrigger, dropdown);
+        el._setupHoverEvents(item, dropdownTrigger, dropdown);
+
+      },
+      /*
+      @function (private) setupHoverEvents
+      @description Creates the hover events for the item
+      @param {object} item
+      */
+      setupHoverEvents: function (item, dropdownTrigger, dropdown) {
+
+        var el = this;
+
+        if (el.hover == "true" || el.hover == true) {
+
+          // Dropdown item visited
+          dropdownTrigger.addEventListener("pointerover", function (e) {
+
+            if (!vcomet.util.isTouchScreen()) {
+
+              // Check if menu dropdown is already displayed
+              if (!item.dataset.visible || item.dataset.visible == "false") {
+                el._toggleDropdown(item);
+              }
+
+            }
+
+
+          });
+
+          // Dropdown item left
+          item.addEventListener("pointerleave", function (e) {
+
+            if (!vcomet.util.isTouchScreen()) {
+
+              // Check if menu dropdown is already hidden
+              if (item.dataset.visible == true || item.dataset.visible == "true") {
+                el._toggleDropdown(item);
+              }
+
+            }
+
+          });
+
+        }
+
+      },
+      /*
+      @function (private) setupClickEvents
+      @description Creates the click events for the item
+      @param {object} item
+      */
+      setupClickEvents: function (item, dropdownTrigger, dropdown) {
+
+        var el = this;
+
+        // Dropdown item clicked
+        document.body.addEventListener("pointerdown", function (e) {
+
+          if (vcomet.util.isTouchScreen() || (!vcomet.util.isTouchScreen() && el.hover != "true")) {
+
+            if (dropdownTrigger.isOnPath) {
+
+              el._toggleDropdown(item);
+
+            } else if (!item.isOnPath) {
+              
+              item.style.visibility = "hidden";
+              item.dataset.visible = false;
+              item.style.visibility = "visible";
+
+              item.classList.remove("vc-bg3");
+
+            }
+
+          }
+
+        });
+
+      },
+      /*
+        @function 
+        @description
+      */
+      toggleDropdown: function (item, display) {
+
+        var classListFunction = item.dataset.visible == "true" || item.dataset.visible == true ? "remove" : "add";
+        // Change dropdown displaying property
+        item.style.visibility = "hidden";
+        item.dataset.visible = item.dataset.visible == "true" || item.dataset.visible == true ? false : true;
+        item.style.visibility = "visible";
+        
+        item.classList[classListFunction]("vc-bg3");
+
+      },
+      /*
+      @function hideVisibleMenuItems
+      @description Hides the visible dropdowns of the menu
+      */
+      hideVisibleMenuItems: function () {
+        var el = this;
+        var visibleMenuItems = el.querySelectorAll('vc-item[data-visible="true"]');
+
+        console.log('hideVisibleMenuItems');
+
+        for (var i = 0; i < visibleMenuItems.length; i++) {
+          // This visibility style declarations is for internet explorer to properly refresh the visual changes
+          visibleMenuItems[i].style.visibility = "hidden";
+          visibleMenuItems[i].dataset.visible = false;
+          visibleMenuItems[i].style.visibility = "visible";
+
+        }
+
+      },
+      /*
+      @function stashMenuItems
+      @description Saves the declarative content to a template to be used when transformed
+      */
+      stashMenuItems: function () {
+
+        var template = document.createElement("template");
+        template.innerHTML = this.innerHTML;
+        this.innerHTML = "";
+        this.appendChild(template);
+      },
+      /*
+      @function exceesWindow
+      @description If the dropdown to be opened exceeds we return an object with data about the sides that have ben exceeded
+      @param {object} element
+      */
+      exceedsWindow: function (element) {
+
+        var elementRect = element.getBoundingClientRect();
+        var returnObject = {};
+
+        returnObject.exceeds = false;
+        returnObject.sides = [];
+
+        if (elementRect.left < 0) {
+          returnObject.sides.push("left");
+          returnObject.exceeds = true;
+        }
+        if ((elementRect.left + elementRect.width) > window.innerWidth) {
+          returnObject.sides.push("right");
+          returnObject.exceeds = true;
+        }
+        if (elementRect.top < 0) {
+          returnObject.sides.push("top");
+          returnObject.exceeds = true;
+        }
+        if (elementRect.top + elementRect.height > window.innerHeight) {
+          returnObject.sides.push("bottom");
+          returnObject.exceeds = true;
+        }
+
+        return returnObject;
+      },
+      /*
+      @function relocateDropdownIfNeeded
+      @description Handles the relocation of the dropdown
+      @param {param_type} param_name [param_description]
+      */
+      relocateDropdownIfNeeded: function (item) {
+
+        var exceedsObject = this._exceedsWindow(item.querySelector(".vc-menu-dropdown"));
+
+        if (exceedsObject.exceeds == true) {
+
+          var yAxisDirection = (item.dataset.direction.indexOf("top") > -1) ? "top" : "bottom";
+          var xAxisDirection = (item.dataset.direction.indexOf("left") > -1) ? "left" : "right";
+
+          xAxisDirection = (exceedsObject.sides.indexOf("left") != -1) ? "right" : xAxisDirection;
+          xAxisDirection = (exceedsObject.sides.indexOf("right") != -1) ? "left" : xAxisDirection;
+
+          yAxisDirection = (exceedsObject.sides.indexOf("bottom") != -1) ? "top" : yAxisDirection;
+          yAxisDirection = (exceedsObject.sides.indexOf("top") != -1) ? "bottom" : yAxisDirection;
+
+          item.dataset.direction = yAxisDirection + "-" + xAxisDirection;
+        }
+      }
+    },
+    onInit: function () { },
+    onRender: function () {
+      this._setup();
+    }
+  });
+</script>

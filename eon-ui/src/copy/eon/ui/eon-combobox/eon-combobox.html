@@ -174,6 +174,14 @@
                 reflectDefault: false
             },
             /*
+            @property {String} labelAnim
+            @description Whether the label will have animation or not
+            */
+            labelAnim: {
+                value: true,
+                reflect: true
+            },
+            /*
             @property {Boolean} store
             @description Reference to the inner store
             */
@@ -294,9 +302,11 @@
 
                         if (!el.isOnPath && !el._refs.dropDown.isOnPath) {
                             // When blur occurs and no item has been selected when clear the input
-                            if (el.value == "") {
-                                el._refs.input.value = "";
-                            }
+                            // if (el.value == "") {
+                            //     el._refs.input.value = "";
+                            // }
+
+                            el._refs.input.value = el.displayValue;
                         }
 
                     });
@@ -552,10 +562,10 @@
                 var dropdown = el._refs.dropDown;
                 var itemsDocFragment = document.createDocumentFragment();
                 var displayProperty = (el.displayProperty != "") ? el.displayProperty : el.store.idProperty;
-                
+
                 var storeData = el.store.data;
                 var item;
-                
+
                 storeData.forEach(function (value, key, map) {
                     item = document.createElement("eon-item");
 
@@ -597,13 +607,6 @@
                 eon.registerPathListener(el);
                 eon.registerPathListener(el._refs.dropDown);
 
-                document.addEventListener(blurTrigger, function () {
-                    if (!el.isOnPath && !el._refs.dropDown.isOnPath && !el._refs.overlay.classList.contains("eon-combobox-device")) {
-                        el._refs.input.blur();
-                        el.shrink();
-                    }
-                });
-
             },
             /*
             @function (private) _setupMatchingErrorItem
@@ -616,6 +619,46 @@
                 el._refs.matchingErrorItem = document.createElement("div");
                 el._refs.matchingErrorItem.classList.add("eon-combobox-matchingError");
                 el._refs.matchingErrorItem.innerHTML = "No matches found";
+
+            },
+            /*
+            @function (private) _setupLabelAnimation
+            @description Inits label animation classes and style
+            */
+            setupLabelAnimation: function () {
+
+                var el = this;
+
+                if (eon.util.isTrue(el.labelAnim)) {
+
+                    if (el.value == "" && el.default == "") {
+                        el._refs.label.classList.add("eon-combobox-movedLabel");
+                    }
+
+                    if (el.placeholder != "") {
+                        el._refs.data.style.overflow = "hidden";
+                    }
+
+                }
+
+            },
+            /*
+            @function (private) _animateLabel
+            @description Depending on the focus state animates the label or not
+            */
+            animateLabel: function () {
+
+                var el = this;
+
+                if (eon.util.isTrue(el.labelAnim)) {
+                    
+                    if (el.classList.contains("eon-combobox-focus") || el.value != "") {
+                        el._refs.label.classList.remove("eon-combobox-movedLabel");
+                    } else {
+                        el._refs.label.classList.add("eon-combobox-movedLabel");
+                    }
+
+                }
 
             },
             /*
@@ -646,15 +689,15 @@
 
                 var el = this;
 
-                el._filterItems();
-
                 //Check if its already expanded, if its not then expand it
                 if (el._refs.dropDown.classList.contains("hidden")) {
                     el.expand();
                 }
 
+                el._filterItems();
+
                 el._value = "";
-                el.displayValue = "";
+                // el.displayValue = "";
 
             },
             /*
@@ -670,13 +713,12 @@
 
                 //Loop to find matches and hide those that do not match
                 for (var i = 0; i < items.length; i++) {
-
+                    
                     if (!items[i].hasAttribute("display-value") || !(items[i].hasAttribute("display-value") && items[i].getAttribute("display-value").toLowerCase().match("^" + value))) {
 
                         if (!items[i].classList.contains("hidden")) {
-                            items[i].classList.add("hidden");
+                            items[i].classList.add("hidden", "Richard");
                             items[i].dataset.matches = false;
-
                         }
 
                     } else {
@@ -711,7 +753,7 @@
 
                 var el = this;
                 var hiddenItems = el._refs.dropDown.querySelectorAll('[data-matches="false"]');
-
+                
                 for (var i = 0; i < hiddenItems.length; i++) {
                     hiddenItems[i].dataset.matches = true;
                     hiddenItems[i].classList.remove("hidden");
@@ -896,7 +938,7 @@
             @description Updates the value
             */
             updateValue: function () {
-
+                
                 var el = this;
                 var item = el._misc.items[el.value];
                 if (item) {
@@ -999,6 +1041,7 @@
                 el._misc.modal.active = true;
 
                 el._animateExpand();
+                el._animateLabel();
 
             },
             /*
@@ -1011,9 +1054,9 @@
 
                 if (el.classList.contains("eon-combobox-focus")) {
 
+                    el.classList.remove("eon-combobox-focus");
+                    
                     el._misc.dropdownShrinkFn = el._misc.dropdownShrinkFn || function () {
-
-                        el.classList.remove("eon-combobox-focus");
 
                         if (el._refs.overlay.parentNode) {
                             el._refs.overlay.parentNode.removeChild(el._refs.overlay);
@@ -1027,6 +1070,7 @@
                     }
 
                     el._animateShrink();
+                    el._animateLabel();
 
                 }
 
@@ -1113,6 +1157,8 @@
             el._setupOverlay();
 
             el._initDefault();
+
+            el._setupLabelAnimation();
 
             if (declarativePlaceholder) el._refs.input.placeholder = declarativePlaceholder;
 

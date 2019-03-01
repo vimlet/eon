@@ -166,7 +166,7 @@ The combobox element is a component meant for selecting an option between the gi
   <template type="html-body">
     <div class="content">
       <doc-showcase label='Active'>
-        <eon-combobox label='Colors' placeholder='Select an item' filter='true'>
+        <eon-combobox label='Colors' filter='true'>
           <eon-item value='red' display-value='Red'></eon-item>
           <eon-item value='green' display-value='Green'></eon-item>
           <eon-item value='pink' display-value='Pink'></eon-item>
@@ -174,7 +174,7 @@ The combobox element is a component meant for selecting an option between the gi
         </eon-combobox>
       </doc-showcase>
       <doc-showcase label='Disabled'>
-        <eon-combobox disabled='true' label='States' placeholder='Ohio'>
+        <eon-combobox disabled='true' label='Food' value='avocado'>
           <eon-item value='tomato' display-value='Tomato'></eon-item>
           <eon-item value='avocado' display-value='Avocado'></eon-item>
           <eon-item value='strawberry' display-value='Strawberry'></eon-item>
@@ -232,6 +232,9 @@ Enables the user to type in the input so that the options provided by the dropdo
     .doc-showcase-content{display:flex;}
     .doc-showcase-content eon-button{margin:0 5px;}
   </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
 </doc-playground>
 )*
 
@@ -265,11 +268,11 @@ Classic input type date where you can either `type` the desired date or you can 
   <template type="html-body">
     <div class="content">
       <doc-showcase label='Active'>
-        <eon-date min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" value-format="YYYY-MM-DD">
+        <eon-date label="Start" min="03/07/1969" default="1969-07-06" name="defaultInput" week-format="short" value-format="YYYY-MM-DD">
       </eon-date>
       </doc-showcase>
       <doc-showcase label='Disabled'>
-        <eon-date type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" disabled="true" week-start="monday" value-format="YYYY/MM/DD">
+        <eon-date label="End" type="input" inline="true" day="9" month="2" year="1994" mask="DDMMYYYY" name="disabledInput" disabled="true" week-start="monday" value-format="YYYY/MM/DD">
       </eon-date>
       </doc-showcase>
     </div>
@@ -278,6 +281,9 @@ Classic input type date where you can either `type` the desired date or you can 
   <template type="css">
     .doc-showcase-content{display:flex;}
     .doc-showcase-content eon-button{margin:0 5px;}
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
 </doc-playground>
 )*
@@ -320,6 +326,9 @@ This type of date will only allow you to have a `calendar` directly leaving the 
     .doc-showcase-content{display:flex;}
     .doc-showcase-content eon-button{margin:0 5px;}
   </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
 </doc-playground>
 )*
 
@@ -330,7 +339,7 @@ This type of date will only allow you to have a `calendar` directly leaving the 
 This form component consists of an entry field for numerical values with `up` and `down` buttons. 
 
 *(
-<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
@@ -348,10 +357,10 @@ This form component consists of an entry field for numerical values with `up` an
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
-      <eon-number label="Number field" name="numberField" default="15" max="111"></eon-number>
+      <eon-number label="Age" name="numberField"></eon-number>
     </doc-showcase>
     <doc-showcase label="Disabled">
-      <eon-number label="Number field disabled" name="numberFieldDis" disabled="true"></eon-number>
+      <eon-number label="Amount" name="numberFieldDis" disabled="true" default="15" max="111"></eon-number>
     </doc-showcase>
   </template>
   <template type="footer">
@@ -486,14 +495,24 @@ The text element is a component meant for typing and it has multiple uses depend
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase>
-      <eon-text label="Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
+    <doc-showcase label="Standard">
+<<<<<<< HEAD
+      <eon-text label="Name" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
     </doc-showcase>
-    <doc-showcase>
-      <eon-text value="Initial value" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
+    <doc-showcase label="Counter">
+      <eon-text label="Last Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
     </doc-showcase>
-    <doc-showcase>
-      <eon-text value="Disabled" class="margin-top" inline="false" name="disabled" disabled="true"></eon-text>
+    <doc-showcase label="Disabled">
+      <eon-text label="Middle Name" class="margin-top" inline="false" name="disabled" disabled="true" placeholder="Type here" value="Smith"></eon-text>
+=======
+      <eon-text label="Name" value="John" name="text" max-length="18"></eon-text>
+    </doc-showcase>
+    <doc-showcase label="Counter">
+      <eon-text label="Description" placeholder="Type here" name="text" max-length="18" counter="true"></eon-text>
+    </doc-showcase>
+    <doc-showcase label="Disabled">
+      <eon-text class="margin-top" value="Surname" name="disabled" disabled="true"></eon-text>
+>>>>>>> c7e076b6d875174aae9f71d2a43013dbf5146743
     </doc-showcase>
   </template>
   <template type="footer">
@@ -531,11 +550,15 @@ The area type text enables the user to write large amount of characters in multi
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase>
-      <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
+    <doc-showcase label="Standard">
+      <eon-text placeholder="Type here" name="Description" type="area" label="Description" counter="true" area-height="100"></eon-text>
     </doc-showcase>
-    <doc-showcase>
-      <eon-text placeholder="Disabled Textarea" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
+    <doc-showcase label="Disabled">
+<<<<<<< HEAD
+      <eon-text placeholder="Type here" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true" label="Comments" value="None"></eon-text>
+=======
+      <eon-text placeholder="Type here" class="margin-top" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
+>>>>>>> c7e076b6d875174aae9f71d2a43013dbf5146743
     </doc-showcase>
   </template>
   <template type="footer">
@@ -569,11 +592,15 @@ The password text is pretty similar to the text type but it shows asterisks inst
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase>
-      <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
+    <doc-showcase label="Standard">
+      <eon-text label="Password" default="password" type="password"></eon-text>
     </doc-showcase>
-    <doc-showcase>
-      <eon-text label="Disabled" default="password" inline="false" type="password" disabled="true"></eon-text>
+    <doc-showcase label="Disabled">
+<<<<<<< HEAD
+      <eon-text label="Old Password" default="password" inline="false" type="password" disabled="true"></eon-text>
+=======
+      <eon-text label="Disabled" default="password" type="password" disabled="true"></eon-text>
+>>>>>>> c7e076b6d875174aae9f71d2a43013dbf5146743
     </doc-showcase>
   </template>
   <template type="footer">
@@ -621,7 +648,6 @@ This component is a simple on/off switch. It works almost the same way as an eon
 )*
 
 It can be used as a specific state switcher which some logic blocks will depend on or as a form component as well.
-
 
 
 

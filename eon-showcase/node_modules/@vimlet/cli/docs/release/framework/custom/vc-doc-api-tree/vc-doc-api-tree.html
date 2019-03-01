@@ -1,0 +1,746 @@
+<style>
+    vc-doc-api-tree {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+    }
+
+    #vc-doc-api-tree {
+        height: 100%;
+        width: 300px;
+        /* background-color: rgb(36, 36, 41); */
+        background-color: transparent;
+        z-index: 300;
+    }
+
+    vc-tree {
+        height: calc(100% - 55px) !important;
+        box-sizing: border-box;
+        background-color: #2d2d2d;
+    }
+
+    vc-tree .material-icons {
+        color:white;
+    }   
+
+    vc-tree .vc-tree-tree {
+        padding-left: 10px !important;
+    }
+
+    vc-tree .vc-scroll-content {
+        padding-top: 20px !important;
+    }
+
+    vc-tree .vc-treenode-name {
+        font-weight: normal !important;
+    }
+
+    #vc-doc-api-treeSearch {
+        width: 100%;
+        height: 50px;
+        overflow: hidden;
+        /* background-image: url("img/menu/searchBack.png"); */
+        background-color: transparent;
+        margin-bottom: 5px;
+    }
+
+    #vc-doc-api-treeSearch .vc-text-main {
+        background-color: transparent;
+    }
+
+    .vc-doc-colorBand {
+        width: 100%;
+        height: 5px;
+        background-color: #6b6b6b;
+    }
+
+
+    #vc-doc-api-tree-toggleTree {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        text-align: center;
+        width: 50px;
+        height: 50px;
+        z-index: 298;
+        line-height: 50px;
+        display: none;
+        cursor: pointer;
+        font-size: 36px;
+        font-weight: bold;
+    }
+
+    #vc-doc-api-tree-mobileFade {
+        display: none;
+        position: fixed;
+        top: 0px;
+        height: 100%;
+        width: 100%;
+        z-index: 299;
+        background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    .vc-doc-api-tree-mobileFadeShow {
+        display: inline-block !important;
+    }
+
+    .vc-doc-api-tree-showTreeMobile {
+        position: absolute !important;
+        width: 300px !important;
+        height: 100% !important;
+    }
+
+
+    vc-editor {
+        margin-top: 30px;
+        margin-bottom: 50px;
+    }
+
+    #vc-doc-api-tree-content {
+        height: 100%;
+        width: calc(100% - 300px);
+        min-width: 300px;
+    }
+
+    #vc-doc-api-tree-fakeMenuShadow {
+        left: -5px;
+        width: calc(100% + 10px);
+        position: fixed;
+        top: 0px;
+        height: 55px;
+        z-index: 10;
+        background-color: transparent;
+        pointer-events: none;
+        -webkit-box-shadow: 0px 2px 2x 0 rgba(0, 0, 0, 0.75);
+        -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.75);
+        box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.75);
+    }
+
+
+    vc-doc-api-tree vc-searchbar .vc-bg8,
+    vc-doc-api-tree vc-searchbar .vc-bg7 {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .vc-doc-api-tree-emptyMenu {
+        padding-left: 50px;
+        height: 50px;
+        min-height: 50px;
+        background-color: #2b2b2b;
+        background-image: url("img/menu/menu.png");
+    }
+
+    .vc-doc-api-tree-notFoundContent {
+        margin-top: 40px;
+        margin-left: 20px;
+        font-size: 24px;
+    }
+
+    .vc-treenode-head::before {
+        content: "";
+        height: 25px;
+        margin-top: -3px;
+        position: absolute;
+        left: 0;
+        right: 0;
+    }
+
+
+    vc-searchbar .main {
+        border: none !important;
+        padding: 0px !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .vc-doc-api-tree-menuSearchBar .field {
+        background-color: transparent !important;
+    }
+
+    .vc-doc-api-tree-menuSearchBar .field input {
+        height: 50px;
+        outline: none;
+        background: transparent;
+        border: none;
+        color: #c1c1c1;
+        padding: 0 10px;
+    }
+
+    @media only screen and (max-width: 700px) {
+        #vc-doc-api-tree {
+            width: 0px;
+        }
+        #vc-doc-api-tree-content {
+            width: 100%;
+        }
+        #vc-doc-api-tree-toggleTree {
+            display: inline-block;
+        }
+    }
+
+    @media only screen and (min-width: 700px) {
+        #vc-doc-api-tree {
+            width: 300px;
+        }
+        #vc-doc-api-tree-content {
+            width: calc(100% - 300px);
+        }
+        .vc-doc-api-tree-showTreeMobile {
+            position: relative !important;
+        }
+        .vc-doc-api-tree-mobileFadeShow {
+            display: none !important;
+        }
+    }
+</style>
+
+<template>
+    <div id="vc-doc-api-tree-fakeMenuShadow"></div>
+    <div id="vc-doc-api-tree">
+        <div>
+            <vc-searchbar id="vc-doc-api-treeSearch" class="vc-doc-api-tree-menuSearchBar">
+                <vc-text placeholder="Search" type="search" name="name" value="" onkeyup="document.querySelector('#vc-doc-api-treeSearch').search(document.querySelector('#menuProperties'));"></vc-text>
+            </vc-searchbar>
+        </div>
+        <!-- <div class="vc-doc-colorBand"></div> -->
+    </div>
+    <div id="vc-doc-api-tree-mobileFade" onclick="document.querySelector('vc-doc-api-tree').closeMobileTree();"></div>
+    <i class="material-icons" id="vc-doc-api-tree-toggleTree" onclick="document.querySelector('vc-doc-api-tree').openMobileTree();">menu</i>
+    <div id="vc-doc-api-tree-content">
+    </div>
+</template>
+
+<script>
+    vcomet.element("vc-doc-api-tree", null, {
+
+        privateProperties: {
+            refs: { // References for quick access
+                value: {}
+            },
+            treeData: {
+                value: {}
+            },
+            misc: {
+                value: {
+                    folderNodeOrderRegex: new RegExp("\\[\\d+\\]", "gm")
+                }
+            },
+            regex: {
+                value: {
+                    treeLink: new RegExp(
+                        "^\\[(?:(?!\\[)[\\s\\S])+\\]<(?:(?!<)[\\s\\S])*>(\\r\\n|\\r|\\n){1}",
+                        "gm"
+                    ),
+                    inner: new RegExp(
+                        "\\[.*\\]",
+                        "gm"
+                    ),
+                    optionalTitle: new RegExp(
+                        "<.*>",
+                        "gm"
+                    )
+                }
+            },
+            waitUntilTreeSetUp: {
+                value: 0
+            }
+        },
+
+        properties: {
+            src: {
+                value: "",
+                reflect: true
+            }
+        },
+
+        functions: {
+            // @function setContent (public) [Open a file at content window] @param path
+            setContent(path) { // Open a file at contentWindow
+                var el = this;
+                var contentWindow = document.querySelector("#vc-doc-api-tree-content");
+                var root = "";
+                var lastFolderIndex = path.lastIndexOf("/");
+                if (lastFolderIndex && lastFolderIndex > -1) {
+                    root = path.substring(0, lastFolderIndex + 1);
+                }
+                el._getRequest(decodeURIComponent(path), function (data) {
+                    var ext = path.substring(path.lastIndexOf(".") + 1, path.length);
+                    if (ext === "json") {
+                        if (el._misc.lastOpen != "vc-doc-api") {
+                            contentWindow.innerHTML = "";
+                            var apiDoc = document.createElement("vc-doc-api");
+                            contentWindow.appendChild(apiDoc);
+                            apiDoc.onReady(function () {
+                                apiDoc.setData(JSON.parse(data), el._treeData.config);
+                            });
+                        } else {
+                            document.querySelector("vc-doc-api").setData(JSON.parse(data), el._treeData
+                                .config);
+                        }
+                        el._misc.lastOpen = "vc-doc-api";
+                    } else if (ext === "md") {
+                        if (el._misc.lastOpen != "vc-doc-article") {
+                            contentWindow.innerHTML = "";
+                            el._refs.articleDoc = document.createElement("vc-doc-article");
+                            el._refs.articleDoc.root = encodeURIComponent(root);
+                            if (el._treeData.config.head) {
+                                el._refs.articleDoc.head = el._treeData.config.head;
+                            }
+                            contentWindow.appendChild(el._refs.articleDoc);
+                            el._refs.articleDoc.onReady(function () {
+                                el._refs.articleDoc.setString(data);
+                            });
+                        } else {
+                            el._refs.articleDoc.setString(data);
+                        }
+                        el._misc.lastOpen = "vc-doc-article";
+                    } else if (ext === "html") {
+                        if (el._misc.lastOpen != "vc-doc-html") {
+                            contentWindow.innerHTML = "";
+                            var htmlDoc = document.createElement("vc-doc-html");
+                            htmlDoc.setAttribute("root", encodeURIComponent(root));
+                            htmlDoc.content = encodeURIComponent(data);
+                            contentWindow.appendChild(htmlDoc);
+                        } else {
+                            document.querySelector("vc-doc-html").content = encodeURIComponent(data);
+                        }
+                        el._misc.lastOpen = "vc-doc-html";
+                    }
+                });
+            },
+            // @function loadDocument (public) [Load document from path and open in content window] @param path @param namePath [Name to show in the url] @param-optional link [Tree node maybe a link to a markdown document]
+            loadDocument: function (path, namePath, link) {
+                var el = this;
+                if (!el._misc.openedDocument || el._misc.openedDocument != namePath) {
+                    el.setContent(el.src + decodeURIComponent(path));
+                    el._urlOpenView(namePath, link);
+                } else if (link) {
+                    el._urlNewLink(link);
+                }
+                el._misc.openedDocument = namePath;
+                el.closeMobileTree();
+            },
+            // @function openMobileTree (public) [Shows mobile menu]
+            openMobileTree() {
+                document.querySelector("#vc-doc-api-tree").classList.add("vc-doc-api-tree-showTreeMobile");
+                document.querySelector("#vc-doc-api-tree-mobileFade").classList.add(
+                    "vc-doc-api-tree-mobileFadeShow");
+            },
+            // @function closeMobileTree (public) [Hides mobile menu]
+            closeMobileTree() {
+                document.querySelector("#vc-doc-api-tree").classList.remove("vc-doc-api-tree-showTreeMobile");
+                document.querySelector("#vc-doc-api-tree-mobileFade").classList.remove(
+                    "vc-doc-api-tree-mobileFadeShow");
+            }
+        },
+
+        privateFunctions: {
+            // @function setupCss (private) [Set up css configuration from data object]
+            setupCss: function () {
+                var el = this;
+                var customCss = document.querySelector("#customCss");
+                customCss = customCss || document.createElement("style");
+                customCss.id = "customCss";
+                var fullcss = "";
+                var colorBandClass = " .vc-doc-colorBand{background-color:" + el._treeData.config.__band +
+                    " !important;} ";
+                fullcss += colorBandClass;
+                var selectedColor = " vc-treenode .vc-treenode-selected::before {background-color: " + el._treeData
+                    .config.__selectedColor + " !important;} ";
+                fullcss += selectedColor;
+                var selectedColorText = " vc-treenode .vc-treenode-selected .vc-treenode-name {color: " +
+                    el._treeData.config.__selectedColorText + " !important;} ";
+                fullcss += selectedColorText;
+
+                var hoverColor = "vc-treenode .vc-treenode-head:hover::before {background-color: " + el._treeData
+                    .config
+                    .__hoverColor + " !important;} ";
+                fullcss += hoverColor;
+                var hoverColorText = " vc-treenode .vc-treenode-head:hover .vc-treenode-name {color: " + el
+                    ._treeData.config.__hoverColorText +
+                    " !important;} ";
+                fullcss += hoverColorText;
+
+                var apiMenuHover = " vc-doc-api .dropdownTrigger:hover {color: " + el
+                    ._treeData.config.__band +
+                    " !important;} ";
+                fullcss += apiMenuHover;
+
+
+                customCss.innerHTML = fullcss;
+                document.body.appendChild(customCss);
+            },
+            // @function setTreeIcons (private) [Configure icons to be shown at tree]
+            setTreeIcons: function () {
+                var el = this;
+                var treeIcons = "none";
+                if (el._treeData.config
+                    .__arrowIcon && el._treeData.config
+                    .__folderIcon) {
+                    treeIcons = "all";
+                } else if (el._treeData.config
+                    .__arrowIcon) {
+                    treeIcons = "expand";
+                } else if (el._treeData.config
+                    .__folderIcon) {
+                    treeIcons = "type";
+                }
+                return treeIcons;
+            },
+
+
+            // @function treeOnReady (private) [vc-tree onReady]
+            treeOnReady: function () {
+                var el = this;
+                el._refs.tree.onReady(function () {
+
+                    el._refs.tree.vcometScroll.thickness = 8;
+
+                    // Select first element if there are no element in url
+                    if (window.location.href.indexOf("#") < 0) {
+                        if (el._misc.firstElem) {
+                            el._misc.firstElem.select();
+                        }
+                    } else {
+                        var currentDoc = decodeURIComponent(window.location.href.split("file=")[1]);
+                        if (currentDoc) {
+                            currentDoc = currentDoc.split("&link")[0];
+                        }
+                        var currentLink = decodeURIComponent(window.location.href.split("link=")[1]);
+                        var selectedNode = null;
+                        for (var tNodeKey in el._refs.tree.nodes) {
+                            if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
+                                selectedNode = el._refs.tree.nodes[tNodeKey];
+                                break;
+                            }
+                        }
+                        if (selectedNode && selectedNode.type === "directory") {
+                            if (currentLink) {
+                                var inLinks = selectedNode.querySelectorAll("vc-treenode");
+                                inLinks.forEach(function (inlink) {
+                                    if (inlink.link === currentLink) {
+                                        selectedNode = inlink;
+                                    }
+                                });
+                            } else {
+                                selectedNode = null;
+                            }
+                        }
+
+                        if (selectedNode) {
+                            selectedNode.select();
+                        } else {
+                            if (!currentDoc || currentDoc === "undefined") {
+                                if (el._misc.firstElem) {
+                                    el._misc.firstElem.select();
+                                }
+                            } else {
+                                el._notFound();
+                            }
+                        }
+                    }
+                });
+            },
+            // @function treeOnNodeSelected (private) [vc-tree onNodeSelected]
+            treeOnNodeSelected: function () {
+                var el = this;
+                el._refs.tree.onNodeSelected(function () {
+                    if (el._refs.tree.selectedNode.type != "directory") {
+                        el.loadDocument(el._refs.tree.selectedNode.realPath, el._refs.tree.selectedNode
+                            .namePath, el._refs.tree.selectedNode.link);
+                    }
+                });
+            },
+            // @function sanitizeUrl [Replace \ with /] @param path
+            sanitizeUrl: function (path) {
+                return path.replace(/[/\\*]/g, "/");
+            },
+            // @function sanitizeNode
+            sanitizeNode: function (node) {
+                var el = this;
+                node.name = el._sanitizeUrl(node.name);
+                node.path = el._sanitizeUrl(node.path);
+                node.namePath = el._sanitizeUrl(node.namePath);
+                return node;
+            },
+            // @function addSortedFolders (private) [Add folders sorted manually to the tree] @param tNode
+            addSortedFolders: function (tNode) {
+                var el = this;
+                var pathWithoutFile = tNode.path.substring(0, tNode.path.lastIndexOf("/"));
+
+                while (pathWithoutFile.match(el._misc.folderNodeOrderRegex)) {
+                    var folderNodeOrderRegexOnce = new RegExp("\\[\\d+\\]", ""); // Replace only first ocurrence per loop
+                    var firstOcurrencePath = new RegExp(
+                        "(?:(?!\\[\\d+\\])[\\s\\S])*\\/\\[\\d+\\](?:(?!\\/)[\\s\\S])*",
+                        ""); // Get path until first ocurrence of [sort]
+
+                    var pathToFirstOcurrence = pathWithoutFile.match(firstOcurrencePath);
+                    if (pathToFirstOcurrence) {
+                        var firstSort = pathToFirstOcurrence[0].match(folderNodeOrderRegexOnce);
+                        if (firstSort) {
+                            var currentOrder = parseInt(el._cleanMatch(firstSort[0], "[", "]"));
+                            var currentPath = pathToFirstOcurrence[0].replace(
+                                folderNodeOrderRegexOnce, "");
+                            if (el._misc.folderAdded.indexOf(currentPath) < 0) {
+                                el._misc.folderAdded.push(currentPath);
+                                var currentElm = document.createElement("vc-treenode");
+                                currentElm.order = currentOrder;
+                                currentElm.type = "directory";
+                                currentPath = el._removeEntries(currentPath);
+                                currentElm.path = currentPath;
+                                el._refs.treeFragment.appendChild(currentElm);
+                            }
+                        }
+                    }
+                    pathWithoutFile = pathWithoutFile.replace(folderNodeOrderRegexOnce, "");
+                }
+            },
+            // @function addTreeNodes (private) {element} [Fullfil tree with nodes] @param data
+            addTreeNodes: function (data) {
+                var el = this;
+                el._refs.treeFragment = document.createDocumentFragment();
+                el._waitUntilTreeSetUp = data.files.length;
+                data.files.forEach(function (tNode) {
+                    console.log("tnode",tNode);
+                    
+                    elm = document.createElement("vc-treenode");
+
+                    tNode = el._sanitizeNode(tNode);
+
+                    el._addSortedFolders(tNode);
+
+                    //Set node order and replace name[order]
+                    var nodeOrderRegex = new RegExp("^\\[\\d+\\]", "gm");
+                    var nodeNameMatches = tNode.name.match(nodeOrderRegex);
+                    if (nodeNameMatches) {                        
+                        var order = parseInt(el._cleanMatch(nodeNameMatches[0], "[", "]"));                        
+                        elm.order = order;
+                        tNode.name = tNode.name.replace(nodeOrderRegex, ""); // Remove order from tree node name
+                    }
+
+                    el._misc.firstElem = el._misc.firstElem || elm;
+                    el._setTreeNodeLinks(tNode, elm);
+                    elm = el._setNodeData(tNode, elm);  
+                                      
+                    el._refs.treeFragment.appendChild(elm);
+                });
+            },
+            // @function setNodeData (private) [Set node path, name and real path] @param tNode @description Node data @param elm [Current tree node]
+            setNodeData: function (tNode, elm) {
+                var el = this;
+                // Set node data         
+                var realPath = tNode.path;
+                var cleanPath = tNode.path.replace(el._misc.folderNodeOrderRegex, "");
+                cleanPath = el._removeEntries(cleanPath);
+                elm.name = tNode.name;
+                elm.path = cleanPath; // Without [sort]
+                elm.realPath = realPath; // Real path with [sort] to find files at disk
+                elm.type = "file";
+                elm.namePath = tNode.namePath.replace(el._misc.folderNodeOrderRegex, ""); // Name path to show at url
+                return elm;
+            },
+            // @function setTreeNodeLinks (private) [Set treenodes for document links] @param tNode @param elmO [Current tree node]
+            setTreeNodeLinks: function (tNode, elmO) {
+                var el = this;
+                var extIndex = tNode.name.lastIndexOf(".");
+                var ext = tNode.name.substring(extIndex + 1);
+                if (ext === "md") {
+                    el._getRequest(el.src + tNode.path, function (data) {
+                        var matches = data.match(el._regex.treeLink);
+                        var parsedResult = [];
+                        if (matches) {
+                            for (var i = 0; i < matches.length; i++) {
+                                var inner = el._getInner(matches[i]);
+                                var optionalTitle = el._getOptionalTitle(matches[i]);
+                                var linkSubDir = optionalTitle || inner;
+                                var thisPath = tNode.name.substring(0, extIndex);
+
+                                thisPath += "/" + linkSubDir;
+                                elm = document.createElement("vc-treenode");
+                                elm = el._setNodeData(tNode, elm);
+                                elm.path = elm.path + "/" + linkSubDir;
+                                elm.name = linkSubDir;
+                                elm.link = inner;
+                                elm.order = i + 1;
+                                el._refs.treeFragment.childNodes.forEach(function (childNode) {
+                                    if (elmO === childNode) {
+                                        if (el._misc.firstElem === childNode) { // If firstElem becomes a directory, check next first element
+                                            el._misc.firstElem = elm;
+                                        }
+                                        //  childNode.type = "directory";
+                                        childNode.onReady(function () {
+                                            childNode.changeType("directory");
+                                        });
+                                    }
+
+                                });
+                                el._refs.treeFragment.appendChild(elm);
+                            }
+                        }
+                        el._setupTreeCallback();
+                    });
+                } else {
+                    el._setupTreeCallback();
+                }
+            },
+            // @function getInner (private) {string} [Get inner html from link tag] @param tag
+            getInner: function (tag) {
+                var el = this;
+                var matches = tag.match(el._regex.inner);
+                if (matches) {
+                    tag = el._cleanMatch(matches[0], "[", "]");
+                } else {
+                    tag = "";
+                }
+                return tag;
+            },
+            // @function getInner (private) {string} [Get optional title from link tag] @param tag
+            getOptionalTitle: function (tag) {
+                var el = this;
+                var matches = tag.match(el._regex.optionalTitle);
+                if (matches) {
+                    tag = el._cleanMatch(matches[0], "<", ">");
+                } else {
+                    tag = null;
+                }
+                return tag;
+            },
+            // @function setupTree (private) @param data
+            setupTree: function (data) {                
+                var el = this;
+                this._treeData = data;
+                el._misc.folderAdded = []; // Store which folder I've added manually to avoid repetitions
+                el._refs.tree = document.createElement("vc-tree");
+                el._refs.tree.setAttribute("icons", el._setTreeIcons());
+
+                if (el._treeData.config && el._treeData.config.__extension) {
+                    el._refs.tree.showExtension = true;
+                } else {
+                    el._refs.tree.showExtension = false;
+                }
+
+                el._setupCss();
+                var elm;
+                el._misc.firstElem = null;
+                el._treeOnNodeSelected();
+                el._addTreeNodes(data);
+            },
+            // @function setupTreeCallback (private) [Tree reads each file to look for links. Tree must be appended after all files have been parsed]
+            setupTreeCallback: function () {                
+                var el = this;
+                var treeContainer = document.querySelector("#vc-doc-api-tree");
+                el._waitUntilTreeSetUp--;
+                if (el._waitUntilTreeSetUp <= 0) {
+                    setTimeout(function() {
+                    el._refs.tree.appendChild(el._refs.treeFragment);
+                    treeContainer.appendChild(el._refs.tree);
+                    el._treeOnReady();
+                    }, 0);
+                }
+            },
+            // @function removeEntries (private) [Remove entries folder from path] @param path
+            removeEntries: function (path) {
+                return path.substring(8, path.length);
+            },
+            // @function notFound [Page displayed when the user insert manually a non valid url]
+            notFound: function () {
+                var fragment = document.createDocumentFragment();
+                var emptyMenu = document.createElement("div");
+                emptyMenu.classList.add("vc-doc-api-tree-emptyMenu");
+                fragment.appendChild(emptyMenu);
+                var cBand = document.createElement("div");
+                cBand.classList.add("vc-doc-colorBand");
+                fragment.appendChild(cBand);
+                var notFoundContent = document.createElement("div");
+                notFoundContent.classList.add("vc-doc-api-tree-notFoundContent");
+                notFoundContent.innerHTML = "Not found";
+                fragment.appendChild(notFoundContent);
+                document.querySelector("#vc-doc-api-tree-content").appendChild(fragment);
+            },
+            // @function cleanMatch (private) [Clean regex match] @param match @param open @param close
+            cleanMatch: function (match, open, close) {
+                match = match.trim();
+                match = match.substring(open.length, match.length - close.length).trim();
+                return match;
+            },
+            // @function getRequest (private) [Get file from disk] @param path @param callback
+            getRequest: function (path, callback) { // Generic html get request
+                var httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (httpRequest.readyState === 4) {
+                        if (httpRequest.status === 200) {
+                            var data = httpRequest.responseText;
+                            if (callback) {
+                                callback(data);
+                            }
+                        }
+                    }
+                };
+                httpRequest.open('GET', path);
+                httpRequest.send();
+            },
+            // @function urlOpenView (private) [Modify url when opening a view] @param path @param link
+            urlOpenView: function (path, link) { // Add current opened file to url            
+                var res = "";
+                if (!document.querySelector("vc-doc-main")) { // Url depends on main mode vs solo api mode
+                    res = window.location.href.split('#')[0] + "#!file=" + encodeURIComponent(path);
+                } else {
+                    res = window.location.href.split('&file=')[0] + "&file=" + encodeURIComponent(path);
+                }
+                if (link) {
+                    res += "&link=" + encodeURIComponent(link);
+                }
+                window.location.href = res;
+            },
+            // @function urlNewLink (private) [Modify url when surfing inside document] @param link
+            urlNewLink: function (link) {
+                var res = window.location.href.split('&link=')[0];
+                res += "&link=" + encodeURIComponent(link);
+                window.location.href = res;
+                document.querySelector("vc-doc-article").checkUrlLink();
+            },
+            // @function onHash (private) [Hash change listener. If selected document does not match hash, it means that user is goig backward or forward in the browser. Handle it]
+            onHash: function () {
+                window.onhashchange = function () {
+                    var el = document.querySelector("vc-doc-api-tree");
+                    if (el && el._refs && el._refs.tree && el._refs.tree.nodes) { // As api tree is used at main, and not all views has tree (see first main view) it is mandatory to check all references before manage them
+                        var currentDoc = decodeURIComponent(window.location.href.split("file=")[1]);
+                        var selectedNode = null;
+                        for (var tNodeKey in el._refs.tree.nodes) {
+                            if (el._refs.tree.nodes[tNodeKey].namePath === currentDoc) {
+                                selectedNode = el._refs.tree.nodes[tNodeKey];
+                                break;
+                            }
+                        }
+                        if (selectedNode && selectedNode != el._refs.tree.selectedNode) {
+                            selectedNode.select();
+                        }
+                    }
+
+                };
+            }
+        },
+
+        onCreated: function () {},
+
+        onRender: function () {},
+        onBubbleRender: function () {
+            var el = this;
+            // Get data from disk when rendered            
+            this._getRequest(el.src + "files.json", function (data) {                
+                el._setupTree(JSON.parse(data));
+            });
+
+            el._onHash();
+            // Initialize tree search
+            document.querySelector("#vc-doc-api-treeSearch").onSearch(function (filters) {
+                var name = filters.name;
+                el._refs.tree.refresh(name);
+            });
+        }
+
+
+    });
+</script>

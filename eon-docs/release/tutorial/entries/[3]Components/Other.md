@@ -11,7 +11,7 @@
 The loader element is a useful mask for your application processes and page loading as well. Its style, animation, and functionality are completely customizable improving your application user experience.
 
 *(
-<doc-playground label="Progress bar" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Progress Bar" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
@@ -40,7 +40,7 @@ The loader element is a useful mask for your application processes and page load
         <eon-button class="btn" value="Run page loader" onclick="runLoader()"></eon-button>
       </div>
     </doc-showcase>
-    <doc-showcase label="Progress ease">
+    <doc-showcase label="Progress Ease">
       <eon-progressbar id="d-l4" type="progress" effect="ease" bar-color="#b36a6a"   class="loader progress" duration="1000">
       </eon-progressbar>
       <div class="loader-btn-container">
@@ -106,7 +106,7 @@ Despite there are two types of `eon-progressbar`, the only difference between th
 The eon-tree element is the best ally to represent hierarchical data, it is based on the same tree structure idea as many other frameworks that cover this component, but it is hugely easier to configure and it can be initialized on a reduced and intuitive code. 
 
 *(
-<doc-playground label="File manager" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="File Manager" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>

@@ -99,8 +99,8 @@
         reflect: true
       },
       /*
-      @property {String} String
-      @description It can be a number of max rows of the page, or automatic
+      @property {String} pageSize
+      @description Number of rows to fill the page
       */
       pageSize: {
         value: "auto",
@@ -268,7 +268,7 @@
 
         eon.addResizeListener(el._refs.rowsWrapper, el.nodeName.toLowerCase(), function () {
 
-          if (el._misc.pagingType == "auto") {
+          if (el._misc.pagingType == "auto" && !el._misc.dropdowns.childRowsCount) {
             el._handleRowsLayout(el._misc.entriesCount);
           }
 
@@ -879,6 +879,9 @@
           var rowHeight = row.content.offsetHeight;
           // Add the dropdown to be opened children to the global childs amount
           subRowsCount = el._misc.dropdowns.childRowsCount + row.dropdown.children.length;
+          
+          el._misc.dropdowns.active = true;
+
           // Takes the current row height and multiplies it to the childs + itself
           row.style.minHeight = rowHeight * (1 + row.dropdown.children.length) + "px";
           row.dropdown.style.minHeight = (rowHeight * row.dropdown.children.length) + "px";
