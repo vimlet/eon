@@ -541,7 +541,7 @@ The area type text enables the user to write large amount of characters in multi
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
-      <eon-text placeholder="Type here" inline="false" name="Description" type="area" label="Description" counter="true" area-height="100"></eon-text>
+      <eon-text placeholder="Type here" name="Description" type="area" label="Description" counter="true" area-height="100"></eon-text>
     </doc-showcase>
     <doc-showcase label="Disabled">
       <eon-text placeholder="Type here" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true" label="Comments" value="None"></eon-text>
@@ -579,7 +579,7 @@ The password text is pretty similar to the text type but it shows asterisks inst
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
-      <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
+      <eon-text label="Password" default="password" type="password"></eon-text>
     </doc-showcase>
     <doc-showcase label="Disabled">
       <eon-text label="Old Password" default="password" inline="false" type="password" disabled="true"></eon-text>

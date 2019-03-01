@@ -496,6 +496,7 @@ The text element is a component meant for typing and it has multiple uses depend
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
+<<<<<<< HEAD
       <eon-text label="Name" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
     </doc-showcase>
     <doc-showcase label="Counter">
@@ -503,6 +504,15 @@ The text element is a component meant for typing and it has multiple uses depend
     </doc-showcase>
     <doc-showcase label="Disabled">
       <eon-text label="Middle Name" class="margin-top" inline="false" name="disabled" disabled="true" placeholder="Type here" value="Smith"></eon-text>
+=======
+      <eon-text label="Name" value="John" name="text" max-length="18"></eon-text>
+    </doc-showcase>
+    <doc-showcase label="Counter">
+      <eon-text label="Description" placeholder="Type here" name="text" max-length="18" counter="true"></eon-text>
+    </doc-showcase>
+    <doc-showcase label="Disabled">
+      <eon-text class="margin-top" value="Surname" name="disabled" disabled="true"></eon-text>
+>>>>>>> c7e076b6d875174aae9f71d2a43013dbf5146743
     </doc-showcase>
   </template>
   <template type="footer">
@@ -541,10 +551,14 @@ The area type text enables the user to write large amount of characters in multi
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
-      <eon-text placeholder="Type here" inline="false" name="Description" type="area" label="Description" counter="true" area-height="100"></eon-text>
+      <eon-text placeholder="Type here" name="Description" type="area" label="Description" counter="true" area-height="100"></eon-text>
     </doc-showcase>
     <doc-showcase label="Disabled">
+<<<<<<< HEAD
       <eon-text placeholder="Type here" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true" label="Comments" value="None"></eon-text>
+=======
+      <eon-text placeholder="Type here" class="margin-top" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
+>>>>>>> c7e076b6d875174aae9f71d2a43013dbf5146743
     </doc-showcase>
   </template>
   <template type="footer">
@@ -579,10 +593,14 @@ The password text is pretty similar to the text type but it shows asterisks inst
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
-      <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
+      <eon-text label="Password" default="password" type="password"></eon-text>
     </doc-showcase>
     <doc-showcase label="Disabled">
+<<<<<<< HEAD
       <eon-text label="Old Password" default="password" inline="false" type="password" disabled="true"></eon-text>
+=======
+      <eon-text label="Disabled" default="password" type="password" disabled="true"></eon-text>
+>>>>>>> c7e076b6d875174aae9f71d2a43013dbf5146743
     </doc-showcase>
   </template>
   <template type="footer">
