@@ -2,7 +2,7 @@
 
 ## What are eon components?
 
-Eon components are the individual parts of what your application is composed of, providing both functionality and visuals. With Eon components you can develop an application by composing it of small parts that can be built one at a time, this foments a encapsulated and reusable architecture.
+Eon components are the individual parts of what your application is composed of, providing both functionality and visuals. With Eon components you can develop an application by composing it of small parts that can be built one at a time, this foments an encapsulated and reusable architecture.
 
 ## What can I build with them?
 
