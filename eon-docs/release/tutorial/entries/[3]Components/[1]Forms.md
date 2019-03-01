@@ -339,7 +339,7 @@ This type of date will only allow you to have a `calendar` directly leaving the 
 This form component consists of an entry field for numerical values with `up` and `down` buttons. 
 
 *(
-<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
@@ -495,14 +495,14 @@ The text element is a component meant for typing and it has multiple uses depend
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase>
-      <eon-text label="Name" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
+    <doc-showcase label="Standard">
+      <eon-text label="Name" value="John" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
     </doc-showcase>
-    <doc-showcase>
-      <eon-text value="Initial value" class="margin-top" inline="false" name="text" max-length="18"></eon-text>
+    <doc-showcase label="Counter">
+      <eon-text label="Description" placeholder="Type here" inline="false" name="text" max-length="18" counter="true"></eon-text>
     </doc-showcase>
-    <doc-showcase>
-      <eon-text value="Disabled" class="margin-top" inline="false" name="disabled" disabled="true"></eon-text>
+    <doc-showcase label="Disabled">
+      <eon-text value="Surname" class="margin-top" inline="false" name="disabled" disabled="true"></eon-text>
     </doc-showcase>
   </template>
   <template type="footer">
@@ -540,11 +540,11 @@ The area type text enables the user to write large amount of characters in multi
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase>
-      <eon-text placeholder="Textarea" inline="false" name="description" type="area" label="Description" counter="true" area-height="100"></eon-text>
+    <doc-showcase label="Standard">
+      <eon-text placeholder="Type here" inline="false" name="Description" type="area" label="Description" counter="true" area-height="100"></eon-text>
     </doc-showcase>
-    <doc-showcase>
-      <eon-text placeholder="Disabled Textarea" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
+    <doc-showcase label="Disabled">
+      <eon-text placeholder="Type here" class="margin-top" inline="false" name="disabled" type="area" area-height="100" disabled="true"></eon-text>
     </doc-showcase>
   </template>
   <template type="footer">
@@ -578,10 +578,10 @@ The password text is pretty similar to the text type but it shows asterisks inst
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase>
+    <doc-showcase label="Standard">
       <eon-text label="Password" default="password" inline="false" type="password"></eon-text>
     </doc-showcase>
-    <doc-showcase>
+    <doc-showcase label="Disabled">
       <eon-text label="Disabled" default="password" inline="false" type="password" disabled="true"></eon-text>
     </doc-showcase>
   </template>

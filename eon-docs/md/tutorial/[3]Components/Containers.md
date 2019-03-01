@@ -15,7 +15,7 @@ Also, it has different properties to give it different functionality such as res
 
 
 *(
-<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector=".content" format="true">
+<doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
@@ -149,65 +149,64 @@ Also known as `table`, displays a large number of data using rows and columns.
     </script>
   </template>
   <template type="html-body">
-    <doc-showcase label="Scrollable grid">
-      <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200"
-        columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
+    <doc-showcase label="Scrollable Grid">
+      <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
         <eon-grid-row>
-            <eon-grid-cell column="name">John</eon-grid-cell>
-            <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-            <eon-grid-cell column="age">27</eon-grid-cell>
-            <eon-grid-cell column="phone">766565454</eon-grid-cell>
+          <eon-grid-cell column="name">John</eon-grid-cell>
+          <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+          <eon-grid-cell column="age">27</eon-grid-cell>
+          <eon-grid-cell column="phone">766565454</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">Jill</eon-grid-cell>
-            <eon-grid-cell column="lastname">Smith</eon-grid-cell>
-            <eon-grid-cell column="phone">666676666</eon-grid-cell>
+          <eon-grid-cell column="name">Jill</eon-grid-cell>
+          <eon-grid-cell column="lastname">Smith</eon-grid-cell>
+          <eon-grid-cell column="phone">666676666</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">Joseph</eon-grid-cell>
-            <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-            <eon-grid-cell column="age">16</eon-grid-cell>
-            <eon-grid-cell column="phone">3345</eon-grid-cell>
+          <eon-grid-cell column="name">Joseph</eon-grid-cell>
+          <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+          <eon-grid-cell column="age">16</eon-grid-cell>
+          <eon-grid-cell column="phone">3345</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">Charles</eon-grid-cell>
-            <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-            <eon-grid-cell column="age">27</eon-grid-cell>
-            <eon-grid-cell column="phone">766565454</eon-grid-cell>
+          <eon-grid-cell column="name">Charles</eon-grid-cell>
+          <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+          <eon-grid-cell column="age">27</eon-grid-cell>
+          <eon-grid-cell column="phone">766565454</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">Jaime</eon-grid-cell>
-            <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-            <eon-grid-cell column="age">16</eon-grid-cell>
-            <eon-grid-cell column="phone">3345</eon-grid-cell>
+          <eon-grid-cell column="name">Jaime</eon-grid-cell>
+          <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+          <eon-grid-cell column="age">16</eon-grid-cell>
+          <eon-grid-cell column="phone">3345</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">Johan</eon-grid-cell>
-            <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-            <eon-grid-cell column="phone">666676666</eon-grid-cell>
+          <eon-grid-cell column="name">Johan</eon-grid-cell>
+          <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+          <eon-grid-cell column="phone">666676666</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">David</eon-grid-cell>
-            <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-            <eon-grid-cell column="age">27</eon-grid-cell>
-            <eon-grid-cell column="phone">766565454</eon-grid-cell>
+          <eon-grid-cell column="name">David</eon-grid-cell>
+          <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+          <eon-grid-cell column="age">27</eon-grid-cell>
+          <eon-grid-cell column="phone">766565454</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">Samuel</eon-grid-cell>
-            <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-            <eon-grid-cell column="age">16</eon-grid-cell>
-            <eon-grid-cell column="phone">3345</eon-grid-cell>
+          <eon-grid-cell column="name">Samuel</eon-grid-cell>
+          <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+          <eon-grid-cell column="age">16</eon-grid-cell>
+          <eon-grid-cell column="phone">3345</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">Vera</eon-grid-cell>
-            <eon-grid-cell column="lastname">Doe</eon-grid-cell>
-            <eon-grid-cell column="phone">666676666</eon-grid-cell>
+          <eon-grid-cell column="name">Vera</eon-grid-cell>
+          <eon-grid-cell column="lastname">Doe</eon-grid-cell>
+          <eon-grid-cell column="phone">666676666</eon-grid-cell>
         </eon-grid-row>
         <eon-grid-row>
-            <eon-grid-cell column="name">Janine</eon-grid-cell>
-            <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
-            <eon-grid-cell column="age">27</eon-grid-cell>
-            <eon-grid-cell column="phone">766565454</eon-grid-cell>
+          <eon-grid-cell column="name">Janine</eon-grid-cell>
+          <eon-grid-cell column="lastname">Jackson</eon-grid-cell>
+          <eon-grid-cell column="age">27</eon-grid-cell>
+          <eon-grid-cell column="phone">766565454</eon-grid-cell>
         </eon-grid-row>
       </eon-grid>
     </doc-showcase>
@@ -380,7 +379,7 @@ The gutter element is a container with the ability to separate its content in tw
 Gutter sections can be collapsible for dynamic behavior. On the contrary, the gutter provides other properties like `allowDrag` to reflect a static content layout.
 
 *(
-<doc-playground label="Horizontal gutter" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Horizontal Gutter" format="true" html="true" js="true" css="true" selector="body" format="true">
  <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
@@ -453,7 +452,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 
 
 *(
-<doc-playground label="Nested gutter" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Nested Gutter" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
@@ -545,7 +544,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 The Headerpanel element works as a simple container but provides a bunch of properties to simulate a card layout with a title header, action and remove buttons and scrollable content.
 
 *(
-<doc-playground label="Flexible behavior" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Flexible Behavior" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
@@ -567,7 +566,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase label="Header panel">
+    <doc-showcase label="Header Panel">
       <eon-headerpanel header="static" header-content="Squares"  class="headerpanel" default-style="false">
       <div class="headerpanel-square blue"></div>
         <div class="headerpanel-square blue"></div>
@@ -575,7 +574,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
         <div class="headerpanel-square blue"></div>
       </eon-headerpanel>
     </doc-showcase>
-    <doc-showcase label="Growing header">
+    <doc-showcase label="Growing Header">
       <eon-headerpanel id="growing-headerpanel" default-style="false" header="grow" class="headerpanel" header-content="More squares" action-button="changeSquaresColor('growing-headerpanel')" close-button="none" close-button-class="d-black-close">
         <div class="headerpanel-square red"></div>
         <div class="headerpanel-square red"></div>
@@ -583,7 +582,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
         <div class="headerpanel-square red"></div>
       </eon-headerpanel>
     </doc-showcase>
-    <doc-showcase label="Simple panel">
+    <doc-showcase label="Simple Panel">
       <eon-headerpanel class="headerpanel" default-style="false">
       </eon-headerpanel>
     </doc-showcase>
