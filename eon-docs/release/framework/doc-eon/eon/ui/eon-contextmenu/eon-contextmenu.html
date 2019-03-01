@@ -1,14 +1,12 @@
 <template>
     <div class="eon-contextmenu-wrapper eon-fg2">
-        <div class="eon-contextmenu-container eon-bg1">
-            <!-- Only small devices -->
-            <div class="eon-contextmenu-close eon-bg1">
-                <i class="eon-contextmenu-closeIcon vicon vicon-close"></i>
-            </div>
-            <eon-scroll fill="false" auto-growth="true" arrowScrolls="true" thickness="6" fill="false">
-                <div class="eon-contextmenu-contextmenu eon-bg1 eon-unselectable"></div>
-            </eon-scroll>
+        <!-- Only small devices -->
+        <div class="eon-contextmenu-close eon-bg1">
+            <i class="eon-contextmenu-closeIcon vicon vicon-close"></i>
         </div>
+        <eon-scroll fill="false" auto-growth="true" arrowScrolls="true" thickness="6" fill="false">
+            <div class="eon-contextmenu-contextmenu eon-bg1 eon-unselectable"></div>
+        </eon-scroll>
     </div>
 </template>
 
@@ -59,6 +57,13 @@
             */
             refs: {
                 value: {}
+            },
+            /*
+            @property (private) {Object} _misc
+            @description Object with useful information
+            */
+            misc: {
+                value: {}
             }
         },
 
@@ -70,9 +75,10 @@
             createRefs: function () {
                 var el = this;
 
-                el._refs.contextmenu = el.template.querySelector(".eon-contextmenu-contextmenu");
+                el._refs.placeholder = el.generatePlaceholderNode();
+                el._refs.overlay = el.generateOverlayNode();
                 el._refs.wrapper = el.template.querySelector(".eon-contextmenu-wrapper");
-                el._refs.container = el.template.querySelector(".eon-contextmenu-container");
+                el._refs.contextmenu = el.template.querySelector(".eon-contextmenu-contextmenu");
                 el._refs.close = el.template.querySelector(".eon-contextmenu-close");
                 el._refs.closeIcon = el.template.querySelector(".eon-contextmenu-closeIcon");
                 el._refs.scroll = el.template.querySelector("eon-scroll");
@@ -83,14 +89,95 @@
             */
             setContextmenuEvent: function (triggerElement) {
                 var el = this;
-                
-                if (el._refs.wrapper.dataset.version == "desktop") {
+
+                if (el.dataset.version == "desktop") {
                     el._setDesktopEvents(triggerElement);
 
                 } else {
                     el._setDeviceEvents(triggerElement);
 
                 }
+            },
+
+            /*
+            @function (private) _setupOverlay
+            @description Creates the overlay and all the events for its optimal cross browser performance
+            */
+            setupOverlay: function () {
+
+                var el = this;
+
+                var iOS = parseFloat(
+                    ('' + (/CPU.*OS ([0-9_]{1,5})|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent) || [0, ''])[1])
+                        .replace('undefined', '3_2').replace('_', '.').replace('_', '')
+                ) || false;
+
+                el._refs.overlay.classList.add("eon-contextmenu-overlay");
+                el.parentNode.insertBefore(el._refs.placeholder, el);
+                el._refs.overlay.appendChild(el);
+
+                eon.registerPathListener(el);
+
+                el.style.display = "flex";
+
+                document.body.addEventListener("click", function () {
+                    if (!el.isOnPath && el._misc.modal.active) {
+                        el.hide();
+                    }
+                })
+
+                document.body.addEventListener("contextmenu", function () {
+                    if (!el.isOnPath && el._misc.modal.active) {
+                        el.hide();
+                    }
+                }, true);
+
+                // Prevents scrolling on mobile devices
+                el._refs.overlay.addEventListener("wheel", function (e) {
+                    // e.preventDefault();
+                    // e.stopPropagation();
+                }, { passive: false });
+
+                // If the user manages the scroll we close the overlay
+                window.addEventListener("scroll", function (e) {
+                    if (el._misc.modal.active) {
+                        el.hide();
+                    }
+                });
+
+                // This behavior is only supported on iOS 10 and beyond
+                if (iOS && iOS >= 10) {
+
+                    // Prevents scrolling on mobile devices
+                    window.addEventListener("touchstart", function (e) {
+                        if (el._misc.modal.active && el.dataset.version == "device") {
+                            if (!el.isOnPath) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                el._misc.modal.blur = true;
+                            }
+                        }
+                    }, { passive: false });
+
+                    // On touch end it blurs the modal dropdown
+                    window.addEventListener("touchend", function (e) {
+                        if (el._misc.modal.active && el.dataset.version == "device" && el._misc.modal.blur) {
+                            el._misc.modal.blur = false;
+                            el.hide();
+                        }
+                    });
+
+                } else {
+
+                    // On touch end it blurs the modal dropdown
+                    // window.addEventListener("touchend", function (e) {
+                    //     if (el._misc.modal.active && el.dataset.version == "device" && !el.isOnPath) {
+                    //         el.hide();
+                    //     }
+                    // });
+
+                }
+
             },
 
             /*
@@ -106,20 +193,17 @@
                 triggerElement.addEventListener("contextmenu", contextmenuEvent);
 
                 function contextmenuEvent(e) {
-                    // if (el._refs.wrapper.dataset.version == "desktop") {
                     posX = e.clientX;
                     posY = e.clientY;
 
-                    el._refs.container.classList.remove("eon-boxshadow6");
-                    el._refs.container.classList.add("eon-boxshadow1");
+                    el.classList.remove("eon-boxshadow6");
+                    el.classList.add("eon-boxshadow1");
 
                     el.show(posX, posY);
 
                     var exceedsObject = el._exceedsWindow();
 
                     (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
-                    // }
-
                 };
 
             },
@@ -137,12 +221,14 @@
                 var timer, lockerTimer;
                 var touchDuration = 800;
 
-                el._refs.container.classList.remove("eon-boxshadow1");
-                el._refs.container.classList.add("eon-boxshadow6");
+                el.classList.remove("eon-boxshadow1");
+                el.classList.add("eon-boxshadow6");
 
                 function touchStart(event) {
                     event.stopPropagation();
-                    event.preventDefault();
+                    if (event.cancelable) {
+                        event.preventDefault();
+                    }
                     timer = setTimeout(onLongTouch, touchDuration);
                 }
 
@@ -155,9 +241,7 @@
                 }
 
                 onLongTouch = function () {
-                    // if (el._refs.wrapper.dataset.version == "device") {
                     el.show();
-                    // }
                 }
 
                 // Events for small devices
@@ -179,7 +263,7 @@
             */
             exceedsWindow: function () {
                 var el = this;
-                var elementRect = el._refs.wrapper.getBoundingClientRect();
+                var elementRect = el.getBoundingClientRect();
                 var returnObject = {};
 
                 returnObject.exceeds = false;
@@ -315,7 +399,7 @@
             verifyScreenResolution: function () {
                 var el = this;
 
-                el._refs.wrapper.dataset.version = (window.innerWidth <= eon.tabletWidth) ? "device" : "desktop";
+                el.dataset.version = (window.innerWidth <= eon.tabletWidth) ? "device" : "desktop";
 
             },
 
@@ -348,24 +432,30 @@
 
                 // Contextmenu opened by a click event for the responsive functionality
                 if (typeof posX == "undefined" && typeof posY == "undefined") {
-                    el._refs.wrapper.classList.add("eon-contextmenu-wrapper-visible", "eon-bg1-modal");
 
-                    document.body.appendChild(el._refs.wrapper);
-                    el._setResponsiveClose();
+                    el._refs.overlay.classList.add("eon-bg1-modal");
+                    document.body.appendChild(el._refs.overlay);
 
                 } else {
-                    var openContextmenu = eon.contextmenu.openContextmenu;
-                    var openContextmenuObject = {};
+                    // var openContextmenu = eon.contextmenu.openContextmenu;
+                    // var openContextmenuObject = {};
 
-                    el._verifyOpenContextmenu(openContextmenu);
-                    openContextmenuObject.element = el._refs.wrapper;
-                    eon.contextmenu.openContextmenu.push(openContextmenuObject);
-                    el._refs.wrapper.style.top = posY + "px";
-                    el._refs.wrapper.style.left = posX + "px";
+                    // el._verifyOpenContextmenu(openContextmenu);
+                    // openContextmenuObject.element = el;
+                    // eon.contextmenu.openContextmenu.push(openContextmenuObject);
+
+                    el.style.top = posY + "px";
+                    el.style.left = posX + "px";
                     // Appends the wrapper node to the body to control when it is in an absolute container
-                    document.body.appendChild(el._refs.wrapper);
-                    el._refs.wrapper.classList.add("eon-contextmenu-wrapper-visible");
+
+                    // el.classList.add("eon-contextmenu-visible");
+
+                    // el.parentNode.insertBefore(el._refs.placeholder, el);
+                    // el._refs.overlay.appendChild(el);
+                    document.body.appendChild(el._refs.overlay);
                 }
+
+                el._misc.modal.active = true;
 
                 eon.triggerCallback("onShow", this);
 
@@ -375,18 +465,20 @@
              @function hide
              @description Hides contextmenu
             */
-            hide: function (el) {
+            hide: function () {
                 var el = this;
-                var verticalScroll = el.querySelector(".eon-contextmenu-wrapper .eon-scroll-verticalScroll");
+                // var verticalScroll = el.querySelector(".eon-contextmenu-wrapper .eon-scroll-verticalScroll");
 
-                if ((!verticalScroll && el._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible")) || (el._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible") && (verticalScroll.isOnPath == false))) {
-                    el._refs.wrapper.classList.remove("eon-contextmenu-wrapper-visible", "eon-bg1-modal");
-                    el._refs.close.classList.remove("eon-contextmenu-closeVisible");
-                    el._refs.wrapper.style.top = "0";
-                    el._refs.wrapper.style.left = "0";
-                    el.appendChild(el._refs.wrapper);
-                    document.body.removeEventListener("click", el._hideEvent);
-                }
+                // if ((!verticalScroll && el.classList.contains("eon-contextmenu-wrapper-visible")) || (el.classList.contains("eon-contextmenu-wrapper-visible") && (verticalScroll.isOnPath == false))) {
+                // el.classList.remove("eon-contextmenu-wrapper-visible", "eon-bg1-modal");
+                // el._refs.close.classList.remove("eon-contextmenu-closeVisible");
+                // el.style.top = "0";
+                // el.style.left = "0";
+                el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+
+                el._misc.modal.active = false;
+                // document.body.removeEventListener("click", el._hideEvent);
+                // }
 
                 eon.triggerCallback("onHide", this);
             },
@@ -455,6 +547,8 @@
                 openContextmenu: []
             };
 
+            el._misc.modal = {};
+
             el._createRefs();
         },
 
@@ -463,7 +557,9 @@
             var sourceNodes = el.getSourceElements();
             var triggers = document.querySelectorAll('[eon-contextmenu=' + el.name + ']');
 
+            el._setupOverlay();
             el._verifyScreenResolution();
+
             for (var i = 0; i < triggers.length; i++) {
                 el.addTrigger(triggers[i]);
             }
@@ -475,20 +571,21 @@
             });
 
             window.addEventListener("blur", function () {
-                if (el._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible")) {
+                if (el.classList.contains("eon-contextmenu-wrapper-visible")) {
                     // el.hide();
                 }
             });
 
             document.body.addEventListener("click", function () {
-                if (el._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible")) {
+                if (el.classList.contains("eon-contextmenu-wrapper-visible")) {
                     el.hide();
                 }
             });
+
         },
 
         onWindowResize: function (event) {
-            if (this._refs.wrapper.classList.contains("eon-contextmenu-wrapper-visible") && this._refs.wrapper.dataset.version == "desktop") {
+            if (this.classList.contains("eon-contextmenu-wrapper-visible") && this.dataset.version == "desktop") {
                 this.hide();
             }
         }
