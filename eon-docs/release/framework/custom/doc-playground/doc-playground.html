@@ -392,13 +392,17 @@
                 if (head) {
                     iframeSrc += head;
                 }
-                iframeSrc += "<style>";
-                iframeSrc += el._misc.code.css;
-                iframeSrc += "</style>";
+                if (el._misc.code.css) {
+                    iframeSrc += "<style>";
+                    iframeSrc += el._misc.code.css;
+                    iframeSrc += "</style>";
+                }
                 iframeSrc += "</head><body>" + body;
-                iframeSrc += "<script>";
-                iframeSrc += el._misc.code.js;
-                iframeSrc += "<\/script>";
+                if (el._misc.code.js) {
+                    iframeSrc += "<script>";
+                    iframeSrc += el._misc.code.js;
+                    iframeSrc += "<\/script>";
+                }
                 iframeSrc += "</body></html>";
                 return iframeSrc;
             },
@@ -580,7 +584,7 @@
                         return el._misc.code.body;
                     } else {
                         var template = document.createElement('template');
-                        template.innerHTML = el._misc.code.body;                        
+                        template.innerHTML = el._misc.code.body;
                         return template.content.querySelector(el.selector).innerHTML;
                     }
                 } else {
@@ -606,7 +610,7 @@
                         };
                     } else {
                         var template = document.createElement('template');
-                        template.innerHTML = el._misc.code.body;                        
+                        template.innerHTML = el._misc.code.body;
                         template.content.querySelector(el.selector).innerHTML = el._refs.editor.getValue();
                         return {
                             head: el._misc.code.head,
@@ -620,7 +624,7 @@
                     var headMatches = code.match(headReg) ? el._cleanMatch(code.match(headReg)[0], "<head>",
                         "</head>") : "";
                     var bodyMatches = code.match(bodyReg) ? el._cleanMatch(code.match(bodyReg)[0], "<body>",
-                        "</body>") : "";                        
+                        "</body>") : "";
                     return {
                         head: headMatches,
                         body: bodyMatches
