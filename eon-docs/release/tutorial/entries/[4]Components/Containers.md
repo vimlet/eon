@@ -57,6 +57,11 @@ Also, it has different properties to give it different functionality such as res
       .d-dialog-form eon-text {
         margin: 5px 0;
       }
+      @media (max-width: 600px) {
+        #textDialog {
+          max-height: none;
+        }
+      }
       @media (max-width: 460px) {
         .d-dialog-form eon-text {
           width: 100% !important;
@@ -110,7 +115,7 @@ Also, it has different properties to give it different functionality such as res
         </eon-dialog>
       </doc-showcase>
       <doc-showcase label="Login">
-        <eon-button value="Show" onclick="document.querySelector('#myDialog').open()">
+        <eon-button value="Show log" onclick="document.querySelector('#myDialog').open()">
         </eon-button>
         <eon-dialog id="myDialog" modal="true" blur="true" resize="true" heading="Login" default-style="false">
           <eon-section type="content">
