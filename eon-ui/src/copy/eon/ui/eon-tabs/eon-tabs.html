@@ -142,6 +142,8 @@
           el._refs.tabsWrapper.appendChild(tabsFragment);
 
           el._misc.tabs[firstPanelName].classList.add("eon-tabs-selected", "eon-bg2-active");
+          el._misc.tabs[firstPanelName].classList.remove("eon-bg2-hoverable");
+
           el._setupDropArea();
           el._handleTabsScrollsStatus();
 
@@ -218,9 +220,9 @@
 
         el._misc.dragging.dropArea = dropArea;
 
-        dropArea.addEventListener("dragover", function (e) {
-          el._handleDragOver(e);
-        });
+        // dropArea.addEventListener("dragover", function (e) {
+        //   el._handleDragOver(e);
+        // });
 
         el._refs.tabsWrapper.appendChild(dropArea);
 
@@ -287,7 +289,7 @@
 
         el._refs.stack.swapToPanel(name);
         el._misc.tabs[name].classList.add("eon-tabs-selected", "eon-bg2-active");
-        el._misc.tabs[name].classList.remove("eon-bg1-hoverable");
+        el._misc.tabs[name].classList.remove("eon-bg2-hoverable");
 
         eon.triggerCallback("onTabSelected", el, el, [el._refs.stack._misc.panels[name]]);
       },
@@ -303,7 +305,7 @@
         //Remove selected Tab class from the previous tab
         tab.classList.remove("eon-tabs-selected");
         tab.classList.remove("eon-bg2-active");
-        tab.classList.add("eon-bg1-hoverable");
+        tab.classList.add("eon-bg2-hoverable");
 
       },
       /*
@@ -334,14 +336,15 @@
       @param {Object} e [event]
       */
       handleDragEnter: function (e) {
-        this._misc.dragging.dropArea.style.visibility = "visible";
+        e.preventDefault();
+        // this._misc.dragging.dropArea.style.visibility = "visible";
       },
       /*
       @function (private) _handleDragOver
       @description Handles the mouse over event when dragging inside the tabs dropping area
       @param {Object} e [event]
       */
-      handleDragOver: function (e) {
+      handleDragOver: function (e, tab) {
 
         if (this._misc.isDragging) {
 
@@ -349,7 +352,7 @@
             e.preventDefault(); // Necessary. Allows us to drop.
           }
 
-          this._handleTabsDetection(e);
+          this._handleTabsDetection(e, tab);
 
           e.dataTransfer.dropEffect = 'move';
 
@@ -397,12 +400,16 @@
       @description Handles the movement of the tab over a tab region and shows/moves the indicator
       @param {Object} e [event]
       */
-      handleTabsDetection: function (e) {
+      handleTabsDetection: function (e, tab) {
 
         var el = this;
+        // NEW
+        var targetTabRect = tab.getBoundingClientRect();
+        // var tabLeftCenter = targetTabRect.left + (targetTabRect.width / 2);
+        var position = e.clientX < (targetTabRect.left + (targetTabRect.width / 2)) ? "left" : "right";
 
-        var dropArea = el._misc.dragging.dropArea;
-        var indicator = el._misc.dragging.indicator;
+        // var dropArea = el._misc.dragging.dropArea;
+        // var indicator = el._misc.dragging.indicator;
         var tabsLeft = el._misc.dragging.dropArea.getBoundingClientRect().left;
         var tabs = el._refs.tabsWrapper.querySelectorAll(".eon-tabs-tab");
         var targetOrder, targetTab, targetTabRect, position, indicatorLeft;
@@ -410,7 +417,7 @@
         el._misc.dragging.target = el._misc.dragging.target && el._misc.dragging.target.nodeType ? el._misc.dragging.target : document.createElement("div");
 
         targetOrder = Math.ceil((e.clientX - tabsLeft) / tabs[0].offsetWidth) - 1;
-
+        console.log('targetOrder', targetOrder);
         targetTab = el._refs.tabsWrapper.querySelector('.eon-tabs-tab[data-order="' + targetOrder + '"]');
         targetTab = targetTab ? targetTab : tabs[tabs.length - 1];
 
@@ -420,15 +427,11 @@
 
         if ((el._misc.dragging.target.isEqualNode(targetTab) && el._misc.dragging.position != position) || !el._misc.dragging.target.isEqualNode(targetTab)) {
 
-          indicatorLeft = position == "right" ? targetTabRect.left + targetTabRect.width - indicator.offsetWidth / 2 : targetTabRect.left - indicator.offsetWidth / 2;
-          indicatorLeft = indicatorLeft - tabsLeft;
-
-          indicator.style.visibility = "visible";
-          indicator.style.left = indicatorLeft + "px";
-
-          if (!dropArea.contains(indicator)) {
-            dropArea.appendChild(indicator);
+          if (el._misc.dragging.target) {
+            el._misc.dragging.target.classList.remove("eon-tabs-dragTarget");
           }
+
+          targetTab.classList.add("eon-tabs-dragTarget");
 
           el._misc.dragging.target = targetTab;
           el._misc.dragging.position = position;
@@ -524,10 +527,9 @@
 
         title = title ? title : name;
 
-        tab.classList.add("eon-tabs-tab", "eon-bg1-border3", "eon-bg1-hoverable");
-        titleSpan.classList.add("eon-tabs-title", "eon-fg0");
+        tab.classList.add("eon-tabs-tab", "eon-bg1-border3", "eon-bg2-hoverable");
         closeButton.classList.add("eon-tabs-closeButton", "eon-tabs-hidden");
-        closeIcon.classList.add("iconsSize", "vicon", "vicon-close", "eon-fg0", "eon-fg1-hoverable");
+        closeIcon.classList.add("iconsSize", "vicon", "vicon-close");
 
         titleSpan.innerHTML = title ? title : "";
 
@@ -535,8 +537,8 @@
 
         tab.dataset.selected = false;
 
-        tab.appendChild(closeButton);
         tab.appendChild(titleSpan);
+        tab.appendChild(closeButton);
 
         tab.dataset.panel = panel.name;
 
@@ -560,12 +562,27 @@
         }, false);
 
         if (eon.util.isTrue(el.closable)) {
+
           var closeButton = tab.querySelector(".eon-tabs-closeButton");
           closeButton.classList.remove("eon-tabs-hidden");
+
           // Creates the close button event
           closeButton.addEventListener('click', function (e) {
             el.close(tab.dataset.panel, e);
           }, false);
+
+          closeButton.addEventListener("mouseenter", function () {
+            tab.classList.add("eon-tabs-closing");
+            tab.classList.remove("eon-bg2-hoverable");
+          });
+
+          closeButton.addEventListener("mouseleave", function () {
+            tab.classList.remove("eon-tabs-closing");
+            if (!tab.classList.contains("eon-tabs-selected")) {
+              tab.classList.add("eon-bg2-hoverable");
+            }
+          });
+
         }
 
         // Check if we need to assign dragging related events
@@ -573,7 +590,13 @@
 
           tab.setAttribute("draggable", "true");
 
-          //Adding the draggable functionality, there are more available functions, but these are the ones we need
+          tab.addEventListener("dragover", function (e) {
+            e.preventDefault();
+            el._handleDragOver(e, tab);
+            return false;
+          });
+
+          // //Adding the draggable functionality, there are more available functions, but these are the ones we need
           tab.addEventListener('dragstart', function (e) {
             el._handleDragStart(e, tab);
           });
@@ -581,6 +604,7 @@
           tab.addEventListener("dragend", function (e) {
             el._handleDragEnd(e, tab);
           });
+
         }
 
       },
@@ -678,7 +702,7 @@
           var siblingTab = this._getSiblingTab(tab);
 
           tab.classList.remove("eon-tabs-selected", "eon-bg2-active");
-          tab.classList.add("eon-bg1-hoverable");
+          tab.classList.add("eon-bg2-hoverable");
 
           el._hide(name);
 
