@@ -768,7 +768,7 @@
                 if (el.dataset.status != "maximized") {
                     el._savePreviousStatus();
                 }
-                
+
                 // To return it to maximized state
                 if (el.dataset.status == "maximized") {
                     el._misc.statusMaxi = true;
@@ -839,9 +839,9 @@
                     el.style.height = el._misc.previousHeight + "px";
                     el.style.left = el._misc.previousLeft + "px";
                     el.style.top = el._misc.previousTop + "px";
-    
+
                     el._handleWindowEdges();
-    
+
                     el.dataset.status = "";
 
                 }
@@ -853,10 +853,9 @@
             */
             verifyDeviceVersion: function () {
                 var el = this;
-
-                var mobileCondition = (window.innerWidth <= eon.mobileWidth || window.innerHeight <= eon.mobileWidth) && eon.util.isTouchScreen();
+                var mobileCondition = ((window.innerWidth <= eon.mobileWidth || window.innerHeight <= eon.mobileWidth) && eon.util.isTouchScreen()) || navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i);
+               
                 el.dataset.mobile = mobileCondition ? "true" : "false";
-
             },
 
             /*
@@ -866,8 +865,7 @@
             assignSize: function () {
                 var el = this;
 
-                if (el.dataset.mobile == "false") {
-
+                if (!el.dataset.mobile) {
                     if (el._misc.initialWidth && el._misc.initialHeight) {
                         el.style.width = el._misc.initialWidth + "px";
                         el.style.height = el._misc.initialHeight + "px";
@@ -992,6 +990,7 @@
 
                 el.style.left = centerWidth + "px";
                 el.style.top = centerHeight + "px";
+
             },
 
 
@@ -1089,7 +1088,7 @@
             */
             handleDialogSize: function () {
                 var el = this;
-
+               
                 // When the dialog width is bigger than window set it a percentage width
                 if (el.offsetWidth >= (window.innerWidth - 20) && !el._misc.sizeControl) {
                     el.style.width = "calc(100% - 20px)";
@@ -1188,7 +1187,6 @@
 
                     el._assignSize();
                     el._addOverlay();
-                    el._setPosition();
 
                     el.addEventListener("mousedown", function (e) {
                         if (e.button == 0 && el._refs.close.isOnPath == false) {
@@ -1197,7 +1195,11 @@
                     });
 
                     el.classList.remove("eon-dialog-hide");
+
+                    // To see the opening animation of the dialog
                     setTimeout(function () {
+                        // The dialog will already have the final size.
+                        el._setPosition();
                         el.classList.add("eon-dialog-visible");
                     }, 0);
 
