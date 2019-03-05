@@ -1,27 +1,44 @@
 ## Data management
-
 One of the main concerns a web application has to deal with is data management. The data required for each web application should be totally independent of each component functionality that composes the main application structure. This means that if our application needs a new data communication technology, we better anticipate this and be aware that the data handling techniques are modular and has nothing to do with the other application functionalities and the single structure elements logic. 
 
 Therefore, Eon provides two tools to make this task easier:
 
 - `eon-endpoint`: 
 - `eon-store` 
-
 [Endpoint]<>
-The endpoint tool offers an API for data managing based on the commonly used web communication technologies (REST, Web Sockets, GraphQL). It is as easy as specifying the technology that is been used to communicate with the remote resource and the resource location: 
+The endpoint tool offers an API for data managing based on the commonly used web communication technologies (REST, Web Sockets, GraphQL). It is as easy as specifying the technology that you are using to communicate with the remote resource and the resource location: 
 
 ```[javascript]
 var endpoint = new eon.endpoint("rest", "https://remote/source");
 ```
 
-The endpoint API is based on the CRUD operations to manage with the data (`get`, `put`, `post`, `delete`). 
+The endpoint interface is based on the HTTP operations to manage the data (`get`, `put`, `post`, `delete`). Once our REST endpoint instance is initialized, let's perform a read operation:
 
 ```[javascript]
 endpoint.get("1", function (success, data) {
-  // Resource data handling
-  // ...
+  if(success) {
+    // Resource data handling
+    // ...
+  }
 }
 ```
+
+The `data` argument is an object containing useful response information (xhr object, the status, among others) and the requested data as a JSON.
+
+Now we will see a `post` operation to see how to create a new data item:
+
+```[javascript]
+var item = {name: "new", properties: 2}
+
+endpoint.post(item, function (success, data) {
+  if(success) {
+    // Item created successfully
+    // ...
+  }
+}
+```
+
+The other HTTP operations are regulated by the same method.
 
 It is important to realize that when using GraphQL, it might be required a specific protocol to work with, that's why Eon includes another two types of GraphQL based endpoints: `graphHTTP` and `graphSockets`.
 
