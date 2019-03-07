@@ -93,8 +93,6 @@
 
                 el._refs.scroll.appendChild(el._refs.contextmenu);
                 el._refs.wrapper.appendChild(el._refs.scroll);
-
-
             },
             /*
               @function (private) _setContextmenuEvent
@@ -103,15 +101,55 @@
             setContextmenuEvent: function (triggerElement) {
                 var el = this;
 
-                if (el.dataset.version == "desktop") {
-                    el._setDesktopEvents(triggerElement);
+                if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+                    el._setIosListeners(triggerElement);
                 } else {
-                    el._setDeviceEvents(triggerElement);
+                    var posX;
+                    var posY;
 
+                    triggerElement.addEventListener("contextmenu", function (e) {
+                        posX = e.clientX;
+                        posY = e.clientY;
+                        el.show(posX, posY);
+                    });
                 }
             },
 
+            /*
+              @function (private) {Object} _setIosListeners
+              @description Creates the iOS devices events
+              @param {Object} triggerElement
+            */
+            setIosListeners: function (triggerElement) {
+                var el = this;
 
+                // Long touch event functionality
+                var onLongTouch;
+                var timer, lockerTimer;
+                var touchDuration = 800;
+
+                function touchStart(event) {
+                    event.stopPropagation();
+                    if (event.cancelable) {
+                        event.preventDefault();
+                    }
+                    timer = setTimeout(onLongTouch, touchDuration);
+                }
+
+                function touchEnd() {
+                    // Stops short touches from firing the event
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                }
+
+                onLongTouch = function () {
+                    el.show();
+                }
+
+                triggerElement.addEventListener("touchstart", touchStart, false);
+                triggerElement.addEventListener("touchend", touchEnd, false);
+            },
             /*
             @function (private) _setupOverlay
             @description Creates the overlay and all the events for its optimal cross browser performance
@@ -196,82 +234,6 @@
 
                 }
             },
-            /*
-              @function (private) {Object} _setDesktopEvents
-              @description Creates the desktop related events
-              @param {Object} triggerElement
-            */
-            setDesktopEvents: function (triggerElement) {
-                var el = this;
-                var posX;
-                var posY;
-
-                triggerElement.addEventListener("contextmenu", contextmenuEvent);
-
-                function contextmenuEvent(e) {
-                    posX = e.clientX;
-                    posY = e.clientY;
-
-                    el.classList.remove("eon-boxshadow6");
-                    el.classList.add("eon-boxshadow1");
-                    el.show(posX, posY);
-
-                    var exceedsObject = el._exceedsWindow();
-
-                    (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
-                };
-
-            },
-
-            /*
-              @function (private) {Object} _setDeviceEvents
-              @description Creates the device related events
-              @param {Object} triggerElement
-            */
-            setDeviceEvents: function (triggerElement) {
-                var el = this;
-
-                // Long touch event functionality
-                var onLongTouch;
-                var timer, lockerTimer;
-                var touchDuration = 800;
-
-                el.classList.remove("eon-boxshadow1");
-                el.classList.add("eon-boxshadow6");
-
-                function touchStart(event) {
-                    event.stopPropagation();
-                    if (event.cancelable) {
-                        event.preventDefault();
-                    }
-                    timer = setTimeout(onLongTouch, touchDuration);
-                }
-
-                function touchEnd() {
-                    // Stops short touches from firing the event
-                    if (timer) {
-                        clearTimeout(timer);
-                    }
-
-                }
-
-                onLongTouch = function () {
-                    el.show();
-                }
-
-                // Events for small devices
-                if (navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i)) {
-                    triggerElement.addEventListener("touchstart", touchStart, false);
-                    triggerElement.addEventListener("touchend", touchEnd, false);
-
-                    // Events for small resized screens
-                } else {
-                    triggerElement.addEventListener("pointerdown", touchStart, false);
-                    triggerElement.addEventListener("pointerup", touchEnd, false);
-                }
-
-            },
-
             /*
               @function (private) {Object} _exceedsWindow
               @description Check if contextmenu is going to exceed window limits
@@ -401,22 +363,41 @@
                     el.classList.add("eon-contextmenu-hide");
                 }
             },
-
             /*
-              @function (private) _verifyOpenContextmenu
-              @description Checks if there is already a contextmenu open and close it
-              @param {Array} openContextmenu [Stores the node of open contextmenu]
+              @function (private) _showDesktopView
+              @description Shows desktop view of the contextmenu
+              @param {Number} posX [Position X of mouse event click]
+              @param {Number} posY [Position Y of mouse event click]
             */
-            verifyOpenContextmenu: function (openContextmenu) {
+            showDesktopView: function (posX, posY) {
+                var el = this;
+                var exceedsObject = el._exceedsWindow();
+
+                (exceedsObject.exceeds == true) ? el._relocateContextmenu(posX, posY, exceedsObject) : null;
+                el.classList.remove("eon-boxshadow6");
+                el.classList.add("eon-boxshadow1");
+                el._refs.overlay.classList.remove("eon-bg1-modal");
+                el.style.top = posY + "px";
+                el.style.left = posX + "px";
+            },
+            /*
+              @function (private) _showDeviceView
+              @description Shows desktop view of the contextmenu
+            */
+            showDeviceView: function () {
                 var el = this;
 
-                if (openContextmenu.length == 1) {
-                    openContextmenu[0].element.classList.remove("eon-contextmenu-wrapper-visible");
-                    openContextmenu.splice(0);
-                }
+                el.classList.remove("eon-boxshadow1");
+                el.classList.add("eon-boxshadow6");
+                el._refs.overlay.classList.add("eon-bg1-modal");
+                el.style.top = 0;
+                el.style.left = 0;
+                // To see the opening animation of the contextmenu
+                setTimeout(function () {
+                    el.classList.add("eon-contextmenu-visible");
+                }, 0);
 
-            },
-
+            }
         },
 
         functions: {
@@ -428,26 +409,16 @@
             */
             show: function (posX, posY) {
                 var el = this;
+                el.style.opacity = 1;
+                el.classList.remove("eon-contextmenu-hide");
 
-                // Contextmenu opened by a click event for the responsive functionality
-                if (typeof posX == "undefined" && typeof posY == "undefined") {
-                    el._refs.overlay.classList.add("eon-bg1-modal");
-                    el.classList.remove("eon-contextmenu-hide");
-                    el.style.opacity = 1;
-                    // To see the opening animation of the contextmenu
-                    setTimeout(function () {
-                        el.classList.add("eon-contextmenu-visible");
-                    }, 0);
-
-                    document.body.appendChild(el._refs.overlay);
-
-
+                if (el.dataset.version == "device") {
+                    el._showDeviceView();
                 } else {
-                    el.style.top = posY + "px";
-                    el.style.left = posX + "px";
-                    document.body.appendChild(el._refs.overlay);
+                    el._showDesktopView(posX, posY);
                 }
 
+                document.body.appendChild(el._refs.overlay);
                 el._misc.modal.active = true;
 
                 eon.triggerCallback("onShow", this);
@@ -550,10 +521,10 @@
         onRender: function () {
             var el = this;
             var triggers = document.querySelectorAll('[eon-contextmenu=' + this.name + ']');
+            el._verifyScreenResolution();
 
             if (triggers.length > 0) {
                 el._setupOverlay();
-                el._verifyScreenResolution();
                 el._setupItems();
 
                 for (var i = 0; i < triggers.length; i++) {
@@ -581,7 +552,6 @@
 
             if (el._misc.delay) {
                 el._setupOverlay();
-                el._verifyScreenResolution();
                 el._setupItems();
             }
 
@@ -590,9 +560,10 @@
         onWindowResize: function (event) {
             var el = this;
 
-            if (el._misc.modal.active && !navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i)) {
+            if (el._misc.modal.active) {
                 el.hide();
                 el._verifyScreenResolution();
+                // el._setContextmenuEvent();
             }
         }
 
