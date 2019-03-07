@@ -142,7 +142,6 @@ eon.endpoint = function (type, url) {
         contentType: "application/json",
         payload: "query:" +  queryString
       };
-      console.log('options', options.payload);
       // Send request
       eon.ajax(el.url, options, cb);
     }

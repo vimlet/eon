@@ -27,7 +27,7 @@ vimlet.meta = vimlet.meta || {};
   vimlet.meta.lineBreak = vimlet.meta.lineBreak || null;
 
   // Decode html
-  vimlet.meta.decodeHTML = vimlet.meta.decodeHTML || true;
+  vimlet.meta.decodeHTML = "decodeHTML" in vimlet.meta? vimlet.meta.decodeHTML : true;
   vimlet.meta.__decodeEntityRegex = /&(?:#x[a-f0-9]+|#[0-9]+|[a-z0-9]+);?/ig;
 
   vimlet.meta.parse = function (scope, text, data, callback) {

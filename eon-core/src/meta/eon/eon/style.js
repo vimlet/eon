@@ -21,7 +21,7 @@ eon.style.sheet.insertRule("eon-script { display: none; }", 0);
 eon.mobileWidth = 450;
 eon.tabletWidth = 800;
 
-eon.addViewportMeta = eon.addViewportMeta || true;
+eon.addViewportMeta = "addViewportMeta" in eon? eon.addViewportMeta : true;
 
 if (eon.addViewportMeta) {
     document.write(
