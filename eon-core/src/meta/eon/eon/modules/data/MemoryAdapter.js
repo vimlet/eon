@@ -41,7 +41,6 @@ eon.data.MemoryAdapter = function () {
       // Check id value
       if (query.id) {
         if (memory.data.get(query.id)) {
-          console.log('memory.data.get(query.id)', memory.data.get(query.id));
           resolve(memory.data.get(query.id));
         } else {
           reject(new Error("Not found"));
