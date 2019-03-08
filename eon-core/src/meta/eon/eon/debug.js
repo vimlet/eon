@@ -23,9 +23,9 @@ eon.error.log = function(condition, message) {
   }
 };
 
-eon.debug.adapterEvents = eon.debug.adapterEvents || false;
-eon.debug.configEvents = eon.debug.configEvents || false;
-eon.debug.elementEvents = eon.debug.elementEvents || false;
+eon.debug.adapterEvents = "adapterEvents" in eon.debug ? eon.debug.adapterEvents : false;
+eon.debug.configEvents = "configEvents" in eon.debug ? eon.debug.configEvents : false;
+eon.debug.elementEvents = "elementEvents" in eon.debug ? eon.debug.elementEvents : false;
 
-eon.warn.store = eon.warn.store || true;
-eon.error.store = eon.error.store || true;
+eon.warn.store = "store" in eon.warn?  eon.warn.store : true;
+eon.error.store = "store" in eon.error? eon.error.store : true;

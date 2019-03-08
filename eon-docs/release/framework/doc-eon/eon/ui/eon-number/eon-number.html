@@ -2,7 +2,7 @@
 
   <div class="eon-number-group eon-fg2 eon-unselectable">
     <div class="eon-number-data">
-        <label class="eon-number-label"></label>
+      <label class="eon-number-label"></label>
     </div>
     <div class="eon-number-number eon-bg2">
       <div class="eon-number-control eon-fg2-hoverable eon-number-controlDown">
@@ -35,7 +35,7 @@
     properties: {
       /*
         @property {String} name 
-        @description number name
+        @description Input number name
       */
       name: {
         value: "",
@@ -43,7 +43,7 @@
       },
       /*
         @property {Number} value 
-        @description Number value
+        @description Input number value
       */
       value: {
         value: 0,
@@ -59,7 +59,7 @@
       },
       /*
         @property {String} placeholder 
-        @description Number placeholder
+        @description Input number placeholder
       */
       placeholder: {
         value: "",
@@ -67,7 +67,7 @@
       },
       /*
         @property {String} label 
-        @description Number label
+        @description Input number label
       */
       label: {
         value: "",
@@ -76,7 +76,7 @@
       },
       /*
         @property {Boolean} disabled 
-        @description Number field deactivation.
+        @description Input number field deactivation.
         Default: false
       */
       disabled: {
@@ -86,7 +86,7 @@
       },
       /*
         @property {Boolean} readonly 
-        @description Toggles the readonly status of the number.
+        @description Toggles the readonly status of the input number.
         Default: false
       */
       readonly: {
@@ -96,7 +96,7 @@
       },
       /*
         @property {Boolean} autofocus 
-        @description Number automatically get focus when page loads
+        @description Input number automatically get focus when page loads
         Default: false
       */
       autofocus: {
@@ -105,7 +105,7 @@
       },
       /*
         @property {Number} max 
-        @description Number maximum number value.
+        @description Input number maximum number value.
         Value must be int number.
         Default: valueless
       */
@@ -115,7 +115,7 @@
       },
       /*
         @property {Number} min 
-        @description Number minimum number value.
+        @description Input number minimum number value.
         Value must be int number.
         Default: valueless
       */
@@ -166,7 +166,7 @@
     privateProperties: {
       /*
         @property (private) {String} _formElement 
-        @description Set that number is a form element.
+        @description Set that input number is a form element.
         Value: number
       */
       formElement: {
@@ -174,21 +174,21 @@
       },
       /*
         @property (private) {String} _currentValue
-        @description Current textarea value
+        @description Current input number value
       */
       currentValue: {
         value: ""
       },
       /*
         @property (private) {Object} _callUpdateEvent
-        @description Store number call update number event
+        @description Store input number call update number event
       */
       callUpdateEvent: {
         value: {}
       },
       /*
         @property (private) {Object} _refs 
-        @description Object with  references
+        @description Object with references
       */
       refs: {
         value: {}
@@ -225,18 +225,17 @@
       },
       /*
       @function updateDescription
-      @description Updates the description value for the
+      @description Updates the description value
       */
       updateDescription: function (text) {
         this._misc.descriptionText = text;
         this._refs.description.innerHTML = this._misc.descriptionText;
       },
       /*
-      @function updateDescription
-      @description Updates the description value for the
+      @function resetDescription
+      @description Resets the description value
       */
       resetDescription: function () {
-
         var el = this;
         var description = el.tooltip != "" ? el.tooltip : "";
 
@@ -252,11 +251,9 @@
       @description Inits label animation classes and style
       */
       setupLabelAnimation: function () {
-
         var el = this;
 
         if (eon.util.isTrue(el.labelAnim)) {
-
           if (el.value == "" && el.default == "") {
             el._refs.label.classList.add("eon-number-movedLabel");
           }
@@ -271,7 +268,7 @@
       animateLabel: function () {
 
         var el = this;
-        
+
         if (eon.util.isTrue(el.labelAnim)) {
 
           if (el.classList.contains("eon-number-focus") || el.value != "") {
@@ -302,7 +299,7 @@
 
       /*
         @function (private) _setValue
-        @description Set new number value
+        @description Set new input number value
         @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
       */
       setValue: function (privateValueKey) {
@@ -385,7 +382,7 @@
       },
       /*
         @function (private) _updateNumber
-        @description Update number value
+        @description Update input number value
         @param {Object} e [Event object]
       */
       updateNumber: function (e) {
@@ -463,7 +460,7 @@
 
       /*
       @function (private) _setFocusingListeners
-      @description Set listener for update the number value
+      @description Set listener for update the input number value
       */
       setUpdateListeners: function () {
         var el = this;
@@ -538,7 +535,7 @@
 
       /*
       @function (private) _setAutofocus
-      @description Gives autofocus to the number
+      @description Gives autofocus to the input number
       */
       setAutofocus: function () {
         var el = this;
@@ -585,20 +582,14 @@
     },
 
     onInit: function () {
-      this._setupLabelAnimation();
-    },
-
-    onRender: function () {
       var el = this;
 
+      el._setupLabelAnimation();
       // Sets a default value set by the user
       el.value = el.default != "" && el.value == "" ? el.default : el.value;
       el._setValue();
-
-      el._updateDisabled();
       el._updateReadonly();
       el._setFocusingListeners();
-      el._setUpdateListeners();
       el._setupDescription();
       el._updateInvalid();
 
@@ -610,6 +601,13 @@
         el._refs.label.innerHTML = el.label ? el.label : el._refs.label.innerHTML;
         el._refs.label.classList.add("eon-number-labelDisplay");
       }
+    },
+
+    onRender: function () {
+      var el = this;
+
+      el._updateDisabled();
+      el._setUpdateListeners();
     },
 
     onReady: function () {

@@ -740,3 +740,104 @@ Panel is the basic container element. It has no associated style so it is comple
 All the elements not surrounded by the template tag will render normally. 
 For further implementation, you can use as many templates as you need to manage lazy content inside a single eon-panel.
 
+[Tabs]<>
+^[eon-tabs API](#!version=latest&mode=api&file=ui%2Feon-panel%2Feon-panel.html)
+
+
+Meant to swap between different panels easily with a tabs base wrapper, this tabs have multiple options and features to fulfill the most common needs.
+
+*(
+<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
+  <template type="html-head">
+    <script src='framework/doc-eon/eon/eon.js'></script>
+    <script>
+      eon.import([
+        'framework/doc-eon/eon/ui/eon-tabs',
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
+      ])
+    </script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      doc-showcase {
+        width: 100%;
+      }
+      @media (max-width: 430px) {
+        doc-showcase {
+          width: calc(100% - 40px);
+        }
+        eon-panel {
+          width: 100%;
+          min-width: 100% !important;
+        }
+        .panel-content {
+          width: 100% !important;
+        }
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <doc-showcase label="Closable and Draggable">
+      <eon-tabs class="d-tabs" dragging="true" closable="true">
+          <eon-panel default-style="false" name="Help" tab-title="Blue">
+            <div class="d-tabs-content blue"></div>
+          </eon-panel>
+          <eon-panel default-style="false" name="serverStart" tab-title="Green">
+            <div class="d-tabs-content green"></div>
+          </eon-panel>
+          <eon-panel default-style="false" name="build" tab-title="Red">
+            <div class="d-tabs-content red"></div>
+          </eon-panel>
+        </eon-tabs>
+    </doc-showcase>
+  </template>
+  <template type="css">
+    /* Tabs custom style */
+      .d-tabs {
+        height: 330px;
+        width: 100%;
+        padding: 0;
+        -webkit-box-shadow: 0px 0px 10px #d8d8d8;
+        -moz-box-shadow: 0px 0px 10px #d8d8d8;
+        box-shadow: 0px 0px 10px #d8d8d8;
+      }
+
+      .d-tabs-content {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .blue {
+        background-color: #7296bb !important;
+      }
+
+      .green {
+        background-color: #76bb72 !important;
+      }
+
+      .red {
+        background-color: #b36a6a;
+      }
+  </template>
+  <template type="js">
+    function renderLazy() {
+      document.querySelector("#lazy-content").render();
+      // Remove place holder
+      document.querySelector("#lazy-content .place-holder").style.display = "none";
+    }
+    function importRemote() {
+      document.querySelector("#lazy-remote").importContent();
+      // Remove place holder
+      document.querySelector("#lazy-remote .place-holder").style.display = "none";
+    }
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+

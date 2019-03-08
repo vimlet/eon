@@ -1,4 +1,4 @@
-<template>
+<template class="eon-sect1 eon-boxshadow1">
 
   <!--Begin tabs and scroll indicators container-->
   <div class="eon-tabs-tabsSection eon-fg1 eon-unselectable">
@@ -44,7 +44,7 @@
         value: {}
       },
       /*
-      @property (private) {Boolean} _refs
+      @property (private) {Object} _refs
       @description Object with references to relevant element nodes
       */
       refs: {
@@ -62,8 +62,8 @@
         reflect: true
       },
       /*
-      @property {String} dragging
-      @description Whether the user wants the tabs to be draggables or not
+      @property {String} tabsScroll
+      @description Position in which the user wants the tabs scrolls located
       */
       tabsScroll: {
         value: "right",
@@ -77,21 +77,11 @@
         value: "true",
         reflect: true
       },
-      /*
-        @property {String} controllers
-        @description 
-        Values: auto, static
-        Default: 
-      */
-      controllers: {
-        value: "auto",
-        reflect: true
-      }
     },
     privateFunctions: {
       /*
       @function (private) _setupRefs
-      @description Sets up the scrolls positions and its events
+      @description Creates references to relevant nodes
       */
       setupRefs: function () {
 
@@ -112,7 +102,7 @@
       },
       /*
       @function (private) _setupTabs
-      @description Appends the stack component and creates the corresponding panel tabs and drop area
+      @description Appends the stack component and creates the corresponding panel tabs
       */
       setupTabs: function () {
 
@@ -144,7 +134,6 @@
           el._misc.tabs[firstPanelName].classList.add("eon-tabs-selected", "eon-bg2-active");
           el._misc.tabs[firstPanelName].classList.remove("eon-bg2-hoverable");
 
-          el._setupDropArea();
           el._handleTabsScrollsStatus();
 
         });
@@ -180,7 +169,7 @@
       },
       /*
       @function (private) _setupDragging
-      @description Sets up the data object, the indicator and some dragging events
+      @description Sets up some basic steps for the dragging to take place
       */
       setupDragging: function () {
 
@@ -188,52 +177,20 @@
 
         if (eon.util.isTrue(el.dragging)) {
 
-          var indicator;
-
-          indicator = document.createElement("div");
-          indicator.classList.add("eon-tabs-dropIndicator", "eon-fg3");
-          indicator.dataset.visible = "false";
-          indicator.id = "dropIndicator";
-
           el._misc.dragging = {};
           el._misc.dragging.source = {};
           el._misc.dragging.target = undefined;
-          el._misc.dragging.indicator = indicator;
 
           el.addEventListener('dragenter', function (e) {
-            el._handleDragEnter(e, el);
+            e.preventDefault();
           }, false);
 
         }
 
       },
       /*
-      @function (private) _setupDropArea
-      @description Creates references tu tabs nodes, creates the dropping area and creates resize and dragging events
-      */
-      setupDropArea: function () {
-
-        var el = this;
-        var dropArea = document.createElement("div");
-
-        dropArea.classList.add("eon-tabs-dropArea");
-
-        el._misc.dragging.dropArea = dropArea;
-
-        // dropArea.addEventListener("dragover", function (e) {
-        //   el._handleDragOver(e);
-        // });
-
-        el._refs.tabsWrapper.appendChild(dropArea);
-
-        eon.addResizeListener(el._refs.tabsRegion, el.tagName + el.uid, function () {
-          el._handleTabsScrollsStatus();
-        });
-
-      },
-      /*
       @function (private) _importPanels
-      @description Searches the panels and appends them in the stack
+      @description Searches the panels and appends them in the stack element
       */
       importPanels: function () {
 
@@ -250,9 +207,9 @@
 
       },
       /*
-        @function (private) _handleTabsScrollsStatus
-        @description Enables/disabled the tabs scroll
-        */
+      @function (private) _handleTabsScrollsStatus
+      @description Enables/disabled the tabs scroll
+      */
       handleTabsScrollsStatus: function () {
         var el = this;
 
@@ -260,18 +217,14 @@
 
           if (el._refs.tabsWrapper.scrollWidth <= el._refs.tabsRegion.offsetWidth) {
             // Monitor scroll controllers display
-            if (el.controllers == "auto") {
-              el._refs.tabsScrolls.classList.add("eon-tabs-auto");
-            }
+            el._refs.tabsScrolls.classList.add("eon-tabs-auto");
             el._refs.tabsScrolls.classList.remove("enabled");
             el._refs.leftScroll.classList.remove("eon-fg1-hoverable");
             el._refs.rightScroll.classList.remove("eon-fg1-hoverable");
             el._refs.tabsWrapper.style.left = 0;
           } else {
             // Monitor scroll controllers display
-            if (el.controllers == "auto") {
-              el._refs.tabsScrolls.classList.remove("eon-tabs-auto");
-            }
+            el._refs.tabsScrolls.classList.remove("eon-tabs-auto");
             el._refs.tabsScrolls.classList.add("enabled");
             el._refs.leftScroll.classList.add("eon-fg1-hoverable");
             el._refs.rightScroll.classList.add("eon-fg1-hoverable");
@@ -331,28 +284,32 @@
 
       },
       /*
-      @function (private) _handleDragEnter
-      @description Handles the mouse enter to the element and shows the tabs dropping area
-      @param {Object} e [event]
-      */
-      handleDragEnter: function (e) {
-        e.preventDefault();
-        // this._misc.dragging.dropArea.style.visibility = "visible";
-      },
-      /*
       @function (private) _handleDragOver
-      @description Handles the mouse over event when dragging inside the tabs dropping area
+      @description Handles the mouse over event when dragging over the tabs
       @param {Object} e [event]
       */
       handleDragOver: function (e, tab) {
 
-        if (this._misc.isDragging) {
+        var el = this;
+
+        if (el._misc.isDragging) {
 
           if (e.preventDefault) {
             e.preventDefault(); // Necessary. Allows us to drop.
           }
 
-          this._handleTabsDetection(e, tab);
+          var tabRect = tab.getBoundingClientRect();
+          var position = e.clientX < (tabRect.left + (tabRect.width / 2)) ? "left" : "right";
+          var targetOrder = tab.dataset.order;
+
+          if (el._misc.dragging.target) {
+            el._misc.dragging.target.classList.remove("eon-tabs-dragTarget");
+          }
+
+          tab.classList.add("eon-tabs-dragTarget");
+
+          el._misc.dragging.target = tab;
+          el._misc.dragging.position = position;
 
           e.dataTransfer.dropEffect = 'move';
 
@@ -381,67 +338,20 @@
           targetOrder = el._misc.dragging.position === "left" ? parseInt(targetOrder) : parseInt(targetOrder) + 1;
           targetTab = el._refs.tabsWrapper.querySelector('.eon-tabs-tab[data-order="' + targetOrder + '"]');
 
-          el._refs.tabsWrapper.insertBefore(this._misc.dragging.source, targetTab);
+          el._misc.dragging.target.classList.remove("eon-tabs-dragTarget");
+
+          el._refs.tabsWrapper.insertBefore(el._misc.dragging.source, targetTab);
           el._misc.isDragging = false;
 
           el._reorderTabs();
 
         }
 
-        el._misc.dragging.dropArea.style.visibility = "hidden";
-        el._misc.dragging.indicator.style.visibility = "hidden";
-
-        el._refs.tabsWrapper.appendChild(el._misc.dragging.dropArea);
-
         return false;
       },
       /*
-      @function (private) _handleTabsDetection
-      @description Handles the movement of the tab over a tab region and shows/moves the indicator
-      @param {Object} e [event]
-      */
-      handleTabsDetection: function (e, tab) {
-
-        var el = this;
-        // NEW
-        var targetTabRect = tab.getBoundingClientRect();
-        // var tabLeftCenter = targetTabRect.left + (targetTabRect.width / 2);
-        var position = e.clientX < (targetTabRect.left + (targetTabRect.width / 2)) ? "left" : "right";
-
-        // var dropArea = el._misc.dragging.dropArea;
-        // var indicator = el._misc.dragging.indicator;
-        var tabsLeft = el._misc.dragging.dropArea.getBoundingClientRect().left;
-        var tabs = el._refs.tabsWrapper.querySelectorAll(".eon-tabs-tab");
-        var targetOrder, targetTab, targetTabRect, position, indicatorLeft;
-
-        el._misc.dragging.target = el._misc.dragging.target && el._misc.dragging.target.nodeType ? el._misc.dragging.target : document.createElement("div");
-
-        targetOrder = Math.ceil((e.clientX - tabsLeft) / tabs[0].offsetWidth) - 1;
-        console.log('targetOrder', targetOrder);
-        targetTab = el._refs.tabsWrapper.querySelector('.eon-tabs-tab[data-order="' + targetOrder + '"]');
-        targetTab = targetTab ? targetTab : tabs[tabs.length - 1];
-
-        // Once we have our target tab we get and set all the info we need
-        targetTabRect = targetTab.getBoundingClientRect();
-        position = e.clientX < (targetTabRect.left + targetTabRect.width / 2) ? "left" : "right";
-
-        if ((el._misc.dragging.target.isEqualNode(targetTab) && el._misc.dragging.position != position) || !el._misc.dragging.target.isEqualNode(targetTab)) {
-
-          if (el._misc.dragging.target) {
-            el._misc.dragging.target.classList.remove("eon-tabs-dragTarget");
-          }
-
-          targetTab.classList.add("eon-tabs-dragTarget");
-
-          el._misc.dragging.target = targetTab;
-          el._misc.dragging.position = position;
-
-        }
-
-      },
-      /*
       @function (private) _reorderTabs
-      @description Reasigns order to the tabs
+      @description Reasigns an order to the tabs
       */
       reorderTabs: function () {
 
@@ -457,7 +367,7 @@
 
       },
       /*
-      @function (private) _getSiblingTab
+      @function (private) {Object} _getSiblingTab
       @description Returns a sibling for the requested tab
       @param {Object} tab
       */
@@ -509,7 +419,7 @@
 
       },
       /*
-      @function (private) _createPanelTab
+      @function (private) {Object} _createPanelTab
       @description Creates a tab for the provided panel
       @param {Object} panel
       */
@@ -628,7 +538,6 @@
         el._misc.tabs[tab.dataset.panel] = tab;
 
         el._refs.tabsWrapper.appendChild(tab);
-        el._refs.tabsWrapper.appendChild(el._misc.dragging.dropArea);
 
         el._handleTabsScrollsStatus();
 
@@ -755,34 +664,24 @@
           var tabsRegion = el._refs.tabsRegion;
           var tabsWrapperLeft = el._refs.tabsWrapper.style.left ? parseInt(el._refs.tabsWrapper.style.left) : 0;
           var scrollableAmount = el._refs.tabsWrapper.offsetWidth - tabsRegion.offsetWidth;
-          var tabWidth = el._refs.tabsWrapper.querySelector(".eon-tabs-tab").offsetWidth;
-          var rightProgress, halfwayTab, advanceNeeded, finalLeft;
+          var tabWidth = 200;
+          var finalLeft;
 
           if (el._refs.tabsWrapper.offsetWidth > tabsRegion.offsetWidth) {
 
             if (direction == "right") {
 
-              rightProgress = tabsWrapperLeft - tabsRegion.offsetWidth < 0 ? -(tabsWrapperLeft - tabsRegion.offsetWidth) : tabsWrapperLeft - tabsRegion.offsetWidth;
-              halfwayTab = Math.ceil(rightProgress / tabWidth);
-              advanceNeeded = (tabWidth * halfwayTab) - rightProgress;
-
-              finalLeft = tabsWrapperLeft - advanceNeeded;
-              finalLeft = finalLeft == tabsWrapperLeft && finalLeft != (-scrollableAmount) ? finalLeft - tabWidth : finalLeft;
-              finalLeft = finalLeft < (-scrollableAmount) ? (-scrollableAmount) : finalLeft;
+              finalLeft = Math.abs(tabsWrapperLeft - tabWidth);
+              finalLeft = (scrollableAmount - finalLeft) < tabWidth / 2 ? scrollableAmount : finalLeft;
 
             } else {
 
-              rightProgress = tabsWrapperLeft - tabsRegion.offsetWidth < 0 ? -(tabsWrapperLeft - tabsRegion.offsetWidth) : tabsWrapperLeft - tabsRegion.offsetWidth;
-              halfwayTab = Math.floor(rightProgress / tabWidth);
-              advanceNeeded = rightProgress - (tabWidth * halfwayTab);
-
-              finalLeft = tabsWrapperLeft + advanceNeeded;
-              finalLeft = finalLeft == tabsWrapperLeft && finalLeft != scrollableAmount ? finalLeft + tabWidth : finalLeft;
-              finalLeft = finalLeft > 0 ? 0 : finalLeft;
+              finalLeft = tabsWrapperLeft == 0 ? 0 : Math.abs(tabsWrapperLeft + tabWidth);
+              finalLeft = finalLeft < tabWidth / 2 ? 0 : finalLeft;
 
             }
 
-            el._refs.tabsWrapper.style.left = finalLeft + "px";
+            el._refs.tabsWrapper.style.left = -finalLeft + "px";
 
           }
 
@@ -830,8 +729,9 @@
       el._setupScrolls();
       el._setupDragging();
 
-      el.classList.add("eon-sect1");
-      el._refs.stack.classList.add("eon-sect1");
+      eon.addResizeListener(el._refs.tabsRegion, el.tagName + el.uid, function () {
+        el._handleTabsScrollsStatus();
+      });
 
     }
   });
