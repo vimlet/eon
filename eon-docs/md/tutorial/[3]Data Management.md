@@ -38,7 +38,19 @@ endpoint.post(item, function (success, data) {
 }
 ```
 
-The other HTTP operations are regulated by the same method.
+The other HTTP operations are regulated by the same method. It's time to find out the other endpoint capabilities.
+
+### Web Sockets based
+
+```[javascript]
+var item = {name: "new item", properties: 2}
+
+endpoint.put("1", item, function (success, data) {
+  if(success) {
+    // Item created successfully
+    // ...
+  }
+}
 
 It is important to realize that when using GraphQL, it might be required a specific protocol to work with, that's why Eon includes another two types of GraphQL based endpoints: `graphHTTP` and `graphSockets`.
 
