@@ -1,6 +1,5 @@
 <template>
     <div class="eon-contextmenu-wrapper eon-fg2">
-        <!-- Only small devices -->
         <div class="eon-contextmenu-contextmenu eon-bg1 eon-unselectable"></div>
     </div>
 </template>
@@ -79,7 +78,7 @@
             },
             /*
               @function (private) _createScroll
-              @description 
+              @description Generates the eon-scroll
             */
             createScroll: function () {
                 var el = this;
@@ -90,13 +89,13 @@
                 el._refs.scroll.autoGrowth = true;
                 el._refs.scroll.thickness = 6;
 
-
                 el._refs.scroll.appendChild(el._refs.contextmenu);
                 el._refs.wrapper.appendChild(el._refs.scroll);
             },
             /*
               @function (private) _setContextmenuEvent
-              @description Set event to open contextmenu
+              @description Set event to the trigger node to open contextmenu
+              @param {Object} triggerElement
             */
             setContextmenuEvent: function (triggerElement) {
                 var el = this;
@@ -117,7 +116,7 @@
 
             /*
               @function (private) {Object} _setIosListeners
-              @description Creates the iOS devices events
+              @description Creates the iOS devices event to the trigger node to open contextmenu
               @param {Object} triggerElement
             */
             setIosListeners: function (triggerElement) {
@@ -162,9 +161,7 @@
                 el._refs.overlay.appendChild(el);
 
                 eon.registerPathListener(el);
-
                 el.style.display = "flex";
-
                 el._setOverlayListeners();
             },
 
@@ -200,7 +197,7 @@
 
                 window.addEventListener("blur", function () {
                     if (el._misc.modal.active) {
-                        // el.hide();
+                        el.hide();
                     }
                 });
 
@@ -212,7 +209,6 @@
 
                 // This behavior is only supported on iOS 10 and beyond
                 if (iOS && iOS >= 10) {
-
                     // Prevents scrolling on mobile devices
                     window.addEventListener("touchstart", function (e) {
                         if (el._misc.modal.active && el.dataset.version == "device") {
@@ -231,7 +227,6 @@
                             el.hide();
                         }
                     });
-
                 }
             },
             /*
@@ -513,16 +508,10 @@
             el._createScroll();
         },
 
-        onInit: function () {
-            var el = this;
-
-        },
-
         onRender: function () {
             var el = this;
             var triggers = document.querySelectorAll('[eon-contextmenu=' + this.name + ']');
             el._verifyScreenResolution();
-
             if (triggers.length > 0) {
                 el._setupOverlay();
                 el._setupItems();
@@ -546,7 +535,6 @@
             });
         },
 
-
         onReady: function () {
             var el = this;
 
@@ -554,7 +542,6 @@
                 el._setupOverlay();
                 el._setupItems();
             }
-
         },
 
         onWindowResize: function (event) {
@@ -563,7 +550,6 @@
             if (el._misc.modal.active) {
                 el.hide();
                 el._verifyScreenResolution();
-                // el._setContextmenuEvent();
             }
         }
 

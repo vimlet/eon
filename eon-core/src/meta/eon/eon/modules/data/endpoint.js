@@ -9,6 +9,7 @@ eon.endpoint = function (type, url) {
   this.url = url;
   /* GraphQL Web Sockets based use only */
   this.socket = type == "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
+  this.socket = ~["socket", "graphSockets"].indexOf(type) ? new WebSocket(this.url) : this.socket;
 
   /* 
       ##########
@@ -32,7 +33,7 @@ eon.endpoint = function (type, url) {
     };
     // Send request
     eon.ajax(el.composedUrl, options, cb);
-  } : "";
+  } : this.get;
   /*
     @function put
     @description Overwrite data resource // create if not exists
@@ -52,7 +53,7 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource id found');
     }
-  } : "";
+  } : this.put;
   /*
     @function post
     @description Create data resource
@@ -70,7 +71,7 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource data found');
     }
-  } : "";
+  } : this.post;
   /*
     @function delete
     @description Delete data resource
@@ -89,7 +90,29 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource id found');
     }
-  } : "";
+  } : this.delete;
+
+  // -- Web Sockets --
+
+  /*
+    @function send
+    @description Send data
+  */
+  this.send = type == "socket" ? function (data) {
+    el.socket.send(data);
+  } : this.send;
+
+  /*
+    @function onMessage
+    @description On socket data received
+  */
+  this.onMessage = function (cb) {
+    // Server response listener
+    el.socket.onmessage = function (event) {
+      // TODO Handle response messages
+      cb(true, event);
+    };
+  };
 
   // -- GraphQL --
 
@@ -99,21 +122,21 @@ eon.endpoint = function (type, url) {
   */
   this.send = type == "graphHTTP" ? function (queryString, cb) {
     el.query(queryString, cb);
-  } : "";
+  } : this.send;
   /*
     @function query
     @description Query data source
   */
   this.query = type == "graphHTTP" ? function (queryString, cb) {
     graphHTTPQuery(queryString, cb);
-  } : "";
+  } : this.query;
   /*
     @function mutation
     @description Update data source
    */
   this.mutation = type == "graphHTTP" ? function (queryString, cb) {
     graphHTTPMutation(queryString, cb);
-  } : "";
+  } : this.query;
   /*
     @function subscribe
     @description Subscribe
@@ -121,8 +144,8 @@ eon.endpoint = function (type, url) {
   this.subscribe = type == "graphSockets" ? function (queryString, cb) {
     // Check graphQL protocol based on
     graphSocketsSubscription(queryString, cb);
-  } : "";
-
+  } : this.subscribe;
+ 
   /* 
       #################
       Private Functions
@@ -164,11 +187,6 @@ eon.endpoint = function (type, url) {
 
   // Query call Web sockets based
   function graphSocketsSubscription(queryString, cb) {
-    // Server response listener
-    el.socket.onmessage = function (event) {
-      // TODO Handle response messages
-      cb(true, event);
-    };
     el.socket.send("subscription:" + queryString);
   }
 }

@@ -12,6 +12,7 @@ The endpoint tool offers an API for data managing based on the commonly used web
 var endpoint = new eon.endpoint("rest", "https://remote/source");
 ```
 
+### REST based
 The endpoint interface is based on the HTTP operations to manage the data (`get`, `put`, `post`, `delete`). Once our REST endpoint instance is initialized, let's perform a read operation:
 
 ```[javascript]
@@ -30,7 +31,7 @@ Now we will see a `post` operation to see how to create a new data item:
 ```[javascript]
 var item = {name: "new", properties: 2}
 
-endpoint.post(item, function (success, data) {
+endpoint.send(item, function (success, data) {
   if(success) {
     // Item created successfully
     // ...
@@ -38,8 +39,46 @@ endpoint.post(item, function (success, data) {
 }
 ```
 
-The other HTTP operations are regulated by the same method.
+The other HTTP operations are regulated by the same method. It's time to find out the other endpoint capabilities.
+<<<<<<< HEAD
+=======
 
+### Web Sockets based
+
+```[javascript]
+var item = {name: "new item", properties: 2}
+
+endpoint.put("1", item, function (success, data) {
+  if(success) {
+    // Item created successfully
+    // ...
+  }
+}
+>>>>>>> 789ac3967d8baf1d230ea61bd3a59f403891b1df
+
+### Web Sockets based
+This endpoint type is based on the Web Sockets API. Sending and receiving data using sockets
+is very easy, first we have to define what we are going to handle the messages received through the socket:
+
+```[javascript]
+var item = {name: "new item", properties: 2}
+
+endpoint.onMessage(function(success, data){
+  if(success) {
+    // Socket message received
+    // ...
+  }
+});
+```
+Once the listener is declared, we can make any request to send new data:
+
+```[javascript]
+endpoint.send(item);
+```
+
+It is as simple as that.
+
+### GraphQL based
 It is important to realize that when using GraphQL, it might be required a specific protocol to work with, that's why Eon includes another two types of GraphQL based endpoints: `graphHTTP` and `graphSockets`.
 
 [Store]<>
