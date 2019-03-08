@@ -743,7 +743,6 @@ For further implementation, you can use as many templates as you need to manage 
 [Tabs]<>
 ^[eon-tabs API](#!version=latest&mode=api&file=ui%2Feon-panel%2Feon-panel.html)
 
-
 Meant to swap between different panels easily with a tabs base wrapper, this tabs have multiple options and features to fulfill the most common needs.
 
 *(
@@ -824,16 +823,6 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
       }
   </template>
   <template type="js">
-    function renderLazy() {
-      document.querySelector("#lazy-content").render();
-      // Remove place holder
-      document.querySelector("#lazy-content .place-holder").style.display = "none";
-    }
-    function importRemote() {
-      document.querySelector("#lazy-remote").importContent();
-      // Remove place holder
-      document.querySelector("#lazy-remote .place-holder").style.display = "none";
-    }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -841,3 +830,73 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
 </doc-playground>
 )*
 
+[Scroll]<>
+^[eon-scroll API](#!version=latest&mode=api&file=ui%2Feon-panel%2Feon-panel.html)
+
+
+Meant to swap between different panels easily with a tabs base wrapper, this tabs have multiple options and features to fulfill the most common needs.
+
+*(
+<doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
+  <template type="html-head">
+    <script src='framework/doc-eon/eon/eon.js'></script>
+    <script>
+      eon.import([
+        'framework/doc-eon/eon/ui/eon-scroll',
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
+      ])
+    </script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      doc-showcase {
+        width: 100%;
+      }
+      .doc-showcase-content {
+        height : 500px;
+      }
+      @media (max-width: 430px) {
+        doc-showcase {
+          width: calc(100% - 40px);
+        }
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <doc-showcase label="Closable and Draggable">
+      <eon-scroll fill="true" arrow-scrolls="true" rail-scrolls="true">
+      <div style="width: 100%; color: #d3d3d3;">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et placerat nulla, at suscipit lorem. Nulla ac elementum quam, rhoncus interdum quam. Morbi volutpat mauris eu lectus consequat sollicitudin. Curabitur eu odio maximus, consectetur quam vitae, vestibulum erat. Cras id rutrum ligula. Vestibulum viverra libero dui, non elementum erat porttitor ullamcorper. Donec euismod fringilla arcu, quis lacinia urna volutpat id. Quisque eget pellentesque arcu, sit amet blandit nisi. Donec eu maximus ex, at elementum est. Etiam consequat vestibulum justo, facilisis aliquet nisi sodales nec. Donec rutrum pulvinar justo, nec pharetra felis fringilla ac. Aliquam posuere gravida erat et tristique. In congue felis sit amet suscipit pharetra. Vestibulum volutpat non diam imperdiet sodales. Donec vitae tempor turpis.<br><br>
+
+Ut ornare rhoncus volutpat. Nulla facilisi. Etiam eget rhoncus libero. Duis nec fermentum mauris. Vestibulum sed finibus nulla, eu accumsan turpis. Vivamus vel dui blandit, cursus libero id, pellentesque urna. Fusce venenatis eleifend ipsum. Etiam ornare consectetur odio. Nunc blandit ac est nec suscipit. Donec ac enim lacus. Nullam ante mi, vestibulum non enim hendrerit, maximus tempus orci. Cras vestibulum mauris nunc, nec rutrum ante convallis id. Sed porta nulla eu egestas ornare. Fusce ligula sapien, scelerisque vel suscipit sit amet, tincidunt id metus. Etiam malesuada dignissim libero.<br><br>
+
+Morbi tempor magna nunc, quis pellentesque sem tristique ut. Quisque nec nunc congue, aliquet massa vitae, pharetra metus. Nulla leo neque, efficitur sed congue vitae, ultricies sed nisi. Morbi at risus id erat egestas lacinia vitae vel diam. In at nisi urna. Nunc dapibus tincidunt suscipit. Donec aliquam placerat justo eget dignissim. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Integer et ligula tincidunt, efficitur eros auctor, interdum sem.<br><br>
+
+Pellentesque aliquam tellus vitae velit fringilla, sed luctus metus rutrum. Curabitur nibh urna, facilisis sit amet augue sit amet, ullamcorper pretium turpis. Donec nec justo ac erat porttitor fringilla vitae quis eros. Nunc sapien justo, lobortis eget libero id, pretium aliquam urna. Vivamus lobortis, odio finibus luctus faucibus, quam ligula pellentesque ex, vel rutrum mauris justo vitae lectus. Duis diam purus, mattis et erat vitae, congue dignissim tortor. Ut id nunc interdum, semper tellus non, ornare orci.<br><br>
+
+Fusce porta a mauris in porta. Nam consectetur laoreet est at pretium. Nam et dapibus dui. Aenean quis feugiat mauris, sit amet fringilla nunc. Aenean consequat tempus ultricies. Vivamus a ipsum sit amet massa pellentesque tristique accumsan ac nisl. Praesent facilisis ultricies mi nec interdum. Nullam sem ante, pharetra ac fringilla nec, ornare vel est. Sed diam velit, mattis aliquam eros hendrerit, posuere fermentum ex. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam consequat rhoncus ex, ac rhoncus nibh porta eu. Quisque congue elit ac neque fringilla, a aliquet lorem laoreet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nulla auctor blandit augue id tempus. Nulla vel lobortis lectus, at volutpat nisl. Donec quis mauris diam.<br><br>
+
+Cras sed mollis dui. Vivamus vitae risus nulla. Quisque at est mattis, aliquet quam vel, sodales augue. Vivamus eget velit consectetur, feugiat urna id, convallis dui. Proin id consectetur felis, quis cursus augue. Donec ac ex scelerisque, luctus ante a, tempus neque. Sed luctus velit non sagittis egestas. Aliquam neque risus, tincidunt non quam sit amet, feugiat rutrum orci. Donec id dolor lectus. Sed accumsan, mauris quis finibus laoreet, nulla lacus ultricies nunc, vitae auctor tellus velit in mi. Mauris quis tempor lacus. Morbi molestie ligula id dui congue, eu sagittis enim placerat.<br><br>
+
+Vestibulum hendrerit ligula erat, at eleifend arcu scelerisque et. Vestibulum volutpat urna sit amet ultricies consectetur. Integer consectetur scelerisque urna, suscipit auctor odio congue in. Etiam sagittis maximus condimentum. Quisque eget ligula faucibus mauris convallis consectetur. Mauris ullamcorper nisi id malesuada tincidunt. Mauris lacinia dui sed ullamcorper pulvinar. Quisque eget placerat massa. Ut mattis sem nunc, nec iaculis massa vulputate a. Vivamus ornare finibus eros vitae tincidunt. In et luctus lacus. Cras malesuada fermentum mi sed pretium. Nulla lacinia rutrum odio. Suspendisse suscipit nec magna non lacinia. In hac habitasse platea dictumst. Ut ac consectetur turpis, eu finibus ligula.<br><br>
+
+Morbi consectetur hendrerit mauris non sodales. Praesent vitae viverra arcu, a porta enim. Nunc sed neque imperdiet, commodo massa ac, condimentum massa. Curabitur congue eros a dui lobortis dignissim. Proin nisi nunc, volutpat quis sem vitae, faucibus dapibus lectus. Suspendisse potenti. Sed ex leo, suscipit eget tempor a, vehicula vel dolor. Morbi tristique auctor ultrices. Quisque ornare quam in risus bibendum molestie sit amet sed lacus. Pellentesque a ultricies diam, vitae tincidunt sapien.<br><br>
+
+Cras nulla lacus, sodales eget mollis vitae, vulputate quis tortor. Etiam non nibh at lectus consectetur blandit. Nulla a sapien fermentum elit vestibulum dictum vitae nec leo. Duis sodales, enim nec bibendum pretium, neque ligula lacinia est, cursus condimentum ligula mi vitae enim. Phasellus sollicitudin at enim sollicitudin convallis. Aliquam leo risus, blandit sed dui a, maximus mollis lorem. Praesent aliquet at eros a dictum. Nunc pulvinar dui vitae tempus suscipit. Suspendisse tempor in tellus at commodo. Sed quis molestie lectus, id lacinia mi. Donec justo nulla, lobortis sed massa vel, vulputate consectetur massa. Cras egestas varius lectus, sed ornare lacus. Mauris at sollicitudin metus, id blandit libero. Suspendisse vulputate sodales urna eu scelerisque. In bibendum mi sed nunc cursus efficitur. Duis lobortis vulputate nunc a posuere.<br><br>
+
+Mauris vel pulvinar mi. Nullam eu facilisis nibh. Nulla at leo vel velit cursus lacinia vitae eleifend justo. In sed quam vel felis faucibus condimentum id a neque. Donec nibh lorem, facilisis congue mollis ut, ultricies mattis libero. Donec viverra egestas iaculis. Vivamus gravida mi id accumsan pharetra.<br><br>
+      </div>
+      </eon-scroll>
+    </doc-showcase>
+  </template>
+  <template type="css">
+  </template>
+  <template type="js">
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*

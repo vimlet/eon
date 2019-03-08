@@ -122,13 +122,6 @@
 
       },
       /*
-      @function (private) _setupRefs
-      @description Creates references to relevant nodes
-      */
-      setupRefs: function () {
-        this._refs.container = this.parentNode;
-      },
-      /*
       @function (private) _definePublicProperties
       @description Creates definitions for some public properties
       */
@@ -395,6 +388,11 @@
         // If the element will take the size of its parent
         if (eon.util.isTrue(el.fill)) {
 
+          el.onRender(function () {
+            console.log('el._refs.container', el._refs.container);
+          console.log('parent', el.parentNode);
+          
+          
           var containerComputedStyle = window.getComputedStyle(el._refs.container);
 
           // If the parent has a height given by flex then we also setup our element as flex
@@ -424,6 +422,8 @@
             el._misc.calculatedContentSize = true;
 
           }
+
+        });
 
           // Else if we do not want to fill
         } else {
@@ -1862,15 +1862,16 @@
     onInit: function () {
 
       var el = this;
-
-      el._setupRefs();
-
       el._appendContent();
-      el._assignSize();
 
       el._definePublicProperties();
       el._setupScrolling();
 
+    },
+
+    onReady: function () {
+      this._refs.container = this.parentNode;
+      this._assignSize();
     },
 
     onPropertyChanged: function (key, oldVal, newVal) {

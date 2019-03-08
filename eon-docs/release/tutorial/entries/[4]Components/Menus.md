@@ -44,9 +44,7 @@ On device mode, the menu appears when the user doing a long click.
           deviceButton.style.display = "none";
           window.contextStatus = "desktop";
         }
-        console.log(window.contextStatus);
         window.addEventListener("resize", function () {
-        console.log("windowresize");
             if (navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i) && window.contextStatus == "desktop") {
               deviceButton.style.display = "inline-block";
               deskButton.style.display = "none";
