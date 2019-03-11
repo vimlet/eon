@@ -42,7 +42,7 @@ restEndpoint.send(item, function (success, data) {
 The other HTTP operations are regulated by the same method. It's time to find out the other endpoint capabilities.
 
 ### Web Sockets based
-This endpoint type is based on the Web Sockets API. Sending and receiving data using sockets is very easy, first we have to define what we are going to handle the messages received through the socket:
+This endpoint type is based on the Web Sockets API. Sending and receiving data using sockets is very easy. First, we have to define what we are going to handle the messages received through the socket:
 
 ```[javascript]
 var socketEndpoint = new eon.endpoint("WebSockets", "https://remote/source");
@@ -68,7 +68,7 @@ It is as simple as that.
 Since GraphQL is a query language and only defines a standard to send and receive data from the back and front sides of an application, it is completely independent of any storage engine or data transfer protocol. 
 This is the reason why using this technology it should be required a specific protocol to work with, that's why Eon includes two types of GraphQL based endpoints: `graphHTTP` and `graphSockets`.
 
-As you probably already know, GraphQL defines three operations for handling the data: `query`, `mutation` and `subscription`. Following the terms meaning, we easily conclude that `graphSockets` endpoint type is intended to be used to perform the subscription operations, and the `graphHTTP` to perform queries and mutations.
+As you probably already know, GraphQL defines three operations for handling the data: `query`, `mutation` and `subscription`. Following the meaning of these terms, we easily conclude that `graphSockets` endpoint type is intended to be used to perform the subscription operations, and the `graphHTTP` to perform queries and mutations.
 
 Query operation (read data):
 ```[javascript]
@@ -132,11 +132,11 @@ store.data = new Map();
 The store is based on the Javascript `Map` object to warehouse the data. You might be thinking why this little layer of complexity. There are two main issues you won't deal with `Objects` or `Arrays` in Javascript:
 
 - The associative behavior is missing when using Arrays, for a simple reason: you cannot access to any item but using its position index.
-- Object covers this issue since it is based on a key/value structure but, it has its own problems like: when you insert a new object property, it is not guaranteed to keep the items insertion order so it could become a big headache when accessing the data.
+- Object covers this issue since it is based on a key/value structure but, it has its own problems like when you insert a new object property, it is not guaranteed to keep the items insertion order so it could become a big headache when accessing the data.
 
 `Map` can hold both objects and primitive values as either key or value, so it solves all the other previous issues, and much more which are not mentioned in this article.
 
-As a consequence, it is not possible to pass to the store any different types of data. To overcome this issue Eon offers two functions for parsing the frequent Javascript types based data into a `Map` object:
+As a consequence, it is not possible to pass to the store any different types of data. To overcome this mishap, Eon offers two functions for parsing those types based data into a `Map` object:
 
 ```[javascript]
 // Store data from an `Array` source
@@ -145,17 +145,45 @@ store.data = eon.util.arrayToMap([]]);
 store.data = eon.util.objectToMap({});
 ```
 
-Access the store data is really easy since the API provided is based on the main CRUD operations:
+Accessing the store data is really easy since the provided API is based on the main CRUD operations:
+
+- Read an item:
 
 ```[javascript]
-// Store read
 store.read(id).result(function (error, data) {
-  // Resource handling
+  // Handle read data
   // ...
 });
 ```
 
-Eon uses a specific strategy to handle the components data. The Eon components are not aware of the data source, they get their data from its own instance of the `eon.store` data type, meanwhile the store receives its data updates from an `eon-endpoint` instance operation. This approach converts the Eon components into a more powerful and data technology independent elements.
+- Create a new item:
+
+```[javascript]
+store.create(item).result(function (error, data) {
+  // Handle created data
+  // ...
+});
+```
+
+- Update a new item:
+
+```[javascript]
+store.update(id, item).result(function (error, data) {
+  // Handle updated data
+  // ...
+});
+```
+
+- Delete a new item:
+
+```[javascript]
+store.delete(id).result(function (error, data) {
+  // Handle deleted data
+  // ...
+});
+```
+
+Eon uses a specific strategy to handle the components data. The Eon components are not aware of the data source, they get their data from its own instance of the `eon.store` data type. Meanwhile, the store receives its data updates from an `eon-endpoint` instance operation. This approach converts the Eon components into a more powerful and data technology independent elements.
 
 
 
