@@ -15,6 +15,7 @@ The loader element is a useful mask for your application processes and page load
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-progressbar"]
       }
@@ -110,6 +111,7 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-tree", "eon-tree-node"]
       }

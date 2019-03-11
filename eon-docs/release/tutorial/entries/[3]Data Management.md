@@ -40,21 +40,6 @@ endpoint.send(item, function (success, data) {
 ```
 
 The other HTTP operations are regulated by the same method. It's time to find out the other endpoint capabilities.
-<<<<<<< HEAD
-=======
-
-### Web Sockets based
-
-```[javascript]
-var item = {name: "new item", properties: 2}
-
-endpoint.put("1", item, function (success, data) {
-  if(success) {
-    // Item created successfully
-    // ...
-  }
-}
->>>>>>> 789ac3967d8baf1d230ea61bd3a59f403891b1df
 
 ### Web Sockets based
 This endpoint type is based on the Web Sockets API. Sending and receiving data using sockets

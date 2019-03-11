@@ -23,6 +23,7 @@ eon.element = function (param1, param2) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
+        stylePath = eon.cacheBusting || eon.themeCacheBusting ? eon.getCacheBustedUrl(stylePath) : stylePath;
 
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", stylePath);

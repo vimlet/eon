@@ -4,6 +4,7 @@
 // ############################################################################################
 
 eon.polyfills.injectPolyfill = function (url) {
+  url = eon.cacheBusting || eon.pollyfillCacheBusting ? eon.getCacheBustedUrl(url) : url;
   document.write('<script type="text/javascript" src="' + url + '"></script>');
 };
 

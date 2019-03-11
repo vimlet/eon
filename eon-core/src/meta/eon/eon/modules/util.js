@@ -197,6 +197,9 @@ eon.ajax = function (url, options, cb) {
   options.async = options.async || null;
   options.user = options.user || null;
   options.password = options.password || null;
+  options.cacheBusting = "cacheBusting" in options ? options.cacheBusting : false;
+
+  url = options.cacheBusting? eon.getCacheBustedUrl(url) : url;
 
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {

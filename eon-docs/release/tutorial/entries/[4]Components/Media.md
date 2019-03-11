@@ -16,6 +16,7 @@ This element is a combination of the well known slider and image gallery compone
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-swiper"]
       }
@@ -91,6 +92,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-swiper"]
       }
@@ -159,6 +161,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-video"]
       }

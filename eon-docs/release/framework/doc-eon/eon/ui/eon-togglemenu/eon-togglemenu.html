@@ -1,0 +1,377 @@
+<template>
+
+  <div class="eon-togglemenu-button eon-fg1 eon-sect1 eon-bg1-border eon-bg1-hoverable eon-unselectable">
+    <div class="eon-togglemenu-title"></div>
+    <i class="eon-togglemenu-arrow vicon vicon-chevron-down"></i>
+  </div>
+
+  <div class="eon-togglemenu-content eon-fg1 eon-bg1-border eon-bg1 eon-unselectable">
+    <eon-scroll arrowScrolls="true"></eon-scroll>
+  </div>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-togglemenu",
+    style: "eon-togglemenu.css",
+
+    dependencies: [
+      "../eon-item",
+      "../eon-scroll"
+    ],
+
+    properties: {
+      /*
+        @property {String} heading 
+        @description Togglemenu button text
+      */
+      heading: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} displayed 
+        @description Togglemenu display status
+        Default: true
+      */
+      displayed: {
+        value: true,
+        reflect: true
+      },
+      /*
+        @property {String} occupy 
+        @description Togglemenu size adjust
+        Values can be: complete or fit
+        Default: complete
+      */
+      occupy: {
+        value: "complete",
+        reflect: true
+      },
+      /*
+        @property {String} deploy 
+        @description Togglemenu deploy behavior respect below items
+        Values can be: regard or overlap
+        Default: regard
+      */
+      deploy: {
+        value: "regard",
+        reflect: true
+      },
+      /*
+        @property {Boolean} defaultStyle 
+        @description 
+        Values: true, false
+        Default: true
+      */
+      defaultStyle: {
+        value: true,
+        reflect: true
+      }
+    },
+
+    privateProperties: {
+      /*
+       @property (private) {Number} _windowHeight
+       @description Store maximum height of toggle menu
+     */
+      maxHeight: {
+        value: 0
+      },
+      /*
+        @property (private) {Object} _refs 
+        @description Object with references
+      */
+      refs: {
+        value: {}
+      },
+    },
+
+    functions: {
+      /*
+        @function setHeading
+        @description Set new togglemenu button text
+        @param {String} newVal [new togglemenu button text value]
+      */
+      setHeading: function (newVal) {
+        var title = this.querySelector(".eon-togglemenu-title");
+        title.innerHTML = newVal;
+        this.heading = newVal;
+        eon.triggerCallback("onChange", this);
+      },
+      /*
+        @function addItem
+        @description Add new togglemenu node item programmatically
+        @param {Object} item [Node to add to togglemenu]
+      */
+      addItem: function (item) {
+        (item.value) ? this._setupSpan(item) : null;
+        item.classList.add("eon-togglemenu-item");
+        this._refs.scroll.content.appendChild(item);
+      },
+      /*
+        @function removeItem 
+        @description Remove node item passed as parameter
+        @param {Object} item [Node to removes from togglemenu] 
+       */
+      removeItem: function (item) {
+        this._refs.scroll.content.removeChild(item);
+      },
+      /*
+        @function replaceItem 
+        @description Replace old node item with a new one
+        @param {Object} newItem [Node that replaces old one]
+        @param {Object} oldItem [Node to be replaced]
+       */
+      replaceItem: function (newItem, oldItem) {
+        if (newItem.value && !newItem.querySelector(".eon-togglemenu-itemSpan")) {
+          this._setupSpan(newItem);
+        }
+
+        newItem.classList.add("eon-togglemenu-item");
+        this._refs.scroll.content.replaceChild(newItem, oldItem);
+      }
+    },
+
+    privateFunctions: {
+      /*
+        @function (private) _setDefaultStyle
+        @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+        var el = this;
+        // Check default style configuration
+        if (!eon.util.isTrue(el.defaultStyle)) {
+          // Remove default style
+          el._refs.scroll.content.classList.remove("eon-spaced-container");
+        } else {
+          // Wait for eon-scroll onReady to append elements in the new spaced wrapper element
+          el._refs.scroll.onReady(function () {
+            // Spaced items style
+            el._refs.scroll.content.classList.add("eon-spaced-container");
+          });
+        }
+      },
+      /*
+        @function (private) _setupItems
+        @description Set up declarative user togglemenu items
+        @param {Array} sourceNodes
+      */
+      setupItems: function (sourceNodes) {
+        var el = this;
+        var itemsDocFragment = document.createDocumentFragment();
+        var length = sourceNodes.length;
+        var item;
+
+        while (sourceNodes.length) {
+          item = sourceNodes.shift();
+          item.classList.add("eon-togglemenu-item");
+          (item.value) ? this._setupSpan(item) : null;
+          itemsDocFragment.appendChild(item);
+        }
+
+        // Move documentFragment to shadowRoot
+        el._refs.scroll.content.appendChild(itemsDocFragment);
+
+      },
+      /*
+        @function (private) _setupSpan
+        @description Set up span with value of item
+        @param {Object} item [Togglemenu node item]
+     */
+      setupSpan: function (item) {
+        var itemSpan = document.createElement("span");
+        itemSpan.innerHTML = item.value;
+        itemSpan.classList.add("eon-togglemenu-itemSpan");
+        item.appendChild(itemSpan);
+      },
+
+      /*
+        @function (private) _setMeasurements
+        @description Set height and width of the togglemenu
+     */
+      setMeasurements: function () {
+        var el = this;
+        style = el.currentStyle || window.getComputedStyle(el);
+        var contentStyle = window.getComputedStyle(el._refs.content);
+        var buttonStyle = window.getComputedStyle(el._refs.button);
+
+        // el._refs.content.style.width = parseInt(buttonStyle.width) + "px";
+
+        if (el.deploy == "overlap") {
+          el._refs.content.style.position = "absolute";
+          el.parentNode.style.position = "relative";
+          el._refs.content.style.top = el._refs.button.offsetHeight + "px";
+        }
+
+        if (el.occupy == "fit") {
+          var offsetTopEl = (el.deploy == "regard") ? (el.offsetTop - el.parentNode.offsetTop) : el.offsetTop;
+
+          el._maxHeight = el.parentNode.clientHeight - (parseInt(style.marginTop) + parseInt(style.marginBottom) + el._refs.button.offsetHeight) - offsetTopEl;
+          el._refs.content.style.maxHeight = el._maxHeight + "px";
+        }
+
+      },
+
+      /*
+        @function (private) _setDisplayHeight
+        @description Set adapted height to content when is not on 100% for to be possible deploy animation
+      */
+      setDisplayHeight: function () {
+        var el = this;
+        var totalItemsHeight = 0;
+
+        if (el.occupy == "fit") {
+          totalItemsHeight = el._refs.scroll.content.scrollHeight;
+          el._refs.content.style.height = totalItemsHeight + "px";
+
+        } else {
+          var style = window.getComputedStyle(el);
+          var parentStyle = window.getComputedStyle(el.parentNode);
+          var elMargins = parseInt(style.marginBottom) + parseInt(style.marginTop);
+
+          if (el.deploy == "overlap") {
+            var parentNode = el.parentNode.offsetHeight;
+
+            el._refs.content.style.height = parentNode - (el.offsetTop + el._refs.button.offsetHeight + elMargins) + "px";
+
+          } else {
+            var offsetTopEl = el.offsetTop - el.parentNode.offsetTop;
+
+            el._refs.content.style.height = el.parentNode.clientHeight - (parseInt(style.marginTop) + parseInt(style.marginBottom) + el._refs.button.offsetHeight) - offsetTopEl + "px";
+          }
+        }
+      },
+
+      /*
+        @function (private) _updateDisplay
+        @description Update displayed status
+      */
+      updateDisplay: function () {
+        var el = this;
+
+        if (eon.util.isTrue(el.displayed)) {
+          this._displayTogglemenu();
+          el.autoAdjustHeight = true;
+
+        } else {
+          el._refs.content.classList.remove("eon-togglemenu-display");
+          el._refs.button.classList.remove("eon-togglemenu-buttonActive");
+          el.autoAdjustHeight = false;
+          el._refs.content.style.height = 0;
+        }
+
+      },
+
+      /*
+        @function (private) _displayTogglemenu 
+        @description Display togglemenu
+      */
+      displayTogglemenu: function () {
+        var el = this;
+        var icon = this.querySelector(".eon-togglemenu-arrow");
+
+        el._refs.content.classList.add("eon-togglemenu-transition");
+
+        if (el._refs.content.classList.contains("eon-togglemenu-display")) {
+          el._firstUndisplay = (el._firstUndisplay == "false") ? "true" : el._firstUndisplay;
+          el._refs.content.style.height = (el._firstUndisplay == "false") ? this._refs.content.offsetHeight + "px" : null;
+          el._refs.content.style.height = 0;
+          el._refs.button.classList.add("eon-bg1-hoverable");
+          el._refs.content.classList.remove("eon-togglemenu-display");
+          el._refs.button.classList.remove("eon-togglemenu-buttonActive", "eon-sect1-hoverable");
+          eon.triggerCallback("onUndisplay", this);
+          el.autoAdjustHeight = false;
+          el._refs.content.style.height = 0;
+
+        } else {
+          el._refs.content.classList.add("eon-togglemenu-display");
+          el._refs.button.classList.remove("eon-bg1-hoverable");
+          el._refs.button.classList.add("eon-togglemenu-buttonActive", "eon-sect1-hoverable");
+          eon.triggerCallback("onDisplay", this);
+          el._setDisplayHeight();
+
+        }
+      },
+    },
+
+    onCreated: function () {
+      var el = this;
+      el._refs.button = el.template.querySelector(".eon-togglemenu-button");
+      el._refs.title = el.template.querySelector(".eon-togglemenu-title");
+      el._refs.content = el.template.querySelector(".eon-togglemenu-content");
+      el._refs.scroll = el.template.querySelector("eon-scroll");
+
+      eon.createCallback("onChange", this);
+      eon.createCallback("onDisplay", this);
+      eon.createCallback("onUndisplay", this);
+
+    },
+
+    onTransformed: function () {
+      // ** Apply default items positioning style
+      this._setDefaultStyle();
+    },
+    onBubbleRender: function () {
+      var el = this;
+      var sourceNodes = el.getSourceElements();
+
+      el._refs.title.innerHTML = el.heading;
+      el._setupItems(sourceNodes);
+      el._setMeasurements();
+      el._updateDisplay();
+
+      // Sets buttons listener for display the togglemenu
+      el._refs.button.addEventListener("click", function () {
+        el._displayTogglemenu();
+      }, false);
+
+      // Resizes toggle content when adds or deletes elements
+      // eon.addResizeListener(el._refs.content, el.tagName + el.uid, function () {
+      //     var differentHeight = (parseInt(el._refs.content.style.height) != el._refs.content);
+      eon.addResizeListener(el._refs.scroll.content, el.tagName + el.uid, function () {
+        var differentHeight = (parseInt(el._refs.content.style.height) != el._refs.scroll.content.scrollHeight);
+
+        (el.autoAdjustHeight && differentHeight) ? el._setDisplayHeight() : null;
+      });
+
+    },
+    onResize: function (event) {
+      var delay = 50;
+      var throttled = false;
+      if (!throttled) {
+        this._refs.content.classList.remove("eon-togglemenu-transition");
+        this._setMeasurements();
+
+        if (this._refs.content.classList.contains("eon-togglemenu-display")) {
+          this._setDisplayHeight();
+        }
+        // Throttle
+        throttled = true;
+        // Set a timeout to un-throttle
+        setTimeout(function () {
+          throttled = false;
+        }, delay);
+      }
+    },
+    onWindowResize: function (event) {
+      this._refs.content.classList.remove("eon-togglemenu-transition");
+      this._setMeasurements();
+
+      if (this._refs.content.classList.contains("eon-togglemenu-display")) {
+        this._setDisplayHeight();
+      }
+    },
+
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case "displayed":
+          this._updateDisplay();
+          break;
+      }
+    }
+  });
+
+</script>

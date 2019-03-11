@@ -34,16 +34,26 @@ eon.error.log = function(condition, message) {
   }
 };
 
-eon.debug.adapterEvents = eon.debug.adapterEvents || false;
-eon.debug.configEvents = eon.debug.configEvents || false;
-eon.debug.elementEvents = eon.debug.elementEvents || false;
+eon.debug.adapterEvents = "adapterEvents" in eon.debug ? eon.debug.adapterEvents : false;
+eon.debug.configEvents = "configEvents" in eon.debug ? eon.debug.configEvents : false;
+eon.debug.elementEvents = "elementEvents" in eon.debug ? eon.debug.elementEvents : false;
 
-eon.warn.store = eon.warn.store || true;
-eon.error.store = eon.error.store || true;
+eon.warn.store = "store" in eon.warn?  eon.warn.store : true;
+eon.error.store = "store" in eon.error? eon.error.store : true;
     
     // ############################################################################################
 // BASE
 // ############################################################################################
+
+eon.cacheBusting = "cacheBusting" in eon ? eon.cacheBusting : false;
+eon.importCacheBusting = "importCacheBusting" in eon ? eon.importCacheBusting : false;
+eon.themeCacheBusting = "themeCacheBusting" in eon ? eon.themeCacheBusting : false;
+eon.pollyfillCacheBusting = "pollyfillCacheBusting" in eon ? eon.pollyfillCacheBusting : false;
+
+eon.getCacheBustedUrl = function (url) {
+  return url + "?" + (+new Date);
+}
+
 eon.getCurrentScript = function() {
     if (document.currentScript) {
       return document.currentScript.src;
@@ -96,7 +106,7 @@ eon.style.sheet.insertRule("eon-script { display: none; }", 0);
 eon.mobileWidth = 450;
 eon.tabletWidth = 800;
 
-eon.addViewportMeta = eon.addViewportMeta || true;
+eon.addViewportMeta = "addViewportMeta" in eon? eon.addViewportMeta : true;
 
 if (eon.addViewportMeta) {
     document.write(
@@ -110,6 +120,7 @@ if (eon.addViewportMeta) {
 // ############################################################################################
 
 eon.polyfills.injectPolyfill = function (url) {
+  url = eon.cacheBusting || eon.pollyfillCacheBusting ? eon.getCacheBustedUrl(url) : url;
   document.write('<script type="text/javascript" src="' + url + '"></script>');
 };
 
@@ -2405,7 +2416,7 @@ vimlet.meta = vimlet.meta || {};
   vimlet.meta.lineBreak = vimlet.meta.lineBreak || null;
 
   // Decode html
-  vimlet.meta.decodeHTML = vimlet.meta.decodeHTML || true;
+  vimlet.meta.decodeHTML = "decodeHTML" in vimlet.meta? vimlet.meta.decodeHTML : true;
   vimlet.meta.__decodeEntityRegex = /&(?:#x[a-f0-9]+|#[0-9]+|[a-z0-9]+);?/ig;
 
   vimlet.meta.parse = function (scope, text, data, callback) {
@@ -3290,14 +3301,11 @@ eon.import = function (param) {
 };
 
 eon.insertImport = function (href) {
-    
+
     var elementName;
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
-
-    // Cache
-    eon.cache.add(href, { name: elementName });
 
     if (!(elementName in eon.imports.templates)) {
 
@@ -3313,31 +3321,34 @@ eon.insertImport = function (href) {
         // Declare element
         eon.declare(elementName);
 
-        var xhttp = new XMLHttpRequest();
+        eon.ajax(href, { cacheBusting: eon.cacheBusting || eon.importCacheBusting }, function (success, obj) {
 
-        xhttp.onreadystatechange = function () {
+            if (success) {
 
-            if (this.readyState == 4 && this.status == 200) {
+                // Cache
+                eon.cache.add(obj.url, { name: elementName });
 
-                eon.insertFragment(elementName, this.responseText);
+                if (obj.xhr.status == 200) {
 
-            } else if (this.readyState == 4) {
+                    eon.insertFragment(elementName, obj.responseText);
 
-                // Since this element can't be imported, we reduce the total components amount so that the execution may continue
-                eon.imports.total--;
+                } else {
 
-                // Removes it from the already saved objects
-                delete eon.imports.templates[elementName];
-                delete eon.imports.paths[elementName];
+                    // Since this element can't be imported, we reduce the total components amount so that the execution may continue
+                    eon.imports.total--;
 
-                // Saves it into the erros object
-                eon.imports.errors[elementName] = this.status;
+                    // Removes it from the already saved objects
+                    delete eon.imports.templates[elementName];
+                    delete eon.imports.paths[elementName];
+
+                    // Saves it into the erros object
+                    eon.imports.errors[elementName] = obj.xhr.status;
+
+                }
 
             }
-        };
 
-        xhttp.open("GET", href);
-        xhttp.send();
+        });
 
     }
 
@@ -3520,6 +3531,8 @@ eon.importMainTheme = function (theme) {
         var mainLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/main.css";
 
+        themePath = eon.cacheBusting || eon.themeBoostedCache ? eon.getCacheBustedUrl(themePath) : themePath;
+
         eon.registry.registerTheme("main", theme);
 
         mainLink.setAttribute("rel", "stylesheet");
@@ -3541,6 +3554,8 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
+
+        themePath = eon.cacheBusting || eon.themeBoostedCache ? eon.getCacheBustedUrl(themePath) : themePath;
 
         eon.registry.registerTheme(name, theme);
 
@@ -4487,6 +4502,7 @@ eon.element = function (param1, param2) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
+        stylePath = eon.cacheBusting || eon.themeCacheBusting ? eon.getCacheBustedUrl(stylePath) : stylePath;
 
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", stylePath);
@@ -6096,6 +6112,9 @@ eon.ajax = function (url, options, cb) {
   options.async = options.async || null;
   options.user = options.user || null;
   options.password = options.password || null;
+  options.cacheBusting = "cacheBusting" in options ? options.cacheBusting : false;
+
+  url = options.cacheBusting? eon.getCacheBustedUrl(url) : url;
 
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {
@@ -6427,6 +6446,7 @@ eon.endpoint = function (type, url) {
   this.url = url;
   /* GraphQL Web Sockets based use only */
   this.socket = type == "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
+  this.socket = ~["socket", "graphSockets"].indexOf(type) ? new WebSocket(this.url) : this.socket;
 
   /* 
       ##########
@@ -6450,7 +6470,7 @@ eon.endpoint = function (type, url) {
     };
     // Send request
     eon.ajax(el.composedUrl, options, cb);
-  } : "";
+  } : this.get;
   /*
     @function put
     @description Overwrite data resource // create if not exists
@@ -6470,7 +6490,7 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource id found');
     }
-  } : "";
+  } : this.put;
   /*
     @function post
     @description Create data resource
@@ -6488,7 +6508,7 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource data found');
     }
-  } : "";
+  } : this.post;
   /*
     @function delete
     @description Delete data resource
@@ -6507,7 +6527,29 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource id found');
     }
-  } : "";
+  } : this.delete;
+
+  // -- Web Sockets --
+
+  /*
+    @function send
+    @description Send data
+  */
+  this.send = type == "socket" ? function (data) {
+    el.socket.send(data);
+  } : this.send;
+
+  /*
+    @function onMessage
+    @description On socket data received
+  */
+  this.onMessage = function (cb) {
+    // Server response listener
+    el.socket.onmessage = function (event) {
+      // TODO Handle response messages
+      cb(true, event);
+    };
+  };
 
   // -- GraphQL --
 
@@ -6517,21 +6559,21 @@ eon.endpoint = function (type, url) {
   */
   this.send = type == "graphHTTP" ? function (queryString, cb) {
     el.query(queryString, cb);
-  } : "";
+  } : this.send;
   /*
     @function query
     @description Query data source
   */
   this.query = type == "graphHTTP" ? function (queryString, cb) {
     graphHTTPQuery(queryString, cb);
-  } : "";
+  } : this.query;
   /*
     @function mutation
     @description Update data source
    */
   this.mutation = type == "graphHTTP" ? function (queryString, cb) {
     graphHTTPMutation(queryString, cb);
-  } : "";
+  } : this.query;
   /*
     @function subscribe
     @description Subscribe
@@ -6539,8 +6581,8 @@ eon.endpoint = function (type, url) {
   this.subscribe = type == "graphSockets" ? function (queryString, cb) {
     // Check graphQL protocol based on
     graphSocketsSubscription(queryString, cb);
-  } : "";
-
+  } : this.subscribe;
+ 
   /* 
       #################
       Private Functions
@@ -6560,7 +6602,6 @@ eon.endpoint = function (type, url) {
         contentType: "application/json",
         payload: "query:" +  queryString
       };
-      console.log('options', options.payload);
       // Send request
       eon.ajax(el.url, options, cb);
     }
@@ -6583,11 +6624,6 @@ eon.endpoint = function (type, url) {
 
   // Query call Web sockets based
   function graphSocketsSubscription(queryString, cb) {
-    // Server response listener
-    el.socket.onmessage = function (event) {
-      // TODO Handle response messages
-      cb(true, event);
-    };
     el.socket.send("subscription:" + queryString);
   }
 }
@@ -6635,7 +6671,6 @@ eon.data.MemoryAdapter = function () {
       // Check id value
       if (query.id) {
         if (memory.data.get(query.id)) {
-          console.log('memory.data.get(query.id)', memory.data.get(query.id));
           resolve(memory.data.get(query.id));
         } else {
           reject(new Error("Not found"));

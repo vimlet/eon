@@ -19,6 +19,7 @@ Also, it has different properties to give it different functionality such as res
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-dialog',
         'framework/doc-eon/eon/ui/eon-text',
@@ -147,6 +148,7 @@ Also known as `table`, displays a large number of data using rows and columns.
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -155,7 +157,7 @@ Also known as `table`, displays a large number of data using rows and columns.
   </template>
   <template type="html-body">
     <doc-showcase label="Scrollable Grid">
-      <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
+      <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:394px" page-size="8" autofit="false">
         <eon-grid-row>
           <eon-grid-cell column="name">John</eon-grid-cell>
           <eon-grid-cell column="lastname">Doe</eon-grid-cell>
@@ -234,6 +236,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -242,7 +245,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
   </template>
   <template type="html-body">
     <doc-showcase label='Smaller Space'>
-      <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80"     column-min-width="200" autofit="true" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:260px">
+      <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80"     column-min-width="200" autofit="true" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:315px">
         <eon-grid-row>
             <eon-grid-cell column="name">John</eon-grid-cell>
             <eon-grid-cell column="lastname">Doe</eon-grid-cell>
@@ -388,6 +391,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
  <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-gutter"]
       }
@@ -461,6 +465,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-gutter"]
       }
@@ -553,6 +558,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-headerpanel"]
       }
@@ -640,6 +646,7 @@ Panel is the basic container element. It has no associated style so it is comple
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-button',
         'framework/doc-eon/eon/ui/eon-panel',
@@ -750,6 +757,7 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-tabs',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -834,13 +842,14 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
 ^[eon-scroll API](#!version=latest&mode=api&file=ui%2Feon-panel%2Feon-panel.html)
 
 
-Meant to swap between different panels easily with a tabs base wrapper, this tabs have multiple options and features to fulfill the most common needs.
+Custom scrollbar with different options to have different behaviors from the native one.
 
 *(
 <doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-scroll',
         'framework/doc-eon/custom/doc-playground/doc-showcase'

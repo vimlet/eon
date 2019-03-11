@@ -19,6 +19,7 @@ Also, it has different properties to give it different functionality such as res
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-dialog',
         'framework/doc-eon/eon/ui/eon-text',
@@ -147,6 +148,7 @@ Also known as `table`, displays a large number of data using rows and columns.
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -155,7 +157,7 @@ Also known as `table`, displays a large number of data using rows and columns.
   </template>
   <template type="html-body">
     <doc-showcase label="Scrollable Grid">
-      <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:340px" page-size="8" autofit="false">
+      <eon-grid footer="true" entries-count="false" row-min-height="80" column-min-width="200" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:394px" page-size="8" autofit="false">
         <eon-grid-row>
           <eon-grid-cell column="name">John</eon-grid-cell>
           <eon-grid-cell column="lastname">Doe</eon-grid-cell>
@@ -234,6 +236,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -242,7 +245,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
   </template>
   <template type="html-body">
     <doc-showcase label='Smaller Space'>
-      <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80"     column-min-width="200" autofit="true" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:260px">
+      <eon-grid resizable="false" footer="true" entries-count="false" row-min-height="80"     column-min-width="200" autofit="true" columns="name, lastname, age, phone" headers="Name, Lastname, Age, Phone, DNI" style="height:315px">
         <eon-grid-row>
             <eon-grid-cell column="name">John</eon-grid-cell>
             <eon-grid-cell column="lastname">Doe</eon-grid-cell>
@@ -388,6 +391,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
  <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-gutter"]
       }
@@ -461,6 +465,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-gutter"]
       }
@@ -553,6 +558,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-headerpanel"]
       }
@@ -640,6 +646,7 @@ Panel is the basic container element. It has no associated style so it is comple
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-button',
         'framework/doc-eon/eon/ui/eon-panel',
@@ -750,6 +757,7 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-tabs',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -823,16 +831,6 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
       }
   </template>
   <template type="js">
-    function renderLazy() {
-      document.querySelector("#lazy-content").render();
-      // Remove place holder
-      document.querySelector("#lazy-content .place-holder").style.display = "none";
-    }
-    function importRemote() {
-      document.querySelector("#lazy-remote").importContent();
-      // Remove place holder
-      document.querySelector("#lazy-remote .place-holder").style.display = "none";
-    }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -844,13 +842,14 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
 ^[eon-scroll API](#!version=latest&mode=api&file=ui%2Feon-panel%2Feon-panel.html)
 
 
-Meant to swap between different panels easily with a tabs base wrapper, this tabs have multiple options and features to fulfill the most common needs.
+Custom scrollbar with different options to have different behaviors from the native one.
 
 *(
 <doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-scroll',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -871,20 +870,13 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
         doc-showcase {
           width: calc(100% - 40px);
         }
-        eon-panel {
-          width: 100%;
-          min-width: 100% !important;
-        }
-        .panel-content {
-          width: 100% !important;
-        }
       }
     </style>
   </template>
   <template type="html-body">
     <doc-showcase label="Closable and Draggable">
       <eon-scroll fill="true" arrow-scrolls="true" rail-scrolls="true">
-      <div style="width: 100%">
+      <div style="width: 100%; color: #d3d3d3;">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et placerat nulla, at suscipit lorem. Nulla ac elementum quam, rhoncus interdum quam. Morbi volutpat mauris eu lectus consequat sollicitudin. Curabitur eu odio maximus, consectetur quam vitae, vestibulum erat. Cras id rutrum ligula. Vestibulum viverra libero dui, non elementum erat porttitor ullamcorper. Donec euismod fringilla arcu, quis lacinia urna volutpat id. Quisque eget pellentesque arcu, sit amet blandit nisi. Donec eu maximus ex, at elementum est. Etiam consequat vestibulum justo, facilisis aliquet nisi sodales nec. Donec rutrum pulvinar justo, nec pharetra felis fringilla ac. Aliquam posuere gravida erat et tristique. In congue felis sit amet suscipit pharetra. Vestibulum volutpat non diam imperdiet sodales. Donec vitae tempor turpis.<br><br>
 
 Ut ornare rhoncus volutpat. Nulla facilisi. Etiam eget rhoncus libero. Duis nec fermentum mauris. Vestibulum sed finibus nulla, eu accumsan turpis. Vivamus vel dui blandit, cursus libero id, pellentesque urna. Fusce venenatis eleifend ipsum. Etiam ornare consectetur odio. Nunc blandit ac est nec suscipit. Donec ac enim lacus. Nullam ante mi, vestibulum non enim hendrerit, maximus tempus orci. Cras vestibulum mauris nunc, nec rutrum ante convallis id. Sed porta nulla eu egestas ornare. Fusce ligula sapien, scelerisque vel suscipit sit amet, tincidunt id metus. Etiam malesuada dignissim libero.<br><br>
@@ -909,46 +901,8 @@ Mauris vel pulvinar mi. Nullam eu facilisis nibh. Nulla at leo vel velit cursus 
     </doc-showcase>
   </template>
   <template type="css">
-    /* Tabs custom style */
-      .d-tabs {
-        height: 330px;
-        width: 100%;
-        padding: 0;
-        -webkit-box-shadow: 0px 0px 10px #d8d8d8;
-        -moz-box-shadow: 0px 0px 10px #d8d8d8;
-        box-shadow: 0px 0px 10px #d8d8d8;
-      }
-
-      .d-tabs-content {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .blue {
-        background-color: #7296bb !important;
-      }
-
-      .green {
-        background-color: #76bb72 !important;
-      }
-
-      .red {
-        background-color: #b36a6a;
-      }
   </template>
   <template type="js">
-    function renderLazy() {
-      document.querySelector("#lazy-content").render();
-      // Remove place holder
-      document.querySelector("#lazy-content .place-holder").style.display = "none";
-    }
-    function importRemote() {
-      document.querySelector("#lazy-remote").importContent();
-      // Remove place holder
-      document.querySelector("#lazy-remote .place-holder").style.display = "none";
-    }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
