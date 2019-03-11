@@ -3,7 +3,7 @@ One of the main concerns a web application has to deal with is data management. 
 
 Therefore, Eon provides two tools to make this task easier:
 
-- `eon-endpoint`: 
+- `eon-endpoint`
 - `eon-store` 
 [Endpoint]<>
 The endpoint tool offers an API for data managing based on the commonly used web communication technologies (REST, Web Sockets, GraphQL). It is as easy as specifying the technology that you are using to communicate with the remote resource and the resource location: 
