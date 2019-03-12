@@ -2702,7 +2702,7 @@ eon.themeCacheBusting = "themeCacheBusting" in eon ? eon.themeCacheBusting : fal
 eon.pollyfillCacheBusting = "pollyfillCacheBusting" in eon ? eon.pollyfillCacheBusting : false;
 
 eon.getCacheBustedUrl = function (url) {
-  return url + "?" + new Date;
+  return url + "?ecb=" + (+ new Date);
 }
 
 eon.getCurrentScript = function() {
@@ -9097,7 +9097,7 @@ eon.endpoint = function (type, url) {
   this.url = url;
   /* GraphQL Web Sockets based use only */
   this.socket = type == "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
-  this.socket = ~["socket", "graphSockets"].indexOf(type) ? new WebSocket(this.url) : this.socket;
+  this.socket = ~["WebSockets", "graphSockets"].indexOf(type) ? new WebSocket(this.url) : this.socket;
 
   /* 
       ##########
@@ -9186,7 +9186,7 @@ eon.endpoint = function (type, url) {
     @function send
     @description Send data
   */
-  this.send = type == "socket" ? function (data) {
+  this.send = type == "WebSockets" ? function (data) {
     el.socket.send(data);
   } : this.send;
 
@@ -9273,8 +9273,8 @@ eon.endpoint = function (type, url) {
 
   // -- GraphQL Web Sockets API --
 
-  // Query call Web sockets based
-  function graphSocketsSubscription(queryString, cb) {
+  // Query call Web Sockets based
+  function graphSocketsSubscription(queryString) {
     el.socket.send("subscription:" + queryString);
   }
 }
