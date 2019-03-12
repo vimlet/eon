@@ -8,7 +8,7 @@ eon.themeCacheBusting = "themeCacheBusting" in eon ? eon.themeCacheBusting : fal
 eon.pollyfillCacheBusting = "pollyfillCacheBusting" in eon ? eon.pollyfillCacheBusting : false;
 
 eon.getCacheBustedUrl = function (url) {
-  return url + "?" + (+ new Date);
+  return url + "?ecb=" + (+ new Date);
 }
 
 eon.getCurrentScript = function() {

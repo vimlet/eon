@@ -81,6 +81,8 @@ On device mode, the menu appears when the user doing a long click.
 [Menu]<>
 ^[eon-menu API](#!version=latest&mode=api&file=ui%2Feon-menu%2Feon-menu.html)
 
+Basic menu with dropdowns for category options.
+
 *(
 <doc-playground label="Regular Contextmenu" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html-head">
@@ -113,6 +115,7 @@ On device mode, the menu appears when the user doing a long click.
         </eon-menu>
       </doc-showcase>
     </div>
+    <div style="height:50px;"></div>
     <div style="height:50px;"></div>
   </template>
   <template type="footer">
