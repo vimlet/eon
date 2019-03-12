@@ -16,6 +16,11 @@ By default the button style is outline, but they can be flat and filled using th
 *(
 <doc-playground label="Regular Buttons" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
@@ -59,6 +64,11 @@ To display buttons with icons just use the `vicon` property passing any of the i
 *(
 <doc-playground label="Icon Buttons" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
@@ -110,6 +120,11 @@ The checkbox element allows selecting multiple options of a group of choices. It
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
       eon.import([
@@ -147,6 +162,11 @@ The combobox element is a component meant for selecting an option between the gi
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
@@ -200,6 +220,11 @@ Enables the user to type in the input so that the options provided by the dropdo
 *(
 <doc-playground label="Filtering" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
@@ -250,6 +275,11 @@ Classic input type date where you can either `type` the desired date or you can 
 *(
 <doc-playground label="Input Type" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
@@ -294,6 +324,11 @@ This type of date will only allow you to have a `calendar` directly leaving the 
 *(
 <doc-playground label="Calendar Type" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
@@ -341,6 +376,11 @@ This form component consists of an entry field for numerical values with `up` an
 *(
 <doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
       eon.import([
@@ -378,6 +418,11 @@ The radio element allows selecting one option of a group of choices, for this, t
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
@@ -431,6 +476,11 @@ Form component that allows selecting a value from a range of values by moving th
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
       eon.import([
@@ -474,6 +524,11 @@ The text element is a component meant for typing and it has multiple uses depend
 *(
 <doc-playground label="Regular Text" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
       eon.import([
@@ -515,6 +570,11 @@ The area type text enables the user to write large amount of characters in multi
 *(
 <doc-playground label="Textarea" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
       eon.import([
@@ -554,6 +614,11 @@ The password text is pretty similar to the text type but it shows asterisks inst
 *(
 <doc-playground label="Password" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script>
       eon.import([
@@ -595,6 +660,11 @@ This component is a simple on/off switch. It works almost the same way as an eon
 *(
 <doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
       eon.import([

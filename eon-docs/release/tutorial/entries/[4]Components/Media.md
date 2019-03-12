@@ -14,9 +14,13 @@ This element is a combination of the well known slider and image gallery compone
 *(
 <doc-playground label="Simple Slider" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-swiper"]
       }
@@ -90,9 +94,13 @@ The swiper gallery type provides a full bunch of options to build the images lay
 *(
 <doc-playground label="Gallery" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-swiper"]
       }
@@ -159,9 +167,13 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
 *(
 <doc-playground label="Simple Video" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-video"]
       }
