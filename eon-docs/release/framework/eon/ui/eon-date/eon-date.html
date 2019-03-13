@@ -270,14 +270,6 @@
         reflect: true
       },
       /*
-      @property {String} labelAnim
-      @description Whether the label will have animation or not
-      */
-      labelAnim: {
-          value: true,
-          reflect: true
-      },
-      /*
       @property {String} tooltip
       @description Text to be shown for the element
       */
@@ -329,23 +321,6 @@
         el._updateLabel();
         el._updateDisabled();
         el._updateReadOnly();
-
-      },
-      /*
-      @function (private) _setupLabelAnimation
-      @description Inits label animation classes and style
-      */
-      setupLabelAnimation: function () {
-
-        var el = this;
-
-        if (eon.util.isTrue(el.labelAnim)) {
-
-          if (el.value == "" && el.default == "") {
-            el._refs.label.classList.add("eon-text-movedLabel");
-          }
-
-        }
 
       },
       /*
@@ -530,7 +505,6 @@
 
         el._refs.data = el.template.querySelector(".eon-date-data");
         el._refs.main = el.template.querySelector(".eon-date-main");
-        el._refs.label = el.template.querySelector(".eon-date-label");
 
         el._refs.calendarButton = el.template.querySelector(".eon-date-button");
 
@@ -1109,8 +1083,6 @@
         el.classList.add("eon-date-focus");
         el._labelNode.classList.add("eon-fg1");
 
-        el._animateLabel();
-
       },
       /*
       @function (private) _revertFocusStyle
@@ -1123,27 +1095,6 @@
         el._refs.underline.classList.remove("animate");
         el.classList.remove("eon-date-focus");
         el._labelNode.classList.remove("eon-fg1");
-
-        el._animateLabel();
-
-      },
-      /*
-      @function (private) _animateLabel
-      @description Depending on the focus state animates the label or not
-      */
-      animateLabel: function () {
-
-        var el = this;
-
-        if (eon.util.isTrue(el.labelAnim)) {
-          
-          if (el.classList.contains("eon-date-focus") || el.value != "") {
-            el._refs.label.classList.remove("eon-date-movedLabel");
-          } else {
-            el._refs.label.classList.add("eon-date-movedLabel");
-          }
-
-        }
 
       },
       /*
@@ -1275,7 +1226,7 @@
           year: year
 
         }
-        
+
         //If all the three fields have text typed in and their content is valid we set the boolean to true
         if (year != "") {
           if (month != "" && parseInt(month) > 0 && parseInt(month) <= 12) {
@@ -1296,15 +1247,12 @@
 
           el._misc.preventUpdate = true;
 
-          el.value = eon.time.generateOutput(obj, el.valueFormat);
+          el.value = eon.time.generateOutput(dateObj, el.valueFormat);
 
 
         } else {
 
           el.invalid = true;
-
-          el._misc.preventUpdate = true;
-          el.value = "";
 
         }
 
@@ -1538,9 +1486,9 @@
       handleKeyUp: function (subInput, e) {
 
         var el = this;
-        
+
         if (!(document.activeElement.isEqualNode(subInput) && el._getSelectionText().length == subInput.value.length)) {
-          
+
           if (el._isNumeric(e) || e.keyCode == "8" || e.keyCode == "46") {
 
             var subInputs = el.querySelector(".eon-date-subInputs");
@@ -1556,12 +1504,12 @@
 
               el._handleCorrection();
             }
-            
+
+            el._validate();
+
           }
 
         }
-
-        el._validate();
 
       },
       /*
@@ -2795,7 +2743,7 @@
       updateValue: function () {
 
         var el = this;
-        
+
         if (!el._misc.preventUpdate) {
 
           var format = el.valueFormat;
@@ -2929,7 +2877,7 @@
 
     },
     onInit: function () {
-      
+
       var el = this;
 
       el._setupMisc();
@@ -2937,8 +2885,6 @@
       el._setupOverlay();
       el._setupType();
       el._setupDescription();
-
-      el._setupLabelAnimation(); 
 
     },
     onRender: function () {

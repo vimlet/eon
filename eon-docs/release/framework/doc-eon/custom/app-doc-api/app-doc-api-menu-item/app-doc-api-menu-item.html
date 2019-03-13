@@ -1,0 +1,161 @@
+<template>
+    <eon-combobox>
+        <eon-item class="app-doc-api-menu-item-search-item" value="">
+            <eon-searchbar>
+                <eon-text name="name" placeholder="Search" onkeyup='this.parent.search();'></eon-text>
+            </eon-searchbar>
+        </eon-item>
+    </eon-combobox>
+    <div class="app-doc-api-menu-item-label">
+        <div class="app-doc-api-menu-item-label-text"></div>
+    </div>
+</template>
+
+<script>
+    eon.element("app-doc-api-menu-item", {
+
+        style: "app-doc-api-menu-item.css",
+        dependencies: [
+            "../../../eon/ui/eon-combobox",
+            "../../../eon/ui/eon-searchbar"
+        ],
+
+
+        properties: {
+            label: {
+                value: "",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {}
+            }
+        },
+        functions: {
+            // @function addItem (public) [Add item to menu]
+            addItem: function (item, onclick, private) {
+                var el = this;
+                var newItem = document.createElement("eon-item");
+                newItem.value = item;
+                newItem.displayValue = item;
+                newItem.name = item;
+                newItem.addEventListener("click", function () {
+                    onclick();
+                });
+                if (private) {
+                    el._misc.privates.push(newItem);
+                    newItem.classList.add("app-doc-api-menu-item-hide");
+                }
+                el._misc.items.push(newItem);
+                el._refs.combobox.addItem(newItem);
+            },
+            // @function togglePrivate (public) [Toggle private elements]
+            togglePrivate: function (toggleTo) {
+                var el = this;
+                if (toggleTo) {
+                    el._misc.privates.forEach(function (priv) {
+                        priv.classList.add("app-doc-api-menu-item-hide");
+                    });
+                } else {
+                    el._misc.privates.forEach(function (priv) {
+                        priv.classList.remove("app-doc-api-menu-item-hide");
+                    });
+                }
+            },
+            // @function search (public) [Filter items]
+            search: function () {
+                var el = this;
+                if (el._refs.search) {
+                    var searchbar = el._refs.search.querySelector("eon-searchbar");
+                    // searchbar.search(el._refs.combobox);
+                    searchbar.search();
+                }
+            },
+            // @function reset (public) [Reset current element to new]
+            reset: function () {
+                var el = this;
+                el._misc.items.forEach(function (node) {
+                    if (node.parentNode) {
+                        node.parentNode.removeChild(node);
+                    }
+                });
+                el._misc.items = [];
+                el._misc.privates = [];
+                el.style.display = "block";
+            }
+        },
+
+        privateFunctions: {
+            // @function init (private)
+            init: function () {
+                var el = this;
+                el._setRefs();
+                el._setUp();
+                // el._setUpSearch();
+                el._misc.items = [];
+                el._misc.privates = [];
+            },
+            // @function setRefs (private)
+            setRefs: function () {
+                var el = this;
+                el._refs = {};
+                el._refs.combobox = el.querySelector("eon-combobox");
+                el._refs.label = {};
+                el._refs.label.main = el.querySelector(".app-doc-api-menu-item-label");
+                el._refs.label.text = el._refs.label.main.querySelector(".app-doc-api-menu-item-label-text");
+                el._refs.search = el._refs.combobox._misc.items[""];
+            },
+            // @function setUp (private)
+            setUp: function (value) {
+                var el = this;
+                el._refs.label.main.addEventListener("click", function () {
+                    setTimeout(function () {
+
+                        el._refs.combobox._toggleDropdown();
+                    }, 0);
+                });
+                if (el.label) {
+                    el._refs.label.text.innerText = el.label;
+                }
+
+                if (el._refs.search) {
+                    var searchbar = el._refs.search.querySelector("eon-searchbar");
+                    searchbar.addEventListener("click", function (e) {
+                        e.stopPropagation();
+                    });
+                    el._refs.search.querySelector("eon-text").parent = el;
+
+
+
+                    searchbar.onSearch(function (filters) {
+                        var name = filters.name;
+                        for (var i = 0; i < el._misc.items.length; i++) {
+                            if (el._misc.items[i].getAttribute("value").toLowerCase().indexOf(name.trim()
+                                    .toLowerCase()) >
+                                -1) {
+                                el._misc.items[i].classList.remove(
+                                    "app-doc-api-menu-item-filter-hidden");
+                            } else {
+                                el._misc.items[i].classList.add(
+                                    "app-doc-api-menu-item-filter-hidden");
+                            }
+                        }
+                    });
+
+                }
+            }
+        },
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        },
+
+
+    });
+</script>
