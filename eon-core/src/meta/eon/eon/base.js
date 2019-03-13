@@ -1,6 +1,16 @@
 // ############################################################################################
 // BASE
 // ############################################################################################
+
+eon.cacheBusting = "cacheBusting" in eon ? eon.cacheBusting : false;
+eon.importCacheBusting = "importCacheBusting" in eon ? eon.importCacheBusting : false;
+eon.themeCacheBusting = "themeCacheBusting" in eon ? eon.themeCacheBusting : false;
+eon.pollyfillCacheBusting = "pollyfillCacheBusting" in eon ? eon.pollyfillCacheBusting : false;
+
+eon.getCacheBustedUrl = function (url) {
+  return url + "?ecb=" + (+ new Date);
+}
+
 eon.getCurrentScript = function() {
     if (document.currentScript) {
       return document.currentScript.src;

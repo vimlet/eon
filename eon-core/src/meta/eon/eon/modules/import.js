@@ -39,14 +39,11 @@ eon.import = function (param) {
 };
 
 eon.insertImport = function (href) {
-    
+
     var elementName;
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
-
-    // Cache
-    eon.cache.add(href, { name: elementName });
 
     if (!(elementName in eon.imports.templates)) {
 
@@ -62,31 +59,34 @@ eon.insertImport = function (href) {
         // Declare element
         eon.declare(elementName);
 
-        var xhttp = new XMLHttpRequest();
+        eon.ajax(href, { cacheBusting: eon.cacheBusting || eon.importCacheBusting }, function (success, obj) {
 
-        xhttp.onreadystatechange = function () {
+            if (success) {
 
-            if (this.readyState == 4 && this.status == 200) {
+                // Cache
+                eon.cache.add(obj.url, { name: elementName });
 
-                eon.insertFragment(elementName, this.responseText);
+                if (obj.xhr.status == 200) {
 
-            } else if (this.readyState == 4) {
+                    eon.insertFragment(elementName, obj.responseText);
 
-                // Since this element can't be imported, we reduce the total components amount so that the execution may continue
-                eon.imports.total--;
+                } else {
 
-                // Removes it from the already saved objects
-                delete eon.imports.templates[elementName];
-                delete eon.imports.paths[elementName];
+                    // Since this element can't be imported, we reduce the total components amount so that the execution may continue
+                    eon.imports.total--;
 
-                // Saves it into the erros object
-                eon.imports.errors[elementName] = this.status;
+                    // Removes it from the already saved objects
+                    delete eon.imports.templates[elementName];
+                    delete eon.imports.paths[elementName];
+
+                    // Saves it into the erros object
+                    eon.imports.errors[elementName] = obj.xhr.status;
+
+                }
 
             }
-        };
 
-        xhttp.open("GET", href);
-        xhttp.send();
+        });
 
     }
 
@@ -269,6 +269,8 @@ eon.importMainTheme = function (theme) {
         var mainLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/main.css";
 
+        themePath = eon.cacheBusting || eon.themeBoostedCache ? eon.getCacheBustedUrl(themePath) : themePath;
+
         eon.registry.registerTheme("main", theme);
 
         mainLink.setAttribute("rel", "stylesheet");
@@ -290,6 +292,8 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
+
+        themePath = eon.cacheBusting || eon.themeBoostedCache ? eon.getCacheBustedUrl(themePath) : themePath;
 
         eon.registry.registerTheme(name, theme);
 

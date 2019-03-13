@@ -8,11 +8,16 @@
 ^[eon-progressbar API](#!version=latest&mode=api&file=ui%2Feon-progressbar%2Feon-progressbar.html)
 
 
-The loader element is a useful mask for your application processes and page loading as well. Its style, animation, and functionality are completely customizable improving your application user experience.
+The loader element is an useful mask for your application processes and page loading as well. Its style, animation, and functionality are completely customizable improving your application user experience.
 
 *(
 <doc-playground label="Progress Bar" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.themeSchema = {
@@ -108,6 +113,11 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
 *(
 <doc-playground label="File Manager" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.themeSchema = {
