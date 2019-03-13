@@ -28,7 +28,7 @@ The loader element is an useful mask for your application processes and page loa
       eon.import([  
         'framework/doc-eon/eon/ui/eon-progressbar',
         'framework/doc-eon/eon/ui/eon-button',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -127,7 +127,7 @@ The eon-tree element is the best ally to represent hierarchical data, it is base
     <script>
       eon.import([  
         'framework/doc-eon/eon/ui/eon-tree',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>

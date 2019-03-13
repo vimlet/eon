@@ -28,7 +28,7 @@ Also, it has different properties to give it different functionality such as res
         'framework/doc-eon/eon/ui/eon-dialog',
         'framework/doc-eon/eon/ui/eon-text',
         'framework/doc-eon/eon/ui/eon-button',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -82,7 +82,7 @@ Also, it has different properties to give it different functionality such as res
     <div class="content">
       <doc-showcase label="Interactive">
         <eon-button value="Show" onclick="document.querySelector('#textDialog').open()"></eon-button>
-        <eon-dialog id="textDialog" modal="true" class="d-dialog" heading="Interactive dialog" blur="true" closable="true" maximize="true"
+        <eon-dialog id="textDialog" class="d-dialog" heading="Interactive dialog" blur="true" closable="true" maximize="true"
           minimize="true" resize="true" drag="true" default-style="false">
           <eon-section type="content">
             <p>
@@ -123,10 +123,10 @@ Also, it has different properties to give it different functionality such as res
           </eon-section>
         </eon-dialog>
       </doc-showcase>
-      <doc-showcase label="Login">
-        <eon-button value="Show log" onclick="document.querySelector('#loginDialog').open()">
+      <doc-showcase label="Modal">
+        <eon-button value="Show" onclick="document.querySelector('#loginDialog').open()">
         </eon-button>
-        <eon-dialog id="loginDialog" blur="true" resize="true" heading="Login" default-style="false">
+        <eon-dialog id="loginDialog" modal="true" blur="true" resize="true" heading="Login" default-style="false">
           <eon-section type="content">
             <eon-form class="d-dialog-form" action="#" method="get">
               <eon-text name="userName" inline="false" placeholder="User name" label="User name"></eon-text>
@@ -141,7 +141,7 @@ Also, it has different properties to give it different functionality such as res
   </template>
   <template type="js">
     eon.onReady(function(){
-      document.querySelector("#loginDialog").open();
+      document.querySelector("#textDialog").open();
     });
   </template>
   <template type="footer">
@@ -168,7 +168,7 @@ Also known as `table`, displays a large number of data using rows and columns.
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
   </template>
@@ -260,7 +260,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
   </template>
@@ -424,7 +424,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-gutter',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -502,7 +502,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-gutter',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -599,7 +599,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-headerpanel',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -687,7 +687,7 @@ Panel is the basic container element. It has no associated style so it is comple
       eon.import([
         'framework/doc-eon/eon/ui/eon-button',
         'framework/doc-eon/eon/ui/eon-panel',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -801,7 +801,7 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-tabs',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -881,7 +881,7 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
 ^[eon-scroll API](#!version=latest&mode=api&file=ui%2Feon-panel%2Feon-panel.html)
 
 
-Custom scrollbar with different options to have different behaviors from the native one.
+Custom scrollbar with multiple options to have different behaviors from the native one.
 
 *(
 <doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
@@ -895,7 +895,7 @@ Custom scrollbar with different options to have different behaviors from the nat
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-scroll',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>

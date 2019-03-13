@@ -28,7 +28,7 @@ This element is a combination of the well known slider and image gallery compone
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-swiper',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -106,7 +106,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
       }
       eon.import([
         'framework/doc-eon/eon/ui/eon-swiper',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -181,7 +181,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-video',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>

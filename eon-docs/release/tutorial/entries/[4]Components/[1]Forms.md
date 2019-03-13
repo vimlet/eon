@@ -25,7 +25,7 @@ By default the button style is outline, but they can be flat and filled using th
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-button',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -73,7 +73,7 @@ To display buttons with icons just use the `vicon` property passing any of the i
     <script>
       eon.import([
       'framework/doc-eon/eon/ui/eon-button',
-      'framework/doc-eon/custom/doc-playground/doc-showcase'
+      'framework/custom/doc-playground/doc-showcase'
     ]);
     </script>
     <style>
@@ -129,7 +129,7 @@ The checkbox element allows selecting multiple options of a group of choices. It
     <script> 
       eon.import([
         "framework/doc-eon/eon/ui/eon-checkbox", 
-        "framework/doc-eon/custom/doc-playground/doc-showcase"
+        "framework/custom/doc-playground/doc-showcase"
       ]);
     </script>
     <style>
@@ -172,7 +172,7 @@ The combobox element is a component meant for selecting an option between the gi
       eon.import([
         'framework/doc-eon/eon/ui/eon-combobox',
         'framework/doc-eon/eon/ui/eon-item',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -230,7 +230,7 @@ Enables the user to type in the input so that the options provided by the dropdo
       eon.import([
         'framework/doc-eon/eon/ui/eon-combobox',
         'framework/doc-eon/eon/ui/eon-item',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -284,7 +284,7 @@ Classic input type date where you can either `type` the desired date or you can 
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-date',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -333,7 +333,7 @@ This type of date will only allow you to have a `calendar` directly leaving the 
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-date',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -385,7 +385,7 @@ This form component consists of an entry field for numerical values with `up` an
     <script> 
       eon.import([
         "framework/doc-eon/eon/ui/eon-number",
-        "framework/doc-eon/custom/doc-playground/doc-showcase"
+        "framework/custom/doc-playground/doc-showcase"
       ]);
     </script>
     <style>
@@ -428,7 +428,7 @@ The radio element allows selecting one option of a group of choices, for this, t
       eon.import([
         'framework/doc-eon/eon/ui/eon-group',
         'framework/doc-eon/eon/ui/eon-radio',
-        'framework/doc-eon/custom/doc-playground/doc-showcase'
+        'framework/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -485,7 +485,7 @@ Form component that allows selecting a value from a range of values by moving th
     <script> 
       eon.import([
         "framework/doc-eon/eon/ui/eon-slider",
-        "framework/doc-eon/custom/doc-playground/doc-showcase"
+        "framework/custom/doc-playground/doc-showcase"
       ]);
     </script>
     <style>
@@ -533,7 +533,7 @@ The text element is a component meant for typing and it has multiple uses depend
     <script> 
       eon.import([
         "framework/doc-eon/eon/ui/eon-text",
-        "framework/doc-eon/custom/doc-playground/doc-showcase"
+        "framework/custom/doc-playground/doc-showcase"
       ]);
     </script>
     <style>
@@ -579,7 +579,7 @@ The area type text enables the user to write large amount of characters in multi
     <script> 
       eon.import([
         "framework/doc-eon/eon/ui/eon-text", 
-        "framework/doc-eon/custom/doc-playground/doc-showcase"
+        "framework/custom/doc-playground/doc-showcase"
       ]);
     </script>
     <style>
@@ -623,7 +623,7 @@ The password text is pretty similar to the text type but it shows asterisks inst
     <script>
       eon.import([
         "framework/doc-eon/eon/ui/eon-text", 
-        "framework/doc-eon/custom/doc-playground/doc-showcase"
+        "framework/custom/doc-playground/doc-showcase"
       ]);
     </script>
     <style>
@@ -669,7 +669,7 @@ This component is a simple on/off switch. It works almost the same way as an eon
     <script> 
       eon.import([
         "framework/doc-eon/eon/ui/eon-toggle",
-        "framework/doc-eon/custom/doc-playground/doc-showcase"
+        "framework/custom/doc-playground/doc-showcase"
       ]);
     </script>
     <style>

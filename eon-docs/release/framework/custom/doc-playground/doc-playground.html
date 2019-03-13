@@ -12,7 +12,7 @@
     <div class="doc-playground-content">
         <iframe class="doc-playground-hidden"></iframe>
         <eon-editor class="doc-playground-hidden" lazy-load="true"></eon-editor>
-        <eon-loading class="doc-playground-loading"></eon-loading>
+        <eon-loading class="doc-playground-loading" format="descendant" duration="0"></eon-loading>
         <app-fading in="0" out="0.5"></app-fading>
         <div class="doc-playground-footer-links"></div>
     </div>
@@ -59,16 +59,6 @@
                 value: "false",
                 reflect: true
             },
-            // @html-attribute scripts (public) [Scripts to import in result header without show them. Strings separated with comas]
-            scripts: {
-                value: "",
-                reflect: false
-            },
-            // @html-attribute components (public) [Components to import in result header without show them. Note that eon.js should be added to scripts in order to use components import. Strings separated with comas]
-            components: {
-                value: "",
-                reflect: false
-            },
             // @html-attribute result (public) [Result window]
             result: {
                 value: {},
@@ -87,6 +77,10 @@
             // @html-attribute onResultReady (public) [Callback when the result view is ready]
             onResultReady: {
                 value: {}
+            },
+            // @html-attribute autoHideLoadingMask (public) [Auto hide loading mask when iframe ready. Default true. If set to false, the loading mask needs to be cancel calling hideLoadingMask function]
+            autoHideLoadingMask: {
+                value: "true"
             }
         },
 
@@ -100,6 +94,11 @@
         },
 
         functions: {
+            // @function hideLoadingMask (public) [Hide loading mask]
+            hideLoadingMask: function () {
+                var el = this;
+                el._refs.loading.hide();
+            },
             // @function setTitle (public) [Set playground title]
             setTitle: function (title) {
                 var el = this;
@@ -222,16 +221,12 @@
 
                 el._refs.iframe.onload = el._iframeLoaded(el.result);
 
-                // TODO This function load scripts async which could result into a bottle neck
-                el._appendScriptsToIframe(el.result);
-
-
                 if (typeof (el.onResultReady) != "object") {
                     eval(el.onResultReady)(el, el.result);
                 }
-
-                el._refs.iframe.classList.remove("doc-playground-hidden");
-                el._refs.loading.hide();
+                if (eon.util.isTrue(el.autoHideLoadingMask)) {
+                    el._refs.loading.hide();
+                }
             },
             // @function toggle (public) [Switch code and result view] @param-optional view [Force toggle to one specific (result/code)]
             toggle: function (view) {
@@ -307,23 +302,23 @@
             // @function _init (private) [Initialize component]
             init: function () {
                 var el = this;
-                el._setUpRefs();
+                // el._setUpRefs();
                 el._setUp();
             },
             // @function _setUpRefs (private) [Set up references]
             setUpRefs: function () {
                 var el = this;
-                el._refs.title = el.querySelector(".doc-playground-menu-title");
-                el._refs.iframe = el.querySelector("iframe");
-                el._refs.content = el.querySelector(".doc-playground-content");
-                el._refs.editor = el.querySelector("eon-editor");
-                el._refs.loading = el.querySelector(".doc-playground-loading");
-                el._refs.toggle = el.querySelector(".doc-playground-toggle");
-                el._refs.fullscreen = el.querySelector(".doc-playground-fullscreen");
-                el._refs.tabs = el.querySelector(".doc-playground-menu-tabs");
-                el._refs.header = el.querySelector(".doc-playground-menu-links");
-                el._refs.footer = el.querySelector(".doc-playground-footer-links");
-                el._refs.fading = el.querySelector("app-fading");
+                el._refs.title = el.template.querySelector(".doc-playground-menu-title");
+                el._refs.iframe = el.template.querySelector("iframe");
+                el._refs.content = el.template.querySelector(".doc-playground-content");
+                el._refs.editor = el.template.querySelector("eon-editor");
+                el._refs.loading = el.template.querySelector(".doc-playground-loading");
+                el._refs.toggle = el.template.querySelector(".doc-playground-toggle");
+                el._refs.fullscreen = el.template.querySelector(".doc-playground-fullscreen");
+                el._refs.tabs = el.template.querySelector(".doc-playground-menu-tabs");
+                el._refs.header = el.template.querySelector(".doc-playground-menu-links");
+                el._refs.footer = el.template.querySelector(".doc-playground-footer-links");
+                el._refs.fading = el.template.querySelector("app-fading");
             },
             // @function _setUp (private) [Set up component]
             setUp: function () {
@@ -332,12 +327,6 @@
                 el._misc.editorSet = false;
                 el._refs.editor.readonly = el.readonly;
                 el._misc.isFullscreen = false;
-                el.scripts = el.scripts ? Array.isArray(el.getAttribute("scripts").split(",")) ? el.getAttribute(
-                    "scripts").split(",") : [] : "";
-                el.components = el.components ? Array.isArray(el.getAttribute("components").split(",")) ?
-                    el.getAttribute(
-                        "components").split(
-                        ",") : [] : "";
                 el.setTitle();
                 el.setIframe();
                 el.setLinks();
@@ -648,54 +637,6 @@
                 match = match.substring(open.length, match.length - close.length).trim();
                 return match;
             },
-            // @function _appendScriptsToIframe (private) [Append scripts to iframe head] @param iframeContent
-            appendScriptsToIframe: function (iframeContent) {
-                var el = this;
-                var scriptsToLoad = el._iframeGenericJs();
-
-                // @function _appendJs (private) [Recursive call to load scripts within _appendScriptsToIframe function] @param script
-                function appendJs(script) {
-                    script.addEventListener('load', function () {
-                        var currentScript = scriptsToLoad.shift();
-                        if (currentScript) {
-                            appendJs(currentScript);
-                        }
-                    });
-                    iframeContent.head.appendChild(script);
-                }
-
-                iframeContent.head.appendChild(scriptsToLoad.shift());
-                appendJs(scriptsToLoad.shift());
-            },
-            // @function _iframeGenericJs (private) [Js code added to any iframe]
-            iframeGenericJs: function () {
-                var el = this;
-                var result = [];
-                var themeJs = document.createElement("script");
-                themeJs.innerHTML = "var eon = { theme: 'claro' };";
-                result.push(themeJs);
-                if (el.scripts.length > 0) {
-                    el.scripts.forEach(function (src) {
-                        var script = document.createElement("script");
-                        script.src = src;
-                        result.push(script);
-                    });
-                }
-                var componentsJs = document.createElement("script");
-                componentsJs.innerHTML = "";
-                if (el.components.length > 0) {
-                    var imp = "eon.import([";
-                    el.components.forEach(function (component) {
-                        imp += "'" + component + "',";
-
-                    });
-                    imp = imp.substring(0, imp.length - 1); // Remove last coma.
-                    imp += "]);";
-                    componentsJs.innerHTML += imp;
-                }
-                result.push(componentsJs);
-                return result;
-            },
             // @function _iframeLoaded (private) [Function called when iframe is loaded. Calculate iframe height]
             iframeLoaded: function (iframeContent) {
                 var el = this;
@@ -742,14 +683,13 @@
             eon.createCallback("onResultReady", this, "ready");
             eon.createCallback("onFullScreenActivated", this);
             eon.createCallback("onFullScreenDeactivated", this);
+            el._setUpRefs();
         },
 
 
         onReady: function () {
             var el = this;
-            setTimeout(() => {
-                el._init();
-            }, 0);
+            el._init();
         },
 
 
