@@ -122,13 +122,6 @@
 
       },
       /*
-      @function (private) _setupRefs
-      @description Creates references to relevant nodes
-      */
-      setupRefs: function () {
-        this._refs.container = this.parentNode;
-      },
-      /*
       @function (private) _definePublicProperties
       @description Creates definitions for some public properties
       */
@@ -391,53 +384,66 @@
       assignSize: function () {
 
         var el = this;
+        var fn = function () {
 
-        // If the element will take the size of its parent
-        if (eon.util.isTrue(el.fill)) {
+          el._refs.container = el.parentNode;
 
-          var containerComputedStyle = window.getComputedStyle(el._refs.container);
+          // If the element will take the size of its parent
+          if (eon.util.isTrue(el.fill)) {
 
-          // If the parent has a height given by flex then we also setup our element as flex
-          if (containerComputedStyle.flexGrow == "1") {
+            var containerComputedStyle = window.getComputedStyle(el._refs.container);
 
-            el._refs.container.classList.add("eon-scroll-flexContainer");
+            // If the parent has a height given by flex then we also setup our element as flex
+            if (containerComputedStyle.flexGrow == "1") {
 
-            el.style.display = "flex";
-            el.style.flexGrow = "1";
+              el._refs.container.classList.add("eon-scroll-flexContainer");
 
-            el.content.style.flexGrow = "1";
+              el.style.display = "flex";
+              el.style.flexGrow = "1";
 
-            // Else if the container has a specified height we will completely fill it
+              el.content.style.flexGrow = "1";
+
+              // Else if the container has a specified height we will completely fill it
+            } else {
+
+              el.style.height = "100%";
+              el.style.width = "100%";
+
+              if (el._isAllowedToHaveScroll("vertical")) {
+                el.content.style.width = "calc(100% + " + el._misc.scrollBarSpace + "px)";
+              }
+
+              if (el._isAllowedToHaveScroll("horizontal")) {
+                el.content.style.height = "calc(100% + " + el._misc.scrollBarSpace + "px)";
+              }
+
+              el._misc.calculatedContentSize = true;
+
+            }
+
+            // Else if we do not want to fill
           } else {
 
-            el.style.height = "100%";
-            el.style.width = "100%";
-
-            if (el._isAllowedToHaveScroll("vertical")) {
-              el.content.style.width = "calc(100% + " + el._misc.scrollBarSpace + "px)";
+            // If we have autoGrowth set to true then it means the scroll will grow according to its content, so we set display: flex to the container
+            if (eon.util.isTrue(el.autoGrowth)) {
+              el._refs.container.style.display = "flex";
             }
 
-            if (el._isAllowedToHaveScroll("horizontal")) {
-              el.content.style.height = "calc(100% + " + el._misc.scrollBarSpace + "px)";
-            }
+            el.style.display = "flex";
+            el.style.flexDirection = "column";
 
-            el._misc.calculatedContentSize = true;
+            el.content.style.flexGrow = 1;
 
           }
 
-          // Else if we do not want to fill
+        }
+
+        if (el.parentNode.nodeType == 1) {
+          fn();
         } else {
-
-          // If we have autoGrowth set to true then it means the scroll will grow according to its content, so we set display: flex to the container
-          if (eon.util.isTrue(el.autoGrowth)) {
-            el._refs.container.style.display = "flex";
-          }
-
-          el.style.display = "flex";
-          el.style.flexDirection = "column";
-
-          el.content.style.flexGrow = 1;
-
+          el.onReady(function () {
+            fn();
+          });
         }
 
       },
@@ -1862,8 +1868,6 @@
     onInit: function () {
 
       var el = this;
-
-      el._setupRefs();
 
       el._appendContent();
       el._assignSize();
