@@ -1,0 +1,344 @@
+<template>
+  <a>
+    <div class="eon-button-button eon-bg2-border eon-bg2-hoverable eon-fg2-filled eon-unselectable"></div>
+  </a>
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-button",
+    style: "eon-button.css",
+
+    themed: true, 
+
+    properties: {
+      /*
+        @property {String} label 
+        @description Button text
+      */
+      label: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} value 
+        @description Button text
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} href 
+        @description Button href
+      */
+      href: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} design 
+        @description Button design
+        Values can be: filled, outline and flat
+        Default: outline
+      */
+      design: {
+        value: "outline",
+        reflect: true
+      },
+      /*
+        @property {String} target 
+        @description Specifies where to open links
+      */
+      target: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} disabled 
+        @description Button deactivation
+        Values can be: true o false
+        Default: false
+      */
+      disabled: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {String} type 
+        @description Only indicate for submit buttons
+        Values can be: submit or valueless
+        Default: valueless
+      */
+      type: {
+        value: "",
+        reflect: true
+      },
+      /*
+       @property {Boolean} inline 
+       @description Space that occupy the button inside parent container.
+       By default, its size adapts to its content
+       Values can be: true or false
+       Default: true
+     */
+      inline: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+        @property {String} icon 
+        @description Button icon
+      */
+      icon: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} iconPosition 
+        @description Button icon position with respect text
+        Values can be: left or right
+        Default: left
+      */
+      iconPosition: {
+        value: "left",
+        reflect: true
+      },
+      /*
+        @property {String} vicon 
+        @description Vimlet icon
+      */
+      vicon: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property (private) {Object} _refs 
+        @description Object with  references
+      */
+      refs: {
+        value: {}
+      }
+    },
+
+    functions: {
+      /*
+        @function setOnClick
+        @description Set onclick attribute
+        @param {String} functionality [Button onclick functionality]
+      */
+      setOnClick: function (functionality) {
+
+        this.setAttribute("onclick", functionality);
+      },
+
+    },
+
+    privateFunctions: {
+      /*
+        @function (private) _createRefs
+        @description Creates fast access to elements
+      */
+      createRefs: function () {
+        var el = this;
+
+        el._refs.button = el.template.querySelector(".eon-button-button");
+      },
+      /*
+        @function (private) _setLabel
+        @description Set new button text
+        @param {String} newVal [New button text]
+      */
+      setLabel: function () {
+        var el = this;
+        var buttonText = document.createElement("div");
+
+        var label = el.label || (el.label && el.value) ? el.label : el.value;
+
+        if (label) {
+          // First time the button text is added
+          if (!el.hasAttribute("text")) {
+
+            buttonText.innerHTML = label;
+            el._refs.button.appendChild(buttonText);
+            buttonText.classList.add("eon-button-buttonText");
+
+            // When the button text is dynamically changed
+          } else {
+            var oldText = el._refs.button.querySelector(".eon-button-buttonText");
+
+            if (!oldText) {
+              buttonText.innerHTML = label;
+              el._refs.button.appendChild(buttonText);
+              buttonText.classList.add("eon-button-buttonText");
+
+            } else {
+              buttonText.innerHTML = label;
+              var newText = buttonText;
+              newText.classList.add("eon-button-buttonText");
+              el._refs.button.replaceChild(newText, oldText);
+            }
+
+          }
+
+        }
+
+        // When the button has no text is added an attribute
+        // so if the button has icon it will be placed centered
+        (!label) ? el.setAttribute("text", "false") : el.setAttribute("text", "true");
+      },
+
+      /*
+       @function (private) _setDesign
+       @description Set button design
+     */
+      setDesign: function () {
+        var el = this;
+
+        if (el.design == "filled") {
+          el._refs.button.classList.add("eon-bg2-filled", "eon-bg2-filled-hoverable");
+          el._refs.button.classList.remove("eon-bg2-hoverable");
+        } else if (el.design == "flat") {
+          el._refs.button.classList.remove("eon-bg2-border");
+        }
+      },
+
+      /*
+        @function (private) _setupIcon
+        @description Set new button icon
+        @param {String} newVal [New button icon]
+      */
+      setupIcon: function () {
+        var el = this;
+
+        if (el.vicon) {
+          var vicon = document.createElement("i");
+          vicon.classList.add("vicon", el.vicon, "eon-button-buttonIcon");
+          el._refs.button.appendChild(vicon);
+
+        } else if (el.icon) {
+          var iconAttribute = el.icon;
+          var icon;
+
+          // When change the icon dynamically is necessary delete old icon
+          if (el._refs.button.classList.contains("eon-button-addedIcon")) {
+            var oldIcon = el.querySelector(".eon-button-buttonIcon");
+
+            el._refs.button.removeChild(oldIcon);
+          }
+
+          if (iconAttribute.indexOf("</i>") !== -1) {
+            var tempDiv = document.createElement("div");
+
+            tempDiv.innerHTML = iconAttribute;
+            icon = tempDiv.querySelector("i");
+            icon.classList.add("eon-button-buttonIcon");
+
+          } else {
+            icon = document.createElement("div");
+            icon.style.backgroundImage = "url('" + iconAttribute + "')";
+            icon.classList.add("eon-button-buttonIcon");
+          }
+
+          el._refs.button.appendChild(icon);
+          el._refs.button.classList.add("eon-button-addedIcon");
+        }
+      },
+
+      /*
+        @function (private) _setupLink
+        @description Assigns an href and target to the link element
+      */
+      setupLink: function () {
+        var el = this;
+        var a = el.querySelector("a");
+
+        if (el.href != "") {
+          a.href = el.href;
+        }
+
+        if (el.target != "") {
+          a.setAttribute("target", el.target);
+        }
+
+      },
+
+      /*
+        @function (private) _updateDisabled
+        @description Update disabled status
+        @param {String} newVal [New value of disabled]
+      */
+      updateDisabled: function () {
+        var el = this;
+
+        if (!eon.util.isTrue(this.disabled)) {
+          el._refs.button.removeAttribute("disabled");
+          el._refs.button.classList.remove("eon-fg2-disabled");
+          this.style.pointerEvents = "auto";
+
+          if (el.design == "filled") {
+            el._refs.button.classList.add("eon-bg2-filled");
+            el._refs.button.classList.remove("eon-bg2-filled-disabled", "eon-fg2-filled-disabled");
+          } 
+
+        } else {
+
+          el._refs.button.setAttribute("disabled", "true");
+          el._refs.button.classList.add("eon-fg2-disabled");
+          this.style.pointerEvents = "none";
+
+          if (el.design == "filled") {
+            el._refs.button.classList.remove("eon-bg2-filled");
+            el._refs.button.classList.add("eon-bg2-filled-disabled", "eon-fg2-filled-disabled");
+          } 
+        }
+      }
+    },
+
+    onCreated: function () {
+      var el = this;
+
+      el._createRefs();
+    },
+
+    onInit: function () {
+      var el = this;
+      
+      el._setLabel();
+      el._setDesign();
+      el._updateDisabled();
+      el._setupIcon(el.icon);
+      
+      // When the button is a type form submit
+      (el.type) ? el._refs.button.setAttribute("type", el.type) : null;
+      
+      el.setAttribute("icon-position", el.iconPosition);
+      
+    },
+    
+    onRender: function () {
+      var el = this;
+      el._setupLink();
+    },
+
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case "disabled":
+          this._updateDisabled();
+          break;
+        case "icon":
+          this._setupIcon();
+          break;
+        case "label":
+          this._setLabel();
+          break;
+        case "value":
+          this._setLabel();
+          break;
+      }
+    }
+  });
+</script>

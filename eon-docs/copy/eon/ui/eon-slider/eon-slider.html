@@ -1,0 +1,644 @@
+<template>
+
+    <div class="eon-slider-wrapper eon-fg1 eon-unselectable">
+        <div class="eon-slider-shell">
+
+            <div class="eon-slider-track eon-bg5"></div>
+            <input class="eon-slider-slider" type="range" />
+            <div class="eon-slider-fill">
+                <div class="eon-slider-thumb eon-fg3-boxshadow"></div>
+            </div>
+
+        </div>
+
+        <div class="eon-slider-display">0</div>
+    </div>
+
+    <div class="eon-slider-description"></div>
+
+</template>
+
+<script>
+    eon.element({
+
+        name: "eon-slider",
+        style: "eon-slider.css",
+
+        themed: true,
+
+        properties: {
+
+            /*
+              @property {String} name 
+              @description Slider name
+            */
+            name: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {String} value 
+              @description Slider value
+            */
+            value: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {Number} default
+            @description Value of the element when the element is reset, if will also be the value of the element if no value is provided
+            */
+            default: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {Number} min 
+              @description Slider minimum range value.
+              Value must be an integer
+            */
+            min: {
+                value: 0,
+                reflect: true
+            },
+            /*
+              @property {Number} max 
+              @description Slider maximum range value.
+              Value must be an integer
+            */
+            max: {
+                value: 100,
+                reflect: true
+            },
+            /*
+              @property {Boolean} disabled 
+              @description Slider deactivation.
+              Default: false
+            */
+            disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {Boolean} readonly 
+              @description Toggles the readonly status of the spinner.
+              Default: false
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {String} orientation 
+              @description Slider orientation.
+              Values can be: horizontal or vertical.
+              Default: horizontal
+            */
+            orientation: {
+                value: "horizontal",
+                reflect: true
+            },
+            /*
+              @property {String} size 
+              @description Slider size respect to container.
+              Value must be number percentage.
+              Default: 50%
+            */
+            size: {
+                value: "",
+                reflect: true
+            },
+            /*
+              @property {Boolean} displayVisibility 
+              @description Slider range value visibility.
+              Default: false
+            */
+            displayVisibility: {
+                value: false,
+                reflect: true
+            },
+            /*
+              @property {String} displayAlign 
+              @description Slider range value align.
+              Different depending the orientation of the slider.
+              Vertical slider: center.
+              Horizontal slider: center, left or right.
+              Default: right
+            */
+            displayAlign: {
+                value: "right",
+                reflect: true
+            },
+            /*
+              @property {String} displayPosition 
+              @description Slider range value position.
+              Different depending the orientation of the slider.
+              Vertical slider: top, bottom, left or right.
+              Horizontal slider: top & bottom.
+              Default: bottom
+            */
+            displayPosition: {
+                value: "bottom",
+                reflect: true
+            },
+            /*
+             @property {Boolean} inline 
+             @description Space that occupy the slider inside parent container.
+             By default, its size adapts to its content.
+             Values can be: true or false.
+             Default: true
+           */
+            inline: {
+                value: true,
+                reflect: true
+            },
+            /*
+            @property {String} tooltip
+            @description Text to be shown for the element
+            */
+            tooltip: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {Boolean} invalid
+            @description Whether the element meets the requirements or not
+            */
+            invalid: {
+                value: false,
+                reflect: true,
+                reflectDefault: false
+            }
+        },
+
+        privateProperties: {
+            /*
+              @property (private) {String} _formElement 
+              @description Set that slider is a form element.
+              Value: slider
+            */
+            formElement: {
+                value: "slider"
+            },
+            /*
+              @property (private) {String} _currentValue
+              @description Current slider value
+           */
+            currentValue: {
+                value: ""
+            },
+            /*
+              @property (private) {Object} _thumbEvent
+              @description Store slider thumb event
+            */
+            thumbEvent: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _refs 
+              @description Object with  references
+            */
+            refs: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _misc 
+              @description Stores slider useful data.
+            */
+            misc: {
+                value: {}
+            },
+        },
+        functions: {
+            /*
+            @function clear
+            @description Empties the value
+            */
+            clear: function () {
+                this.value = 0;
+            },
+            /*
+            @function reset
+            @description Resets the value of the element to the default one, if no default is provided then empties the value
+            */
+            reset: function () {
+                var el = this;
+
+                if (el.default != "") {
+                    el.value = el.default;
+                } else {
+                    el.clear();
+                }
+
+            },
+
+            /*
+            @function updateDescription
+            @description Updates the description value for the element
+            */
+            updateDescription: function (text) {
+                this._misc.descriptionText = text;
+                this._refs.description.innerHTML = this._misc.descriptionText;
+            },
+            /*
+            @function resetDescription
+            @description Updates the description value for the element
+            */
+            resetDescription: function () {
+
+                var el = this;
+                var description = el.tooltip != "" ? el.tooltip : "";
+
+                el._misc.descriptionText = description;
+                el._refs.description.innerHTML = description;
+
+            }
+        },
+        privateFunctions: {
+
+            /*
+            @function (private) {String} _setupDescription
+            @description Creates the touch blur
+            */
+            setupDescription: function () {
+
+                var el = this;
+
+                if (el.tooltip != "") {
+                    el.updateDescription(el.tooltip);
+                }
+
+            },
+
+            /*
+              @function (private) _setValue
+              @param {String} newVal [new slider value]
+            */
+            setValue: function () {
+                var el = this;
+                el._refs.slider.value = el.value;
+                el._currentValue = el.value;
+                el._updateSlider(true);
+
+                if (el.orientation == "vertical") {
+                    el._updateVerticalHeight();
+                }
+
+                eon.triggerCallback("onChange", el);
+
+            },
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.shell = el.template.querySelector(".eon-slider-shell");
+                el._refs.track = el.template.querySelector(".eon-slider-track");
+                el._refs.slider = el.template.querySelector(".eon-slider-slider");
+                el._refs.fill = el.template.querySelector(".eon-slider-fill");
+                el._refs.thumb = el.template.querySelector(".eon-slider-thumb");
+                el._refs.range = el.template.querySelector(".eon-slider-display");
+                el._refs.description = el.template.querySelector(".eon-slider-description");
+            },
+            /*
+              @function (private) _updateSlider
+              @description Update slider view
+              @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
+            */
+            updateSlider: function (privateValueKey) {
+                var el = this;
+
+                var sliderVal = el._refs.slider.value;
+                var thumbPosition = -5.7;
+                el._misc.percentValue = (sliderVal - el._refs.slider.min) / (el._refs.slider.max - el._refs.slider.min); /* percentage slider value */
+                var valueKey = privateValueKey ? "__value" : "value";
+
+                el._refs.range.innerHTML = sliderVal;
+                (el.orientation == "horizontal") ? el._horizontalSlider() : el._verticalSlider();
+                el[valueKey] = el._refs.slider.value;
+                el._refs.slider.setAttribute("value", el._refs.slider.value);
+            },
+
+
+            /*
+            @function (private) _horizontalSlider
+            @description Specify horizontal slider view style
+            */
+            horizontalSlider: function () {
+                var el = this;
+                var trackSize = 100;
+
+                el.style.width = (el.size) ? el.size : el.offsetWidth;
+                el._refs.fill.style.width = (el._misc.percentValue * trackSize) + "%";
+                el._refs.track.style.width = trackSize + "%"; /* adjust for border */
+            },
+
+            /*
+              @function (private) _verticalSlider
+              @description Specify vertical slider view style
+            */
+            verticalSlider: function () {
+                var el = this;
+
+                // If its the first the verticalSlider is called then we have
+                // to invert the width and height
+                if (el._misc.first) {
+                    // Stores the width of the input when it is horizontal,
+                    // then use it as height when it is vertical
+                    var actualNodeWidth = el.offsetWidth;
+                    el._misc.first = false;
+
+                    // Sets an automatic width for the vertical slider, because the value of the height when
+                    // it was horizontal may not be a correct measurement
+                    el.style.width = "auto";
+
+                    // Sets height of slider depending on the properties inline and size 
+                    if (eon.util.isTrue(el.inline)) {
+                        el.style.height = el.size == "" ? "auto" : el.size;
+                    } else {
+                        el.style.height = el.size;
+                    }
+
+                    // Sets the property to place the slider in vertical for IE and Firefox browsers
+                    (eon.util.getBrowser() == "Firefox" || eon.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
+                }
+
+            },
+
+            /*
+              @function (private) _thumbMotion
+              @description Slider thumb movement and update slider value
+            */
+            thumbMotion: function () {
+                var el = this;
+
+                el._refs.thumb.addEventListener("pointerdown", startThumb, false);
+                el._thumbEvent = startThumb;
+
+                function startThumb(e) {
+                    if (!eon.util.isTrue(el.readonly)) {
+                        el._startY = e.clientY;
+                        document.addEventListener("pointermove", moveThumb, false);
+                        document.addEventListener("pointerup", function stopThumb(e) {
+
+                            document.removeEventListener("pointermove", moveThumb, false);
+                            document.removeEventListener("pointerup", stopThumb, false);
+                        }, false);
+                    }
+                }
+
+                function moveThumb(e) {
+                    el._interactionSlider(e);
+                    el._updateCurrentValue();
+                }
+
+            },
+
+            /*
+              @function (private) _interactionSlider
+              @description Functionality when interacting with the slider
+              Only for thumb interaction and click interaction on iOS devices
+              @param {Object} e [Event]
+            */
+            interactionSlider: function (e) {
+                var el = this;
+                var trackSize;
+                var max = parseInt(el.max);
+                var min = parseInt(el.min);
+
+                if (el.orientation == "horizontal") {
+                    trackSize = el._refs.slider.offsetWidth;
+                    var shellLeft = el._refs.shell.getBoundingClientRect().left;
+                    var trackRight = shellLeft + trackSize;
+
+                    if (e.clientX <= trackRight && e.clientX >= shellLeft) {
+                        el._refs.slider.value = (((e.clientX - shellLeft) / trackSize) * (max - min)) + min;
+                        el._updateSlider();
+                    }
+
+                } else {
+                    trackSize = el._refs.slider.offsetHeight;
+                    var shellTop = el._refs.shell.getBoundingClientRect().top;
+                    var trackBottom = shellTop + trackSize;
+                    var sliderNode = parseInt(el._refs.slider.value);
+                    var positionDiff;
+
+                    if (e.clientY <= trackBottom && e.clientY >= shellTop) {
+
+                        // When interaction is moving the thumb
+                        if (el._startY) {
+                            positionDiff = el._startY - e.clientY;
+                            el._startY = e.clientY;
+
+                            // Vertical click slider on iOS
+                        } else {
+                            positionDiff = el._refs.fill.getBoundingClientRect().top - e.clientY;
+                        }
+
+                        el._refs.fill.style.height = (el._refs.fill.offsetHeight + positionDiff) + "px";
+                        el._refs.slider.value = ((el._refs.fill.offsetHeight / trackSize) * (max - min)) + min;
+                        el._refs.range.innerHTML = el._refs.slider.value;
+                        el.value = el._refs.slider.value;
+                    }
+                }
+            },
+
+            /*
+              @function (private) _setSliderListeners
+              @description Sets slider listeners
+            */
+            setSliderListeners: function () {
+                var el = this;
+
+                // On IE, Safari and IOS devices not work event "input"
+                // So is necessary a click event
+                el._refs.slider.addEventListener("click", function (e) {
+                    if (!eon.util.isTrue(el.readonly)) {
+                        if (eon.util.getBrowser() == "IE" || eon.util.getBrowser() == "Safari" || /iPad|iPhone|iPod/.test(navigator.platform)) {
+                            // On iOS devices and IE clicking on the input does not update its status
+                            // Is is necessary  to do it programmatically
+                            el._interactionSlider(e);
+                            el._updateCurrentValue();
+                        }
+                        // For the vertical slider it is necessary to update its height when clicking
+                        el._updateVerticalHeight();
+
+                    }
+                }, false);
+
+                el._refs.slider.addEventListener("input", function (e) {
+                    if (!eon.util.isTrue(el.readonly)) {
+                        el._updateSlider();
+                        el._updateCurrentValue();
+                    }
+                }, false);
+            },
+
+            /*
+              @function (private) _updateDisabled
+              @description Updates disabled status and activates the thumb motion when it is not disabled
+            */
+            updateDisabled: function () {
+                var el = this;
+
+                if (!eon.util.isTrue(el.disabled)) {
+                    el._refs.slider.removeAttribute("disabled");
+                    el._refs.shell.classList.remove("eon-slider-disabled");
+                    el._refs.fill.classList.remove("eon-bg5-disabled");
+                    el._refs.fill.classList.add("eon-fg3");
+                    el._refs.thumb.classList.remove("eon-bg5-disabled");
+                    el._refs.thumb.classList.add("eon-fg3");
+                    el._refs.track.classList.remove("eon-bg5-disabled");
+
+                    el._thumbMotion();
+
+                } else {
+                    el._refs.slider.setAttribute("disabled", "true");
+                    el._refs.shell.classList.add("eon-slider-disabled");
+                    el._refs.fill.classList.add("eon-bg5-disabled");
+                    el._refs.fill.classList.remove("eon-fg3");
+                    el._refs.thumb.classList.add("eon-bg5-disabled");
+                    el._refs.thumb.classList.remove("eon-fg3");
+                    el._refs.track.classList.add("eon-bg5-disabled");
+                    el._refs.thumb.removeEventListener("pointerdown", el._thumbEvent, false);
+                }
+
+            },
+
+            /*
+            @function (private) _updateReadonly
+            @description Updates readonly status
+            */
+            updateReadonly: function () {
+                var el = this;
+
+                if (eon.util.isTrue(el.readonly)) {
+                    el._refs.slider.setAttribute("readonly", "true");
+                } else {
+                    el._refs.slider.removeAttribute("readonly");
+                }
+
+            },
+
+            /*
+            @function (private) _updateInvalid
+            @description Updates the invalid status
+            */
+            updateInvalid: function () {
+
+                var el = this;
+                var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
+
+                el.classList[classListFn]("eon-slider-error");
+
+            },
+
+            /*
+              @function (private) _updateCurrentValue
+              @description Updates slider current value and trigger onChange callback
+            */
+            updateCurrentValue: function () {
+                var el = this;
+                (el.value !== el._currentValue) ? eon.triggerCallback("onChange", el) : null;
+                el._currentValue = (el.value !== el._currentValue) ? el.value : el._currentValue;
+            },
+
+            /*
+             @function (private) _verifyScreenResolution
+             @description Set device type
+           */
+            verifyScreenResolution: function () {
+                var el = this;
+
+                // Small devices view
+                if (window.innerWidth <= eon.tabletWidth) {
+                    el.setAttribute("version", "tablet");
+
+                    // Desktop view
+                } else {
+                    el.setAttribute("version", "desktop");
+                }
+
+                el._updateSlider();
+
+            },
+
+            /*
+             @function (private) _updateVerticalHeight
+             @description Updates fill's height on vertical sliders
+           */
+            updateVerticalHeight: function () {
+                var el = this;
+
+                if (el.orientation == "vertical") {
+                    el._refs.fill.style.height = (el._misc.percentValue * 100) + "%";
+                }
+            }
+
+        },
+
+        onCreated: function () {
+            eon.createCallback("onChange", this);
+            this._createRefs();
+
+            this._misc.first = true;
+            this._misc.descriptionText = "";
+        },
+
+        onInit: function () {
+            var el = this;
+
+            el.value = el.default != "" && el.value == "" ? el.default : el.value;
+            el._refs.slider.setAttribute("name", el.name);
+            el._refs.slider.setAttribute("value", el.value);
+            el._refs.slider.setAttribute("min", el.min);
+            el._refs.slider.setAttribute("max", el.max);
+            el.setAttribute("touch-action", "none");
+
+            el._currentValue = el.value;
+
+            el._setSliderListeners();
+
+            if (el.orientation == "horizontal" && el.displayAlign != "center") {
+                el.displayPosition = "";
+            }
+
+            el._setupDescription();
+            el._updateDisabled();
+            el._updateReadonly();
+            el._updateVerticalHeight();
+        },
+
+        onRender: function () {
+            var el = this;
+
+            el._verifyScreenResolution();
+        },
+
+        onWindowResize: function (event) {
+            this._verifyScreenResolution();
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            switch (attrName) {
+                case "disabled":
+                    this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadonly();
+                    break;
+                case "value":
+                    this._setValue();
+                    break;
+                case "invalid":
+                    this._updateInvalid();
+                    break;
+            }
+        },
+
+    });
+
+</script>

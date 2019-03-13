@@ -1,0 +1,1757 @@
+<template class="eon-sect1">
+
+  <div class="eon-grid-header">
+    <div class="eon-grid-wrapper"></div>
+  </div>
+
+  <div class="eon-grid-rows">
+    <eon-scroll thickness="10" rail-scrolls="false">
+      <div class="eon-grid-wrapper">
+      </div>
+    </eon-scroll>
+  </div>
+
+  <div class="eon-grid-footer eon-fg1 eon-unselectable">
+    <div class="eon-grid-pagControls eon-fg5">
+      <i class="vicon vicon-first eon-grid-pagIcon eon-fg1-hoverable" data-navigation="first"></i>
+      <i class="vicon vicon-chevron-left eon-grid-pagIcon eon-fg1-hoverable" data-navigation="previous"></i>
+      <div class="pageSelector"></div>
+      <i class="vicon vicon-chevron-right eon-grid-pagIcon eon-fg1-hoverable" data-navigation="next"></i>
+      <i class="vicon vicon-last eon-grid-pagIcon eon-fg1-hoverable" data-navigation="last"></i>
+    </div>
+    <span class="eon-grid-entriesCount eon-fg5"></span>
+  </div>
+
+</template>
+
+<script type="text/javascript">
+  eon.element({
+
+    name: "eon-grid",
+    style: "eon-grid.css",
+
+    themed: true,
+
+    dependencies: [
+      "../eon-grid-row",
+      "../eon-grid-cell",
+      "../eon-overlay",
+      "../eon-scroll"
+    ],
+    privateProperties: {
+      /*
+      @property (private) {Object} _misc
+      @description Object with miscellaneous data
+      */
+      misc: {
+        value: {},
+        reflect: false
+      },
+      /*
+      @property (private) {Object} _refs
+      @description Object with references
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+    },
+
+    properties: {
+      /*
+      @property {Boolean} footer
+      @description Whether the footer will be displayed or not
+      */
+      footer: {
+        value: true,
+        reflect: true
+      },
+      /*
+      @property {String} pagination
+      @description Whether the user wants a default pagination or not
+      */
+      pagination: {
+        value: true,
+        reflect: true
+      },
+      /*
+      @property {Boolean} entriesCount
+      @description Whether the footer will display the page entries or not
+      */
+      entriesCount: {
+        value: false,
+        reflect: true
+      },
+      /*
+      @property {String} columns
+      @description Defines the columns that will be shown in the grid
+      */
+      columns: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} headers
+      @description Defines the headers of the given columns
+      */
+      headers: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} pageSize
+      @description Number of rows to fill the page
+      */
+      pageSize: {
+        value: "auto",
+        reflect: true
+      },
+      /*
+      @property {Boolean} autofit
+      @description Whether the grid will manage the rows amount depending on the available space
+      */
+      autofit: {
+        value: "true",
+        reflect: true
+      },
+      /*
+      @property {Boolean} resizable
+      @description Whether the user can resize the columns or not
+      */
+      resizable: {
+        value: true,
+        reflect: true
+      },
+      /*
+      @property {Number} columnMinWidth
+      @description Pixels that will be set as the minimum width of each column
+      */
+      columnMinWidth: {
+        value: 150,
+        reflect: true
+      },
+      /*
+      @property {Number} rowMinHeight
+      @description Pixels that will be set as the minimum height of each row
+      */
+      rowMinHeight: {
+        value: 70,
+        reflect: true
+      },
+      /*
+      @property {Boolean} editable
+      @description Whether the user will be able to edit entry cells or not
+      */
+      editable: {
+        value: "false",
+        reflect: true
+      },
+      /*
+      @property {String} keyProperty
+      @description Property that sets the id for the entries
+      */
+      keyProperty: {
+        value: "id",
+        reflect: true
+      },
+      /*
+      @property {String} childProperty
+      @description Property to indicate the entries children
+      */
+      childProperty: {
+        value: "children",
+        reflect: true
+      },
+      /*
+        @property {Boolean} fill 
+        @description 
+        Values: true, false
+        Default: true
+      */
+      fill: {
+        value: true,
+        reflect: true
+      }
+    },
+
+    privateFunctions: {
+      /*
+      @function (private) _setupRefs
+      @description Creates some fast access elements so that theres no need for calling the QuerySelector all the time.
+      */
+      setupRefs: function () {
+
+        var el = this;
+
+        el._refs.header = el.template.querySelector(".eon-grid-header");
+        el._refs.headersWrapper = el.template.querySelector(".eon-grid-header .eon-grid-wrapper");
+        el._refs.rowsWrapper = el.template.querySelector(".eon-grid-rows .eon-grid-wrapper");
+        el._refs.footer = el.template.querySelector(".eon-grid-footer");
+
+        el._refs.scroll = el.template.querySelector("eon-scroll");
+
+        el._refs.pageSelector = el.template.querySelector(".pageSelector");
+        el._refs.entriesCount = el.template.querySelector(".eon-grid-entriesCount");
+
+        el._refs.buttons = {};
+        el._refs.buttons.first = el.template.querySelector('i[data-navigation="first"]');
+        el._refs.buttons.previous = el.template.querySelector('i[data-navigation="previous"]');
+        el._refs.buttons.next = el.template.querySelector('i[data-navigation="next"]');
+        el._refs.buttons.last = el.template.querySelector('i[data-navigation="last"]');
+
+      },
+      /*
+     @function (private) _setupStore
+     @description Creates the store that will handle all the grid data
+     */
+      setupStore: function () {
+
+        var el = this;
+
+        el.store = new eon.store();
+
+        // When the store data changes we reloaded the current page, if the page no longer exists we take the last available one
+        el.store.onDataChanged(function () {
+
+          var currentPage = parseInt(el._misc.currentPage) > el._getLastAvailablePage() ? el._getLastAvailablePage() : parseInt(el._misc.currentPage);
+          var pageSize = parseInt(el._misc.pageSize);
+
+          start = parseInt((currentPage - 1) * pageSize);
+          limit = parseInt(start + pageSize - 1);
+
+          el._handleRange(start, limit, true);
+          el._updatePagination(currentPage);
+
+        });
+
+      },
+      /*
+      @function (private) _setupMisc
+      @description Sets up basic properties for the misc object
+      */
+      setupMisc: function () {
+
+        var el = this;
+
+        el._misc.columns = {};
+        el._misc.range = {};
+        el._misc.entriesCount = 0;
+
+        el._misc.resize = {};
+        el._misc.resize.active = false;
+        el._misc.resize.firstTime = true;
+
+        el._misc.sourceFragment = document.createDocumentFragment();
+
+        el._misc.currentPage = 1;
+        el._misc.isEditing = false;
+
+        el._misc.sort = {};
+        el._misc.sort.active = false;
+        el._misc.sort.column = "";
+        el._misc.sort.type = "none";
+
+        el._misc.dropdowns = {};
+        el._misc.dropdowns.rows = [];
+        el._misc.dropdowns.childRowsCount = 0;
+
+        el._misc.browser = eon.util.getBrowser();
+
+      },
+      /*
+      @function (private) _setupResize
+      @description Creates a resize listener for the grid resize
+      */
+      setupResize: function () {
+
+        var el = this;
+
+        eon.addResizeListener(el._refs.rowsWrapper, el.nodeName.toLowerCase(), function () {
+
+          if (el._misc.pagingType == "auto" && !el._misc.dropdowns.childRowsCount) {
+            el._handleRowsLayout(el._misc.entriesCount);
+          }
+
+        });
+
+      },
+      /*
+      @function (private) _setupHeaders
+      @description Creation of the headers and its attributes
+      */
+      setupHeaders: function () {
+
+        var el = this;
+
+        var columnsKeys = Object.keys(el._misc.columns);
+        var docFragment = document.createDocumentFragment();
+        var headerCell;
+        var headerResize;
+
+        el._refs.headersWrapper.classList.add("headers");
+
+        el.onReady(function () {
+          el._refs.scroll.onScrolled(function (e) {
+            el._refs.header.style.transform = "translate3d(" + -e.scrollLeft + "px, 0, 0)";
+          });
+        })
+
+
+        //Create header for each column
+        for (var i = 0; i < columnsKeys.length; i++) {
+          headerCell = document.createElement("eon-grid-cell");
+
+          if (el._misc.columns[columnsKeys[i]].class) {
+            headerCell.classList.add(el._misc.columns[columnsKeys[i]].class);
+          }
+
+          headerCell.classList.add("eon-grid-" + columnsKeys[i] + "Column", "eon-bg2-hoverable");
+
+          //Adding Attributes to the header
+          headerCell.setAttribute("type", "header");
+          headerCell.setAttribute("sort", "none");
+          headerCell.setAttribute("fixed", "false")
+          headerCell.setAttribute("column", el._misc.columns[columnsKeys[i]].name);
+          headerCell.setAttribute("order", el._misc.columns[columnsKeys[i]].order);
+          headerCell.content.innerHTML = el._misc.columns[columnsKeys[i]].header;
+          headerCell.onclick = function (e) {
+            el._sort(e, this)
+          };
+
+          docFragment.appendChild(headerCell);
+
+          //If he grid columns are resizable then we will create a resize Indicator for every columns
+          //except for the last one
+          if (eon.util.isTrue(el.resizable)) {
+
+            headerResize = document.createElement("div");
+
+            headerResize.classList.add("eon-grid-resizeIndicator");
+            headerResize.dataset.columnTarget = i;
+
+            headerResize.addEventListener('mousedown', function (e) {
+
+              if (e.button == 0) {
+
+                el._misc.resize.initialPosition = el._misc.resize.initialPosition || {};
+                el._misc.resize.initialPosition.x = e.clientX;
+                el._misc.resize.initialPosition.y = e.clientY;
+
+                el._resizeColumn(this);
+
+              }
+            });
+
+            headerCell.appendChild(headerResize);
+
+          }
+        }
+
+        el._refs.headersWrapper.appendChild(docFragment);
+      },
+      /*
+      @function (private) _setupColumns
+      @description Sets up the columns and its css rule
+      */
+      setupColumns: function () {
+
+        var el = this;
+
+        var columns = el.columns.substring(0, 1) == "[" ? eval(el.columns) : el.columns.replace(/\s/g, '').split(',');
+        var headers = el.headers.length > 0 && el.headers.substring(0, 1) == "[" ? eval(el.headers) : el.headers.replace(/\s/g, '').split(',');
+        var layoutWidth = 0;
+
+        var rulePosition, columnRule, columnName, columnHeader;
+
+        //If there are no headers specified or the amount of headers is not the same as columns,
+        //then we equal the headers to the columns
+        headers = (headers.length == 0 || (headers.length < 0 && columns.length != headers.length)) ? columns : headers;
+
+        for (var i = 0; i < columns.length; i++) {
+
+          columnName = columns[i].constructor === Object ? columns[i].name : columns[i];
+          columnHeader = columns[i].constructor === Object && columns[i].header ? columns[i].header : headers[i];
+          columnContent = columns[i].constructor === Object && columns[i].content ? columns[i].content : false;
+          columnClass = columns[i].constructor === Object && columns[i].class ? columns[i].class : false;
+          columnMinWidth = columns[i].constructor === Object && columns[i].minWidth ? columns[i].minWidth : el.columnMinWidth;
+          columnEditable = columns[i].constructor === Object && columns[i].hasOwnProperty("editable") ? eon.util.isTrue(columns[i].editable) : (eon.util.isTrue(el.editable));
+
+          // Layout related, creates the column rule
+          rulePosition = eon.style.sheet.cssRules.length;
+          eon.style.sheet.insertRule("eon-grid[uid='" + el.uid + "'] eon-grid-cell.eon-grid-" + columnName + "Column {}", rulePosition);
+          columnRule = eon.style.sheet.cssRules[rulePosition];
+          columnRule.style.minWidth = columnMinWidth + "px";
+          layoutWidth = layoutWidth + parseInt(columnMinWidth);
+
+          // Saves all the column information
+          el._misc.columns[columnName] = {};
+          el._misc.columns[columnName]["name"] = columnName;
+          el._misc.columns[columnName]["header"] = columnHeader;
+          el._misc.columns[columnName]["content"] = columnContent;
+          el._misc.columns[columnName]["order"] = i;
+          el._misc.columns[columnName]["rule"] = columnRule;
+          el._misc.columns[columnName]["class"] = columnClass;
+          el._misc.columns[columnName]["editable"] = columnEditable;
+
+        }
+
+        el._refs.headersWrapper.style.minWidth = layoutWidth + "px";
+        el._refs.headersWrapper.style.width = "auto";
+
+        el._refs.rowsWrapper.style.minWidth = layoutWidth + "px";
+        el._refs.rowsWrapper.style.width = "auto";
+
+      },
+      /*
+      @function (private) _setupPageSize
+      @description Setting up the rows size type depending on the user input
+      */
+      setupPageSize: function () {
+
+        var el = this;
+
+        if (parseInt(el.pageSize)) {
+
+          el._misc.pagingType = "fixed";
+          el._misc.pageSize = parseInt(el.pageSize);
+
+        } else {
+
+          if (!el.pageSize || el.pageSize == "auto") {
+
+            el._misc.pagingType = "auto";
+            el._misc.pageSize = el._getRowsCapacity();
+
+          } else if (el.pageSize == "all") {
+
+            el._misc.pagingType = "all";
+            el._misc.pageSize = 0;
+
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _setupContent
+      @description Depending on what the user provided with the grid we will set up our store with the data we have
+      */
+      setupContent: function () {
+
+        var el = this;
+        var start, limit;
+
+        //Store calls
+        el.store.onLoaded(function () {
+
+          var rowsData = el._generateSourceRowsData();
+
+          if (rowsData && rowsData.size > 0) {
+            el.store.data = rowsData;
+          }
+
+          el._misc.pageSize = el._misc.pagingType == "all" ? el.store.data.size : el._misc.pageSize;
+
+          start = 0;
+          limit = parseInt(el._misc.pageSize);
+
+          el.store.read().limit(start, limit).result(function (error, data) {
+            el._handleEntries(data, true, start, limit);
+            el._updatePagination(1);
+          });
+
+        });
+
+      },
+      /*
+      @function (private) _setupAutofit
+      @description Sets up the autofit boolean depending on the situation
+      */
+      setupAutofit: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.autofit)) {
+
+          el.onReady(function () {
+            el._refs.scroll.onRender(function () {
+              el._refs.scroll.content.style.display = "flex";
+            });
+          });
+
+        }
+
+        if (el._misc.pagingType == "auto") {
+          el._refs.rowsWrapper.classList.add("eon-grid-autofitRows");
+        }
+
+      },
+      /*
+      @function (private) _setupOverlay
+      @description Creates the overlay that will be used when resizing columns
+      */
+      setupOverlay: function () {
+
+        var el = this;
+
+        el._refs.overlay = el.generateOverlayNode();
+        el._refs.overlay.style.cursor = "col-resize";
+        el._refs.overlay.classList.add("eon-unselectable");
+
+        el._refs.overlay.style.position = "absolute";
+        el._refs.overlay.style.top = 0;
+        el._refs.overlay.style.bottom = 0;
+        el._refs.overlay.style.right = 0;
+        el._refs.overlay.style.left = 0;
+        el._refs.overlay.style.backgroundColor = "transparent";
+        el._refs.overlay.style.cursor = "col-resize";
+
+      },
+      /*
+      @function (private) _setupFooter
+      @description Sets up the grid footer
+      */
+      setupFooter: function () {
+
+        var el = this;
+
+        if (!eon.util.isTrue(el.footer)) {
+
+          el.pagination = false;
+
+          el._misc.hasEntriesCount = false;
+
+          el._refs.footer.style.display = "none";
+          el._refs.entriesCount.style.display = "none";
+
+        } else {
+
+          el._misc.hasEntriesCount = eon.util.isTrue(el.entriesCount) ? true : false;
+
+          if (!el._misc.hasEntriesCount) {
+            el._refs.entriesCount.style.display = "none";
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _setupPagination
+      @description Sets up the page selector to navigate through the pages
+      */
+      setupPagination: function () {
+
+        var el = this;
+
+        // If it has pagination then it sets it up depending on the type specified by the user
+        if (eon.util.isTrue(el.pagination)) {
+
+          var el = this;
+
+          var stripPageSelector = document.createElement("div");
+          var currentStripPage = document.createElement("div");
+
+          stripPageSelector.classList.add("eon-grid-stripPageSelector");
+
+          currentStripPage.id = "currentPage";
+          currentStripPage.dataset.page = el._misc.currentPage;
+          currentStripPage.innerHTML = el._misc.currentPage;
+          currentStripPage.classList.add("eon-grid-currentPage", "eon-bg8", "eon-fg2", "eon-grid-stripPage", "eon-sect2-border-hoverable");
+
+          stripPageSelector.appendChild(currentStripPage);
+          el._refs.pageSelector.appendChild(stripPageSelector);
+
+          el._refs.buttons.first.onclick = function () {
+            el._navigate(el._refs.buttons.first);
+          };
+          el._refs.buttons.previous.onclick = function () {
+            el._navigate(el._refs.buttons.previous);
+          };
+          el._refs.buttons.next.onclick = function () {
+            el._navigate(el._refs.buttons.next);
+          };
+          el._refs.buttons.last.onclick = function () {
+            el._navigate(el._refs.buttons.last);
+          };
+
+          // Else just removes it from the element
+        } else {
+
+          var pageControls = el.querySelector(".eon-grid-pagControls");
+          pageControls.parentNode.removeChild(pageControls);
+
+        }
+
+      },
+      /*
+      @function (private) _navigate
+      @description Called from the navigation buttons to navigate through the pages
+      @param {Object} button 
+      */
+      navigate: function (button) {
+
+        if (eon.util.isTrue(button.dataset.enabled)) {
+
+          var el = this;
+
+          var navigation = button.dataset.navigation;
+          var currentPage = parseInt(el._misc.currentPage);
+          var pageSize = parseInt(el._misc.pageSize);
+          var start;
+          var limit;
+
+          switch (navigation) {
+            case "first":
+              start = 0;
+              limit = parseInt(start + pageSize - 1);
+
+              el._handleRange(start, limit, true);
+              el._updatePagination(1);
+              break;
+            case "previous":
+              var previousPage = currentPage - 1;
+
+              start = parseInt(((previousPage - 1) * pageSize));
+              limit = parseInt(start + pageSize - 1);
+
+              if (previousPage >= 1) {
+                previousPage = (previousPage < 1) ? 1 : previousPage;
+                el._handleRange(start, limit, true);
+                el._updatePagination(previousPage);
+              }
+              break;
+            case "next":
+              var nextPage = currentPage + 1;
+
+              start = parseInt((nextPage - 1) * pageSize);
+              limit = parseInt(start + pageSize - 1);
+
+              if (nextPage <= el._getLastAvailablePage()) {
+                el._handleRange(start, limit, true);
+                el._updatePagination(nextPage);
+              }
+              break;
+            case "last":
+              var lastPage;
+
+              limit = el.store.data.size;
+              lastPage = el._getLastAvailablePage();
+              start = parseInt(((lastPage * pageSize) - pageSize));
+
+              if (lastPage > 0) {
+                el._handleRange(start, limit, true);
+                el._updatePagination(lastPage);
+              }
+              break;
+            default:
+
+          }
+        }
+      },
+      /*
+      @function (private) {Object} _generateSourceRowsData
+      @description Searches for rows declared by the user to elaborate our data object and returns it
+      */
+      generateSourceRowsData: function () {
+
+        var el = this;
+
+        var rows = el._misc.sourceFragment.childNodes;
+        var dataMap = new Map();
+        var counter = 0;
+
+        if (rows.length > 0) {
+
+          var columns = el.columns.replace(/\s/g, '').split(',');
+          var dataModel = {};
+          var fillRowData;
+
+          // We create a data model based on the columns specified in the grid, this is done so that in case there is an entry missing one of the column values
+          // we will be able to fill it with an empty one
+          for (var i = 0; i < columns.length; i++) {
+            dataModel[columns[i]] = "";
+          }
+
+          fillRowData = function (row, isChild) {
+
+            var data = Object.assign({}, dataModel);
+
+            counter++;
+
+            // Since in the declarative creation eon-grid-row will not get to exists as it will be
+            // part of eon-grids template, it will not transform and wont have its source appended,
+            // since we want eon-grid-row to have its eon-grid-cells to be part of the component, we append 
+            // it manually in case it exists
+            if (row.source) {
+              row.appendChild(row.source);
+            }
+
+            for (var m = 0; m < row.children.length; m++) {
+
+              if (row.children[m].tagName.toLowerCase() == "eon-grid-cell") {
+                
+                data[row.children[m].getAttribute("column")] = row.children[m].innerHTML;
+
+              } else if (row.children[m].tagName.toLowerCase() == "eon-grid-row") {
+
+                var childData;
+
+                row.children[m].entryId = counter;
+
+                childData = fillRowData(row.children[m], true);
+                childData.id = row.children[m].entryId;
+
+                data[el.childProperty] = data[el.childProperty] ? data[el.childProperty] : [];
+                data[el.childProperty].push(childData);
+
+              }
+
+            }
+
+            return data;
+
+          };
+
+          for (var k = 0; k < rows.length; k++) {
+
+            if (rows[k].nodeType == 1) {
+
+              rows[k].entryId = counter;
+
+              dataMap.set(rows[k].entryId, fillRowData(rows[k]));
+              dataMap.set(rows[k].entryId, dataMap.get(rows[k].entryId));
+            }
+
+          }
+
+        }
+
+        return dataMap;
+
+      },
+      //HANDLE FUNCTIONS
+      /*
+      @function (private) _handleEntries
+      @description Manages the redirection to another function depending on the situation
+      @param {String} responseType
+      @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
+      @param {Number} start
+      @param {Number} limit
+      */
+      handleEntries: function (data, cleanCurrentRange, start, limit) {
+
+        var el = this;
+
+        var columnsKeys = Object.keys(el._misc.columns);
+        var rowsDocFragment = document.createDocumentFragment();
+        var entriesCount = data.size;
+        var dataObject, row, cell, eventObject;
+
+        el._misc.range.start = start ? start : el._misc.range.start;
+        el._misc.range.limit = limit ? limit : el._misc.range.limit;
+        el._misc.range.limit = (el._misc.pagingType == "all") ? el.store.data.size : el._misc.range.limit;
+
+        if (cleanCurrentRange) {
+          el._clearPage();
+        }
+
+        // Store map keys
+        data.forEach(function (value, key, map) {
+
+          dataObject = value;
+
+          row = document.createElement("eon-grid-row");
+          row.classList.add("eon-grid-entryRow");
+          row.dataset.entryId = dataObject[el.keyProperty];
+
+          el._createChildRows(row, dataObject);
+
+          //For each column we have in the grid we will look for its value on the dataObject
+          // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
+          for (var i = 0; i < columnsKeys.length; i++) {
+            cell = el._createCell(columnsKeys[i], dataObject);
+            row.content.appendChild(cell);
+          }
+
+          if (eon.util.isTrue(el.autofit)) {
+            row.classList.add("eon-grid-autofit");
+          }
+
+          row.style.minHeight = el.rowMinHeight + "px";
+          row.content.style.minHeight = el.rowMinHeight + "px";
+
+          el._increaseEntriesCount();
+
+          rowsDocFragment.appendChild(row);
+
+          // Creates the callback event object for the user
+          eventObject = { data: dataObject, row: row };
+
+          eon.triggerCallback("onRowCreated", el, el, [eventObject]);
+
+        });
+
+        el._refs.rowsWrapper.appendChild(rowsDocFragment);
+
+        if (el._misc.pagingType == "auto") {
+          el._handleRowsLayout(entriesCount);
+        };
+
+      },
+      /*
+      @function (private) _createChildRows
+      @description Creates the child rows for the given row
+      @param {Object} row
+      @param {Object} dataObject
+      */
+      createChildRows: function (row, dataObject) {
+
+        var el = this;
+
+        if (dataObject[el.childProperty] && dataObject[el.childProperty].length > 0) {
+
+          var columnsKeys = Object.keys(el._misc.columns);
+          var children = dataObject[el.childProperty];
+          var childrenDocFragment = document.createDocumentFragment();
+          var childRow;
+
+          for (var i = 0; i < children.length; i++) {
+
+            childRow = document.createElement("eon-grid-row");
+            childRow.classList.add("eon-grid-entryRow");
+            childRow.dataset.entryId = dataObject[el.keyProperty];
+
+            //For each column we have in the grid we will look for its value on the dataObject
+            // and create a cell, this way if a dataObject doesnt have a columnKey it will still have the cell but it will be an empty one
+            for (var j = 0; j < columnsKeys.length; j++) {
+              cell = el._createCell(columnsKeys[j], dataObject[el.childProperty][i]);
+              childRow.content.appendChild(cell);
+            }
+
+            if (eon.util.isTrue(el.autofit)) {
+              childRow.classList.add("eon-grid-autofit");
+            } else {
+              childRow.style.minHeight = el.rowMinHeight + "px";
+              childRow.content.style.minHeight = el.rowMinHeight + "px";
+            }
+
+            childrenDocFragment.appendChild(childRow);
+
+          }
+
+          row.dropdown.appendChild(childrenDocFragment);
+
+          row.content.addEventListener("click", function () {
+            el[eon.util.isTrue(el.autofit) ? "_handleAutofitRowDropdown" : "_handleRowDropdown"].apply(el, [row]);
+          });
+
+        }
+
+      },
+      /*
+      @function (private) _handleRowDropdown
+      @description shows the row childs
+      @param {Object} row
+      */
+      handleRowDropdown: function (row) {
+
+        var el = this;
+
+        var rowIndex = el._misc.dropdowns.rows.indexOf(row);
+        var subRowsCount;
+
+        // If it is in the opened dropdowns array
+        if (rowIndex != -1) {
+          // Substracts the dropdown to be closed children to the global childs amount
+          subRowsCount = el._misc.dropdowns.childRowsCount - row.dropdown.children.length;
+          // Returns the row height to its original one
+          row.style.minHeight = el.rowMinHeight + "px";
+          row.removeChild(row.dropdown);
+          el._misc.dropdowns.rows.splice(rowIndex, 1);
+
+          row.classList.remove("eon-grid-expandedRow");
+          row.content.classList.remove("eon-bg2-active");
+          row.content.classList.add("eon-bg2-hoverable");
+          row.dropdown.classList.remove("eon-sect3");
+
+        } else {
+
+          var rowHeight = row.content.offsetHeight;
+          // Add the dropdown to be opened children to the global childs amount
+          subRowsCount = el._misc.dropdowns.childRowsCount + row.dropdown.children.length;
+          
+          el._misc.dropdowns.active = true;
+
+          // Takes the current row height and multiplies it to the childs + itself
+          row.style.minHeight = rowHeight * (1 + row.dropdown.children.length) + "px";
+          row.dropdown.style.minHeight = (rowHeight * row.dropdown.children.length) + "px";
+          row.appendChild(row.dropdown);
+
+          el._misc.dropdowns.rows.push(row);
+
+          row.classList.add("eon-grid-expandedRow");
+          row.content.classList.add("eon-bg2-active");
+          row.content.classList.remove("eon-bg2-hoverable");
+          row.dropdown.classList.add("eon-sect3");
+
+        }
+
+        // Updates the count
+        el._misc.dropdowns.childRowsCount = subRowsCount;
+
+      },
+      /*
+      @function (private) _handleAutofitRowDropdown
+      @description shows the row childs on autofit grid
+      @param {Object} row
+      */
+      handleAutofitRowDropdown: function (row) {
+
+        var el = this;
+
+        var rowIndex = el._misc.dropdowns.rows.indexOf(row);
+        var rowHeight = el._refs.scroll.offsetHeight / el._misc.entriesCount;
+        var subRowsCount;
+
+        // If it is in the opened dropdowns array
+        if (rowIndex != -1) {
+          // Substracts the dropdown to be closed children to the global childs amount
+          subRowsCount = el._misc.dropdowns.childRowsCount - row.dropdown.children.length;
+
+          row.removeChild(row.dropdown);
+          row.style.flexGrow = 1;
+
+          if (el._misc.browser == "IE") {
+            row.style.minHeight = el.rowMinHeight + "px";
+            row.content.style.minHeight = el.rowMinHeight + "px";
+            row.content.style.flexGrow = 1;
+          }
+
+          el._misc.dropdowns.rows.splice(rowIndex, 1);
+
+          row.classList.remove("eon-grid-expandedRow");
+          row.content.classList.remove("eon-bg2-active");
+          row.content.classList.add("eon-bg2-hoverable");
+          row.dropdown.classList.remove("eon-sect3");
+
+        } else {
+          // Add the dropdown to be opened children to the global childs amount
+          subRowsCount = el._misc.dropdowns.childRowsCount + row.dropdown.children.length;
+
+          row.appendChild(row.dropdown);
+
+          if (el._misc.browser != "IE") {
+            row.style.flexGrow = 1 + row.dropdown.children.length;
+          } else {
+            row.style.flexGrow = 0;
+            row.style.minHeight = rowHeight * (1 + row.dropdown.children.length) + "px";
+            row.content.style.minHeight = "" + 100 / (subRowsCount + 1) + "%";
+            row.content.style.flexGrow = 0;
+            row.dropdown.style.flexGrow = 1;
+          }
+
+          row.dropdown.style.flexGrow = row.dropdown.children.length;
+
+          el._misc.dropdowns.rows.push(row);
+
+          row.classList.add("eon-grid-expandedRow");
+          row.content.classList.add("eon-bg2-active");
+          row.content.classList.remove("eon-bg2-hoverable");
+          row.dropdown.classList.add("eon-sect3");
+
+        }
+
+        // Updates the count
+        el._misc.dropdowns.childRowsCount = subRowsCount;
+        // Since we are working with flex on autofit, we change the wrapper size so everything can still work as always and all the rows
+        // keep its height
+        el._refs.rowsWrapper.style.height = subRowsCount > 0 ? rowHeight * (subRowsCount + el._misc.entriesCount) + "px" : "auto";
+
+      },
+      /*
+      @function (private) _createCell
+      @description Handles the cell creation and if the user has specified the grid as editable it will add its corresponding events
+      @param {String} columnKey
+      @param {Object} dataObject
+      */
+      createCell: function (columnKey, dataObject) {
+
+        var el = this;
+        var cell = document.createElement("eon-grid-cell");
+        var editableColumns, eventObject;
+
+        if (el._misc.columns[columnKey].class) {
+          cell.classList.add(el._misc.columns[columnKey].class);
+        }
+
+        cell.classList.add("eon-grid-" + columnKey + "Column");
+        cell.setAttribute("column", columnKey);
+        cell.dataset.entryId = dataObject[el.keyProperty];
+        cell.content.innerHTML = dataObject[columnKey] ? dataObject[columnKey] : "";
+
+        if (el._misc.columns[columnKey].editable) {
+          el._assignEditableEvents(cell);
+        }
+
+        // Creates the callback event object for the user
+        eventObject = { data: dataObject, column: columnKey, cell: cell };
+
+        eon.triggerCallback("onCellCreated", el, el, [eventObject]);
+
+        return cell;
+
+      },
+      /*
+      @function (private) assignEditableEvents
+      @description Creates the cell events for the user edition
+      @param {Object} cell
+      */
+      assignEditableEvents: function (cell) {
+
+        var el = this;
+
+        cell.onReady(function () {
+
+          cell.content.setAttribute("contenteditable", "true");
+          cell.content.spellcheck = false;
+
+          // This is ment for mobile devices: When entering edit mode the keyboard will trigger grid resize, 
+          // setting this property to true will prevent resize from triggering in those situation
+          cell.content.addEventListener("focus", function (e) {
+            el._misc.isEditing = true;
+          });
+
+          // Keydown event that will be aware for the enter key, to blur the cell
+          cell.content.addEventListener("keydown", function (e) {
+
+            if (e.key.toLowerCase() == "enter") {
+              cell.content.blur();
+            }
+
+          });
+
+          // Blur event that will trigger the entry update
+          cell.content.addEventListener("blur", function (e) {
+
+            var cell = this.parentNode;
+            var entryId = cell.dataset.entryId;
+            var column = cell.getAttribute("column");
+
+            // We only want to update if the value has changed
+            if (cell.value != cell.content.textContent) {
+
+              // cell.value = cell.content.textContent;
+
+              var eventObject = {
+                id: entryId,
+                column: column,
+                value: cell.content.textContent
+              }
+
+              eon.triggerCallback("onEdit", el, el, [eventObject]);
+
+            }
+
+            el._misc.isEditing = false;
+
+          });
+
+        });
+
+
+      },
+      /*
+      @function (private) _updateCurrentPage
+      @description Updates strip page selector
+      @param {Number} page
+      */
+      updateCurrentPage: function (page) {
+
+        var el = this;
+
+        var pageSelector = el._refs.pageSelector;
+        var previousSelectedPage = pageSelector.querySelector('[selected="true"]');
+        var newPageToSelect = pageSelector.querySelector('[data-page="' + page + '"]');
+
+        if (previousSelectedPage) {
+          previousSelectedPage.classList.remove("eon-grid-currentPage", "eon-bg2-active");
+          previousSelectedPage.classList.add("eon-bg2-hoverable", "eon-fg1-hoverable");
+          previousSelectedPage.setAttribute("selected", "false");
+        }
+
+        if (newPageToSelect) {
+          newPageToSelect.classList.add("eon-grid-currentPage", "eon-bg2-active");
+          previousSelectedPage.classList.remove("eon-bg2-hoverable", "eon-fg1-hoverable");
+          newPageToSelect.setAttribute("selected", "true");
+        }
+
+      },
+      /*
+      @function (private) _handleNavigability
+      @description Handles the navigability buttons to be enabled/disabled depending on the situation
+      */
+      handleNavigability: function () {
+
+        var el = this;
+
+        var currentPage = parseInt(el._misc.currentPage);
+        var pageSize = parseInt(el._misc.pageSize);
+        var lastPage = el._getLastAvailablePage();
+
+        var disableNavigationbutton = function (button) {
+          button.classList.add("eon-fg2-disabled");
+          button.dataset.enabled = "false";
+        };
+
+        var enableNavigationButton = function (button) {
+          button.classList.remove("eon-fg2-disabled");
+          button.dataset.enabled = "true";
+        };
+
+        if (currentPage == 1) {
+
+          disableNavigationbutton(el._refs.buttons.first);
+          disableNavigationbutton(el._refs.buttons.previous);
+
+          if (lastPage == 1) {
+
+            disableNavigationbutton(el._refs.buttons.next);
+            disableNavigationbutton(el._refs.buttons.last);
+
+          } else {
+
+            enableNavigationButton(el._refs.buttons.next);
+            enableNavigationButton(el._refs.buttons.last);
+          }
+
+        } else {
+
+          enableNavigationButton(el._refs.buttons.first);
+          enableNavigationButton(el._refs.buttons.previous);
+
+          if (currentPage == lastPage) {
+
+            disableNavigationbutton(el._refs.buttons.next);
+            disableNavigationbutton(el._refs.buttons.last);
+
+          } else {
+            enableNavigationButton(el._refs.buttons.next);
+            enableNavigationButton(el._refs.buttons.last);
+          }
+        }
+      },
+      /*
+      @function (private) _resizeColumn
+      @description First action when clicking to resize, sets up some information and actions before the actual resize function is called when moving the mouse
+      @param {Object} resizeIndicator
+      */
+      resizeColumn: function (resizeIndicator) {
+
+        var el = this;
+
+        el._misc.resize.header = resizeIndicator.parentNode;
+        el._misc.resize.indicator = resizeIndicator;
+        el._misc.resize.active = true;
+
+        if (el._misc.resize.firstTime == true) {
+
+          el._misc.resize.headers = el._refs.headersWrapper.querySelectorAll("eon-grid-cell");
+          el._misc.resize.firstTime = false;
+
+          var headerWidth;
+
+          for (var i = 0; i < el._misc.resize.headers.length; i++) {
+
+            if (el._misc.resize.headers[i].column != el._misc.resize.header.column) {
+
+              headerWidth = window.getComputedStyle(el._misc.resize.headers[i]).width.split("px")[0];
+
+              el._misc.columns[el._misc.resize.headers[i].column].rule.style.minWidth = headerWidth + "px";
+              el._misc.columns[el._misc.resize.headers[i].column].rule.style.flexGrow = 0;
+              el._misc.columns[el._misc.resize.headers[i].column].rule.style.flexBasis = headerWidth + "px";
+            }
+          }
+
+          window.addEventListener("mousemove", function (e) {
+
+            if (el._misc.resize.active == true && e.clientX != el._misc.resize.initialPosition.x) {
+
+              e.stopPropagation();
+              e.preventDefault();
+
+              el._handleColumnResize(e);
+
+            }
+
+          });
+
+          window.addEventListener("mouseup", function (e) {
+
+            e.stopPropagation();
+            e.preventDefault();
+
+            if (el._misc.resize.active == true) {
+              el._handleColumnResizeStop(e);
+            }
+
+          });
+
+        }
+
+        //We create an overlay so that while resizing we dont select text and hover over other elements,
+        //this overlay will be removed on resizeStop
+        document.body.appendChild(el._refs.overlay);
+
+        //We add a class to the header of the columns we are resizing as an indicator
+        el._misc.resize.header.classList.add("eon-grid-resizingHeader", "eon-bg1-hoverable3");
+      },
+      /*
+      @function (private) _handleColumnsResize
+      @description Handles the resize of the columns
+      @param {Object} e [event]
+      */
+      handleColumnResize: function (e) {
+
+        var el = this;
+
+        var headerOrder = parseInt(el._misc.columns[el._misc.resize.header.column].order);
+        var columnRule = el._misc.columns[el._misc.resize.header.column].rule;
+
+        var resizeIndicatorLeftPosition = el._misc.resize.indicator.getBoundingClientRect().left;
+        var resizeIndicatorRightPosition = el._misc.resize.indicator.offsetWidth + resizeIndicatorLeftPosition;
+
+        var nextSiblingOrder = headerOrder + 1;
+        var previousSiblingOrder = headerOrder - 1;
+
+        var contentWidth = el._refs.header.offsetWidth;
+        var remainingSpace = el._refs.header.offsetWidth;
+
+        var newHeaderMinWidth = 0;
+        var columnWidth;
+
+        //For each header/column we have we loop to set its css properties in case its the first time we resize,
+        //also we will be calculating the remainingSpace
+        for (var i = 0; i < el._misc.resize.headers.length; i++) {
+
+          if (el._misc.resize.headers[i].column != el._misc.resize.header.column) {
+
+            columnWidth = Math.ceil(parseInt(el._misc.columns[el._misc.resize.headers[i].column].rule.style.minWidth.split("px")[0]));
+            remainingSpace = remainingSpace - columnWidth;
+            newHeaderMinWidth = newHeaderMinWidth + columnWidth;
+          }
+        }
+
+        var difference;
+        var finalWidth;
+
+        //Here we will see if the mouse is on the left or right and calculate the difference
+        if (e.clientX < resizeIndicatorRightPosition) {
+          difference = resizeIndicatorRightPosition - e.clientX;
+          finalWidth = el._misc.resize.header.offsetWidth - difference;
+        } else if (e.clientX > resizeIndicatorRightPosition) {
+          difference = e.clientX - resizeIndicatorRightPosition;
+          finalWidth = el._misc.resize.header.offsetWidth + difference;
+        }
+
+        finalWidth = (finalWidth < el.columnMinWidth) ? el.columnMinWidth : finalWidth;
+        remainingSpace = remainingSpace - finalWidth;
+
+        columnRule.style.flexBasis = 0;
+        columnRule.style.flexGrow = 0;
+        columnRule.style.minWidth = finalWidth + "px";
+
+        newHeaderMinWidth = parseInt(newHeaderMinWidth) + parseInt(finalWidth);
+
+        // Solves wrong header size when smaller resizing
+        el._refs.headersWrapper.style.minWidth = newHeaderMinWidth + "px";
+        el._refs.rowsWrapper.style.minWidth = newHeaderMinWidth + "px";
+
+        var headersWrapperWidth = el._refs.headersWrapper.offsetWidth;
+
+        //If the headersWrapper is smaller than the contentWidth we equal the headersContaienr width and
+        //add the remainingSpace to the last column
+        if (headersWrapperWidth <= contentWidth) {
+
+          var sibling = el._refs.headersWrapper.querySelector('eon-grid-cell[order="' + nextSiblingOrder + '"]');
+
+          if (!sibling) {
+            sibling = el._refs.headersWrapper.querySelector('eon-grid-cell[order="' + previousSiblingOrder + '"]');
+          }
+
+          el._misc.columns[sibling.column].rule.style.minWidth = parseInt(sibling.offsetWidth) + parseInt(remainingSpace) + "px";
+
+        }
+
+      },
+      /*
+      @function (private) _handleColumnResizeStop
+      @description Handles the end of the column resize
+      @param {Object} e [event]
+      */
+      handleColumnResizeStop: function (e) {
+
+        var el = this;
+
+        var columnRule = el._misc.columns[el._misc.resize.header.column].rule;
+
+        //At the end of the resizing event we remove the header resizing indicator
+        var headersWithResizingClass = el._refs.headersWrapper.querySelectorAll(".eon-grid-resizingHeader");
+        for (var i = 0; i < headersWithResizingClass.length; i++) {
+          headersWithResizingClass[i].classList.remove("eon-grid-resizingHeader", "eon-bg1-hoverable3");
+        }
+
+        columnRule.style.minWidth = el._misc.resize.header.offsetWidth + "px";
+        document.body.removeChild(el._refs.overlay);
+        el._misc.resize.active = false;
+
+      },
+      /*
+      @function (private) _handleRowsLayout
+      @description Handles everything autofit rows related, the paginations, its sizes...
+      @param {Number} entriesCount
+      */
+      handleRowsLayout: function (entriesCount) {
+
+        var el = this;
+        var rowsCapacity = el._getRowsCapacity();
+
+        //We will only do stuff when the rowsCapacity is bigger than one.
+        //One row will be the smallest number of rows possible, we will not allow pages with no rows
+        if (rowsCapacity >= 1) {
+
+          var existingDummiesCount = el.querySelectorAll(".eon-grid-dummyRow").length;
+          var totalPageRows = existingDummiesCount + entriesCount;
+          var dummyRowsAmount = rowsCapacity - entriesCount;
+
+          //If there are more rows than the capacity that we have we will remove an amount of rows
+          //until we match our capacity, the removal starts from the last one
+          if (rowsCapacity < totalPageRows) {
+
+            var rowsAmountDifference = totalPageRows - rowsCapacity;
+            var rows = el._refs.rowsWrapper.querySelectorAll(".eon-grid-entryRow, .eon-grid-dummyRow");
+            var rowsLength = rows.length;
+            var lastRowIndex;
+
+            for (var i = rowsAmountDifference; i > 0; i--) {
+              lastRowIndex = rowsLength - 1;
+
+              if (rows[lastRowIndex].classList.contains("eon-grid-entryRow")) {
+                el._decreaseEntriesCount();
+              }
+
+              el._refs.rowsWrapper.removeChild(el._refs.rowsWrapper.querySelectorAll(".eon-grid-entryRow, .eon-grid-dummyRow")[lastRowIndex]);
+              rowsLength--;
+            }
+
+            //If we have more capacity than actual rows displayed then we will fill the page with dummies
+          } else if (rowsCapacity > totalPageRows) {
+
+            var dummyDocFragment = document.createDocumentFragment();
+            var newDummiesCount = dummyRowsAmount - existingDummiesCount;
+            var dummyRow;
+
+            for (var i = 0; i < newDummiesCount; i++) {
+              dummyRow = document.createElement("div");
+              dummyRow.classList.add("eon-grid-autofit", "eon-grid-dummyRow");
+              dummyDocFragment.appendChild(dummyRow);
+            }
+
+            el._refs.rowsWrapper.appendChild(dummyDocFragment);
+          }
+
+          //If ourpageSize is different from the actual amount of rows we can have, we will handle
+          //different calls to reload the page with the data corresponding to the page
+          if (el._misc.pageSize != rowsCapacity) {
+            var currentPage = parseInt(el._misc.currentPage);
+            var newPage;
+
+            el._misc.pageSize = rowsCapacity;
+
+            newPage = currentPage > el._getLastAvailablePage() ? el._getLastAvailablePage() : currentPage;
+            newPage = newPage <= 0 ? 1 : newPage;
+
+            el._selectPage(newPage);
+
+          }
+        }
+      },
+      /*
+      @function (private) _getLastAvailablePage
+      @description Gets the current last page depending on the store size
+      */
+      getLastAvailablePage: function () {
+
+        var el = this;
+        var dataLength = el.store.data.size;
+
+        if (el._misc.pagingType == "all" && dataLength > 0) {
+          return 1;
+        }
+
+        return Math.ceil(parseInt(dataLength) / parseInt(el._misc.pageSize));
+      },
+      /*
+      @function (private) _selectPage
+      @description Selects a page
+      @param {Number} selectedPage
+      @param {Boolean} isSelected
+      */
+      selectPage: function (selectedPage, isSelected) {
+
+        if (isSelected == false || isSelected == "false" || typeof isSelected == "undefined") {
+
+          var el = this;
+
+          var pageSize = parseInt(el._misc.pageSize);
+          var rangeLimit = (parseInt(selectedPage) * pageSize);
+          var rangeStart = rangeLimit - pageSize;
+
+          el._handleRange(rangeStart, rangeLimit, true);
+          el._updatePagination(selectedPage);
+
+        }
+
+      },
+      /*
+      @function (private) _handleRange
+      @description Manages the redirection to another function depending on the situation
+      @param {Number} start
+      @param {Number} limit
+      @param {Boolean} cleanCurrentRange [Whether it has to clean the current page or not]
+      */
+      handleRange: function (start, limit, cleanCurrentRange) {
+
+        var el = this;
+
+        el._misc.range.start = start;
+        el._misc.range.limit = limit;
+
+        if (!el._misc.sort.active) {
+
+          el.store.read().limit(el._misc.range.start, el._misc.pageSize).result(function (error, data) {
+            el._handleEntries(data, cleanCurrentRange, start, limit);
+          });
+
+        } else {
+
+          el._handleSort(el._misc.sort.column, el._misc.sort.type);
+
+        }
+
+      },
+      /*
+       @function (private) _sort
+       @description Redirects the sort call depending on the situation, it also toggles the icon
+       @param {Object} e [event]
+       @param {Object} header
+       */
+      sort: function (e, header) {
+
+        if (e.target != header.querySelector(".eon-grid-resizeIndicator")) {
+
+          var el = this;
+
+          var currentSort = header.getAttribute("sort");
+          var sortType;
+
+          sortType = currentSort == "descending" ? "ascending" : "none";
+          sortType = currentSort == "none" ? "descending" : sortType;
+
+          el._handleSort(header.column, sortType);
+          el._updateHeaders(header, sortType);
+
+        }
+      },
+      /*
+      @function (private) _handleSort
+      @description Manages the redirection to another function depending on the situation
+      @param {String} columnKey
+      @param {Boolean} isDescending
+      */
+      handleSort: function (columnKey, sortType) {
+
+        var el = this;
+
+        if (sortType != "none") {
+
+          el._misc.sort.active = true;
+          el._misc.sort.column = columnKey;
+          el._misc.sort.type = sortType;
+
+          if (el._misc.pagingType != "all") {
+
+            el.store.read().limit(el._misc.range.start, el._misc.pageSize).sort(columnKey, sortType).result(function (error, data) {
+              el._handleEntries(data, true, el._misc.range.start, el._misc.range.limit);
+            });
+
+          } else {
+
+            el.store.read().sort(columnKey, sortType).result(function (error, data) {
+              el._handleEntries(data, true, el._misc.range.start, el._misc.range.limit);
+            });
+
+          }
+
+        } else {
+
+          el._misc.sort.active = false;
+          el._misc.sort.column = "";
+          el._misc.sort.type = "none";
+
+          el.store.read().limit(el._misc.range.start, el._misc.pageSize).result(function (error, data) {
+            el._handleEntries(data, true, el._misc.range.start, el._misc.range.limit);
+          });
+
+        }
+
+      },
+      /*
+      @function (private) _updateHeaders
+      @description Resets all the sorted headers, it does nothing in the clicked header
+      @param {Object} header
+      @param {String} sortType
+      */
+      updateHeaders: function (header, sortType) {
+
+        var el = this;
+
+        var sortedHeaders = el._refs.headersWrapper.querySelectorAll('eon-grid-cell[sort="descending"], eon-grid-cell[sort="ascending"]');
+        var upIcon = "vicon-chevron-up";
+        var downIcon = "vicon-chevron-down";
+
+        if (sortType != "none") {
+          var icon = sortType == "descending" ? downIcon : upIcon;
+        }
+
+        for (var i = 0; i < sortedHeaders.length; i++) {
+          headerIcon = sortedHeaders[i].querySelector("i");
+          sortedHeaders[i].sort = "none";
+          headerIcon.classList.remove(upIcon);
+          headerIcon.classList.remove(downIcon);
+        }
+
+        if (icon) {
+          header.querySelector("i").classList.add(icon);
+        }
+
+        header.setAttribute("sort", sortType);
+
+      },
+      /*
+      @function (private) _generateSourceFragment
+      @description Takes all the source declared by the user and creates its own fragment to save it
+      */
+      generateSourceFragment: function () {
+        this._misc.sourceFragment.appendChild(this.source);
+      },
+      /*
+      @function (private) _setDefaultStyle
+      @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+        var el = this;
+        // Check fill behavior
+        if (eon.util.isTrue(el.fill)) {
+          // Content style
+          el.classList.add("eon-fill");
+        }
+      },
+      /*
+      @function (private) _updatePagination
+      @description Updates pageSelectors and the navigability buttons
+      @param {Number} page
+      */
+      updatePagination: function (page) {
+
+        var el = this;
+
+        el._misc.currentPage = page;
+        // Resets the childs rows wrapper height in case a childRow is open
+        el._misc.dropdowns.childRowsCount = 0;
+        el._refs.rowsWrapper.style.height = "auto";
+
+        if (eon.util.isTrue(el.pagination)) {
+
+          el._createStripPages();
+          el._updateCurrentPage(page);
+          el._handleNavigability();
+
+        }
+
+      },
+      /*
+      @function (private) _createStripPages
+      @description Creates the pages for the strip page selector
+      */
+      createStripPages: function () {
+
+        var el = this;
+        var currentPage = el._misc.currentPage;
+        var pageSize = parseInt(el._misc.pageSize);
+        var pageCount = el._getLastAvailablePage();
+        var pageItemsDocFragment = document.createDocumentFragment();
+        var pageItem;
+
+        var pagesToCreate = [];
+
+        var loopStart;
+        var loopEnd;
+
+        var pageSelector = el.querySelector(".eon-grid-stripPageSelector");
+
+        pageSelector.innerHTML = "";
+
+        if (pageCount > 5) {
+
+          if (currentPage == pageCount) {
+
+            loopStart = parseInt(currentPage) - 4;
+            loopEnd = parseInt(currentPage);
+
+          } else if (currentPage > 2) {
+
+            if (currentPage == (pageCount - 1)) {
+
+              loopStart = parseInt(currentPage) - 3;
+              loopEnd = parseInt(currentPage) + 1;
+
+            } else {
+
+              loopStart = parseInt(currentPage) - 2;
+              loopEnd = parseInt(currentPage) + 2;
+            }
+          } else if (currentPage == 2) {
+
+            loopStart = parseInt(currentPage) - 1;
+            loopEnd = parseInt(currentPage) + 3;
+
+          } else {
+
+            loopStart = 1;
+            loopEnd = 5;
+          }
+        } else {
+
+          loopStart = 1;
+          loopEnd = parseInt(pageCount);
+        }
+
+        for (var page = loopStart; page <= loopEnd; page++) {
+          pagesToCreate.push(parseInt(page));
+        }
+
+        for (var i = 0; i < pagesToCreate.length; i++) {
+
+          pageItem = document.createElement("div");
+
+          pageItem.classList.add("eon-grid-stripPage", "eon-fg1-hoverable", "eon-bg2-hoverable");
+          pageItem.dataset.page = pagesToCreate[i];
+          pageItem.innerHTML = pagesToCreate[i];
+          pageItem.onclick = function () {
+            el._selectPage(this.dataset.page, this.getAttribute('selected'))
+          };
+          pageItem.setAttribute("selected", "false");
+
+          if (currentPage == pagesToCreate[i]) {
+            pageItem.id = "currentPage";
+            pageItem.classList.add("eon-grid-currentPage", "eon-sect2-hoverable", "eon-fg1-hoverable", "eon-bg2-hoverable");
+            pageItem.setAttribute("selected", "true");
+          }
+          pageItemsDocFragment.appendChild(pageItem);
+        }
+
+        pageSelector.appendChild(pageItemsDocFragment);
+
+      },
+      /*
+      @function (private) _getRowsCapacity
+      @description Gets the current rows capacity
+      */
+      getRowsCapacity: function () {
+        return Math.floor(this._refs.rowsWrapper.offsetHeight / parseInt(this.rowMinHeight));
+      },
+      /*
+      @function (private) _increaseEntriesCount
+      @description Increases the entries count
+      */
+      increaseEntriesCount: function () {
+
+        var el = this;
+
+        el._misc.entriesCount++;
+        el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
+      },
+      /*
+      @function (private) _decreaseEntriesCount
+      @description Decrease the entries count
+      */
+      decreaseEntriesCount: function () {
+
+        var el = this;
+
+        el._misc.entriesCount--;
+        el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
+      },
+      /*
+      @function (private) _clearPage
+      @description Clears the page and resets the entries count
+      */
+      clearPage: function () {
+
+        var el = this;
+
+        el._refs.rowsWrapper.innerHTML = "";
+
+        el._misc.entriesCount = 0;
+        el._refs.entriesCount.innerHTML = el._misc.entriesCount + " entries";
+
+      }
+    },
+
+    onCreated: function () {
+
+      var el = this;
+
+      el._setupRefs();
+      el._setupStore();
+      el._setupMisc();
+      el._setupResize();
+
+      el._generateSourceFragment();
+
+      eon.createCallback("onCellCreated", el);
+      eon.createCallback("onRowCreated", el);
+      eon.createCallback("onEdit", el);
+
+    },
+    onInit: function () {
+
+      var el = this;
+
+      // ** Apply default items positioning style
+      el._setDefaultStyle();
+
+    },
+
+    onBubbleRender: function () {
+
+      var el = this;
+
+      // Order matters
+      el._setupFooter();
+      el._setupPagination();
+      el._setupPageSize();
+
+      el._setupColumns();
+      el._setupHeaders();
+
+      el._setupContent();
+
+      el._setupAutofit();
+
+      el._setupOverlay();
+
+    }
+  });
+
+</script>
