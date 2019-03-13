@@ -12,7 +12,7 @@
     <div class="doc-playground-content">
         <iframe class="doc-playground-hidden"></iframe>
         <eon-editor class="doc-playground-hidden" lazy-load="true"></eon-editor>
-        <eon-loading class="doc-playground-loading"></eon-loading>
+        <eon-loading class="doc-playground-loading" format="descendant" duration="0"></eon-loading>
         <app-fading in="0" out="0.5"></app-fading>
         <div class="doc-playground-footer-links"></div>
     </div>
@@ -77,6 +77,10 @@
             // @html-attribute onResultReady (public) [Callback when the result view is ready]
             onResultReady: {
                 value: {}
+            },
+            // @html-attribute autoHideLoadingMask (public) [Auto hide loading mask when iframe ready. Default true. If set to false, the loading mask needs to be cancel calling hideLoadingMask function]
+            autoHideLoadingMask: {
+                value: "true"
             }
         },
 
@@ -90,6 +94,11 @@
         },
 
         functions: {
+            // @function hideLoadingMask (public) [Hide loading mask]
+            hideLoadingMask: function () {
+                var el = this;
+                el._refs.loading.hide();
+            },
             // @function setTitle (public) [Set playground title]
             setTitle: function (title) {
                 var el = this;
@@ -215,9 +224,9 @@
                 if (typeof (el.onResultReady) != "object") {
                     eval(el.onResultReady)(el, el.result);
                 }
-
-                el._refs.iframe.classList.remove("doc-playground-hidden");
-                el._refs.loading.hide();
+                if (eon.util.isTrue(el.autoHideLoadingMask)) {
+                    el._refs.loading.hide();
+                }
             },
             // @function toggle (public) [Switch code and result view] @param-optional view [Force toggle to one specific (result/code)]
             toggle: function (view) {
@@ -293,23 +302,23 @@
             // @function _init (private) [Initialize component]
             init: function () {
                 var el = this;
-                el._setUpRefs();
+                // el._setUpRefs();
                 el._setUp();
             },
             // @function _setUpRefs (private) [Set up references]
             setUpRefs: function () {
                 var el = this;
-                el._refs.title = el.querySelector(".doc-playground-menu-title");
-                el._refs.iframe = el.querySelector("iframe");
-                el._refs.content = el.querySelector(".doc-playground-content");
-                el._refs.editor = el.querySelector("eon-editor");
-                el._refs.loading = el.querySelector(".doc-playground-loading");
-                el._refs.toggle = el.querySelector(".doc-playground-toggle");
-                el._refs.fullscreen = el.querySelector(".doc-playground-fullscreen");
-                el._refs.tabs = el.querySelector(".doc-playground-menu-tabs");
-                el._refs.header = el.querySelector(".doc-playground-menu-links");
-                el._refs.footer = el.querySelector(".doc-playground-footer-links");
-                el._refs.fading = el.querySelector("app-fading");
+                el._refs.title = el.template.querySelector(".doc-playground-menu-title");
+                el._refs.iframe = el.template.querySelector("iframe");
+                el._refs.content = el.template.querySelector(".doc-playground-content");
+                el._refs.editor = el.template.querySelector("eon-editor");
+                el._refs.loading = el.template.querySelector(".doc-playground-loading");
+                el._refs.toggle = el.template.querySelector(".doc-playground-toggle");
+                el._refs.fullscreen = el.template.querySelector(".doc-playground-fullscreen");
+                el._refs.tabs = el.template.querySelector(".doc-playground-menu-tabs");
+                el._refs.header = el.template.querySelector(".doc-playground-menu-links");
+                el._refs.footer = el.template.querySelector(".doc-playground-footer-links");
+                el._refs.fading = el.template.querySelector("app-fading");
             },
             // @function _setUp (private) [Set up component]
             setUp: function () {
@@ -674,14 +683,13 @@
             eon.createCallback("onResultReady", this, "ready");
             eon.createCallback("onFullScreenActivated", this);
             eon.createCallback("onFullScreenDeactivated", this);
+            el._setUpRefs();
         },
 
 
         onReady: function () {
             var el = this;
-            setTimeout(() => {
-                el._init();
-            }, 0);
+            el._init();
         },
 
 

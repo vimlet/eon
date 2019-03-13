@@ -1,7 +1,7 @@
 <template>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <eon-loading color="white"></eon-loading>
+  <eon-loading color="white" format="descendant"></eon-loading>
   <div class="eon-editor-padding eon-editor-until-render">
     <div id="eon-editor-content"></div>
   </div>
@@ -107,7 +107,7 @@
           }
         };
         require(['vs/editor/editor.main'], function () {
-          el._refs.editor = monaco.editor.create(el.querySelector("#eon-editor-content"), el._misc.config);
+          el._refs.editor = monaco.editor.create(el._refs.content, el._misc.config);
 
           // Ugly solution to know when monaco is ready because there is not an onReady function implemented yet
           var didScrollChangeDisposable = el._refs.editor.onDidScrollChange(function (
@@ -131,6 +131,12 @@
           });
         });
       },
+      // @function _setupRefs (private)
+      setupRefs:function(){
+        var el = this;
+        el._refs.content = el.template.querySelector("#eon-editor-content");
+        el._refs.loading = el.template.querySelector("eon-loading");
+      },
       // @function editorReady (private) [Fires when monaco editor is loaded]
       editorReady: function () {
         var el = this;
@@ -141,14 +147,15 @@
       // @function show (private) [Hides loading mask and shows editor]
       show: function () {
         var el = this;
-        el.querySelector("#eon-editor-content").parentNode.classList.remove(
+        el._refs.content.parentNode.classList.remove(
           "eon-editor-until-render");
-        el.querySelector("eon-loading").hide();
+          el._refs.loading.hide();
       }
     },
 
     onCreated: function () {
       var el = this;
+      el._setupRefs();
       eon.amd.require([eon.basePath + "/ui/eon-editor/vs/loader.js"], function () {
         eon.triggerCallback("onloader", el, el, [el]);
       });

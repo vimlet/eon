@@ -1,7 +1,9 @@
 <template>
 
   <div class="eon-number-group eon-fg2 eon-unselectable">
-    <label class="eon-number-label"></label>
+    <div class="eon-number-data">
+      <label class="eon-number-label"></label>
+    </div>
     <div class="eon-number-number eon-bg2">
       <div class="eon-number-control eon-fg2-hoverable eon-number-controlDown">
         <i class="vicon vicon-minimize"></i>
@@ -33,7 +35,7 @@
     properties: {
       /*
         @property {String} name 
-        @description number name
+        @description Input number name
       */
       name: {
         value: "",
@@ -41,7 +43,7 @@
       },
       /*
         @property {Number} value 
-        @description Number value
+        @description Input number value
       */
       value: {
         value: 0,
@@ -57,7 +59,7 @@
       },
       /*
         @property {String} placeholder 
-        @description Number placeholder
+        @description Input number placeholder
       */
       placeholder: {
         value: "",
@@ -65,7 +67,7 @@
       },
       /*
         @property {String} label 
-        @description Number label
+        @description Input number label
       */
       label: {
         value: "",
@@ -74,25 +76,27 @@
       },
       /*
         @property {Boolean} disabled 
-        @description Number field deactivation.
+        @description Input number field deactivation.
         Default: false
       */
       disabled: {
         value: false,
-        reflect: true
+        reflect: true,
+        reflectDefault: true
       },
       /*
         @property {Boolean} readonly 
-        @description Toggles the readonly status of the number.
+        @description Toggles the readonly status of the input number.
         Default: false
       */
       readonly: {
         value: false,
-        reflect: true
+        reflect: true,
+        reflectDefault: true
       },
       /*
         @property {Boolean} autofocus 
-        @description Number automatically get focus when page loads
+        @description Input number automatically get focus when page loads
         Default: false
       */
       autofocus: {
@@ -101,7 +105,7 @@
       },
       /*
         @property {Number} max 
-        @description Number maximum number value.
+        @description Input number maximum number value.
         Value must be int number.
         Default: valueless
       */
@@ -111,7 +115,7 @@
       },
       /*
         @property {Number} min 
-        @description Number minimum number value.
+        @description Input number minimum number value.
         Value must be int number.
         Default: valueless
       */
@@ -127,6 +131,15 @@
        Default: true
      */
       inline: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {String} labelAnim
+      @description Whether the label will have animation or not
+      */
+      labelAnim: {
         value: true,
         reflect: true
       },
@@ -153,7 +166,7 @@
     privateProperties: {
       /*
         @property (private) {String} _formElement 
-        @description Set that number is a form element.
+        @description Set that input number is a form element.
         Value: number
       */
       formElement: {
@@ -161,21 +174,21 @@
       },
       /*
         @property (private) {String} _currentValue
-        @description Current textarea value
+        @description Current input number value
       */
       currentValue: {
         value: ""
       },
       /*
         @property (private) {Object} _callUpdateEvent
-        @description Store number call update number event
+        @description Store input number call update number event
       */
       callUpdateEvent: {
         value: {}
       },
       /*
         @property (private) {Object} _refs 
-        @description Object with  references
+        @description Object with references
       */
       refs: {
         value: {}
@@ -212,18 +225,17 @@
       },
       /*
       @function updateDescription
-      @description Updates the description value for the
+      @description Updates the description value
       */
       updateDescription: function (text) {
         this._misc.descriptionText = text;
         this._refs.description.innerHTML = this._misc.descriptionText;
       },
       /*
-      @function updateDescription
-      @description Updates the description value for the
+      @function resetDescription
+      @description Resets the description value
       */
       resetDescription: function () {
-
         var el = this;
         var description = el.tooltip != "" ? el.tooltip : "";
 
@@ -234,6 +246,40 @@
 
     },
     privateFunctions: {
+      /*
+      @function (private) _setupLabelAnimation
+      @description Inits label animation classes and style
+      */
+      setupLabelAnimation: function () {
+        var el = this;
+
+        if (eon.util.isTrue(el.labelAnim)) {
+          if (el.value == "" && el.default == "") {
+            el._refs.label.classList.add("eon-number-movedLabel");
+          }
+
+        }
+
+      },
+      /*
+      @function (private)  _animateLabel
+      @description Depending on the focus state animates the label or not
+      */
+      animateLabel: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.labelAnim)) {
+
+          if (el.classList.contains("eon-number-focus") || el.value != "") {
+            el._refs.label.classList.remove("eon-number-movedLabel");
+          } else {
+            el._refs.label.classList.add("eon-number-movedLabel");
+          }
+
+        }
+
+      },
       /*
         @function (private) _createRefs
         @description Creates fast access to elements
@@ -253,7 +299,7 @@
 
       /*
         @function (private) _setValue
-        @description Set new number value
+        @description Set new input number value
         @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
       */
       setValue: function (privateValueKey) {
@@ -336,7 +382,7 @@
       },
       /*
         @function (private) _updateNumber
-        @description Update number value
+        @description Update input number value
         @param {Object} e [Event object]
       */
       updateNumber: function (e) {
@@ -396,9 +442,9 @@
         eon.registerPathListener(el._refs.number);
 
         document.addEventListener(eventType, function (e) {
-          if (el._refs.number.isOnPath && !el._refs.label.classList.contains("eon-number-focusLabel")) {
+          if (el._refs.number.isOnPath && !el.classList.contains("eon-number-focus")) {
             el._inputFocus()
-          } else if (!el._refs.number.isOnPath && el._refs.label.classList.contains("eon-number-focusLabel")) {
+          } else if (!el._refs.number.isOnPath && el.classList.contains("eon-number-focus")) {
             el._inputBlur(e);
           }
 
@@ -414,7 +460,7 @@
 
       /*
       @function (private) _setFocusingListeners
-      @description Set listener for update the number value
+      @description Set listener for update the input number value
       */
       setUpdateListeners: function () {
         var el = this;
@@ -457,8 +503,10 @@
       */
       inputFocus: function () {
         if (!eon.util.isTrue(this.readonly)) {
-          this._refs.label.classList.add("eon-number-focusLabel", "eon-fg1");
+          this.classList.add("eon-number-focus");
+          this._refs.label.classList.add("eon-fg1");
           this._refs.inputBar.classList.add("eon-number-animate");
+          this._animateLabel();
         }
       },
 
@@ -469,22 +517,25 @@
       */
       inputBlur: function (e) {
 
-        if (this._refs.label.classList.contains("eon-number-focusLabel")) {
+        if (this.classList.contains("eon-number-focus")) {
           this._updateNumber(e);
         }
 
-        this._refs.label.classList.remove("eon-number-focusLabel", "eon-fg1");
+        this.classList.remove("eon-number-focus");
+        this._refs.label.classList.remove("eon-fg1");
         this._refs.inputBar.classList.remove("eon-number-animate");
 
         // Trigger onChange callback
         this._currentValue = (this.value !== this._currentValue) ? this.value : this._currentValue;
         (this.value !== this._currentValue) ? eon.triggerCallback("onChange", this) : null;
 
+        this._animateLabel();
+
       },
 
       /*
       @function (private) _setAutofocus
-      @description Gives autofocus to the number
+      @description Gives autofocus to the input number
       */
       setAutofocus: function () {
         var el = this;
@@ -530,28 +581,33 @@
       el._createRefs();
     },
 
-    onRender: function () {
+    onInit: function () {
       var el = this;
-
+      
+      el._setupLabelAnimation();
       // Sets a default value set by the user
       el.value = el.default != "" && el.value == "" ? el.default : el.value;
       el._setValue();
-
-      el._updateDisabled();
       el._updateReadonly();
       el._setFocusingListeners();
-      el._setUpdateListeners();
       el._setupDescription();
       el._updateInvalid();
-
+      
       // Sets the name of the input
       el._refs.input.setAttribute("name", el.name);
-
+      
       // Set label
       if (el.label) {
         el._refs.label.innerHTML = el.label ? el.label : el._refs.label.innerHTML;
         el._refs.label.classList.add("eon-number-labelDisplay");
       }
+    },
+    
+    onRender: function () {
+      var el = this;
+      
+      el._updateDisabled();
+      el._setUpdateListeners();
     },
 
     onReady: function () {
