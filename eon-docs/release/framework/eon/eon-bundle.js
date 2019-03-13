@@ -762,6 +762,7 @@ if (eon.polyfills.needCustomElementsPolyfill()) {
   }
 }.call(self));
 
+//# sourceMappingURL=custom-elements.min.js.map
 
 }
 
@@ -2685,26 +2686,16 @@ eon.error.log = function(condition, message) {
   }
 };
 
-eon.debug.adapterEvents = "adapterEvents" in eon.debug ? eon.debug.adapterEvents : false;
-eon.debug.configEvents = "configEvents" in eon.debug ? eon.debug.configEvents : false;
-eon.debug.elementEvents = "elementEvents" in eon.debug ? eon.debug.elementEvents : false;
+eon.debug.adapterEvents = eon.debug.adapterEvents || false;
+eon.debug.configEvents = eon.debug.configEvents || false;
+eon.debug.elementEvents = eon.debug.elementEvents || false;
 
-eon.warn.store = "store" in eon.warn?  eon.warn.store : true;
-eon.error.store = "store" in eon.error? eon.error.store : true;
+eon.warn.store = eon.warn.store || true;
+eon.error.store = eon.error.store || true;
     
     // ############################################################################################
 // BASE
 // ############################################################################################
-
-eon.cacheBusting = "cacheBusting" in eon ? eon.cacheBusting : false;
-eon.importCacheBusting = "importCacheBusting" in eon ? eon.importCacheBusting : false;
-eon.themeCacheBusting = "themeCacheBusting" in eon ? eon.themeCacheBusting : false;
-eon.pollyfillCacheBusting = "pollyfillCacheBusting" in eon ? eon.pollyfillCacheBusting : false;
-
-eon.getCacheBustedUrl = function (url) {
-  return url + "?ecb=" + (+ new Date);
-}
-
 eon.getCurrentScript = function() {
     if (document.currentScript) {
       return document.currentScript.src;
@@ -2757,7 +2748,7 @@ eon.style.sheet.insertRule("eon-script { display: none; }", 0);
 eon.mobileWidth = 450;
 eon.tabletWidth = 800;
 
-eon.addViewportMeta = "addViewportMeta" in eon? eon.addViewportMeta : true;
+eon.addViewportMeta = eon.addViewportMeta || true;
 
 if (eon.addViewportMeta) {
     document.write(
@@ -2771,7 +2762,6 @@ if (eon.addViewportMeta) {
 // ############################################################################################
 
 eon.polyfills.injectPolyfill = function (url) {
-  url = eon.cacheBusting || eon.pollyfillCacheBusting ? eon.getCacheBustedUrl(url) : url;
   document.write('<script type="text/javascript" src="' + url + '"></script>');
 };
 
@@ -5067,7 +5057,7 @@ vimlet.meta = vimlet.meta || {};
   vimlet.meta.lineBreak = vimlet.meta.lineBreak || null;
 
   // Decode html
-  vimlet.meta.decodeHTML = "decodeHTML" in vimlet.meta? vimlet.meta.decodeHTML : true;
+  vimlet.meta.decodeHTML = vimlet.meta.decodeHTML || true;
   vimlet.meta.__decodeEntityRegex = /&(?:#x[a-f0-9]+|#[0-9]+|[a-z0-9]+);?/ig;
 
   vimlet.meta.parse = function (scope, text, data, callback) {
@@ -5952,11 +5942,14 @@ eon.import = function (param) {
 };
 
 eon.insertImport = function (href) {
-
+    
     var elementName;
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
+
+    // Cache
+    eon.cache.add(href, { name: elementName });
 
     if (!(elementName in eon.imports.templates)) {
 
@@ -5972,34 +5965,31 @@ eon.insertImport = function (href) {
         // Declare element
         eon.declare(elementName);
 
-        eon.ajax(href, { cacheBusting: eon.cacheBusting || eon.importCacheBusting }, function (success, obj) {
+        var xhttp = new XMLHttpRequest();
 
-            if (success) {
+        xhttp.onreadystatechange = function () {
 
-                // Cache
-                eon.cache.add(obj.url, { name: elementName });
+            if (this.readyState == 4 && this.status == 200) {
 
-                if (obj.xhr.status == 200) {
+                eon.insertFragment(elementName, this.responseText);
 
-                    eon.insertFragment(elementName, obj.responseText);
+            } else if (this.readyState == 4) {
 
-                } else {
+                // Since this element can't be imported, we reduce the total components amount so that the execution may continue
+                eon.imports.total--;
 
-                    // Since this element can't be imported, we reduce the total components amount so that the execution may continue
-                    eon.imports.total--;
+                // Removes it from the already saved objects
+                delete eon.imports.templates[elementName];
+                delete eon.imports.paths[elementName];
 
-                    // Removes it from the already saved objects
-                    delete eon.imports.templates[elementName];
-                    delete eon.imports.paths[elementName];
-
-                    // Saves it into the erros object
-                    eon.imports.errors[elementName] = obj.xhr.status;
-
-                }
+                // Saves it into the erros object
+                eon.imports.errors[elementName] = this.status;
 
             }
+        };
 
-        });
+        xhttp.open("GET", href);
+        xhttp.send();
 
     }
 
@@ -6182,8 +6172,6 @@ eon.importMainTheme = function (theme) {
         var mainLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/main.css";
 
-        themePath = eon.cacheBusting || eon.themeBoostedCache ? eon.getCacheBustedUrl(themePath) : themePath;
-
         eon.registry.registerTheme("main", theme);
 
         mainLink.setAttribute("rel", "stylesheet");
@@ -6205,8 +6193,6 @@ eon.importElementTheme = function (config, name, theme) {
         var importedDocumentHead = document.querySelector("head");
         var elementLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/" + name.toLowerCase() + ".css";
-
-        themePath = eon.cacheBusting || eon.themeBoostedCache ? eon.getCacheBustedUrl(themePath) : themePath;
 
         eon.registry.registerTheme(name, theme);
 
@@ -6652,7 +6638,7 @@ eon.interpolation.prepare = function (template) {
   if (!vimlet.meta.sandbox) {
     vimlet.meta.sandbox = {
       "bind": function (keyPath, rootPath, global) {
-
+        
         global = eon.util.isTrue(global) ? true : false;
 
         // If rootPath is provided we split it
@@ -6705,15 +6691,23 @@ eon.interpolation.prepare = function (template) {
 };
 
 // Handles all the initial state of the data and variable elements
-eon.interpolation.init = function (el, config) {
+eon.interpolation.handleInterpolationVariables = function (el, config) {
+  var variables = el.template.querySelectorAll("eon-variable");
+  var currentVariable;
+
+  var isGlobal, scope, source, sourceType;
+  var bindString, bindValue, root;
 
   var sources = {};
 
   sources.element = {};
   sources.global = {};
   
+  eon.interpolation.globalScope.__interpolations = eon.interpolation.globalScope.__interpolations || {};
+  el.__interpolations = el.__interpolations || {};
+
   // First of all checks if there is a data specified in the element config, if so, it creates the source
-  if (Object.keys(el.data).length > 0) {
+  if (el.data) {
 
     sources.element.data = {};
     sources.element.data.scope = el;
@@ -6723,79 +6717,57 @@ eon.interpolation.init = function (el, config) {
 
   }
 
-  // If parse is not enabled then we will try to create onDataChanged callback if data exists on the component
-  if (!config.parse) {
+  // Loops all the inner element variables
+  for (var i = 0; i < variables.length; i++) {
 
-    if (sources.element.data) {
+    currentVariable = variables[i];
+
+    // Sets some basic variables to be used later on
+    isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
+    bindString = currentVariable.getAttribute("bind");
+    scope = isGlobal ? eon.interpolation.globalScope : el;
+    sourceName = bindString.split(".")[0] == "locale" ? "locale" : "data";
+
+    root = sourceName != "locale" ? scope[sourceName] : scope;
+
+    // Reads if there is already a value on the source if there is not then it assigns an empty string
+    bindValue = eon.object.readFromPath(root, bindString);
+    bindValue = typeof bindValue == "undefined" ? "" : bindValue;
+
+    // Reassigns the value to the source, in case there was no value
+    eon.object.assignToPath(root, bindString, bindValue);
+
+    sourceType = isGlobal ? "global" : "element";
+
+    // Creates the source object
+    if (!sources[sourceType][sourceName]) {
+
+      sources[sourceType][sourceName] = {};
+      sources[sourceType][sourceName].scope = scope;
+      sources[sourceType][sourceName].obj = scope[sourceName];
+      sources[sourceType][sourceName].isGlobal = isGlobal;
+
+      sources[sourceType][sourceName].isLocale = (sourceName == "locale");
+
+
+    }
+
+  }
+
+  var sourceTypeKeys = Object.keys(sources);
+  var sourceKeys;
+
+  for (var i = 0; i < sourceTypeKeys.length; i++) {
+
+    sourceKeys = Object.keys(sources[sourceTypeKeys[i]]);
+
+    for (var j = 0; j < sourceKeys.length; j++) {
+
+      source = sources[sourceTypeKeys[i]][sourceKeys[j]];
       
-      eon.interpolation.setupDataChangeCallback(el, sources.element.data, config);
-      eon.interpolation.setupDataPropDescriptors(sources.element.data, "data");
-
-    }
-
-  } else {
-
-    var variables = el.template.querySelectorAll("eon-variable");
-    var currentVariable;
-
-    var isGlobal, scope, source, sourceType;
-    var bindString, bindValue, root;
-
-    eon.interpolation.globalScope.__interpolations = eon.interpolation.globalScope.__interpolations || {};
-    el.__interpolations = el.__interpolations || {};
-
-    // Loops all the inner element variables
-    for (var i = 0; i < variables.length; i++) {
-
-      currentVariable = variables[i];
-
-      // Sets some basic variables to be used later on
-      isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
-      bindString = currentVariable.getAttribute("bind");
-      scope = isGlobal ? eon.interpolation.globalScope : el;
-      sourceName = bindString.split(".")[0] == "locale" ? "locale" : "data";
-
-      root = sourceName != "locale" ? scope[sourceName] : scope;
-
-      // Reads if there is already a value on the source if there is not then it assigns an empty string
-      bindValue = eon.object.readFromPath(root, bindString);
-      bindValue = typeof bindValue == "undefined" ? "" : bindValue;
-
-      // Reassigns the value to the source, in case there was no value
-      eon.object.assignToPath(root, bindString, bindValue);
-
-      sourceType = isGlobal ? "global" : "element";
-
-      // Creates the source object
-      if (!sources[sourceType][sourceName]) {
-
-        sources[sourceType][sourceName] = {};
-        sources[sourceType][sourceName].scope = scope;
-        sources[sourceType][sourceName].obj = scope[sourceName];
-        sources[sourceType][sourceName].isGlobal = isGlobal;
-
-        sources[sourceType][sourceName].isLocale = (sourceName == "locale");
-
-      }
-
-    }
-
-    var sourceTypeKeys = Object.keys(sources);
-    var sourceKeys;
-
-    for (var i = 0; i < sourceTypeKeys.length; i++) {
-
-      sourceKeys = Object.keys(sources[sourceTypeKeys[i]]);
-
-      for (var j = 0; j < sourceKeys.length; j++) {
-
-        source = sources[sourceTypeKeys[i]][sourceKeys[j]];
-
-        eon.interpolation.setupDataChangeCallback(el, source, config);
-        eon.interpolation.setupDataPropDescriptors(source, sourceKeys[j]);
-        eon.interpolation.interpolate(el, source, source.obj, source.scope.__interpolations);
-
-      }
+      eon.interpolation.setupDataChangeCallback(el, source, config);
+      eon.interpolation.setupDataPropDescriptors(source, sourceKeys[j]);
+      eon.interpolation.interpolate(el, source, source.obj, source.scope.__interpolations);
 
     }
 
@@ -6823,7 +6795,7 @@ eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
 // Simple property descriptor creation that in case its changed it will trigger our internal callback
 eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyPath, value) {
   var propDescriptor = {};
-
+  
   // Update property value
   keyOwnerObj["__" + key] = value;
 
@@ -6848,7 +6820,7 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
   var value;
 
   keyPath = keyPath + ".";
-
+  
   for (var key in obj) {
     // We only want take into account the keys that are not used for the descriptor
     if (key.indexOf("__") == -1) {
@@ -6882,7 +6854,6 @@ eon.interpolation.setupDataChangeCallback = function (el, source, config) {
 
     // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
     scope._onDataChanged(function (keyPath, oldVal, newVal) {
-      
       if (newVal.constructor === Object) {
         eon.interpolation.handleObjectChange(el, scope, keyPath, oldVal, newVal, config);
       } else {
@@ -6898,7 +6869,7 @@ eon.interpolation.setupDataChangeCallback = function (el, source, config) {
 // Takes all the properties from data, finds its variable and sets its value
 eon.interpolation.interpolate = function (el, source, obj, interpolations, bind) {
   var key, i, variableBind, variable;
-
+  
   for (key in obj) {
     // We only want take into account the keys that are not used for the descriptor
     if (key.indexOf("__") == -1) {
@@ -6916,12 +6887,12 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
         variableBind = source.isLocale ? "locale." + variableBind : variableBind;
 
         interpolations[key] = interpolations[key] ? interpolations[key] : [];
-
+        
         // Looks for the variables matching the binding
         Array.prototype.push.apply(interpolations[key], el.template.querySelectorAll(
           'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
         ));
-
+          
         // For each variable found previously sets its value
         for (i = 0; i < interpolations[key].length; i++) {
           variable = interpolations[key][i];
@@ -6959,7 +6930,7 @@ eon.interpolation.handleVariableChange = function (el, scope, keyPath, oldVal, n
   interpolationPath = pathArray.join(".");
   // Takes the variable elements for the path
   variablesToChange = eon.object.readFromPath(scope.__interpolations, interpolationPath);
-
+  
   // If it has variable elements changes its value 
   if (variablesToChange) {
     for (var i = 0; i < variablesToChange.length; i++) {
@@ -7153,7 +7124,6 @@ eon.element = function (param1, param2) {
         var link = document.createElement("link");
 
         stylePath = eon.imports.paths[name.toLowerCase()] + stylePath;
-        stylePath = eon.cacheBusting || eon.themeCacheBusting ? eon.getCacheBustedUrl(stylePath) : stylePath;
 
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", stylePath);
@@ -8117,7 +8087,7 @@ eon.declare = function (name, baseElement) {
                 eon.triggerAllCallbackEvents(el, config, "onInit");
 
                 // Interpolation data bind
-                eon.interpolation.init(el, config);
+                eon.interpolation.handleInterpolationVariables(el, config);
 
                 // Creates the on resize callbacks handler for the element
                 eon.registerResizeListeners(el, config);
@@ -8763,9 +8733,6 @@ eon.ajax = function (url, options, cb) {
   options.async = options.async || null;
   options.user = options.user || null;
   options.password = options.password || null;
-  options.cacheBusting = "cacheBusting" in options ? options.cacheBusting : false;
-
-  url = options.cacheBusting? eon.getCacheBustedUrl(url) : url;
 
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {
@@ -9097,7 +9064,6 @@ eon.endpoint = function (type, url) {
   this.url = url;
   /* GraphQL Web Sockets based use only */
   this.socket = type == "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
-  this.socket = ~["WebSockets", "graphSockets"].indexOf(type) ? new WebSocket(this.url) : this.socket;
 
   /* 
       ##########
@@ -9121,7 +9087,7 @@ eon.endpoint = function (type, url) {
     };
     // Send request
     eon.ajax(el.composedUrl, options, cb);
-  } : this.get;
+  } : "";
   /*
     @function put
     @description Overwrite data resource // create if not exists
@@ -9141,7 +9107,7 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource id found');
     }
-  } : this.put;
+  } : "";
   /*
     @function post
     @description Create data resource
@@ -9159,7 +9125,7 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource data found');
     }
-  } : this.post;
+  } : "";
   /*
     @function delete
     @description Delete data resource
@@ -9178,29 +9144,7 @@ eon.endpoint = function (type, url) {
     } else {
       console.error('No resource id found');
     }
-  } : this.delete;
-
-  // -- Web Sockets --
-
-  /*
-    @function send
-    @description Send data
-  */
-  this.send = type == "WebSockets" ? function (data) {
-    el.socket.send(data);
-  } : this.send;
-
-  /*
-    @function onMessage
-    @description On socket data received
-  */
-  this.onMessage = function (cb) {
-    // Server response listener
-    el.socket.onmessage = function (event) {
-      // TODO Handle response messages
-      cb(true, event);
-    };
-  };
+  } : "";
 
   // -- GraphQL --
 
@@ -9210,21 +9154,21 @@ eon.endpoint = function (type, url) {
   */
   this.send = type == "graphHTTP" ? function (queryString, cb) {
     el.query(queryString, cb);
-  } : this.send;
+  } : "";
   /*
     @function query
     @description Query data source
   */
   this.query = type == "graphHTTP" ? function (queryString, cb) {
     graphHTTPQuery(queryString, cb);
-  } : this.query;
+  } : "";
   /*
     @function mutation
     @description Update data source
    */
   this.mutation = type == "graphHTTP" ? function (queryString, cb) {
     graphHTTPMutation(queryString, cb);
-  } : this.query;
+  } : "";
   /*
     @function subscribe
     @description Subscribe
@@ -9232,8 +9176,8 @@ eon.endpoint = function (type, url) {
   this.subscribe = type == "graphSockets" ? function (queryString, cb) {
     // Check graphQL protocol based on
     graphSocketsSubscription(queryString, cb);
-  } : this.subscribe;
- 
+  } : "";
+
   /* 
       #################
       Private Functions
@@ -9253,6 +9197,7 @@ eon.endpoint = function (type, url) {
         contentType: "application/json",
         payload: "query:" +  queryString
       };
+      console.log('options', options.payload);
       // Send request
       eon.ajax(el.url, options, cb);
     }
@@ -9273,8 +9218,13 @@ eon.endpoint = function (type, url) {
 
   // -- GraphQL Web Sockets API --
 
-  // Query call Web Sockets based
-  function graphSocketsSubscription(queryString) {
+  // Query call Web sockets based
+  function graphSocketsSubscription(queryString, cb) {
+    // Server response listener
+    el.socket.onmessage = function (event) {
+      // TODO Handle response messages
+      cb(true, event);
+    };
     el.socket.send("subscription:" + queryString);
   }
 }
@@ -9322,6 +9272,7 @@ eon.data.MemoryAdapter = function () {
       // Check id value
       if (query.id) {
         if (memory.data.get(query.id)) {
+          console.log('memory.data.get(query.id)', memory.data.get(query.id));
           resolve(memory.data.get(query.id));
         } else {
           reject(new Error("Not found"));

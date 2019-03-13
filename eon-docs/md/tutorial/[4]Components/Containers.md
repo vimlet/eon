@@ -56,7 +56,11 @@ Also, it has different properties to give it different functionality such as res
       .d-right-margin {
         margin-right: 10px;
       }
-      #myDialog.eon-dialog-dialog .eon-dialog-content {
+      #loginDialog {
+        min-height: 292px;
+        min-width: 280px;
+      }
+      #loginDialog.eon-dialog-dialog .eon-dialog-content {
         padding: 0 25px 25px 25px;
       }
       .d-dialog-form eon-text {
@@ -78,7 +82,7 @@ Also, it has different properties to give it different functionality such as res
     <div class="content">
       <doc-showcase label="Interactive">
         <eon-button value="Show" onclick="document.querySelector('#textDialog').open()"></eon-button>
-        <eon-dialog id="textDialog" class="d-dialog" heading="Interactive dialog" blur="true" closable="true" maximize="true"
+        <eon-dialog id="textDialog" modal="true" class="d-dialog" heading="Interactive dialog" blur="true" closable="true" maximize="true"
           minimize="true" resize="true" drag="true" default-style="false">
           <eon-section type="content">
             <p>
@@ -120,13 +124,13 @@ Also, it has different properties to give it different functionality such as res
         </eon-dialog>
       </doc-showcase>
       <doc-showcase label="Login">
-        <eon-button value="Show log" onclick="document.querySelector('#myDialog').open()">
+        <eon-button value="Show log" onclick="document.querySelector('#loginDialog').open()">
         </eon-button>
-        <eon-dialog id="myDialog" modal="true" blur="true" resize="true" heading="Login" default-style="false">
+        <eon-dialog id="loginDialog" blur="true" resize="true" heading="Login" default-style="false">
           <eon-section type="content">
             <eon-form class="d-dialog-form" action="#" method="get">
-              <eon-text name="userName" type="text" placeholder="User name" label="User name"></eon-text>
-              <eon-text name="userPass" type="Password" placeholder="Password" label="Password"></eon-text>
+              <eon-text name="userName" inline="false" placeholder="User name" label="User name"></eon-text>
+              <eon-text name="userPass" inline="false" type="Password" placeholder="Password" label="Password"></eon-text>
               <eon-button class="d-top-margin" type="submit" value="Sign in" expand="full" design="flat"></eon-button>
             </eon-form>
           </eon-section>
@@ -134,6 +138,11 @@ Also, it has different properties to give it different functionality such as res
       </doc-showcase>
     </div>
     <div style="height: 350px;"></div>
+  </template>
+  <template type="js">
+    eon.onReady(function(){
+      document.querySelector("#loginDialog").open();
+    });
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -862,8 +871,6 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
         background-color: #b36a6a;
       }
   </template>
-  <template type="js">
-  </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
@@ -910,7 +917,7 @@ Custom scrollbar with different options to have different behaviors from the nat
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase label="Closable and Draggable">
+    <doc-showcase label="Auto hide">
       <eon-scroll fill="true" arrow-scrolls="true" rail-scrolls="true">
       <div style="width: 100%; color: #d3d3d3;">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et placerat nulla, at suscipit lorem. Nulla ac elementum quam, rhoncus interdum quam. Morbi volutpat mauris eu lectus consequat sollicitudin. Curabitur eu odio maximus, consectetur quam vitae, vestibulum erat. Cras id rutrum ligula. Vestibulum viverra libero dui, non elementum erat porttitor ullamcorper. Donec euismod fringilla arcu, quis lacinia urna volutpat id. Quisque eget pellentesque arcu, sit amet blandit nisi. Donec eu maximus ex, at elementum est. Etiam consequat vestibulum justo, facilisis aliquet nisi sodales nec. Donec rutrum pulvinar justo, nec pharetra felis fringilla ac. Aliquam posuere gravida erat et tristique. In congue felis sit amet suscipit pharetra. Vestibulum volutpat non diam imperdiet sodales. Donec vitae tempor turpis.<br><br>

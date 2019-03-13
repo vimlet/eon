@@ -59,6 +59,16 @@
                 value: "false",
                 reflect: true
             },
+            // @html-attribute scripts (public) [Scripts to import in result header without show them. Strings separated with comas]
+            scripts: {
+                value: "",
+                reflect: false
+            },
+            // @html-attribute components (public) [Components to import in result header without show them. Note that eon.js should be added to scripts in order to use components import. Strings separated with comas]
+            components: {
+                value: "",
+                reflect: false
+            },
             // @html-attribute result (public) [Result window]
             result: {
                 value: {},
@@ -212,6 +222,10 @@
 
                 el._refs.iframe.onload = el._iframeLoaded(el.result);
 
+                // TODO This function load scripts async which could result into a bottle neck
+                el._appendScriptsToIframe(el.result);
+
+
                 if (typeof (el.onResultReady) != "object") {
                     eval(el.onResultReady)(el, el.result);
                 }
@@ -318,6 +332,12 @@
                 el._misc.editorSet = false;
                 el._refs.editor.readonly = el.readonly;
                 el._misc.isFullscreen = false;
+                el.scripts = el.scripts ? Array.isArray(el.getAttribute("scripts").split(",")) ? el.getAttribute(
+                    "scripts").split(",") : [] : "";
+                el.components = el.components ? Array.isArray(el.getAttribute("components").split(",")) ?
+                    el.getAttribute(
+                        "components").split(
+                        ",") : [] : "";
                 el.setTitle();
                 el.setIframe();
                 el.setLinks();
@@ -627,6 +647,54 @@
                 match = match.trim();
                 match = match.substring(open.length, match.length - close.length).trim();
                 return match;
+            },
+            // @function _appendScriptsToIframe (private) [Append scripts to iframe head] @param iframeContent
+            appendScriptsToIframe: function (iframeContent) {
+                var el = this;
+                var scriptsToLoad = el._iframeGenericJs();
+
+                // @function _appendJs (private) [Recursive call to load scripts within _appendScriptsToIframe function] @param script
+                function appendJs(script) {
+                    script.addEventListener('load', function () {
+                        var currentScript = scriptsToLoad.shift();
+                        if (currentScript) {
+                            appendJs(currentScript);
+                        }
+                    });
+                    iframeContent.head.appendChild(script);
+                }
+
+                iframeContent.head.appendChild(scriptsToLoad.shift());
+                appendJs(scriptsToLoad.shift());
+            },
+            // @function _iframeGenericJs (private) [Js code added to any iframe]
+            iframeGenericJs: function () {
+                var el = this;
+                var result = [];
+                var themeJs = document.createElement("script");
+                themeJs.innerHTML = "var eon = { theme: 'claro' };";
+                result.push(themeJs);
+                if (el.scripts.length > 0) {
+                    el.scripts.forEach(function (src) {
+                        var script = document.createElement("script");
+                        script.src = src;
+                        result.push(script);
+                    });
+                }
+                var componentsJs = document.createElement("script");
+                componentsJs.innerHTML = "";
+                if (el.components.length > 0) {
+                    var imp = "eon.import([";
+                    el.components.forEach(function (component) {
+                        imp += "'" + component + "',";
+
+                    });
+                    imp = imp.substring(0, imp.length - 1); // Remove last coma.
+                    imp += "]);";
+                    componentsJs.innerHTML += imp;
+                }
+                result.push(componentsJs);
+                return result;
             },
             // @function _iframeLoaded (private) [Function called when iframe is loaded. Calculate iframe height]
             iframeLoaded: function (iframeContent) {
