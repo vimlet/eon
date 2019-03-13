@@ -17,9 +17,13 @@ Also, it has different properties to give it different functionality such as res
 *(
 <doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-dialog',
         'framework/doc-eon/eon/ui/eon-text',
@@ -146,9 +150,13 @@ Also known as `table`, displays a large number of data using rows and columns.
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -234,9 +242,13 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
 *(
 <doc-playground label="Autofit" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -389,9 +401,13 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
 *(
 <doc-playground label="Horizontal Gutter" format="true" html="true" js="true" css="true" selector="body" format="true">
  <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-gutter"]
       }
@@ -463,9 +479,13 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
 *(
 <doc-playground label="Nested Gutter" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-gutter"]
       }
@@ -556,9 +576,13 @@ The Headerpanel element works as a simple container but provides a bunch of prop
 *(
 <doc-playground label="Flexible Behavior" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.themeSchema = {
         claro: ["eon-headerpanel"]
       }
@@ -644,9 +668,13 @@ Panel is the basic container element. It has no associated style so it is comple
 *(
 <doc-playground label="Panels" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-button',
         'framework/doc-eon/eon/ui/eon-panel',
@@ -755,9 +783,13 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
 *(
 <doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-tabs',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
@@ -847,9 +879,13 @@ Custom scrollbar with different options to have different behaviors from the nat
 *(
 <doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-scroll',
         'framework/doc-eon/custom/doc-playground/doc-showcase'

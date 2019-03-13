@@ -13,9 +13,13 @@ On device mode, the menu appears when the user doing a long click.
 *(
 <doc-playground label="Regular Contextmenu" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-contextmenu',
         'framework/doc-eon/eon/ui/eon-button',
@@ -86,9 +90,13 @@ Basic menu with dropdowns for category options.
 *(
 <doc-playground label="Regular Contextmenu" html="true" js="true" css="true" selector=".content" format="true">
   <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+    </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
-      eon.cacheBusting = true;
       eon.import([
         'framework/doc-eon/eon/ui/eon-menu',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
