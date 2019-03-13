@@ -68,7 +68,7 @@
         @description 
       */
       duration: {
-        value: 1000,
+        value: 2000,
         reflect: true
       },
       /*
@@ -104,7 +104,7 @@
         Default: filled
       */
       pagination: {
-        value: "hidden", // (filled), hideable, hidden
+        value: "hidden", // (filled), hidable, hidden
         reflect: true,
         reflectDefault: true
       },
@@ -181,6 +181,14 @@
       */
       fullScreen: {
         value: false,
+        reflect: true
+      },
+      /*
+        @property {Number} responsiveLimit 
+        @description 
+      */
+      responsiveLimit: {
+        value: 0,
         reflect: true
       },
       /*
@@ -755,7 +763,8 @@
         slideObj.el = slide;
         // Set auto animation
         if (eon.util.isTrue(el.auto)) {
-          slide.style.transition = "width " + el.transition + "ms";
+          slide.style.transition = "width " + el.transition + "ms, " + "transform " + el.transition + "ms, height "
+            + el.transition + "ms, margin " + el.transition + "ms, filter .3s";
         }
         // Set slide range values
         el.slides.push(el._updateSlideRange(slideObj, newSlideIndex));
@@ -1210,57 +1219,91 @@
         el._translate(el._refs.wrapper, -newPos);
       },
       /*
-        @function (private) _setUpAuto
-        @description Set up the automatic playing behavior 
-      */
-      setUpAuto: function () {
-        var el = this;
-      },
-      /*
         @function (private) _initAuto
         @description Set up the automatic playing behavior 
       */
       initAuto: function () {
         var el = this;
         if (eon.util.isTrue(el.auto)) {
-          el.onSlidesReady(function () {
+          el._monitorResponsive();
+          el._setWrapperAutoTranslation();
+        }
+      },
+      /*
+        @function (private) _monitorResponsive
+        @description 
+      */
+      monitorResponsive: function () {
+        var el = this;
+        // Responsive behavior
+        if (el.responsiveLimit > 0) {
+          if (window.innerWidth <= el.responsiveLimit) {
+            el._responsive("vertical");
+          } else {
+            el._responsive("horizontal");
+          }
+        }
+      },
+      /*
+        @function (private) _responsive
+        @description 
+      */
+      responsive: function (direction) {
+        var el = this;
+        // Check if a swipe direction change is needed
+        if (el.direction !== direction && eon.util.isTrue(el.auto)) {
+          el.direction = direction;
+          
+          // Set up translation values based on slides size
+          el._setWrapperAutoTranslation();
 
-            // Get number of slides that fit into the wrapper size
-            el._misc.containingSlides = el._refs.wrapper[el._misc.sizeProperty] / el.slides[0].el[el._misc.sizeProperty];
-            el._misc.containingSlides = Math.round(el._misc.containingSlides);
-
-            // Ge first and last shown
-            if (el.autoType == "prev") {
-              el._refs.lastVisible = el.currentSlide;
-              el._refs.firstVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
-              // Adjust bad round calculation
-              if (~el.slides.indexOf(el._misc.containingSlides)) {
-              } else {
-                el._refs.firstVisible = el.slides[el.slides.length - 1];
-              }
-              // Trigger onSlideChange event
-              eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible.el, el._refs.lastVisible.el]);
-              // Init movement
-              setTimeout(function () {
-                el.prev();
-              }, el.duration);
-
-            } else {
-              el._refs.firstVisible = el.currentSlide;
-              el._refs.lastVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
-              // Adjust bad round calculation
-              if (~el.slides.indexOf(el._misc.containingSlides)) {
-              } else {
-                el._refs.lastVisible = el.slides[el.slides.length - 1];
-              }
-              // Trigger onSlideChange event
-              eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible.el, el._refs.lastVisible.el]);
-              // Init movement
-              setTimeout(function () {
-                el.next();
-              }, el.duration);
+          if (el.direction == "horizontal") {
+            // -- HORIZONTAL
+            // Main configuration
+            el.classList.remove("eon-swiper-vertical");
+            el._misc.sizeProperty = "offsetWidth";
+            el._misc.styleSizeProperty = "width";
+            // Position absolute slides to prevent wierd view scrolling behavior
+            for (var i = 0; i < el.slides.length; i++) {
+              var sld = el.slides[i].el;
+              el._translate(sld, 0);
             }
-          });
+          } else {
+            // -- VERTICAL
+            // Main configuration
+            el.classList.add("eon-swiper-vertical");
+            el._misc.sizeProperty = "offsetHeight";
+            el._misc.styleSizeProperty = "height";
+
+            // Position absolute slides to prevent wierd view scrolling behavior
+            for (var i = 0; i < el.slides.length; i++) {
+              var sld = el.slides[i].el;
+              el._translate(sld, (i - 1) * sld[el._misc.sizeProperty]);
+            }
+          }
+        }
+      },
+       /*
+        @function (private) _setWrapperAutoTranslation
+        @description 
+      */
+      setWrapperAutoTranslation: function () {
+        var el = this;
+        // Get slides size including margins
+        var slide = el.slides[0].el;
+        var horizMargin = el.direction == "horizontal" ? parseInt(window.getComputedStyle(slide).marginRight)
+          : parseInt(window.getComputedStyle(slide).marginBottom);
+        var margin = el.direction == "horizontal"
+          ? parseInt(window.getComputedStyle(slide).marginRight) + parseInt(window.getComputedStyle(slide).marginLeft)
+          : parseInt(window.getComputedStyle(slide).marginBottom) + parseInt(window.getComputedStyle(slide).marginTop);
+        el._misc.realSlideSize = slide[el._misc.sizeProperty] + margin;
+
+        // Check initial slide visibility
+        el._misc.realSlideSize += horizMargin / 2;
+        if(el.direction == "horizontal"){
+          el._translate(el._refs.wrapper, -(el.initialSlide * el._misc.realSlideSize));
+        } else {
+          el._translate(el._refs.wrapper, 0);
         }
       },
       /*
@@ -1285,56 +1328,62 @@
         var el = this;
         el._misc.resizeFn = function () {
           el.onSlidesReady(function () {
-            // Update maximum translation value
-            el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+            
+            if (eon.util.isTrue(el.auto)) {
+              // Update swiper auto configuration
+              el._monitorResponsive();
+            } else {
+              // Update maximum translation value
+              el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
 
-            // Update slides ranges
-            for (i = 0; i < el.slides.length; i++) {
-              el.slides[i] = el._updateSlideRange(el.slides[i], i);
-            }
-            //
-            el._updateThumbnailsSize();
+              // Update slides ranges
+              for (i = 0; i < el.slides.length; i++) {
+                el.slides[i] = el._updateSlideRange(el.slides[i], i);
+              }
+              //
+              el._updateThumbnailsSize();
 
-            // Translate current slide to its new centered position
-            el.currentSlide = el.currentSlide && !el.currentSlide.el ? el.slides[0] : el.currentSlide;
-            currentIndex = el.currentSlide ? el.slides.indexOf(el.currentSlide) : 0;
+              // Translate current slide to its new centered position
+              el.currentSlide = el.currentSlide && !el.currentSlide.el ? el.slides[0] : el.currentSlide;
+              currentIndex = el.currentSlide ? el.slides.indexOf(el.currentSlide) : 0;
 
-            // TODO: This was triggering slide change every time the swiper was being resized
-            el._keepInPlace(currentIndex);
+              // TODO: This was triggering slide change every time the swiper was being resized
+              el._keepInPlace(currentIndex);
 
-            if (el.type == "gallery" && el.pagination != "hidden") {
-              el.onPagingReady(function () {
-                // Update thumbnail size reference
-                el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
-
-                // Update minimum paging translation
-                el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
-                // Update thumbnails ranges
-                if (el.thumbnails[0]) {
+              if (el.type == "gallery" && el.pagination != "hidden") {
+                el.onPagingReady(function () {
+                  // Update thumbnail size reference
                   el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
-                  for (i = 0; i < el.thumbnails.length; i++) {
-                    el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+
+                  // Update minimum paging translation
+                  el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
+                  // Update thumbnails ranges
+                  if (el.thumbnails[0]) {
+                    el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
+                    for (i = 0; i < el.thumbnails.length; i++) {
+                      el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+                    }
                   }
-                }
-                // Translate slide thumbnail to its new centered position
-                currentThumbnail = el.thumbnails[currentIndex];
-                if (el.type === "gallery") {
-                  el._translate(el.pagingNode, currentThumbnail.range[0]);
-                }
+                  // Translate slide thumbnail to its new centered position
+                  currentThumbnail = el.thumbnails[currentIndex];
+                  if (el.type === "gallery") {
+                    el._translate(el.pagingNode, currentThumbnail.range[0]);
+                  }
 
-                if (eon.util.isTrue(el.navigation)) {
-                  // Update navigation buttons position
-                  el._updateNavButtonSize();
-                }
+                  if (eon.util.isTrue(el.navigation)) {
+                    // Update navigation buttons position
+                    el._updateNavButtonSize();
+                  }
 
-                el._decreaseNavButtonHeight(el.backBtn);
-                el._decreaseNavButtonHeight(el.nextBtn);
-              });
-            }
-            // Restore the parent reference avoiding parent nodes like document fragments
-            var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
-            if (!activated && el._refs.parent && el._refs.parent.nodeType == 11) {
-              el._refs.parent = el.parentNode;
+                  el._decreaseNavButtonHeight(el.backBtn);
+                  el._decreaseNavButtonHeight(el.nextBtn);
+                });
+              }
+              // Restore the parent reference avoiding parent nodes like document fragments
+              var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
+              if (!activated && el._refs.parent && el._refs.parent.nodeType == 11) {
+                el._refs.parent = el.parentNode;
+              }
             }
           });
         }
@@ -1371,23 +1420,36 @@
       */
       nextAuto: function () {
         var el = this;
-        // Trigger onNextCalled event
-        eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible.el, el._refs.lastVisible.el]);
-
         var slide = el.slides[0];
-        slide.el.style.width = 0;
-
+        // HORIZONTAL - Decrease first slide size to simulate the translate animation
+        if(el.direction == "horizontal") { 
+          slide.el.classList.add("eon-swiper-auto-size");
+        } else {
+          // VERTICAL - Translate each slide to the new position
+          // ** Size based animations are not valid since their causes scroll container issues
+          for (var i = 0; i < el.slides.length; i++) {
+            var sld = el.slides[i].el;
+            el._translate(sld, (i-1) * sld[el._misc.sizeProperty]);
+          }
+        }
+        // Wait until the translate animation has ended
         setTimeout(function () {
-          // Move element to the las of the queue
-          el.slides.push(el.slides.shift());
+          // Move element to the last of the queue
+          var slideOut = el.slides.shift();
+          el.slides.push(slideOut);
           el._refs.wrapper.appendChild(slide.el);
-          slide.el.style[el._misc.styleSizeProperty] = el.slides[0].el.style[el._misc.styleSizeProperty];
-
-          // Update first and last shown
-          el._refs.firstVisible = el.slides[0];
-          el._refs.lastVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
+          // HORIZONTAL - Set the first slide size to its previous value
+          if(el.direction == "horizontal") { 
+            slide.el.classList.remove("eon-swiper-auto-size");
+          } else {
+            // VERTICAL - Translate the first slide to the last position
+            el._translate(slide.el, 1000);
+          }
+          // Trigger onNextCalled event
+          eon.triggerCallback("onNextCalled", el, el, [slideOut.el]);
         }, el.transition);
-
+        
+        // Trigger the new translation
         setTimeout(function () {
           el.next();
         }, el.duration);
@@ -1422,23 +1484,37 @@
       */
       prevAuto: function () {
         var el = this;
-        // Trigger onNextCalled event
-        eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible.el, el._refs.lastVisible.el]);
-
         var slide = el.slides[0];
-        slide.el.style.width = 0;
-
+        var lastSlide = el.slides[el.slides.length - 1].el;
+        // HORIZONTAL - Decrease first slide size to simulate the translate animation
+        if(el.direction == "horizontal") { 
+          slide.el.classList.remove("eon-swiper-auto-size");
+        } else {
+          // VERTICAL - Translate each slide to the new position
+          // ** Size based animations are not valid since their causes scroll container issues
+          for (var i = 0; i < el.slides.length; i++) {
+            var sld = el.slides[i].el;
+            el._translate(sld, (i-1) * sld[el._misc.sizeProperty]);
+          }
+        }
+        // Wait until the translate animation has ended
         setTimeout(function () {
-          // Move element to the las of the queue
-          el.slides.unshift(el.slides.pop());
-          el._refs.wrapper.appendChild(slide.el);
-          slide.el.style[el._misc.styleSizeProperty] = el.slides[0].el.style[el._misc.styleSizeProperty];
-
-          // Update first and last shown
-          el._refs.lastVisible = el.slides[0];
-          el._refs.firstVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
+          // Move element to the first position of the queue
+          el._refs.wrapper.insertBefore(lastSlide, slide.el);
+          var slideOut = el.slides.pop();
+          el.slides.unshift(slideOut);
+          slide = el.slides[0];
+          // HORIZONTAL - Set the first slide size to its previous value
+          if(el.direction == "horizontal") {
+              // Increase first hidden slide size
+              slide.el.classList.add("eon-swiper-auto-size");
+            } else {
+              el._translate(slide.el, -200);
+            }
+          // Trigger onPrevCalled event
+          eon.triggerCallback("onPrevCalled", el, el, [slideOut.el]);
         }, el.transition);
-
+        // Trigger the new translation
         setTimeout(function () {
           el.prev();
         }, el.duration);
@@ -1542,18 +1618,19 @@
       el.onSlidesReady(function () {
         el.currentSlide = el.slides[el.initialSlide];
         el.slideTo(el.initialSlide);
+        el._misc.loaded = true;
+        el._createResizeFunction();
       });
-      el._misc.loaded = true;
-      el._createResizeFunction();
     },
     onBubbleRender: function () {
       var el = this;
       // Set up auto functionality
-      el._initAuto();
-      el._setUpAuto();
-      el._misc.resizeFn();
-      // Get swiper parent node for fullscreen purposes
-      el._refs.parent = el.parentNode;
+      el.onSlidesReady(function () {
+        el._initAuto();
+        el._misc.resizeFn();
+        // Get swiper parent node for fullscreen purposes
+        el._refs.parent = el.parentNode;
+      });
     },
     onResize: function () {
       var el = this;

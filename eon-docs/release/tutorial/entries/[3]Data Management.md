@@ -47,7 +47,10 @@ This endpoint type is based on the Web Sockets API. Sending and receiving data u
 ```[javascript]
 var socketEndpoint = new eon.endpoint("WebSockets", "https://remote/source");
 
-var item = {name: "new item", properties: 2}
+var item = {
+  name: "new item",
+  properties: 2
+}
 
 socketEndpoint.onMessage(function(success, data){
   if(success) {
@@ -76,7 +79,11 @@ var graphHTTP = new eon.endpoint("graphHTTP", "https://remote/source");
 ```
 
 ```[javascript]
-var query = "{ posts { title } }";
+var query = "{ 
+  posts {
+    title 
+  } 
+}";
 
 graphHTTP.query(query, function (success, data) {
   if(success) {
@@ -109,7 +116,12 @@ Subscription operation (socket subscription):
 var graphSockets = new eon.endpoint("graphSockets", "https://remote/source");
 ```
 ```[javascript]
-var query = "{ posts { title } }";
+var query = "{
+  posts { 
+    title  
+  } 
+}";
+
 graphSockets.onMessage(function(success, data){
   if(success) {
     // Socket message received
