@@ -762,6 +762,7 @@ if (eon.polyfills.needCustomElementsPolyfill()) {
   }
 }.call(self));
 
+//# sourceMappingURL=custom-elements.min.js.map
 
 }
 

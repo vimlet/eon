@@ -1,0 +1,2979 @@
+<template>
+
+  <!-- Default date input elements -->
+  <div class="eon-date-data eon-fg1">
+    <label class="eon-date-label"></label>
+  </div>
+
+  <div class="eon-date-main eon-bg2 eon-fg1 eon-unselectable">
+
+    <div class="eon-date-subInputs">
+      <div class="eon-date-subInput first">
+        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
+      </div>
+      <div class="eon-date-separator"></div>
+      <div class="eon-date-subInput second">
+        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
+      </div>
+      <div class="eon-date-separator"></div>
+      <div class="eon-date-subInput third">
+        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
+      </div>
+    </div>
+    <i class="eon-date-button eon-fg2 eon-fg2-hoverable vicon vicon-calendar"></i>
+
+  </div>
+
+  <span class="eon-date-underline"></span>
+
+  <!-- Date calendar elements -->
+  <div class="eon-date-calendar eon-unselectable eon-sect1 eon-boxshadow2 eon-fg1">
+
+    <div class="eon-date-header">
+      <div class="eon-date-leftNavigation">
+        <div class="eon-date-previous eon-unselectable eon-fg1-hoverable">
+          <i class="vicon vicon-chevron-left"></i>
+        </div>
+        <div class="eon-date-next eon-unselectable eon-fg1-hoverable">
+          <i class="vicon vicon-chevron-right"></i>
+        </div>
+      </div>
+
+      <div class="eon-date-daysGridSelectors">
+        <div class="eon-date-month eon-fg1-hoverable"></div>
+        <div class="eon-date-year eon-fg1-hoverable"></div>
+      </div>
+
+      <div class="eon-date-rightNavigation">
+        <div class="eon-date-back eon-unselectable eon-date-hidden eon-fg1-hoverable">
+          <i class="vicon vicon-arrow-back"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="eon-date-body"> </div>
+
+  </div>
+
+  <div class="eon-date-description"></div>
+
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-date",
+    style: "eon-date.css",
+
+    themed: true,
+
+    dependencies: [
+      "../eon-overlay"
+    ],
+
+    privateProperties: {
+      /*
+      @property (private) {Object} _misc
+      @description Object with useful information
+      */
+      misc: {
+        value: {},
+        reflect: false
+      },
+      /*
+      @property (private) {object} _refs
+      @description Object with references to relevant element nodes
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+      /*
+      @property (private) {string} _formElement 
+      @description Necessary property to be recognized by a form
+      */
+      formElement: {
+        value: "date"
+      }
+    },
+
+    properties: {
+      /*
+      @property {String} name
+      @description Name to identify the element in a form
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} value
+      @description Value of the element
+      */
+      value: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} default
+      @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+      */
+      default: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Number} fontSize
+      @description Basic font size from which we will determine all the sizes
+      */
+      fontSize: {
+        value: 14,
+        reflect: true
+      },
+      /*
+      @property {String} type
+      @description Determines the type of the date selection (input or calendar)
+      */
+      type: {
+        value: "input",
+        reflect: true
+      },
+      /*
+      @property {String} selectable
+      @description Indicates the selectable values of the calendar (day, month and year)
+      */
+      selectable: {
+        value: "dmy",
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {String} label
+      @description Label for the element
+      */
+      label: {
+        value: "",
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {String} locale
+      @description Locale to be used in the datebox
+      */
+      locale: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} mask
+      @description Date format of the input
+      */
+      mask: {
+        value: "YYYYMMDD",
+        reflect: true
+      },
+      /*
+      @property {String} min
+      @description Indicates the inferior limit of the date
+      */
+      min: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} max
+      @description Indicates the superior limit of the date
+      */
+      max: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} weekStart
+      @description Indicates the first day of the week for the calendar
+      */
+      weekStart: {
+        value: "monday",
+        reflect: true
+      },
+      /*
+      @property {String} weekFormat
+      @description Indicates the format of the week days header
+      */
+      weekFormat: {
+        value: "short",
+        reflect: true
+      },
+      /*
+      @property {String} valueFormat
+      @description Indicates the format of the value
+      */
+      valueFormat: {
+        value: "YYYY-MM-DD",
+        reflect: true
+      },
+      /*
+      @property {Boolean} toolbar
+      @description Indicates whether its in toolbar mode or not
+      */
+      toolbar: {
+        value: false,
+        reflect: true
+      },
+      /*
+      @property {Boolean} inline 
+      @description Space that occupies the button inside its parent container.
+      */
+      inline: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {Boolean} readonly
+      @description Toggles the readonly status of the element
+      */
+      readonly: {
+        value: false,
+        reflect: true
+      },
+      /*
+      @property {Boolean} disabled
+      @description Toggles the disabled status of the element
+      */
+      disabled: {
+        value: false,
+        reflect: true
+      },
+      /*
+      @property {Number} day
+      @description Toggles the disabled status of the element
+      */
+      day: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Number} month
+      @description Toggles the disabled status of the element
+      */
+      month: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {Number} year
+      @description Toggles the disabled status of the element
+      */
+      year: {
+        value: "",
+        reflect: true
+      },
+      /*
+      @property {String} labelAnim
+      @description Whether the label will have animation or not
+      */
+      labelAnim: {
+          value: true,
+          reflect: true
+      },
+      /*
+      @property {String} tooltip
+      @description Text to be shown for the element
+      */
+      tooltip: {
+        value: "",
+        reflect: true,
+        reflectDefault: false
+      },
+      /*
+      @property {Boolean} invalid
+      @description Whether the element meets the requirements or not
+      */
+      invalid: {
+        value: false,
+        reflect: true,
+        reflectDefault: false
+      }
+    },
+    privateFunctions: {
+      /*
+      @function (private) _setup
+      @description Here we setup everything we need for the element
+      */
+      setup: function () {
+
+        var el = this;
+
+        el.locale = (el.locale != undefined && el.locale != "") ? el.locale : navigator.language;
+
+        el._refs.calendar.setAttribute("selectable", el.selectable);
+
+        el._initDefault();
+
+        el._setupMinDate();
+        el._setupMaxDate();
+
+        el._setupSeparator();
+        el._setupMask();
+        el._setupEvents();
+
+        el._setupCalendar();
+
+        el._setupToolbarMode();
+
+        el._initValue();
+
+        el._refresh();
+
+        el._updateLabel();
+        el._updateDisabled();
+        el._updateReadOnly();
+
+      },
+      /*
+      @function (private) _setupLabelAnimation
+      @description Inits label animation classes and style
+      */
+      setupLabelAnimation: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.labelAnim)) {
+
+          if (el.value == "" && el.default == "") {
+            el._refs.label.classList.add("eon-text-movedLabel");
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _setupType
+      @description Creates the structure of the element depending on the type
+      */
+      setupType: function () {
+
+        var el = this;
+
+        var calendarFragment = document.createDocumentFragment();
+        var dataFragment = document.createDocumentFragment();
+        var inputFragment = document.createDocumentFragment();
+
+        // Separates the template into 3 different fragments, depending on the type we will reappend 
+        // the elements we need
+        calendarFragment.appendChild(el.template.querySelector(".eon-date-calendar"));
+        dataFragment.appendChild(el.template.querySelector(".eon-date-data"));
+        inputFragment.appendChild(el.template);
+
+        if (el.type == "calendar") {
+
+          el.template.appendChild(dataFragment);
+          el.template.appendChild(calendarFragment);
+
+          eon.addResizeListener(el._refs.calendar, "calendar", function () {
+            el._handleAutoHeight();
+            el._handleFonts();
+          });
+
+        } else {
+
+          el.template.appendChild(dataFragment);
+          el.template.appendChild(inputFragment);
+
+          el._refs.overlay.appendChild(calendarFragment);
+
+        }
+
+      },
+      /*
+      @function (private) _setupCalendar
+      @description Prepares the calendar and its grids/events
+      */
+      setupCalendar: function () {
+
+        var el = this;
+
+        el._setupWeekDays();
+        el._setupYearsGrid();
+        el._setupMonthsGrid();
+        el._setupDaysGrid();
+
+        el._handleAutoHeight();
+        el._handleFonts();
+
+        // Events
+
+        el._refs.calendarButton.addEventListener('click', function (e) {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el._expand();
+          }
+        }, false);
+
+        el._refs.previous.addEventListener(el._misc.downTrigger, function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          el._goToPrevious(this);
+        });
+
+        el._refs.next.addEventListener(el._misc.downTrigger, function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          el._goToNext(this);
+        });
+
+        el._refs.calendar.querySelector(".eon-date-back").addEventListener(el._misc.downTrigger, function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          el._goBack(this);
+        });
+
+        el._refs.calendar.querySelector(".eon-date-header .eon-date-month").addEventListener(el._misc.downTrigger, function (e) {
+          if (this.dataset.disabled != "true") {
+            e.stopPropagation();
+            e.preventDefault();
+            el._showMonthsGrid();
+          }
+        });
+
+        el._refs.calendar.querySelector(".eon-date-header .eon-date-year").addEventListener(el._misc.downTrigger, function (e) {
+          if (this.dataset.disabled != "true") {
+            e.stopPropagation();
+            e.preventDefault();
+            el._showYearsGrid();
+          }
+        });
+
+        eon.registerPathListener(el._refs.calendar, "calendar");
+
+      },
+      /*
+      @function (private) _setupOverlay
+      @description Sets up basic properties for the data object
+      */
+      setupOverlay: function () {
+
+        var el = this;
+
+        el._refs.overlay = el.generateOverlayNode();
+        el._refs.overlay.classList.add("eon-date-overlay", "eon-bg1-modal");
+
+        // Prevents scrolling on mobile devices
+        el._refs.overlay.addEventListener("wheel", function (e) {
+          if (!el._refs.calendar.isOnPath) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, { passive: false });
+
+        // Overlay blur
+        el._refs.overlay.addEventListener("click", function (e) {
+          if (el._misc.modal.active && !el._refs.calendar.isOnPath) {
+            e.preventDefault();
+            e.stopPropagation();
+            el._shrink();
+          }
+        });
+
+        // If the user scrolls the window scrollbar we hide the calendar
+        window.addEventListener("scroll", function (e) {
+          if (el._misc.modal.active) {
+            el._shrink();
+          }
+        });
+
+      },
+      /*
+      @function (private) _setupMisc
+      @description Sets up basic properties for the misc object
+      */
+      setupMisc: function () {
+
+        var el = this;
+
+        el._misc.current = {};
+        el._misc.mask = {};
+        el._misc.min = {};
+        el._misc.min.active = false;
+        el._misc.max = {};
+        el._misc.max.active = false;
+        el._misc.modal = {};
+
+        el._misc.weekDays = {};
+        el._misc.current = {};
+        el._misc.selected = {};
+        el._misc.selector = {};
+        el._misc.selector.range = {};
+
+        el._misc.descriptionText = "";
+
+        el._misc.downTrigger = "click";
+
+      },
+      /*
+      @function (private) _setupRefs
+      @description Creates some fast access elements so that theres no need for calling the QuerySelector all the time.
+      */
+      setupRefs: function () {
+
+        var el = this;
+
+        // Input related references
+        el._refs.subInputsWrapper = el.template.querySelector(".eon-date-subInputs");
+        el._refs.subInputs = {};
+
+        el._refs.subInputs.first = el.template.querySelector(".eon-date-subInputs .first input");
+        el._refs.subInputs.second = el.template.querySelector(".eon-date-subInputs .second input");
+        el._refs.subInputs.third = el.template.querySelector(".eon-date-subInputs .third input");
+
+        el._refs.underline = el.template.querySelector(".eon-date-underline");
+
+        el._refs.data = el.template.querySelector(".eon-date-data");
+        el._refs.main = el.template.querySelector(".eon-date-main");
+        el._refs.label = el.template.querySelector(".eon-date-label");
+
+        el._refs.calendarButton = el.template.querySelector(".eon-date-button");
+
+        // Calendar related references
+        el._refs.calendar = el.template.querySelector(".eon-date-calendar");
+
+        el._refs.selectorsContainer = el._refs.calendar.querySelector(".eon-date-daysGridSelectors");
+        el._refs.monthSelector = el._refs.calendar.querySelector(".eon-date-header .eon-date-month");
+        el._refs.yearSelector = el._refs.calendar.querySelector(".eon-date-header .eon-date-year");
+
+        el._refs.header = el._refs.calendar.querySelector(".eon-date-header");
+        el._refs.body = el._refs.calendar.querySelector(".eon-date-body");
+
+        el._refs.description = el.template.querySelector(".eon-date-description");
+
+        el._refs.previous = el._refs.calendar.querySelector(".eon-date-previous");
+        el._refs.next = el._refs.calendar.querySelector(".eon-date-next");
+
+      },
+      /*
+      @function (private) {String} _setupDescription
+      @description Creates the touch blur
+      */
+      setupDescription: function () {
+
+        var el = this;
+
+        if (el.tooltip != "") {
+          el.updateDescription(el.tooltip);
+        }
+
+      },
+      /*
+      @function (private) _setupMask
+      @description Sets up the mask and the subinputs to be used for the user input
+      */
+      setupMask: function () {
+
+        var el = this;
+
+        el._misc.mask.order = [];
+
+        var dayFormat = el.mask.match(/[d|D]{1,2}/)[0];
+        var monthFormat = el.mask.match(/[M]{1,4}/)[0];
+        var yearFormat = el.mask.match(/[y|Y]{2,4}/)[0];
+
+        el._misc.mask["day"] = {};
+        el._misc.mask["month"] = {};
+        el._misc.mask["year"] = {};
+
+        if (dayFormat && monthFormat && yearFormat) {
+
+          var yearOrder = el.mask.indexOf(yearFormat);
+
+          el._misc.mask.day.format = dayFormat;
+          el._misc.mask.month.format = monthFormat;
+          el._misc.mask.year.format = yearFormat;
+
+          if (el.mask.indexOf(dayFormat) < el.mask.indexOf(monthFormat)) {
+
+            el._misc.mask.order[0] = "day";
+            el._misc.mask.order[1] = "month";
+
+          } else {
+
+            el._misc.mask.order[0] = "month";
+            el._misc.mask.order[1] = "day";
+          }
+
+          if (el.mask.indexOf(yearFormat) < el.mask.indexOf(dayFormat)) {
+            el._misc.mask.order.splice(0, 0, "year");
+          } else if (el.mask.indexOf(yearFormat) < el.mask.indexOf(monthFormat)) {
+            el._misc.mask.order.splice(1, 0, "year");
+          } else {
+            el._misc.mask.order[2] = "year";
+          }
+
+          el.mask = el._misc.mask[el._misc.mask.order[0]].format + el._misc.mask[el._misc.mask.order[1]].format + el._misc.mask[el._misc.mask.order[2]].format;
+
+          el._refs.subInputs.first.placeholder = el._misc.mask[el._misc.mask.order[0]].format;
+          el._refs.subInputs.second.placeholder = el._misc.mask[el._misc.mask.order[1]].format;
+          el._refs.subInputs.third.placeholder = el._misc.mask[el._misc.mask.order[2]].format;
+
+        } else {
+
+          el._misc.mask.order = ["day", "month", "year"];
+
+          el._misc.mask.day.format = "DD";
+          el._misc.mask.month.format = "MM";
+          el._misc.mask.year.format = "YYYY";
+
+          el.mask = "DDMMYYYY";
+
+          el._refs.subInputs.first.placeholder = "DD";
+          el._refs.subInputs.second.placeholder = "MM";
+          el._refs.subInputs.third.placeholder = "YYYY";
+        }
+
+        var firstSection = el._misc.mask[el._misc.mask.order[0]];
+        var secondSection = el._misc.mask[el._misc.mask.order[1]];
+        var thirdSection = el._misc.mask[el._misc.mask.order[2]];
+
+        firstSection.start = 0;
+        firstSection.end = el._misc.mask[el._misc.mask.order[0]].format.length;
+
+        secondSection.start = firstSection.end + el._misc.separator.length;
+        secondSection.end = secondSection.start + el._misc.mask[el._misc.mask.order[1]].format.length;
+
+        thirdSection.start = secondSection.end + el._misc.separator.length;
+        thirdSection.end = thirdSection.start + el._misc.mask[el._misc.mask.order[2]].format.length;
+
+        el._refs.subInputs.first.parentNode.dataset.field = el._misc.mask.order[0];
+        el._refs.subInputs.first.parentNode.dataset.order = "0";
+
+        el._refs.subInputs.second.parentNode.dataset.field = el._misc.mask.order[1];
+        el._refs.subInputs.second.parentNode.dataset.order = "1";
+
+        el._refs.subInputs.third.parentNode.dataset.field = el._misc.mask.order[2];
+        el._refs.subInputs.third.parentNode.dataset.order = "2";
+
+        var separators = el.querySelectorAll(".eon-date-subInputs .eon-date-separator");
+
+        for (var i = 0; i < separators.length; i++) {
+          separators[i].innerHTML = el._misc.separator;
+        }
+
+      },
+      /*
+      @function (private) _setupEvents
+      @description Creates the events for the subinputs
+      */
+      setupEvents: function () {
+
+        var el = this;
+
+        el._setupFocusEvents();
+        el._setupBlurEvents();
+        el._setupOnKeyDownEvents();
+        el._setupOnKeyUpEvents();
+        el._setupPasteEvents();
+
+      },
+      /*
+      @function (private) _setupFocusEvents
+      @description Creates the focus events for the subinputs
+      */
+      setupFocusEvents: function () {
+
+        var el = this;
+        el._labelNode = el.querySelector(".eon-date-label");
+
+        el._refs.subInputs.first.addEventListener("focus", function (e) {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el._handleFocus(this);
+            el._assignFocusStyle();
+          }
+        }, true);
+
+        el._refs.subInputs.second.addEventListener("focus", function (e) {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el._handleFocus(el._refs.subInputs.second);
+            el._assignFocusStyle();
+          }
+        }, true);
+
+        el._refs.subInputs.third.addEventListener("focus", function (e) {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el._handleFocus(el._refs.subInputs.third);
+            el._assignFocusStyle();
+          }
+        }, true);
+
+      },
+      /*
+      @function (private) _setupBlurEvents
+      @description Sets up the blur events for the subinputs
+      */
+      setupBlurEvents: function () {
+
+        var el = this;
+
+        el._refs.subInputs.first.addEventListener("blur", function () {
+
+          if ((el._refs.subInputs.first.dataset.field == "day" || el._refs.subInputs.first.dataset.field == "month") && el._refs.subInputs.first.textContent.length == 1 && el._refs.subInputs.first.textContent.length < el._misc.mask[el._misc.mask.order[0]].format.length) {
+            el._refs.subInputs.first.textContent = "0" + el._refs.subInputs.first.textContent;
+          }
+
+          el._revertFocusStyle();
+
+        }, true);
+
+        el._refs.subInputs.second.addEventListener("blur", function () {
+
+          if ((el._refs.subInputs.second.dataset.field == "day" || el._refs.subInputs.second.dataset.field == "month") && el._refs.subInputs.second.textContent.length == 1 && el._refs.subInputs.second.textContent.length < el._misc.mask[el._misc.mask.order[0]].format.length) {
+            el._refs.subInputs.second.textContent = "0" + el._refs.subInputs.second.textContent;
+          }
+
+          el._revertFocusStyle();
+
+        }, true);
+
+        el._refs.subInputs.third.addEventListener("blur", function () {
+
+          if ((el._refs.subInputs.third.dataset.field == "day" || el._refs.subInputs.third.dataset.field == "month") && el._refs.subInputs.third.textContent.length == 1 && el._refs.subInputs.third.textContent.length < el._misc.mask[el._misc.mask.order[0]].format.length) {
+            el._refs.subInputs.third.textContent = "0" + el._refs.subInputs.third.textContent;
+          }
+
+          el._revertFocusStyle();
+
+        }, true);
+
+      },
+      /*
+      @function (private) _setupOnKeyDownEvents
+      @description Sets up the keydown events for the subinputs
+      */
+      setupOnKeyDownEvents: function () {
+
+        var el = this;
+
+        el._refs.subInputs.first.addEventListener("keydown", function (e) {
+          el._handleKeyDown(el._refs.subInputs.first, e);
+        }, true);
+
+        el._refs.subInputs.second.addEventListener("keydown", function (e) {
+          el._handleKeyDown(el._refs.subInputs.second, e);
+        }, true);
+
+        el._refs.subInputs.third.addEventListener("keydown", function (e) {
+          el._handleKeyDown(el._refs.subInputs.third, e);
+        }, true);
+
+      },
+      /*
+      @function (private) _setupOnKeyUpEvents
+      @description Sets up the keyup events for the subinputs
+      */
+      setupOnKeyUpEvents: function () {
+
+        var el = this;
+
+        el._refs.subInputs.first.addEventListener("keyup", function (e) {
+          el._handleKeyUp(el._refs.subInputs.first, e);
+        }, true);
+
+        el._refs.subInputs.second.addEventListener("keyup", function (e) {
+          el._handleKeyUp(el._refs.subInputs.second, e);
+        }, true);
+
+        el._refs.subInputs.third.addEventListener("keyup", function (e) {
+          el._handleKeyUp(el._refs.subInputs.third, e);
+        }, true);
+
+      },
+      /*
+      @function (private) _setupPasteEvents
+      @description Sets up the events for the subinputs to prevent paste
+      */
+      setupPasteEvents: function () {
+
+        var el = this;
+
+        el._refs.subInputs.first.addEventListener("paste", function (e) {
+          e.preventDefault;
+          return false;
+        }, true);
+
+        el._refs.subInputs.second.addEventListener("paste", function (e) {
+          e.preventDefault;
+          return false;
+        }, true);
+
+        el._refs.subInputs.third.addEventListener("paste", function (e) {
+          e.preventDefault;
+          return false;
+        }, true);
+
+      },
+      /*
+      @function (private) _setupMinDate
+      @description Sets up the inferior limit of the date
+      */
+      setupMinDate: function () {
+
+        var el = this;
+
+        if (el.min != "") {
+
+          if (el.min.indexOf("/") > -1) {
+
+            var splittedMin = el.min.split("/");
+
+            el._misc.min.day = parseInt(splittedMin[0]);
+            el._misc.min.month = parseInt(splittedMin[1]) - 1;
+            el._misc.min.year = parseInt(splittedMin[2]);
+
+            el._misc.min.active = true;
+
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _setupMaxDate
+      @description Sets up the superior limit of the date
+      */
+      setupMaxDate: function () {
+
+        var el = this;
+
+        if (el.max != "") {
+
+          if (el.max.indexOf('/') > -1) {
+
+            var splittedMax = el.max.split("/");
+
+            el._misc.max.day = parseInt(splittedMax[0]);
+            el._misc.max.month = parseInt(splittedMax[1]) - 1;
+            el._misc.max.year = parseInt(splittedMax[2]);
+
+            el._misc.max.active = true;
+
+          }
+
+        }
+
+      },
+      /*
+      @function (private) {String} _setupSeparator
+      @description Takes the value format and saves its separator
+      */
+      setupSeparator: function () {
+        var el = this;
+        el._misc.separator = eon.time.getFormatSeparator(el.valueFormat);
+      },
+      /*
+      @function (private) _setupToolbarMode
+      @description Adds whats needed to overwrite the default style
+      */
+      setupToolbarMode: function () {
+        var el = this;
+        el._refs.main.classList.add("toolbar");
+      },
+      /*
+      @function (private) _addFocusStyle
+      @description When focused, it adds the corresponding style
+      */
+      addFocusStyle: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.toolbar)) {
+          el._refs.main.classList.add("toolbar");
+        }
+
+      },
+      /*
+      @function (private) _setupWeekDays
+      @description Sets up the weekdays, including its locale, format and weekDayStart
+      */
+      setupWeekDays: function () {
+
+        var el = this;
+
+        function reorderWeekDays(array, oldIndex, newIndex) {
+          while (oldIndex < 0) {
+            oldIndex += array.length;
+          }
+          while (newIndex < 0) {
+            newIndex += array.length;
+          }
+          if (newIndex >= array.length) {
+            var k = newIndex - array.length;
+            while ((k--) + 1) {
+              array.push(undefined);
+            }
+          }
+          array.splice(newIndex, 0, array.splice(oldIndex, 1)[0]);
+          return array;
+        }
+
+        el._misc.weekDays.display = eon.time.getWeekDays(el.locale, el.weekFormat);
+        el._misc.weekDays.keys = eon.time.getWeekDays("en", "long");
+
+        if (el._misc.weekDays.keys[0].toLowerCase() != el.weekStart.toLowerCase()) {
+
+          for (var i = 0; i < el._misc.weekDays.keys.length; i++) {
+
+            el._misc.weekDays.display = reorderWeekDays(el._misc.weekDays.display, 6, 0);
+            el._misc.weekDays.keys = reorderWeekDays(el._misc.weekDays.keys, 6, 0);
+
+            if (el._misc.weekDays.keys[0].toLowerCase() == el.weekStart.toLowerCase()) {
+              break;
+            }
+          }
+        }
+      },
+      /*
+      @function (private) _setupDaysGrid
+      @description Sets up the days Grid
+      */
+      setupDaysGrid: function () {
+
+        var el = this;
+
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('d') > -1) {
+
+          var week;
+          var day;
+
+          var daysGridContainer = document.createElement("div");
+          var weekDaysContainer = document.createElement("div");
+          var daysGrid = document.createElement("div");
+
+          var weeksFragment = document.createDocumentFragment();
+
+          daysGridContainer.style.zIndex = -1;
+
+          daysGridContainer.classList.add("eon-date-daysGrid");
+          weekDaysContainer.classList.add("eon-date-weekDays");
+          daysGrid.classList.add("eon-date-grid");
+
+          daysGridContainer.appendChild(weekDaysContainer);
+          daysGridContainer.appendChild(daysGrid);
+          el._refs.calendar.querySelector(".eon-date-body").appendChild(daysGridContainer);
+
+          el._refs.daysGrid = daysGridContainer;
+
+          el._createWeekDaysHeaders();
+
+          for (var i = 1; i <= 6; i++) {
+
+            week = document.createElement("div");
+            week.classList.add("eon-date-week");
+
+            for (var j = 1; j <= 7; j++) {
+
+              day = document.createElement("div");
+              day.classList.add("eon-date-day", "eon-bg2-hoverable", "eon-fg1-hoverable");
+              day.addEventListener(el._misc.downTrigger, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                el._selectDay(this);
+              });
+
+              week.appendChild(day);
+            }
+            weeksFragment.appendChild(week);
+          }
+          daysGrid.appendChild(weeksFragment);
+
+        }
+
+      },
+      /*
+      @function (private) _setupMonthsGrid
+      @description Sets up the months Grid
+      */
+      setupMonthsGrid: function () {
+
+        var el = this;
+
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('m') > -1) {
+
+          var row;
+          var month;
+
+          var monthsGrid = document.createElement("div");
+          var rowsFragment = document.createDocumentFragment();
+
+          var months = eon.time.getMonthNames(el.locale, "short");
+
+          monthsGrid.classList.add("eon-date-monthsGrid", "eon-sect1");
+          el._refs.calendar.querySelector(".eon-date-body").appendChild(monthsGrid);
+
+          el._refs.monthsGrid = monthsGrid;
+
+          row = document.createElement("div");
+          row.classList.add("eon-date-row");
+
+          for (var i = 0; i < months.length; i++) {
+
+            month = document.createElement("div");
+            month.classList.add("eon-date-month", "eon-bg2-hoverable", "eon-fg1-hoverable");
+            month.innerHTML = months[i];
+            month.dataset.index = i;
+
+            month.addEventListener(el._misc.downTrigger, function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              el._selectMonth(this);
+            });
+
+            row.appendChild(month);
+
+            if (row.childNodes.length == 4) {
+              rowsFragment.appendChild(row);
+              row = document.createElement("div");
+              row.classList.add("eon-date-row");
+            }
+          }
+
+          monthsGrid.appendChild(rowsFragment);
+
+        }
+
+      },
+      /*
+      @function (private) _setupYearsGrid
+      @description Sets up the years Grid
+      */
+      setupYearsGrid: function () {
+
+        var el = this;
+
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('y') > -1) {
+
+          var row;
+          var year;
+
+          var yearsGrid = document.createElement("div");
+          var rowsFragment = document.createDocumentFragment();
+
+          var currentYear = new Date();
+          var years = [];
+
+          currentYear = currentYear.getFullYear();
+
+          for (var i = currentYear - 6; i < currentYear + 6; i++) {
+            years.push(i);
+          }
+
+          yearsGrid.classList.add("eon-date-yearsGrid", "eon-sect1");
+          el._refs.calendar.querySelector(".eon-date-body").appendChild(yearsGrid);
+
+          el._refs.yearsGrid = yearsGrid;
+
+          row = document.createElement("div");
+          row.classList.add("eon-date-row");
+
+          for (var i = 0; i < years.length; i++) {
+
+            year = document.createElement("div");
+            year.classList.add("eon-date-year", "eon-bg2-hoverable", "eon-fg1-hoverable");
+
+            year.addEventListener(el._misc.downTrigger, function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              el._selectYear(this);
+            });
+
+            row.appendChild(year);
+
+            if (row.childNodes.length == 4) {
+              rowsFragment.appendChild(row);
+              row = document.createElement("div");
+              row.classList.add("eon-date-row");
+            }
+          }
+
+          yearsGrid.appendChild(rowsFragment);
+
+        }
+
+      },
+      /*
+      @function (private) _assignFocusStyle
+      @description When focused, it adds the corresponding style
+      */
+      assignFocusStyle: function () {
+
+        var el = this;
+
+        el._refs.underline.classList.add("animate");
+        el.classList.add("eon-date-focus");
+        el._labelNode.classList.add("eon-fg1");
+
+        el._animateLabel();
+
+      },
+      /*
+      @function (private) _revertFocusStyle
+      @description On blur, removes the corresponding style
+      */
+      revertFocusStyle: function () {
+
+        var el = this;
+
+        el._refs.underline.classList.remove("animate");
+        el.classList.remove("eon-date-focus");
+        el._labelNode.classList.remove("eon-fg1");
+
+        el._animateLabel();
+
+      },
+      /*
+      @function (private) _animateLabel
+      @description Depending on the focus state animates the label or not
+      */
+      animateLabel: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.labelAnim)) {
+          
+          if (el.classList.contains("eon-date-focus") || el.value != "") {
+            el._refs.label.classList.remove("eon-date-movedLabel");
+          } else {
+            el._refs.label.classList.add("eon-date-movedLabel");
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _assignCalendarStyle
+      @description Assigns the calendar's width and position relative to the datebox
+      */
+      assignCalendarStyle: function () {
+
+        var el = this;
+
+        if (window.innerWidth <= eon.tabletWidth) {
+
+          if (!el._refs.overlay.classList.contains("eon-date-device")) {
+
+            el._refs.calendar.style.top = "auto";
+            el._refs.calendar.style.left = "auto";
+
+            el._refs.overlay.classList.add("eon-date-device");
+            el._refs.overlay.classList.add("eon-bg1-modal");
+
+          }
+
+        } else {
+
+          el._refs.overlay.classList.remove("eon-date-device");
+          el._refs.overlay.classList.remove("eon-bg1-modal");
+
+          el._refs.calendar.style.top = el._refs.main.getBoundingClientRect().top + 1 + el._refs.main.offsetHeight + "px";
+          el._refs.calendar.style.left = el._refs.main.getBoundingClientRect().left + "px";
+          el._refs.calendar.style.width = el._refs.main.offsetWidth + "px";
+          el._refs.calendar.style.height = "auto";
+
+        }
+
+      },
+      /*
+      @function (private) _expand
+      @description Shows the calendar
+      */
+      expand: function () {
+
+        var el = this;
+
+        el._assignCalendarStyle();
+        el._assignFocusStyle();
+
+        el._refresh();
+
+        document.body.appendChild(el._refs.overlay);
+
+        el._handleAutoHeight();
+        el._handleFonts();
+
+        el._misc.modal.active = true;
+
+        el._animateExpand();
+
+      },
+      /*
+      @function (private) _animateExpand
+      @description Expands the items dropdown with transition
+      */
+      animateExpand: function () {
+
+        var el = this;
+
+        setTimeout(function () {
+          el._refs.overlay.removeEventListener("transitionend", el._misc.calendarShrinkFn);
+          el._refs.overlay.classList.add("eon-date-opaque");
+        }, 0);
+
+      },
+      /*
+      @function (private) _shrink
+      @description Hides the calendar
+      */
+      shrink: function () {
+
+        var el = this;
+
+        el._misc.calendarShrinkFn = el._misc.calendarShrinkFn || function () {
+
+          el._revertFocusStyle();
+
+          if (el._refs.overlay.parentNode) {
+            el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+          }
+
+        };
+
+        el._misc.modal.active = false;
+
+        el._animateShrink();
+
+      },
+      /*
+      @function (private) _animateShrink
+      @description Expands the items dropdown with transitions
+      */
+      animateShrink: function () {
+
+        var el = this;
+
+        el._refs.overlay.addEventListener("transitionend", el._misc.calendarShrinkFn);
+        el._refs.overlay.classList.remove("eon-date-opaque");
+
+      },
+      /*
+      @function (private) _validate
+      @description Validates if what the user typed is a valid date
+      */
+      validate: function () {
+
+        var el = this;
+
+        var inputs = el.querySelectorAll(".eon-date-subInputs .eon-date-subInput input");
+
+        var day = inputs[el._misc.mask.order.indexOf("day")].value;
+        var month = inputs[el._misc.mask.order.indexOf("month")].value;
+        var year = inputs[el._misc.mask.order.indexOf("year")].value;
+
+        var validDate = false;
+        var date;
+
+        var obj = {
+
+          day: day,
+          month: month,
+          year: year
+
+        }
+        
+        //If all the three fields have text typed in and their content is valid we set the boolean to true
+        if (year != "") {
+          if (month != "" && parseInt(month) > 0 && parseInt(month) <= 12) {
+            if (day != "" && day > 0 && day <= eon.time.getDaysInMonth(year, parseInt(month) - 1)) {
+              validDate = true;
+            }
+          }
+        }
+
+        //If its valid we remove the error classes, and update everything according to the new date
+        if (validDate) {
+
+          el.invalid = false;
+
+          el._misc.current.day = parseInt(day);
+          el._misc.current.month = parseInt(month) - 1;
+          el._misc.current.year = parseInt(year);
+
+          el._misc.preventUpdate = true;
+
+          el.value = eon.time.generateOutput(obj, el.valueFormat);
+
+
+        } else {
+
+          el.invalid = true;
+
+          el._misc.preventUpdate = true;
+          el.value = "";
+
+        }
+
+      },
+      /*
+      @function (private) _initDefault
+      @description If a value has been provided by the user we set it for our element
+      */
+      initDefault: function () {
+        this.value = this.default != "" && this.value == "" ? this.default : this.value;
+      },
+      /*
+      @function (private) _initValue
+      @description If a value has been provided by the user we set it for our element
+      */
+      initValue: function () {
+
+        var el = this;
+        var dateObj;
+
+        // If no value was provided by the user we create one
+        if (el.value == "") {
+
+          var date = new Date();
+
+          dateObj = {
+            day: el.day != "" ? parseInt(el.day) : parseInt(date.getDate()),
+            month: el.month != "" ? parseInt(el.month) : parseInt(date.getMonth()) + 1,
+            year: el.year != "" ? parseInt(el.year) : parseInt(date.getFullYear())
+          }
+
+        } else {
+
+          dateObj = eon.time.getDateObjectFromString(el.value, el.valueFormat);
+
+        }
+
+        if (el._exceedsMinDate(dateObj)) {
+
+          dateObj.day = el._misc.min.day;
+          dateObj.month = el._misc.min.month + 1;
+          dateObj.year = el._misc.min.year;
+
+        } else if (el._exceedsMaxDate(dateObj)) {
+
+          dateObj.day = el._misc.max.day;
+          dateObj.month = el._misc.max.month + 1;
+          dateObj.year = el._misc.max.year;
+
+        }
+
+        dateObj = el._formatObj(dateObj);
+
+        el.value = eon.time.generateOutput(dateObj, el.valueFormat);
+
+        el._updateValue();
+
+      },
+      /*
+      @function (private) {String} _format
+      @description We replace the format with the given data, in case the field's length is lower than its format then we add 0 as needed
+      @param {String} text
+      @param {String} format
+      */
+      format: function (text, format) {
+
+        var el = this;
+
+        text = text ? text + "" : "";
+
+        if (text.length > 0 && text.length < format.length) {
+          for (var i = 0; i < (format.length - text.length); i++) {
+            text = "0" + text;
+          }
+        }
+
+        return text;
+
+      },
+      /*
+      @function (private) {Boolean} _isMinMonth
+      @description Returns true if the month is equal/lower than the min month
+      @param {Number} year
+      @param {Number} month
+      */
+      isMinMonth: function (year, month) {
+        return (year == this._misc.min.year && month <= this._misc.min.month || year < this._misc.min.year);
+      },
+      /*
+      @function (private) {Boolean} _isMaxMonth
+      @description Returns true if the month is equal/higher than the max month
+      @param {Number} year
+      @param {Number} month
+      */
+      isMaxMonth: function (year, month) {
+        return (year == this._misc.max.year && month >= this._misc.max.month || year > this._misc.max.year);
+      },
+      /*
+      @function (private) _handleFocus
+      @description Moves the cursor to the right when a subinput is being focused
+      @param {Object} subInput
+      */
+      handleFocus: function (subInput) {
+        if (subInput.firstChild) {
+          var range = document.createRange();
+          var sel = window.getSelection();
+
+          range.selectNodeContents(subInput);
+
+          sel.removeAllRanges();
+          sel.addRange(range);
+
+        }
+      },
+      /*
+      @function (private) {Number}  _getCaretPosition
+      @description function_description
+      @param {Object} editableDiv
+      */
+      getCaretPosition: function (editableDiv) {
+        var caretPos = 0,
+          sel, range;
+        if (window.getSelection) {
+          sel = window.getSelection();
+          if (sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            if (range.commonAncestorContainer.parentNode == editableDiv) {
+              caretPos = range.endOffset;
+            }
+          }
+        } else if (document.selection && document.selection.createRange) {
+          range = document.selection.createRange();
+          if (range.parentElement() == editableDiv) {
+            var tempEl = document.createElement("span");
+            editableDiv.insertBefore(tempEl, editableDiv.firstChild);
+            var tempRange = range.duplicate();
+            tempRange.moveToElementText(tempEl);
+            tempRange.setEndPoint("EndToEnd", range);
+            caretPos = tempRange.text.length;
+          }
+        }
+        return caretPos;
+      },
+      /*
+      @function (private) {Boolean} _isNumeric
+      @description Whether the recieved key event has a numeric value or not
+      @param {Object} e
+      */
+      isNumeric: function (e) {
+        return (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
+      },
+      /*
+      @function (private) _handleKeyDown
+      @description Handles the typing and the date correction, if the subinput reaches its limit it jumpes to the next one
+      @param {Object} subInput
+      @param {Object} e
+      */
+      handleKeyDown: function (subInput, e) {
+
+        var el = this;
+        var selection = window.getSelection();
+
+        if (!el._isNumeric(e)) {
+
+          if (e.keyCode != "9" && e.keyCode != "46" && e.keyCode != "8" && e.keyCode != "37" && e.keyCode != "39") {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+          } else {
+
+            if (e.keyCode == "8") {
+
+              var subInputs = el.querySelector(".eon-date-subInputs");
+              var previousSubInputOrder = parseInt(subInput.parentNode.dataset.order) - 1;
+              var previousSubInput = subInputs.querySelector('[data-order="' + previousSubInputOrder + '"] input');
+              var caretPosition = subInput.selectionStart;
+
+              if (!(selection.anchorNode === subInput && selection.extentOffset > 0 && selection.type == "Range")) {
+                if (caretPosition == 0 && previousSubInput) {
+                  previousSubInput.focus();
+                }
+
+              }
+
+            }
+
+          }
+        } else {
+
+          var subInputs = el.querySelector(".eon-date-subInputs");
+
+          var nextSubInputOrder = parseInt(subInput.dataset.order) + 1;
+          var nextSubInput = subInputs.querySelector('[data-order="' + nextSubInputOrder + '"] input');
+
+          var aux = subInput.value;
+
+          if (!(selection.anchorNode === subInput && selection.extentOffset > 0 && selection.type == "Range")) {
+
+            if (!(aux.length >= el._misc.mask[subInput.parentNode.dataset.field].format.length)) {
+              subInput.value = aux + el._getStringFromKeyCode(e.keyCode);
+              e.preventDefault();
+              e.stopPropagation();
+            }
+
+
+          }
+
+        }
+
+        // Checks if the key press corresponds to ENTER
+        if (e.keyCode == 13) {
+          eon.triggerCallback("onEnter", el)
+        }
+
+      },
+      /*
+      @function (private) {String} _getStringFromKeyCode
+      @description Receives a keyCode and returns the string value (intented for numeric)
+      @param {String} keyCode
+      */
+      getStringFromKeyCode: function (keyCode) {
+        return String.fromCharCode((keyCode >= 96 && keyCode <= 105) ? keyCode - 48 : keyCode)
+      },
+      /*
+      @function (private) _handleKeyUp
+      @description Handles the key up event
+      @param {Object} subInput 
+      @param {Object} e [event]
+      */
+      handleKeyUp: function (subInput, e) {
+
+        var el = this;
+        
+        if (!(document.activeElement.isEqualNode(subInput) && el._getSelectionText().length == subInput.value.length)) {
+          
+          if (el._isNumeric(e) || e.keyCode == "8" || e.keyCode == "46") {
+
+            var subInputs = el.querySelector(".eon-date-subInputs");
+
+            var nextSubInputOrder = parseInt(subInput.parentNode.dataset.order) + 1;
+            var nextSubInput = subInputs.querySelector('[data-order="' + nextSubInputOrder + '"] input');
+
+            if ((subInput.value.length >= el._misc.mask[subInput.parentNode.dataset.field].format.length)) {
+
+              if (nextSubInput) {
+                nextSubInput.focus();
+              }
+
+              el._handleCorrection();
+            }
+            
+          }
+
+        }
+
+        el._validate();
+
+      },
+      /*
+      @function (private) {String} _getSelectionText
+      @description Gets the selected text
+      */
+      getSelectionText: function () {
+        var text = "";
+        var activeEl = document.activeElement;
+        var activeElTagName = activeEl ? activeEl.tagName.toLowerCase() : null;
+        if (
+          (activeElTagName == "textarea") || (activeElTagName == "input" &&
+            /^(?:text|search|password|tel|url)$/i.test(activeEl.type)) &&
+          (typeof activeEl.selectionStart == "number")
+        ) {
+          text = activeEl.value.slice(activeEl.selectionStart, activeEl.selectionEnd);
+        } else if (window.getSelection) {
+          text = window.getSelection().toString();
+        }
+        return text;
+      },
+      /*
+      @function (private) _handleCorrection
+      @description Handles the date correction for months and days
+      */
+      handleCorrection: function () {
+
+        var el = this;
+
+        var subInputs = el.querySelector(".eon-date-subInputs");
+
+        var dayInput = subInputs.querySelector('[data-field="day"] input');
+        var monthInput = subInputs.querySelector('[data-field="month"] input');
+        var yearInput = subInputs.querySelector('[data-field="year"] input');
+
+        if (dayInput.value != "" && parseInt(dayInput.value) > 31) {
+          dayInput.value = "31";
+        } else if (dayInput.value.length == 2 && parseInt(dayInput.value) == 0) {
+          dayInput.value = "1";
+        }
+
+        if (monthInput.value != "" && parseInt(monthInput.value) > 12) {
+          monthInput.value = "12";
+        } else if (monthInput.value.length == 2 && parseInt(monthInput.value) == 0) {
+          monthInput.value = "1";
+        }
+
+        if (yearInput.value != "" && parseInt(yearInput.value) > 9999) {
+          yearInput.value = "9999";
+        } else if (parseInt(yearInput.value) == 0) {
+          yearInput.value = "1";
+        }
+
+        if (dayInput.value != "" && monthInput.value != "" && yearInput.value != "" && (yearInput.value.length == el._misc.mask.year.format.length)) {
+          if (parseInt(dayInput.value) > eon.time.getDaysInMonth(parseInt(yearInput.value), parseInt(monthInput.value) - 1)) {
+            dayInput.value = eon.time.getDaysInMonth(parseInt(yearInput.value), parseInt(monthInput.value) - 1);
+          }
+        }
+
+        el._handleLimits(dayInput, monthInput, yearInput);
+      },
+      /*
+      @function (private) _handleLimits
+      @description Handles the limits such as min/max date
+      @param {Object} dayInput
+      @param {Object} monthInput
+      @param {Object} yearInput
+      */
+      handleLimits: function (dayInput, monthInput, yearInput) {
+
+        var el = this;
+
+        if (dayInput.value != "" && monthInput.value != "" && yearInput.value != "" && yearInput.value.length == el._misc.mask.year.format.length) {
+
+          var dayInputValue = parseInt(dayInput.value);
+          var monthInputValue = parseInt(monthInput.value);
+          var yearInputValue = parseInt(yearInput.value);
+
+          if ((dayInputValue < el._misc.min.day && monthInputValue <= el._misc.min.month && yearInputValue == el._misc.min.year) || (monthInputValue < el._misc.min.month && yearInputValue == el._misc.min.year) || yearInputValue < el._misc.min.year) {
+
+            dayInput.value = el._misc.min.day;
+            monthInput.value = el._misc.min.month;
+            yearInput.value = el._misc.min.year;
+
+          } else if ((dayInputValue > el._misc.max.day && monthInputValue >= el._misc.max.month && yearInputValue == el._misc.max.year) || (monthInputValue > el._misc.max.month && yearInputValue == el._misc.max.year) || yearInputValue > el._misc.max.year) {
+
+            dayInput.value = el._misc.max.day;
+            monthInput.value = el._misc.max.month;
+            yearInput.value = el._misc.max.year;
+          }
+        }
+      },
+      /*
+      @function (private) {Boolean} _exceedsMinDate
+      @description Returns whether the provided date exceeds the minimal date or not
+      @param {Object} dateObj
+      */
+      exceedsMinDate: function (dateObj) {
+
+        var el = this;
+
+        if (el._misc.min.active) {
+          var exceedsDay = dateObj.day < el._misc.min.day && dateObj.month == el._misc.min.month && dateObj.year == el._misc.min.year;
+          var exceedsMonth = dateObj.month < el._misc.min.month && dateObj.year == el._misc.min.year;
+          var exceedsYear = dateObj.year < el._misc.min.year;
+        }
+
+        return exceedsDay || exceedsMonth || exceedsYear ? true : false;
+
+      },
+      /*
+      @function (private) {Boolean} _exceedsMaxDate
+      @description Returns whether the provided date exceeds the maximum date or not
+      @param {Object} dateObj
+      */
+      exceedsMaxDate: function (dateObj) {
+
+        var el = this;
+
+        if (el._misc.max.active) {
+          var exceedsDay = dateObj.day > el._misc.min.day && dateObj.month == el._misc.min.month && dateObj.year == el._misc.min.year;
+          var exceedsMonth = dateObj.month > el._misc.max.month && dateObj.year == el._misc.max.year;
+          var exceedsYear = dateObj.year > el._misc.max.year;
+        }
+
+        return exceedsDay || exceedsMonth || exceedsYear ? true : false;
+
+      },
+      /*
+      @function (private) _createWeekDaysHeaders
+      @description Creates the weekdays headers for the daysGrid
+      */
+      createWeekDaysHeaders: function () {
+
+        var el = this;
+
+        var dayHeadersFragment = document.createDocumentFragment();
+        var dayHeader;
+
+        for (var i = 0; i < el._misc.weekDays.keys.length; i++) {
+
+          dayHeader = document.createElement("div");
+          dayHeader.classList.add("eon-date-dayHeader");
+          dayHeader.innerHTML = el._misc.weekDays.display[i];
+
+          dayHeadersFragment.appendChild(dayHeader);
+        }
+
+        el._refs.calendar.querySelector(".eon-date-daysGrid .eon-date-weekDays").appendChild(dayHeadersFragment);
+      },
+      /*
+      @function (private) _refresh
+      @description Shows the picker and the corresponding grid
+      */
+      refresh: function () {
+
+        var el = this;
+
+        if (el._refs.daysGrid) {
+
+          el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
+          el._updateHeaderSelectors("daysGrid", el._misc.current.year, el._misc.current.month);
+          el._showDaysGrid();
+
+        } else if (el._refs.monthsGrid) {
+
+          el._updateHeaderSelectors("monthsGrid");
+          el._showMonthsGrid();
+
+        } else if (el._refs.yearsGrid) {
+
+          el._updateHeaderSelectors("yearsGrid");
+          el._showYearsGrid();
+        }
+
+        if (el._refs.yearsGrid) {
+
+          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.selected.year + "']");
+
+          if (yearButton && yearButton.dataset.disabled != "true") {
+            el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+          }
+
+        }
+
+        if (el._refs.monthsGrid) {
+
+          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.selected.year + "'][data-index='" + el._misc.selected.month + "']");
+
+          if (monthButton && monthButton.dataset.disabled != "true") {
+            el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+          }
+
+        }
+
+        if (el._refs.daysGrid) {
+
+          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.selected.year + "'][month='" + parseInt(el._misc.selected.month) + "'][day='" + parseInt(el._misc.selected.day) + "']");
+
+          if (dayButton && dayButton.dataset.disabled != "true") {
+            el._highlight(dayButton, el.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _updateHeaderSelectors
+      @description Updates the header depending on the grid passed as parameters
+      @param {String} headerType
+      @param {Number} year
+      @param {Number} month
+      */
+      updateHeaderSelectors: function (headerType, year, month) {
+
+        var el = this;
+
+        var backButton = el._refs.calendar.querySelector(".eon-date-back");
+
+        if (headerType == "daysGrid") {
+
+          year = (!year) ? el._misc.current.year : year;
+          month = (!month) ? el._misc.current.month : month;
+
+          el._refs.selectorsContainer.setAttribute("class", "eon-date-daysGridSelectors");
+
+          el._refs.yearSelector.innerHTML = year;
+          el._refs.yearSelector.classList.remove("eon-date-hidden");
+
+          // Depending on the selectable we enabled/disable the hover class
+          el._refs.yearSelector.classList[!el.selectable.indexOf("y") > -1 ? "remove" : "add"]("eon-fg1-hoverable");
+          el._refs.monthSelector.classList[!el.selectable.indexOf("m") > -1 ? "remove" : "add"]("eon-fg1-hoverable");
+
+          el._refs.monthSelector.innerHTML = eon.time.getMonthName(el.locale, month, "long");
+          el._refs.monthSelector.classList.remove("eon-date-hidden");
+
+          backButton.classList.add("eon-date-hidden");
+
+          el._refs.previous.dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+          el._refs.previous.classList[el._refs.previous.dataset.disabled != "true" ? "add" : "remove"]("eon-fg1-hoverable");
+
+          el._refs.next.dataset.disabled = (el._isMaxMonth(year, month)) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+          el._refs.next.classList[el._refs.next.dataset.disabled != "true" ? "add" : "remove"]("eon-fg1-hoverable");
+
+        } else if (headerType == "monthsGrid") {
+
+          year = (!year) ? el._misc.current.year : year;
+
+          el._refs.selectorsContainer.setAttribute("class", "eon-date-monthsGridSelectors");
+
+          el._refs.yearSelector.innerHTML = year;
+          el._refs.monthSelector.classList.add("eon-date-hidden");
+
+          // Depending on the selectable we enabled/disable the hover class
+          el._refs.yearSelector.classList[!el.selectable.indexOf("y") > -1 ? "remove" : "add"]("eon-fg1-hoverable");
+          el._refs.monthSelector.classList[!el.selectable.indexOf("m") > -1 ? "remove" : "add"]("eon-fg1-hoverable");
+
+          el._refs.previous.dataset.disabled = (year <= el._misc.min.year) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+
+          el._refs.next.dataset.disabled = (year >= el._misc.max.year) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+
+          if (el._refs.daysGrid) {
+
+            backButton.classList.remove("eon-date-hidden");
+            backButton.dataset.grid = "days";
+
+          } else {
+
+            backButton.classList.add("eon-date-hidden");
+          }
+
+        } else if (headerType == "yearsGrid") {
+
+          year = (!year) ? el._misc.selector.range.start + "-" + el._misc.selector.range.end : year;
+
+          el._refs.selectorsContainer.setAttribute("class", "eon-date-yearsGridSelectors");
+
+          el._refs.yearSelector.innerHTML = year;
+          el._refs.yearSelector.classList.remove("eon-fg1-hoverable");
+
+          el._refs.monthSelector.classList.add("eon-date-hidden");
+
+          el._refs.previous.dataset.disabled = (el._misc.selector.range.start <= el._misc.min.year) ? "true" : "false";
+          el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+
+          el._refs.next.dataset.disabled = (el._misc.selector.range.end >= el._misc.max.year) ? "true" : "false";
+          el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+
+          if (el._refs.daysGrid) {
+
+            backButton.classList.remove("eon-date-hidden");
+            backButton.dataset.grid = "days";
+
+          } else if (el._refs.monthsGrid) {
+
+            backButton.classList.remove("eon-date-hidden");
+            backButton.dataset.grid = "months";
+
+          } else {
+
+            backButton.classList.add("eon-date-hidden");
+          }
+        }
+
+      },
+      /*
+      @function (private) _highlight
+      @description Highlights the button and removes highlight in the previous one
+      @param {Object} selected
+      @param {Object} previous
+      */
+      highlight: function (selected, previous) {
+
+        var el = this;
+
+        if (previous) {
+          previous.classList.remove("eon-date-current", "eon-bg2-active");
+          previous.classList.add("eon-bg2-hoverable", "eon-fg1-hoverable");
+        }
+
+        selected.classList.add("eon-date-current", "eon-bg2-active");
+        selected.classList.remove("eon-bg2-hoverable", "eon-fg1-hoverable");
+      },
+      /*
+      @function (private) {Object} _formatObj
+      @description Recieves an object with a day/year/month and returns an object with the same values with the provided format
+      @param {Object} obj
+      */
+      formatObj: function (obj) {
+
+        var el = this;
+
+        var format = el.valueFormat;
+
+        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
+        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
+        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+
+        var finalObj = {};
+
+        finalObj.day = obj.day ? el._format(obj.day, dayFormat) : undefined;
+        finalObj.month = obj.month ? el._format(obj.month, monthFormat) : undefined;
+        finalObj.year = obj.year ? el._format(obj.year, yearFormat) : undefined;
+
+        return finalObj;
+
+      },
+      /*
+      @function (private) _handleAutoHeight
+      @description Maintains an aspect ratio for the picker relative to its width
+      */
+      handleAutoHeight: function () {
+
+        var el = this;
+        var calendar = el._refs.calendar;
+
+        if (calendar.offsetWidth != 0) {
+          calendar.style.height = (parseFloat(calendar.offsetWidth) * 0.839) + "px";
+        }
+
+      },
+      /*
+      @function (private) _handleFonts
+      @description It handles the fontSizes for different picker widths
+      */
+      handleFonts: function () {
+
+        var el = this;
+        var calendar = el._refs.calendar;
+
+        var baseFontSize, weekDaysConstant, headerConstant;
+        var daysFontSize, weekDaysFontSize, headerFontSize, navigation, otherGridsFontSize;
+
+        weekDaysConstant = 1.0667;
+
+        if (parseInt(calendar.offsetWidth) >= 240) {
+
+          baseFontSize = el.fontSize;
+          navigation = 24;
+          headerConstant = 1.1111111111;
+          otherGridsConstant = 1.1111111111;
+
+        } else {
+
+          baseFontSize = el.fontSize * 0.75;
+          navigation = 18;
+          headerConstant = 1.197916667;
+          otherGridsConstant = 1.296296296;
+        }
+
+        daysFontSize = baseFontSize;
+        weekDaysFontSize = baseFontSize / weekDaysConstant;
+        headerFontSize = baseFontSize * headerConstant;
+        otherGridsFontSize = baseFontSize * otherGridsConstant
+
+        if (calendar.querySelector(".eon-date-daysGrid")) {
+          calendar.querySelector(".eon-date-daysGrid .eon-date-grid").style.fontSize = baseFontSize + "px";
+          calendar.querySelector(".eon-date-daysGrid .eon-date-weekDays").style.fontSize = weekDaysFontSize + "px";
+        }
+
+        if (calendar.querySelector(".eon-date-monthsGrid")) {
+          calendar.querySelector(".eon-date-monthsGrid").style.fontSize = otherGridsFontSize + "px"
+        }
+
+        if (calendar.querySelector(".eon-date-yearsGrid")) {
+          calendar.querySelector(".eon-date-yearsGrid").style.fontSize = otherGridsFontSize + "px"
+        }
+
+        calendar.querySelector(".eon-date-header").style.fontSize = headerFontSize + "px";
+
+        calendar.querySelector(".eon-date-back i").style.fontSize = navigation + "px";
+        calendar.querySelector(".eon-date-previous i").style.fontSize = navigation + "px";
+        calendar.querySelector(".eon-date-next i").style.fontSize = navigation + "px";
+      },
+      /*
+      @function (private) _goBack
+      @description It shows the corresponding grid
+      @param {Object} backButton
+      */
+      goBack: function (backButton) {
+
+        var el = this;
+
+        if (backButton.dataset.grid == "days") {
+
+          el._showDaysGrid();
+
+        } else if (backButton.dataset.grid == "months") {
+
+          el._showMonthsGrid();
+
+        } else if (backButton.dataset.grid == "years") {
+
+          el._showYearsGrid();
+        }
+
+      },
+      /*
+      @function (private) _goToPrevious
+      @description Handles the redirection to whether the month/year/day previous callback
+      @param {Object} button
+      */
+      goToPrevious: function (button) {
+
+        var el = this;
+
+        if (el._misc.selector.type == "month") {
+          el._goToPreviousMonth(button);
+        } else if (el._misc.selector.type == "year") {
+          el._goToPreviousYear(button);
+        } else if (el._misc.selector.type == "yearsRange") {
+          el._goToPreviousYearsRange(button);
+        }
+      },
+      /*
+      @function (private) _goToPreviousMonth
+      @description Fills the daysGrid with the previous Month
+      @param {Object} button
+      */
+      goToPreviousMonth: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+
+          var previous = el._getPreviousByMonth(el._misc.current.year, el._misc.current.month);
+
+
+          el._fillDaysGrid(previous.year, previous.month);
+          el._updateHeaderSelectors("daysGrid", previous.year, previous.month);
+        }
+      },
+      /*
+      @function (private) _goToNext
+      @description Handles the redirection to whether the month/year/day next callback
+      @param {Object} button
+      */
+      goToNext: function (button) {
+
+        var el = this;
+
+        if (el._misc.selector.type == "month") {
+          el._goToNextMonth(button);
+        } else if (el._misc.selector.type == "year") {
+          el._goToNextYear(button);
+        } else if (el._misc.selector.type == "yearsRange") {
+          el._goToNextYearsRange(button);
+        }
+      },
+      /*
+      @function (private) _goToNextMonth
+      @description Fills the daysGrid with the next Month
+      @param {Object} button
+      */
+      goToNextMonth: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+          var next = el._getNextByMonth(el._misc.current.year, el._misc.current.month);
+
+          el._fillDaysGrid(next.year, next.month);
+          el._updateHeaderSelectors("daysGrid", next.year, next.month);
+        }
+      },
+      /*
+      @function (private) _goToPreviousYear
+      @description Changes the actual year, for the previous one
+      @param {Object} button
+      */
+      goToPreviousYear: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+
+          el._misc.current.year = el._misc.current.year - 1;
+
+          el._updateHeaderSelectors("monthsGrid");
+          el._fillMonthsGrid();
+        }
+      },
+      /*
+      @function (private) _goToNextYear
+      @description Changes the actual year, for the next one
+      @param {Object} button
+      */
+      goToNextYear: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+
+          el._misc.current.year = parseInt(el._misc.current.year) + 1;
+
+          el._updateHeaderSelectors("monthsGrid");
+          el._fillMonthsGrid();
+        }
+      },
+      /*
+      @function (private) _goToPreviousYearsRange
+      @description Changes the actual years range, for the previous one
+      @param {Object} button
+      */
+      goToPreviousYearsRange: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+          el._misc.selector.range.start = el._misc.selector.range.start - 12;
+          el._misc.selector.range.end = el._misc.selector.range.start + 11;
+
+          el._fillYearsGrid();
+          el._updateHeaderSelectors("yearsGrid");
+        }
+      },
+      /*
+      @function (private) _goToNextYearsRange
+      @description Changes the actual years range, for the next one
+      @param {Object} button
+      */
+      goToNextYearsRange: function (button) {
+
+        var el = this;
+
+        if (button.dataset.disabled != "true") {
+          el._misc.selector.range.end = el._misc.selector.range.end + 12;
+          el._misc.selector.range.start = el._misc.selector.range.end - 11;
+
+          el._fillYearsGrid();
+          el._updateHeaderSelectors("yearsGrid");
+        }
+      },
+      /*
+      @function (private) _fillDaysGrid
+      @description Fills the grid with the corresponding days for the provided year/month
+      @param {Number} year
+      @param {Number} month
+      */
+      fillDaysGrid: function (year, month) {
+
+        var el = this;
+
+        var gridWeeks = el._refs.calendar.querySelector(".eon-date-grid").children;
+
+        var monthDays = eon.time.getDaysInMonth(year, month);
+        var monthFirstWeekDay = eon.time.getFirstWeekDay("en", year, month, "long");
+
+        var previous = el._getPreviousByMonth(year, month);
+        var next = el._getNextByMonth(year, month);
+
+        var previousMonthDaysToDisplay = el._getPreviousMonthDaysToDisplay(year, month);
+        var nextMonthDaysToDisplay = el._getNextMonthDaysToDisplay(year, month, monthDays, previousMonthDaysToDisplay);
+
+        var week = gridWeeks[0];
+
+        var currentWeek = 0;
+        var weekDaysCount = 0;
+        var dummyDay, day;
+
+        var areLimits = (el._misc.min.active == true || el._misc.max.active == true);
+
+        if (areLimits) {
+          var isPreviousMonthMin = el._isMinMonth(previous.year, previous.month);
+          var isMinMonth = el._isMinMonth(year, month);
+          var isNextMonthMin = el._isMinMonth(next.year, next.month);
+
+          var isPreviousMonthMax = el._isMaxMonth(previous.year, previous.month);
+          var isMaxMonth = el._isMaxMonth(year, month);
+          var isNextMonthMax = el._isMaxMonth(next.year, next.month);
+
+          var disableDayAsMin, disableDayAsMax;
+        }
+
+        el._misc.current.year = year;
+        el._misc.current.month = month;
+
+        //Create previous Month Days
+        for (var i = 0; i < previousMonthDaysToDisplay.length; i++) {
+          if (el._misc.weekDays.keys[i] == monthFirstWeekDay) {
+            break;
+          } else {
+
+            day = week.children[weekDaysCount];
+
+            if (day) {
+
+              day.innerHTML = previousMonthDaysToDisplay[i];
+              day.classList.add("eon-date-previousMonth", "eon-fg2-disabled");
+              day.classList.remove("eon-date-current", "eon-bg2-active");
+
+              day.setAttribute("year", previous.year);
+              day.setAttribute("month", previous.month);
+              day.setAttribute("day", previousMonthDaysToDisplay[i]);
+
+              if (areLimits) {
+
+                disableDayAsMin = (isPreviousMonthMin && previousMonthDaysToDisplay[i] < el._misc.min.day || isMinMonth || isNextMonthMin) ? true : false;
+                disableDayAsMax = (isPreviousMonthMax && previousMonthDaysToDisplay[i] > el._misc.max.day) ? true : false;
+
+                day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin || disableDayAsMax)) ? "true" : "false";
+              }
+
+            }
+
+            weekDaysCount++;
+          }
+        }
+
+        //Create actual month days
+        for (var i = 1; i <= monthDays; i++) {
+
+          day = week.children[weekDaysCount];
+
+          if (day) {
+            day.classList.remove("eon-date-previousMonth", "eon-fg2-disabled", "eon-date-nextMonth", "eon-fg2-disabled", "eon-date-current", "eon-bg2-active");
+            day.innerHTML = i;
+
+            day.setAttribute("year", year);
+            day.setAttribute("month", parseInt(month));
+            day.setAttribute("day", i);
+
+            weekDaysCount++;
+
+            if (weekDaysCount == 7) {
+
+              week = gridWeeks[currentWeek + 1];
+              weekDaysCount = 0;
+
+              currentWeek++;
+            }
+
+            if (areLimits) {
+
+              disableDayAsMin = (isMinMonth && i < el._misc.min.day || isNextMonthMin) ? true : false;
+              disableDayAsMax = (isPreviousMonthMax || isMaxMonth && i > el._misc.max.day) ? true : false;
+
+              day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin || disableDayAsMax)) ? "true" : "false";
+              day.classList[day.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+            }
+
+          }
+        }
+
+        //Create next month days
+        for (var i = 0; i < nextMonthDaysToDisplay.length; i++) {
+
+          day = week.children[weekDaysCount];
+
+          if (day) {
+
+            day.innerHTML = nextMonthDaysToDisplay[i];
+            day.classList.add("eon-date-nextMonth", "eon-fg2-disabled");
+            day.classList.remove("eon-date-current", "eon-bg2-active");
+
+            day.setAttribute("year", next.year);
+            day.setAttribute("month", parseInt(next.month));
+            day.setAttribute("day", nextMonthDaysToDisplay[i]);
+
+            weekDaysCount++;
+
+            if (weekDaysCount == 7) {
+
+              week = gridWeeks[currentWeek + 1];
+              weekDaysCount = 0;
+
+              currentWeek++;
+            }
+
+            if (areLimits) {
+
+              disableDayAsMin = (isNextMonthMin && nextMonthDaysToDisplay[i] < el._misc.min.day) ? true : false;
+              disableDayAsMax = (isNextMonthMax && nextMonthDaysToDisplay[i] > el._misc.max.day || isMaxMonth || isPreviousMonthMax) ? true : false;
+
+              day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin || disableDayAsMax)) ? "true" : "false";
+            }
+
+          }
+        }
+
+        var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.selected.day) + '"][month="' + parseInt(el._misc.selected.month) + '"][year="' + parseInt(el._misc.selected.year) + '"]');
+
+        if (currentDay) {
+          el._highlight(currentDay);
+        }
+      },
+      /*
+      @function (private) _fillMonthsGrid
+      @description When the monthsGrid is about the be showed, we handle the ones that the user can click on, and also point out the current month if needed
+      */
+      fillMonthsGrid: function () {
+
+        var el = this;
+        var monthsGrid = el._refs.calendar.querySelector(".eon-date-monthsGrid");
+        var months = monthsGrid.querySelectorAll('[data-index]');
+        var month, disableMonthAsMin, disableMonthAsMax;
+
+        for (var i = 0; i < 12; i++) {
+
+          year = el._misc.current.year;
+          month = months[i].dataset.index;
+
+          months[i].dataset.year = year;
+          months[i].classList.remove("eon-date-current");
+          months[i].classList.remove("eon-bg2-active");
+
+          if (el._misc.current.year == el._misc.min.year || el._misc.current.year == el._misc.max.year) {
+
+            disableMonthAsMin = (year == el._misc.min.year && month < el._misc.min.month || year < el._misc.min.year) ? true : false;
+            disableMonthAsMax = (year == el._misc.max.year && month > el._misc.max.month || year > el._misc.max.year) ? true : false;
+
+            months[i].dataset.disabled = ((disableMonthAsMin || disableMonthAsMax) || (disableMonthAsMin && disableMonthAsMax)) ? "true" : "false";
+
+          } else {
+            months[i].dataset.disabled = "false";
+          }
+
+          months[i].classList[months[i].dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+        }
+
+        var currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.selected.month) + '"][data-year ="' + parseInt(el._misc.selected.year) + '"]');
+
+        if (currentMonthCell) {
+          el._highlight(currentMonthCell, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+        }
+      },
+      /*
+      @function (private) _fillYearsGrid
+      @description Fills the grid with the year corresponding to the years range
+      */
+      fillYearsGrid: function () {
+
+        var el = this;
+        var yearsGrid = el._refs.calendar.querySelector(".eon-date-yearsGrid");
+        var yearsGridRow = yearsGrid.children;
+        var year = el._misc.selector.range.start;
+        var row;
+        var selectedYearCell;
+
+        for (var i = 0; i < yearsGridRow.length; i++) {
+
+          row = yearsGridRow[i];
+
+          for (var j = 0; j < 4; j++) {
+            row.children[j].innerHTML = year;
+            row.children[j].dataset.year = year;
+            row.children[j].classList.remove("eon-date-current");
+            row.children[j].classList.remove("eon-bg2-active");
+            row.children[j].classList.add("eon-bg2-hoverable");
+
+            disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
+            disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
+            row.children[j].dataset.disabled = ((disableYearAsMin || disableYearAsMax) || (disableYearAsMin && disableYearAsMax)) ? "true" : "false";
+            row.children[j].classList[row.children[j].dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+
+            year++;
+          }
+        }
+
+        selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.selected.year + '"]')
+
+        if (selectedYearCell) {
+          el._highlight(selectedYearCell, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+        }
+      },
+      /*
+      @function (private) _selectDay
+      @description Selects the day clicked and runs its default behavior if the user didnt specify a custom callback
+      @param {Object} dayButton
+      */
+      selectDay: function (dayButton) {
+
+        if (dayButton.dataset.disabled != "true") {
+
+          var el = this;
+
+          // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
+          var dateObj = el._formatObj({ day: dayButton.getAttribute("day"), month: (parseInt(dayButton.getAttribute("month")) + 1), year: dayButton.getAttribute("year") });
+          var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
+
+          el._misc.selected.day = parseInt(dayButton.getAttribute("day"));
+          el._misc.selected.month = parseInt(dayButton.getAttribute("month"));
+          el._misc.selected.year = parseInt(dayButton.getAttribute("year"));
+
+          el._highlight(dayButton, el._refs.calendar.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
+          el._shrink();
+
+          el.value = formattedValue;
+
+        }
+      },
+      /*
+      @function (private) _selectMonth
+      @description Selects the month clicked and runs its default behavior if the user didnt specify a specific funcion
+      @param {Object} monthButton
+      */
+      selectMonth: function (monthButton) {
+
+        var el = this;
+
+        if (monthButton.dataset.disabled != "true") {
+
+          el._misc.current.month = parseInt(monthButton.dataset.index);
+          el._misc.selected.month = parseInt(monthButton.dataset.index);
+          el._misc.selected.year = parseInt(el._misc.current.year);
+
+          if (el._refs.daysGrid) {
+
+            el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
+            el._showDaysGrid();
+
+          } else {
+
+            // We have to add 1 to the month becouse the indexes are set starting from 0 to match it with the way js Date works
+            var dateObj = el._formatObj({ day: undefined, month: (parseInt(monthButton.dataset.index) + 1), year: el._misc.current.year });
+            var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
+
+            el._misc.preventUpdate = true;
+            el.value = formattedValue;
+
+          }
+
+          el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+
+        }
+      },
+      /*
+      @function (private) _selectYear
+      @description Selects the year clicked and runs its default behavior if the user didnt specify a specific funcion
+      @param {Object} yearButton
+      */
+      selectYear: function (yearButton) {
+
+        var el = this;
+
+        if (yearButton.dataset.disabled != "true") {
+
+          el._misc.current.year = parseInt(yearButton.dataset.year);
+          el._misc.selected.year = parseInt(yearButton.dataset.year);
+
+          if (el._refs.daysGrid) {
+
+            if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
+              el._misc.current.month = el._misc.min.month;
+              el._misc.selected.month = el._misc.min.month;
+            }
+
+            el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
+            el._showDaysGrid();
+
+          } else if (el._refs.monthsGrid) {
+
+            if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
+              el._misc.current.month = el._misc.min.month;
+              el._misc.selected.month = el._misc.min.month;
+            }
+
+            el._showMonthsGrid();
+
+          } else {
+
+            var dateObj = el._formatObj({ day: undefined, month: undefined, year: yearButton.dataset.year });
+            var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
+
+            el._misc.preventUpdate = true;
+
+            el.value = formattedValue;
+
+          }
+        }
+
+        el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+
+      },
+      /*
+      @function (private) _showDaysGrid
+      @description Shows the daysGrid and hides the other ones, it also updates the headerSelectors
+      */
+      showDaysGrid: function () {
+
+        var el = this;
+
+        el._refs.daysGrid.style.zIndex = 0;
+        el._refs.daysGrid.style.opacity = 1;
+
+        if (el._refs.monthsGrid) {
+          el._hideMonthsGrid();
+        }
+
+        if (el._refs.yearsGrid) {
+          el._hideYearsGrid();
+        }
+
+        el._updateHeaderSelectors("daysGrid");
+        el._misc.selector.type = "month";
+      },
+      /*
+      @function (private) _hideDaysGrid
+      @description Hides the days grid
+      */
+      hideDaysGrid: function () {
+
+        var el = this;
+
+        el._refs.daysGrid.style.zIndex = -1;
+        el._refs.daysGrid.style.opacity = 0;
+      },
+      /*
+      @function (private) _showMonthsGrid
+      @description Shows the months grid and hides the other ones, it also updates the headerSelectors
+      */
+      showMonthsGrid: function () {
+
+        var el = this;
+
+        el._refs.monthsGrid.style.zIndex = 0;
+        el._refs.monthsGrid.style.opacity = 1;
+
+        if (el._refs.daysGrid) {
+          el._hideDaysGrid();
+        }
+
+        if (el._refs.yearsGrid) {
+          el._hideYearsGrid();
+        }
+
+        el._updateHeaderSelectors("monthsGrid");
+        el._fillMonthsGrid();
+
+        el._misc.selector.type = "year";
+      },
+      /*
+      @function (private) _hideMonthsGrid
+      @description Hides the monthsGrid
+      */
+      hideMonthsGrid: function () {
+
+        var el = this;
+
+        el._refs.monthsGrid.style.zIndex = -1;
+        el._refs.monthsGrid.style.opacity = 0;
+      },
+      /*
+      @function (private) _showYearsGrid
+      @description Shows the yearsGrid and hides the other ones, it also updates the headerSelectors
+      */
+      showYearsGrid: function () {
+
+        var el = this;
+
+        el._refs.yearsGrid.style.zIndex = 1;
+        el._refs.yearsGrid.style.opacity = 1;
+
+        if (el._refs.monthsGrid) {
+          el._hideMonthsGrid();
+        }
+
+        if (el._refs.daysGrid) {
+          el._hideDaysGrid();
+        }
+
+        el._misc.selector.range.start = parseInt(el._misc.current.year) - 6;
+        el._misc.selector.range.end = parseInt(el._misc.current.year) + 5;
+
+        el._fillYearsGrid();
+        el._updateHeaderSelectors("yearsGrid");
+
+        el._misc.selector.type = "yearsRange";
+      },
+      /*
+      @function (private) _hideYearsGrid
+      @description Hides the yearsGrid
+      */
+      hideYearsGrid: function () {
+
+        var el = this;
+
+        el._refs.yearsGrid.style.zIndex = -1;
+        el._refs.yearsGrid.style.opacity = 0;
+      },
+      /*
+      @function (private) {Object} _getPreviousByMonth
+      @description Gets the previos month, the year is returned aswell in case the current month is January
+      @param {Number} year
+      @param {Number} month
+      */
+      getPreviousByMonth: function (year, month) {
+
+        if (parseInt(month) - 1 < 0) {
+          month = 11
+          year = parseInt(year) - 1;
+        } else {
+          month = parseInt(month) - 1;
+        }
+
+        return {
+          "month": month,
+          "year": year
+        };
+      },
+      /*
+      @function (private) {Object} _getNextByMonth
+      @description Gets the next month, the year is returned aswell in case the current month is December
+      @param {Number} year
+      @param {Number} month
+      */
+      getNextByMonth: function (year, month) {
+
+        if (parseInt(month) + 1 > 11) {
+          month = 0
+          year = parseInt(year) + 1;
+        } else {
+          month = parseInt(month) + 1;
+        }
+
+        return {
+          "month": month,
+          "year": year
+        };
+      },
+      /*
+      @function (private) {Array} _getPreviousMonthDaysToDisplay
+      @description Gets the previos month days to show along the current month
+      @param {Number} year
+      @param {Number} month
+      */
+      getPreviousMonthDaysToDisplay: function (year, month) {
+
+        var el = this;
+
+        var monthFirstWeekDay = eon.time.getFirstWeekDay("en", year, month, "long");
+
+        var previous = el._getPreviousByMonth(year, month);
+        var previousMonthDaysToDisplay = [];
+        var previousMonthDays;
+
+        var daysUntilMonthStart = 0;
+
+        previousMonthDays = eon.time.getDaysInMonth(previous.year, previous.month)
+
+        for (var i = 0; i < el._misc.weekDays.keys.length; i++) {
+          if (monthFirstWeekDay != el._misc.weekDays.keys[i]) {
+            previousMonthDaysToDisplay.push(previousMonthDays - i)
+          } else {
+            break;
+          }
+        }
+
+        return previousMonthDaysToDisplay.reverse();
+      },
+      /*
+      @function (private) {Array} _getNextMonthDaysToDisplay
+      @description Gets the next month days to show along the current month
+      @param {Number} year
+      @param {Number} month
+      @param {Number} monthDays
+      @param {Array} previousMonthDaysToDisplay
+      */
+      getNextMonthDaysToDisplay: function (year, month, monthDays, previousMonthDaysToDisplay) {
+
+        var el = this;
+
+        var nextMonthDaysToDisplay = [];
+        var remainingDaysToFill = 42 - monthDays - previousMonthDaysToDisplay.length;
+
+        //Theres no need to know which is the current month as they all start the same
+        for (var i = 1; i <= remainingDaysToFill; i++) {
+          nextMonthDaysToDisplay.push(i);
+        }
+
+        return nextMonthDaysToDisplay;
+      },
+      /*
+      @function (private) _updateLabel
+      @description Updates the label node with the new label
+      */
+      updateLabel: function () {
+
+        var el = this;
+
+        if (el.label != "") {
+          el.querySelector(".eon-date-label").innerHTML = el.label;
+        }
+
+      },
+      /*
+      @function (private) _updateDisabled
+      @description Updates disabled status
+      */
+      updateDisabled: function () {
+
+        var el = this;
+
+        if (el.type == "calendar") {
+
+          var selectedCell = el.querySelector(".eon-bg2-active");
+
+          if (eon.util.isTrue(el.disabled)) {
+
+            if (selectedCell) {
+              selectedCell.classList.remove("eon-bg2-active");
+              selectedCell.classList.add("eon-bg2-disabled");
+            }
+
+            el._refs.data.classList.add("eon-fg2-disabled");
+            el._refs.header.classList.add("eon-fg2-disabled");
+            el._refs.body.classList.add("eon-fg2-disabled");
+
+          } else {
+
+            if (selectedCell) {
+              selectedCell.classList.add("eon-bg2-active");
+              selectedCell.classList.remove("eon-bg2-disabled");
+            }
+
+            el._refs.data.classList.remove("eon-fg2-disabled");
+            el._refs.header.classList.remove("eon-fg2-disabled");
+            el._refs.body.classList.remove("eon-fg2-disabled");
+
+          }
+
+        } else {
+
+          if (eon.util.isTrue(el.disabled)) {
+
+            el._refs.subInputsWrapper.classList.add("eon-fg2-disabled");
+
+            el._refs.calendarButton.classList.remove("eon-fg2");
+            el._refs.calendarButton.classList.add("eon-fg2-disabled");
+
+            el._refs.data.classList.add("eon-fg2-disabled");
+            el._refs.main.classList.add("eon-fg2-disabled");
+
+            el._shrink();
+
+          } else {
+
+            el._refs.subInputsWrapper.classList.remove("eon-fg2-disabled");
+
+            el._refs.calendarButton.classList.add("eon-fg2");
+            el._refs.calendarButton.classList.remove("eon-fg2-disabled");
+
+            el._refs.data.classList.remove("eon-fg2-disabled");
+            el._refs.main.classList.remove("eon-fg2-disabled");
+
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _updateReadOnly
+      @description Updates readonly status
+      */
+      updateReadOnly: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.readonly)) {
+
+          el._refs.subInputs.first.setAttribute("readonly", "true");
+          el._refs.subInputs.second.setAttribute("readonly", "true");
+          el._refs.subInputs.third.setAttribute("readonly", "true");
+
+          el._refs.calendarButton.classList.remove("eon-fg2-hoverable");
+
+        } else {
+
+          el._refs.subInputs.first.removeAttribute("readonly");
+          el._refs.subInputs.second.removeAttribute("readonly");
+          el._refs.subInputs.third.removeAttribute("readonly");
+
+          el._refs.calendarButton.classList.add("eon-fg2-hoverable");
+
+          if (el.type != "calendar") {
+            el._shrink();
+          }
+
+        }
+
+      },
+      /*
+      @function (private) _updateValue
+      @description Allows the user tu set a new value to the element
+      @param {Object} value
+      */
+      updateValue: function () {
+
+        var el = this;
+        
+        if (!el._misc.preventUpdate) {
+
+          var format = el.valueFormat;
+
+          var subInputsWrapper = el._refs.subInputsWrapper;
+          var dayInput = subInputsWrapper.querySelector('[data-field="day"] input');
+          var monthInput = subInputsWrapper.querySelector('[data-field="month"] input');
+          var yearInput = subInputsWrapper.querySelector('[data-field="year"] input');
+
+          var value = el.value;
+
+          var valueObj, day, month, year;
+
+          if (value.constructor == Date) {
+
+            day = value.toLocaleString([], {
+              day: "numeric"
+            });
+
+            month = value.toLocaleString([], {
+              month: "numeric"
+            });
+
+            year = value.toLocaleString([], {
+              year: "numeric"
+            });
+
+            valueObj = {
+              day: day,
+              month: month,
+              year: year
+            }
+
+          } else {
+
+            valueObj = eon.time.getDateObjectFromString(el.value, el.valueFormat);
+
+          }
+
+          el._misc.current.day = valueObj.day;
+          el._misc.current.month = valueObj.month - 1;
+          el._misc.current.year = valueObj.year;
+
+          el._misc.selected.day = el._misc.current.day;
+          el._misc.selected.month = el._misc.current.month;
+          el._misc.selected.year = el._misc.current.year;
+
+          dayInput.value = el._format(valueObj.day, el._misc.mask.day.format);
+          monthInput.value = el._format(valueObj.month, el._misc.mask.month.format);
+          yearInput.value = el._format(valueObj.year, el._misc.mask.year.format);
+
+          el._refresh();
+
+        }
+
+        el._misc.preventUpdate = false;
+
+      },
+
+      /*
+      @function (private) _updateInvalid
+      @description Updates the invalid status
+      */
+      updateInvalid: function () {
+
+        var el = this;
+        var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
+
+        el.classList[classListFn]("eon-date-error");
+
+      }
+
+    },
+    functions: {
+      /*
+      @function clear
+      @description Empties the value
+      */
+      clear: function () {
+        this.value = "";
+      },
+      /*
+      @function reset
+      @description Resets the value of the element to the default one, if no default is provided then empties the value
+      */
+      reset: function () {
+
+        var el = this;
+
+        if (el.default != "") {
+          el.value = el.default;
+        } else {
+          el.clear();
+        }
+
+      },
+
+      /*
+      @function updateDescription
+      @description Updates the description value for the element
+      */
+      updateDescription: function (text) {
+        this._misc.descriptionText = text;
+        this._refs.description.innerHTML = this._misc.descriptionText;
+      },
+      /*
+      @function resetDescription
+      @description Updates the description value for the element
+      */
+      resetDescription: function () {
+
+        var el = this;
+        var description = el.tooltip != "" ? el.tooltip : "";
+
+        el._misc.descriptionText = description;
+        el._refs.description.innerHTML = description;
+
+      }
+    },
+    onCreated: function () {
+
+      var el = this;
+
+      eon.createCallback("onEnter", this);
+
+      if (eon.util.isTouchScreen()) {
+        el.dataset.touch = "true";
+      }
+
+      eon.registerPathListener(el, "date");
+
+    },
+    onInit: function () {
+      
+      var el = this;
+
+      el._setupMisc();
+      el._setupRefs();
+      el._setupOverlay();
+      el._setupType();
+      el._setupDescription();
+
+      el._setupLabelAnimation(); 
+
+    },
+    onRender: function () {
+      this._setup();
+    },
+    onPropertyChanged: function (key, oldVal, newVal) {
+
+      switch (key) {
+        case "label":
+          this._updateLabel();
+          break;
+        case "disabled":
+          this._updateDisabled();
+          break;
+        case "readonly":
+          this._updateReadOnly();
+          break;
+        case "value":
+          this._updateValue();
+          break;
+        case "invalid":
+          this._updateInvalid();
+          break;
+      }
+
+    },
+    onWindowResize: function () {
+
+      var el = this;
+
+      if (el._misc.modal.active) {
+        el._shrink();
+      }
+
+    }
+  });
+
+</script>

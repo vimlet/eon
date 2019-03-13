@@ -1,0 +1,1206 @@
+<template>
+
+    <div class="eon-combobox-data eon-fg2">
+        <label class="eon-combobox-label"></label>
+    </div>
+
+    <div class="eon-combobox-main eon-fg2">
+
+        <div class="eon-combobox-wrapper eon-bg2">
+            <div class="eon-combobox-input">
+                <input type="text" class="eon-fg2">
+            </div>
+            <i class="eon-combobox-dropButton eon-fg2-hoverable eon-unselectable vicon vicon-chevron-down"></i>
+        </div>
+
+        <span class="eon-combobox-underline"></span>
+
+    </div>
+
+    <div class="eon-combobox-dropdown eon-fg2 eon-sect1 eon-boxshadow2 hidden"></div>
+
+    <div class="eon-combobox-description"></div>
+
+</template>
+
+<script type="text/javascript">
+    eon.element({
+
+        name: "eon-combobox",
+        style: "eon-combobox.css",
+
+        themed: true,
+
+        dependencies: [
+            "../eon-overlay",
+            "../eon-scroll",
+            "../eon-item"
+        ],
+
+        privateProperties: {
+            /*
+            @property (private) {string} _formElement 
+            @description Necessary property to be recognized by a form
+            */
+            formElement: {
+                value: "combobox"
+            },
+            /*
+            @property (private) {object} _refs
+            @description Object with references to relevant element nodes
+            */
+            refs: {
+                value: {},
+                reflect: false
+            },
+            /*
+            @property (private) {Object} _misc
+            @description Object with useful information
+            */
+            misc: {
+                value: {},
+                reflect: false
+            },
+        },
+
+        properties: {
+            /*
+            @property {String} name
+            @description Name to identify the element in a form
+            */
+            name: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {string} filter
+            @description Whether the input will be enabled to filter the dropdown options
+            */
+            filter: {
+                value: "false",
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+            @property {string} placeholder
+            @description Sets the placeholder for the input while there is no value
+            */
+            placeholder: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {string} label
+            @description Text that appears at the top of the element to identify the component
+            */
+            label: {
+                value: "",
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+            @property {string} displayProperty
+            @description Property that will be used to get the displayValue in case a store has been provided
+            */
+            displayProperty: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {string} value
+            @description The value of the dropdown
+            */
+            value: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {string} displayValue
+            @description The displayValue of the selected item
+            */
+            displayValue: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {String} default
+            @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+            */
+            default: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {Boolean} inline 
+            @description Space that occupies the button inside its parent container.
+            */
+            inline: {
+                value: true,
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+            @property {string} readonly
+            @description Toggles the readonly status of the element
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
+            @property {String} disabled
+            @description Toggles the disabled status of the element
+            */
+            disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+            @property {String} tooltip
+            @description Text to be shown for the element
+            */
+            tooltip: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {Boolean} invalid
+            @description Whether the element meets the requirements or not
+            */
+            invalid: {
+                value: false,
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {String} labelAnim
+            @description Whether the label will have animation or not
+            */
+            labelAnim: {
+                value: true,
+                reflect: true
+            },
+            /*
+            @property {Boolean} store
+            @description Reference to the inner store
+            */
+            store: {
+                value: false,
+                reflect: true
+            }
+        },
+
+        privateFunctions: {
+            /*
+            @function (private) setupRefs
+            @description Creates some references to nodes that are used frecuently
+            */
+            setupRefs: function () {
+
+                var el = this;
+
+                el._refs.main = el.template.querySelector(".eon-combobox-main");
+                el._refs.input = el.template.querySelector("input");
+                el._refs.dropDown = el.template.querySelector(".eon-combobox-dropdown");
+                el._refs.dropDownButton = el.template.querySelector(".eon-combobox-dropButton");
+
+                el._refs.underline = el.template.querySelector(".eon-combobox-underline");
+
+                el._refs.data = el.template.querySelector(".eon-combobox-data");
+                el._refs.label = el.template.querySelector(".eon-combobox-label");
+
+                el._refs.description = el.template.querySelector(".eon-combobox-description");
+
+            },
+            /*
+            @function (private) _setupDropdown
+            @description Prepares the dropdown to hold the items
+            */
+            setupDropdown: function () {
+
+                var el = this;
+
+                el._refs.scroll = document.createElement("eon-scroll");
+
+                el._refs.scroll.thickness = 8;
+                el._refs.scroll.fill = false;
+                el._refs.scroll.autoGrowth = true;
+                el._refs.scroll.type = "vertical";
+
+                // If the dropdown has now scroll we do not want to close the overlay if the user attempts to scroll
+                // so we prevent scrolling events, otherwise just stops the propagations
+                el._refs.scroll.content.addEventListener("wheel", function (e) {
+
+                    if (el._refs.scroll._getVerticalScrollableSize() == 0) {
+                        e.preventDefault();
+                    }
+
+                    e.stopPropagation();
+                    return false;
+
+                });
+
+                el._refs.dropDown.appendChild(el._refs.scroll);
+
+                if (eon.util.isTrue(el.filter)) {
+
+                    var modalInputWrapper = document.createElement("div");
+
+                    modalInputWrapper.classList.add("eon-combobox-modalFilter", "eon-bg8");
+
+                    el._refs.modalInput = document.createElement("input");
+
+                    el._refs.modalInput.classList.add("eon-fg2");
+                    el._refs.modalInput.placeholder = el.placeholder != "" ? el.placeholder : "Filter";
+
+                    el._refs.modalInput.addEventListener('focus', function (e) {
+                        // When the device modal input is focused, it shows the keyboard, this keyboard triggers onWindowResize, 
+                        // since onWindowResize we want to hide the dropdown this variable helps us know
+                        //  if the resize event was triggered by the input or the window manually resizing
+                        el._misc.modal.inputFocus = true;
+                    }, false);
+
+                    el._refs.modalInput.addEventListener('blur', function (e) {
+                        el._misc.modal.inputFocus = false;
+                    }, false);
+
+                    el._refs.modalInput.addEventListener("keyup", function (e) {
+                        el._filter();
+                    });
+
+                    modalInputWrapper.appendChild(el._refs.modalInput);
+                    el._refs.dropDown.insertBefore(modalInputWrapper, el._refs.dropDown.childNodes[0]);
+                }
+
+            },
+            /*
+            @function (private) _setupStore
+            @description Creates a store if specified by the user
+            */
+            setupStore: function () {
+                this.store = eon.util.isTrue(this.store) ? new eon.store() : "";
+            },
+            /*
+            @function (private) _setupType
+            @description Depending on user specifications we will prepare the element
+            */
+            setupType: function () {
+
+                var el = this;
+
+                if (!eon.util.isTrue(el.filter)) {
+
+                    el._refs.main.classList.add("eon-fg1-hoverable");
+                    el._refs.main.querySelector("input").addEventListener("touchstart", function (e) {
+                        e.stopPropagation();
+                    });
+
+                } else {
+
+                    el._refs.input.addEventListener("blur", function () {
+
+                        if (!el.isOnPath && !el._refs.dropDown.isOnPath) {
+                            // When blur occurs and no item has been selected when clear the input
+                            // if (el.value == "") {
+                            //     el._refs.input.value = "";
+                            // }
+
+                            el._refs.input.value = el.displayValue;
+                        }
+
+                    });
+
+                    el._refs.input.addEventListener("focus", function (e) {
+                        el.expand();
+                        el._refs.modalInput.focus();
+                    });
+
+                    el._refs.input.addEventListener("keyup", function (e) {
+                        el._filter();
+                    });
+
+                }
+
+                // This listener is meant for devices, it does not matter where the user touches we will open de dropdown
+                if (window.innerWidth <= eon.tabletWidth) {
+
+                    el._refs.main.querySelector("input").addEventListener("touchstart", function (e) {
+                        e.stopPropagation();
+                    });
+
+                    el.addEventListener("click", function (e) {
+
+                        e.stopPropagation();
+                        e.preventDefault();
+                        el.expand();
+
+                        if (eon.util.isTrue(el.filter)) {
+                            el._refs.modalInput.focus();
+                        }
+
+                    });
+
+                }
+
+            },
+            /*
+            @function (private) _setupMisc
+            @description Basic information for inner usage
+            */
+            setupMisc: function () {
+
+                var el = this;
+
+                el._misc.modal = {};
+                el._misc.items = {};
+                el._misc.descriptionText = "";
+
+            },
+            /*
+            @function (private) {String} _setupDescription
+            @description Creates the initial element description
+            */
+            setupDescription: function () {
+
+                var el = this;
+
+                if (el.tooltip != "") {
+                    el.updateDescription(el.tooltip);
+                }
+
+            },
+            /*
+            @function (private) setupTriggers
+            @description Creates the listeners to the click events
+            */
+            setupTriggers: function () {
+
+                var el = this;
+                var clickTarget = eon.util.isTrue(el.filter) ? el._refs.dropDownButton : el._refs.main;
+
+                clickTarget.addEventListener("click", function () {
+                    el._toggleDropdown(el);
+                });
+
+                document.body.addEventListener("click", function (e) {
+                    if (!el.isOnPath && !el._refs.dropDown.isOnPath && !el._refs.overlay.classList.contains("eon-combobox-device")) {
+                        el._refs.input.blur();
+                        el.shrink();
+                    }
+                });
+
+            },
+            /*
+            @function (private) setupAnimations
+            @description Creates the focus/blur events for the input animation
+            */
+            setupAnimations: function () {
+
+                var el = this;
+
+                el._refs.input.addEventListener("focus", function () {
+                    el._refs.underline.classList.add("animate");
+                });
+
+                el._refs.input.addEventListener("blur", function () {
+                    el._refs.underline.classList.remove("animate");
+                });
+
+            },
+            /*
+            @function (private) _setupOverlay
+            @description Creates the overlay and all the events for its optimal crossbrowser performance
+            */
+            setupOverlay: function () {
+
+                var el = this;
+
+                var iOS = parseFloat(
+                    ('' + (/CPU.*OS ([0-9_]{1,5})|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent) || [0, ''])[1])
+                        .replace('undefined', '3_2').replace('_', '.').replace('_', '')
+                ) || false;
+
+                el._refs.overlay = el.generateOverlayNode();
+                el._refs.overlay.classList.add("eon-combobox-overlay", "eon-bg1-modal");
+                el._refs.overlay.appendChild(el._refs.dropDown);
+
+                // Prevents scrolling on mobile devices
+                el._refs.overlay.addEventListener("wheel", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, { passive: false });
+
+                // If the user manages the scroll we close the overlay
+                window.addEventListener("scroll", function (e) {
+                    if (el._misc.modal.active && !el._refs.overlay.classList.contains("eon-combobox-device")) {
+                        el.shrink();
+                    }
+                });
+
+                // This behavior is only supported on iOS 10 and beyond
+                if (iOS && iOS >= 10) {
+
+                    // Prevents scrolling on mobile devices
+                    window.addEventListener("touchstart", function (e) {
+                        if (el._misc.modal.active && el._refs.overlay.classList.contains("eon-combobox-device")) {
+                            if (!el._refs.dropDown.isOnPath) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                el._misc.modal.blur = true;
+                            }
+                        }
+                    }, { passive: false });
+
+                    // On touch end it blurs the modal dropdown
+                    window.addEventListener("touchend", function (e) {
+                        if (el._misc.modal.active && el._refs.overlay.classList.contains("eon-combobox-device") && el._misc.modal.blur) {
+                            el._misc.modal.blur = false;
+                            el.shrink();
+                        }
+                    });
+
+                } else {
+
+                    // On touch end it blurs the modal dropdown
+                    window.addEventListener("touchend", function (e) {
+                        if (el._misc.modal.active && el._refs.overlay.classList.contains("eon-combobox-device") && !el._refs.dropDown.isOnPath) {
+                            el.shrink();
+                        }
+                    });
+
+                }
+
+            },
+            /*
+            @function (private) setupItems
+            @description Initializes the items provided by the user
+            */
+            setupItems: function () {
+
+                var el = this;
+
+                if (el.store) {
+
+                    el.store.onLoaded(function () {
+
+                        // Update items on data changed
+                        el.store.onDataChanged(function () {
+                            el._setupStoreItems(el);
+                        });
+
+                        el._setupStoreItems(el);
+
+                    });
+
+                } else {
+
+                    var sourceNodes = this.getSourceElements();
+                    var itemsDocFragment = document.createDocumentFragment();
+                    var length = sourceNodes.length;
+                    var item;
+
+                    for (var i = 0; i < length; i++) {
+
+                        item = sourceNodes[i];
+
+                        el._setupItem(item);
+
+                        el._misc.items[item.value] = item;
+
+                        itemsDocFragment.appendChild(item);
+
+                    }
+
+                    el._refs.scroll.content.appendChild(itemsDocFragment);
+
+                    el._initValue();
+
+                }
+
+            },
+            /*
+            @function (private) setupItem
+            @description Takes a single item, adds its events and assigns its properties
+            @param {object} item
+            */
+            setupItem: function (item) {
+
+                var el = this;
+
+                item.onRender(function () {
+
+                    var span = document.createElement("span");
+
+                    this.classList.add("result", "eon-bg2-hoverable", "eon-unselectable", "eon-fg1-hoverable");
+                    this.dataset.matches = true;
+                    this.value = this.getAttribute("value");
+                    this.displayValue = this.getAttribute("display-value") || this.value;
+
+                    span.innerHTML = this.displayValue;
+
+                    this.appendChild(span);
+                    this.addEventListener("click", function () {
+                        el.select(this)
+                    });
+                    this.addEventListener("pointerdown", function (e) {
+                        // Solves other eon elements bug related to blur event functionality
+                        e.stopPropagation();
+                    });
+
+                });
+
+            },
+            /*
+            @functio (private)n setupStoreItems
+            @description Loops the store to take all the items
+            */
+            setupStoreItems: function () {
+
+                var el = this;
+
+                var dropdown = el._refs.dropDown;
+                var itemsDocFragment = document.createDocumentFragment();
+                var displayProperty = (el.displayProperty != "") ? el.displayProperty : el.store.idProperty;
+
+                var storeData = el.store.data;
+                var item;
+
+                storeData.forEach(function (value, key, map) {
+                    item = document.createElement("eon-item");
+
+                    item.classList.add("eon-bg2-hoverable", "eon-unselectable", "eon-fg1-hoverable");
+                    item.dataset.matches = true;
+                    item.value = storeData.get(key)[el.store.idProperty];
+                    item.displayValue = storeData.get(key)[displayProperty];
+
+                    el._misc.items[item.value] = item;
+
+                    el._misc.items[item.value].style.cursor = "pointer";
+
+                    el._misc.items[item.value].onRender(function () {
+
+                        var span = document.createElement("span");
+
+                        span.innerHTML = this.displayValue;
+                        this.appendChild(span);
+                        this.addEventListener("click", function () { el.select(this) });
+                    });
+
+                    itemsDocFragment.appendChild(item);
+                });
+
+                el._refs.scroll.content.appendChild(itemsDocFragment);
+
+                el._initValue();
+
+            },
+            /*
+            @function (private) {String} _setupTouchBlur
+            @description Creates the touch blur event
+            */
+            setupTouchBlur: function () {
+
+                var el = this;
+                var blurTrigger = eon.util.isTouchScreen() ? "touchend" : "click";
+
+                eon.registerPathListener(el);
+                eon.registerPathListener(el._refs.dropDown);
+
+            },
+            /*
+            @function (private) _setupMatchingErrorItem
+            @description Creates the matching error message to be displayed when filtering causes no results
+            */
+            setupMatchingErrorItem: function () {
+
+                var el = this;
+
+                el._refs.matchingErrorItem = document.createElement("div");
+                el._refs.matchingErrorItem.classList.add("eon-combobox-matchingError");
+                el._refs.matchingErrorItem.innerHTML = "No matches found";
+
+            },
+            /*
+            @function (private) _setupLabelAnimation
+            @description Inits label animation classes and style
+            */
+            setupLabelAnimation: function () {
+
+                var el = this;
+
+                if (eon.util.isTrue(el.labelAnim)) {
+
+                    if (el.value == "" && el.default == "") {
+                        el._refs.label.classList.add("eon-combobox-movedLabel");
+                    }
+
+                    if (el.placeholder != "") {
+                        el._refs.data.style.overflow = "hidden";
+                    }
+
+                }
+
+            },
+            /*
+            @function (private) _animateLabel
+            @description Depending on the focus state animates the label or not
+            */
+            animateLabel: function () {
+
+                var el = this;
+
+                if (eon.util.isTrue(el.labelAnim)) {
+                    
+                    if (el.classList.contains("eon-combobox-focus") || el.value != "") {
+                        el._refs.label.classList.remove("eon-combobox-movedLabel");
+                    } else {
+                        el._refs.label.classList.add("eon-combobox-movedLabel");
+                    }
+
+                }
+
+            },
+            /*
+            @function (private) _initDefault
+            @description If a value has been provided by the user we set it for our element
+            */
+            initDefault: function () {
+                this.value = this.default != "" && this.value == "" ? this.default : this.value;
+            },
+            /*
+            @function (private) _initValue
+            @description Sets the initial value depending if an item with the provided value exists
+            */
+            initValue: function () {
+
+                var el = this;
+
+                if (el.value != "" && el._misc.items.hasOwnProperty(el.value)) {
+                    el.select(el._misc.items[el.value]);
+                }
+
+            },
+            /*
+            @function (private) _filter
+            @description Takes the value of the input and filters the dropdown items
+            */
+            filter: function () {
+
+                var el = this;
+
+                //Check if its already expanded, if its not then expand it
+                if (el._refs.dropDown.classList.contains("hidden")) {
+                    el.expand();
+                }
+
+                el._filterItems();
+
+                el._value = "";
+                // el.displayValue = "";
+
+            },
+            /*
+            @function (private) _filterItems
+            @description Loops through its items to filter the ones that match the value
+            */
+            filterItems: function () {
+
+                var el = this;
+
+                var items = el._refs.dropDown.querySelectorAll("eon-item");
+                var value = el._misc.modal.inputFocus ? el._refs.modalInput.value.toLowerCase() : el._refs.input.value.toLowerCase();
+
+                //Loop to find matches and hide those that do not match
+                for (var i = 0; i < items.length; i++) {
+                    
+                    if (!items[i].hasAttribute("display-value") || !(items[i].hasAttribute("display-value") && items[i].getAttribute("display-value").toLowerCase().match("^" + value))) {
+
+                        if (!items[i].classList.contains("hidden")) {
+                            items[i].classList.add("hidden", "Richard");
+                            items[i].dataset.matches = false;
+                        }
+
+                    } else {
+
+                        if (items[i].classList.contains("hidden")) {
+                            items[i].classList.remove("hidden");
+                            items[i].dataset.matches = true;
+                        }
+
+                    }
+
+                }
+
+                var matchedItems = el._refs.dropDown.querySelectorAll('[data-matches="true"]');
+
+                if (matchedItems.length == 0) {
+
+                    el._showMatchingError();
+
+                } else {
+
+                    el._hideMatchingError();
+
+                }
+
+            },
+            /*
+            @function (private) _undoFilter
+            @description Shows all the previously filtered items
+            */
+            undoFilter: function () {
+
+                var el = this;
+                var hiddenItems = el._refs.dropDown.querySelectorAll('[data-matches="false"]');
+                
+                for (var i = 0; i < hiddenItems.length; i++) {
+                    hiddenItems[i].dataset.matches = true;
+                    hiddenItems[i].classList.remove("hidden");
+                }
+
+                el._hideMatchingError();
+
+                // We set the modalInput value to empty in case its been used to filter
+                if (el._refs.modalInput) {
+                    el._refs.modalInput.value = "";
+                }
+
+            },
+            /*
+            @function (private) _showMatchingError
+            @description Shows matching error on the dropdown
+            */
+            showMatchingError: function () {
+
+                var el = this;
+
+                el._refs.scroll.content.appendChild(el._refs.matchingErrorItem);
+                el.invalid = true;
+
+            },
+            /*
+            @function (private) _hideMatchingError
+            @description Hides matching error on the dropdown
+            */
+            hideMatchingError: function () {
+
+                var el = this;
+
+                if (el._refs.matchingErrorItem.parentNode) {
+
+                    el._refs.matchingErrorItem.parentNode.removeChild(el._refs.matchingErrorItem);
+                    el.invalid = false;
+
+                }
+
+            },
+            /*
+            @functio (private) _toggleDropdown
+            @description Toggles the dropdown when clicking on the dropdown button
+            */
+            toggleDropdown: function () {
+
+                var el = this;
+
+                if (el.classList.contains("eon-combobox-focus")) {
+                    // el.shrink();
+                } else {
+                    el.expand();
+                }
+            },
+            /*
+            @function (private) _assignDropdownStyle
+            @description Assigns the dropdown's width and position relative to the combobox
+            */
+            assignDropdownStyle: function () {
+
+                var el = this;
+
+                if (window.innerWidth <= eon.tabletWidth) {
+
+                    if (!el._refs.overlay.classList.contains("eon-combobox-device")) {
+
+                        el._refs.dropDown.style.top = "auto";
+                        el._refs.dropDown.style.left = "auto";
+
+                        el._refs.overlay.classList.add("eon-combobox-device");
+                        el._refs.overlay.classList.add("eon-bg1-modal");
+
+                    }
+
+                } else {
+
+                    el._refs.overlay.classList.remove("eon-combobox-device");
+                    el._refs.overlay.classList.remove("eon-bg1-modal");
+
+                    el._refs.dropDown.style.top = el._refs.main.getBoundingClientRect().top + el._refs.main.offsetHeight + 1 + "px";
+                    el._refs.dropDown.style.left = el._refs.main.getBoundingClientRect().left + "px";
+                    el._refs.dropDown.style.width = el._refs.main.offsetWidth + "px";
+
+                }
+
+            },
+            /*
+            @function (private) _animateExpand
+            @description Expands the items dropdown with transition
+            */
+            animateExpand: function () {
+
+                var el = this;
+
+                setTimeout(function () {
+                    el._refs.overlay.removeEventListener("transitionend", el._misc.dropdownShrinkFn);
+                    el._refs.overlay.classList.add("eon-combobox-opaque");
+                }, 0);
+
+            },
+            /*
+            @function (private) _animateShrink
+            @description Expands the items dropdown with transitions
+            */
+            animateShrink: function () {
+
+                var el = this;
+
+                el._refs.overlay.addEventListener("transitionend", el._misc.dropdownShrinkFn);
+                el._refs.overlay.classList.remove("eon-combobox-opaque");
+
+            },
+            /*
+            @function (private) _updateLabel
+            @description Updates the label node with the new label
+            */
+            updateLabel: function () {
+
+                var el = this;
+
+                if (el.label != "") {
+                    el._refs.label.innerHTML = el.label;
+                }
+
+            },
+            /*
+            @function (private) _updateDisabled
+            @description Updates disabled status
+            */
+            updateDisabled: function () {
+
+                var el = this;
+                var typingNode = el.type == "area" ? el._refs.editableArea : el._refs.input;
+
+                if (!eon.util.isTrue(el.disabled)) {
+
+                    el._refs.input.classList.add("eon-fg2");
+                    el._refs.input.classList.remove("eon-fg2-disabled");
+
+                    el._refs.data.classList.remove("eon-fg2-disabled");
+                    el._refs.main.classList.remove("eon-fg2-disabled");
+
+                    el.removeAttribute("disabled");
+                    el._refs.input.removeAttribute("disabled");
+
+                } else {
+
+                    el._refs.input.setAttribute("disabled", "true");
+
+                    el._refs.input.classList.remove("eon-fg2");
+                    el._refs.input.classList.add("eon-fg2-disabled");
+
+                    el._refs.data.classList.add("eon-fg2-disabled");
+                    el._refs.main.classList.add("eon-fg2-disabled");
+
+                }
+            },
+            /*
+            @function (private) _updateReadOnly
+            @description Updates readonly status
+            */
+            updateReadOnly: function () {
+
+                var el = this;
+
+                if (!eon.util.isTrue(el.readonly) && eon.util.isTrue(el.filter)) {
+
+                    el.removeAttribute("readonly");
+                    el._refs.input.removeAttribute("readonly");
+                    el._refs.input.classList.add("eon-unselectable");
+
+                } else {
+
+                    el._refs.input.setAttribute("readonly", "true");
+                    el._refs.input.classList.remove("eon-unselectable");
+                }
+
+            },
+            /*
+            @function (private) _updateValue
+            @description Updates the value
+            */
+            updateValue: function () {
+                
+                var el = this;
+                var item = el._misc.items[el.value];
+                if (item) {
+
+                    var value = item.value;
+                    var displayValue = item.displayValue;
+
+                    el.displayValue = displayValue;
+
+                    el._refs.input.value = item.displayValue;
+
+                } else {
+
+                    el._value = "";
+                    el.displayValue = "";
+                    el._refs.input.value = "";
+
+                }
+
+            },
+            /*
+            @function (private) _updateInvalid
+            @description Updates the invalid status
+            */
+            updateInvalid: function () {
+
+                var el = this;
+                var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
+
+                el.classList[classListFn]("eon-combobox-error");
+
+            }
+
+        },
+
+        functions: {
+            /*
+            @function addItem
+            @description Adding a new option item programmatically
+            @param {object} item 
+            */
+            addItem: function (item) {
+
+                var el = this;
+
+                el._misc.items[item.value] = item;
+
+                item.onRender(function () {
+                    var span = document.createElement("span");
+                    span.innerHTML = this.displayValue;
+                    this.classList.add("result", "eon-bg2-hoverable", "eon-unselectable", "eon-fg1-hoverable");
+                    this.appendChild(span);
+                    this.dataset.matches = true;
+                    this.addEventListener("click", function () { el.select(this) });
+                });
+
+                el._refs.scroll.content.appendChild(item);
+            },
+            /*
+            @function select
+            @description Sets the item as the inputs value and hide the options div
+            @param {object} item
+            */
+            select: function (item) {
+                var el = this;
+
+                var value = item.value;
+                var displayValue = item.displayValue;
+
+                el.value = value;
+                el.displayValue = displayValue;
+
+                el._refs.input.value = item.displayValue;
+
+                eon.triggerCallback("onSelected", el, el, [item]);
+
+                setTimeout(function () {
+                    el.shrink();
+                }, 150);
+
+            },
+            /*
+            @function expand
+            @description Expands the items dropdown
+            */
+            expand: function () {
+
+                var el = this;
+
+                el._assignDropdownStyle();
+
+                el._refs.scroll.scrollTop = 0;
+
+                el.classList.add("eon-combobox-focus");
+
+                el._undoFilter();
+
+                document.body.appendChild(el._refs.overlay);
+
+                el._misc.modal.active = true;
+
+                el._animateExpand();
+                el._animateLabel();
+
+            },
+            /*
+            @function shrink
+            @description Shrinks the items dropdown
+            */
+            shrink: function () {
+
+                var el = this;
+
+                if (el.classList.contains("eon-combobox-focus")) {
+
+                    el.classList.remove("eon-combobox-focus");
+                    
+                    el._misc.dropdownShrinkFn = el._misc.dropdownShrinkFn || function () {
+
+                        if (el._refs.overlay.parentNode) {
+                            el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+                        }
+
+                        el._filterItems();
+
+                        el._misc.modal.active = false;
+                        el._misc.modal.inputFocus = false;
+
+                    }
+
+                    el._animateShrink();
+                    el._animateLabel();
+
+                }
+
+            },
+            /*
+            @function clear
+            @description Empties the value
+            */
+            clear: function () {
+                this.value = "";
+            },
+            /*
+            @function reset
+            @description Resets the value of the element to the default one, if no default is provided then empties the value
+            */
+            reset: function () {
+
+                var el = this;
+
+                if (el.default != "") {
+                    el.value = el.default;
+                } else {
+                    el.clear();
+                }
+
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the
+            @param {String} text
+            */
+            updateDescription: function (text) {
+                this._misc.descriptionText = text;
+                this._refs.description.innerHTML = this._misc.descriptionText;
+            },
+            /*
+            @function updateDescription
+            @description Updates the description value for the
+            */
+            resetDescription: function () {
+
+                var el = this;
+                var description = el.tooltip != "" ? el.tooltip : "";
+
+                el._misc.descriptionText = description;
+                el._refs.description.innerHTML = description;
+
+            }
+
+        },
+
+        onCreated: function () {
+
+            var el = this;
+
+            el._setupMisc();
+            el._setupRefs();
+            el._setupDropdown();
+
+            eon.createCallback("onSelected", el);
+
+        },
+
+        onInit: function () {
+
+            var el = this;
+
+            var declarativePlaceholder = el.getAttribute("placeholder");
+
+            el._setupStore();
+
+            el._setupTriggers();
+            el._setupAnimations();
+            el._setupTouchBlur();
+            el._setupMatchingErrorItem();
+
+            el._setupDescription();
+
+            el._updateLabel();
+            el._updateDisabled();
+            el._updateReadOnly();
+
+            el._setupType();
+            el._setupOverlay();
+
+            el._initDefault();
+
+            el._setupLabelAnimation();
+
+            if (declarativePlaceholder) el._refs.input.placeholder = declarativePlaceholder;
+
+        },
+
+        onRender: function () {
+
+            var el = this;
+
+            el._setupItems();
+
+        },
+
+        onPropertyChanged: function (key, oldVal, newVal) {
+
+            switch (key) {
+                case "label":
+                    this._updateLabel();
+                    break;
+                case "disabled":
+                    this._updateDisabled();
+                    break;
+                case "readonly":
+                    this._updateReadOnly();
+                    break;
+                case "value":
+                    this._updateValue();
+                    break;
+                case "invalid":
+                    this._updateInvalid();
+                    break;
+            }
+
+        },
+        onWindowResize: function () {
+
+            var el = this;
+
+            if (el._misc.modal.active && !el._misc.modal.inputFocus) {
+                el.shrink();
+            }
+
+        }
+    });
+</script>

@@ -1,0 +1,639 @@
+<template>
+
+  <div class="eon-number-group eon-fg2 eon-unselectable">
+    <div class="eon-number-data">
+      <label class="eon-number-label"></label>
+    </div>
+    <div class="eon-number-number eon-bg2">
+      <div class="eon-number-control eon-fg2-hoverable eon-number-controlDown">
+        <i class="vicon vicon-minimize"></i>
+      </div>
+
+      <div class="eon-number-inputBox">
+        <input class="eon-number-input eon-fg2" type="number" pattern="[0-9]*">
+      </div>
+
+      <div class="eon-number-control eon-fg2-hoverable eon-number-controlUp">
+        <i class="vicon vicon-add"></i>
+      </div>
+    </div>
+    <span class="eon-number-inputBar"></span>
+  </div>
+
+  <div class="eon-number-description"></div>
+
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-number",
+    style: "eon-number.css",
+
+    themed: true,
+
+    properties: {
+      /*
+        @property {String} name 
+        @description Input number name
+      */
+      name: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Number} value 
+        @description Input number value
+      */
+      value: {
+        value: 0,
+        reflect: true
+      },
+      /*
+      @property {Number} default
+      @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+      */
+      default: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} placeholder 
+        @description Input number placeholder
+      */
+      placeholder: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} label 
+        @description Input number label
+      */
+      label: {
+        value: "",
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+        @property {Boolean} disabled 
+        @description Input number field deactivation.
+        Default: false
+      */
+      disabled: {
+        value: false,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+        @property {Boolean} readonly 
+        @description Toggles the readonly status of the input number.
+        Default: false
+      */
+      readonly: {
+        value: false,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+        @property {Boolean} autofocus 
+        @description Input number automatically get focus when page loads
+        Default: false
+      */
+      autofocus: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Number} max 
+        @description Input number maximum number value.
+        Value must be int number.
+        Default: valueless
+      */
+      max: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Number} min 
+        @description Input number minimum number value.
+        Value must be int number.
+        Default: valueless
+      */
+      min: {
+        value: "",
+        reflect: true
+      },
+      /*
+       @property {Boolean} inline 
+       @description Space that occupy the number inside parent container.
+       By default, its size adapts to its content.
+       Values can be: true or false.
+       Default: true
+     */
+      inline: {
+        value: true,
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {String} labelAnim
+      @description Whether the label will have animation or not
+      */
+      labelAnim: {
+        value: true,
+        reflect: true
+      },
+      /*
+      @property {String} tooltip
+      @description Text to be shown for the element
+      */
+      tooltip: {
+        value: "",
+        reflect: true,
+        reflectDefault: false
+      },
+      /*
+      @property {Boolean} invalid
+      @description Whether the element meets the requirements or not
+      */
+      invalid: {
+        value: false,
+        reflect: true,
+        reflectDefault: false
+      }
+    },
+
+    privateProperties: {
+      /*
+        @property (private) {String} _formElement 
+        @description Set that input number is a form element.
+        Value: number
+      */
+      formElement: {
+        value: "number"
+      },
+      /*
+        @property (private) {String} _currentValue
+        @description Current input number value
+      */
+      currentValue: {
+        value: ""
+      },
+      /*
+        @property (private) {Object} _callUpdateEvent
+        @description Store input number call update number event
+      */
+      callUpdateEvent: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _refs 
+        @description Object with references
+      */
+      refs: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _misc
+        @description Object with useful information
+      */
+      misc: {
+        value: {}
+      }
+    },
+    functions: {
+      /*
+      @function clear
+      @description Empties the value
+      */
+      clear: function () {
+        this.value = 0;
+      },
+      /*
+      @function reset
+      @description Resets the value of the element to the default one, if no default is provided then empties the value
+      */
+      reset: function () {
+        var el = this;
+
+        if (el.default != "") {
+          el.value = el.default;
+        } else {
+          el.clear();
+        }
+
+      },
+      /*
+      @function updateDescription
+      @description Updates the description value
+      */
+      updateDescription: function (text) {
+        this._misc.descriptionText = text;
+        this._refs.description.innerHTML = this._misc.descriptionText;
+      },
+      /*
+      @function resetDescription
+      @description Resets the description value
+      */
+      resetDescription: function () {
+        var el = this;
+        var description = el.tooltip != "" ? el.tooltip : "";
+
+        el._misc.descriptionText = description;
+        el._refs.description.innerHTML = description;
+
+      }
+
+    },
+    privateFunctions: {
+      /*
+      @function (private) _setupLabelAnimation
+      @description Inits label animation classes and style
+      */
+      setupLabelAnimation: function () {
+        var el = this;
+
+        if (eon.util.isTrue(el.labelAnim)) {
+          if (el.value == "" && el.default == "") {
+            el._refs.label.classList.add("eon-number-movedLabel");
+          }
+
+        }
+
+      },
+      /*
+      @function (private)  _animateLabel
+      @description Depending on the focus state animates the label or not
+      */
+      animateLabel: function () {
+
+        var el = this;
+
+        if (eon.util.isTrue(el.labelAnim)) {
+
+          if (el.classList.contains("eon-number-focus") || el.value != "") {
+            el._refs.label.classList.remove("eon-number-movedLabel");
+          } else {
+            el._refs.label.classList.add("eon-number-movedLabel");
+          }
+
+        }
+
+      },
+      /*
+        @function (private) _createRefs
+        @description Creates fast access to elements
+      */
+      createRefs: function () {
+        var el = this;
+
+        el._refs.number = el.template.querySelector(".eon-number-number");
+        el._refs.group = el.template.querySelector(".eon-number-group");
+        el._refs.inputBox = el.template.querySelector(".eon-number-inputBox");
+        el._refs.input = el.template.querySelector(".eon-number-input");
+        el._refs.label = el.template.querySelector(".eon-number-label");
+        el._refs.inputBar = el.template.querySelector(".eon-number-inputBar");
+        el._refs.description = el.template.querySelector(".eon-number-description");
+
+      },
+
+      /*
+        @function (private) _setValue
+        @description Set new input number value
+        @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
+      */
+      setValue: function (privateValueKey) {
+        var el = this;
+        var value = el.value;
+        var valueKey = privateValueKey ? "__value" : "value";
+        var newValue;
+
+        if (el.value !== "") {
+          newValue = this._checkMin(value);
+          newValue = this._checkMax(newValue);
+          // If we have to fix the value because it exceeds any of the limits we update the elements value
+          if (parseInt(newValue) != parseInt(value)) {
+            setTimeout(function () {
+              el.value = newValue;
+            }, 0);
+
+          } else {
+            el[valueKey] = newValue;
+          }
+
+          el._refs.input.value = newValue;
+          el._currentValue = newValue;
+
+          el._refs.input.setAttribute("value", newValue);
+
+          eon.triggerCallback("onChange", el);
+
+
+        }
+      },
+      /*
+        @function (private) _updateDisabled
+        @description Update disabled status
+      */
+      updateDisabled: function () {
+        var el = this;
+        var numberGroup = el.querySelector(".eon-number-group");
+        var controlDown = el.querySelector(".eon-number-controlDown");
+        var controlUp = el.querySelector(".eon-number-controlUp");
+
+        if (!eon.util.isTrue(el.disabled)) {
+          el._refs.input.removeAttribute("disabled");
+          el.removeAttribute("disabled");
+          numberGroup.classList.remove("eon-number-disabled", "eon-fg2-disabled");
+          controlUp.classList.remove("eon-fg2-disabled");
+          controlUp.classList.add("fg2-hover");
+          controlDown.classList.remove("eon-fg2-disabled");
+          controlDown.classList.add("eon-fg2-hoverable");
+          el._refs.input.classList.remove("eon-fg2-disabled");
+          el._refs.input.classList.add("eon-fg2");
+          el._refs.label.classList.remove("eon-fg2-disabled");
+
+        } else {
+          el._refs.input.setAttribute("disabled", "true");
+          numberGroup.classList.add("eon-number-disabled", "eon-fg2-disabled");
+          controlUp.classList.add("eon-fg2-disabled");
+          controlUp.classList.remove("eon-fg2-hoverable");
+          controlDown.classList.add("eon-fg2-disabled");
+          controlDown.classList.remove("eon-fg2-hoverable");
+          el._refs.input.classList.add("eon-fg2-disabled");
+          el._refs.input.classList.remove("eon-fg2");
+          el._refs.label.classList.add("eon-fg2-disabled");
+        }
+
+      },
+      /*
+      @function (private) _updateReadonly
+      @description Updates readonly status
+      */
+      updateReadonly: function () {
+        var el = this;
+
+        if (eon.util.isTrue(el.readonly)) {
+          el._refs.input.setAttribute("readonly", "true");
+        } else {
+          el._refs.input.removeAttribute("readonly");
+        }
+
+      },
+      /*
+        @function (private) _updateNumber
+        @description Update input number value
+        @param {Object} e [Event object]
+      */
+      updateNumber: function (e) {
+        var el = this;
+        var value = isNaN(parseInt(el._refs.input.value)) ? "" : parseInt(el._refs.input.value);
+        var control = e.target.parentNode;
+
+        // Added isOnPath condition, this solves issues when clicking between numbers
+        if (el._refs.number.isOnPath && e.type == "click" && !eon.util.isTrue(el.readonly)) {
+          (control.classList.contains("eon-number-controlDown")) ? value-- : null;
+          (control.classList.contains("eon-number-controlUp")) ? value++ : null;
+
+          value = el._checkMin(value);
+          value = el._checkMax(value);
+        }
+
+        el.value = value;
+        el._refs.input.value = value;
+        el._refs.input.setAttribute("value", value);
+
+      },
+
+      /*
+      @function (private) {String} _setupDescription
+      @description Creates the touch blur
+      */
+      setupDescription: function () {
+
+        var el = this;
+
+        if (el.tooltip != "") {
+          el.updateDescription(el.tooltip);
+        }
+
+      },
+
+      /*
+      @function (private) _updateInvalid
+      @description Updates the invalid status
+      */
+      updateInvalid: function () {
+
+        var el = this;
+        var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
+
+        el.classList[classListFn]("eon-number-error");
+
+      },
+
+      /*
+      @function (private) _setFocusingListeners
+      @description Set listener for focus and blur
+      */
+      setFocusingListeners: function () {
+        var el = this;
+        var eventType = /iPad|iPhone/.test(navigator.platform) ? "touchstart" : "click";
+        eon.registerPathListener(el._refs.number);
+
+        document.addEventListener(eventType, function (e) {
+          if (el._refs.number.isOnPath && !el.classList.contains("eon-number-focus")) {
+            el._inputFocus()
+          } else if (!el._refs.number.isOnPath && el.classList.contains("eon-number-focus")) {
+            el._inputBlur(e);
+          }
+
+        });
+
+        el._refs.input.addEventListener("blur", function (e) {
+          if (!el._refs.number.isOnPath) {
+            el._inputBlur(e);
+          }
+        });
+
+      },
+
+      /*
+      @function (private) _setFocusingListeners
+      @description Set listener for update the input number value
+      */
+      setUpdateListeners: function () {
+        var el = this;
+        var controlDown = el.querySelector(".eon-number-controlDown");
+        var controlUp = el.querySelector(".eon-number-controlUp");
+
+        // Click listener to control decrement number value
+        controlDown.addEventListener("click", callUpdateEvent, false);
+
+        // Click listener to control increment number value
+        controlUp.addEventListener("click", callUpdateEvent, false);
+
+        // Handle the invalids keys in the input
+        el._refs.input.addEventListener("keyup", function (e) {
+          var keysComprobation = (e.keyCode != "9" && e.keyCode != "46" && e.keyCode != "8" && e.keyCode != "38" && e.keyCode != "40" && isNaN(parseInt(e.key)));
+
+          keysComprobation ? e.preventDefault() : null;
+          keysComprobation ? e.stopPropagation() : null;
+
+          // Checks if the key press corresponds to ENTER
+          if (e.keyCode == 13) {
+            eon.triggerCallback("onEnter", el)
+          }
+
+          el._updateNumber(e);
+
+        });
+
+        el._callUpdateEvent = callUpdateEvent;
+
+        function callUpdateEvent(e) {
+          el._updateNumber(e);
+        }
+
+      },
+
+      /*
+      @function (private) _inputFocus
+      @description Set focus functionality to number element and to number input
+      */
+      inputFocus: function () {
+        if (!eon.util.isTrue(this.readonly)) {
+          this.classList.add("eon-number-focus");
+          this._refs.label.classList.add("eon-fg1");
+          this._refs.inputBar.classList.add("eon-number-animate");
+          this._animateLabel();
+        }
+      },
+
+      /*
+      @function (private) _inputBlur
+      @description Set blur functionality to number element and to number input
+      @param {Object} e [Event object]
+      */
+      inputBlur: function (e) {
+
+        if (this.classList.contains("eon-number-focus")) {
+          this._updateNumber(e);
+        }
+
+        this.classList.remove("eon-number-focus");
+        this._refs.label.classList.remove("eon-fg1");
+        this._refs.inputBar.classList.remove("eon-number-animate");
+
+        // Trigger onChange callback
+        this._currentValue = (this.value !== this._currentValue) ? this.value : this._currentValue;
+        (this.value !== this._currentValue) ? eon.triggerCallback("onChange", this) : null;
+
+        this._animateLabel();
+
+      },
+
+      /*
+      @function (private) _setAutofocus
+      @description Gives autofocus to the input number
+      */
+      setAutofocus: function () {
+        var el = this;
+
+        setTimeout(function () {
+          if (eon.util.isTrue(el.autofocus) && el.disabled == false) {
+            el._refs.input.focus();
+            el._inputFocus();
+          }
+        }, 100);
+      },
+
+      /*
+      @function (private) {Number} _checkMin
+      @description Check that value is not less than minimum
+      @param {Number} value [number value]
+      */
+      checkMin: function (value) {
+        var el = this;
+        var returnValue = (el.min && parseInt(value) < parseInt(el.min)) ? parseInt(el.min) : parseInt(value);
+
+        return returnValue;
+      },
+
+      /*
+      @function (private) {Number} _checkMax
+      @description Check that value is not greater than maximum
+      @param {Number} value [number value]
+      */
+      checkMax: function (value) {
+        var el = this;
+        var returnValue = (el.max && parseInt(value) > parseInt(el.max)) ? parseInt(el.max) : parseInt(value);
+
+        return returnValue;
+      }
+    },
+
+    onCreated: function () {
+      var el = this;
+      eon.createCallback("onChange", this);
+      eon.createCallback("onEnter", this);
+
+      el._createRefs();
+    },
+
+    onInit: function () {
+      var el = this;
+      
+      el._setupLabelAnimation();
+      // Sets a default value set by the user
+      el.value = el.default != "" && el.value == "" ? el.default : el.value;
+      el._setValue();
+      el._updateReadonly();
+      el._setFocusingListeners();
+      el._setupDescription();
+      el._updateInvalid();
+      
+      // Sets the name of the input
+      el._refs.input.setAttribute("name", el.name);
+      
+      // Set label
+      if (el.label) {
+        el._refs.label.innerHTML = el.label ? el.label : el._refs.label.innerHTML;
+        el._refs.label.classList.add("eon-number-labelDisplay");
+      }
+    },
+    
+    onRender: function () {
+      var el = this;
+      
+      el._updateDisabled();
+      el._setUpdateListeners();
+    },
+
+    onReady: function () {
+      var el = this;
+      el._setAutofocus();
+    },
+
+    onPropertyChanged: function (attrName, oldVal, newVal) {
+      switch (attrName) {
+        case "disabled":
+          this._updateDisabled();
+          break;
+        case "readonly":
+          this._updateReadonly();
+          break;
+        case "label":
+          this._refs.label.innerHTML = newVal;
+          break;
+        case "value":
+          this._setValue(true);
+          break;
+        case "invalid":
+          this._updateInvalid();
+          break;
+      }
+    }
+  });
+
+</script>

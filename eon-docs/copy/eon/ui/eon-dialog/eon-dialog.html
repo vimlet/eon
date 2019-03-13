@@ -1,0 +1,1328 @@
+<template class="eon-dialog-dialog eon-dialog-hide eon-sect1 eon-fg1 eon-boxshadow6 eon-defaultStyle">
+    <div class="eon-dialog-heading eon-unselectable">
+        <div class="eon-dialog-headingButtons">
+            <i class="eon-dialog-minimize eon-fg1-hoverable eon-dialog-hidden vicon vicon-minimize"></i>
+            <i class="eon-dialog-maximize eon-fg1-hoverable eon-dialog-hidden vicon vicon-maximize"></i>
+            <i class="eon-dialog-close eon-fg1-hoverable vicon vicon-close"></i>
+        </div>
+    </div>
+    <eon-scroll thickness="10" fill="false"></eon-scroll>
+</template>
+
+<script type="text/javascript">
+    eon.element({
+
+        name: "eon-dialog",
+        style: "eon-dialog.css",
+
+        dependencies: [
+            "../eon-overlay",
+            "../eon-section",
+            "../eon-scroll"
+        ],
+        properties: {
+            /*
+              @property {String} heading 
+              @description Dialog title
+            */
+            heading: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} closable 
+              @description Dialog may have a button that will close it.
+              Values can be: true or false.
+              Default: true
+            */
+            closable: {
+                value: "true",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} blur 
+              @description Dialog is closed when click outside it.
+              Values can be: true or false.
+              Default: false
+            */
+            blur: {
+                value: "false",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} modal 
+              @description Allow page components inaccessible until interact with dialog.
+              Values can be: true or false.
+              Default: false
+            */
+            modal: {
+                value: "false",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} drag 
+              @description Dialog draggable.
+              Values can be: true or false.
+              Default: false
+            */
+            drag: {
+                value: "false",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} resize 
+              @description Dialog resizable.
+              Values can be: true or false.
+              Default: false
+            */
+            resize: {
+                value: "false",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} maximize 
+              @description Dialog maximizable.
+              Values can be: true or false.
+              Default: false
+            */
+            maximize: {
+                value: "false",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} minimize 
+              @description Dialog minimizable.
+              Values can be: true or false.
+              Default: false
+            */
+            minimize: {
+                value: "false",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {String} multiposition 
+              @description Position of more than one open dialogs.
+              Values can be: centered or scaled.
+              Default: centered
+            */
+            multiposition: {
+                value: "centered",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {String} width 
+              @description Dialog width.
+              Values can be: any of the width CSS values
+            */
+            width: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {String} height 
+              @description Dialog height.
+              Values can be: any of the height CSS values
+            */
+            height: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Number} minWidth 
+              @description Dialog minimum width.
+              Value must be int number.
+              Default: 250
+            */
+            minWidth: {
+                value: "auto",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Number} minHeight 
+              @description Dialog minimum height.
+              Value must be int number.
+              Default: 200
+            */
+            minHeight: {
+                value: "auto",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Number} scaleBreak 
+              @description Distance in pixels between scaled dialogs.
+              Value must be int number. 
+              Default: 20
+            */
+            scaleBreak: {
+                value: "20",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} hasFooter 
+              @description Makes the dialog footer visible or not.
+              Default: false
+            */
+            hasFooter: {
+                value: "false",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+              @property {Boolean} allowScroll
+              @description Allow or denied scroll
+            */
+            allowScroll: {
+                value: true,
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+             @property {Object} content 
+             @description Reference to the content element
+           */
+            content: {
+                value: {}
+            },
+            /*
+             @property {Object} footer 
+             @description Reference to the footer element
+           */
+            footer: {
+                value: {}
+            },
+            /*
+              @property {Boolean} defaultStyle 
+              @description Sets spacers to the content section.
+              Values: true, false.
+              Default: true
+            */
+            defaultStyle: {
+                value: true,
+                reflect: true
+            }
+        },
+        privateProperties: {
+            /*
+              @property (private) {Object} _misc 
+              @description Stores dialog useful data.
+            */
+            misc: {
+                value: {}
+            },
+            /*
+              @property (private) {Object} _refs 
+              @description Object with  references
+            */
+            refs: {
+                value: {}
+            },
+        },
+
+        privateFunctions: {
+            /*
+              @function (private) _createRefs
+              @description Creates fast access to elements
+            */
+            createRefs: function () {
+                var el = this;
+
+                el._refs.placeholder = el.generatePlaceholderNode();
+
+                el._refs.heading = el.template.querySelector(".eon-dialog-heading");
+                el._refs.footer = el.template.querySelector(".eon-dialog-footer");
+                el._refs.buttonsFooter = el.template.querySelector(".eon-dialog-buttonsFooter");
+                el._refs.close = el.template.querySelector(".eon-dialog-close");
+                el._refs.scroll = el.template.querySelector("eon-scroll");
+
+                el._refs.maximizeButton = el.template.querySelector(".eon-dialog-maximize");
+                el._refs.minimizeButton = el.template.querySelector(".eon-dialog-minimize");
+
+                el._refs.userContent = el.source.querySelector("[type='content']");
+                el._refs.userFooter = el.source.querySelector("[type='footer']");
+
+            },
+
+            /*
+              @function (private) _handleContentScroll
+              @description Depending on the allowScroll property we append the user content to the custom scroll or not
+            */
+            handleContentScroll: function () {
+                var el = this;
+
+                if (eon.util.isTrue(el.allowScroll)) {
+                    el._refs.scroll.appendChild(el.content);
+                } else {
+                    el.content.style.overflow = "auto";
+                    el.template.appendChild(el.content);
+                    el._refs.scroll.parentNode.removeChild(el._refs.scroll);
+                }
+            },
+            /*
+              @function (private) _setDefaultStyle
+              @description Checks if the default element style should be applied
+            */
+            setDefaultStyle: function () {
+                var el = this;
+                // Check default style configuration
+                if (!eon.util.isTrue(el.defaultStyle)) {
+                    // Remove default style
+                    el.classList.remove("eon-spaced-container");
+                    el.classList.remove("eon-defaultStyle");
+                    el._refs.userContent.classList.remove("eon-spaced-container");
+                } else {
+                    // Spaced items container
+                    var spacedItemsContainer = document.createElement("div");
+                    var spacedFragment = document.createDocumentFragment();
+                    spacedItemsContainer.classList.add("eon-spaced-items-container");
+                    // Append content into the new spaced items container
+                    var nodes = [].slice.call(el._refs.userContent.childNodes);
+                    while (nodes.length) {
+                        spacedFragment.appendChild(nodes.shift());
+                    }
+                    spacedItemsContainer.appendChild(spacedFragment);
+                    el._refs.userContent.appendChild(spacedItemsContainer);
+                }
+            },
+            /*
+              @function (private) _addHeading
+              @description Adds dialog heading and its different options
+            */
+            addHeading: function () {
+                var el = this;
+                eon.registerPathListener(el._refs.close);
+
+                // If the user specified a heading title or he did not but he set closable to true
+                // we want to enable the header with the closable button
+                if (el.heading != "" || el.heading == "" && eon.util.isTrue(el.closable)) {
+                    el._refs.heading.classList.remove("eon-dialog-hidden");
+
+                    if (el.querySelector(".eon-dialog-title")) {
+                        el.querySelector(".eon-dialog-title").innerHTML = el.heading;
+
+                    } else {
+                        var title = document.createElement("span");
+                        title.classList.add("eon-dialog-title");
+                        title.innerHTML = el.heading;
+                        // As we want the heading to be at the top of the dialog, we insert it before its first child
+                        el._refs.heading.insertBefore(title, el._refs.heading.childNodes[0]);
+                    }
+
+                    // If closable is enabled then we add its event listener to close the dialog
+                    if (eon.util.isTrue(el.closable)) {
+                        if (!el._misc.hasCloseListener) {
+                            el._misc.hasCloseListener = true;
+                            el._refs.close.addEventListener("click", function () {
+                                el.close();
+                            });
+                        }
+                        // Otherwise we just hide the button
+                    } else {
+                        el._refs.close.classList.add("eon-dialog-hidden");
+                    }
+
+
+                } else {
+                    el._refs.close.classList.add("eon-dialog-hidden");
+                    el._refs.heading.classList.add("eon-dialog-hidden");
+                }
+
+            },
+
+            /*
+              @function (private) _addContent
+              @description Adds dialog content
+            */
+            addContent: function () {
+                var el = this;
+
+                el._refs.userContent = el._refs.userContent ? el._refs.userContent : document.createElement("eon-section");
+
+                el._refs.userContent.type = "content";
+                el._refs.userContent.classList.add("eon-dialog-content", "eon-spaced-container");
+
+                el.content = el._refs.userContent;
+            },
+
+            /* 
+              @function (private) _addFooter
+              @description Adds dialog footer
+            */
+            addFooter: function () {
+                var el = this;
+
+                el.footer = el._refs.userFooter ? el._refs.userFooter : document.createElement("eon-section");
+                el.footer.type = "footer";
+                el.footer.classList.add("eon-dialog-footer", "eon-spaced-items-container", "eon-unselectable");
+
+                el._handleFooterAppend();
+            },
+
+            /* 
+              @function (private) _handleFooterAppend
+              @description Depending on the hasFooter property it will append/remove the footer from the dialog
+            */
+            handleFooterAppend: function () {
+                var el = this;
+
+                el.onTransformed(function () {
+                    if (eon.util.isTrue(el.hasFooter)) {
+                        el.appendChild(el.footer);
+                    } else {
+                        if (el.footer.parentNode && el.footer.parentNode.isEqualNode(el)) {
+                            el.removeChild(el.footer);
+                        }
+                    }
+                });
+
+            },
+            /*
+            @function (private) _addDragListeners
+            @description Adds drag listeners
+            */
+            addDragListeners: function () {
+                var el = this;
+
+                if (eon.util.isTrue(el.drag) && !eon.util.isTrue(el.dataset.mobile)) {
+                    var xPos = 0;
+                    var yPos = 0; // Stores x & y coordinates of the mouse pointer
+                    var xElem = 0;
+                    var yElem = 0; // Stores top, left values (edge) of the element
+                    var windowWidth;
+                    var windowHeight;
+
+                    // Will be called when user starts dragging an element
+                    el._refs.heading.addEventListener("mousedown", function (e) {
+                        if (e.button == 0 && !el._refs.heading.classList.contains("eon-dialog-hidden") && el._refs.close.isOnPath == false) {
+                            // Store the object of the element which needs to be moved
+                            el._misc.drag.started = true;
+                            xElem = xPos - el.offsetLeft;
+                            yElem = yPos - el.offsetTop;
+                        }
+
+                    });
+
+                    window.addEventListener("mousemove", function (e) {
+                        xPos = e.pageX;
+                        yPos = e.pageY;
+
+                        if (el._misc.drag.started && el.dataset.status == "") {
+                            if (el.style.width == "" && el.classList.contains("eon-dialog-visible")) {
+                                el.style.width = el.offsetWidth + "px";
+                                el.style.height = el.offsetHeight + "px";
+                            }
+                            el.style.left = (xPos - xElem) + "px";
+                            el.style.top = (yPos - yElem) + "px";
+
+                            // Call method to establish movement of dialog limits
+                            el._dragLimits();
+                            el.classList.remove("eon-dialog-scaled");
+                            el._misc.centered = false;
+                        }
+
+                    }, false);
+
+                    window.addEventListener("mouseup", function (e) {
+                        el._misc.drag.started = false;
+                    }, false);
+
+                }
+            },
+
+            /*
+              @function (private) _addDragListeners
+              @description Establishes limits for dialog movement
+            */
+            dragLimits: function () {
+                var el = this;
+                windowWidth = window.innerWidth - el._misc.windowPadding;
+                windowHeight = window.innerHeight - el._misc.windowPadding;
+
+                el.style.left = (el.offsetLeft < el._misc.windowPadding) ? el.style.left = el._misc.windowPadding + "px" : el.style.left;
+                el.style.top = (el.offsetTop < el._misc.windowPadding) ? el.style.top = el._misc.windowPadding + "px" : el.style.top;
+
+                el.style.left = ((el.offsetLeft + el.offsetWidth) > windowWidth) ? windowWidth - el.offsetWidth + "px" : el.style.left;
+                el.style.top = ((el.offsetTop + el.offsetHeight) > windowHeight) ? windowHeight - el.offsetHeight + "px" : el.style.top;
+            },
+
+            /*
+              @function (private) _addResizes
+              @description Adds resizes and their functionality.
+            */
+            addResizes: function () {
+                var el = this;
+
+                // When the dialog changes its size dynamically it will center
+                eon.addResizeListener(el, "dialog", function () {
+                    if (el.classList.contains("eon-dialog-visible") && el.multiposition == "centered" && !el._misc.resize.active && el._misc.previousWindowWidth == el._misc.newWindowWidth) {
+                        // If when opening the dialog for the first time it suffers resize event due to its content we update the initial size
+                        el._registerInitialSize();
+                    }
+                });
+
+                if (eon.util.isTrue(el.resize) && !eon.util.isTrue(el.dataset.mobile)) {
+                    var sideResizers = ["top", "right", "bottom", "left"];
+                    var cornerResizers = ["topLeft", "topRight", "bottomLeft", "bottomRight"];
+                    var sideResizersClasses = ["eon-dialog-topResizer", "eon-dialog-rightResizer", "eon-dialog-bottomResizer", "eon-dialog-leftResizer"];
+                    var cornerResizersClasses = ["eon-dialog-topLeftResizer", "eon-dialog-topRightResizer", "eon-dialog-bottomLeftResizer", "eon-dialog-bottomRightResizer"];
+
+                    el._refs.resizers = {};
+                    el._refs.resizers.sides = {};
+                    el._refs.resizers.corners = {};
+
+                    for (var i = 0; i < sideResizers.length; i++) {
+                        el._refs.resizers.sides[sideResizers[i]] = document.createElement("div");
+                        el._refs.resizers.sides[sideResizers[i]].classList.add(sideResizersClasses[i], "eon-dialog-sideResizer");
+                        el._addResizeListeners("sides", sideResizers[i]);
+                        el.appendChild(el._refs.resizers.sides[sideResizers[i]]);
+                    }
+
+                    for (var i = 0; i < cornerResizers.length; i++) {
+                        el._refs.resizers.corners[cornerResizers[i]] = document.createElement("div");
+                        el._refs.resizers.corners[cornerResizers[i]].classList.add(cornerResizersClasses[i], "eon-dialog-cornerResizer");
+                        el._addResizeListeners("corners", cornerResizers[i]);
+                        el.appendChild(el._refs.resizers.corners[cornerResizers[i]]);
+                    }
+                }
+
+            },
+
+            /*
+              @function (private) _addResizeListeners
+              @description Adds resize listeners.
+              @param {String} type [Type of resizer, side or corner]
+              @param {String} resizerName 
+            */
+            addResizeListeners: function (type, resizerName) {
+                var el = this;
+                var moveFunctionName = type == "sides" ? "_handleSideResize" : "_handleCornerResize";
+
+                var moveFunction = function (e) {
+                    el[moveFunctionName](resizerName, e);
+                    // Sets centered to false so that when the window is resized it does not center it
+                    el._misc.centered = false;
+                    // Removes the scaled class so that when the window is resized it does not moves the dialog to its new according scaled position
+                    el.classList.remove("eon-dialog-scaled");
+                };
+
+                el._refs.resizers[type][resizerName].addEventListener("mousedown", function (e) {
+                    el._misc.resize.active = true;
+                    el._misc.resize.startX = e.clientX;
+                    el._misc.resize.startY = e.clientY;
+                    el._misc.resize.startWidth = parseInt(document.defaultView.getComputedStyle(el).width, 10);
+                    el._misc.resize.startHeight = parseInt(document.defaultView.getComputedStyle(el).height, 10);
+
+                    el.classList.add("eon-unselectable");
+                    document.body.addEventListener("mousemove", moveFunction);
+                });
+
+                document.addEventListener("mouseup", function (e) {
+                    el._misc.resize.active = false;
+                    el.classList.remove("eon-unselectable");
+                    document.body.removeEventListener("mousemove", moveFunction);
+                });
+
+            },
+            /*
+              @function (private) _handleSideResize
+              @description Handles sides resize functionality.
+              @param {String} resizerName [Resizer name]
+              @param {Object} e [Mouse event]
+            */
+            handleSideResize: function (resizerName, e) {
+                var el = this;
+                var minWidth = parseInt(window.getComputedStyle(el, null).minWidth);
+                var minHeight = parseInt(window.getComputedStyle(el, null).minHeight);
+                var rightLimit = window.innerWidth - el._misc.windowPadding;
+                var bottomLimit = window.innerHeight - el._misc.windowPadding;
+                var newWidth, newHeight;
+
+                switch (resizerName) {
+                    case "left":
+                        newWidth = (el._misc.resize.startWidth + el._misc.resize.startX - e.clientX);
+                        if (e.clientX >= el._misc.windowPadding) {
+                            if (newWidth >= minWidth) {
+                                el.style.left = e.clientX + "px";
+                                el.style.width = newWidth + "px";
+                            }
+                        }
+                        break;
+
+                    case "right":
+                        newWidth = (el._misc.resize.startWidth + e.clientX - el._misc.resize.startX);
+                        if (e.clientX <= rightLimit) {
+                            el.style.width = newWidth + "px";
+                        }
+                        break;
+
+                    case "top":
+                        newHeight = (el._misc.resize.startHeight + el._misc.resize.startY - e.clientY);
+                        if (e.clientY >= el._misc.windowPadding) {
+                            if (newHeight >= minHeight) {
+                                el.style.top = e.clientY + "px";
+                                el.style.height = newHeight + "px";
+                            }
+                        }
+                        break;
+
+                    case "bottom":
+                        newHeight = (el._misc.resize.startHeight + e.clientY - el._misc.resize.startY);
+                        if (e.clientY <= bottomLimit) {
+                            el.style.height = newHeight + "px";
+                        }
+                        break;
+                    default:
+
+                }
+
+
+            },
+            /*
+              @function (private) _handleCornerResize
+              @description Handles corners resize functionality.
+              @param {String} resizerName [Resizer name]
+              @param {Object} e [Mouse event]
+            */
+            handleCornerResize: function (resizerName, e) {
+                var el = this;
+                var minWidth = parseInt(window.getComputedStyle(el, null).minWidth);
+                var minHeight = parseInt(window.getComputedStyle(el, null).minHeight);
+                var rightLimit = window.innerWidth - el._misc.windowPadding;
+                var bottomLimit = window.innerHeight - el._misc.windowPadding;
+
+                var newWidth, newHeight;
+
+                switch (resizerName) {
+                    case "topLeft":
+                        newHeight = (el._misc.resize.startHeight + el._misc.resize.startY - e.clientY);
+                        newWidth = (el._misc.resize.startWidth + el._misc.resize.startX - e.clientX);
+
+                        if (e.clientY >= el._misc.windowPadding && e.clientX >= el._misc.windowPadding) {
+
+                            if (newWidth >= minWidth) {
+                                el.style.left = e.clientX + "px";
+                                el.style.width = newWidth + "px";
+                            }
+
+                            if (newHeight >= minHeight) {
+                                el.style.top = e.clientY + "px";
+                                el.style.height = newHeight + "px";
+                            }
+                        }
+                        break;
+
+                    case "topRight":
+                        newHeight = (el._misc.resize.startHeight + el._misc.resize.startY - e.clientY);
+                        newWidth = (el._misc.resize.startWidth + e.clientX - el._misc.resize.startX);
+
+                        if (e.clientY >= el._misc.windowPadding && e.clientX <= rightLimit) {
+
+                            el.style.width = newWidth + "px";
+
+                            if (newHeight >= minHeight) {
+                                el.style.top = e.clientY + "px";
+                                el.style.height = newHeight + "px";
+                            }
+                        }
+                        break;
+
+                    case "bottomLeft":
+                        newWidth = (el._misc.resize.startWidth + el._misc.resize.startX - e.clientX);
+                        newHeight = (el._misc.resize.startHeight + e.clientY - el._misc.resize.startY);
+
+                        if (e.clientX >= el._misc.windowPadding && e.clientY <= bottomLimit) {
+
+                            if (newWidth >= minWidth) {
+                                el.style.left = e.clientX + "px";
+                                el.style.width = newWidth + "px";
+                            }
+                            el.style.height = newHeight + "px";
+                        }
+                        break;
+
+                    case "bottomRight":
+                        newWidth = (el._misc.resize.startWidth + e.clientX - el._misc.resize.startX);
+                        newHeight = (el._misc.resize.startHeight + e.clientY - el._misc.resize.startY);
+
+                        if (e.clientX <= rightLimit && e.clientY <= bottomLimit) {
+                            el.style.width = newWidth + "px";
+                            el.style.height = newHeight + "px";
+                        }
+                        break;
+                    default:
+
+                }
+            },
+
+            /*
+              @function (private) _addMaximize
+              @description Adds maximize button and its functionality.
+            */
+            addMaximize: function () {
+                var el = this;
+
+                if (eon.util.isTrue(el.maximize) && !eon.util.isTrue(el.dataset.mobile)) {
+                    el._refs.maximizeButton.classList.remove("eon-dialog-hidden");
+                    el._refs.heading.classList.remove("eon-dialog-hidden");
+
+                    el._refs.maximizeButton.addEventListener("click", function () {
+                        if (el.dataset.status != "maximized") {
+                            el._maximize();
+                        } else {
+                            el._restore();
+                        }
+                    });
+                }
+
+            },
+
+            /*
+              @function (private) _addMinimize
+              @description Adds minimize button and its functionality.
+            */
+            addMinimize: function () {
+                var el = this;
+
+                if (eon.util.isTrue(el.minimize) && !eon.util.isTrue(el.dataset.mobile)) {
+                    el._refs.minimizeButton.classList.remove("eon-dialog-hidden");
+                    el._refs.heading.classList.remove("eon-dialog-hidden");
+
+                    el._refs.minimizeButton.addEventListener("click", function () {
+                        if (el.dataset.status != "minimized") {
+                            el._minimize();
+                        } else {
+                            el._restore();
+                        }
+                    });
+                }
+            },
+
+            /*
+              @function (private) _maximize
+              @description Maximize functionality.
+            */
+            maximize: function () {
+                var el = this;
+
+                // Since entering this function means a change in the dialog ,we no longer consider its the first time the the dialog is open
+                el._misc.firstOpen = false;
+
+                if (el.dataset.status != "minimized") {
+                    el._savePreviousStatus();
+                }
+
+                document.body.appendChild(el);
+
+                el.style.maxWidth = "none";
+                el.style.maxHeight = "none";
+                el.style.width = "100%";
+                el.style.height = "100%";
+                el.style.left = 0;
+                el.style.top = 0;
+
+                el._refs.maximizeButton.classList.remove("vicon-maximize");
+                el._refs.maximizeButton.classList.add("vicon-restore");
+
+                el.classList.remove("eon-dialog-minimized");
+                el.classList.remove("eon-dialog-scaled");
+
+                el.dataset.status = "maximized";
+
+                document.body.appendChild(el);
+            },
+
+            /*
+              @function (private) _minimize
+              @description Maximize functionality.
+            */
+            minimize: function () {
+                var el = this;
+                var minimizedBar = document.querySelector(".eon-dialog-minBar");
+
+                // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
+                el._misc.firstOpen = false;
+
+                if (!minimizedBar) {
+                    minimizedBar = document.createElement("div");
+                    minimizedBar.classList.add("eon-dialog-minBar");
+                    document.body.appendChild(minimizedBar);
+                }
+
+                if (eon.util.isTrue(el.modal) && el._refs.overlay.parentNode) {
+                    el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+                }
+
+                if (el.dataset.status != "maximized") {
+                    el._savePreviousStatus();
+                }
+
+                // To return it to maximized state
+                if (el.dataset.status == "maximized") {
+                    el._misc.statusMaxi = true;
+                }
+
+                el.style.left = "0px";
+                el.style.top = "0px";
+
+                el.style.height = "auto";
+                el.style.width = "auto";
+
+                el.classList.add("eon-dialog-minimized");
+                el.classList.remove("eon-dialog-scaled");
+
+                el._refs.maximizeButton.classList.remove("vicon-restore");
+                el._refs.maximizeButton.classList.add("vicon-maximize");
+
+                minimizedBar.appendChild(el);
+
+                el.dataset.status = "minimized";
+            },
+
+            /*
+              @function (private) _restore
+              @description Returns a maximized or minimized dialog to its default position.
+            */
+            restore: function () {
+                var el = this;
+
+                el._addOverlay();
+
+                if (el.dataset.status == "maximized") {
+                    el._refs.maximizeButton.classList.remove("vicon-restore");
+                    el._refs.maximizeButton.classList.add("vicon-maximize");
+                } else if (el.dataset.status == "minimized") {
+                    el.classList.remove("eon-dialog-minimized");
+                }
+
+                document.body.appendChild(el);
+
+                el._restorePreviousStatus();
+            },
+
+            /*
+              @function (private) _savePreviousStatus
+              @description Saves the dialog size and position before maximize or minimize it.
+            */
+            savePreviousStatus: function () {
+                var el = this;
+                el._misc.previousWidth = el.offsetWidth;
+                el._misc.previousHeight = el.offsetHeight;
+                el._misc.previousLeft = el.offsetLeft;
+                el._misc.previousTop = el.offsetTop;
+            },
+
+            /*
+              @function (private) _restorePreviousStatus
+              @description Returns the dialog size and position after maximize or minimize it.
+            */
+            restorePreviousStatus: function () {
+                var el = this;
+
+                if (el._misc.statusMaxi) {
+                    el._misc.statusMaxi = false;
+                    el._maximize();
+                } else {
+                    el.style.width = el._misc.previousWidth + "px";
+                    el.style.height = el._misc.previousHeight + "px";
+                    el.style.left = el._misc.previousLeft + "px";
+                    el.style.top = el._misc.previousTop + "px";
+
+                    el._handleWindowEdges();
+
+                    el.dataset.status = "";
+
+                }
+            },
+
+            /*
+              @function (private) _verifyDeviceVersion
+              @description Controls the different screens versions.
+            */
+            verifyDeviceVersion: function () {
+                var el = this;
+                var mobileCondition = ((window.innerWidth <= eon.mobileWidth || window.innerHeight <= eon.mobileWidth) && eon.util.isTouchScreen()) || navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i);
+               
+                el.dataset.mobile = mobileCondition ? "true" : "false";
+            },
+
+            /*
+              @function (private) _assignSize
+              @description Establishes the maximum and minimum sizes of dialog.
+            */
+            assignSize: function () {
+                var el = this;
+
+                if (!el.dataset.mobile) {
+                    if (el._misc.initialWidth && el._misc.initialHeight) {
+                        el.style.width = el._misc.initialWidth + "px";
+                        el.style.height = el._misc.initialHeight + "px";
+                    }
+                }
+
+            },
+
+            /*
+              @function (private) _addOverlay
+              @description Adds overlay if the dialog is modal type.
+            */
+            addOverlay: function () {
+                var el = this;
+
+                // If there is no overlay created yet, we create/prepare it
+                if (!el._refs.overlay) {
+                    // Whether we have to add or remove the modal class
+                    var classListFn = eon.util.isTrue(el.modal) ? "add" : "remove";
+
+                    // Generates the overlay element and adds its classes
+                    el._refs.overlay = el.generateOverlayNode();
+                    el._refs.overlay.classList.add("eon-dialog-overlay");
+                    el._refs.overlay.classList[classListFn]("eon-bg1-modal");
+
+                    // If the dialog is blureable then we add an event listener to close the dialog on overlay touch
+                    if (eon.util.isTrue(el.blur)) {
+                        el._refs.overlay.addEventListener("click", function (e) {
+                            // Hide the dialog only if its currently active
+                            if (el.classList.contains("eon-dialog-visible")) {
+                                el.close();
+                            }
+
+                        }, false);
+
+                    } else if (!eon.util.isTrue(el.modal)) {
+                        el._refs.overlay.style.pointerEvents = "none";
+                    }
+
+                }
+
+
+                // Appends the overlay
+                document.body.appendChild(el._refs.overlay);
+            },
+
+            /*
+              @function (private) _isFirstScaled
+              @description Returns true if it is the first scaled dialog opened.
+            */
+            isFirstScaled: function () {
+                var openedScaledDialogs = document.querySelectorAll(".eon-dialog-scaled");
+                return openedScaledDialogs.length == 0;
+            },
+
+            /*
+              @function (private) _setPosition
+              @description Sets the position of the dialogs depending on the value of multiposition properties.
+            */
+            setPosition: function () {
+                var el = this;
+
+                if (!eon.util.isTrue(el.modal) && el.multiposition == "scaled" && !eon.util.isTrue(el.dataset.mobile) && !el._isFirstScaled()) {
+                    el._scale();
+                } else {
+                    el._center();
+                }
+            },
+
+            /*
+              @function (private) _scale
+              @description When there is more than one dialog open, position them scaled.
+            */
+            scale: function () {
+                var el = this;
+
+                // This will only scale the dialog if it is has not been scaled yet
+                if (!el.classList.contains("eon-dialog-scaled")) {
+                    var openedScaledDialogs = document.querySelectorAll(".eon-dialog-scaled");
+                    var lastOpenedScaled = openedScaledDialogs[openedScaledDialogs.length - 1];
+
+                    lastOpenedScaled = lastOpenedScaled.isEqualNode(el) ? openedScaledDialogs[openedScaledDialogs.length - 2] : lastOpenedScaled;
+
+                    el.style.left = lastOpenedScaled.offsetLeft + parseInt(el.scaleBreak) + "px";
+                    el.style.top = lastOpenedScaled.offsetTop + parseInt(el.scaleBreak) + "px";
+
+                    el._misc.scaled.order = lastOpenedScaled._misc.scaled.order ? lastOpenedScaled._misc.scaled.order : 0;
+                    el._misc.scaled.order = el._misc.scaled.order + 1;
+
+                    el.classList.add("eon-dialog-scaled");
+                }
+
+            },
+
+            /*
+              @function (private) _center
+              @description Positions the dialog in the center of the window.
+            */
+            center: function () {
+                var el = this;
+                el.style.opacity = 0;
+
+                if (el.multiposition == "scaled") {
+                    el.classList.add("eon-dialog-scaled");
+                }
+
+                setTimeout(function () {
+                    el._assignCenterPosition();
+                    el.style.opacity = 1;
+                    el._misc.centered = true;
+                }, 0);
+            },
+
+            /*
+              @function (private) _assignCenterPosition
+              @description Calculations needed to centered the dialog.
+            */
+            assignCenterPosition: function () {
+                var el = this;
+                var centerWidth = (window.innerWidth - el.offsetWidth) / 2;
+                var centerHeight = (window.innerHeight - el.offsetHeight) / 2;
+
+                el.style.left = centerWidth + "px";
+                el.style.top = centerHeight + "px";
+
+            },
+
+
+            /*
+              @function (private) _moveToFront
+              @description Puts the dialog in the foreground by clicking on it.
+            */
+            moveToFront: function () {
+                var el = this;
+
+                // If the dialog was previously minimized or maximized,
+                // when return to its default position, it will be placed in the foreground
+                if (el.dataset.status != "minimized" && el.dataset.status != "maximized") {
+                    var openedDialogs = document.querySelectorAll(".eon-dialog-visible:not(.eon-dialog-minimized)");
+                    var minimizedBar = document.querySelector(".eon-dialog-minBar");
+                    var fragment = document.createDocumentFragment();
+
+                    for (var i = openedDialogs.length - 1; i >= 0; i--) {
+                        if (!openedDialogs[i].isEqualNode(el)) {
+                            fragment.insertBefore(openedDialogs[i], fragment.childNodes[0]);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    document.body.insertBefore(fragment, el);
+
+                    if (minimizedBar) {
+                        document.body.appendChild(minimizedBar);
+                    }
+
+                }
+
+            },
+
+            /*
+              @function (private) _registerInitialSize
+              @description Stores the initial size of the dialog.
+            */
+            registerInitialSize: function () {
+                var el = this;
+
+                if (el._misc.firstOpen) {
+                    el._misc.initialWidth = el.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el.offsetWidth;
+                    el._misc.initialHeight = el.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el.offsetHeight;
+                }
+
+                // Prevents the scroll from exceeding the dialog since 
+                // the dialog has no default size to limit the scroll on IE 
+                if (eon.util.getBrowser() == "IE") {
+                    el.style.width = el.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el.offsetWidth + "px";
+                    el.style.height = el.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el.offsetHeight + "px";
+                }
+            },
+
+            /*
+              @function (private) _handleWindowResize
+              @description Handles different options of the dialog when doing the resizing of the window.
+            */
+            handleWindowResize: function () {
+                var el = this;
+
+                // Stores the windows previous window resize size and the resize after do window resize
+                el._misc.previousWindowWidth = el._misc.newWindowWidth;
+                el._misc.newWindowWidth = window.innerWidth;
+
+                // Only when the dialog is visible and is neither minimized nor maximized.
+                if (el.dataset.status == "" && el.classList.contains("eon-dialog-visible") && el.dataset.mobile == "false") {
+
+                    // When the dialog becomes visible sets its sizes
+                    if (el.style.width == "" && el.classList.contains("eon-dialog-visible")) {
+                        el.style.width = el.offsetWidth + "px";
+                        el.style.height = el.offsetHeight + "px";
+                    }
+
+                    el._handleDialogSize();
+
+                    // If the dialog is centered, when resizing the window, it will remain centered.
+                    if ((el.multiposition == "centered" && el._misc.centered)) {
+                        el._assignCenterPosition();
+
+                        // If the dialog is scaled or has been moved, 
+                        // it will stay right where it is only if it is not pushed by the window edges
+                    } else {
+                        el._handleWindowEdges();
+                    }
+
+                }
+
+            },
+
+            /*
+              @function (private) _handleDialogSize
+              @description Sets dialog width when do the window resize.
+            */
+            handleDialogSize: function () {
+                var el = this;
+               
+                // When the dialog width is bigger than window set it a percentage width
+                if (el.offsetWidth >= (window.innerWidth - 20) && !el._misc.sizeControl) {
+                    el.style.width = "calc(100% - 20px)";
+                    el._misc.sizeControl = true;
+                }
+
+                // When the window grows back, the width of the dialog is restored
+                if (el.maxWidth != "auto") {
+                    if (el.offsetWidth < (window.innerWidth - 20) && el.offsetWidth == el._misc.initialWidth && el._misc.sizeControl) {
+                        el.style.width = "";
+                        el._misc.sizeControl = false;
+                    }
+
+                } else if (el.offsetWidth <= (window.innerWidth - 20) && el.offsetWidth >= el._misc.initialWidth && el._misc.sizeControl) {
+                    el.style.width = "";
+                    el._misc.sizeControl = false;
+                }
+            },
+
+            /*
+              @function (private) _handleWindowEdges
+              @description Handles window edges so that the dialog does not exceed it.
+            */
+            handleWindowEdges: function () {
+                var el = this;
+
+                var isOnRightEdge = (el.offsetLeft + el.offsetWidth) >= (window.innerWidth - el._misc.windowPadding);
+                var isOnBottomEdge = (el.offsetTop + el.offsetHeight) >= (window.innerHeight - el._misc.windowPadding);
+                var exceedsTopEdge = el.offsetTop < el._misc.windowPadding;
+                var exceedsLeftEdge = el.offsetLeft < el._misc.windowPadding;
+
+                if (isOnRightEdge || exceedsLeftEdge) {
+                    el.style.left = window.innerWidth - (el.offsetWidth + el._misc.windowPadding) + "px";
+                }
+
+                if (isOnBottomEdge || exceedsTopEdge) {
+                    el.style.top = window.innerHeight - (el.offsetHeight + el._misc.windowPadding) + "px";
+                }
+            },
+
+            /*
+              @function (private) _limitPosition
+              @description Sets the limit of the window for cases in which, when opening several scaled dialogs, they do not exceed them.
+            */
+            limitPosition: function () {
+                var el = this;
+                var exceedsWindowWidth = (parseInt(el.style.left) + el.offsetWidth) > (window.innerWidth - el._misc.windowPadding);
+                var exceedsWindowHeight = (parseInt(el.style.top) + el.offsetHeight) > (window.innerHeight - el._misc.windowPadding);
+
+                // If exceeds the window size, we will move the dialog to axis 0 so that we can know which would be its real size on that axis, then we set back its top/left to the position
+                // its should be placed keeping in mind its width/height when it has space to grow
+                if (exceedsWindowWidth || exceedsWindowHeight) {
+                    var top = parseInt(el.style.top);
+                    var left = parseInt(el.style.left);
+                    var width, height;
+
+                    el.style.opacity = 0;
+
+                    if (exceedsWindowHeight) {
+                        el.style.top = 0;
+                    }
+
+                    if (exceedsWindowWidth) {
+                        el.style.left = 0;
+                    }
+
+                    setTimeout(function () {
+                        width = el.offsetWidth;
+                        height = el.offsetHeight;
+
+                        if (exceedsWindowWidth) {
+                            el.style.left = window.innerWidth - el._misc.windowPadding - width + "px";
+                        }
+
+                        if (exceedsWindowHeight) {
+                            el.style.top = window.innerHeight - el._misc.windowPadding - height + "px";
+                        }
+
+                        el.style.opacity = 1;
+                    }, 0);
+                }
+            }
+
+        },
+
+        functions: {
+            /*
+              @function open
+              @description Opens the dialog.
+            */
+            open: function () {
+                var el = this;
+
+                if (!el.classList.contains("eon-dialog-visible")) {
+                    eon.triggerCallback("onOpen", el);
+
+                    el._assignSize();
+                    el._addOverlay();
+
+                    el.addEventListener("mousedown", function (e) {
+                        if (e.button == 0 && el._refs.close.isOnPath == false) {
+                            el._moveToFront();
+                        }
+                    });
+
+                    el.classList.remove("eon-dialog-hide");
+
+                    // To see the opening animation of the dialog
+                    setTimeout(function () {
+                        // The dialog will already have the final size.
+                        el._setPosition();
+                        el.classList.add("eon-dialog-visible");
+                    }, 0);
+
+                    el.parentNode.insertBefore(el._refs.placeholder, el);
+                    document.body.appendChild(el);
+
+                    el._handleDialogSize();
+                    el._registerInitialSize();
+                    el._limitPosition();
+
+                    eon.triggerCallback("onOpened", el);
+                }
+
+            },
+
+            /*
+              @function close
+              @description Closes the dialog.
+            */
+            close: function () {
+                var el = this;
+                // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
+                el._misc.firstOpen = false;
+
+                eon.triggerCallback("onClose", el);
+
+                el.classList.remove("eon-dialog-visible");
+                el.classList.remove("eon-dialog-scaled");
+
+                setTimeout(function () {
+                    el.classList.add("eon-dialog-hide");
+                    el._refs.placeholder.parentNode.insertBefore(el, el._refs.placeholder);
+                    el._refs.placeholder.parentNode.removeChild(el._refs.placeholder);
+                }, 100);
+
+
+                if (el._refs.overlay && el._refs.overlay.parentNode) {
+                    el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+                    el.style.opacity = 0;
+                }
+
+                if (el.dataset.status == "maximized") {
+                    el.classList.add("eon-dialog-hide");
+                    el._refs.maximizeButton.classList.remove("vicon-restore");
+                    el._refs.maximizeButton.classList.add("vicon-maximize");
+                }
+
+                if (el.dataset.status == "minimized") {
+                    el.classList.add("eon-dialog-hide");
+                    el.classList.remove("eon-dialog-minimized");
+                }
+
+                el.dataset.status = "";
+                eon.triggerCallback("onClosed", el);
+
+            },
+
+        },
+
+        onCreated: function () {
+            var el = this;
+
+            // Create callbacks
+            eon.createCallback("onOpen", el);
+            eon.createCallback("onOpened", el);
+            eon.createCallback("onClose", el);
+            eon.createCallback("onClosed", el);
+
+            el._createRefs();
+
+            el._misc.drag = {};
+            el._misc.resize = {};
+            el._misc.scaled = {};
+            el._misc.windowPadding = 5;
+            el._misc.sizeControl = false;
+            el._misc.previousWindowWidth = window.innerWidth;
+            el._misc.newWindowWidth = window.innerWidth;
+
+            el._misc.firstOpen = true;
+            el._misc.statusMaxi = false;
+
+            el._addContent();
+            el._addFooter();
+
+        },
+
+        onInit: function () {
+            var el = this;
+
+            el._handleContentScroll();
+
+            // ** Apply default items positioning style
+            el._setDefaultStyle();
+
+            el.dataset.status = "";
+            el.multiposition = el.multiposition == "scaled" && eon.util.isTrue(el.modal) ? "centered" : el.multiposition;
+            el.hasFooter = el._refs.userFooter ? true : el.hasFooter;
+
+            el._verifyDeviceVersion();
+            el._addHeading();
+            el._addDragListeners();
+            el._addResizes();
+            el._addMaximize();
+            el._addMinimize();
+        },
+
+        onWindowResize: function (e) {
+
+            this._verifyDeviceVersion();
+            this._handleWindowResize(e);
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            switch (attrName) {
+                case "heading":
+                    this._addHeading();
+                    break;
+
+                case "hasFooter":
+                    this._handleFooterAppend();
+                    break;
+            }
+        },
+    });
+
+</script>

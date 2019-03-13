@@ -1,0 +1,1125 @@
+<template>
+  <div class="eon-video-wrapper eon-fg1">
+    <div class="eon-video-controls">
+      <div class="eon-video-timerail eon-boxshadow5">
+        <div class="eon-video-timerail-back eon-bg1">
+          <div class="eon-video-timeline eon-bg7"></div>
+        </div>
+      </div>
+      <div class="eon-video-controls-container eon-sect3">
+        <div class="eon-video-play eon-fg1-hoverable">
+          <span class="vicon-play"></span>
+        </div>
+        <div class="eon-video-volume-container">
+          <span class="vicon-volume-on eon-fg1-hoverable"></span>
+          <eon-slider max="100" size="50%" class="eon-video-volume"></eon-slider>
+        </div>
+        <div class="eon-video-time">
+          <span class="eon-video-currentTime"></span>
+          <span class="eon-video-totalTime"></span>
+        </div>
+        <div class="eon-video-fullscreen eon-fg1-hoverable">
+          <span class="vicon-fullscreen"></span>
+        </div>
+      </div>
+    </div>
+    <div class="eon-video-poster">
+      <span class="vicon-circle-play eon-fg1-hoverable"></span>
+    </div>
+  </div>
+</template>
+<script>
+  eon.element({
+
+    name: "eon-video",
+    style: "eon-video.css",
+
+    themed: true,
+    
+    dependencies: [
+      "../eon-slider"
+    ],
+    properties: {
+      /*
+        @property {String} type 
+        @description Array containing MIME Types for video formats
+      */
+      type: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} src
+        @description Video file URL
+      */
+      src: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} captions
+        @description Whether or not the video should have text tracks
+      */
+      captions: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} srcDevice
+        @description Specific device video file URL
+      */
+      srcDevice: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Number} deviceWidth
+        @description Window width that is considered the device limit
+      */
+      deviceWidth: {
+        value: 768,
+        reflect: true
+      },
+      /*
+        @property {Boolean} controls
+        @description Whether or not the video controls should be displayed
+      */
+      controls: {
+        value: true,
+        reflect: true
+      },
+      /*
+        @property {Number} volume
+        @description Video volume value
+        Values: 0-1
+      */
+      volume: {
+        value: 1,
+        reflect: true
+      },
+      /*
+        @property {String} poster
+        @description Video poster URL
+      */
+      poster: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} fallbackGif
+        @description Video gif to be used as the video source fallback
+      */
+      fallbackGif: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} preLoad
+        @description Video source load strategy
+        Values: auto, metadata, none
+        Default: auto
+      */
+      preLoad: {
+        value: "none",
+        reflect: true
+      },
+      /*
+        @property {String} background
+        @description Video element background color
+      */
+      background: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} timeLineColor
+        @description Video time line background color
+      */
+      timeLineColor: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {String} sliderColor
+        @description Video volume control background color 
+      */
+      sliderColor: {
+        value: "",
+        reflect: true
+      },
+      /*
+        @property {Boolean} touchPlaying
+        @description Whether or not the video should be played/paused clicking the video screen
+      */
+      touchPlaying: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} autoPlay
+        @description Whether or not the video should be played on loaded
+      */
+      autoPlay: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} autoPlayAllowed
+        @description Whether or not the video autoPlay option is allowed 
+      */
+      autoPlayAllowed: {
+        value: true
+      },
+      /*
+        @property {Boolean} loop
+        @description Whether or not the video should be played once it has finished
+      */
+      loop: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Boolean} deviceFullscreen
+        @description Whether or not the video should be played once it has finished
+      */
+      deviceFullscreen: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {Number} responsive
+        @description Limit from which video elements should change its appearance
+      */
+      responsive: {
+        value: 500,
+        reflect: true
+      },
+      /*
+        @property {String} objectFit
+        @description How the video should be resized to fit its container
+        Values: contain, cover, fit
+      */
+      objectFit: {
+        value: "contain",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property {object} _refs
+        @description Object with references to relevant element nodes
+      */
+      refs: {
+        value: {}
+      },
+      /*
+        @property {object} _misc
+        @description Object with useful information
+      */
+      misc: {
+        value: {}
+      }
+    },
+    functions: {
+      /*  
+        @function play
+        @description Play the video
+      */
+      play: function () {
+        var el = this;
+
+        el._togglePlayIcon("paused");
+
+        el._refs.video.play();
+        el._misc.paused = false;
+
+        // Hide poster
+        el._refs.poster.style.display = "none";
+        el._misc.posterHidden = true;
+        el.setAttribute("paused", false);
+      },
+      /*  
+        @function reload
+        @description Reload the video
+      */
+      reload: function () {
+        var el = this;
+
+        el._misc.reloaded = true;
+        el._refs.video.load();
+      },
+      /*  
+        @function pause
+        @description Pause the video
+      */
+      pause: function () {
+        var el = this;
+
+        // Show pause icon and pause native video
+        el._togglePlayIcon("play");
+
+        if (!el._misc.paused) {
+          el._refs.video.pause();
+          el._misc.paused = true;
+        }
+
+        el.setAttribute("paused", true);
+      },
+      /*  
+        @function mute
+        @description Mute the video
+      */
+      mute: function () {
+        var el = this;
+        el._refs.video.muted = true;
+        el._refs.video.setAttribute("muted", "");
+        el._toggleSoundIcon("forceMute");
+      },
+      /*  
+        @function unMute
+        @description Unmute the video
+      */
+      unMute: function () {
+        var el = this;
+        el._refs.video.muted = false;
+        el._refs.video.setAttribute("muted", "false");
+        el._toggleSoundIcon("forceUnMute");
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setUpHTMLVideo
+        @description Set up the HTML video configuration
+      */
+      setUpHTMLVideo: function () {
+        var el = this;
+        var source, src, i, fitClass;
+
+        // Get HTML video reference
+        el._refs.video = el.querySelector("video");
+        // Set up video configuration
+        el._refs.video.poster = el.poster;
+        if (eon.util.isTrue(el.autoPlay)) {
+          el._refs.video.autoplay = el.autoPlay;
+        }
+        el._refs.video.loop = el.loop;
+        // Video fit class
+        fitClass = el.objectFit == "cover" ? "eon-video-cover" : "eon-video-fit";
+        el._refs.video.classList.add(fitClass);
+
+        // Loads device src or normal src  depending on the screen resolution
+        // If the device src was specified
+        if (window.innerWidth <= el.deviceWidth && el.srcDevice) {
+          el._misc.srcTemp = el.srcDevice;
+          el._misc.windowVersion = "device";
+        } else {
+          el._misc.srcTemp = el.src;
+          el._misc.windowVersion = "screen";
+        }
+
+        // Allow multiple sources
+        // el.src = el.src.replace(/\s/g, '').split(",");
+        el._misc.srcTemp = el._misc.srcTemp.replace(/\s/g, '').split(",");
+        el.type = el.type.replace(/\s/g, '').split(",");
+        // Append sources
+        for (i = 0; i < el._misc.srcTemp.length; i++) {
+          // Append correct source
+          if (el.type[i]) {
+            // Create source element
+            source = document.createElement("source");
+            source.src = el._misc.srcTemp[i];
+            source.type = el.type[i];
+            el._refs.video.appendChild(source);
+          }
+        }
+
+        // Crate track elements for captions support
+        el._setUpCaptions();
+
+        // Auto play video configuration
+        if (eon.util.isTrue(el.autoPlay)) {
+          // Remove poster play button and wrapper overlay
+          el._refs.playBtn.style.display = "none";
+          el._refs.wrapper.style.backgroundColor = "transparent";
+          // iOS devices autoplay configuration needed
+          el._misc.paused = false;
+          el._refs.video.muted = true;
+          el._refs.video.playsinline = true;
+          el._refs.video.setAttribute("muted", "");
+          el._refs.video.setAttribute("playsinline", "");
+        } else {
+          // Hide controls until play click is triggered
+          el._refs.controls.style.opacity = 0;
+          el._misc.paused = true;
+        }
+        // Check pre-load functionality (Not IE compatible)
+        el._refs.video.setAttribute("preload", el.preLoad);
+      },
+      /*
+        @function (private) _setUp
+        @description Set up the eon-video element
+      */
+      setUp: function () {
+        var el = this;
+        // Accessibility
+        el.setAttribute("tabindex", 0);
+        // Video custom style
+        el.style.backgroundColor = el.background;
+        // Controls event path monitor 
+        eon.registerPathListener(el._refs.controls);
+        // Auto play configuration
+        el._autoPlaySetUp();
+        // Fullscreen configuration
+        el._fullscreenChangeListener();
+        // Poster configuration
+        el._posterSetUp();
+        // Controls configuration
+        el._controlsSetUp();
+        // Wrapper configuration
+        el._wrapperSetUp();
+        // Keyboard controls
+        el._keyboardControl();
+        // Controls bar displaying monitor
+        el._controlsDisplayListener();
+      },
+      /*
+        @function (private) _setUpCaptions
+        @description Create the video text tracks
+      */
+      setUpCaptions: function () {
+        var el = this;
+        if (eon.util.isTrue(el.captions)) {
+          var fragment = document.createDocumentFragment();
+          // Get track elements
+          var tracks = el.getSourceElements();
+          for (var i = 0; i < tracks.length; i++) {
+            var track = tracks[i];
+            fragment.appendChild(tracks[i]);
+          }
+          el._refs.video.appendChild(fragment);
+        }
+      },
+      /*
+        @function (private) _autoPlaySetUp
+        @description Set up auto-play cross-platform support
+      */
+      autoPlaySetUp: function () {
+        var el = this;
+        // Get platform information
+        var agent = window.navigator.userAgent;
+        var start = agent.indexOf("OS");
+        var iOSVersion = false;
+
+        if ((agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1) && start > -1) {
+          iOSVersion = window.Number(agent.substr(start + 3, 3).replace("_", "."));
+        }
+        // Hide poster
+        if (eon.util.isTrue(el.autoPlay) && (!iOSVersion || (iOSVersion >= 10))) {
+          el._refs.poster.style.display = "none";
+          el._misc.posterHidden = true;
+          // Toggle video play icon
+          el._togglePlayIcon();
+          el._toggleSoundIcon("forceMute");
+        }
+      },
+      /*
+        @function (private) _autoPlaySetUp
+        @description Set up the auto-play cross-platform support
+      */
+      controlsSetUp: function () {
+        var el = this;
+        // Show video controls displaying
+        if (eon.util.isTrue(el.controls)) {
+          el._refs.controls.style.display = "flex";
+        }
+      },
+      /*
+        @function (private) _posterSetUp
+        @description Video poster click behavior
+      */
+      posterSetUp: function () {
+        var el = this;
+        // Place holder click functionality
+        el._refs.poster.addEventListener("click", function (e) {
+          // Hide poster
+          el._refs.poster.style.display = "none";
+          el._misc.posterHidden = true;
+          // Toggle play video
+          el._togglePlay();
+          if (eon.util.isTrue(el.deviceFullscreen)) {
+            // Display in fullscreen mode
+            el._misc.fullscreenFn();
+          }
+        });
+      },
+      /*
+        @function (private) _wrapperSetUp
+        @description Video screen section click behavior
+      */
+      wrapperSetUp: function () {
+        var el = this;
+        // Toggle play on video wrapper click
+        el._refs.wrapper.addEventListener("pointerdown", function (e) {
+          if (!el._refs.controls.isOnPath && e.button == 0 && el._misc.posterHidden == true
+            && el._misc.controlsHidden == false && eon.util.isTrue(el.touchPlaying)) {
+            el._togglePlay();
+          }
+        });
+      },
+      /*
+        @function (private) _keyboardControl
+        @description Set up video keyboard control
+      */
+      keyboardControl: function () {
+        var el = this;
+        // Toggle video playing using keyboards
+        el.addEventListener("keydown", function (e) {
+          if (e.keyCode == 32) {
+            el._togglePlay();
+          }
+        });
+      },
+      /*
+        @function (private) _fullscreenChangeListener
+        @description Set up video fullscreen state changed listeners
+      */
+      fullscreenChangeListener: function () {
+        var el = this;
+        el._setUpFullscreenFn();
+        var fullscreenFn = function (vendorFullscreen) {
+          el._misc.isFullscreen = document[vendorFullscreen];
+          el._toggleFullscreen();
+        }
+        document.addEventListener("fullscreenchange", function () {
+          fullscreenFn("fullscreen");
+        }, false);
+        document.addEventListener("mozfullscreenchange", function () {
+          fullscreenFn("mozFullScreen");
+        }, false);
+        document.addEventListener("webkitfullscreenchange", function () {
+          fullscreenFn("webkitIsFullScreen");
+        }, false);
+        document.addEventListener("msfullscreenchange", function () {
+          fullscreenFn("msFullscreenElement");
+        }, false);
+        // IE 11 fix
+        if ('onmsfullscreenchange' in document) {
+          document.onmsfullscreenchange = function () {
+            fullscreenFn("msFullscreenElement");
+          };
+        };
+      },
+      /*
+        @function (private) _setUpFullscreenFn
+        @description Initialize toggle fullscreen function
+      */
+      setUpFullscreenFn: function () {
+        var el = this;
+        el._misc.fullscreenFn = function () {
+          if (el._misc.isFullscreen) {
+            el._misc.isFullscreen = false;
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+              document.webkitCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+              document.msExitFullscreen();
+            }
+          } else {
+            el._misc.isFullscreen = true;
+            if (/iPad|iPhone|iPod|Mac/.test(navigator.platform)) {
+              el._refs.video.webkitEnterFullscreen();
+            } else {
+              if (el.requestFullscreen) {
+                el.requestFullscreen();
+              } else if (el.mozRequestFullScreen) {
+                el.mozRequestFullScreen();
+              } else if (el.webkitRequestFullscreen) {
+                el.webkitRequestFullscreen();
+              } else if (el.msRequestFullscreen) {
+                el.msRequestFullscreen();
+              }
+            }
+            el._refs.video.removeAttribute("controls");
+          }
+        };
+      },
+      /*
+        @function (private) _controlsDisplayListener
+        @description Set up video controls display monitor
+      */
+      controlsDisplayListener: function () {
+        var el = this;
+        var controlsOver = false;
+        // Initialize displaying toggle function
+        function toggleControls(hide) {
+          el._refs.controls.style.opacity = hide ? 0 : 1;
+          el.classList[hide ? "add" : "remove"]("eon-video-hideCursor");
+          el._misc.controlsHidden = hide;
+        }
+        // Hide controls when pointer leaves the video screen
+        el._refs.wrapper.addEventListener("pointerleave", function (e) {
+          if (!el._misc.touch) {
+            el._misc.leaveTimeout = setTimeout(function () {
+              toggleControls(true);
+            }, 200);
+          }
+        });
+        // Show controls when pointer moves inside the video screen
+        el._refs.wrapper.addEventListener("pointermove", function (e) {
+          clearTimeout(el._misc.hideTimeout);
+          clearTimeout(el._misc.leaveTimeout);
+          setTimeout(function () {
+            if (el._misc.posterHidden) {
+              toggleControls(false);
+            }
+          }, 0);
+          if (!controlsOver || el._misc.touch) {
+            el._misc.hideTimeout = setTimeout(function () {
+              toggleControls(true);
+            }, 2000);
+          }
+        }, true);
+        // Monitor pointer position timing on not touchable devices
+        el._refs.controls.addEventListener("pointerover", function (e) {
+          controlsOver = true;
+          if (!el._misc.touch) {
+            clearTimeout(el._misc.hideTimeout);
+            clearTimeout(el._misc.leaveTimeout);
+          }
+        });
+        // Monitor pointer position timing on not touchable devices
+        el._refs.controls.addEventListener("pointerleave", function (e) {
+          controlsOver = false;
+          if (!el._misc.touch) {
+            clearTimeout(el._misc.hideTimeout);
+          }
+        });
+        // Define the pointer timing behavior when the video element is clicked
+        el.addEventListener("click", function (e) {
+          setTimeout(function () {
+            toggleControls(false);
+          }, 0);
+          clearTimeout(el._misc.hideTimeout);
+          if (!el._misc.touch) {
+            setTimeout(function () {
+              clearTimeout(el._misc.leaveTimeout);
+            }, 200);
+          }
+          if (!controlsOver) {
+            el._misc.hideTimeout = setTimeout(function () {
+              toggleControls(true);
+            }, 2000);
+          }
+        }, true);
+      },
+      /*
+        @function (private) _volumeListener
+        @description Set up the volume slider behavior
+      */
+      volumeListener: function () {
+        var el = this;
+        var initValue, thresholdValue;
+        // Set slider color
+        el._refs.volume._refs.slider.style.backgroundColor = el.sliderColor;
+        el._refs.volume._refs.thumb.style.backgroundColor = el.sliderColor;
+        el._refs.volume._refs.thumb.parentNode.style.backgroundColor = el.sliderColor;
+        // Set initial volume
+        el._refs.video.volume = el._misc.lastVolume = el.volume;
+        // Set slider position
+        el._refs.volume.value = el.volume * 100;
+        // Bind slider and volume values
+        el._refs.volume.onChange(function (arg) {
+          // Unmute if volume is muted
+          el._refs.video.volume = this.value / 100;
+          el._misc.lastVolume = parseFloat(el.volume);
+          el.volume = el._refs.video.volume;
+          el._onChangedMuting();
+        });
+        // Bind slider and volume values
+        el._refs.volume.addEventListener("pointerdown", function (e) {
+          if (e.button == 0 && el._misc.controlsHidden == false) {
+            initValue = e.clientY;
+            // Slide complete trigger interval
+            el._misc.slideTimeInterval = setInterval(function () {
+              el._misc.actionCounter = !el._misc.actionCounter ? 1 : el._misc.actionCounter + 1;
+            }, 1);
+          }
+        });
+        // Bind slider and volume values
+        el._refs.volume.addEventListener("pointermove", function (e) {
+          if (el._misc.controlsHidden == false) {
+            thresholdValue = Math.abs(initValue - e.clientY);
+            //
+            if (thresholdValue < 20 || el._misc.actionCounter > 10) {
+              el._misc.stopPropagation = true
+            } else {
+              el._misc.stopPropagation = false;
+            }
+          }
+        });
+        // Toggle volume state when the volume icon is clicked
+        el._refs.volumeIcon.addEventListener("pointerdown", function (e) {
+          if (e.button == 0 && el._misc.controlsHidden == false) {
+            el._toggleSound();
+          }
+        });
+        // Prevent volume slider input event propagation
+        el._refs.volume.addEventListener("input", function (e) {
+          if (el._misc.controlsHidden) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, true);
+      },
+      /*
+        @function (private) _onChangedMuting
+        @description Mute state changed behavior
+      */
+      onChangedMuting: function () {
+        var el = this;
+        // Unmute
+        if (el._misc.lastVolume < 0.1 && el._refs.video.volume > 0.1 && !el._onDownMuted
+          || el._refs.video.volume > 0.1 && !el._onDownMuted) {
+          el._toggleSoundIcon("forceUnMute");
+          el._refs.video.muted = false;
+        }
+        // Mute
+        else if (el._misc.lastVolume >= 0.1 && el._refs.video.volume <= 0.1 && !el._onDownMuted) {
+          el._toggleSoundIcon("forceMute");
+          el._refs.video.muted = true;
+        }
+        el._onDownMuted = false;
+      },
+      /*
+        @function (private) _playBtnListener
+        @description Set up the play button click behavior
+      */
+      playBtnListener: function () {
+        var el = this;
+        el._refs.play.addEventListener('click', function (e) {
+          if (e.button == 0 && el._misc.controlsHidden == false) {
+            el._togglePlay();
+          }
+        }, false);
+      },
+      /*
+        @function (private) _durationListener
+        @description Track video duration
+      */
+      durationListener: function () {
+        var el = this;
+        el._misc.duration = el._refs.video.duration;
+        el._refs.video.addEventListener("durationchange", function () {
+          el._misc.duration = el._refs.video.duration;
+        });
+      },
+      /*
+        @function (private) _timeListener
+        @description Update video current time/duration label
+      */
+      timeListener: function () {
+        var el = this;
+        var currentTime = el.querySelector(".eon-video-currentTime");
+        var totalTime = el.querySelector(".eon-video-totalTime");
+        var secs, mins, time;
+        // Update current time
+        totalTime.innerHTML = "/ " + el._getMinutes(el._misc.duration) + ":" + el._getSeconds(el._misc.duration);
+        currentTime.innerHTML = "00:00";
+        el._refs.video.addEventListener("timeupdate", function () {
+          time = el._refs.video.currentTime;
+          mins = el._getMinutes(time);
+          secs = el._getSeconds(time);
+          // Update current time
+          currentTime.innerHTML = mins + ":" + secs;
+        });
+      },
+      /*
+        @function (private) _timeLineListener
+        @description Create the video timing monitor
+      */
+      timeLineListener: function () {
+        var el = this;
+        var railWidth, lineWidth, duration, time, currentTime, endTime, remaining, rate, initValue, thresholdValue;
+        var poster = el.querySelector(".eon-video-poster");
+        var railPressed = false;
+        // Set time line color
+        el._refs.timeline.style.backgroundColor = el.timeLineColor;
+        // Increase proportionally the duration on partial animations
+        el._refs.video.addEventListener("timeupdate", function () {
+          railWidth = el._refs.timerail.offsetWidth;
+          time = el._refs.video.currentTime;
+          // Update time line
+          el._refs.timeline.style.width = ((time * railWidth) / el._misc.duration) + "px";
+        });
+        // Set up the time rail pointer down behavior
+        el._refs.timerail.addEventListener("pointerdown", function (e) {
+          if (e.button == 0 && el._misc.controlsHidden == false) {
+            initValue = e.clientY;
+            // Slide complete trigger interval
+            el._misc.slideTimeInterval = setInterval(function () {
+              el._misc.actionCounter = !el._misc.actionCounter || el._misc.actionCounter == 0 ? 1 : (el._misc.actionCounter + 1);
+            }, 1);
+            // Decrease timeline size on touchable devices
+            if (el._misc.touch) {
+              el._refs.timerail.back.style.transform = "scaleY(1.4)";
+            }
+            railPressed = true;
+            lineWidth = el._misc.isFullscreen ? e.clientX : (e.clientX - el.getBoundingClientRect().left);
+            // Update time line
+            el._refs.timeline.style.width = lineWidth + "px";
+            // Update video time
+            el._refs.video.currentTime = (lineWidth * el._misc.duration) / railWidth;
+          }
+        });
+        // Move the video time across the rail if the time rail is pressed while moving
+        el._refs.timerail.addEventListener("pointermove", function (e) {
+          if (el._misc.controlsHidden == false) {
+            thresholdValue = Math.abs(initValue - e.clientY);
+            // TODO - STOP PROPAGATION UNDER THRESHOLD
+            if (thresholdValue < 20 || el._misc.actionCounter > 10) {
+              el._misc.stopPropagation = true
+            } else {
+              el._misc.stopPropagation = false;
+            }
+          }
+        });
+        // Monitor video time position also when the pointer moves over the video element 
+        el.addEventListener("pointermove", function (e) {
+          if (railPressed) {
+            lineWidth = el._misc.isFullscreen ? e.clientX : (e.clientX - el.getBoundingClientRect().left);
+            // Update time line
+            el._refs.timeline.style.width = lineWidth + "px";
+            // Update video time
+            el._refs.video.currentTime = (lineWidth * el._misc.duration) / railWidth;
+          }
+        });
+        // Move the video time across the rail if the time rail is pressed while moving
+        document.addEventListener("pointerup", function (e) {
+          clearInterval(el._misc.slideTimeInterval);
+          el._misc.stopPropagation = false;
+          el._misc.actionCounter = 0;
+          if (railPressed) {
+            railPressed = false;
+          }
+          // Decrease timeline size on touchable devices
+          if (el._misc.touch) {
+            el._refs.timerail.back.style.transform = "scaleY(1)";
+          }
+        });
+        // Reset time monitor if the video ends
+        el._refs.video.addEventListener("ended", function (e) {
+          // Reset timeline and video
+          el._refs.timeline.style.width = 0;
+          el._refs.video.currentTime = 0;
+          // Reset play button icon
+          el._refs.playIcon.classList.add("vicon-play");
+          el._refs.playIcon.classList.remove("vicon-pause");
+          // Check loop functionality
+          if (!eon.util.isTrue(el.loop)) {
+            // Show poster
+            poster.style.display = "flex";
+            poster.style.backgroundImage = "url(" + el.poster + ")";
+            poster.style.backgroundSize = "cover";
+            el._misc.posterHidden = false;
+          }
+        });
+      },
+      /*
+        @function (private) _fullScreenListener
+        @description Fullscreen icon click behavior
+      */
+      fullScreenListener: function () {
+        var el = this;
+
+        el._refs.fullscreen.addEventListener("click", function (e) {
+          if (e.button == 0 && el._misc.controlsHidden == false) {
+            el._misc.fullscreenFn();
+          }
+        });
+      },
+      /*
+        @function (private) _toggleFullscreen
+        @description Activate or deactivate the fullscreen mode
+      */
+      toggleFullscreen: function () {
+        var el = this;
+        // Toggle fullscreen
+        if (!el._misc.isFullscreen) {
+          el.classList.remove("eon-video-fullscreenActive", "eon-bg2");
+          el._refs.wrapper.classList.remove("eon-video-wrapperFullscreen");
+          clearTimeout(el._misc.hideTimeout);
+        } else {
+          // Append video wrapper to the body
+          el.classList.add("eon-video-fullscreenActive", "eon-bg2");
+          el._refs.wrapper.classList.add("eon-video-wrapperFullscreen");
+        }
+      },
+      /*
+        @function (private) _getMinutes
+        @description Get a minutes formatted label from seconds value
+        @param {String} secondsValue 
+      */
+      getMinutes: function (secondsValue) {
+        var el = this;
+        var min = secondsValue / 60;
+        var result;
+        if (min < 1) {
+          result = "00";
+        } else {
+          result = min < 10 ? ("0" + Math.floor(min)) : Math.floor(min);
+        }
+        return result;
+      },
+      /*
+        @function (private) _getSeconds
+        @description Get a seconds formatted label from seconds value
+        @param {String} secondsValue 
+      */
+      getSeconds: function (secondsValue) {
+        var el = this;
+        var min = secondsValue / 60;
+        var result, seconds;
+        if (min > 1) {
+          var minRound = Math.floor(min);
+          var secs = (min - minRound) * 60;
+          secs = Math.floor(secs);
+        }
+        result = secondsValue < 10 ? ("0" + Math.floor(secondsValue)) : Math.floor(secondsValue);
+        // Get seconds extrapolated to a single minute
+        if (min > 1) {
+          seconds = result - (60 * minRound);
+          seconds = seconds < 10 ? ("0" + Math.floor(seconds)) : Math.floor(seconds);
+        } else {
+          seconds = result;
+        }
+        return seconds;
+      },
+      /*
+        @function (private) _togglePlay
+        @description Play or pause the video
+      */
+      togglePlay: function () {
+        var el = this;
+        // Check video status
+        if (el._refs.video.paused) {
+          // Play video
+          el._togglePlayIcon();
+          el._refs.video.play();
+        } else {
+          // Pause video
+          el._togglePlayIcon();
+          el._refs.video.pause();
+        }
+      },
+      /*
+        @function (private) _togglePlay
+        @description Play or pause the video
+        @param {String} state 
+      */
+      togglePlayIcon: function (state) {
+        var el = this;
+        // Check video status
+        if ((el._refs.video.paused && !state) || state == "paused") {
+          // Play video
+          el._refs.playIcon.classList.add("vicon-pause");
+          el._refs.playIcon.classList.remove("vicon-play");
+        } else if ((!el._refs.video.paused && !state) || state == "play") {
+          // Pause video
+          el._refs.playIcon.classList.add("vicon-play");
+          el._refs.playIcon.classList.remove("vicon-pause");
+        }
+      },
+      /*
+        @function (private) _toggleSound
+        @description Mute or unmute volume
+      */
+      toggleSound: function () {
+        var el = this;
+        el._onDownMuted = true;
+        // Check video status
+        if (el._refs.video.muted) {
+          // Set last volume value
+          el._refs.volume.value = el._misc.lastVolume * 100;
+          // Unmute video
+          el._toggleSoundIcon();
+          el._refs.video.muted = false;
+        } else {
+          el._refs.volume.value = 0;
+          // Mute video
+          el._toggleSoundIcon();
+          el._refs.video.muted = true;
+        }
+      },
+      /*
+        @function (private) _toggleSoundIcon
+        @description Switch volume icon
+        @param {Boolean} constraint
+      */
+      toggleSoundIcon: function (constraint) {
+        var el = this;
+        // Check video status
+        if ((el._refs.video.muted && !constraint) || constraint == "forceUnMute") {
+          // Unmute video
+          el._refs.volumeIcon.classList.add("vicon-volume-on");
+          el._refs.volumeIcon.classList.remove("vicon-volume-off");
+        } else if ((!el._refs.video.muted && !constraint) || constraint == "forceMute") {
+          // Mute video
+          el._refs.volumeIcon.classList.add("vicon-volume-off");
+          el._refs.volumeIcon.classList.remove("vicon-volume-on");
+        }
+      },
+      /*
+        @function (private) _changeVideoSrc
+        @description Set a video new source
+        @param {String} src
+      */
+      changeVideoSrc: function (src) {
+        var el = this;
+
+        el._misc.videoSources = el._refs.video.$("source");
+        // Allow multiple sources
+        el._misc.srcTemp = src.replace(/\s/g, '').split(",");
+
+        el._refs.video.pause();
+        // Append sources
+        for (i = 0; i < el._misc.srcTemp.length; i++) {
+          // Append correct source
+          if (el.type[i]) {
+            el._misc.videoSources[i].src = el._misc.srcTemp[i];
+          }
+        }
+        if (eon.util.isTrue(el.autoPlay)) {
+          el._refs.video.load();
+          el._refs.video.play();
+        }
+      },
+      /*
+        @function (private) _responsiveStyle
+        @description Change video structure elements appearance
+      */
+      responsiveStyle: function () {
+        var el = this;
+        // Check window device dimensions
+        if (window.innerWidth <= parseInt(el.responsive)) {
+          el._refs.playIcon.style.fontSize = "26px";
+          el._refs.volumeIcon.style.fontSize = "20px";
+          el._refs.fullscreen.style.fontSize = "24px";
+        } else {
+          el._refs.playIcon.style.fontSize = "";
+          el._refs.volumeIcon.style.fontSize = "";
+          el._refs.fullscreen.style.fontSize = "";
+        }
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      // Create video element (** MacOS bug declaring on element template)
+      var vid = document.createElement("video");
+      vid.classList.add("eon-video-video");
+      el._refs.wrapper = el.template.querySelector(".eon-video-wrapper");
+      el.template.insertBefore(vid, el._refs.wrapper);
+
+      eon.createCallback("onEnd", el);
+      eon.createCallback("onDataLoaded", el, "ready");
+
+      // Quick access
+      el._refs.poster = el.template.querySelector(".eon-video-poster");
+      el._refs.controls = el.template.querySelector(".eon-video-controls");
+      el._refs.play = el.template.querySelector(".eon-video-play");
+      el._refs.playBtn = el.template.querySelector(".eon-video-poster .vicon-circle-play");
+      el._refs.playIcon = el.template.querySelector(".eon-video-play").children[0];
+      el._refs.videoContainer = el.template.querySelector(".eon-video-volume-container");
+      el._refs.volume = el.template.querySelector(".eon-video-volume");
+      el._refs.volumeIcon = el.template.querySelector(".eon-video-volume").previousSibling.previousSibling;
+      el._refs.time = el.template.querySelector(".eon-video-time");
+      el._refs.timerail = el.template.querySelector(".eon-video-timerail");
+      el._refs.timerail.back = el.template.querySelector(".eon-video-timerail-back");
+      el._refs.timeline = el.template.querySelector(".eon-video-timeline");
+      el._refs.fullscreen = el.template.querySelector(".eon-video-fullscreen");
+    },
+    onInit: function () {
+      var el = this;
+      // Pointer events attribute required
+      el.setAttribute("touch-action", "pan-y");
+      //
+      el._misc.touch = eon.util.isTouchScreen();
+    },
+    onTransformed: function () {
+      var el = this;
+      // Initialize HTML video
+      el._setUpHTMLVideo();
+      // Initialize eon-video inner configuration
+      el._setUp();
+      // Set up playing monitors on video data loaded
+      el._refs.video.addEventListener("loadeddata", function () {
+        if (!el._misc.reloaded) {
+          el._durationListener();
+          el._playBtnListener();
+          // Set up volume listener on not apple devices only
+          if (!/iPad|iPhone|iPod/.test(navigator.platform)) {
+            el._refs.videoContainer.classList.add("eon-video-volume-container-display");
+            el._volumeListener();
+          }
+          el._timeListener();
+          el._fullScreenListener();
+          eon.triggerCallback("onDataLoaded", el, el);
+        }
+      });
+    },
+    onRender: function () {
+      var el = this;
+      // Set up the timing label on video data loaded
+      el._refs.video.addEventListener("loadeddata", function () {
+        el._timeLineListener();
+        eon.triggerCallback("onDataLoaded", el, el);
+      });
+      // Wrap the video on ended event
+      el._refs.video.onended = function () {
+        eon.triggerCallback("onEnd", el, el);
+      }
+    },
+    onResize: function () {
+      var el = this;
+      el._responsiveStyle();
+    },
+    onWindowResize: function () {
+      var el = this;
+      // Change video src when the window reaches the device width
+      if (window.innerWidth <= el.deviceWidth && el._misc.windowVersion == "screen" && el.srcDevice) {
+        el._changeVideoSrc(el.srcDevice);
+        el._misc.windowVersion = "device";
+      } else if (window.innerWidth > el.deviceWidth && el._misc.windowVersion == "device") {
+        el._changeVideoSrc(el.src);
+        el._misc.windowVersion = "screen";
+      }
+    },
+    onBubbleRender: function () {
+      var el = this;
+      var promise;
+      if (eon.util.isTrue(el.autoPlay)) {
+        if (/iPad|iPhone/.test(navigator.platform)) {
+          // Automatic playback failed, Fallback! set gif to imitate video
+          el.autoPlayAllowed = false;
+          eon.triggerCallback("onPlayTested", el, el);
+        } else {
+          promise = el._refs.video.play();
+          // ** IE play function does not retrieve a promise
+          if (promise) {
+            promise.then(function () {
+              // Automatic playback started!
+              eon.triggerCallback("onPlayTested", el, el);
+            }).catch(function (error) {
+              // Automatic playback failed, Fallback! set gif to imitate video
+              el._refs.video.poster = el.fallbackGif ? el.fallbackGif : el._refs.video.poster;
+              el.autoPlayAllowed = false;
+              eon.triggerCallback("onPlayTested", el, el);
+            });
+          }
+        }
+      }
+    }
+  });
+</script>
