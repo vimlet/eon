@@ -23,7 +23,7 @@ On device mode, the menu appears when the user doing a long click.
       eon.import([
         'framework/doc-eon/eon/ui/eon-contextmenu',
         'framework/doc-eon/eon/ui/eon-button',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -99,7 +99,7 @@ Basic menu with dropdowns for category options.
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-menu',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>

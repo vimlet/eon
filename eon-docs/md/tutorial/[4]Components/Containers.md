@@ -712,7 +712,7 @@ Panel is the basic container element. It has no associated style so it is comple
   <template type="html-body">
     <doc-showcase label="On demand import">
       <eon-button class="panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
-      <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" allow-scroll="false" href="data/panel/lazyContent.html" lazy-load="true">
+      <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" allow-scroll="false" href="framework/doc-eon/resources/data/panel/lazyContent.html" lazy-load="true">
         <div class="panel-content place-holder" style="box-shadow: none;">No content here</div>
       </eon-panel>
     </doc-showcase>

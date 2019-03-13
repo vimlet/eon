@@ -28,7 +28,7 @@ Also, it has different properties to give it different functionality such as res
         'framework/doc-eon/eon/ui/eon-dialog',
         'framework/doc-eon/eon/ui/eon-text',
         'framework/doc-eon/eon/ui/eon-button',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -168,7 +168,7 @@ Also known as `table`, displays a large number of data using rows and columns.
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ]);
     </script>
   </template>
@@ -260,7 +260,7 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-grid',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ]);
     </script>
   </template>
@@ -424,7 +424,7 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-gutter',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -502,7 +502,7 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-gutter',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -599,7 +599,7 @@ The Headerpanel element works as a simple container but provides a bunch of prop
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-headerpanel',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -687,7 +687,7 @@ Panel is the basic container element. It has no associated style so it is comple
       eon.import([
         'framework/doc-eon/eon/ui/eon-button',
         'framework/doc-eon/eon/ui/eon-panel',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -712,7 +712,7 @@ Panel is the basic container element. It has no associated style so it is comple
   <template type="html-body">
     <doc-showcase label="On demand import">
       <eon-button class="panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
-      <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" allow-scroll="false" href="data/panel/lazyContent.html" lazy-load="true">
+      <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" allow-scroll="false" href="framework/doc-eon/resources/data/panel/lazyContent.html" lazy-load="true">
         <div class="panel-content place-holder" style="box-shadow: none;">No content here</div>
       </eon-panel>
     </doc-showcase>
@@ -801,7 +801,7 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-tabs',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -895,7 +895,7 @@ Custom scrollbar with multiple options to have different behaviors from the nati
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-scroll',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>

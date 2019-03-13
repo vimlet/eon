@@ -28,7 +28,7 @@ This element is a combination of the well known slider and image gallery compone
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-swiper',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -106,7 +106,7 @@ The swiper gallery type provides a full bunch of options to build the images lay
       }
       eon.import([
         'framework/doc-eon/eon/ui/eon-swiper',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ]);
     </script>
     <style>
@@ -139,13 +139,13 @@ The swiper gallery type provides a full bunch of options to build the images lay
     <doc-showcase>
       <eon-swiper direction="horizontal" pagination="true" navigation="true" type="gallery"
         full-screen="true">
-        <eon-swiper-slide image="img/swiper/view-5.jpeg"></eon-swiper-slide>
-        <eon-swiper-slide image="img/swiper/view-2.jpeg"></eon-swiper-slide>
-        <eon-swiper-slide image="img/swiper/view-6.jpeg"></eon-swiper-slide>
-        <eon-swiper-slide image="img/swiper/view-4.jpeg"></eon-swiper-slide>
-        <eon-swiper-slide image="img/swiper/view-1.jpeg"></eon-swiper-slide>
-        <eon-swiper-slide image="img/swiper/view-5.jpeg"></eon-swiper-slide>
-        <eon-swiper-slide image="img/swiper/view-2.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="framework/doc-eon/resources/img/swiper/view-5.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="framework/doc-eon/resources/img/swiper/view-2.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="framework/doc-eon/resources/img/swiper/view-6.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="framework/doc-eon/resources/img/swiper/view-4.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="framework/doc-eon/resources/img/swiper/view-1.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="framework/doc-eon/resources/img/swiper/view-5.jpeg"></eon-swiper-slide>
+        <eon-swiper-slide image="framework/doc-eon/resources/img/swiper/view-2.jpeg"></eon-swiper-slide>
       </eon-swiper>
     </doc-showcase>
   </template>
@@ -181,7 +181,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-video',
-        'framework/custom/doc-playground/doc-showcase'
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
     <style>
@@ -193,7 +193,7 @@ The video component is an HTML5 `<video>` wrap. It provides an extra layer of co
   </template>
   <template type="html-body">
     <doc-showcase>
-      <eon-video type="video/mp4" controls="true" src="video/snow.mp4" poster="img/video/snow.jpg" volume="0.5">
+      <eon-video type="framework/doc-eon/resources/video/mp4" controls="true" src="framework/doc-eon/resources/video/snow.mp4" poster="framework/doc-eon/resources/img/video/snow.jpg" volume="0.5">
       </eon-video>
     </doc-showcase>
   </template>
