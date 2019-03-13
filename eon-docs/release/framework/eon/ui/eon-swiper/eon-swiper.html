@@ -1,1588 +1,1570 @@
 <script>
-  eon.element({
-
-    name: "eon-swiper",
-    style: "eon-swiper.css",
-
-    themed: true,
-    dependencies: [
-      "../eon-swiper-slide"
-    ],
-    privateProperties: {
-      /*
-        @property (private) {Object} _misc
-        @description Internal used data
-      */
-      misc: {
-        value: {}
-      },
-      /*
-        @property (private) {Object} _refs
-        @description Quick access to the swiper structure nodes references
-      */
-      refs: {
-        value: {}
-      }
-    },
-    properties: {
-      /*
-        @property {String} type
-        @description Swiper type
-        Values: slider, gallery
-        Default: slider
-      */
-      type: {
-        value: "slider",
-        reflect: true
-      },
-      /*
-        @property {String} direction
-        @description Slides direction movement
-        Values: horizontal, vertical
-        Default: horizontal
-      */
-      direction: {
-        value: "horizontal",
-        reflect: true,
-        reflectDefault: true
-      },
-
-      /*
-        @property {Boolean} auto
-        @description 
-      */
-      auto: {
-        value: false,
-        reflect: true
-      },
-      /*
-        @property {String} autoType
-        @description 
-      */
-      autoType: {
-        value: "next",
-        reflect: true
-      },
-      /*
-        @property {Number} duration
-        @description 
-      */
-      duration: {
-        value: 1000,
-        reflect: true
-      },
-      /*
-        @property {Number} transition
-        @description 
-      */
-      transition: {
-        value: 200,
-        reflect: true
-      },
-
-      /*
-        @property {Boolean} externalSlide
-        @description Denied slide by touching
-        Values: false, true
-        Default: false
-      */
-      externalSlide: {
-        value: false,
-        reflect: true
-      },
-      /*
-        @property {Object} pagingNode
-        @description Quick access to the thumbnails container node
-      */
-      pagingNode: {
-        value: {}
-      },
-      /*
-        @property {String} pagination
-        @description Pagination type
-        Values: filled, hideable, hidden
-        Default: filled
-      */
-      pagination: {
-        value: "hidden", // (filled), hideable, hidden
-        reflect: true,
-        reflectDefault: true
-      },
-      /*
-        @property {Boolean} navigation
-        @description Whether or not navigation buttons should be displayed
-        Values: false, true
-        Default: false
-      */
-      navigation: {
-        value: false,
-        reflect: true
-      },
-      /*
-        @property {Array} slides
-        @description Slides nodes and their translate ranges
-      */
-      slides: {
-        value: []
-      },
-      /*
-        @property {Array} thumbnails
-        @description Thumbnails nodes and their translate ranges
-      */
-      thumbnails: {
-        value: []
-      },
-      /*
-        @property {Number} initialSlide
-        @description Initial displayed slide index
-        Default: 0
-      */
-      initialSlide: {
-        value: 0,
-        reflect: true
-      },
-      /*
-        @property {Object} currentSlide
-        @description Slide which the view is focused on
-      */
-      currentSlide: {
-        value: {},
-        observe: true
-      },
-      /*
-        @property {Number} slideDistance
-        @description Slide translate pixels amount for each pixel move by the mouse
-        Default: 1
-      */
-      slideDistance: {
-        value: 1
-      },
-      /*
-        @property {Number} thumbnailDistance
-        @description Translate pixels amount for each pixel move by the mouse on pagination node
-        Default: 2
-      */
-      thumbnailDistance: {
-        value: 2
-      },
-      /*
-        @property {Array} excludedSliders
-        @description Nodes not allowed to act as sliders
-      */
-      excludedSliders: {
-        value: "",
-        reflect: true
-      },
-      /*
-        @property {Boolean} fullScreen
-        @description Whether or not the swiper should have full screen mode
-        Values: false, true
-        Default: false
-      */
-      fullScreen: {
-        value: false,
-        reflect: true
-      },
-      /*
-        @property {Boolean} fill 
-        @description 
-        Values: true, false
-        Default: true
-      */
-      fill: {
-        value: true,
-        reflect: true
-      }
-    },
-    privateFunctions: {
-      /*
-        @function (private) _setDefaultStyle
-        @description Check if the default element style should be applied
-      */
-      setDefaultStyle: function () {
-        var el = this;
-        // Check fill behavior
-        if (eon.util.isTrue(el.fill)) {
-          // Content style
-          el.classList.add("eon-fill");
+    eon.element({
+  
+      name: "eon-swiper",
+      style: "eon-swiper.css",
+  
+      themed: true,
+      dependencies: [
+        "../eon-swiper-slide"
+      ],
+      privateProperties: {
+        /*
+          @property (private) {Object} _misc
+          @description Internal used data
+        */
+        misc: {
+          value: {}
+        },
+        /*
+          @property (private) {Object} _refs
+          @description Quick access to the swiper structure nodes references
+        */
+        refs: {
+          value: {}
         }
       },
-      /*
-        @function (private) _setUp
-        @description Configure swiper
-      */
-      setUp: function () {
-        var el = this;
-        // Check swiper type
-        if (el.type == "gallery") {
-          el.classList.add("eon-swiper-gallery");
+      properties: {
+        /*
+          @property {String} type
+          @description Swiper type
+          Values: slider, gallery
+          Default: slider
+        */
+        type: {
+          value: "slider",
+          reflect: true
+        },
+        /*
+          @property {String} direction
+          @description Slides direction movement
+          Values: horizontal, vertical
+          Default: horizontal
+        */
+        direction: {
+          value: "horizontal",
+          reflect: true,
+          reflectDefault: true
+        },
+  
+        /*
+          @property {Boolean} auto
+          @description 
+        */
+        auto: {
+          value: false,
+          reflect: true
+        },
+        /*
+          @property {String} autoType
+          @description 
+        */
+        autoType: {
+          value: "next",
+          reflect: true
+        },
+        /*
+          @property {Number} duration
+          @description 
+        */
+        duration: {
+          value: 1000,
+          reflect: true
+        },
+        /*
+          @property {Number} transition
+          @description 
+        */
+        transition: {
+          value: 200,
+          reflect: true
+        },
+  
+        /*
+          @property {Boolean} externalSlide
+          @description Denied slide by touching
+          Values: false, true
+          Default: false
+        */
+        externalSlide: {
+          value: false,
+          reflect: true
+        },
+        /*
+          @property {Object} pagingNode
+          @description Quick access to the thumbnails container node
+        */
+        pagingNode: {
+          value: {}
+        },
+        /*
+          @property {String} pagination
+          @description Pagination type
+          Values: filled, hideable, hidden
+          Default: filled
+        */
+        pagination: {
+          value: "hidden", // (filled), hideable, hidden
+          reflect: true,
+          reflectDefault: true
+        },
+        /*
+          @property {Boolean} navigation
+          @description Whether or not navigation buttons should be displayed
+          Values: false, true
+          Default: false
+        */
+        navigation: {
+          value: false,
+          reflect: true
+        },
+        /*
+          @property {Array} slides
+          @description Slides nodes and their translate ranges
+        */
+        slides: {
+          value: []
+        },
+        /*
+          @property {Array} thumbnails
+          @description Thumbnails nodes and their translate ranges
+        */
+        thumbnails: {
+          value: []
+        },
+        /*
+          @property {Number} initialSlide
+          @description Initial displayed slide index
+          Default: 0
+        */
+        initialSlide: {
+          value: 0,
+          reflect: true
+        },
+        /*
+          @property {Object} currentSlide
+          @description Slide which the view is focused on
+        */
+        currentSlide: {
+          value: {},
+          observe: true
+        },
+        /*
+          @property {Number} slideDistance
+          @description Slide translate pixels amount for each pixel move by the mouse
+          Default: 1
+        */
+        slideDistance: {
+          value: 1
+        },
+        /*
+          @property {Number} thumbnailDistance
+          @description Translate pixels amount for each pixel move by the mouse on pagination node
+          Default: 2
+        */
+        thumbnailDistance: {
+          value: 2
+        },
+        /*
+          @property {Array} excludedSliders
+          @description Nodes not allowed to act as sliders
+        */
+        excludedSliders: {
+          value: "",
+          reflect: true
+        },
+        /*
+          @property {Boolean} fullScreen
+          @description Whether or not the swiper should have full screen mode
+          Values: false, true
+          Default: false
+        */
+        fullScreen: {
+          value: false,
+          reflect: true
+        },
+        /*
+          @property {Boolean} fill 
+          @description 
+          Values: true, false
+          Default: true
+        */
+        fill: {
+          value: true,
+          reflect: true
         }
-        // Set initial displayed slide
-        el.initialSlide = !el.initialSlide ? 0 : parseInt(el.initialSlide);
-        // Format exclude sliders nodes property
-        el.excludedSliders = el._formatArrayProperty(el.excludedSliders);
       },
-      /*
-        @function (private) {Number} _getNumProperty
-        @description Get element computed style float property value
-        @param {String} property [CSS property name]
-        @param {Object} elm [Element target]
-        @return {Number} [Number property value]
-      */
-      getNumProperty: function (property, elm) {
-        var el = elm ? elm : this;
-        // Don no why of this condition
-        // if (Object.keys(el).length == 0) {
-        //   return 0;
-        // } else {
-        return parseFloat(getComputedStyle(el).getPropertyValue(property));
-        // }
-      },
-      /*
-        @function (private) _buildWrapper
-        @description Swiper structure and slides configuration
-        @param {Object} fragment [Swiper temporal structure]
-      */
-      buildWrapper: function (fragment) {
-        var el = this;
-        el.slides = [];
-        // Create swiper wrapper container
-        var wrapper = document.createElement("div");
-        wrapper.classList.add("eon-swiper-wrapper");
-        el._refs.wrapper = wrapper;
-        // Get axis
-        if (el.direction == "horizontal") {
-          el.classList.add("eon-swiper-horizontal");
-          el._misc.sizeProperty = "offsetWidth";
-          el._misc.styleSizeProperty = "width";
-        } else {
-          el.classList.add("eon-swiper-vertical");
-          el._misc.sizeProperty = "offsetHeight";
-          el._misc.styleSizeProperty = "height";
-        }
-        fragment.appendChild(wrapper);
-        // Get maximum slide value
-        el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
-
-      },
-      /*
-        @function (private) _buildPagination
-        @description Pagination configuration and nodes structure
-        @param {Object} fragment [Swiper temporal container]
-      */
-      buildPagination: function (fragment) {
-        var el = this;
-        el.thumbnails = [];
-        // Is pagination activated
-        if (el.pagination != "hidden") {
-          el._refs.styleSheet = {};
-          // Create swiper pagination container
-          var pagination = document.createElement("div");
-          pagination.classList.add("eon-swiper-pagination");
-          el.pagingNode = pagination;
-          // Build gallery pagination container
-          el._buildGalleryPagination(pagination);
-          fragment.appendChild(pagination);
-        }
-      },
-      /*
-        @function (private) _buildGalleryPagination
-        @description Gallery pagination slide configuration
-        @param {Object} pagingNode [Thumbnails container element]
-      */
-      buildGalleryPagination: function (pagingNode) {
-        var el = this;
-        if (el.type == "gallery" && el.pagination != "hidden") {
-          var pagingFragment = document.createDocumentFragment();
-          // Create swiper wrapper container
-          var pagingWrapper = document.createElement("div");
-          pagingWrapper.classList.add("eon-swiper-paginationWrapper");
-          // Append paging wrapper as the new paging node
-          pagingFragment.appendChild(pagingWrapper);
-          pagingNode.appendChild(pagingFragment);
-          el.pagingNode = pagingWrapper;
-          // Make sure paging thumbnails are created, allowing access to thumbnail size
-          el.onPagingReady(function (thumbnailSize) {
-            el._misc.thumbnailSize = thumbnailSize;
-            // Add paging wrapper slide event listener
-            el._addPagingSlideEventListeners();
-          });
-          // Apply pagination type
-          if (el.pagination == "hideable") {
-            el._paginationHideAnim();
-          } else if (el.pagination) {
-            // Make pagination static
-            el.style.flexDirection = el.direction == "horizontal" ? "column" : "row";
-            pagingNode.classList.add("eon-swiper-paginationStatic");
+      privateFunctions: {
+        /*
+          @function (private) _setDefaultStyle
+          @description Check if the default element style should be applied
+        */
+        setDefaultStyle: function () {
+          var el = this;
+          // Check fill behavior
+          if (eon.util.isTrue(el.fill)) {
+            // Content style
+            el.classList.add("eon-fill");
           }
-        }
-      },
-      /*
-        @function (private) _setUpNavigation
-        @description Set up navigation button controllers
-        @param {Object} fragment [Navigation container element]
-      */
-      setUpNavigation: function (fragment) {
-        var el = this;
-        if (eon.util.isTrue(el.navigation)) {
-          // Create navigation next button
-          var nextBtn = document.createElement("i");
-          nextBtn.className = " vicon eon-swiper-navBtn eon-fg1-hoverable eon-bg1-modal2-hoverable eon-swiper-next eon-unselectable"
-          if (el.direction == "horizontal") { nextBtn.classList.add("vicon-chevron-right"); } else { nextBtn.classList.add("vicon-chevron-down"); }
-          // Create navigation back button
-          var backBtn = document.createElement("i");
-          backBtn.className = " vicon eon-swiper-navBtn eon-fg1-hoverable eon-bg1-modal2-hoverable eon-swiper-back eon-unselectable"
-          if (el.direction == "horizontal") { backBtn.classList.add("vicon-chevron-left"); } else { backBtn.classList.add("vicon-chevron-up"); }
-          // Get swiper type size properties
-          var sizeValue = el.direction == "horizontal"
-            ? el._getNumProperty("height", el.pagingNode) : el._getNumProperty("width", el.pagingNode);
-          var btnSizeValue = el.direction == "horizontal"
-            ? nextBtn.offsetHeight : nextBtn.offsetWidth;
-          // Save the navigation buttons reference
-          el.nextBtn = {
-            node: nextBtn,
-            minSize: btnSizeValue - sizeValue
-          };
-          el.backBtn = {
-            node: backBtn,
-            minSize: btnSizeValue - sizeValue
-          };
-          // If pagination is not hidable change clickable zone size
-          if (el.pagination != "hidden") {
-            el._decreaseNavButtonHeight(el.nextBtn);
-            el._decreaseNavButtonHeight(el.backBtn);
-          }
-          // Navigation Functionality
-          el._navClick();
-          // Append buttons
-          fragment.appendChild(nextBtn);
-          fragment.appendChild(backBtn);
-        }
-      },
-      /*
-        @function (private) _addPagingSlideEventListeners
-        @description Pagination slide event listeners
-      */
-      addPagingSlideEventListeners: function () {
-        // Relevant nodes
-        var el = this;
-        var paging = el.pagingNode;
-        var pagingParent = paging.parentNode;
-        // Functionality control
-        var throttled, mousedown, thumbnailClicked, initialValue, moveValue, translatePixels, position;
-        var delay = el._isTrickyBrowser() ? 10 : 60;
-        // Movement information
-        var axis = el.direction == "horizontal" ? "clientX" : "clientY";
-        // Thumbnail size information
-        var thumbnailSize = el._misc.thumbnailSize;
-        var thumbnailMidSize = thumbnailSize / 2;
-        var marginValue = el.direction == "vertical" ? 5 : 10;
-        el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, pagingParent) / 2) - (marginValue + thumbnailMidSize);
-        // Translate element
-        el._translate(paging, el._misc.minPagingTranslation);
-        // Start slide on mouse down event
-        pagingParent.addEventListener("pointerdown", function (e) {
-          e.preventDefault();
-          // ** Fix bad rendering while sliding bug on tricky browsers
-          paging.style.transition = el._isTrickyBrowser() ? "none" : "transform " + el.transition + "ms";
-          // Prevent mouse down functionality on secondary mouse button is clicked
-          if (e.button == 0) {
-            if (e.target.classList.contains("eon-swiper-thumbnail")) {
-              thumbnailClicked = e.target;
-            }
-            mousedown = true;
-            // Get x/y value
-            initialValue = moveValue = e[axis];
-          }
-        }, false);
-        // Slide element on mouse move
-        pagingParent.addEventListener("pointermove", function (e) {
-          if (mousedown) {
-            if (!throttled) {
-              // Get y/z translate pixels
-              translatePixels = moveValue - e[axis];
-              // Process position with the new movement values
-              position = el._processPosition(paging, translatePixels, "thumbnails");
-              // Translate element
-              el._translate(paging, position);
-              // Update move value
-              moveValue = e[axis];
-              // Throttle
-              throttled = true;
-              // Set a timeout to un-throttle
-              setTimeout(function () {
-                throttled = false;
-              }, delay);
-            }
-          }
-        });
-        // Stop slide on mouse up
-        document.addEventListener("pointerup", function (e) {
-          // Make sure a movement has been fired
-          if (mousedown) {
-            // ** Fix bad rendering while sliding bug on tricky browsers
-            paging.style.transition = "transform " + el.transition + "ms";
-            mousedown = false;
-            // Mouse position is different from initial position
-            // The mousedown thumbnail target is different from mouseup ones
-            if (moveValue != initialValue && thumbnailClicked == e.target) {
-              // Denied thumbnail selection
-              el._misc.selectElement = false;
-            } else {
-              el._misc.selectElement = true;
-            }
-          }
-        });
-      },
-      /*
-        @function (private) _paginationHideAnim
-        @description Hidable pagination animation
-      */
-      paginationHideAnim: function () {
-        var el = this;
-        var node = el.pagingNode.parentNode;
-        // Create pagination hidden control div
-        var control = document.createElement("div");
-        var fragment = document.createDocumentFragment();
-        control.classList.add("eon-swiper-paginationHideControl");
-        // Get translate property for this swiper direction
-        var prop = el.direction == "horizontal" ? "bottom" : "right";
-        var hideSizeProp = el._misc.sizeProperty == "offsetWidth" ? "offsetHeight" : "offsetWidth";
-        var leaveTimeout;
-        var pagingActive = true;
-        // Control div on mouseover  functionality
-        control.addEventListener("pointerover", function () {
-          clearTimeout(leaveTimeout);
-          // Show pagination
-          node.style[prop] = 0;
-          // Hide pagination control div
-          control.style.display = "none";
-          if (!pagingActive && node.style[prop] == "0px") {
-            // Decrease navigation buttons size
-            el._decreaseNavButtonHeight(el.nextBtn);
-            el._decreaseNavButtonHeight(el.backBtn);
-            pagingActive = true;
-          }
-        });
-        // Paging node on mouseover functionality
-        node.addEventListener("pointerover", function () {
-          clearTimeout(leaveTimeout);
-          // Show pagination
-          node.style[prop] = 0;
-          // Hide pagination control div
-          control.style.display = "none";
-        });
-        // Paging node on mouseleave functionality
-        node.addEventListener("pointerleave", function () {
-          leaveTimeout = setTimeout(function () {
-            // Hide pagination translating its width distance
-            node.style[prop] = -node[hideSizeProp] + "px";
-            // Display pagination control div
-            control.style.display = "block";
-            // Increase navigation buttons size
-            el.nextBtn.node.style[el.direction == "horizontal" ? "height" : "width"] = "100%";
-            el.backBtn.node.style[el.direction == "horizontal" ? "height" : "width"] = "100%";
-            pagingActive = false;
-          }, 300);
-        });
-        fragment.appendChild(control);
-        el.appendChild(fragment);
-      },
-      /*
-        @function (private) _decreaseNavButtonHeight
-        @description Decrease navigation button container considering pagination size
-        @param {Object} btn [Target element]
-      */
-      decreaseNavButtonHeight: function (btn) {
-        var el = this;
-        // Make sure the paging node has been rendered
-        el.onPagingReady(function () {
-          // Get pagination node size
-          var pagingSize = el._misc.sizeProperty == "offsetHeight"
-            ? el.pagingNode["offsetWidth"] : el.pagingNode["offsetHeight"];
-          // Get button node size
-          var btnSize = btn.node[el._misc.sizeProperty] > el._misc.sizeProperty
-            ? el[el._misc.sizeProperty] : btn.node[el._misc.sizeProperty];
-          if (el.direction == "horizontal") {
-            // Subtract pagination height to button height for centering purposes
-            var value = (btnSize - pagingSize);
-            btn.node.style.height = value < btn.minSize ? btn.minSize + "px" : value + "px";
-          } else {
-            // Subtract pagination width to button width for centering purposes
-            var value = (btnSize - pagingSize);
-            btn.node.style.width = value < btn.minSize ? btn.minSize + "px" : value + "px";
-          }
-        });
-      },
-      /*
-        @function (private) _updateNavButtonSize
-        @description Update navigation button container size
-      */
-      updateNavButtonSize: function () {
-        var el = this;
-        var sizeProp = el.direction == "horizontal" ? "height" : "width";
-        // Get swiper node size
-        var sizeValue = el._getNumProperty(sizeProp, el);
-        // Get pagination node size
-        var pagingSizeValue = el._getNumProperty(sizeProp, el.pagingNode);
-        el.nextBtn.minSize = sizeValue - pagingSizeValue;
-        el.backBtn.minSize = sizeValue - pagingSizeValue;
-        // Update navigation button size
-        el.nextBtn.node.style[sizeProp] = el.nextBtn.minSize + "px";
-        el.backBtn.node.style[sizeProp] = el.backBtn.minSize + "px";
-        // Update fullscreen icon
-        el._resizeFullScreenHandler();
-        // If pagination is not hideable change clickable zone size
-        setTimeout(function () {
-          if (el.pagination == "hideable" && el.pagingNode.parentNode.style.right !== 0) {
-            // Show pagination and adjust navigation buttons
-            el.pagingNode.parentNode.style.right = 0;
-            el._decreaseNavButtonHeight(el.nextBtn);
-            el._decreaseNavButtonHeight(el.backBtn);
-          }
-        }, 200);
-      },
-      /*
-        @function (private) _navClick
-        @description Navigation controller click functionality
-      */
-      navClick: function () {
-        var el = this;
-        el.backBtn.node.addEventListener("click", function () {
-          el.prev();
-        }, false);
-
-        el.nextBtn.node.addEventListener("click", function () {
-          el.next();
-        }, false);
-      },
-      /*
-        @function (private) _createThumbnail
-        @description Create and configure a new thumbnail
-        @param {Object} slide [eon-swiper-slide element]
-        @param {Object} slideObj [eon-swiper slide object reference ]
-      */
-      createThumbnail: function (slide, slideObj) {
-        var el = this;
-        if (el.pagination != "hidden") {
-          // Create thumbnail span element
-          var thumbnail = document.createElement("span");
-          var thumbnailStored = thumbnail;
-          thumbnail.classList.add("eon-swiper-thumbnail", "eon-unselectable", "eon-bg0");
-          // Add thumbnail node
-          var thumbnailFragment = document.createDocumentFragment();
-          thumbnailFragment.appendChild(thumbnail);
-          el.pagingNode.appendChild(thumbnailFragment);
-          // Configure swiper gallery thumbnail
-          el._setGalleryThumbnail(slide, thumbnail);
-          // Thumbnail click functionality
-          el._thumbnailClick(el.slides.indexOf(slideObj), thumbnail);
-
+        },
+        /*
+          @function (private) _setUp
+          @description Configure swiper
+        */
+        setUp: function () {
+          var el = this;
+          // Check swiper type
           if (el.type == "gallery") {
-            var thumbnailObj = {};
-            thumbnailObj.el = thumbnail;
-            // Set 4:3 thumbnail size
-            el._createThumbStyle(thumbnail);
-            var size = thumbnail[el._misc.sizeProperty];
-            var slideIndex = el.slides.indexOf(slideObj);
-            // Trigger paging created event
-            if (slideIndex === 0) {
-              eon.triggerCallback("onPagingReady", el, el, [size]);
-            }
-            // Set thumbnail translation range
-            thumbnailStored = el._updateThumbnailRange(thumbnailObj, slideIndex, size);
+            el.classList.add("eon-swiper-gallery");
           }
-          // Add thumbnail to swiper thumbnails array
-          el.thumbnails.push(thumbnailStored);
-          return thumbnail;
-        }
-      },
-      /*
-        @function (private) _createThumbStyle
-        @description Create the dynamic thumbnail size style rule
-        @param {Object} thumbnail [Thumbnail node]
-      */
-      createThumbStyle: function (thumbnail) {
-        var el = this;
-
-        var typeRuleName = el.direction == "vertical" ? ".eon-swiper-vertical" : "";
-        var staticRuleName = 'eon-swiper.eon-swiper-gallery' + typeRuleName + ' .eon-swiper-thumbnail';
-        var className = staticRuleName + ".eon-swiper-thumbnailSize";
-
-        // Check style existence
-        if (!eon.dom.classExists(className)) {
-          // Calculate 4:3 size ratio
-          var invertSizeProp = el._misc.styleSizeProperty == "width" ? "height" : "width";
-          var invertSize = el._getNumProperty(invertSizeProp, thumbnail);
-          var size = invertSize + (invertSize / 3);
-          // Set up css rule
-          var clss = className + "{" + el._misc.styleSizeProperty + ":" + size + "px;}";
-          // Insert and save rule
-          eon.style.sheet.insertRule(clss, 0);
-          el._refs.styleSheet["thumbnail"] = eon.style.sheet.cssRules[0];
-        }
-        thumbnail.classList.add("eon-swiper-thumbnailSize");
-      },
-      /*
-        @function (private) _updateThumbnailsSize
-        @description Update the dynamic thumbnail size style rule
-      */
-      updateThumbnailsSize: function () {
-        var el = this;
-        el.onPagingReady(function () {
-          // Calculate 4:3 size ratio
-          var invertSizeProp = el._misc.styleSizeProperty == "width" ? "height" : "width";
-          var invertSize = el._getNumProperty(invertSizeProp, el.thumbnails[0].el);
-          var size = invertSize + (invertSize / 3);
-          // Update size rule
-          if (el._refs.styleSheet.thumbnail) {
-            el._refs.styleSheet.thumbnail.style[el._misc.styleSizeProperty] = size + "px";
-            el._refs.styleSheet.thumbnail.style[invertSizeProp] = "calc(100% - 10px)";
-          }
-        });
-      },
-      /*
-        @function (private) _updateThumbnailRange
-        @description Update thumbnail range values
-        @param {Object} thumbnailObj [Target thumbnail object reference]
-        @param {Number} index [Thumbnail index position]
-        @param {Number} [Thumbnail size value]
-      */
-      updateThumbnailRange: function (thumbnailObj, index, size) {
-        var el = this;
-        var marginValue = el.direction == "vertical" ? 5 : 10;
-        size = !size ? el._misc.thumbnailSize : size;
-        // Get thumbnail centered position value
-        var indexValue = ((size + marginValue) * index);
-        var min = index == 0 ? el._misc.minPagingTranslation : el._misc.minPagingTranslation - indexValue;
-        var max = 0 - ((size + marginValue) * (index + 1));
-        thumbnailObj.range = [min, max];
-        // Update max slide value
-        el._misc.maxPagingTranslation = min;
-        return thumbnailObj;
-      },
-      /*
-        @function (private) _activateThumbnail
-        @description Select thumbnail related to the current slide selected
-        @param {Object} target [Thumbnail node to be selected]
-      */
-      activateThumbnail: function (target) {
-        var el = this;
-        // Check thumbnail existence
-        if (target) {
-          try {
-            // Active style
-            target.classList.add("eon-swiper-thumbnailActive");
-          } catch (e) {
-            // Active style
-            target.el.classList.add("eon-swiper-thumbnailActive");
-            // Get translate position
-            var min = target.range[0];
-            // Translate paging wrapper to thumbnail centered position
-            if (el.direction == "horizontal") {
-              el.pagingNode.style.transform = "translate3d(" + min + "px, 0px, 0px)";
-            } else {
-              el.pagingNode.style.transform = "translate3d(0px, " + min + "px, 0px)";
-            }
-          }
-        }
-        // Check other thumbnails status
-        for (var i = 0; i < el.thumbnails.length; i++) {
-          var thumbnail = el.thumbnails[i].el || el.thumbnails[i];
-          // If thumbnail is active change inactive class
-          if (i != el.thumbnails.indexOf(target)
-            && thumbnail.classList.contains("eon-swiper-thumbnailActive")) {
-            thumbnail.classList.remove("eon-swiper-thumbnailActive")
-          }
-        }
-      },
-      /*
-        @function (private) _thumbnailClick
-        @description Thumbnail click functionality
-        @param {Number} slideIndex [Slide index position]
-        @param {Object} thumbnail [Click target thumbnail]
-      */
-      thumbnailClick: function (slideIndex, thumbnail) {
-        var el = this;
-        //
-        // This fixes click not being triggered on body on iPad
-        if (/iPad|iPhone/.test(navigator.platform)) {
-          // alert("pointer");
-          thumbnail.parentNode.style.cursor = "pointer";
-          thumbnail.style.touchAction = "none";
-        }
-        thumbnail.addEventListener("click", function () {
-          // setTimeout(function() {
-          // Translate to slide position
-          if (el._misc.selectElement || typeof el._misc.selectElement == "undefined") {
-            el.slideTo(slideIndex);
+          // Set initial displayed slide
+          el.initialSlide = !el.initialSlide ? 0 : parseInt(el.initialSlide);
+          // Format exclude sliders nodes property
+          el.excludedSliders = el._formatArrayProperty(el.excludedSliders);
+        },
+        /*
+          @function (private) {Number} _getNumProperty
+          @description Get element computed style float property value
+          @param {String} property [CSS property name]
+          @param {Object} elm [Element target]
+          @return {Number} [Number property value]
+        */
+        getNumProperty: function (property, elm) {
+          var el = elm ? elm : this;
+          // Don no why of this condition
+          // if (Object.keys(el).length == 0) {
+          //   return 0;
+          // } else {
+          return parseFloat(getComputedStyle(el).getPropertyValue(property));
+          // }
+        },
+        /*
+          @function (private) _buildWrapper
+          @description Swiper structure and slides configuration
+          @param {Object} fragment [Swiper temporal structure]
+        */
+        buildWrapper: function (fragment) {
+          var el = this;
+          el.slides = [];
+          // Create swiper wrapper container
+          var wrapper = document.createElement("div");
+          wrapper.classList.add("eon-swiper-wrapper");
+          el._refs.wrapper = wrapper;
+          // Get axis
+          if (el.direction == "horizontal") {
+            el.classList.add("eon-swiper-horizontal");
+            el._misc.sizeProperty = "offsetWidth";
+            el._misc.styleSizeProperty = "width";
           } else {
-            el._misc.selectElement = true;
+            el.classList.add("eon-swiper-vertical");
+            el._misc.sizeProperty = "offsetHeight";
+            el._misc.styleSizeProperty = "height";
           }
-          // }, 500);
-        }, true);
-      },
-      /*
-        @function (private) _setGalleryThumbnail
-        @description Configure gallery thumbnail node 
-        @param {Object} slide [Related slide element]
-        @param {Object} thumbnail [Target thumbnail element]
-      */
-      setGalleryThumbnail: function (slide, thumbnail) {
-        var el = this;
-        // Slide belongs to a swiper gallery type
-        if (el.type == "gallery" && slide.image) {
-          var path = slide.image;
-          // Add swiper image style
-          thumbnail.classList.add("eon-swiper-image");
-          thumbnail.style.backgroundImage = "url(" + path + ")";
-        }
-      },
-      /*
-        @function (private) _createSlide
-        @description Create and configure a new slide
-        @param {Object} slide [Target slide element]
-        @return {Object} [Slide object reference]
-      */
-      createSlide: function (slide) {
-        var el = this;
-        // Create slide element
-        var slideObj = {};
-        var newSlideIndex = el.slides.length;
-        slide.classList.add("eon-swiper-child", "eon-unselectable");
-        slide.setAttribute("draggable", false);
-        // Store swiper elements object
-        slideObj.el = slide;
-        // Set auto animation
-        if (eon.util.isTrue(el.auto)) {
-          slide.style.transition = "width " + el.transition + "ms";
-        }
-        // Set slide range values
-        el.slides.push(el._updateSlideRange(slideObj, newSlideIndex));
-
-        return slideObj;
-      },
-      /*
-        @function (private) _updateSlideRange
-        @description Update slide range values
-        @param {Object} slideObj [Target slide object reference]
-        @param {Number} index [Target slide index position]
-        @return {Object} [Slide object reference]
-      */
-      updateSlideRange: function (slideObj, index) {
-        var el = this;
-        slideObj.range = [-Math.abs((el._getNumProperty(el._misc.styleSizeProperty) * index))
-          , -Math.abs((el._getNumProperty(el._misc.styleSizeProperty) * (index + 1)))];
-        return slideObj;
-      },
-      /*
-        @function (private) _addFullScreenListener
-        @description Create full screen mode functionality
-      */
-      addFullScreenListener: function () {
-        var el = this;
-        var mousedown = false;
-        var axis = el.direction == "horizontal" ? "clientX" : "clientY";
-        var clickDelay, clickCounter, clickCounter, diff, initValue, moveValue;
-        clickDelay = clickCounter = clickCounter = diff = initValue = moveValue = 0;
-        var resetDbClick = function () {
-          // Reset double click parameters
-          clickCounter = 0;
-          clickDelay = 0;
-        };
-        // Check fullscreen functionality
-        if (eon.util.isTrue(el.fullScreen)) {
-          // Create the full screen button handler
-          el._createFullScreenHandler();
-          el._refs.wrapper.addEventListener("pointerdown", function (e) {
-            // e.preventDefault();
-            mousedown = true;
-            initValue = moveValue = e[axis];
-            // Save current date in milliseconds
-            if (clickCounter == 0) {
-              clickDelay = new Date().getTime();
-            }
-          });
-          el._refs.wrapper.addEventListener("pointermove", function (e) {
-            // e.preventDefault();
-            // Save movement new position;
-            if (mousedown) {
-              moveValue = moveValue - e[axis];
-            }
-          });
-          el._refs.wrapper.addEventListener("pointerup", function (e) {
-            clickCounter++
-            mousedown = false;
-            // No movement registered
-            if (moveValue == initValue) { moveValue = 0; }
-            // Trigger double click functionality
-            if (clickCounter == 2 && moveValue == 0) {
-              // Check double click time lapse
-              diff = new Date().getTime() - clickDelay;
-              if (diff < 400) {
-                // Activate or deactivate full screen mode
-                el._toggleFullScreen();
-              }
-              // Reset double click parameters
-              resetDbClick();
-            } else {
-              // Handle double click interruption
-              if (clickCounter == 1) {
-                setTimeout(resetDbClick, 400);
-              }
-            }
-          });
-        }
-      },
-      /*
-        @function (private) _createFullScreenHandler
-        @description Set up the full screen button handler
-      */
-      createFullScreenHandler: function () {
-        var el = this;
-        var btn = document.createElement("div");
-        var sizeProp = el.direction == "horizontal" ? "offsetWidth" : "offsetHeight";
-
-        btn.className = "vicon vicon-fullscreen eon-swiper-screenBtn eon-bg2-hoverable-modal eon-fg1-hoverable eon-unselectable"
-        // Set screen button initial size
-        el._resizeFullScreenHandler(btn);
-        el.appendChild(btn);
-        // Full screen toggle function
-        btn.addEventListener("pointerdown", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          el._toggleFullScreen();
-        });
-      },
-      /*
-        @function (private) _toggleFullScreen
-        @description Activate or deactivate full screen mode
-      */
-      toggleFullScreen: function () {
-        var el = this;
-        // *WARNING* Be careful, position fixed elements do not work properly inside parent with any form of transform property
-        var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
-        el.querySelector(".eon-swiper-screenBtn").style.opacity = 0;
-        // Remove translate animation
-        el._refs.wrapper.style.transition = "none";
-        if (el.pagingNode.style) {
-          el.pagingNode.style.transition = "none";
-        }
-        // Toggle full screen
-        if (activated) {
-          el._refs.parent.appendChild(el);
-          // Wait until swiper is re-appended
-          setTimeout(function () {
-            el.classList.remove("eon-swiper-fullscreen");
-          }, 30);
-        } else {
-          if (el.pagingNode.style) {
-            el.pagingNode.style.opacity = 0;
+          fragment.appendChild(wrapper);
+          // Get maximum slide value
+          el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+  
+        },
+        /*
+          @function (private) _buildPagination
+          @description Pagination configuration and nodes structure
+          @param {Object} fragment [Swiper temporal container]
+        */
+        buildPagination: function (fragment) {
+          var el = this;
+          el.thumbnails = [];
+          // Is pagination activated
+          if (el.pagination != "hidden") {
+            el._refs.styleSheet = {};
+            // Create swiper pagination container
+            var pagination = document.createElement("div");
+            pagination.classList.add("eon-swiper-pagination");
+            el.pagingNode = pagination;
+            // Build gallery pagination container
+            el._buildGalleryPagination(pagination);
+            fragment.appendChild(pagination);
           }
-          // Append swiper to the body
-          document.body.appendChild(el);
-          // Resize manually ** Fix no resize triggering
-          el.style.height = "99%";
-          // Wait for the thumbnail positioning before making the paging node visible
-          setTimeout(function () {
-            el.style.height = "100%";
-            if (el.pagingNode.style) {
-              el.pagingNode.style.opacity = 1;
+        },
+        /*
+          @function (private) _buildGalleryPagination
+          @description Gallery pagination slide configuration
+          @param {Object} pagingNode [Thumbnails container element]
+        */
+        buildGalleryPagination: function (pagingNode) {
+          var el = this;
+          if (el.type == "gallery" && el.pagination != "hidden") {
+            var pagingFragment = document.createDocumentFragment();
+            // Create swiper wrapper container
+            var pagingWrapper = document.createElement("div");
+            pagingWrapper.classList.add("eon-swiper-paginationWrapper");
+            // Append paging wrapper as the new paging node
+            pagingFragment.appendChild(pagingWrapper);
+            pagingNode.appendChild(pagingFragment);
+            el.pagingNode = pagingWrapper;
+            // Make sure paging thumbnails are created, allowing access to thumbnail size
+            el.onPagingReady(function (thumbnailSize) {
+              el._misc.thumbnailSize = thumbnailSize;
+              // Add paging wrapper slide event listener
+              el._addPagingSlideEventListeners();
+            });
+            // Apply pagination type
+            if (el.pagination == "hideable") {
+              el._paginationHideAnim();
+            } else if (el.pagination) {
+              // Make pagination static
+              el.style.flexDirection = el.direction == "horizontal" ? "column" : "row";
+              pagingNode.classList.add("eon-swiper-paginationStatic");
             }
-            el.classList.add("eon-swiper-fullscreen");
-          }, 30);
-        }
-        // Restore translate animation
-        setTimeout(function () {
-          el._refs.wrapper.style.transition = "transform " + el.transition + "ms";
-          if (el.pagingNode.style) {
-            el.pagingNode.style.transition = "transform " + el.transition + "ms";
           }
-        }, 60);
-      },
-      /*
-        @function (private) _resizeFullScreenHandler
-        @description Update the full screen handler button dimensions
-        @param {Object} btn [Navigation button target]
-      */
-      resizeFullScreenHandler: function (btn) {
-        var el = this;
-        if (eon.util.isTrue(el.fullScreen) && eon.util.isTrue(el.navigation)) {
-          btn = !btn ? el.querySelector(".eon-swiper-screenBtn") : btn;
-          btn.style.opacity = 0;
-          var sizeProp = el.direction == "horizontal" ? "height" : "width";
-          var scrBtnSizeProp = sizeProp == "height" ? "offsetWidth" : "offsetHeight";
-          btn.style.width = el.nextBtn.node[scrBtnSizeProp] + "px";
-          btn.style.height = el.nextBtn.node[scrBtnSizeProp] + "px";
-          btn.style.opacity = 1;
-        }
-      },
-      /*
-        @function (private) _addSlideEventListeners
-        @description Create slide functionality event listeners
-      */
-      addSlideEventListeners: function () {
-        var el = this;
-        var mousedown, mousedownEvt, mousedownThrottled, throttled;
-        mousedown = mousedownThrottled = throttled = false;
-        var initialValue, moveValue, slideCounter, position, target, translatePixels;
-        var index, slideLimitValue, minTranslValue, elementTranslateMiddle, slide;
-        var delay = el._isTrickyBrowser() ? 10 : 0;
-        var axis = el.direction == "horizontal" ? "clientX" : "clientY";
-        if (!eon.util.isTrue(el.externalSlide)) {
+        },
+        /*
+          @function (private) _setUpNavigation
+          @description Set up navigation button controllers
+          @param {Object} fragment [Navigation container element]
+        */
+        setUpNavigation: function (fragment) {
+          var el = this;
+          if (eon.util.isTrue(el.navigation)) {
+            // Create navigation next button
+            var nextBtn = document.createElement("i");
+            nextBtn.className = " vicon eon-swiper-navBtn eon-fg1-hoverable eon-bg1-modal2-hoverable eon-swiper-next eon-unselectable"
+            if (el.direction == "horizontal") { nextBtn.classList.add("vicon-chevron-right"); } else { nextBtn.classList.add("vicon-chevron-down"); }
+            // Create navigation back button
+            var backBtn = document.createElement("i");
+            backBtn.className = " vicon eon-swiper-navBtn eon-fg1-hoverable eon-bg1-modal2-hoverable eon-swiper-back eon-unselectable"
+            if (el.direction == "horizontal") { backBtn.classList.add("vicon-chevron-left"); } else { backBtn.classList.add("vicon-chevron-up"); }
+            // Get swiper type size properties
+            var sizeValue = el.direction == "horizontal"
+              ? el._getNumProperty("height", el.pagingNode) : el._getNumProperty("width", el.pagingNode);
+            var btnSizeValue = el.direction == "horizontal"
+              ? nextBtn.offsetHeight : nextBtn.offsetWidth;
+            // Save the navigation buttons reference
+            el.nextBtn = {
+              node: nextBtn,
+              minSize: btnSizeValue - sizeValue
+            };
+            el.backBtn = {
+              node: backBtn,
+              minSize: btnSizeValue - sizeValue
+            };
+            // If pagination is not hidable change clickable zone size
+            if (el.pagination != "hidden") {
+              el._decreaseNavButtonHeight(el.nextBtn);
+              el._decreaseNavButtonHeight(el.backBtn);
+            }
+            // Navigation Functionality
+            el._navClick();
+            // Append buttons
+            fragment.appendChild(nextBtn);
+            fragment.appendChild(backBtn);
+          }
+        },
+        /*
+          @function (private) _addPagingSlideEventListeners
+          @description Pagination slide event listeners
+        */
+        addPagingSlideEventListeners: function () {
+          // Relevant nodes
+          var el = this;
+          var paging = el.pagingNode;
+          var pagingParent = paging.parentNode;
+          // Functionality control
+          var throttled, mousedown, thumbnailClicked, initialValue, moveValue, translatePixels, position;
+          var delay = el._isTrickyBrowser() ? 10 : 60;
+          // Movement information
+          var axis = el.direction == "horizontal" ? "clientX" : "clientY";
+          // Thumbnail size information
+          var thumbnailSize = el._misc.thumbnailSize;
+          var thumbnailMidSize = thumbnailSize / 2;
+          var marginValue = el.direction == "vertical" ? 5 : 10;
+          el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, pagingParent) / 2) - (marginValue + thumbnailMidSize);
+          // Translate element
+          el._translate(paging, el._misc.minPagingTranslation);
           // Start slide on mouse down event
-          el._refs.wrapper.addEventListener("pointerdown", function (e) {
-            // Fix pointerup stacked bug
-            // e.preventDefault();
-            // Check slide policy
-            mousedown = el._allowSlide(e.button, e.target);
-            // Slide complete trigger interval
-            el.slideTimeInterval = setInterval(function () {
-              slideCounter = !slideCounter ? 1 : slideCounter + 1;
-            }, 1);
-            if (mousedown) {
-              // ** Fix bad rendering while sliding bug on tricky browsers
-              el._refs.wrapper.style.transition = el._isTrickyBrowser() ? "none" : "transform " + el.transition + "ms";
+          pagingParent.addEventListener("pointerdown", function (e) {
+            e.preventDefault();
+            // ** Fix bad rendering while sliding bug on tricky browsers
+            paging.style.transition = el._isTrickyBrowser() ? "none" : "transform " + el.transition + "ms";
+            // Prevent mouse down functionality on secondary mouse button is clicked
+            if (e.button == 0) {
+              if (e.target.classList.contains("eon-swiper-thumbnail")) {
+                thumbnailClicked = e.target;
+              }
+              mousedown = true;
               // Get x/y value
               initialValue = moveValue = e[axis];
             }
           }, false);
           // Slide element on mouse move
-          el._refs.wrapper.addEventListener("pointermove", function (e) {
+          pagingParent.addEventListener("pointermove", function (e) {
             if (mousedown) {
-              if (slideCounter > 1) {
+              if (!throttled) {
                 // Get y/z translate pixels
                 translatePixels = moveValue - e[axis];
                 // Process position with the new movement values
-                position = el._processPosition(el._refs.wrapper, translatePixels, "slides");
+                position = el._processPosition(paging, translatePixels, "thumbnails");
                 // Translate element
-                el._translate(el._refs.wrapper, position);
-                if (translatePixels) {
-                  eon.triggerCallback("onDragStarted", el, el);
-                }
-                // Update initial move value
+                el._translate(paging, position);
+                // Update move value
                 moveValue = e[axis];
+                // Throttle
+                throttled = true;
+                // Set a timeout to un-throttle
+                setTimeout(function () {
+                  throttled = false;
+                }, delay);
               }
             }
           });
           // Stop slide on mouse up
           document.addEventListener("pointerup", function (e) {
             // Make sure a movement has been fired
-            clearInterval(el.slideTimeInterval);
             if (mousedown) {
               // ** Fix bad rendering while sliding bug on tricky browsers
-              el._refs.wrapper.style.transition = "transform " + el.transition + "ms";
+              paging.style.transition = "transform " + el.transition + "ms";
               mousedown = false;
-              // Complete slide monitor
-              if (slideCounter < 50) {
-                // Trigger complete slide
-                if (moveValue < initialValue) {
-                  el.next();
-                } else if (moveValue > initialValue) {
-                  el.prev();
-                }
+              // Mouse position is different from initial position
+              // The mousedown thumbnail target is different from mouseup ones
+              if (moveValue != initialValue && thumbnailClicked == e.target) {
+                // Denied thumbnail selection
+                el._misc.selectElement = false;
               } else {
-                // Get translate position
-                position = el.direction == "horizontal"
-                  ? parseInt(el._refs.wrapper.style.transform.split(",")[0].split("(")[1])
-                  : parseInt(el._refs.wrapper.style.transform.split(",")[1]);
-                // Get current element displayed index
-                index = el.slides.indexOf(el.currentSlide);
-                slideLimitValue = el._getNumProperty(el._misc.styleSizeProperty) / 2;
-                minTranslValue = el._getNumProperty(el._misc.styleSizeProperty) * index;
-                elementTranslateMiddle = -Math.abs(minTranslValue + slideLimitValue);
-                // Get slide from translate position value
-                slide = el._getPositionSlide(position, "slides");
-                // Execute programmed slide
-                if (position >= elementTranslateMiddle
-                  && el.slides.indexOf(el.currentSlide) != el.slides.indexOf(slide)
-                  && position > (slide.range[1] + (el._getNumProperty(el._misc.styleSizeProperty) / 2))) {
-                  // Slide back
-                  el.slideTo(index - 1);
-                } else if (position >= elementTranslateMiddle) {
-                  // Stay on the current element
-                  el.slideTo(index);
-                } else {
-                  // Slide to next element
-                  el.slideTo(index + 1);
-                }
+                el._misc.selectElement = true;
               }
             }
-            mousedown = false;
-            slideCounter = 0;
-            eon.triggerCallback("onDragStoped", el, el);
           });
-        }
-      },
-      /*
-        @function (private) _getPositionSlide
-        @description Get slide element by index
-        @param {Number} position [Slide index position]
-        @param {Array} swipeElms [Slides array]
-        @return {Object} [Slide object reference]
-      */
-      getPositionSlide: function (position, swipeElms) {
-        var el = this;
-        var selElem, elm, i;
-        // Loop through swiper slider array
-        for (i = 0; i < el[swipeElms].length; i++) {
-          elem = el[swipeElms][i];
-          // Is position between range values
-          if (position > elem.range[1] && position <= elem.range[0]) {
-            selElem = elem;
-            break;
+        },
+        /*
+          @function (private) _paginationHideAnim
+          @description Hidable pagination animation
+        */
+        paginationHideAnim: function () {
+          var el = this;
+          var node = el.pagingNode.parentNode;
+          // Create pagination hidden control div
+          var control = document.createElement("div");
+          var fragment = document.createDocumentFragment();
+          control.classList.add("eon-swiper-paginationHideControl");
+          // Get translate property for this swiper direction
+          var prop = el.direction == "horizontal" ? "bottom" : "right";
+          var hideSizeProp = el._misc.sizeProperty == "offsetWidth" ? "offsetHeight" : "offsetWidth";
+          var leaveTimeout;
+          var pagingActive = true;
+          // Control div on mouseover  functionality
+          control.addEventListener("pointerover", function () {
+            clearTimeout(leaveTimeout);
+            // Show pagination
+            node.style[prop] = 0;
+            // Hide pagination control div
+            control.style.display = "none";
+            if (!pagingActive && node.style[prop] == "0px") {
+              // Decrease navigation buttons size
+              el._decreaseNavButtonHeight(el.nextBtn);
+              el._decreaseNavButtonHeight(el.backBtn);
+              pagingActive = true;
+            }
+          });
+          // Paging node on mouseover functionality
+          node.addEventListener("pointerover", function () {
+            clearTimeout(leaveTimeout);
+            // Show pagination
+            node.style[prop] = 0;
+            // Hide pagination control div
+            control.style.display = "none";
+          });
+          // Paging node on mouseleave functionality
+          node.addEventListener("pointerleave", function () {
+            leaveTimeout = setTimeout(function () {
+              // Hide pagination translating its width distance
+              node.style[prop] = -node[hideSizeProp] + "px";
+              // Display pagination control div
+              control.style.display = "block";
+              // Increase navigation buttons size
+              el.nextBtn.node.style[el.direction == "horizontal" ? "height" : "width"] = "100%";
+              el.backBtn.node.style[el.direction == "horizontal" ? "height" : "width"] = "100%";
+              pagingActive = false;
+            }, 300);
+          });
+          fragment.appendChild(control);
+          el.appendChild(fragment);
+        },
+        /*
+          @function (private) _decreaseNavButtonHeight
+          @description Decrease navigation button container considering pagination size
+          @param {Object} btn [Target element]
+        */
+        decreaseNavButtonHeight: function (btn) {
+          var el = this;
+          // Make sure the paging node has been rendered
+          el.onPagingReady(function(){
+            // Get pagination node size
+            var pagingSize = el._misc.sizeProperty == "offsetHeight"
+              ? el.pagingNode["offsetWidth"] : el.pagingNode["offsetHeight"];
+            // Get button node size
+            var btnSize = btn.node[el._misc.sizeProperty] > el._misc.sizeProperty 
+              ? el[el._misc.sizeProperty] : btn.node[el._misc.sizeProperty];
+            if (el.direction == "horizontal") {
+              // Subtract pagination height to button height for centering purposes
+              var value = (btnSize - pagingSize);
+              btn.node.style.height = value < btn.minSize ? btn.minSize + "px" : value + "px";
+            } else {
+              // Subtract pagination width to button width for centering purposes
+              var value = (btnSize - pagingSize);
+              btn.node.style.width = value < btn.minSize ? btn.minSize + "px" : value + "px";
+            }
+          });
+        },
+        /*
+          @function (private) _updateNavButtonSize
+          @description Update navigation button container size
+        */
+        updateNavButtonSize: function () {
+          var el = this;
+          var sizeProp = el.direction == "horizontal" ? "height" : "width";
+          // Get swiper node size
+          var sizeValue = el._getNumProperty(sizeProp, el);
+          // Get pagination node size
+          var pagingSizeValue = el._getNumProperty(sizeProp, el.pagingNode);
+          el.nextBtn.minSize = sizeValue - pagingSizeValue;
+          el.backBtn.minSize = sizeValue - pagingSizeValue;
+          // Update navigation button size
+          el.nextBtn.node.style[sizeProp] = el.nextBtn.minSize + "px";
+          el.backBtn.node.style[sizeProp] = el.backBtn.minSize + "px";
+          // Update fullscreen icon
+          el._resizeFullScreenHandler();
+          // If pagination is not hideable change clickable zone size
+          setTimeout(function () {
+            if (el.pagination == "hideable" && el.pagingNode.parentNode.style.right !== 0) {
+              // Show pagination and adjust navigation buttons
+              el.pagingNode.parentNode.style.right = 0;
+              el._decreaseNavButtonHeight(el.nextBtn);
+              el._decreaseNavButtonHeight(el.backBtn);
+            }
+          }, 200);
+        },
+        /*
+          @function (private) _navClick
+          @description Navigation controller click functionality
+        */
+        navClick: function () {
+          var el = this;
+          el.backBtn.node.addEventListener("click", function () {
+            el.prev();
+          }, false);
+  
+          el.nextBtn.node.addEventListener("click", function () {
+            el.next();
+          }, false);
+        },
+        /*
+          @function (private) _createThumbnail
+          @description Create and configure a new thumbnail
+          @param {Object} slide [eon-swiper-slide element]
+          @param {Object} slideObj [eon-swiper slide object reference ]
+        */
+        createThumbnail: function (slide, slideObj) {
+          var el = this;
+          if (el.pagination != "hidden") {
+            // Create thumbnail span element
+            var thumbnail = document.createElement("span");
+            var thumbnailStored = thumbnail;
+            thumbnail.classList.add("eon-swiper-thumbnail", "eon-unselectable", "eon-bg0");
+            // Add thumbnail node
+            var thumbnailFragment = document.createDocumentFragment();
+            thumbnailFragment.appendChild(thumbnail);
+            el.pagingNode.appendChild(thumbnailFragment);
+            // Configure swiper gallery thumbnail
+            el._setGalleryThumbnail(slide, thumbnail);
+            // Thumbnail click functionality
+            el._thumbnailClick(el.slides.indexOf(slideObj), thumbnail);
+  
+            if (el.type == "gallery") {
+              var thumbnailObj = {};
+              thumbnailObj.el = thumbnail;
+              // Set 4:3 thumbnail size
+              el._createThumbStyle(thumbnail);
+              var size = thumbnail[el._misc.sizeProperty];
+              var slideIndex = el.slides.indexOf(slideObj);
+              // Trigger paging created event
+              if (slideIndex === 0) {
+                eon.triggerCallback("onPagingReady", el, el, [size]);
+              }
+              // Set thumbnail translation range
+              thumbnailStored = el._updateThumbnailRange(thumbnailObj, slideIndex, size);
+            }
+            // Add thumbnail to swiper thumbnails array
+            el.thumbnails.push(thumbnailStored);
+            return thumbnail;
           }
-        }
-        return selElem;
-      },
-      /*
-        @function (private) _isEdgeElement
-        @description Whether or not the current position is related to an edge slide
-        @param {Number} position [Source position]
-        @param {Object} slide [Target slide element]
-      */
-      isEdgeElement: function (position, slide) {
-        var el = this;
-        var sibling = !slide && el.currentSlide ? el.currentSlide.el.nextSibling : slide.el.nextSibling;
-        // Get the current swiper element
-        if (position == "start") {
-          return (sibling && sibling.tagName === "EON-SWIPER-SLIDE") ? false : true;
-        } else {
-          sibling = !slide && el.currentSlide ? el.currentSlide.el.previousSibling : slide.el.previousSibling;
-          return (sibling && sibling.tagName === "EON-SWIPER-SLIDE") ? false : true;
-        }
-      },
-      /*
-        @function (private) _translate
-        @description Move node a specified pixels distance
-        @param {Object} node [Target element]
-        @param {Number} distance [Translate pixel value]
-      */
-      translate: function (node, distance) {
-        var el = this;
-        // Set the new node translate position
-        if (el.direction == "horizontal") {
-          node.style.transform = "translate3d(" + distance + "px, 0px, 0px)";
-        } else {
-          node.style.transform = "translate3d(0px, " + distance + "px, 0px)";
-        }
-      },
-      /*
-        @function (private) _processPosition
-        @description Process a position value and add the new distance to be translate to
-        @param {Object} node [Translate target element]
-        @param {Number} pixels [Movement pixel value]
-        @param {String} slider [Target swiper element type]
-        @return {Number} [Processed position value]
-      */
-      processPosition: function (node, pixels, slider) {
-        var el = this;
-        // Get current translate value
-        var position = el.direction == "horizontal"
-          ? parseInt(node.style.transform.split(",")[0].split("\(")[1])
-          : parseInt(node.style.transform.split(",")[1]);
-        // Monitor node first position null value
-        position = !position ? 0 : position;
-        // Set translate x/y new value
-        position -= (pixels * (slider == "slides" ? el.slideDistance : el.thumbnailDistance));
-        // Check min and max translate limit values
-        var min = slider == "slides" ? 0 : el._misc.minPagingTranslation;
-        var max = slider == "slides" ? el._misc.maxTranslation : el._misc.maxPagingTranslation;
-        position = position > min ? min : position;
-        position = position < max ? max : position;
-        return position;
-      },
-      /*
-        @function (private) _append
-        @description Use internally when a slide is appended via html api
-        @param {Object} slide [Target slide element]
-      */
-      append: function (slide) {
-        var el = this;
-        var slideObj = el._createSlide(slide);
-        el._createThumbnail(slide, slideObj);
-        // Check if all initial slides have been appended
-        if (el.getSourceElements().length == el.slides.length) {
-          eon.triggerCallback("onSlidesReady", el, el, [el.slides]);
-        }
-        // Update max slide value
-        el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
-      },
-      /*
-        @function (private) {Boolean} _allowSlide
-        @description Whether or not slide process should be triggered
-        @param {Number} btn [Pointer down event button pressed]
-        @param {Object} sliderNode [Pointer down target element]
-        @return {Boolean} [Slide permission]
-      */
-      allowSlide: function (btn, sliderNode) {
-        var el = this;
-        var allow = false;
-        // Check slide excluded nodes array
-        if (btn == 0 && (sliderNode != el.pagingNode
-          && !sliderNode.classList.contains("eon-swiper-thumbnail")
-          && !sliderNode.classList.contains("eon-swiper-pagination"))) {
-          allow = true;
-          // Loop through nodes excluded from triggering drawer displaying
-          for (var i = 0; i < el.excludedSliders.length; i++) {
-            excludedNode = el.querySelector(el.excludedSliders[i]);
-            if (excludedNode.isEqualNode(sliderNode) || excludedNode.isOnPath == true) {
-              allow = false;
+        },
+        /*
+          @function (private) _createThumbStyle
+          @description Create the dynamic thumbnail size style rule
+          @param {Object} thumbnail [Thumbnail node]
+        */
+        createThumbStyle: function (thumbnail) {
+          var el = this;
+  
+          var typeRuleName = el.direction == "vertical" ? ".eon-swiper-vertical" : "";
+          var staticRuleName = 'eon-swiper.eon-swiper-gallery' + typeRuleName + ' .eon-swiper-thumbnail';
+          var className = staticRuleName + ".eon-swiper-thumbnailSize";
+  
+          // Check style existence
+          if (!eon.dom.classExists(className)) {
+            // Calculate 4:3 size ratio
+            var invertSizeProp = el._misc.styleSizeProperty == "width" ? "height" : "width";
+            var invertSize = el._getNumProperty(invertSizeProp, thumbnail);
+            var size = invertSize + (invertSize / 3);
+            // Set up css rule
+            var clss = className + "{" + el._misc.styleSizeProperty + ":" + size + "px;}";
+            // Insert and save rule
+            eon.style.sheet.insertRule(clss, 0);
+            el._refs.styleSheet["thumbnail"] = eon.style.sheet.cssRules[0];
+          }
+          thumbnail.classList.add("eon-swiper-thumbnailSize");
+        },
+        /*
+          @function (private) _updateThumbnailsSize
+          @description Update the dynamic thumbnail size style rule
+        */
+        updateThumbnailsSize: function () {
+          var el = this;
+          el.onPagingReady(function () {
+            // Calculate 4:3 size ratio
+            var invertSizeProp = el._misc.styleSizeProperty == "width" ? "height" : "width";
+            var invertSize = el._getNumProperty(invertSizeProp, el.thumbnails[0].el);
+            var size = invertSize + (invertSize / 3);
+            // Update size rule
+            if (el._refs.styleSheet.thumbnail) {
+              el._refs.styleSheet.thumbnail.style[el._misc.styleSizeProperty] = size + "px";
+              el._refs.styleSheet.thumbnail.style[invertSizeProp] = "calc(100% - 10px)";
+            }
+          });
+        },
+        /*
+          @function (private) _updateThumbnailRange
+          @description Update thumbnail range values
+          @param {Object} thumbnailObj [Target thumbnail object reference]
+          @param {Number} index [Thumbnail index position]
+          @param {Number} [Thumbnail size value]
+        */
+        updateThumbnailRange: function (thumbnailObj, index, size) {
+          var el = this;
+          var marginValue = el.direction == "vertical" ? 5 : 10;
+          size = !size ? el._misc.thumbnailSize : size;
+          // Get thumbnail centered position value
+          var indexValue = ((size + marginValue) * index);
+          var min = index == 0 ? el._misc.minPagingTranslation : el._misc.minPagingTranslation - indexValue;
+          var max = 0 - ((size + marginValue) * (index + 1));
+          thumbnailObj.range = [min, max];
+          // Update max slide value
+          el._misc.maxPagingTranslation = min;
+          return thumbnailObj;
+        },
+        /*
+          @function (private) _activateThumbnail
+          @description Select thumbnail related to the current slide selected
+          @param {Object} target [Thumbnail node to be selected]
+        */
+        activateThumbnail: function (target) {
+          var el = this;
+          // Check thumbnail existence
+          if (target) {
+            try {
+              // Active style
+              target.classList.add("eon-swiper-thumbnailActive");
+            } catch (e) {
+              // Active style
+              target.el.classList.add("eon-swiper-thumbnailActive");
+              // Get translate position
+              var min = target.range[0];
+              // Translate paging wrapper to thumbnail centered position
+              if (el.direction == "horizontal") {
+                el.pagingNode.style.transform = "translate3d(" + min + "px, 0px, 0px)";
+              } else {
+                el.pagingNode.style.transform = "translate3d(0px, " + min + "px, 0px)";
+              }
+            }
+          }
+          // Check other thumbnails status
+          for (var i = 0; i < el.thumbnails.length; i++) {
+            var thumbnail = el.thumbnails[i].el || el.thumbnails[i];
+            // If thumbnail is active change inactive class
+            if (i != el.thumbnails.indexOf(target)
+              && thumbnail.classList.contains("eon-swiper-thumbnailActive")) {
+              thumbnail.classList.remove("eon-swiper-thumbnailActive")
+            }
+          }
+        },
+        /*
+          @function (private) _thumbnailClick
+          @description Thumbnail click functionality
+          @param {Number} slideIndex [Slide index position]
+          @param {Object} thumbnail [Click target thumbnail]
+        */
+        thumbnailClick: function (slideIndex, thumbnail) {
+          var el = this;
+          //
+          // This fixes click not being triggered on body on iPad
+          if (/iPad|iPhone/.test(navigator.platform)) {
+            // alert("pointer");
+            thumbnail.parentNode.style.cursor = "pointer";
+            thumbnail.style.touchAction = "none";
+          }
+          thumbnail.addEventListener("click", function () {
+            // setTimeout(function() {
+            // Translate to slide position
+            if (el._misc.selectElement || typeof el._misc.selectElement == "undefined") {
+              el.slideTo(slideIndex);
+            } else {
+              el._misc.selectElement = true;
+            }
+            // }, 500);
+          }, true);
+        },
+        /*
+          @function (private) _setGalleryThumbnail
+          @description Configure gallery thumbnail node 
+          @param {Object} slide [Related slide element]
+          @param {Object} thumbnail [Target thumbnail element]
+        */
+        setGalleryThumbnail: function (slide, thumbnail) {
+          var el = this;
+          // Slide belongs to a swiper gallery type
+          if (el.type == "gallery" && slide.image) {
+            var path = slide.image;
+            // Add swiper image style
+            thumbnail.classList.add("eon-swiper-image");
+            thumbnail.style.backgroundImage = "url(" + path + ")";
+          }
+        },
+        /*
+          @function (private) _createSlide
+          @description Create and configure a new slide
+          @param {Object} slide [Target slide element]
+          @return {Object} [Slide object reference]
+        */
+        createSlide: function (slide) {
+          var el = this;
+          // Create slide element
+          var slideObj = {};
+          var newSlideIndex = el.slides.length;
+          slide.classList.add("eon-swiper-child", "eon-unselectable");
+          slide.setAttribute("draggable", false);
+          // Store swiper elements object
+          slideObj.el = slide;
+          // Set auto animation
+          if (eon.util.isTrue(el.auto)) {
+            slide.style.transition = "width " + el.transition + "ms";
+          }
+          // Set slide range values
+          el.slides.push(el._updateSlideRange(slideObj, newSlideIndex));
+  
+          return slideObj;
+        },
+        /*
+          @function (private) _updateSlideRange
+          @description Update slide range values
+          @param {Object} slideObj [Target slide object reference]
+          @param {Number} index [Target slide index position]
+          @return {Object} [Slide object reference]
+        */
+        updateSlideRange: function (slideObj, index) {
+          var el = this;
+          slideObj.range = [-Math.abs((el._getNumProperty(el._misc.styleSizeProperty) * index))
+            , -Math.abs((el._getNumProperty(el._misc.styleSizeProperty) * (index + 1)))];
+          return slideObj;
+        },
+        /*
+          @function (private) _addFullScreenListener
+          @description Create full screen mode functionality
+        */
+        addFullScreenListener: function () {
+          var el = this;
+          var mousedown = false;
+          var axis = el.direction == "horizontal" ? "clientX" : "clientY";
+          var clickDelay, clickCounter, clickCounter, diff, initValue, moveValue;
+          clickDelay = clickCounter = clickCounter = diff = initValue = moveValue = 0;
+          var resetDbClick = function () {
+            // Reset double click parameters
+            clickCounter = 0;
+            clickDelay = 0;
+          };
+          // Check fullscreen functionality
+          if (eon.util.isTrue(el.fullScreen)) {
+            // Create the full screen button handler
+            el._createFullScreenHandler();
+            el._refs.wrapper.addEventListener("pointerdown", function (e) {
+              // e.preventDefault();
+              mousedown = true;
+              initValue = moveValue = e[axis];
+              // Save current date in milliseconds
+              if (clickCounter == 0) {
+                clickDelay = new Date().getTime();
+              }
+            });
+            el._refs.wrapper.addEventListener("pointermove", function (e) {
+              // e.preventDefault();
+              // Save movement new position;
+              if (mousedown) {
+                moveValue = moveValue - e[axis];
+              }
+            });
+            el._refs.wrapper.addEventListener("pointerup", function (e) {
+              clickCounter++
+              mousedown = false;
+              // No movement registered
+              if (moveValue == initValue) { moveValue = 0; }
+              // Trigger double click functionality
+              if (clickCounter == 2 && moveValue == 0) {
+                // Check double click time lapse
+                diff = new Date().getTime() - clickDelay;
+                if (diff < 400) {
+                  // Activate or deactivate full screen mode
+                  el._toggleFullScreen();
+                }
+                // Reset double click parameters
+                resetDbClick();
+              } else {
+                // Handle double click interruption
+                if (clickCounter == 1) {
+                  setTimeout(resetDbClick, 400);
+                }
+              }
+            });
+          }
+        },
+        /*
+          @function (private) _createFullScreenHandler
+          @description Set up the full screen button handler
+        */
+        createFullScreenHandler: function () {
+          var el = this;
+          var btn = document.createElement("div");
+          var sizeProp = el.direction == "horizontal" ? "offsetWidth" : "offsetHeight";
+  
+          btn.className = "vicon vicon-fullscreen eon-swiper-screenBtn eon-bg2-hoverable-modal eon-fg1-hoverable eon-unselectable"
+          // Set screen button initial size
+          el._resizeFullScreenHandler(btn);
+          el.appendChild(btn);
+          // Full screen toggle function
+          btn.addEventListener("pointerdown", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            el._toggleFullScreen();
+          });
+        },
+        /*
+          @function (private) _toggleFullScreen
+          @description Activate or deactivate full screen mode
+        */
+        toggleFullScreen: function () {
+          var el = this;
+          // *WARNING* Be careful, position fixed elements do not work properly inside parent with any form of transform property
+          var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
+          el.querySelector(".eon-swiper-screenBtn").style.opacity = 0;
+          // Remove translate animation
+          el._refs.wrapper.style.transition = "none";
+          if (el.pagingNode.style) {
+            el.pagingNode.style.transition = "none";
+          }
+          // Toggle full screen
+          if (activated) {
+            el._refs.parent.appendChild(el);
+            // Wait until swiper is re-appended
+            setTimeout(function () {
+              el.classList.remove("eon-swiper-fullscreen");
+            }, 30);
+          } else {
+            if (el.pagingNode.style) {
+              el.pagingNode.style.opacity = 0;
+            }
+            // Append swiper to the body
+            document.body.appendChild(el);
+            // Resize manually ** Fix no resize triggering
+            el.style.height = "99%";
+            // Wait for the thumbnail positioning before making the paging node visible
+            setTimeout(function () {
+              el.style.height = "100%";
+              if (el.pagingNode.style) {
+                el.pagingNode.style.opacity = 1;
+              }
+              el.classList.add("eon-swiper-fullscreen");
+            }, 30);
+          }
+          // Restore translate animation
+          setTimeout(function () {
+            el._refs.wrapper.style.transition = "transform " + el.transition + "ms";
+            if (el.pagingNode.style) {
+              el.pagingNode.style.transition = "transform " + el.transition + "ms";
+            }
+          }, 60);
+        },
+        /*
+          @function (private) _resizeFullScreenHandler
+          @description Update the full screen handler button dimensions
+          @param {Object} btn [Navigation button target]
+        */
+        resizeFullScreenHandler: function (btn) {
+          var el = this;
+          if (eon.util.isTrue(el.fullScreen) && eon.util.isTrue(el.navigation)) {
+            btn = !btn ? el.querySelector(".eon-swiper-screenBtn") : btn;
+            btn.style.opacity = 0;
+            var sizeProp = el.direction == "horizontal" ? "height" : "width";
+            var scrBtnSizeProp = sizeProp == "height" ? "offsetWidth" : "offsetHeight";
+            btn.style.width = el.nextBtn.node[scrBtnSizeProp] + "px";
+            btn.style.height = el.nextBtn.node[scrBtnSizeProp] + "px";
+            btn.style.opacity = 1;
+          }
+        },
+        /*
+          @function (private) _addSlideEventListeners
+          @description Create slide functionality event listeners
+        */
+        addSlideEventListeners: function () {
+          var el = this;
+          var mousedown, mousedownEvt, mousedownThrottled, throttled;
+          mousedown = mousedownThrottled = throttled = false;
+          var initialValue, moveValue, slideCounter, position, target, translatePixels;
+          var index, slideLimitValue, minTranslValue, elementTranslateMiddle, slide;
+          var delay = el._isTrickyBrowser() ? 10 : 0;
+          var axis = el.direction == "horizontal" ? "clientX" : "clientY";
+          if (!eon.util.isTrue(el.externalSlide)) {
+            // Start slide on mouse down event
+            el._refs.wrapper.addEventListener("pointerdown", function (e) {
+              // Fix pointerup stacked bug
+              // e.preventDefault();
+              // Check slide policy
+              mousedown = el._allowSlide(e.button, e.target);
+              // Slide complete trigger interval
+              el.slideTimeInterval = setInterval(function () {
+                slideCounter = !slideCounter ? 1 : slideCounter + 1;
+              }, 1);
+              if (mousedown) {
+                // ** Fix bad rendering while sliding bug on tricky browsers
+                el._refs.wrapper.style.transition = el._isTrickyBrowser() ? "none" : "transform " + el.transition + "ms";
+                // Get x/y value
+                initialValue = moveValue = e[axis];
+              }
+            }, false);
+            // Slide element on mouse move
+            el._refs.wrapper.addEventListener("pointermove", function (e) {
+              if (mousedown) {
+                if (slideCounter > 1) {
+                  // Get y/z translate pixels
+                  translatePixels = moveValue - e[axis];
+                  // Process position with the new movement values
+                  position = el._processPosition(el._refs.wrapper, translatePixels, "slides");
+                  // Translate element
+                  el._translate(el._refs.wrapper, position);
+                  if (translatePixels) {
+                    eon.triggerCallback("onDragStarted", el, el);
+                  }
+                  // Update initial move value
+                  moveValue = e[axis];
+                }
+              }
+            });
+            // Stop slide on mouse up
+            document.addEventListener("pointerup", function (e) {
+              // Make sure a movement has been fired
+              clearInterval(el.slideTimeInterval);
+              if (mousedown) {
+                // ** Fix bad rendering while sliding bug on tricky browsers
+                el._refs.wrapper.style.transition = "transform " + el.transition + "ms";
+                mousedown = false;
+                // Complete slide monitor
+                if (slideCounter < 50) {
+                  // Trigger complete slide
+                  if (moveValue < initialValue) {
+                    el.next();
+                  } else if (moveValue > initialValue) {
+                    el.prev();
+                  }
+                } else {
+                  // Get translate position
+                  position = el.direction == "horizontal"
+                    ? parseInt(el._refs.wrapper.style.transform.split(",")[0].split("(")[1])
+                    : parseInt(el._refs.wrapper.style.transform.split(",")[1]);
+                  // Get current element displayed index
+                  index = el.slides.indexOf(el.currentSlide);
+                  slideLimitValue = el._getNumProperty(el._misc.styleSizeProperty) / 2;
+                  minTranslValue = el._getNumProperty(el._misc.styleSizeProperty) * index;
+                  elementTranslateMiddle = -Math.abs(minTranslValue + slideLimitValue);
+                  // Get slide from translate position value
+                  slide = el._getPositionSlide(position, "slides");
+                  // Execute programmed slide
+                  if (position >= elementTranslateMiddle
+                    && el.slides.indexOf(el.currentSlide) != el.slides.indexOf(slide)
+                    && position > (slide.range[1] + (el._getNumProperty(el._misc.styleSizeProperty) / 2))) {
+                    // Slide back
+                    el.slideTo(index - 1);
+                  } else if (position >= elementTranslateMiddle) {
+                    // Stay on the current element
+                    el.slideTo(index);
+                  } else {
+                    // Slide to next element
+                    el.slideTo(index + 1);
+                  }
+                }
+              }
+              mousedown = false;
+              slideCounter = 0;
+              eon.triggerCallback("onDragStoped", el, el);
+            });
+          }
+        },
+        /*
+          @function (private) _getPositionSlide
+          @description Get slide element by index
+          @param {Number} position [Slide index position]
+          @param {Array} swipeElms [Slides array]
+          @return {Object} [Slide object reference]
+        */
+        getPositionSlide: function (position, swipeElms) {
+          var el = this;
+          var selElem, elm, i;
+          // Loop through swiper slider array
+          for (i = 0; i < el[swipeElms].length; i++) {
+            elem = el[swipeElms][i];
+            // Is position between range values
+            if (position > elem.range[1] && position <= elem.range[0]) {
+              selElem = elem;
               break;
             }
           }
-        }
-        return allow;
-      },
-      /*
-        @function (private) _hideNavBtn
-        @description Hide navigation button on edge slides
-        @param {Object} slide [Current view slide element]
-      */
-      hideNavBtn: function (slide) {
-        var el = this;
-        // Check if navigation controller exists
-        if (el.type == "gallery" && eon.util.isTrue(el.navigation)) {
-          var backBtnStyle = el.backBtn.node.style;
-          var nextBtnStyle = el.nextBtn.node.style;
-          if (el._isEdgeElement(null, slide)) {
-            // Hide secondary navigation button
-            backBtnStyle.opacity = ".5";
-          } else { backBtnStyle.opacity = backBtnStyle != "1" ? backBtnStyle = "1" : backBtnStyle }
-          if (el._isEdgeElement("start", slide)) {
-            // Hide first navigation button
-            nextBtnStyle.opacity = ".5";
-          } else { nextBtnStyle.opacity = nextBtnStyle != "1" ? nextBtnStyle = "1" : nextBtnStyle }
-        }
-      },
-      /*
-        @function (private) {Array} _formatArrayProperty
-        @description Format array property
-        @param {Array} prop [Property]
-      */
-      formatArrayProperty: function (prop) {
-        var el = this;
-        // Check preventClose property value
-        if (typeof prop == "string") {
-          // Convert value into an array
-          prop = el._getValueAsArray(prop);
-        }
-        return prop;
-      },
-      /*
-        @function (private) {Array} _getValueAsArray
-        @description Get value as array
-        @param {String} value [Array or String value to be processed]
-        @return {Array} [Resulting array]
-      */
-      getValueAsArray: function (value) {
-        var el = this;
-        var array = [];
-        // Check property value
-        if (typeof value == "string") {
-          // Convert value into an array
-          value = value.replace(/\s/g, '');
-          array = value.split(",");
-        }
-        return array[0] ? array : [];
-      },
-      /*
-        @function (private) {Boolean} _isTrickyBrowser
-        @description Get browsers with specific or unstandardized behavior
-        @return {Boolean} [Whether or not the system is running on a unstandardized behavior browser]
-      */
-      isTrickyBrowser: function () {
-        var browser = eon.util.getBrowser();
-        return browser === "IE" || browser === "Edge" || browser === "Firefox" || /iPad/.test(navigator.platform);
-      },
-      /*
-        @function (private) {Boolean} _keepInPlace
-        @description Called when the element is resized, keeps the current slide in its corresponding position
-        @param {Object} currentIndex [The index of the slide to translate to]
-      */
-      keepInPlace: function (currentIndex) {
-        var el = this;
-        // Get current slide index
-        // Get new y/z position
-        var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
-        var newPos = swiperHeight * (currentIndex);
-        // Translate element
-        el._translate(el._refs.wrapper, -newPos);
-      },
-      /*
-        @function (private) _setUpAuto
-        @description Set up the automatic playing behavior 
-      */
-      setUpAuto: function () {
-        var el = this;
-      },
-      /*
-        @function (private) _initAuto
-        @description Set up the automatic playing behavior 
-      */
-      initAuto: function () {
-        var el = this;
-        if (eon.util.isTrue(el.auto)) {
-          el.onSlidesReady(function () {
-
+          return selElem;
+        },
+        /*
+          @function (private) _isEdgeElement
+          @description Whether or not the current position is related to an edge slide
+          @param {Number} position [Source position]
+          @param {Object} slide [Target slide element]
+        */
+        isEdgeElement: function (position, slide) {
+          var el = this;
+          var sibling = !slide && el.currentSlide ? el.currentSlide.el.nextSibling : slide.el.nextSibling;
+          // Get the current swiper element
+          if (position == "start") {
+            return (sibling && sibling.tagName === "EON-SWIPER-SLIDE") ? false : true;
+          } else {
+            sibling = !slide && el.currentSlide ? el.currentSlide.el.previousSibling : slide.el.previousSibling;
+            return (sibling && sibling.tagName === "EON-SWIPER-SLIDE") ? false : true;
+          }
+        },
+        /*
+          @function (private) _translate
+          @description Move node a specified pixels distance
+          @param {Object} node [Target element]
+          @param {Number} distance [Translate pixel value]
+        */
+        translate: function (node, distance) {
+          var el = this;
+          // Set the new node translate position
+          if (el.direction == "horizontal") {
+            node.style.transform = "translate3d(" + distance + "px, 0px, 0px)";
+          } else {
+            node.style.transform = "translate3d(0px, " + distance + "px, 0px)";
+          }
+        },
+        /*
+          @function (private) _processPosition
+          @description Process a position value and add the new distance to be translate to
+          @param {Object} node [Translate target element]
+          @param {Number} pixels [Movement pixel value]
+          @param {String} slider [Target swiper element type]
+          @return {Number} [Processed position value]
+        */
+        processPosition: function (node, pixels, slider) {
+          var el = this;
+          // Get current translate value
+          var position = el.direction == "horizontal"
+            ? parseInt(node.style.transform.split(",")[0].split("\(")[1])
+            : parseInt(node.style.transform.split(",")[1]);
+          // Monitor node first position null value
+          position = !position ? 0 : position;
+          // Set translate x/y new value
+          position -= (pixels * (slider == "slides" ? el.slideDistance : el.thumbnailDistance));
+          // Check min and max translate limit values
+          var min = slider == "slides" ? 0 : el._misc.minPagingTranslation;
+          var max = slider == "slides" ? el._misc.maxTranslation : el._misc.maxPagingTranslation;
+          position = position > min ? min : position;
+          position = position < max ? max : position;
+          return position;
+        },
+        /*
+          @function (private) _append
+          @description Use internally when a slide is appended via html api
+          @param {Object} slide [Target slide element]
+        */
+        append: function (slide) {
+          var el = this;
+          var slideObj = el._createSlide(slide);
+          el._createThumbnail(slide, slideObj);
+          // Check if all initial slides have been appended
+          if (el.getSourceElements().length == el.slides.length) {
+            eon.triggerCallback("onSlidesReady", el, el, [el.slides]);
+          }
+          // Update max slide value
+          el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+        },
+        /*
+          @function (private) {Boolean} _allowSlide
+          @description Whether or not slide process should be triggered
+          @param {Number} btn [Pointer down event button pressed]
+          @param {Object} sliderNode [Pointer down target element]
+          @return {Boolean} [Slide permission]
+        */
+        allowSlide: function (btn, sliderNode) {
+          var el = this;
+          var allow = false;
+          // Check slide excluded nodes array
+          if (btn == 0 && (sliderNode != el.pagingNode
+            && !sliderNode.classList.contains("eon-swiper-thumbnail")
+            && !sliderNode.classList.contains("eon-swiper-pagination"))) {
+            allow = true;
+            // Loop through nodes excluded from triggering drawer displaying
+            for (var i = 0; i < el.excludedSliders.length; i++) {
+              excludedNode = el.querySelector(el.excludedSliders[i]);
+              if (excludedNode.isEqualNode(sliderNode) || excludedNode.isOnPath == true) {
+                allow = false;
+                break;
+              }
+            }
+          }
+          return allow;
+        },
+        /*
+          @function (private) _hideNavBtn
+          @description Hide navigation button on edge slides
+          @param {Object} slide [Current view slide element]
+        */
+        hideNavBtn: function (slide) {
+          var el = this;
+          // Check if navigation controller exists
+          if (el.type == "gallery" && eon.util.isTrue(el.navigation)) {
+            var backBtnStyle = el.backBtn.node.style;
+            var nextBtnStyle = el.nextBtn.node.style;
+            if (el._isEdgeElement(null, slide)) {
+              // Hide secondary navigation button
+              backBtnStyle.opacity = ".5";
+            } else { backBtnStyle.opacity = backBtnStyle != "1" ? backBtnStyle = "1" : backBtnStyle }
+            if (el._isEdgeElement("start", slide)) {
+              // Hide first navigation button
+              nextBtnStyle.opacity = ".5";
+            } else { nextBtnStyle.opacity = nextBtnStyle != "1" ? nextBtnStyle = "1" : nextBtnStyle }
+          }
+        },
+        /*
+          @function (private) {Array} _formatArrayProperty
+          @description Format array property
+          @param {Array} prop [Property]
+        */
+        formatArrayProperty: function (prop) {
+          var el = this;
+          // Check preventClose property value
+          if (typeof prop == "string") {
+            // Convert value into an array
+            prop = el._getValueAsArray(prop);
+          }
+          return prop;
+        },
+        /*
+          @function (private) {Array} _getValueAsArray
+          @description Get value as array
+          @param {String} value [Array or String value to be processed]
+          @return {Array} [Resulting array]
+        */
+        getValueAsArray: function (value) {
+          var el = this;
+          var array = [];
+          // Check property value
+          if (typeof value == "string") {
+            // Convert value into an array
+            value = value.replace(/\s/g, '');
+            array = value.split(",");
+          }
+          return array[0] ? array : [];
+        },
+        /*
+          @function (private) {Boolean} _isTrickyBrowser
+          @description Get browsers with specific or unstandardized behavior
+          @return {Boolean} [Whether or not the system is running on a unstandardized behavior browser]
+        */
+        isTrickyBrowser: function () {
+          var browser = eon.util.getBrowser();
+          return browser === "IE" || browser === "Edge" || browser === "Firefox" || /iPad/.test(navigator.platform);
+        },
+        /*
+          @function (private) {Boolean} _keepInPlace
+          @description Called when the element is resized, keeps the current slide in its corresponding position
+          @param {Object} currentIndex [The index of the slide to translate to]
+        */
+        keepInPlace: function (currentIndex) {
+          var el = this;
+          // Get current slide index
+          // Get new y/z position
+          var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
+          var newPos = swiperHeight * (currentIndex);
+          // Translate element
+          el._translate(el._refs.wrapper, -newPos);
+        },
+        /*
+          @function (private) _initAuto
+          @description Set up the automatic playing behavior 
+        */
+        initAuto: function () {
+          var el = this;
+          if (eon.util.isTrue(el.auto)) {
+  
             // Get number of slides that fit into the wrapper size
             el._misc.containingSlides = el._refs.wrapper[el._misc.sizeProperty] / el.slides[0].el[el._misc.sizeProperty];
             el._misc.containingSlides = Math.round(el._misc.containingSlides);
-
+  
             // Ge first and last shown
             if (el.autoType == "prev") {
               el._refs.lastVisible = el.currentSlide;
               el._refs.firstVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
-              // Adjust bad round calculation
-              if (~el.slides.indexOf(el._misc.containingSlides)) {
-              } else {
-                el._refs.firstVisible = el.slides[el.slides.length - 1];
-              }
+  
               // Trigger onSlideChange event
-              eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible.el, el._refs.lastVisible.el]);
+              eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
               // Init movement
               setTimeout(function () {
                 el.prev();
               }, el.duration);
-
+  
             } else {
               el._refs.firstVisible = el.currentSlide;
               el._refs.lastVisible = el.slides[el.slides.indexOf(el.currentSlide) + (el._misc.containingSlides - 1)];
-              // Adjust bad round calculation
-              if (~el.slides.indexOf(el._misc.containingSlides)) {
-              } else {
-                el._refs.lastVisible = el.slides[el.slides.length - 1];
-              }
+  
               // Trigger onSlideChange event
-              eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible.el, el._refs.lastVisible.el]);
+              eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
               // Init movement
               setTimeout(function () {
                 el.next();
               }, el.duration);
             }
-          });
-        }
-      },
-      /*
-        @function (private) {Boolean} _allInView
-        @description Check if the slides is inside the swiper boundaries
-        @return {Boolean} [Whether or not the slide is inside the swiper boundaries]
-      */
-      allInView: function () {
-        var el = this;
-        var slide = el.slides[el.slides.length - 1].el;
-        if (slide.getBoundingClientRect().left < el._refs.wrapper[el._misc.sizeProperty]) {
-          return true;
-        } else {
-          return false
-        }
-      },
-      /*
-        @function (private)  _createResizeFunction
-        @description Initialize de swiper resize function
-      */
-      createResizeFunction: function () {
-        var el = this;
-        el._misc.resizeFn = function () {
-          el.onSlidesReady(function () {
-            // Update maximum translation value
-            el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
-
-            // Update slides ranges
-            for (i = 0; i < el.slides.length; i++) {
-              el.slides[i] = el._updateSlideRange(el.slides[i], i);
-            }
-            //
-            el._updateThumbnailsSize();
-
-            // Translate current slide to its new centered position
-            el.currentSlide = el.currentSlide && !el.currentSlide.el ? el.slides[0] : el.currentSlide;
-            currentIndex = el.currentSlide ? el.slides.indexOf(el.currentSlide) : 0;
-
-            // TODO: This was triggering slide change every time the swiper was being resized
-            el._keepInPlace(currentIndex);
-
-            if (el.type == "gallery" && el.pagination != "hidden") {
-              el.onPagingReady(function () {
-                // Update thumbnail size reference
-                el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
-
-                // Update minimum paging translation
-                el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
-                // Update thumbnails ranges
-                if (el.thumbnails[0]) {
+          }
+        },
+        /*
+          @function (private) {Boolean} _allInView
+          @description Check if the slides is inside the swiper boundaries
+          @return {Boolean} [Whether or not the slide is inside the swiper boundaries]
+        */
+        allInView: function () {
+          var el = this;
+          var slide = el.slides[el.slides.length - 1].el;
+          if (slide.getBoundingClientRect().left < el._refs.wrapper[el._misc.sizeProperty]) {
+            return true;
+          } else {
+            return false
+          }
+        },
+        /*
+          @function (private)  _createResizeFunction
+          @description Initialize de swiper resize function
+        */
+        createResizeFunction: function () {
+          var el = this;
+          el._misc.resizeFn = function () {
+            el.onSlidesReady(function () {
+              // Update maximum translation value
+              el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+  
+              // Update slides ranges
+              for (i = 0; i < el.slides.length; i++) {
+                el.slides[i] = el._updateSlideRange(el.slides[i], i);
+              }
+              //
+              el._updateThumbnailsSize();
+  
+              // Translate current slide to its new centered position
+              el.currentSlide = el.currentSlide && !el.currentSlide.el ? el.slides[0] : el.currentSlide;
+              currentIndex = el.currentSlide ? el.slides.indexOf(el.currentSlide) : 0;
+  
+              // TODO: This was triggering slide change every time the swiper was being resized
+              el._keepInPlace(currentIndex);
+  
+              if (el.type == "gallery" && el.pagination != "hidden") {
+                el.onPagingReady(function () {
+                  // Update thumbnail size reference
                   el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
-                  for (i = 0; i < el.thumbnails.length; i++) {
-                    el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+  
+                  // Update minimum paging translation
+                  el._misc.minPagingTranslation = (el._getNumProperty(el._misc.styleSizeProperty, el.pagingNode.parentNode) / 2) - (10 + (el._misc.thumbnailSize / 2));
+                  // Update thumbnails ranges
+                  if (el.thumbnails[0]) {
+                    el._misc.thumbnailSize = el._getNumProperty(el._misc.styleSizeProperty, el.thumbnails[0].el);
+                    for (i = 0; i < el.thumbnails.length; i++) {
+                      el.thumbnails[i] = el._updateThumbnailRange(el.thumbnails[i], i);
+                    }
                   }
-                }
-                // Translate slide thumbnail to its new centered position
-                currentThumbnail = el.thumbnails[currentIndex];
-                if (el.type === "gallery") {
-                  el._translate(el.pagingNode, currentThumbnail.range[0]);
-                }
-
-                if (eon.util.isTrue(el.navigation)) {
-                  // Update navigation buttons position
-                  el._updateNavButtonSize();
-                }
-
-                el._decreaseNavButtonHeight(el.backBtn);
-                el._decreaseNavButtonHeight(el.nextBtn);
-              });
-            }
-            // Restore the parent reference avoiding parent nodes like document fragments
-            var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
-            if (!activated && el._refs.parent && el._refs.parent.nodeType == 11) {
-              el._refs.parent = el.parentNode;
-            }
-          });
-        }
-      }
-    },
-    functions: {
-      /*
-        @function next
-        @description Slide to the next slide element
-      */
-      next: function (cb) {
-        var el = this;
-        // Current child has a next sibling
-        if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("start")) {
-          // Update current element
-          var currentIndex = el.slides.indexOf(el.currentSlide);
-          el.currentSlide = el.slides[currentIndex + 1];
-          // Get new y/z position
-          var newPos = el.currentSlide.range[0];
-          // Translate element
-          el._translate(el._refs.wrapper, newPos);
-          // Activate slide related thumbnail
-          el._activateThumbnail(el.thumbnails[currentIndex + 1]);
-          // Trigger onSlideChange event
-          eon.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex + 1)]);
-        } else if (eon.util.isTrue(el.auto)) {
-          // Auto next functionality
-          el.nextAuto();
+                  // Translate slide thumbnail to its new centered position
+                  currentThumbnail = el.thumbnails[currentIndex];
+                  if (el.type === "gallery") {
+                    el._translate(el.pagingNode, currentThumbnail.range[0]);
+                  }
+  
+                  if (eon.util.isTrue(el.navigation)) {
+                    // Update navigation buttons position
+                    el._updateNavButtonSize();
+                  }
+  
+                  el._decreaseNavButtonHeight(el.backBtn);
+                  el._decreaseNavButtonHeight(el.nextBtn);
+                });
+              }
+              // Restore the parent reference avoiding parent nodes like document fragments
+              var activated = el.classList.contains("eon-swiper-fullscreen") ? true : false;
+              if(!activated && el._refs.parent && el._refs.parent.nodeType == 11) {
+                el._refs.parent = el.parentNode;
+              }
+            });
+          }
         }
       },
-      /*
-        @function nextAuto
-        @description 
-      */
-      nextAuto: function () {
-        var el = this;
-        // Trigger onNextCalled event
-        eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible.el, el._refs.lastVisible.el]);
-
-        var slide = el.slides[0];
-        slide.el.style.width = 0;
-
-        setTimeout(function () {
-          // Move element to the las of the queue
-          el.slides.push(el.slides.shift());
-          el._refs.wrapper.appendChild(slide.el);
-          slide.el.style[el._misc.styleSizeProperty] = el.slides[0].el.style[el._misc.styleSizeProperty];
-
-          // Update first and last shown
-          el._refs.firstVisible = el.slides[0];
-          el._refs.lastVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
-        }, el.transition);
-
-        setTimeout(function () {
-          el.next();
-        }, el.duration);
-      },
-      /*
-        @function prev
-        @description Slide to the previous slide element
-      */
-      prev: function () {
-        var el = this;
-        // Current child has a next sibling
-        if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("end")) {
-          // Update current element
-          var currentIndex = el.slides.indexOf(el.currentSlide);
-          el.currentSlide = el.slides[currentIndex - 1];
-          // Get new y/z position
-          var newPos = el.currentSlide.range[0];
-          // Translate element
-          el._translate(el._refs.wrapper, newPos);
-          // Activate slide related thumbnail
-          el._activateThumbnail(el.thumbnails[currentIndex - 1]);
-          // Trigger onSlideChange event
-          eon.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex - 1)]);
-        } else if (eon.util.isTrue(el.auto)) {
-          // Auto next functionality
-          el.prevAuto();
-        }
-      },
-      /*
-        @function prevAuto
-        @description 
-      */
-      prevAuto: function () {
-        var el = this;
-        // Trigger onNextCalled event
-        eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible.el, el._refs.lastVisible.el]);
-
-        var slide = el.slides[0];
-        slide.el.style.width = 0;
-
-        setTimeout(function () {
-          // Move element to the las of the queue
-          el.slides.unshift(el.slides.pop());
-          el._refs.wrapper.appendChild(slide.el);
-          slide.el.style[el._misc.styleSizeProperty] = el.slides[0].el.style[el._misc.styleSizeProperty];
-
-          // Update first and last shown
-          el._refs.lastVisible = el.slides[0];
-          el._refs.firstVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
-        }, el.transition);
-
-        setTimeout(function () {
-          el.prev();
-        }, el.duration);
-      },
-      /*
-        @function slideTo
-        @description Slide to the previous slide element
-        @param {Number} index [Translate target slide index]
-      */
-      slideTo: function (index, cancelAnim) {
-        var el = this;
-        // Get current slide index
-        var currentIndex = el.slides.indexOf(el.currentSlide);
-        // Update current element
-        el.currentSlide = el.slides[index];
-        // Get new y/z position
-        var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
-        var newPos = swiperHeight * (index);
-        // Cancel animation 
-        if (cancelAnim) {
-          var currentTransition = el._refs.wrapper.style.transition;
-          el._refs.wrapper.style.transition = "none";
-        }
-        // Translate element
-        el._translate(el._refs.wrapper, -newPos);
-        if (cancelAnim) {
+      functions: {
+        /*
+          @function next
+          @description Slide to the next slide element
+        */
+        next: function (cb) {
+          var el = this;
+          // Current child has a next sibling
+          if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("start")) {
+            // Update current element
+            var currentIndex = el.slides.indexOf(el.currentSlide);
+            el.currentSlide = el.slides[currentIndex + 1];
+            // Get new y/z position
+            var newPos = el.currentSlide.range[0];
+            // Translate element
+            el._translate(el._refs.wrapper, newPos);
+            // Activate slide related thumbnail
+            el._activateThumbnail(el.thumbnails[currentIndex + 1]);
+            // Trigger onSlideChange event
+            eon.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex + 1)]);
+          } else if (eon.util.isTrue(el.auto)) {
+            // Auto next functionality
+            el.nextAuto();
+          }
+        },
+        /*
+          @function nextAuto
+          @description 
+        */
+        nextAuto: function () {
+          var el = this;
+          // Trigger onNextCalled event
+          eon.triggerCallback("onNextCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
+  
+          var slide = s3.slides[0];
+          slide.el.style.width = 0;
+  
           setTimeout(function () {
-            el._refs.wrapper.style.transition = currentTransition;
-          }, 0);
+            // Move element to the las of the queue
+            s3.slides.push(s3.slides.shift());
+            s3._refs.wrapper.appendChild(slide.el);
+            slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
+  
+            // Update first and last shown
+            el._refs.firstVisible = el.slides[0];
+            el._refs.lastVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
+          }, el.transition);
+  
+          setTimeout(function () {
+            el.next();
+          }, el.duration);
+        },
+        /*
+          @function prev
+          @description Slide to the previous slide element
+        */
+        prev: function () {
+          var el = this;
+          // Current child has a next sibling
+          if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("end")) {
+            // Update current element
+            var currentIndex = el.slides.indexOf(el.currentSlide);
+            el.currentSlide = el.slides[currentIndex - 1];
+            // Get new y/z position
+            var newPos = el.currentSlide.range[0];
+            // Translate element
+            el._translate(el._refs.wrapper, newPos);
+            // Activate slide related thumbnail
+            el._activateThumbnail(el.thumbnails[currentIndex - 1]);
+            // Trigger onSlideChange event
+            eon.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex - 1)]);
+          } else if (eon.util.isTrue(el.auto)) {
+            // Auto next functionality
+            el.prevAuto();
+          }
+        },
+        /*
+          @function prevAuto
+          @description 
+        */
+        prevAuto: function () {
+          var el = this;
+          // Trigger onNextCalled event
+          eon.triggerCallback("onPrevCalled", el, el, [el._refs.firstVisible, el._refs.lastVisible]);
+  
+          var slide = s3.slides[0];
+          slide.el.style.width = 0;
+  
+          setTimeout(function () {
+            // Move element to the las of the queue
+            s3.slides.unshift(s3.slides.pop());
+            s3._refs.wrapper.appendChild(slide.el);
+            slide.el.style[el._misc.styleSizeProperty] = s3.slides[0].el.style[el._misc.styleSizeProperty];
+  
+            // Update first and last shown
+            el._refs.lastVisible = el.slides[0];
+            el._refs.firstVisible = el.slides[el.slides.indexOf(el.firstVisible) + (el._misc.containingSlides - 1)];
+          }, el.transition);
+  
+          setTimeout(function () {
+            el.prev();
+          }, el.duration);
+        },
+        /*
+          @function slideTo
+          @description Slide to the previous slide element
+          @param {Number} index [Translate target slide index]
+        */
+        slideTo: function (index, cancelAnim) {
+          var el = this;
+          // Get current slide index
+          var currentIndex = el.slides.indexOf(el.currentSlide);
+          // Update current element
+          el.currentSlide = el.slides[index];
+          // Get new y/z position
+          var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
+          var newPos = swiperHeight * (index);
+          // Cancel animation 
+          if (cancelAnim) {
+            var currentTransition = el._refs.wrapper.style.transition;
+            el._refs.wrapper.style.transition = "none";
+          }
+          // Translate element
+          el._translate(el._refs.wrapper, -newPos);
+          if (cancelAnim) {
+            setTimeout(function () {
+              el._refs.wrapper.style.transition = currentTransition;
+            }, 0);
+          }
+          // Activate slide related thumbnail
+          el._activateThumbnail(el.thumbnails[index]);
+          // Trigger onSlideChange event
+          eon.triggerCallback("onSlideChange", el, el, [currentIndex, index]);
+        },
+        /*
+          @function add
+          @description Add swiper slide element
+          @param {Object} slide [Slide element to be appended]
+        */
+        add: function (slide) {
+          var el = this;
+          var slideFragment = document.createDocumentFragment();
+          slideFragment.appendChild(slide);
+          if (!el._refs.wrapper) {
+            el.appendChild(slideFragment);
+          } else {
+            el._refs.wrapper.appendChild(slideFragment);
+            // Update max slide value
+            el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+          }
         }
-        // Activate slide related thumbnail
-        el._activateThumbnail(el.thumbnails[index]);
-        // Trigger onSlideChange event
-        eon.triggerCallback("onSlideChange", el, el, [currentIndex, index]);
       },
-      /*
-        @function add
-        @description Add swiper slide element
-        @param {Object} slide [Slide element to be appended]
-      */
-      add: function (slide) {
+      onCreated: function () {
         var el = this;
-        var slideFragment = document.createDocumentFragment();
-        slideFragment.appendChild(slide);
-        if (!el._refs.wrapper) {
-          el.appendChild(slideFragment);
-        } else {
-          el._refs.wrapper.appendChild(slideFragment);
-          // Update max slide value
-          el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+        // Swiper events
+        eon.createCallback("onSlideChange", el);
+        eon.createCallback("onDragStarted", el);
+        eon.createCallback("onDragStoped", el);
+        eon.createCallback("onPrevCalled", el);
+        eon.createCallback("onNextCalled", el);
+        eon.createCallback("onSwipeEnd", el);
+        // ** Internally used
+        eon.createCallback("onPagingReady", el, "ready");
+        eon.createCallback("onSlidesReady", el, "ready");
+        // Event target path monitor
+        eon.registerPathListener(el);
+      },
+      onInit: function () {
+        var el = this;
+        // ** Apply default items positioning style
+        el._setDefaultStyle();
+        // Set default font color
+        el.classList.add("eon-fg1");
+        // Pointer events attribute required
+        el.setAttribute("touch-action", "pan-y");
+        if (el.direction == "vertical") {
+          el.setAttribute("touch-action", "pan-x");
         }
-      }
-    },
-    onCreated: function () {
-      var el = this;
-      // Swiper events
-      eon.createCallback("onSlideChange", el);
-      eon.createCallback("onDragStarted", el);
-      eon.createCallback("onDragStoped", el);
-      eon.createCallback("onPrevCalled", el);
-      eon.createCallback("onNextCalled", el);
-      eon.createCallback("onSwipeEnd", el);
-      // ** Internally used
-      eon.createCallback("onPagingReady", el, "ready");
-      eon.createCallback("onSlidesReady", el, "ready");
-      // Event target path monitor
-      eon.registerPathListener(el);
-    },
-    onInit: function () {
-      var el = this;
-      // ** Apply default items positioning style
-      el._setDefaultStyle();
-      // Set default font color
-      el.classList.add("eon-fg1");
-      // Pointer events attribute required
-      el.setAttribute("touch-action", "pan-y");
-      if (el.direction == "vertical") {
-        el.setAttribute("touch-action", "pan-x");
-      }
-      // Set up swiper
-      el._setUp();
-      // Swiper elements container
-      var fragment = document.createDocumentFragment();
-      setTimeout(() => {
-        // Build main swiper structure
-        el._buildWrapper(fragment);
-        // Build swiper pagination controller
-        el._buildPagination(fragment);
-        // Insert gallery navigation
-        el._setUpNavigation(fragment);
-        el.appendChild(fragment);
-      }, 0);
-    },
-    onTransformed: function () {
-      var el = this;
-      // Configure slide events
-      el._addSlideEventListeners();
-      // Configure full screen mode
-      el._addFullScreenListener();
-      // Make sure slides are created before the initial slide translation
-      el.onSlidesReady(function () {
-        el.currentSlide = el.slides[el.initialSlide];
-        el.slideTo(el.initialSlide);
-      });
-      el._misc.loaded = true;
-      el._createResizeFunction();
-    },
-    onBubbleRender: function () {
-      var el = this;
-      // Set up auto functionality
-      el._initAuto();
-      el._setUpAuto();
-      el._misc.resizeFn();
-      // Get swiper parent node for fullscreen purposes
-      el._refs.parent = el.parentNode;
-    },
-    onResize: function () {
-      var el = this;
-      // Throttle event triggering for better performance
-      var throttled = false;
-      var delay = 20;
-      var currentIndex, currentThumbnail, i;
-      if (!throttled) {
-        el._misc.resizeFn();
-        // Throttle
-        throttled = true;
-        // Set a timeout to un-throttle
-        setTimeout(function () {
-          throttled = false;
-        }, delay);
-      }
-    },
-    onPropertyChanged: function (prop, oldValue, value) {
-      var el = this;
-      if (prop == "currentSlide") {
+        // Set up swiper
+        el._setUp();
+        // Swiper elements container
+        var fragment = document.createDocumentFragment();
+        setTimeout(() => {
+          // Build main swiper structure
+          el._buildWrapper(fragment);
+          // Build swiper pagination controller
+          el._buildPagination(fragment);
+          // Insert gallery navigation
+          el._setUpNavigation(fragment);
+          el.appendChild(fragment);
+        }, 0);
+      },
+      onTransformed: function () {
+        var el = this;
+        // Configure slide events
+        el._addSlideEventListeners();
+        // Configure full screen mode
+        el._addFullScreenListener();
+        // Make sure slides are created before the initial slide translation
         el.onSlidesReady(function () {
-          // Select related thumbnail
-          var thumbnail = el.thumbnails[el.slides.indexOf(value)];
-          // Activate thumbnail on swiper current slide change
-          el._activateThumbnail(thumbnail);
-          // Disable navigation button on limit reached
-          el._hideNavBtn(value);
+          el.currentSlide = el.slides[el.initialSlide];
+          el.slideTo(el.initialSlide);
         });
-      };
-    }
-  });
-</script>
+        el._misc.loaded = true;
+        el._createResizeFunction();
+      },
+      onBubbleRender: function () {
+        var el = this;
+        // Set up auto functionality
+        el._initAuto();
+        el._misc.resizeFn();
+        // Get swiper parent node for fullscreen purposes
+        el._refs.parent = el.parentNode;
+      },
+      onResize: function () {
+        var el = this;
+        // Throttle event triggering for better performance
+        var throttled = false;
+        var delay = 20;
+        var currentIndex, currentThumbnail, i;
+        if (!throttled) {
+          el._misc.resizeFn();
+          // Throttle
+          throttled = true;
+          // Set a timeout to un-throttle
+          setTimeout(function () {
+            throttled = false;
+          }, delay);
+        }
+      },
+      onPropertyChanged: function (prop, oldValue, value) {
+        var el = this;
+        if (prop == "currentSlide") {
+          el.onSlidesReady(function () {
+            // Select related thumbnail
+            var thumbnail = el.thumbnails[el.slides.indexOf(value)];
+            // Activate thumbnail on swiper current slide change
+            el._activateThumbnail(thumbnail);
+            // Disable navigation button on limit reached
+            el._hideNavBtn(value);
+          });
+        };
+      }
+    });
+  </script>

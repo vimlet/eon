@@ -874,7 +874,7 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
 ^[eon-scroll API](#!version=latest&mode=api&file=ui%2Feon-panel%2Feon-panel.html)
 
 
-Custom scrollbar with different options to have different behaviors from the native one.
+Custom scrollbar with multiple options to have different behaviors from the native one.
 
 *(
 <doc-playground label="Common usage" format="true" html="true" js="true" css="true" selector="body" format="true">
@@ -910,7 +910,7 @@ Custom scrollbar with different options to have different behaviors from the nat
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase label="Closable and Draggable">
+    <doc-showcase>
       <eon-scroll fill="true" arrow-scrolls="true" rail-scrolls="true">
       <div style="width: 100%; color: #d3d3d3;">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas et placerat nulla, at suscipit lorem. Nulla ac elementum quam, rhoncus interdum quam. Morbi volutpat mauris eu lectus consequat sollicitudin. Curabitur eu odio maximus, consectetur quam vitae, vestibulum erat. Cras id rutrum ligula. Vestibulum viverra libero dui, non elementum erat porttitor ullamcorper. Donec euismod fringilla arcu, quis lacinia urna volutpat id. Quisque eget pellentesque arcu, sit amet blandit nisi. Donec eu maximus ex, at elementum est. Etiam consequat vestibulum justo, facilisis aliquet nisi sodales nec. Donec rutrum pulvinar justo, nec pharetra felis fringilla ac. Aliquam posuere gravida erat et tristique. In congue felis sit amet suscipit pharetra. Vestibulum volutpat non diam imperdiet sodales. Donec vitae tempor turpis.<br><br>
