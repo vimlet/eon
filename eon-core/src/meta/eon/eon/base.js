@@ -21,7 +21,7 @@ eon.getCurrentScript = function() {
   };
   
   eon.__setBase = function() {
-    var path = eon.getCurrentScript().replace("/eon.js", "");
+    var path = eon.getCurrentScript().replace(new RegExp("(\\/[^\\/]+)\\/?$"), "");
     path = path.replace(/.*:\/\//g, "");
     path = path.split("/");
     path = path.slice(1, path.length);
