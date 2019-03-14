@@ -1,11 +1,9 @@
-const { registerSuite } = intern.getInterface("object");
+const { suite, test } = intern.getInterface("tdd");
 const { assert } = intern.getPlugin("chai");
 
-registerSuite("Gutter Suite", {
-    testPage: function () {
-        // Leadfoot API: https://theintern.io/leadfoot  
-        return this.remote.get(intern.config.remoteUrl + "/tests/ui/gutter.html").sleep(500).executeAsync(function (callback) {
-
+suite("hello", () => {
+    test("greet", ({ remote }) => {
+        return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
             // Example of internTest function:
             // -------------------------------
             // function internTest(callback) {
@@ -18,7 +16,8 @@ registerSuite("Gutter Suite", {
             internTest(callback);
         }).then(function (value) {
             // value is the returned value of internTest callback
-            assert.strictEqual(value, true);
+            assert.strictEqual(value, "Hello, Murray!", "greet should return a greeting for the person named in the first argument");
         });
-    }
+
+    });
 });
