@@ -672,14 +672,246 @@ The Headerpanel element works as a simple container but provides a bunch of prop
 ^[eon-panel API](#!version=latest&mode=api&file=ui%2Feon-panel%2Feon-panel.html)
 
 
-Panel is the basic container element. It has no associated style so it is completely customizable in terms of layout. Provides a huge control over its content elements rendering, allowing on demand content or partial content loading.
+Panel is the basic container element. It has no associated style so it is completely customizable in terms of layout. 
+
+You can use it as a part of a flex based layout.
 
 *(
-<doc-playground label="Panels" format="true" html="true" js="true" css="true" selector="body" format="true">
+<doc-playground label="Simple Panels" format="true" html="true" js="true" css="true" selector="body" format="true">
   <template type="html-head">
     <script>
       var eon = {
         cacheBusting: true
+      }
+      eon.themeSchema = {
+        claro: ["eon-panel"]
+      }
+    </script>
+    <script src='framework/doc-eon/eon/eon.js'></script>
+    <script>
+      eon.import([
+        'framework/doc-eon/eon/ui/eon-button',
+        'framework/doc-eon/eon/ui/eon-panel',
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
+      ]);
+    </script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 430px) {
+        doc-showcase {
+          width: calc(100% - 40px);
+        }
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <doc-showcase label="Flex Layout">
+      <eon-panel class="panel" fill="false" allow-scroll="false">
+        <eon-panel class="panel-children" fill="false" allow-scroll="false">
+          <eon-panel class="panel-children mid-width black eon-boxshadow1 animated" content-class="panel" fill="false"
+            allow-scroll="false"></eon-panel>
+          <eon-panel class="panel-children mid-width grey" fill="false" allow-scroll="false">
+            <eon-panel class="panel-children mid-width mid-height blue eon-boxshadow1 animated" fill="false"
+              allow-scroll="false"></eon-panel>
+            <eon-panel class="panel-children mid-width mid-height blue eon-boxshadow1 animated" fill="false"
+              allow-scroll="false"></eon-panel>
+          </eon-panel>
+        </eon-panel>
+        <eon-panel class="panel-children row-reverse" fill="false" allow-scroll="false">
+          <eon-panel class="panel-children mid-width red eon-boxshadow1 animated" fill="false" allow-scroll="false"></eon-panel>
+          <eon-panel class="panel-children mid-width grey" fill="false" allow-scroll="false">
+            <eon-panel class="panel-children mid-width mid-height blue eon-boxshadow1 animated" fill="false"
+              allow-scroll="false"></eon-panel>
+            <eon-panel class="panel-children mid-width mid-height blue eon-boxshadow1 animated" fill="false"
+              allow-scroll="false"></eon-panel>
+          </eon-panel>
+        </eon-panel>
+      </eon-panel>
+    </doc-showcase>
+  </template>
+  <template type="css">
+    eon-panel {
+      transition: transform .2s, background-color .2s;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+    eon-panel.animated:hover {
+      transform: translateZ(0) scale(.96);
+      box-shadow: none;
+      cursor: pointer;
+    }
+    .panel {
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+      max-width: 400px;
+      width: 400px;
+      overflow: hidden;
+    }
+    .panel-children {
+      display: flex;
+      height: calc(100% - 10px);
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .row-reverse {
+      flex-direction: row-reverse;
+    }
+    .mid-width {
+      width: calc(50% - 5px);
+    }
+    .mid-height {
+      height: calc(50% - 5px);
+    }
+
+    .grey {
+      background-color: #f5f5f5;
+    }
+    .blue {
+      background-color: #7296bb;
+    }
+    .red {
+      background-color: #b36a6a;
+    }
+    .brown {
+      background-color: #bb9772;
+    }
+    .black {
+      background-color: #696969;
+    }
+  </template>
+  <template type="js">
+    /* ** Bug on this doc version
+    eon.onReady(function () {
+      var panels = $("eon-panel");
+      var colors = ["#b74747", "#696969", "#8c47b7", "#bb9772", "#b36a6a", "#7296bb", "#76bb72"];
+      
+      for (var i in panels) {
+        var panel = panels[i];
+        console.log(panel)
+        if (panel.classList && panel.classList.contains("eon-boxshadow1")) {
+          panel.addEventListener("click", function (e) {
+            var color = Math.floor((Math.random() * 6) + 1);
+            this.style.backgroundColor = colors[color];
+          }, false);
+        }
+      }
+    });*/
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+## Header panel
+Panel allows you a way to add a simple title header to your panel that reacts to a content scroll 
+triggering.
+
+
+*(
+<doc-playground label="Header Panels" format="true" html="true" js="true" css="true" selector="body" format="true">
+  <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+       eon.themeSchema = {
+        claro: ["eon-panel"]
+      }
+    </script>
+    <script src='framework/doc-eon/eon/eon.js'></script>
+    <script>
+      eon.import([
+        'framework/doc-eon/eon/ui/eon-panel',
+        'framework/doc-eon/custom/doc-playground/doc-showcase'
+      ])
+    </script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 430px) {
+        doc-showcase {
+          width: calc(100% - 40px);
+        }
+      }
+    </style>
+  </template>
+  <template type="html-body">
+    <doc-showcase label="Simple Header">
+      <eon-panel default-style="false" class="header-panel" fill="false" 
+          scroll-fill="true" >
+        <eon-section type="header">
+          <span>Squares</span>
+        </eon-section>
+        <eon-section type="content">
+          <div class="header-panel-square blue"></div>
+          <div class="header-panel-square blue"></div>
+          <div class="header-panel-square blue"></div>
+          <div class="header-panel-square blue"></div>
+        </eon-section>
+      </eon-panel>
+    </doc-showcase>
+    <doc-showcase label="Growing Header">
+      <eon-panel default-style="false" class="header-panel" fill="false" 
+          scroll-fill="true" >
+        <eon-section type="header" grow="true">
+          <span>Squares</span>
+        </eon-section>
+        <eon-section type="content">
+          <div class="header-panel-square brown"></div>
+          <div class="header-panel-square brown"></div>
+          <div class="header-panel-square brown"></div>
+          <div class="header-panel-square brown"></div>
+        </eon-section>
+      </eon-panel>
+    </doc-showcase>
+  </template>
+  <template type="css">
+    .header-panel {
+      height: 220px;
+      width: 200px;
+    }
+    .header-panel-square {
+      width: 100%;
+      height: 100px;
+      margin-top: 12px;
+      transition: all .2s;
+    }
+    .brown {
+      background-color: #bb9772;
+    }
+    .blue {
+      background-color: #7296bb;
+    }
+    .red {
+      background-color: #b36a6a;
+    }
+  </template>
+  <template type="footer">
+    {"button":{"action":"changeTheme", "icon":"theme"}}
+  </template>
+</doc-playground>
+)*
+
+## Remote functionality
+Panel provides a huge control over its content elements rendering, allowing on demand content or partial content loading.
+
+*(
+<doc-playground label="Remote content" format="true" html="true" js="true" css="true" selector="body" format="true">
+  <template type="html-head">
+    <script>
+      var eon = {
+        cacheBusting: true
+      }
+       eon.themeSchema = {
+        claro: ["eon-panel"]
       }
     </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
@@ -710,12 +942,6 @@ Panel is the basic container element. It has no associated style so it is comple
     </style>
   </template>
   <template type="html-body">
-    <doc-showcase label="On demand import">
-      <eon-button class="panel-button" value="Import lazy" onclick="importRemote()"></eon-button>
-      <eon-panel id="lazy-remote" class="panel" default-style="false" fill="false" allow-scroll="false" href="framework/doc-eon/resources/data/panel/lazyContent.html" lazy-load="true">
-        <div class="panel-content place-holder" style="box-shadow: none;">No content here</div>
-      </eon-panel>
-    </doc-showcase>
     <doc-showcase label="On demand rendering">
       <eon-button class="panel-button" inline="true" value="Render lazy" onclick="renderLazy()"></eon-button>
       <eon-panel id="lazy-content" class="panel" default-style="false" fill="false" allow-scroll="false">
@@ -731,8 +957,8 @@ Panel is the basic container element. It has no associated style so it is comple
   <template type="css">
     .panel {
       flex-direction: column;
-        min-width: 350px;
-        height: 100px;
+      min-width: 350px;
+      height: 100px;
     }
     .panel-content {
       height: 100px;
@@ -779,7 +1005,6 @@ Panel is the basic container element. It has no associated style so it is comple
   </template>
 </doc-playground>
 )*
-
 
 All the elements not surrounded by the template tag will render normally. 
 For further implementation, you can use as many templates as you need to manage lazy content inside a single eon-panel.
@@ -829,16 +1054,16 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
   <template type="html-body">
     <doc-showcase label="Closable and Draggable">
       <eon-tabs class="d-tabs" dragging="true" closable="true">
-          <eon-panel default-style="false" name="Help" tab-title="Blue">
-            <div class="d-tabs-content blue"></div>
-          </eon-panel>
-          <eon-panel default-style="false" name="serverStart" tab-title="Green">
-            <div class="d-tabs-content green"></div>
-          </eon-panel>
-          <eon-panel default-style="false" name="build" tab-title="Red">
-            <div class="d-tabs-content red"></div>
-          </eon-panel>
-        </eon-tabs>
+        <eon-panel default-style="false" name="Help" tab-title="Blue">
+          <div class="d-tabs-content blue"></div>
+        </eon-panel>
+        <eon-panel default-style="false" name="serverStart" tab-title="Green">
+          <div class="d-tabs-content green"></div>
+        </eon-panel>
+        <eon-panel default-style="false" name="build" tab-title="Red">
+          <div class="d-tabs-content red"></div>
+        </eon-panel>
+      </eon-tabs>
     </doc-showcase>
   </template>
   <template type="css">
