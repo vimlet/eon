@@ -6,24 +6,53 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Page Title</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script>
-    var greet = function (name) {
-      if (!name) {
-        name = "world";
-      }
-      return "Hello, " + name + "!";
-    };
 
-    function internTest(callback) {
-      setTimeout(function () {
-        callback(greet("Murray"));
-      }, 1000);
-    }
+  <script>
+    var testData = {};
   </script>
+
+  <script src="eon/eon.js"></script>
+
+  <script>
+    eon.import("eon/ui/eon-component-1");
+  </script>
+
 </head>
 
 <body>
-  Test Page
+
+  <eon-component-1 label="Label"></eon-component-1>
+
+  <script>
+
+    // Tests that onPropertyChanged is triggered properly
+    function dependenciesTest(callback) {
+      
+      eon.onImportsReady(function () {
+        // We know that for this scenario the are only 4 imported components, 2 of them being included as part of eon, 
+        // the component that we are importing (eon-component-1) and its dependency (eon-component-2)
+          callback(Object.keys(eon.imports.config).length == 4);
+      });
+
+    }
+
+    // Tests that onPropertyChanged is triggered properly
+    function propertyChangedTest(callback) {
+      
+      var component = document.querySelector("eon-component-1");
+
+      component.onPropertyChanged(function (property, oldVal, newVal) {
+        callback(property == "label");
+      });
+
+      component.onReady(function () {
+        component.label = "Changed Label";
+      });
+
+    }
+
+  </script>
+
 </body>
 
 </html>
