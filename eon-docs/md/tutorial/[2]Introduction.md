@@ -21,45 +21,59 @@ Please note this are conceptual definitions, all components are handled in the s
 
 By splitting a complex problem such as an application in small parts or components we can tackle each of them individually, making development cleaner and faster since each part solves an specific part of the puzzle, which can be improved and reused to perfection.
 
-[Usage]<>
-
-Eon imported components can be added **declaratively** using html tags or **programmatically** creating and appending elements to the DOM with javascript.
-
-## Import
+[Imports]<>
 
 In order to be able to use Eon components, first they must be imported, since this operation is fully asynchronous its recommended to declare component imports on the `head` section. You may access to the wide library of components under the `ui` directory or any other custom element in a directory of your choice.
 
+To import a Eon component, simply call the **eon.import(path)** function with the component **relative path** as the argument. 
+
+**Things to have in mind while importing Eon components:**
+
+- Always import components inside head tags when possible.
+- The path argument accepts both, a single path or an array of paths.
+- The path argument can be both an .html file or a directory, as long as that directory contains an .html file with the same name.
+- The path is always relative to the eon.basePath, which defaults to eon.js file.
+- The .html filename, must mach the custom element tag name.
+
+These are all **valid** ways of importing the same file:
+
+File path:
 ```[html]
-<!DOCTYPE html>
-<html>
-<head>
-<title>Page Title</title>
-
 <script>
-  eon.import("eon/ui/eon-button.html");
-</script>
-
-...
+  eon.import("eon/ui/eon-button/eon-button.html");
+</script
 ```
 
-Although the import function can be called multiple times its recommend to follow the following array pattern.
-
+Directory path:
 ```[html]
-<!DOCTYPE html>
-<html>
-<head>
-<title>Page Title</title>
-
+<script>
+  eon.import("eon/ui/eon-button");
+</script
+```
+Array of paths:
+```[html]
 <script>
   eon.import([
-    "eon/ui/eon-button.html", 
-    "eon/ui/eon-dialog.html", 
-    "eon/ui/eon-text.html"
+    "eon/ui/eon-button"
+    ]);
+</script
+```
+
+Although the import function can be called multiple times its recommend to use the array pattern instead.
+
+```[html]
+<script>
+  eon.import([
+    "eon/ui/eon-button", 
+    "eon/ui/eon-dialog", 
+    "eon/ui/eon-text"
     ]);
 </script>
-
-...
 ```
+
+[Usage]<>
+
+Eon imported components can be used **declaratively** using html tags or **programmatically** creating and appending elements to the DOM with javascript.
 
 ## Declarative
 
@@ -67,13 +81,9 @@ To use Eon components declaratively simply use their name tag as any other regul
 
 ```[html]
 <body>
-...
-
   <eon-button></eon-button>
-
-...
+</body>
 ```
-
 
 
 ## Programmatically
@@ -112,7 +122,7 @@ Eon comes with a full set of well tested and flexible components that will cover
 1. Create an empty html file in the desired directory, note `filename must match the tag name of your component in lowercase with at least one hyphen`.
 
 ```
-ui-custom/my-element.html
+custom/custom-element/custom-element.html
 ```
 
 2. Add `<template>` tag with the desired layout of your component, this is the default content of your vComent component
@@ -127,7 +137,7 @@ ui-custom/my-element.html
 
 ```[html]
 <script>
-  eon.element("my-element");
+  eon.element("custom-element");
 </script>
 ```
 
@@ -135,18 +145,18 @@ ui-custom/my-element.html
 
 ```[html]
 <style>
-  my-element {
+  custom-element {
     color: blue;
   }
 </style>
 ```
 
-The resultant file `ui-custom/my-element.html` will look something like this:
+The resultant file `custom/custom-element/custom-element.html` will look something like this:
 
 
 ```[html]
 <style>
-  my-element {
+  custom-element {
     color: blue;
   }
 </style>
@@ -156,7 +166,7 @@ The resultant file `ui-custom/my-element.html` will look something like this:
 </template>
 
 <script>
-  eon.element("my-element");
+  eon.element("custom-element");
 </script>
 
 ```
@@ -178,8 +188,8 @@ There are other options to declare the component:
 <script>
   eon.element({
 
-    name: "my-element",
-    style: "my-element.css"
+    name: "custom-element",
+    style: "custom-element.css"
 
     properties: {
       customProperty: "I'm a custom property"
@@ -226,7 +236,7 @@ Events by execution order:
 
 Recurrent events might be triggered more than once:
 
-- **onResize** - Adds a resize listener element and triggers and gets triggered everytime the size changes. 
+- **onResize** - Adds a resize listener element and triggers and gets triggered every time the size changes. 
 
 - **onWindowResize** - Triggers each time window is resized.
 

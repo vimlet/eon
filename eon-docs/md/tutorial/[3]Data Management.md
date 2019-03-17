@@ -134,21 +134,19 @@ graphSockets.subscribe(query);
 These have been de main actions the endpoint tool offers. It is important to realize, even if it goes without saying, that all these client-side approaches need a backend implementation to work in a real situation that is foreign to these examples.
 
 [Store]<>
-The Eon store tool is basically a data container that provides a CRUD API for handling its data.
+The Eon store tool is basically a data container that provides a CRUD API for handling its data. It normalizes how components access data granting a uniform layer of interaction. 
 
 ```[javascript]
 var store = new eon.store();
 store.data = new Map();
 ```
 
-The store is based on the Javascript `Map` object to warehouse the data. You might be thinking why this little layer of complexity. There are two main issues you won't deal with `Objects` or `Arrays` in Javascript:
+The store uses Javascript `Map` to warehouse the data, which similar to `Object`, can hold keys and values, but has many advantages over a plain `Object`.
 
-- The associative behavior is missing when using Arrays, for a simple reason: you cannot access to any item but using its position index.
-- Object covers this issue since it is based on a key/value structure but, it has its own problems like when you insert a new object property, it is not guaranteed to keep the items insertion order so it could become a big headache when accessing the data.
+Learn more about `Map` advantages here: 
+[https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map)
 
-`Map` can hold both objects and primitive values as either key or value, so it solves all the other previous issues, and much more which are not mentioned in this article.
-
-As a consequence, it is not possible to pass to the store any different types of data. To overcome this mishap, Eon offers two functions for parsing those types based data into a `Map` object:
+To leverage the the data transformation into `Map`, Eon offers two functions that transforms data thats based on `Object` and `Array` types into `Map`.
 
 ```[javascript]
 // Store data from an `Array` source
@@ -195,7 +193,7 @@ store.delete(id).result(function (error, data) {
 });
 ```
 
-Eon uses a specific strategy to handle the components data. The Eon components are not aware of the data source, they get their data from its own instance of the `eon.store` data type. Meanwhile, the store receives its data updates from an `eon-endpoint` instance operation. This approach converts the Eon components into a more powerful and data technology independent elements.
+Eon uses a specific strategy to handle the components data. The Eon components are not aware of the data source, they get their data from its own instance of the `eon.store` data type. Meanwhile, the store receives its data updates from an `eon-endpoint` instance operation. This approach allows components to access data in the same way, regardless of the endpoint technology being used.
 
 
 
