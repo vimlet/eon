@@ -1,7 +1,7 @@
 const { suite, test } = intern.getInterface("tdd");
 const { assert } = intern.getPlugin("chai");
 
-suite("hello", () => {
+suite("eon-core", () => {
     test("Dependencies", ({ remote }) => {
         return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
             dependenciesTest(callback);
