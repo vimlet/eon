@@ -146,7 +146,7 @@ The store uses Javascript `Map` to warehouse the data, which similar to `Object`
 Learn more about `Map` advantages here: 
 [https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map)
 
-To leverage the the data transformation into `Map`, Eon offers two functions that transforms data thats based on `Object` and `Array` types into `Map`.
+To leverage the data transformation into `Map`, Eon offers two functions that transforms data thats based on `Object` and `Array` types into `Map`.
 
 ```[javascript]
 // Store data from an `Array` source
@@ -157,7 +157,7 @@ store.data = eon.util.objectToMap({});
 
 Accessing the store data is really easy since the provided API is based on the main CRUD operations:
 
-- Read an item:
+- Read an existing item:
 
 ```[javascript]
 store.read(id).result(function (error, data) {
@@ -175,7 +175,7 @@ store.create(item).result(function (error, data) {
 });
 ```
 
-- Update a new item:
+- Update an existing item:
 
 ```[javascript]
 store.update(id, item).result(function (error, data) {
@@ -184,7 +184,7 @@ store.update(id, item).result(function (error, data) {
 });
 ```
 
-- Delete a new item:
+- Delete an existing item:
 
 ```[javascript]
 store.delete(id).result(function (error, data) {

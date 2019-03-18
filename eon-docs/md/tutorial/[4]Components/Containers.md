@@ -618,21 +618,21 @@ You can use it as a part of a flex based layout.
     <doc-showcase label="Flex Layout">
       <eon-panel class="panel" fill="false" allow-scroll="false">
         <eon-panel class="panel-children" fill="false" allow-scroll="false">
-          <eon-panel class="panel-children mid-width black eon-boxshadow1 animated" content-class="panel" fill="false"
+          <eon-panel class="panel-children mid-width black animated" content-class="panel" fill="false"
             allow-scroll="false"></eon-panel>
           <eon-panel class="panel-children mid-width grey" fill="false" allow-scroll="false">
-            <eon-panel class="panel-children mid-width mid-height blue eon-boxshadow1 animated" fill="false"
+            <eon-panel class="panel-children mid-width mid-height blue animated" fill="false"
               allow-scroll="false"></eon-panel>
-            <eon-panel class="panel-children mid-width mid-height blue eon-boxshadow1 animated" fill="false"
+            <eon-panel class="panel-children mid-width mid-height blue animated" fill="false"
               allow-scroll="false"></eon-panel>
           </eon-panel>
         </eon-panel>
         <eon-panel class="panel-children row-reverse" fill="false" allow-scroll="false">
-          <eon-panel class="panel-children mid-width red eon-boxshadow1 animated" fill="false" allow-scroll="false"></eon-panel>
+          <eon-panel class="panel-children mid-width red animated" fill="false" allow-scroll="false"></eon-panel>
           <eon-panel class="panel-children mid-width grey" fill="false" allow-scroll="false">
-            <eon-panel class="panel-children mid-width mid-height blue eon-boxshadow1 animated" fill="false"
+            <eon-panel class="panel-children mid-width mid-height blue animated" fill="false"
               allow-scroll="false"></eon-panel>
-            <eon-panel class="panel-children mid-width mid-height blue eon-boxshadow1 animated" fill="false"
+            <eon-panel class="panel-children mid-width mid-height blue animated" fill="false"
               allow-scroll="false"></eon-panel>
           </eon-panel>
         </eon-panel>
@@ -645,9 +645,11 @@ You can use it as a part of a flex based layout.
       backface-visibility: hidden;
       transform: translateZ(0);
     }
+    eon-panel.animated {
+      box-shadow: 0 1px 6px 0 #696969;
+    }
     eon-panel.animated:hover {
       transform: translateZ(0) scale(.96);
-      box-shadow: none;
       cursor: pointer;
     }
     .panel {
