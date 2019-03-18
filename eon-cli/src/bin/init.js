@@ -103,7 +103,7 @@ function downloadAndExtractTemplate(releaseURL, templateName, projectPath, cb) {
         commons.request.download(file_url, dest, {}, function (error) {
             if (!error) {
                 // Extract
-                commons.compress.unpack(dest, projectPath, "zip", {}, function (error) {
+                commons.compress.unpack(dest, projectPath, {}, function (error) {
                     cb(error);
                 });
             } else {
@@ -112,7 +112,7 @@ function downloadAndExtractTemplate(releaseURL, templateName, projectPath, cb) {
         });
     } else {
         // Extract
-        commons.compress.unpack(dest, projectPath, "zip", {}, function (error) {
+        commons.compress.unpack(dest, projectPath, {}, function (error) {
             cb(error);
         });
     }

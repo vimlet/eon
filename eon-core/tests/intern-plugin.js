@@ -8,7 +8,7 @@ var serverHttp;
 intern.on("beforeRun", () => {
   return new Promise(resolve => {
     // Default config
-    var port = 80;
+    var port = 3000;
     var staticPath = path.join(__dirname, "webapp");
 
     // Serve static content

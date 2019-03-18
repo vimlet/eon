@@ -466,7 +466,7 @@ function downloadAndExtract(file_url, extractPath, version, cb) {
         commons.request.download(file_url, dest, {}, function (error) {
             if (!error) {
                 // Extract
-                commons.compress.unpack(dest, extractPath, "zip", {}, function (error) {
+                commons.compress.unpack(dest, extractPath, {}, function (error) {
                     cb(error);
                 });
             } else {
@@ -476,7 +476,7 @@ function downloadAndExtract(file_url, extractPath, version, cb) {
 
     } else {
         // Extract
-        commons.compress.unpack(dest, extractPath, "zip", {}, function (error) {
+        commons.compress.unpack(dest, extractPath, {}, function (error) {
             cb(error);
         });
     }
