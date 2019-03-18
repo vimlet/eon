@@ -41,14 +41,14 @@ File path:
 ```[html]
 <script>
   eon.import("eon/ui/eon-button/eon-button.html");
-</script
+</script>
 ```
 
 Directory path:
 ```[html]
 <script>
   eon.import("eon/ui/eon-button");
-</script
+</script>
 ```
 Array of paths:
 ```[html]
@@ -56,7 +56,7 @@ Array of paths:
   eon.import([
     "eon/ui/eon-button"
     ]);
-</script
+</script>
 ```
 
 Although the import function can be called multiple times its recommend to use the array pattern instead.
@@ -282,8 +282,8 @@ If we then change the color property, our `onDataChanged` callback will get fire
 
 ```[html]
 <script>
-var component = document.querySelector("eon-component");
-component.data.color = "Red";
+  var component = document.querySelector("eon-component");
+  component.data.color = "Red";
 </script>
 ```
 ```
@@ -296,12 +296,12 @@ We have earlier said that the data object is `immutable`, but you can change the
 
 ```[html]
 <script>
-var component = document.querySelector("eon-component");
-component.data = {
-    color: "Red",
-    name: "Charles",
-    age: 21
-};
+  var component = document.querySelector("eon-component");
+  component.data = {
+      color: "Red",
+      name: "Charles",
+      age: 21
+  };
 </script>
 ```
 ```
@@ -317,7 +317,6 @@ Since `setters/getters` cannot listen to changes made by pushing/removing new it
 ```[html]
 <script>
 eon.element({
-
   name: "eon-component",
 
   parse: true,
@@ -332,7 +331,6 @@ eon.element({
   onDataChanged: function (keyPath, oldVal, newVal) {
       console.log("Key:", keyPath, ", Previous:", oldVal, ", New:", newVal);
   }
-
 });
 </script>
 ```

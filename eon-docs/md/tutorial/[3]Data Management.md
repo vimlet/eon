@@ -144,7 +144,7 @@ store.data = new Map();
 The store uses Javascript `Map` to warehouse the data, which similar to `Object`, can hold keys and values, but has many advantages over a plain `Object`.
 
 Learn more about `Map` advantages here: 
-[https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Map)
+[https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)
 
 To leverage the data transformation into `Map`, Eon offers two functions that transforms data thats based on `Object` and `Array` types into `Map`.
 
