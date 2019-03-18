@@ -64,8 +64,6 @@ eon.declare = function (name, baseElement) {
                 // Registers the element and generates uid
                 eon.registry.registerElement(el);
 
-                eon.createAttributesObserver(el, config);
-
                 // Updates the references for the source nodes
                 eon.updateSourceCallbacks(el);
                 

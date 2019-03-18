@@ -172,6 +172,8 @@ eon.parse = function (el, config) {
     eon.defineOverlayCreation(el);
     eon.definePlaceholderCreation(el);
 
+    eon.createAttributesObserver(el, config);
+
     eon.triggerAllCallbackEvents(el, config, "onParsed");
     eon.registry.updateElementStatus(el, "parsed");
 
