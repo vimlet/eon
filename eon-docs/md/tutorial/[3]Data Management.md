@@ -159,7 +159,7 @@ store.data = eon.util.objectToMap({});
 
 Accessing the store data is really easy since the provided API is based on the main CRUD operations:
 
-- Read an item:
+- Read an existing item:
 
 ```[javascript]
 store.read(id).result(function (error, data) {
@@ -177,7 +177,7 @@ store.create(item).result(function (error, data) {
 });
 ```
 
-- Update a new item:
+- Update an existing item:
 
 ```[javascript]
 store.update(id, item).result(function (error, data) {
@@ -186,7 +186,7 @@ store.update(id, item).result(function (error, data) {
 });
 ```
 
-- Delete a new item:
+- Delete an existing item:
 
 ```[javascript]
 store.delete(id).result(function (error, data) {
