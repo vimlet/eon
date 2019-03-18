@@ -611,6 +611,11 @@ You can use it as a part of a flex based layout.
         doc-showcase {
           width: calc(100% - 40px);
         }
+      @media (max-width: 460px) {
+        eon-panel {
+          height: 260px;
+          width: 260px;
+        }
       }
     </style>
   </template>

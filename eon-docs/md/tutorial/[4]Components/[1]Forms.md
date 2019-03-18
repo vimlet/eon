@@ -110,11 +110,11 @@ To display buttons with icons just use the `vicon` property passing any of the i
 </doc-playground>
 )*
 
-[Checkbox]<>
-^[eon-checkbox API](#!version=latest&mode=api&file=ui%2Feon-checkbox%2Feon-checkbox.html)
+[Check]<>
+^[eon-check API](#!version=latest&mode=api&file=ui%2Feon-check%2Feon-check.html)
 
 
-The checkbox element allows selecting multiple options of a group of choices. It can be used inside a eon-form component or inside an HTML form.
+The check element allows selecting multiple options of a group of choices. It can be used inside a eon-form component or inside an HTML form.
 
 
 *(
@@ -128,7 +128,7 @@ The checkbox element allows selecting multiple options of a group of choices. It
     <script src="framework/doc-eon/eon/eon.js"></script>
     <script> 
       eon.import([
-        "framework/doc-eon/eon/ui/eon-checkbox", 
+        "framework/doc-eon/eon/ui/eon-check", 
         "framework/doc-eon/custom/doc-playground/doc-showcase"
       ]);
     </script>
@@ -141,10 +141,10 @@ The checkbox element allows selecting multiple options of a group of choices. It
   </template>
   <template type="html-body">
     <doc-showcase label="Standard">
-      <eon-checkbox label="Checkbox" value='checkbox1' checked="true" name='checkboxOptions'></eon-checkbox>
+      <eon-check label="Check" value='check1' checked="true" name='checkOptions'></eon-check>
     </doc-showcase>
     <doc-showcase label="Disabled">
-      <eon-checkbox label='Disabled checked' value='checkbox2' checked="true" name='checkboxOptions' disabled='true'></eon-checkbox>
+      <eon-check label='Disabled checked' value='check2' checked="true" name='checkOptions' disabled='true'></eon-check>
     </doc-showcase>
   </template>
   <template type="footer">
@@ -153,11 +153,11 @@ The checkbox element allows selecting multiple options of a group of choices. It
 </doc-playground>
 )*
 
-[Combobox]<>
-^[eon-combobox API](#!version=latest&mode=api&file=ui%2Feon-combobox%2Feon-combobox.html)
+[Combo]<>
+^[eon-combo API](#!version=latest&mode=api&file=ui%2Feon-combo%2Feon-combo.html)
 
 
-The combobox element is a component meant for selecting an option between the given ones, a dropdown with the available options appears giving the users the ability to choose among the different items.
+The combo element is a component meant for selecting an option between the given ones, a dropdown with the available options appears giving the users the ability to choose among the different items.
 
 *(
 <doc-playground label="Common Usage" html="true" js="true" css="true" selector=".content" format="true">
@@ -170,7 +170,7 @@ The combobox element is a component meant for selecting an option between the gi
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
-        'framework/doc-eon/eon/ui/eon-combobox',
+        'framework/doc-eon/eon/ui/eon-combo',
         'framework/doc-eon/eon/ui/eon-item',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
       ]);
@@ -186,20 +186,20 @@ The combobox element is a component meant for selecting an option between the gi
   <template type="html-body">
     <div class="content">
       <doc-showcase label='Active'>
-        <eon-combobox label='Colors' filter='true'>
+        <eon-combo label='Colors' filter='true'>
           <eon-item value='red' display-value='Red'></eon-item>
           <eon-item value='green' display-value='Green'></eon-item>
           <eon-item value='pink' display-value='Pink'></eon-item>
           <eon-item value='grey' display-value='Grey'></eon-item>
-        </eon-combobox>
+        </eon-combo>
       </doc-showcase>
       <doc-showcase label='Disabled'>
-        <eon-combobox disabled='true' label='Food' value='avocado'>
+        <eon-combo disabled='true' label='Food' value='avocado'>
           <eon-item value='tomato' display-value='Tomato'></eon-item>
           <eon-item value='avocado' display-value='Avocado'></eon-item>
           <eon-item value='strawberry' display-value='Strawberry'></eon-item>
           <eon-item value='onion' display-value='Onion'></eon-item>
-        </eon-combobox>
+        </eon-combo>
       </doc-showcase>
     </div>
     <div style="height:284px;"></div>
@@ -228,7 +228,7 @@ Enables the user to type in the input so that the options provided by the dropdo
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
       eon.import([
-        'framework/doc-eon/eon/ui/eon-combobox',
+        'framework/doc-eon/eon/ui/eon-combo',
         'framework/doc-eon/eon/ui/eon-item',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
       ]);
@@ -244,11 +244,11 @@ Enables the user to type in the input so that the options provided by the dropdo
   <template type="html-body">
     <div class="content">
       <doc-showcase>
-        <eon-combobox label="Colors" name='myCombobox' placeholder='Pick a color' filter='true'>
+        <eon-combo label="Colors" name='myCombo' placeholder='Pick a color' filter='true'>
           <eon-item value='r' display-value='Red'></eon-item>
           <eon-item value='p' display-value='Pink'></eon-item>
           <eon-item value='pu' display-value='Purple'></eon-item>
-        </eon-combobox>
+        </eon-combo>
       </doc-showcase>
     </div>
     <div style="height:284px;"></div>
@@ -655,7 +655,7 @@ The password text is pretty similar to the text type but it shows asterisks inst
 ^[eon-toggle API](#!version=latest&mode=api&file=ui%2Feon-toggle%2Feon-toggle.html)
 
 
-This component is a simple on/off switch. It works almost the same way as an eon-checkbox since the user can toggle between two `checked` boolean values.  
+This component is a simple on/off switch. It works almost the same way as an eon-check since the user can toggle between two `checked` boolean values.  
 
 *(
 <doc-playground label="Common Usage" format="true" html="true" js="true" css="true" selector="body" format="true">
