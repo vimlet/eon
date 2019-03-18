@@ -3,7 +3,7 @@ In this tutorial we are going to make a simple To-Do List to teach you about som
 
 ## Setting up our custom component
 
-To create the To-Do List we will create a custom component named `todo-list`, this will encapsulate our functionality to deal with it as a single item separated from the rest of the application functionality block. Our component depends on another 4 basic Eon components: `eon-text`, `eon-button`, `eon-checkbox` and `eon-scroll`. 
+To create the To-Do List we will create a custom component named `todo-list`, this will encapsulate our functionality to deal with it as a single item separated from the rest of the application functionality block. Our component depends on another 4 basic Eon components: `eon-text`, `eon-button`, `eon-check` and `eon-scroll`. 
 
 ```[html]
 <script>
@@ -15,7 +15,7 @@ To create the To-Do List we will create a custom component named `todo-list`, th
       "../../ui/eon-scroll",
       "../../ui/eon-button",
       "../../ui/eon-text",
-      "../../ui/eon-checkbox"
+      "../../ui/eon-check"
     ]
     //...
   })
@@ -108,7 +108,7 @@ paint: function () {
 
 Let's see what it's happening on this function:
 
-- First, we loop through the data items and call the `component.createItem` for each one. The elements that will shape each item list are: an `eon-button` which will allow us to remove an item and a `eon-checkbox` which will let us mark an item as done (see code at the end of this example).
+- First, we loop through the data items and call the `component.createItem` for each one. The elements that will shape each item list are: an `eon-button` which will allow us to remove an item and a `eon-check` which will let us mark an item as done (see code at the end of this example).
 - Then, we remove the old list items and append the new ones.
 
 That's how we make our components react to data source changes.
@@ -160,7 +160,7 @@ To conclude, let's import our new custom component to our application `index.htm
       "../../ui/eon-scroll",
       "../../ui/eon-button",
       "../../ui/eon-text",
-      "../../ui/eon-checkbox"
+      "../../ui/eon-check"
     ],
 
     data: {
@@ -203,10 +203,10 @@ To conclude, let's import our new custom component to our application `index.htm
       createItem: function (data) {
         var el = this;
         var item = document.createElement("div");
-        // Create item status checkbox
-        var statusCheck = document.createElement("eon-checkbox");
-        // Set up checkbox
-        statusCheck.classList.add("checkboxItem");
+        // Create item status check
+        var statusCheck = document.createElement("eon-check");
+        // Set up check
+        statusCheck.classList.add("checkItem");
         statusCheck.label = data.text;
         statusCheck.inline = true;
         statusCheck.checked = data.checked;
