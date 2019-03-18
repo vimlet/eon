@@ -454,7 +454,7 @@ eon.handleConfigDependencies = function (name) {
 eon.getBasePathUrl = function (url) {
     
     url = url.substring(1);
-    return eon.basePath + url;
+    return eon.basePath + "/" + url;
 }
 
 // If there are no imports in the document we will trigger onImportsReady event immediately
