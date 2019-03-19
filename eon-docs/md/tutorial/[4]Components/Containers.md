@@ -742,6 +742,7 @@ triggering.
     <script>
       eon.import([
         'framework/doc-eon/eon/ui/eon-panel',
+        'framework/doc-eon/eon/ui/eon-bubble',
         'framework/doc-eon/custom/doc-playground/doc-showcase'
       ])
     </script>
@@ -783,6 +784,7 @@ triggering.
           <div class="header-panel-square brown"></div>
           <div class="header-panel-square brown"></div>
           <div class="header-panel-square brown"></div>
+          <eon-bubble type="static" class="" ></eon-bubble>
         </eon-section>
       </eon-panel>
     </doc-showcase>
@@ -797,6 +799,13 @@ triggering.
       height: 100px;
       margin-top: 12px;
       transition: all .2s;
+    }
+    eon-bubble {
+      bottom: 16px;
+      right: 16px;
+      height: 40px;
+      width: 40px;
+      position: absolute;
     }
     .brown {
       background-color: #bb9772;
