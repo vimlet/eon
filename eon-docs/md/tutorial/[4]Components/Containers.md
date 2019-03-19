@@ -766,10 +766,10 @@ triggering.
           <span>Squares</span>
         </eon-section>
         <eon-section type="content">
-          <div class="header-panel-square blue"></div>
-          <div class="header-panel-square blue"></div>
-          <div class="header-panel-square blue"></div>
-          <div class="header-panel-square blue"></div>
+          <div class="header-panel-square brown"></div>
+          <div class="header-panel-square brown"></div>
+          <div class="header-panel-square brown"></div>
+          <div class="header-panel-square brown"></div>
         </eon-section>
       </eon-panel>
     </doc-showcase>
@@ -780,10 +780,10 @@ triggering.
           <span>Squares</span>
         </eon-section>
         <eon-section type="content">
-          <div class="header-panel-square brown"></div>
-          <div class="header-panel-square brown"></div>
-          <div class="header-panel-square brown"></div>
-          <div class="header-panel-square brown"></div>
+          <div class="header-panel-square blue"></div>
+          <div class="header-panel-square blue"></div>
+          <div class="header-panel-square blue"></div>
+          <div class="header-panel-square blue"></div>
           <eon-bubble type="static" class="" ></eon-bubble>
         </eon-section>
       </eon-panel>
