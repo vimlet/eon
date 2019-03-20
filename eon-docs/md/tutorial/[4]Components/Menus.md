@@ -20,6 +20,9 @@ On device mode, the menu appears when the user doing a long click.
     </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.themeSchema = {
+        "claro": ["eon-contextmenu"]
+      }
       eon.import([
         'framework/doc-eon/eon/ui/eon-contextmenu',
         'framework/doc-eon/eon/ui/eon-button',
@@ -97,6 +100,9 @@ Basic menu with dropdowns for category options.
     </script>
     <script src='framework/doc-eon/eon/eon.js'></script>
     <script>
+      eon.themeSchema = {
+        "claro": ["eon-menu"]
+      }
       eon.import([
         'framework/doc-eon/eon/ui/eon-menu',
         'framework/doc-eon/custom/doc-playground/doc-showcase'

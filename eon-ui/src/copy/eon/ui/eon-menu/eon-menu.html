@@ -78,7 +78,7 @@
         el._refs.modalPages = {};
 
         el._refs.modalPath = [];
-
+        
         el._refs.items = {};
         el._refs.modalItems = {};
 
@@ -279,7 +279,7 @@
 
         item.appendChild(link);
 
-        item.classList.add("eon-bg2-hoverable");
+        item.classList.add("eon-bg2-hoverable", "eon-fg1", "eon-fg1-hoverable");
 
       },
       /*
@@ -482,6 +482,7 @@
           eon.triggerCallback("onDropdownDisplay", el, el, [item.name, el._refs.dropdowns[item.name]]);
         }
 
+
       },
       /*
       @function _hideDropdown
@@ -492,9 +493,9 @@
 
         var el = this;
         var pathIndex = el._misc.dropdowns.path.indexOf(item.name);
-
+        
         if (pathIndex > -1 && el._refs.dropdowns[item.name]) {
-
+          
           el._refs.dropdowns[item.name].parentNode.removeChild(el._refs.dropdowns[item.name]);
 
           eon.triggerCallback("onDropdownClose", el, el, [item.name, el._refs.dropdowns[item.name]]);
@@ -502,9 +503,11 @@
           for (var i = el._misc.dropdowns.path.length; pathIndex < i; i--) {
             el._misc.dropdowns.path.pop()
           }
+          setTimeout(function() {
+            el._refs.dropdowns[item.name].classList.remove("eon-dropdown-opaque");
+          }, 0);
 
         }
-
       },
       /*
       @function _hideAllDropdowns
@@ -525,7 +528,7 @@
             el._refs.dropdowns[dropdown].parentNode.removeChild(el._refs.dropdowns[dropdown]);
             // It also removes the class so that the items are openable again
             el._refs.items[dropdown].classList.remove("eon-sect3");
-
+            
             eon.triggerCallback("onDropdownClose", el, el, [dropdown, el._refs.dropdowns[el._refs.dropdowns[dropdown]]]);
 
           }
@@ -548,10 +551,14 @@
         dropdown.style[el._misc.dropdowns.path.length > 0 ? "paddingLeft" : "paddingTop"] = parseInt(el.spacing) + "px";
         dropdown.dataset.position = el._misc.dropdowns.path.length > 0 ? "right" : "bottom";
         dropdown.style.height = (item.offsetHeight * dropdown.querySelectorAll("eon-item").length) + "px";
-
+        
         item.appendChild(dropdown);
 
         el._misc.dropdowns.path.push(item.name);
+
+        setTimeout(function() {
+          dropdown.classList.add("eon-dropdown-opaque");
+        }, 0);
 
       },
       /*
@@ -622,7 +629,7 @@
         setTimeout(function () {
           el._refs.modal.style.opacity = 1;
         }, 0);
-
+        
         // Attempt to fix situations when the fixed modal view was having bugs on devices, now its absolute at the start and fixed after
         setTimeout(function () {
           el._refs.modal.classList.add("eon-menu-modal-fixed");
