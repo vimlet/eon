@@ -27,6 +27,9 @@ eon.declare = function (name, baseElement) {
             // Generates an instance of the element template and assigns it as a property of the element so we can easily access from anywhere
             eon.generateElementTemplate(el);
 
+            // Searches elements tagged to have its reference saved inside the component template 
+            eon.generateElementReferences(el);
+
             // Sets a css rule with the provided display by the config, if no display is provided it will have display block by default
             eon.initializeDisplay(el, config);
             
