@@ -1,0 +1,155 @@
+<template>
+  <i class="eon-bubble-icon"></i>
+</template>
+
+<script>
+  eon.element({
+
+    name: "eon-bubble",
+    style: "eon-bubble.css",
+
+    themed: true,
+
+    privateProperties: {
+      /*
+        @property (private) {object} _refs
+        @description Object with references to relevant element nodes
+      */
+      refs: {
+        value: {},
+        reflect: false
+      },
+      /*
+        @property (private) {Object} _misc
+        @description Object with useful information
+      */
+      misc: {
+        value: {},
+        reflect: false
+      }
+    },
+    properties: {
+      /*
+        @property {String} type
+        @description Bubble displaying behavior
+        Values: hidable, static, 
+        Default: hidable
+      */
+      type: {
+        value: "hidable",
+        reflect: true
+      },
+      /*
+        @property {String} icon
+        @description vicon library icon name
+      */
+      icon: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _setUpRefs
+        @description Store useful structure nodes references
+      */
+      setUpRefs: function () {
+        var el = this;
+        el._refs.icon = el.template.querySelector(".eon-bubble-icon");
+      },
+      /*
+        @function (private) _setUp
+        @description Set bubble style and functionality
+      */
+      setUp: function () {
+        var el = this;
+        // Set bubble style
+        el.classList.add("eon-bg1", "eon-fg2", "eon-fg2-hoverable");
+        // Set default bubble icon
+        el.icon = !el.icon && el.type == "hidable" ? "vicon-chevron-up" : el.icon;
+        if(el.icon) {
+          el._refs.icon.classList.add(el.icon);
+        }
+        // Setup hidable behavior
+        el._setUpHidable();
+      },
+      /*
+        @function (private) _setUpHidable
+        @description Configure bubble hidable behavior
+      */
+      setUpHidable: function () {
+        var el = this;
+        // Check config
+        if(el.type == "hidable") {
+          // Set specific hidable style
+          el.classList.add("eon-bubble-hidable");
+          // Scroll to top functionality
+          el._bubbleClick();
+          el._scrollHide();
+        }
+      },
+      /*
+        @function (private) _bubbleClick
+        @description Bubble scroll to top functionality
+      */
+      bubbleClick: function () {
+        var el = this;
+        el.addEventListener("click", function(e) {
+          window.scrollTo(0, 0);
+        }, false);
+      },
+      /*
+        @function (private) _scrollHide
+        @description Bubble hidable monitor
+      */
+      scrollHide: function () {
+        var el = this;
+        // Prevent bubble first displaying if it should start hidden
+        el.style.display = "none";
+        // Toggle bubble first display
+        el._translateBubble(true);
+        el.style.display = "";
+        // Check bubble position on scrolling
+        window.onscroll = function(e) {
+          el._translateBubble();
+        };
+      },
+      /*
+        @function (private) _translateBubble
+        @description Se bubble position
+        @param {Boolean} onLoad [True if it is the first bubble displaying]
+      */
+      translateBubble: function (onLoad) {
+        var el = this;
+        // Check initial bubble display
+        if(onLoad) {
+          if(window.scrollY < 30) {
+            // Hide bubble
+            el.style.transform = "translate(0, 100px)";
+            el._misc.hidden = true;
+          } else {
+            // Show bubble
+            el.style.transform = "translate(0, 0)";
+            el._misc.hidden = false;
+          }
+        } else {
+          // Toggle bubble display
+          if(!el._misc.hidden && window.scrollY < 30) {
+            // Hide bubble
+            el.style.transform = "translate(0, 100px)";
+            el._misc.hidden = true;
+          } else if(el._misc.hidden && window.scrollY >= 30){
+             // Show bubble
+            el.style.transform = "translate(0, 0)";
+            el._misc.hidden = false;
+          }
+        }
+      }
+    },
+    onCreated: function () {
+      var el = this;
+      el._setUpRefs();
+      el._setUp();
+    }
+  });
+</script>
