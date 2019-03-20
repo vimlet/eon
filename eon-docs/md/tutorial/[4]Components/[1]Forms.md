@@ -49,8 +49,9 @@ By default the button style is outline, but they can be flat and filled using th
     </doc-showcase>
   </template>
   <template type="css">
-    .doc-showcase-content{display:flex;}
-    .doc-showcase-content eon-button{margin:0 5px;}
+eon-button {
+  margin:0 5px;
+}
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -101,8 +102,9 @@ To display buttons with icons just use the `vicon` property passing any of the i
     </doc-showcase>
   </template>
   <template type="css">
-      .doc-showcase-content{display:flex;}
-      .doc-showcase-content eon-button{margin:0 5px;}
+eon-button {
+  margin:0 5px;
+}
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -204,10 +206,6 @@ The combo element is a component meant for selecting an option between the given
     </div>
     <div style="height:284px;"></div>
   </template>
-  <template type="css">
-    .doc-showcase-content{display:flex;}
-    .doc-showcase-content eon-button{margin:0 5px;}
-  </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
@@ -252,10 +250,6 @@ Enables the user to type in the input so that the options provided by the dropdo
       </doc-showcase>
     </div>
     <div style="height:284px;"></div>
-  </template>
-  <template type="css">
-    .doc-showcase-content{display:flex;}
-    .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -308,10 +302,6 @@ Classic input type date where you can either `type` the desired date or you can 
     </div>
     <div style="height: 284px;"></div></doc-body>
   </template>
-  <template type="css">
-    .doc-showcase-content{display:flex;}
-    .doc-showcase-content eon-button{margin:0 5px;}
-  </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
@@ -356,10 +346,6 @@ This type of date will only allow you to have a `calendar` directly leaving the 
     <doc-showcase label="Disabled">
       <eon-date disabled="true" selectable="dmy" type="calendar" name="disabledCalendar"></eon-date>
     </doc-showcase>
-  </template>
-  <template type="css">
-    .doc-showcase-content{display:flex;}
-    .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -456,10 +442,6 @@ The radio element allows selecting one option of a group of choices, for this, t
         <eon-radio class="d-top-margin" label="Desktop" value="desktop" disabled="true"></eon-radio>
       </eon-group>
     </doc-showcase>
-  </template>
-  <template type="css">
-      .doc-showcase-content{display:flex;}
-      .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}

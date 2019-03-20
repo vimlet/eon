@@ -1,107 +1,124 @@
 <template>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <div class="eon-loading-loading eon-bg1 eon-fg1">
-      <div class="eon-loading-rotator">
-        <div class="eon-loading-inner-spin eon-bg1"></div>
-        <div class="eon-loading-inner-spin eon-bg1"></div>
-      </div>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <div class="eon-loading-loading eon-bg1 eon-fg1">
+    <div class="eon-loading-rotator">
+      <div class="eon-loading-inner-spin eon-bg1"></div>
+      <div class="eon-loading-inner-spin eon-bg1"></div>
     </div>
-  </template>
-  <script type="text/javascript">
-    eon.element({
-      name: "eon-loading",
-      style: "eon-loading.css",
-      properties: {
-        /*
-          @property {String} format 
-          @description What loading occupies
-          Values can be: complete or descendant
-          Default: complete
-        */
-        format: {
-          value: "complete",
-          reflect: true
-        },
-        /*
-          @property {Boolean} display 
-          @description Loading is displayed since load the page or not
-          Values can be: false or true
-          Default: true
-        */
-        display: {
-          value: true,
-          reflect: true
-        },
-        /*
-          @property {Number} display 
-          @description Time until loading hides
-          Value must be a number of milliseconds
-          Default: 2000
-        */
-        duration: {
-          value: 2000,
-          reflect: true
-        },
-        /*
-          @property {String} color 
-          @description Loading color
-        */
-        color: {
-          value: "",
-          reflect: true
-        }
+  </div>
+</template>
+<script type="text/javascript">
+  eon.element({
+    name: "eon-loading",
+    style: "eon-loading.css",
+    properties: {
+      /*
+        @property {String} format 
+        @description What loading occupies
+        Values can be: complete or descendant
+        Default: complete
+      */
+      format: {
+        value: "complete",
+        reflect: true
       },
-      privateProperties: {
-        /*
-          @property (private) {Object} _refs 
-          @description Object with  references
-        */
-        refs: {
-          value: {}
-        }
+      /*
+        @property {Boolean} display 
+        @description Loading is displayed since load the page or not
+        Values can be: false or true
+        Default: true
+      */
+      display: {
+        value: true,
+        reflect: true
       },
-      functions: {
-        /*
-          @function show
-          @description Show loading
-        */
-        show: function () {
-          var el = this;
-          // Show loading mask
-          el._refs.loading.classList.remove("eon-loading-hidden");
-          el.classList.add("eon-loading-active");
-          el._refs.loading.classList.add("eon-loading-noTransition", "eon-loading-visible");
-          // Show loading rotator
-          el._refs.rotator.classList.add("eon-loading-visible");
-          // On IE browser
-          if (eon.util.getBrowser() == "IE") {
-            el._refs.loading.appendChild(el._refs.rotator);
-          }
-          eon.triggerCallback("onShow", this);
-          // Call the function to hide loading in a time interval given by the user
-          if (el.duration) {
-            setTimeout(function () {
-              el.hide();
-            }, el.duration);
-          }
-        },
-        /*
-          @function hide
-          @description Hide loading
-        */
-        hide: function () {
-          var el = this;
-          // Hide loading rotator
-          el._refs.rotator.classList.remove("eon-loading-visible");
-          // Hide loading mask
-          el.style.backgroundColor = "transparent";
-          el._refs.loading.classList.remove("eon-loading-noTransition", "eon-loading-visible");
-          eon.triggerCallback("onHide", this);
-          // After hidden animation, change element display to none
+      /*
+        @property {Number} display 
+        @description Time until loading hides
+        Value must be a number of milliseconds
+        Default: 2000
+      */
+      duration: {
+        value: 2000,
+        reflect: true
+      },
+      /*
+        @property {String} color 
+        @description Loading color
+      */
+      color: {
+        value: "",
+        reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property (private) {Object} _refs 
+        @description Object with  references
+      */
+      refs: {
+        value: {}
+      }
+    },
+    functions: {
+      /*
+        @function show
+        @description Show loading
+      */
+      show: function () {
+        var el = this;
+        // Show loading mask
+        el._refs.loading.classList.remove("eon-loading-hidden");
+        el.classList.add("eon-loading-active");
+        el._refs.loading.classList.add("eon-loading-noTransition", "eon-loading-visible");
+        // Show loading rotator
+        el._refs.rotator.classList.add("eon-loading-visible");
+        // On IE browser
+        if (eon.util.getBrowser() == "IE") {
+          el._refs.loading.appendChild(el._refs.rotator);
+        }
+        eon.triggerCallback("onShow", this);
+        // Call the function to hide loading in a time interval given by the user
+        if (el.duration) {
           setTimeout(function () {
-            el._refs.loading.classList.add("eon-loading-hidden");
-            el.classList.remove("eon-loading-active");
-          }, 1000);
+            el.hide();
+          }, el.duration);
+        }
+      },
+      /*
+        @function hide
+        @description Hide loading
+      */
+      hide: function () {
+        var el = this;
+        // Hide loading rotator
+        el._refs.rotator.classList.remove("eon-loading-visible");
+        // Hide loading mask
+        el.style.backgroundColor = "transparent";
+        el._refs.loading.classList.remove("eon-loading-noTransition", "eon-loading-visible");
+        eon.triggerCallback("onHide", this);
+        // After hidden animation, change element display to none
+        setTimeout(function () {
+          el._refs.loading.classList.add("eon-loading-hidden");
+          el.classList.remove("eon-loading-active");
+        }, 1000);
+      }
+    },
+    privateFunctions: {
+      /*
+        @function (private) _createRefs
+        @description Creates fast access to elements
+      */
+      createRefs: function () {
+        var el = this;
+        el._refs.loading = el.template.querySelector(".eon-loading-loading");
+        el._refs.rotator = el.template.querySelector(".eon-loading-rotator");
+        // Get svg children
+        var srcEls = el.getSourceElements();
+        if (srcEls[0] && srcEls[0].tagName == "svg") {
+          el._refs.rotator.style.display = "none";
+          el._refs.rotator = srcEls[0];
+          el._refs.loading.appendChild(el._refs.rotator);
         }
       },
       privateFunctions: {
@@ -115,7 +132,7 @@
           el._refs.rotator = el.template.querySelector(".eon-loading-rotator");
           // Get svg children
           var srcEls = el.getSourceElements();
-          if(srcEls[0] && srcEls[0].tagName == "svg"){
+          if (srcEls[0] && srcEls[0].tagName == "svg") {
             el._refs.rotator.style.display = "none";
             el._refs.rotator = srcEls[0];
             el._refs.loading.appendChild(el._refs.rotator);
@@ -147,7 +164,8 @@
             // Parent fit loading mask
             el._refs.loading.classList.remove("eon-loading-complete");
             el._refs.loading.classList.add("eon-loading-descendant");
-            el.parentNode.style.position = "relative";
+            // **
+            el.parentNode.style.position = el.parentNode.style.position == "static" ? "relative" : el.parentNode.style.position;
           }
         },
         /*
@@ -168,21 +186,37 @@
           el._refs.rotator.style.color = (el.color) ? el.color : el._refs.rotator.style.color;
         }
       },
-      onCreated: function () {
-        this.classList.add("eon-bg1");
-        // Useful event callbacks
-        eon.createCallback("onShow", this);
-        eon.createCallback("onHide", this);
-        // Shell references
-        this._createRefs();
-        // Loading configuration
-        this._setUpLoading();
-        this._setUpRotator();
-      },
-      onRender: function () {
+      /*
+        @function (private) _setUpTiming
+        @description 
+      */
+      setUpTiming: function () {
         var el = this;
-        // Show rotator after mask load
-        // el._refs.rotator.classList.add("eon-loading-visible");
+        // Show loading mask at the beginning of the page load
+        (eon.util.isTrue(el.display)) ? el.show() : null;
+      },
+      /*
+        @function (private) _setUpRotator
+        @description 
+      */
+      setUpRotator: function () {
+        var el = this;
+        el._refs.rotator.style.color = (el.color) ? el.color : el._refs.rotator.style.color;
       }
-    });
-  </script>
+    },
+    onCreated: function () {
+      this.classList.add("eon-bg1");
+      // Useful event callbacks
+      eon.createCallback("onShow", this);
+      eon.createCallback("onHide", this);
+      // Shell references
+      this._createRefs();
+    },
+    onInit: function () {
+      var el = this;
+      // Loading configuration
+      this._setUpLoading();
+      this._setUpRotator();
+    }
+  });
+</script>

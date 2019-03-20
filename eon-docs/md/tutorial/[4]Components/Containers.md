@@ -235,10 +235,6 @@ Also known as `table`, displays a large number of data using rows and columns.
       </eon-grid>
     </doc-showcase>
   </template>
-  <template type="css">
-      .doc-showcase-content{display:flex;}
-      .doc-showcase-content eon-button{margin:0 5px;}
-  </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
   </template>
@@ -387,10 +383,6 @@ This type of grid is meant to reduce the amount of headaches when dealing with g
         </eon-grid-row>
       </eon-grid>
     </doc-showcase>
-  </template>
-  <template type="css">
-      .doc-showcase-content{display:flex;}
-      .doc-showcase-content eon-button{margin:0 5px;}
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
