@@ -743,6 +743,21 @@ eon.appendElementTemplate = function (el) {
     delete el.template;
 };
 
+eon.generateElementReferences = function (el) {
+    
+    var nodes = el.template.querySelectorAll("[eon-ref]");
+    var node;
+
+    el._ref = el._ref || {};
+
+    for (var i = 0; i < nodes.length; i++) {
+        node = nodes[i];
+        el._ref[node.getAttribute("eon-ref")] = node;
+        node.removeAttribute("eon-ref");
+    }
+
+};
+
 eon.initSourceCallbacks = function (el) {
     // Creates the getSourceElements function even if it has no source elements
     el.getSourceNodes = function () {
