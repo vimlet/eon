@@ -14,7 +14,7 @@
     properties: {
       /*
         @property {String} format 
-        @description What loading occupies
+        @description Loading displaying context
         Values can be: complete or descendant
         Default: complete
       */
@@ -24,7 +24,7 @@
       },
       /*
         @property {Boolean} display 
-        @description Loading is displayed since load the page or not
+        @description Whether the loading mask should be displayed while loading
         Values can be: false or true
         Default: true
       */
@@ -35,7 +35,7 @@
       /*
         @property {Number} display 
         @description Time until loading hides
-        Value must be a number of milliseconds
+        Value Number in milliseconds
         Default: 2000
       */
       duration: {
@@ -54,7 +54,7 @@
     privateProperties: {
       /*
         @property (private) {Object} _refs 
-        @description Object with  references
+        @description Object with references to relevant element nodes
       */
       refs: {
         value: {}
@@ -63,7 +63,7 @@
     functions: {
       /*
         @function show
-        @description Show loading
+        @description Display the loading mask
       */
       show: function () {
         var el = this;
@@ -87,7 +87,7 @@
       },
       /*
         @function hide
-        @description Hide loading
+        @description Hide the loading mask
       */
       hide: function () {
         var el = this;
@@ -107,7 +107,7 @@
     privateFunctions: {
       /*
         @function (private) _createRefs
-        @description Creates fast access to elements
+        @description Store element nodes references
       */
       createRefs: function () {
         var el = this;
@@ -121,74 +121,39 @@
           el._refs.loading.appendChild(el._refs.rotator);
         }
       },
-      privateFunctions: {
-        /*
-          @function (private) _createRefs
-          @description Creates fast access to elements
-        */
-        createRefs: function () {
-          var el = this;
-          el._refs.loading = el.template.querySelector(".eon-loading-loading");
-          el._refs.rotator = el.template.querySelector(".eon-loading-rotator");
-          // Get svg children
-          var srcEls = el.getSourceElements();
-          if (srcEls[0] && srcEls[0].tagName == "svg") {
-            el._refs.rotator.style.display = "none";
-            el._refs.rotator = srcEls[0];
-            el._refs.loading.appendChild(el._refs.rotator);
-          }
-        },
-        /*
-          @function (private) _setUpRotator
-          @description 
-        */
-        setUpLoading: function () {
-          var el = this;
-          // Check mask extension type
-          el._setUpMaskExtension();
-          // Check mask displaying time
-          el._setUpTiming();
-        },
-        /*
-          @function (private) _setUpMaskExtension
-          @description 
-        */
-        setUpMaskExtension: function () {
-          var el = this;
-          // Check mask extension type
-          if (el.format == "complete") {
-            // Full screen loading mask
-            document.body.appendChild(el);
-            el._refs.loading.classList.add("eon-loading-complete");
-          } else if (el.format == "descendant") {
-            // Parent fit loading mask
-            el._refs.loading.classList.remove("eon-loading-complete");
-            el._refs.loading.classList.add("eon-loading-descendant");
-            // **
-            el.parentNode.style.position = el.parentNode.style.position == "static" ? "relative" : el.parentNode.style.position;
-          }
-        },
-        /*
-          @function (private) _setUpTiming
-          @description 
-        */
-        setUpTiming: function () {
-          var el = this;
-          // Show loading mask at the beginning of the page load
-          (eon.util.isTrue(el.display)) ? el.show() : null;
-        },
-        /*
-          @function (private) _setUpRotator
-          @description 
-        */
-        setUpRotator: function () {
-          var el = this;
-          el._refs.rotator.style.color = (el.color) ? el.color : el._refs.rotator.style.color;
+      /*
+        @function (private) _setUpLoading
+        @description Configure loading mask
+      */
+      setUpLoading: function () {
+        var el = this;
+        // Configure displaying expanse limits
+        el._setUpMaskArea();
+        // Configure displaying
+        el._setUpTiming();
+      },
+      /*
+        @function (private) _setUpMaskArea
+        @description Set the mask displaying type
+      */
+      setUpMaskArea: function () {
+        var el = this;
+        // Check mask extension type
+        if (el.format == "complete") {
+          // Full screen loading mask
+          document.body.appendChild(el);
+          el._refs.loading.classList.add("eon-loading-complete");
+        } else if (el.format == "descendant") {
+          // Parent fit loading mask
+          el._refs.loading.classList.remove("eon-loading-complete");
+          el._refs.loading.classList.add("eon-loading-descendant");
+          // Make sure the parent has a no static position value
+          el.parentNode.style.position = el.parentNode.style.position == "static" ? "relative" : el.parentNode.style.position;
         }
       },
       /*
         @function (private) _setUpTiming
-        @description 
+        @description Set up the displaying mask type
       */
       setUpTiming: function () {
         var el = this;
@@ -197,12 +162,12 @@
       },
       /*
         @function (private) _setUpRotator
-        @description 
+        @description Set the loading rotator style
       */
       setUpRotator: function () {
         var el = this;
         el._refs.rotator.style.color = (el.color) ? el.color : el._refs.rotator.style.color;
-      }
+      },
     },
     onCreated: function () {
       this.classList.add("eon-bg1");
@@ -214,7 +179,7 @@
     },
     onInit: function () {
       var el = this;
-      // Loading configuration
+      // Loading mask configuration
       this._setUpLoading();
       this._setUpRotator();
     }

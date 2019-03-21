@@ -27,7 +27,6 @@
     themed: true,
 
     properties: {
-
       /*
         @property {String} name 
         @description Slider name
@@ -45,8 +44,8 @@
         reflect: true
       },
       /*
-      @property {Number} default
-      @description Value of the element when the element is reset, if will also be the value of the element if no value is provided
+        @property {Number} default
+        @description Value of the element when the element is reset, if will also be the value of the element if no value is provided
       */
       default: {
         value: "",
@@ -153,8 +152,8 @@
         reflect: true
       },
       /*
-      @property {String} tooltip
-      @description Text to be shown for the element
+        @property {String} tooltip
+        @description Text to be shown for the element
       */
       tooltip: {
         value: "",
@@ -162,8 +161,8 @@
         reflectDefault: false
       },
       /*
-      @property {Boolean} invalid
-      @description Whether the element meets the requirements or not
+        @property {Boolean} invalid
+        @description Whether the element meets the requirements or not
       */
       invalid: {
         value: false,
@@ -171,7 +170,6 @@
         reflectDefault: false
       }
     },
-
     privateProperties: {
       /*
         @property (private) {String} _formElement 
@@ -212,15 +210,15 @@
     },
     functions: {
       /*
-      @function clear
-      @description Empties the value
+        @function clear
+        @description Empties the value
       */
       clear: function () {
         this.value = 0;
       },
       /*
-      @function reset
-      @description Resets the value of the element to the default one, if no default is provided then empties the value
+        @function reset
+        @description Resets the value of the element to the default one, if no default is provided then empties the value
       */
       reset: function () {
         var el = this;
@@ -230,53 +228,47 @@
         } else {
           el.clear();
         }
-
       },
-
       /*
-      @function updateDescription
-      @description Updates the description value for the element
+        @function updateDescription
+        @description Updates the description value for the element
       */
       updateDescription: function (text) {
         this._misc.descriptionText = text;
         this._refs.description.innerHTML = this._misc.descriptionText;
       },
       /*
-      @function resetDescription
-      @description Updates the description value for the element
+        @function resetDescription
+        @description Updates the description value for the element
       */
       resetDescription: function () {
-
         var el = this;
+
         var description = el.tooltip != "" ? el.tooltip : "";
 
         el._misc.descriptionText = description;
         el._refs.description.innerHTML = description;
-
       }
     },
     privateFunctions: {
-
       /*
-      @function (private) {String} _setupDescription
-      @description Creates the touch blur
+        @function (private) {String} _setupDescription
+        @description Creates the touch blur
       */
       setupDescription: function () {
-
         var el = this;
 
         if (el.tooltip != "") {
           el.updateDescription(el.tooltip);
         }
-
       },
-
       /*
         @function (private) _setValue
         @param {String} newVal [new slider value]
       */
       setValue: function () {
         var el = this;
+
         el._refs.slider.value = el.value;
         el._currentValue = el.value;
         el._updateSlider(true);
@@ -286,7 +278,6 @@
         }
 
         eon.triggerCallback("onChange", el);
-
       },
       /*
         @function (private) _createRefs
@@ -321,11 +312,9 @@
         el[valueKey] = el._refs.slider.value;
         el._refs.slider.setAttribute("value", el._refs.slider.value);
       },
-
-
       /*
-      @function (private) _horizontalSlider
-      @description Specify horizontal slider view style
+        @function (private) _horizontalSlider
+        @description Specify horizontal slider view style
       */
       horizontalSlider: function () {
         var el = this;
@@ -335,7 +324,6 @@
         el._refs.fill.style.width = (el._misc.percentValue * trackSize) + "%";
         el._refs.track.style.width = trackSize + "%"; /* adjust for border */
       },
-
       /*
         @function (private) _verticalSlider
         @description Specify vertical slider view style
@@ -365,9 +353,7 @@
           // Sets the property to place the slider in vertical for IE and Firefox browsers
           (eon.util.getBrowser() == "Firefox" || eon.util.getBrowser() == "IE") ? el._refs.slider.setAttribute("orient", "vertical") : null;
         }
-
       },
-
       /*
         @function (private) _thumbMotion
         @description Slider thumb movement and update slider value
@@ -389,14 +375,11 @@
             }, false);
           }
         }
-
         function moveThumb(e) {
           el._interactionSlider(e);
           el._updateCurrentValue();
         }
-
       },
-
       /*
         @function (private) _interactionSlider
         @description Functionality when interacting with the slider
@@ -445,7 +428,6 @@
           }
         }
       },
-
       /*
         @function (private) _setSliderListeners
         @description Sets slider listeners
@@ -476,7 +458,6 @@
           }
         }, false);
       },
-
       /*
         @function (private) _updateDisabled
         @description Updates disabled status and activates the thumb motion when it is not disabled
@@ -505,12 +486,10 @@
           el._refs.track.classList.add("eon-bg5-disabled");
           el._refs.thumb.removeEventListener("pointerdown", el._thumbEvent, false);
         }
-
       },
-
       /*
-      @function (private) _updateReadonly
-      @description Updates readonly status
+        @function (private) _updateReadonly
+        @description Updates readonly status
       */
       updateReadonly: function () {
         var el = this;
@@ -520,22 +499,17 @@
         } else {
           el._refs.slider.removeAttribute("readonly");
         }
-
       },
-
       /*
-      @function (private) _updateInvalid
-      @description Updates the invalid status
+        @function (private) _updateInvalid
+        @description Updates the invalid status
       */
       updateInvalid: function () {
-
         var el = this;
         var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
 
         el.classList[classListFn]("eon-slider-error");
-
       },
-
       /*
         @function (private) _updateCurrentValue
         @description Updates slider current value and trigger onChange callback
@@ -545,7 +519,6 @@
         (el.value !== el._currentValue) ? eon.triggerCallback("onChange", el) : null;
         el._currentValue = (el.value !== el._currentValue) ? el.value : el._currentValue;
       },
-
       /*
        @function (private) _verifyScreenResolution
        @description Set device type
@@ -563,9 +536,7 @@
         }
 
         el._updateSlider();
-
       },
-
       /*
        @function (private) _updateVerticalHeight
        @description Updates fill's height on vertical sliders
@@ -577,9 +548,7 @@
           el._refs.fill.style.height = (el._misc.percentValue * 100) + "%";
         }
       }
-
     },
-
     onCreated: function () {
       eon.createCallback("onChange", this);
       this._createRefs();
@@ -587,7 +556,6 @@
       this._misc.first = true;
       this._misc.descriptionText = "";
     },
-
     onInit: function () {
       var el = this;
 
@@ -611,17 +579,14 @@
       el._updateReadonly();
       el._updateVerticalHeight();
     },
-
     onRender: function () {
       var el = this;
 
       el._verifyScreenResolution();
     },
-
     onWindowResize: function (event) {
       this._verifyScreenResolution();
     },
-
     onPropertyChanged: function (attrName, oldVal, newVal) {
       switch (attrName) {
         case "disabled":
@@ -637,8 +602,6 @@
           this._updateInvalid();
           break;
       }
-    },
-
+    }
   });
-
 </script>

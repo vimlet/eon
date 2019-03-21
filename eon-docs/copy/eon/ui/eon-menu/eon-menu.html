@@ -10,27 +10,108 @@
       "../eon-item",
       "../eon-overlay"
     ],
-    privateProperties: {
-      refs: {
-        value: {},
-      },
-      misc: {
-        value: {},
-      }
-    },
     properties: {
+      /*
+       @property {Number} spacing 
+       @description Sub items dropdown position spacing 
+       Values: number in pixels
+     */
       spacing: {
         value: 0,
         reflect: true
       }
     },
+    privateProperties: {
+      /*
+        @property (private) {Object} _refs 
+        @description Object with references to relevant element nodes
+      */
+      refs: {
+        value: {},
+      },
+      /*
+        @property (private) {Object} _misc 
+        @description Object with useful data
+      */
+      misc: {
+        value: {},
+      }
+    },
+    functions: {
+      /*
+        @function displayModalView
+        @description Displays the modal view to navigate through the menu options
+      */
+      displayModalView: function () {
+        var el = this;
+
+        // Empties the path span since we are in the main page
+        el._refs.pathSpan.innerHTML = "";
+        el._misc.currentPage = el._refs.modalPages.main;
+        el._misc.modal.path = [el._refs.modalPages.main];
+
+        // Appends the modal view
+        document.body.appendChild(el._refs.modal);
+
+        // Triggers onModalDisplay callback
+        eon.triggerCallback("onModalDisplay", el, el, [el._refs.modal]);
+
+        // After being appended we set the opacity in a timeout so that the transition takes place
+        setTimeout(function () {
+          el._refs.modal.style.opacity = 1;
+        }, 0);
+
+        // Attempt to fix situations when the fixed modal view was having bugs on devices, now its absolute at the start and fixed after
+        setTimeout(function () {
+          el._refs.modal.classList.add("eon-menu-modal-fixed");
+        }, 100);
+
+        el._misc.modal.active = true;
+      },
+      /*
+        @function hideModalView
+        @description Hides the modal view
+      */
+      hideModalView: function () {
+        var el = this;
+
+        var hideFunction = function () {
+          var visiblePages = el._refs.modalBody.querySelectorAll(".eon-menu-page:not(.eon-menu-hidden)");
+
+          document.body.removeChild(el._refs.modal);
+          el._refs.modal.removeEventListener("transitionend", hideFunction);
+
+          // Takes all the visible pages and hides them except for the main one
+          for (var i = 0; i < visiblePages.length; i++) {
+            if (!visiblePages[i].dataset || !visiblePages[i].dataset.main) {
+              el._refs.modalBody.insertBefore(visiblePages[i], el._refs.modalBody.childNodes[0]);
+              visiblePages[i].classList.remove("eon-menu-front");
+            } else {
+              visiblePages[i].classList.add("eon-menu-front");
+            }
+          }
+
+          // Empties the path and hides the back button
+          el._refs.modalPath = [];
+          el._refs.backButton.classList.add("eon-menu-hidden");
+          el._refs.modal.classList.remove("eon-menu-modal-fixed");
+
+        }
+        // Only hide the modal view if its not already hidden
+        if (el._refs.modal.style.opacity != 0) {
+          eon.triggerCallback("onModalClose", el, el, [el._refs.modal]);
+          el._refs.modal.addEventListener("transitionend", hideFunction);
+          el._refs.modal.style.opacity = 0;
+          el._misc.modal.active = false;
+        }
+      }
+    },
     privateFunctions: {
       /*
-      @function (private) _setup
-      @description Sets up everything needed for the component
+        @function (private) _setup
+        @description Sets up everything needed for the component
       */
       setup: function () {
-
         var el = this;
 
         el._setupMisc();
@@ -40,14 +121,12 @@
         el._setupDeviceBehavior();
 
         el._handleWindowSize();
-
       },
       /*
-      @function (private) _setupMisc
-      @description Prepares the misc object to hold useful information
+        @function (private) _setupMisc
+        @description Prepares the misc object to hold useful information
       */
       setupMisc: function () {
-
         var el = this;
 
         el._misc.dropdowns = {};
@@ -62,14 +141,12 @@
 
         el._misc.displayDuration = 500;
         el._misc.hideDuration = 300;
-
       },
       /*
-      @function (private) _setupRefs
-      @description Prepares the refs object to hold useful references
+        @function (private) _setupRefs
+        @description Prepares the refs object to hold useful references
       */
       setupRefs: function () {
-
         var el = this;
 
         el._refs.dropdowns = {};
@@ -78,17 +155,15 @@
         el._refs.modalPages = {};
 
         el._refs.modalPath = [];
-        
+
         el._refs.items = {};
         el._refs.modalItems = {};
-
       },
       /*
-      @function (private) _setupDesktopBehavior
-      @description Prepares everything needed for the desktop behavior
+        @function (private) _setupDesktopBehavior
+        @description Prepares everything needed for the desktop behavior
       */
       setupDesktopBehavior: function () {
-
         var el = this;
 
         // Creates the eon-items wrapper
@@ -103,14 +178,12 @@
         }
 
         el.appendChild(el._refs.wrapper);
-
       },
       /*
-      @function (private) _setupDeviceBehavior
-      @description Prepares everything needed for the device behavior
+        @function (private) _setupDeviceBehavior
+        @description Prepares everything needed for the device behavior
       */
       setupDeviceBehavior: function () {
-
         var el = this;
         var item;
 
@@ -135,16 +208,13 @@
           el._refs.modalPages["main"].appendChild(item);
 
         }
-
         el._refs.modalBody.appendChild(el._refs.modalPages["main"]);
-
       },
       /*
-      @function (private) _setupModalView
-      @description Prepares the node in which the user will experience the modal behavior
+        @function (private) _setupModalView
+        @description Prepares the node in which the user will experience the modal behavior
       */
       setupModalView: function () {
-
         var el = this;
 
         el._refs.modal = el.generateOverlayNode();
@@ -187,21 +257,18 @@
           e.stopPropagation();
         }, { passive: false });
 
-        // TODO: Consider if this is necessary or not
-        // If the user scrolls the window scrollbar we hide the modal view
-        // window.addEventListener("scroll", function (e) {
-        //   if (el._misc.modal.active) {
-        //     el.hideModalView();
-        //   }
-        // });
-
+        // If the user scrolls the window scroll bar we hide the modal view
+        window.addEventListener("scroll", function (e) {
+          if (el._misc.modal.active) {
+            el.hideModalView();
+          }
+        });
       },
       /*
-      @function (private) _setupModalViewTrigger
-      @description Prepares the button that will trigger the modal node to appear
+        @function (private) _setupModalViewTrigger
+        @description Prepares the button that will trigger the modal node to appear
       */
       setupModalViewTrigger: function () {
-
         var el = this;
         var icon = document.createElement("i");
 
@@ -216,12 +283,11 @@
         });
 
         el.appendChild(el._refs.modalButton);
-
       },
       /*
-      @function (private) _setupModalItem
-      @description Takes the cloned declarative items and moves them to the modal view
-      @param {String} name 
+        @function (private) _setupModalItem
+        @description Takes the cloned declarative items and moves them to the modal view
+        @param {String} name 
       */
       setupModalItem: function (name) {
 
@@ -251,12 +317,11 @@
 
       },
       /*
-      @function (private) _setupItem
-      @description Creates a page for the child items
-      @param {Object} item 
+        @function (private) _setupItem
+        @description Creates a page for the child items
+        @param {Object} item 
       */
       setupItem: function (item) {
-
         var el = this;
         var link, span;
 
@@ -280,15 +345,13 @@
         item.appendChild(link);
 
         item.classList.add("eon-bg2-hoverable", "eon-fg1", "eon-fg1-hoverable");
-
       },
       /*
-      @function (private) _setupDropdown
-      @description Creates a dropdown for the child items
-      @param {Object} item 
+        @function (private) _setupDropdown
+        @description Creates a dropdown for the child items
+        @param {Object} item 
       */
       setupDropdown: function (item) {
-
         var el = this;
 
         if (item.children.length > 0) {
@@ -314,19 +377,15 @@
           }
 
           el._refs.dropdowns[item.getAttribute("name")] = dropdown;
-
           dropdown.appendChild(wrapper);
-
         }
-
       },
       /*
-      @function _setupEvents
-      @description Sets up the events for the menu item
-      @param {Object} item
+        @function _setupEvents
+        @description Sets up the events for the menu item
+        @param {Object} item
       */
       setupEvents: function (item) {
-
         var el = this;
 
         // Dropdown item visited
@@ -354,15 +413,13 @@
           // Hides all the dropdowns
           el._hideAllDropdowns();
         });
-
       },
       /*
-      @function (private) _setupModalPage
-      @description Creates a page for the child items
-      @param {Object} item 
+        @function (private) _setupModalPage
+        @description Creates a page for the child items
+        @param {Object} item 
       */
       setupModalPage: function (item) {
-
         var el = this;
 
         var items = el._misc.tree[item.name];
@@ -394,16 +451,14 @@
         });
 
         el._refs.modalBody.appendChild(el._refs.modalPages[item.name]);
-
       },
       /*
-      @function (private) _displayPage
-      @description Displays the provided page with/without animate
-      @param {Object} page
-      @param {Boolean} animate
+        @function (private) _displayPage
+        @description Displays the provided page with/without animate
+        @param {Object} page
+        @param {Boolean} animate
       */
       displayPage: function (page, animate) {
-
         var el = this;
 
         var currentPage = el._refs.modalPages[el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "main"];
@@ -424,14 +479,12 @@
           currentPage.addEventListener("transitionend", displayFunction);
           currentPage.classList.remove("eon-menu-front");
         }
-
       },
       /*
-      @function (private) _back
-      @description Hides the provided page with/without animation
+        @function (private) _back
+        @description Hides the provided page with/without animation
       */
-      back: function (page, animate) {
-
+      back: function () {
         var el = this;
 
         var currentPage = el._refs.modalPages[el._refs.modalPath.pop()];
@@ -466,36 +519,31 @@
 
         // Empties the path span
         el._refs.pathSpan.innerHTML = el._refs.modalPath.length > 0 ? el._refs.modalPath[el._refs.modalPath.length - 1] : "";
-
       },
       /*
-      @function _showDropdown
-      @description Shows the dropdown for the given item
-      @param {Object} item
+        @function _showDropdown
+        @description Shows the dropdown for the given item
+        @param {Object} item
       */
       showDropdown: function (item) {
-
         var el = this;
 
         if (el._refs.dropdowns[item.name]) {
           el._assignDropdownStyle(item);
           eon.triggerCallback("onDropdownDisplay", el, el, [item.name, el._refs.dropdowns[item.name]]);
         }
-
-
       },
       /*
-      @function _hideDropdown
-      @description Hides the dropdown for the given item
-      @param {Object} item
+        @function _hideDropdown
+        @description Hides the dropdown for the given item
+        @param {Object} item
       */
       hideDropdown: function (item) {
-
         var el = this;
         var pathIndex = el._misc.dropdowns.path.indexOf(item.name);
-        
+
         if (pathIndex > -1 && el._refs.dropdowns[item.name]) {
-          
+
           el._refs.dropdowns[item.name].parentNode.removeChild(el._refs.dropdowns[item.name]);
 
           eon.triggerCallback("onDropdownClose", el, el, [item.name, el._refs.dropdowns[item.name]]);
@@ -503,23 +551,20 @@
           for (var i = el._misc.dropdowns.path.length; pathIndex < i; i--) {
             el._misc.dropdowns.path.pop()
           }
-          setTimeout(function() {
+          setTimeout(function () {
             el._refs.dropdowns[item.name].classList.remove("eon-dropdown-opaque");
           }, 0);
-
         }
       },
       /*
-      @function _hideAllDropdowns
-      @description Hides all the dropdowns
+        @function _hideAllDropdowns
+        @description Hides all the dropdowns
       */
       hideAllDropdowns: function () {
-
         var el = this;
         var dropdown;
 
         for (var i = el._misc.dropdowns.path.length; 0 < i; i--) {
-
           dropdown = el._misc.dropdowns.path.pop();
 
           if (el._refs.dropdowns[dropdown]) {
@@ -528,42 +573,36 @@
             el._refs.dropdowns[dropdown].parentNode.removeChild(el._refs.dropdowns[dropdown]);
             // It also removes the class so that the items are openable again
             el._refs.items[dropdown].classList.remove("eon-sect3");
-            
+
             eon.triggerCallback("onDropdownClose", el, el, [dropdown, el._refs.dropdowns[el._refs.dropdowns[dropdown]]]);
-
           }
-
         }
-
         el._misc.dropdowns.path = [];
-
       },
       /*
-      @function _assignDropdownStyle
-      @description Determines and assigns the location of the dropdown
-      @param {Object} item
+        @function _assignDropdownStyle
+        @description Determines and assigns the location of the dropdown
+        @param {Object} item
       */
       assignDropdownStyle: function (item) {
-
         var el = this;
         var dropdown = el._refs.dropdowns[item.name];
 
         dropdown.style[el._misc.dropdowns.path.length > 0 ? "paddingLeft" : "paddingTop"] = parseInt(el.spacing) + "px";
         dropdown.dataset.position = el._misc.dropdowns.path.length > 0 ? "right" : "bottom";
         dropdown.style.height = (item.offsetHeight * dropdown.querySelectorAll("eon-item").length) + "px";
-        
+
         item.appendChild(dropdown);
 
         el._misc.dropdowns.path.push(item.name);
 
-        setTimeout(function() {
+        setTimeout(function () {
           dropdown.classList.add("eon-dropdown-opaque");
         }, 0);
-
       },
       /*
-      @function _handleWindowSize
-      @description Toggles between the device and desktop view depending on the window size
+        @function _handleWindowSize
+        @description Toggles between the device and desktop view depending on the window size
       */
       handleWindowSize: function () {
         if (eon.util.isTouchScreen()) {
@@ -573,12 +612,11 @@
         }
       },
       /*
-      @function exceedsWindow
-      @description If the dropdown to be opened exceeds we return an object with data about the sides that have ben exceeded
-      @param {Object} element
+        @function exceedsWindow
+        @description If the dropdown to be opened exceeds we return an object with data about the sides that have ben exceeded
+        @param {Object} element
       */
       exceedsWindow: function (element) {
-
         var elementRect = element.getBoundingClientRect();
         var returnObject = {};
 
@@ -605,83 +643,7 @@
         return returnObject;
       }
     },
-    functions: {
-      /*
-      @function displayModalView
-      @description Displays the modal view to navigate through the menu options
-      */
-      displayModalView: function () {
-
-        var el = this;
-
-        // Empties the path span since we are in the main page
-        el._refs.pathSpan.innerHTML = "";
-        el._misc.currentPage = el._refs.modalPages.main;
-        el._misc.modal.path = [el._refs.modalPages.main];
-
-        // Appends the modal view
-        document.body.appendChild(el._refs.modal);
-
-        // Triggers onModalDisplay callback
-        eon.triggerCallback("onModalDisplay", el, el, [el._refs.modal]);
-
-        // After being appended we set the opacity in a timeout so that the transition takes place
-        setTimeout(function () {
-          el._refs.modal.style.opacity = 1;
-        }, 0);
-        
-        // Attempt to fix situations when the fixed modal view was having bugs on devices, now its absolute at the start and fixed after
-        setTimeout(function () {
-          el._refs.modal.classList.add("eon-menu-modal-fixed");
-        }, 100);
-
-        el._misc.modal.active = true;
-
-      },
-      /*
-      @function hideModalView
-      @description Hides the modal view
-      */
-      hideModalView: function () {
-
-        var el = this;
-
-        var hideFunction = function () {
-
-          var visiblePages = el._refs.modalBody.querySelectorAll(".eon-menu-page:not(.eon-menu-hidden)");
-
-          document.body.removeChild(el._refs.modal);
-          el._refs.modal.removeEventListener("transitionend", hideFunction);
-
-          // Takes all the visible pages and hides them except for the main one
-          for (var i = 0; i < visiblePages.length; i++) {
-            if (!visiblePages[i].dataset || !visiblePages[i].dataset.main) {
-              el._refs.modalBody.insertBefore(visiblePages[i], el._refs.modalBody.childNodes[0]);
-              visiblePages[i].classList.remove("eon-menu-front");
-            } else {
-              visiblePages[i].classList.add("eon-menu-front");
-            }
-          }
-
-          // Empties the path and hides the back button
-          el._refs.modalPath = [];
-          el._refs.backButton.classList.add("eon-menu-hidden");
-          el._refs.modal.classList.remove("eon-menu-modal-fixed");
-
-        }
-
-        // Only hide the modal view if its not already hidden
-        if (el._refs.modal.style.opacity != 0) {
-          eon.triggerCallback("onModalClose", el, el, [el._refs.modal]);
-          el._refs.modal.addEventListener("transitionend", hideFunction);
-          el._refs.modal.style.opacity = 0;
-          el._misc.modal.active = false;
-        }
-
-      }
-    },
     onCreated: function () {
-
       var el = this;
 
       eon.createCallback("onModalDisplay", el);
@@ -689,7 +651,6 @@
 
       eon.createCallback("onDropdownDisplay", el);
       eon.createCallback("onDropdownClose", el);
-
     },
     onInit: function () {
       this._setup();
