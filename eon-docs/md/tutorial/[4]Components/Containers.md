@@ -452,20 +452,20 @@ Gutter sections can be collapsible for dynamic behavior. On the contrary, the gu
     </doc-showcase>
   </template>
   <template type="css">
-    .gutter-box {
-        height: 50px;
-        width: 50px;
-        min-width: 50px;
-        margin: 8px;
-        background: #76bb72;
-    }
-    .blue {
-      background-color: #7296bb !important;
-    }
+  .gutter-box {
+      height: 50px;
+      width: 50px;
+      min-width: 50px;
+      margin: 8px;
+      background: #76bb72;
+  }
+  .blue {
+    background-color: #7296bb !important;
+  }
 
-    .red {
-      background-color: #b36a6a;
-    }
+  .red {
+    background-color: #b36a6a;
+  }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -544,22 +544,22 @@ Nothing prevents you from declaring nested eon-gutter elements without losing cu
     </doc-showcase>
   </template>
   <template type="css">
-    .gutter-box {
-        height: 50px;
-        width: 50px;
-        min-width: 50px;
-        margin: 8px;
-        background: #76bb72;
-    }
-    .blue {
-      background-color: #7296bb !important;
-    }
-    .orange {
-      background-color: #bb9772;
-    }
-    .red {
-      background-color: #b36a6a;
-    }
+  .gutter-box {
+      height: 50px;
+      width: 50px;
+      min-width: 50px;
+      margin: 8px;
+      background: #76bb72;
+  }
+  .blue {
+    background-color: #7296bb !important;
+  }
+  .orange {
+    background-color: #bb9772;
+  }
+  .red {
+    background-color: #b36a6a;
+  }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -637,76 +637,58 @@ You can use it as a part of a flex based layout.
     </doc-showcase>
   </template>
   <template type="css">
-    eon-panel {
-      transition: transform .2s, background-color .2s;
-      backface-visibility: hidden;
-      transform: translateZ(0);
-    }
-    eon-panel.animated {
-      box-shadow: 0 1px 6px 0 #696969;
-    }
-    eon-panel.animated:hover {
-      transform: translateZ(0) scale(.96);
-      cursor: pointer;
-    }
-    .panel {
-      display: flex;
-      flex-direction: column;
-      height: 400px;
-      max-width: 400px;
-      width: 400px;
-      overflow: hidden;
-    }
-    .panel-children {
-      display: flex;
-      height: calc(100% - 10px);
-      width: 100%;
-      overflow: hidden;
-    }
+  eon-panel {
+    transition: transform .2s, background-color .2s;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+  eon-panel.animated {
+    box-shadow: 0 1px 6px 0 #696969;
+  }
+  eon-panel.animated:hover {
+    transform: translateZ(0) scale(.96);
+    cursor: pointer;
+  }
+  .panel {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    max-width: 400px;
+    width: 400px;
+    overflow: hidden;
+  }
+  .panel-children {
+    display: flex;
+    height: calc(100% - 10px);
+    width: 100%;
+    overflow: hidden;
+  }
 
-    .row-reverse {
-      flex-direction: row-reverse;
-    }
-    .mid-width {
-      width: calc(50% - 5px);
-    }
-    .mid-height {
-      height: calc(50% - 5px);
-    }
+  .row-reverse {
+    flex-direction: row-reverse;
+  }
+  .mid-width {
+    width: calc(50% - 5px);
+  }
+  .mid-height {
+    height: calc(50% - 5px);
+  }
 
-    .grey {
-      background-color: #f5f5f5;
-    }
-    .blue {
-      background-color: #7296bb;
-    }
-    .red {
-      background-color: #b36a6a;
-    }
-    .brown {
-      background-color: #bb9772;
-    }
-    .black {
-      background-color: #696969;
-    }
-  </template>
-  <template type="js">
-    /* ** Bug on this doc version
-    eon.onReady(function () {
-      var panels = $("eon-panel");
-      var colors = ["#b74747", "#696969", "#8c47b7", "#bb9772", "#b36a6a", "#7296bb", "#76bb72"];
-      
-      for (var i in panels) {
-        var panel = panels[i];
-        console.log(panel)
-        if (panel.classList && panel.classList.contains("eon-boxshadow1")) {
-          panel.addEventListener("click", function (e) {
-            var color = Math.floor((Math.random() * 6) + 1);
-            this.style.backgroundColor = colors[color];
-          }, false);
-        }
-      }
-    });*/
+  .grey {
+    background-color: #f5f5f5;
+  }
+  .blue {
+    background-color: #7296bb;
+  }
+  .red {
+    background-color: #b36a6a;
+  }
+  .brown {
+    background-color: #bb9772;
+  }
+  .black {
+    background-color: #696969;
+  }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -782,32 +764,32 @@ triggering.
     </doc-showcase>
   </template>
   <template type="css">
-    .header-panel {
-      height: 220px;
-      width: 200px;
-    }
-    .header-panel-square {
-      width: 100%;
-      height: 100px;
-      margin-top: 12px;
-      transition: all .2s;
-    }
-    eon-bubble {
-      bottom: 16px;
-      right: 16px;
-      height: 40px;
-      width: 40px;
-      position: absolute;
-    }
-    .brown {
-      background-color: #bb9772;
-    }
-    .blue {
-      background-color: #7296bb;
-    }
-    .red {
-      background-color: #b36a6a;
-    }
+  .header-panel {
+    height: 220px;
+    width: 200px;
+  }
+  .header-panel-square {
+    width: 100%;
+    height: 100px;
+    margin-top: 12px;
+    transition: all .2s;
+  }
+  eon-bubble {
+    bottom: 16px;
+    right: 16px;
+    height: 40px;
+    width: 40px;
+    position: absolute;
+  }
+  .brown {
+    background-color: #bb9772;
+  }
+  .blue {
+    background-color: #7296bb;
+  }
+  .red {
+    background-color: #b36a6a;
+  }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -870,38 +852,38 @@ Panel provides a huge control over its content elements rendering, allowing on d
     </doc-showcase>
   </template>
   <template type="css">
-    .panel {
-      flex-direction: column;
-      min-width: 350px;
-      height: 100px;
-    }
-    .panel-content {
-      height: 100px;
-      width: 350px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 18px;
-      text-align: center;
-      padding: 6px;
-      color: #ffffff;
-      box-sizing: border-box;
-    }
-    .place-holder {
-      background-color: #76bb72;
-      -moz-box-shadow: inset 0 0 10px #ffffff;
-      -webkit-box-shadow: inset 0 0 10px #ffffff;
-      box-shadow: inset 0 0 10px #ffffff;
-    }
-    .panel-button {
-      width: 150px;
-      margin-bottom: 10px;
-    }
-    #lazy-remote {
-      -webkit-box-shadow: 0px 0px 10px #d8d8d8;
-      -moz-box-shadow: 0px 0px 10px #d8d8d8;
-      box-shadow: 0px 0px 10px #d8d8d8;
-    }
+  .panel {
+    flex-direction: column;
+    min-width: 350px;
+    height: 100px;
+  }
+  .panel-content {
+    height: 100px;
+    width: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    text-align: center;
+    padding: 6px;
+    color: #ffffff;
+    box-sizing: border-box;
+  }
+  .place-holder {
+    background-color: #76bb72;
+    -moz-box-shadow: inset 0 0 10px #ffffff;
+    -webkit-box-shadow: inset 0 0 10px #ffffff;
+    box-shadow: inset 0 0 10px #ffffff;
+  }
+  .panel-button {
+    width: 150px;
+    margin-bottom: 10px;
+  }
+  #lazy-remote {
+    -webkit-box-shadow: 0px 0px 10px #d8d8d8;
+    -moz-box-shadow: 0px 0px 10px #d8d8d8;
+    box-shadow: 0px 0px 10px #d8d8d8;
+  }
   </template>
   <template type="js">
     function renderLazy() {
@@ -982,34 +964,34 @@ Meant to swap between different panels easily with a tabs base wrapper, this tab
     </doc-showcase>
   </template>
   <template type="css">
-    /* Tabs custom style */
-      .d-tabs {
-        height: 330px;
-        width: 100%;
-        padding: 0;
-        -webkit-box-shadow: 0px 0px 10px #d8d8d8;
-        -moz-box-shadow: 0px 0px 10px #d8d8d8;
-        box-shadow: 0px 0px 10px #d8d8d8;
-      }
+  /* Tabs custom style */
+  .d-tabs {
+    height: 330px;
+    width: 100%;
+    padding: 0;
+    -webkit-box-shadow: 0px 0px 10px #d8d8d8;
+    -moz-box-shadow: 0px 0px 10px #d8d8d8;
+    box-shadow: 0px 0px 10px #d8d8d8;
+  }
 
-      .d-tabs-content {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+  .d-tabs-content {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-      .blue {
-        background-color: #7296bb !important;
-      }
+  .blue {
+    background-color: #7296bb !important;
+  }
 
-      .green {
-        background-color: #76bb72 !important;
-      }
+  .green {
+    background-color: #76bb72 !important;
+  }
 
-      .red {
-        background-color: #b36a6a;
-      }
+  .red {
+    background-color: #b36a6a;
+  }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
@@ -1082,10 +1064,6 @@ Mauris vel pulvinar mi. Nullam eu facilisis nibh. Nulla at leo vel velit cursus 
       </div>
       </eon-scroll>
     </doc-showcase>
-  </template>
-  <template type="css">
-  </template>
-  <template type="js">
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}

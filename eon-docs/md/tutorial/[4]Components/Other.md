@@ -55,11 +55,6 @@ The loader element is an useful mask for your application processes and page loa
   </template>
   <template type="js">
      eon.onReady(function () {
-        //** Showcase resize fix
-        // Iframe content loaded monitoring
-        eon.triggerCallback("onLoaded", window.frameElement);
-        document.body.setAttribute("theme", "claro");
-        //**
         runLoader();
         runEaseProgress()
       });
@@ -77,23 +72,23 @@ The loader element is an useful mask for your application processes and page loa
       }
   </template>
   <template type="css">
-    .loader {
-      height: 5px !important;
-      width: 100% !important;
-    }
-    .progress {
-      position: relative;
-      height: 15px !important;
-      width: 100% !important;
-      margin-right: auto;
-    }
-    .loader-btn-container {
-      width: 100%;
-      height: 100px;
-      margin-right: auto;
-      display: flex;
-      align-items: flex-end;
-    }
+  .loader {
+    height: 5px !important;
+    width: 100% !important;
+  }
+  .progress {
+    position: relative;
+    height: 15px !important;
+    width: 100% !important;
+    margin-right: auto;
+  }
+  .loader-btn-container {
+    width: 100%;
+    height: 100px;
+    margin-right: auto;
+    display: flex;
+    align-items: flex-end;
+  }
   </template>
   <template type="footer">
     {"button":{"action":"changeTheme", "icon":"theme"}}
