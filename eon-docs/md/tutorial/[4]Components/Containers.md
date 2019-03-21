@@ -604,7 +604,7 @@ You can use it as a part of a flex based layout.
           width: calc(100% - 40px);
         }
       @media (max-width: 460px) {
-        eon-panel {
+        .doc-showcase-content > eon-panel {
           height: 260px;
           width: 260px;
         }

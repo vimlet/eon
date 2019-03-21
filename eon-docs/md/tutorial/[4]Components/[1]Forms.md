@@ -82,6 +82,9 @@ To display buttons with icons just use the `vicon` property passing any of the i
         display: flex;
         flex-wrap: wrap;
       }
+      .doc-showcase-content{
+        display:flex;
+      }
     </style>
   </template>
   <template type="html-body">
