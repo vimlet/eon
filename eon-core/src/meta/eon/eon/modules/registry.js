@@ -9,6 +9,8 @@ eon.registry.elementThemes = {};
 eon.registry.elementCounters = {};
 eon.registry.elementRegistry = {};
 
+eon.registry.registeredElements = 0;
+
 eon.registry.elementStatus = {
   declared: [],
   created: [],
@@ -48,6 +50,8 @@ eon.registry.registerElement = function (el) {
       el: el,
       status: "created"
     };
+
+    eon.registry.registeredElements++;
 
     // InnerHTML support
   } else if (uid && (!el.uid || !el.getAttribute("uid"))) {
@@ -114,7 +118,7 @@ eon.registry.addToReadyQueue = function (el, fn) {
 
 eon.registry.triggerRenders = function () {
 
-  if (Object.keys(eon.registry.elementStatus.attached).length == eon.registry.elementStatus.transformed.length) {
+  if (eon.registry.registeredElements == eon.registry.elementStatus.transformed.length) {
     
     eon.registry.triggerRenderCallbacks();
     eon.registry.triggerBubbleRenderCallbacks();
@@ -197,7 +201,7 @@ eon.registry.updateElementStatus = function (el, status) {
 
       eon.registry.elementStatus[status][uidFull] = el;
 
-      if (eon.registry.elementStatus.ready.length != Object.keys(eon.registry.elementStatus.attached).length) {
+      if (eon.registry.elementStatus.ready.length != eon.registry.registeredElements) {
         eon["__onReady__triggered"] = false;
       }
 

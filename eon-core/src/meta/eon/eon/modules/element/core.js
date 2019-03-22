@@ -328,18 +328,19 @@ eon.createAttributesObserver = function (el, config) {
     // First we check if we have attributes to observe
     if (observeAttributesKeys.length > 0) {
 
-        var property, privateProperty, value;
+        var key, property, privateProperty, value;
 
         // For each observe attribute if check which value should be assign to it
         for (var i = 0; i < observeAttributesKeys.length; i++) {
 
-            property = eon.util.hyphenToCamelCase(observeAttributesKeys[i]);
+            key = observeAttributesKeys[i].slice(0);
+            property = eon.util.hyphenToCamelCase(key);
             privateProperty = "__" + property;
 
             // If the attribute already has a value we assign this value to its corresponding property
-            if (el.getAttribute(observeAttributesKeys[i])) {
+            if (el.getAttribute(key)) {
 
-                el[privateProperty] = el.getAttribute(observeAttributesKeys[i]);
+                el[privateProperty] = el.getAttribute(key);
 
                 // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
@@ -348,12 +349,17 @@ eon.createAttributesObserver = function (el, config) {
 
                     value = el.hasOwnProperty(privateProperty) ? el[privateProperty] : "";
 
-                    // Only sets the attribute if the value is not of object type
-                    if (typeof value != "object") {
-                        el.setAttribute(observeAttributesKeys[i], value);
-                    } else {
-                        el.removeAttribute(observeAttributesKeys[i]);
-                    }
+                    // This is done in the onInit callback since we cannot set an attribute in the onCreated one
+                    el.onInit(function () {
+
+                        // Only sets the attribute if the value is not of object type
+                        if (typeof value != "object") {
+                            el.setAttribute(key, value);
+                        } else {
+                            el.removeAttribute(key);
+                        }
+
+                    });
 
                 }
 
