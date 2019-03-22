@@ -8,22 +8,6 @@
     dependencies: [
       "eon-swiper-slide"
     ],
-    privateProperties: {
-      /*
-        @property (private) {Object} _misc
-        @description Internal used data
-      */
-      misc: {
-        value: {}
-      },
-      /*
-        @property (private) {Object} _refs
-        @description Quick access to the swiper structure nodes references
-      */
-      refs: {
-        value: {}
-      }
-    },
     properties: {
       /*
         @property {String} type
@@ -46,26 +30,17 @@
         reflect: true,
         reflectDefault: true
       },
-
       /*
         @property {Boolean} auto
-        @description 
+        @description Whether the slides should be translated automatically
       */
       auto: {
         value: false,
         reflect: true
       },
       /*
-        @property {String} autoType
-        @description 
-      */
-      autoType: {
-        value: "next",
-        reflect: true
-      },
-      /*
         @property {Number} duration
-        @description 
+        @description Auto translation timing
       */
       duration: {
         value: 2000,
@@ -73,13 +48,12 @@
       },
       /*
         @property {Number} transition
-        @description 
+        @description Animations duration
       */
       transition: {
         value: 200,
         reflect: true
       },
-
       /*
         @property {Boolean} externalSlide
         @description Denied slide by touching
@@ -100,11 +74,11 @@
       /*
         @property {String} pagination
         @description Pagination type
-        Values: filled, hideable, hidden
+        Values: filled, hidable, hidden
         Default: filled
       */
       pagination: {
-        value: "hidden", // (filled), hidable, hidden
+        value: "hidden",
         reflect: true,
         reflectDefault: true
       },
@@ -185,7 +159,7 @@
       },
       /*
         @property {Number} responsiveLimit 
-        @description 
+        @description Specific device resolution limit
       */
       responsiveLimit: {
         value: 0,
@@ -200,6 +174,202 @@
       fill: {
         value: true,
         reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property (private) {Object} _misc
+        @description Internal used data
+      */
+      misc: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _refs
+        @description Quick access to the swiper structure nodes references
+      */
+      refs: {
+        value: {}
+      }
+    },
+    functions: {
+      /*
+        @function next
+        @description Slide to the next slide element
+      */
+      next: function (cb) {
+        var el = this;
+        // Current child has a next sibling
+        if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("start")) {
+          // Update current element
+          var currentIndex = el.slides.indexOf(el.currentSlide);
+          el.currentSlide = el.slides[currentIndex + 1];
+          // Get new y/z position
+          var newPos = el.currentSlide.range[0];
+          // Translate element
+          el._translate(el._refs.wrapper, newPos);
+          // Activate slide related thumbnail
+          el._activateThumbnail(el.thumbnails[currentIndex + 1]);
+          // Trigger onSlideChange event
+          eon.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex + 1)]);
+        } else if (eon.util.isTrue(el.auto)) {
+          // Auto next functionality
+          el.nextAuto();
+        }
+      },
+      /*
+        @function nextAuto
+        @description Automatic translate to the next slide
+      */
+      nextAuto: function () {
+        var el = this;
+        var slide = el.slides[0];
+        // HORIZONTAL - Decrease first slide size to simulate the translate animation
+        if (el.direction == "horizontal") {
+          slide.el.classList.add("eon-swiper-auto-size");
+        } else {
+          // VERTICAL - Translate each slide to the new position
+          // ** Size based animations are not valid since their causes scroll container issues
+          for (var i = 0; i < el.slides.length; i++) {
+            var sld = el.slides[i].el;
+            el._translate(sld, (i - 1) * sld[el._misc.sizeProperty]);
+          }
+        }
+        // Wait until the translate animation has ended
+        setTimeout(function () {
+          // Move element to the last of the queue
+          var slideOut = el.slides.shift();
+          el.slides.push(slideOut);
+          el._refs.wrapper.appendChild(slide.el);
+          // HORIZONTAL - Set the first slide size to its previous value
+          if (el.direction == "horizontal") {
+            slide.el.classList.remove("eon-swiper-auto-size");
+          } else {
+            // VERTICAL - Translate the first slide to the last position
+            el._translate(slide.el, 1000);
+          }
+          // Trigger onNextCalled event
+          eon.triggerCallback("onNextCalled", el, el, [slideOut.el]);
+        }, el.transition);
+
+        // Trigger the new translation
+        setTimeout(function () {
+          el.next();
+        }, el.duration);
+      },
+      /*
+        @function prev
+        @description Slide to the previous slide element
+      */
+      prev: function () {
+        var el = this;
+        // Current child has a next sibling
+        if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("end")) {
+          // Update current element
+          var currentIndex = el.slides.indexOf(el.currentSlide);
+          el.currentSlide = el.slides[currentIndex - 1];
+          // Get new y/z position
+          var newPos = el.currentSlide.range[0];
+          // Translate element
+          el._translate(el._refs.wrapper, newPos);
+          // Activate slide related thumbnail
+          el._activateThumbnail(el.thumbnails[currentIndex - 1]);
+          // Trigger onSlideChange event
+          eon.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex - 1)]);
+        } else if (eon.util.isTrue(el.auto)) {
+          // Auto next functionality
+          el.prevAuto();
+        }
+      },
+      /*
+        @function prevAuto
+        @description Automatic translate to the previous slide
+      */
+      prevAuto: function () {
+        var el = this;
+        var slide = el.slides[0];
+        var lastSlide = el.slides[el.slides.length - 1].el;
+        // HORIZONTAL - Decrease first slide size to simulate the translate animation
+        if (el.direction == "horizontal") {
+          slide.el.classList.remove("eon-swiper-auto-size");
+        } else {
+          // VERTICAL - Translate each slide to the new position
+          // ** Size based animations are not valid since their causes scroll container issues
+          for (var i = 0; i < el.slides.length; i++) {
+            var sld = el.slides[i].el;
+            el._translate(sld, (i - 1) * sld[el._misc.sizeProperty]);
+          }
+        }
+        // Wait until the translate animation has ended
+        setTimeout(function () {
+          // Move element to the first position of the queue
+          el._refs.wrapper.insertBefore(lastSlide, slide.el);
+          var slideOut = el.slides.pop();
+          el.slides.unshift(slideOut);
+          slide = el.slides[0];
+          // HORIZONTAL - Set the first slide size to its previous value
+          if (el.direction == "horizontal") {
+            // Increase first hidden slide size
+            slide.el.classList.add("eon-swiper-auto-size");
+          } else {
+            el._translate(slide.el, -200);
+          }
+          // Trigger onPrevCalled event
+          eon.triggerCallback("onPrevCalled", el, el, [slideOut.el]);
+        }, el.transition);
+        // Trigger the new translation
+        setTimeout(function () {
+          el.prev();
+        }, el.duration);
+      },
+      /*
+        @function slideTo
+        @description Slide to the previous slide element
+        @param {Number} index [Translate target slide index]
+        @param {Boolean} cancelAnim [Cancel translate animation]
+      */
+      slideTo: function (index, cancelAnim) {
+        var el = this;
+        // Get current slide index
+        var currentIndex = el.slides.indexOf(el.currentSlide);
+        // Update current element
+        el.currentSlide = el.slides[index];
+        // Get new y/z position
+        var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
+        var newPos = swiperHeight * (index);
+        // Cancel animation 
+        if (cancelAnim) {
+          var currentTransition = el._refs.wrapper.style.transition;
+          el._refs.wrapper.style.transition = "none";
+        }
+        // Translate element
+        el._translate(el._refs.wrapper, -newPos);
+        if (cancelAnim) {
+          setTimeout(function () {
+            el._refs.wrapper.style.transition = currentTransition;
+          }, 0);
+        }
+        // Activate slide related thumbnail
+        el._activateThumbnail(el.thumbnails[index]);
+        // Trigger onSlideChange event
+        eon.triggerCallback("onSlideChange", el, el, [currentIndex, index]);
+      },
+      /*
+        @function add
+        @description Add swiper slide element
+        @param {Object} slide [Slide element to be appended]
+      */
+      add: function (slide) {
+        var el = this;
+        var slideFragment = document.createDocumentFragment();
+        slideFragment.appendChild(slide);
+        if (!el._refs.wrapper) {
+          el.appendChild(slideFragment);
+        } else {
+          el._refs.wrapper.appendChild(slideFragment);
+          // Update max slide value
+          el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
+        }
       }
     },
     privateFunctions: {
@@ -1019,7 +1189,7 @@
             }
             mousedown = false;
             slideCounter = 0;
-            eon.triggerCallback("onDragStoped", el, el);
+            eon.triggerCallback("onDragStopped", el, el);
           });
         }
       },
@@ -1389,191 +1559,12 @@
         }
       }
     },
-    functions: {
-      /*
-        @function next
-        @description Slide to the next slide element
-      */
-      next: function (cb) {
-        var el = this;
-        // Current child has a next sibling
-        if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("start")) {
-          // Update current element
-          var currentIndex = el.slides.indexOf(el.currentSlide);
-          el.currentSlide = el.slides[currentIndex + 1];
-          // Get new y/z position
-          var newPos = el.currentSlide.range[0];
-          // Translate element
-          el._translate(el._refs.wrapper, newPos);
-          // Activate slide related thumbnail
-          el._activateThumbnail(el.thumbnails[currentIndex + 1]);
-          // Trigger onSlideChange event
-          eon.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex + 1)]);
-        } else if (eon.util.isTrue(el.auto)) {
-          // Auto next functionality
-          el.nextAuto();
-        }
-      },
-      /*
-        @function nextAuto
-        @description 
-      */
-      nextAuto: function () {
-        var el = this;
-        var slide = el.slides[0];
-        // HORIZONTAL - Decrease first slide size to simulate the translate animation
-        if (el.direction == "horizontal") {
-          slide.el.classList.add("eon-swiper-auto-size");
-        } else {
-          // VERTICAL - Translate each slide to the new position
-          // ** Size based animations are not valid since their causes scroll container issues
-          for (var i = 0; i < el.slides.length; i++) {
-            var sld = el.slides[i].el;
-            el._translate(sld, (i - 1) * sld[el._misc.sizeProperty]);
-          }
-        }
-        // Wait until the translate animation has ended
-        setTimeout(function () {
-          // Move element to the last of the queue
-          var slideOut = el.slides.shift();
-          el.slides.push(slideOut);
-          el._refs.wrapper.appendChild(slide.el);
-          // HORIZONTAL - Set the first slide size to its previous value
-          if (el.direction == "horizontal") {
-            slide.el.classList.remove("eon-swiper-auto-size");
-          } else {
-            // VERTICAL - Translate the first slide to the last position
-            el._translate(slide.el, 1000);
-          }
-          // Trigger onNextCalled event
-          eon.triggerCallback("onNextCalled", el, el, [slideOut.el]);
-        }, el.transition);
-
-        // Trigger the new translation
-        setTimeout(function () {
-          el.next();
-        }, el.duration);
-      },
-      /*
-        @function prev
-        @description Slide to the previous slide element
-      */
-      prev: function () {
-        var el = this;
-        // Current child has a next sibling
-        if (!eon.util.isTrue(el.auto) && !el._isEdgeElement("end")) {
-          // Update current element
-          var currentIndex = el.slides.indexOf(el.currentSlide);
-          el.currentSlide = el.slides[currentIndex - 1];
-          // Get new y/z position
-          var newPos = el.currentSlide.range[0];
-          // Translate element
-          el._translate(el._refs.wrapper, newPos);
-          // Activate slide related thumbnail
-          el._activateThumbnail(el.thumbnails[currentIndex - 1]);
-          // Trigger onSlideChange event
-          eon.triggerCallback("onSlideChange", el, el, [currentIndex, (currentIndex - 1)]);
-        } else if (eon.util.isTrue(el.auto)) {
-          // Auto next functionality
-          el.prevAuto();
-        }
-      },
-      /*
-        @function prevAuto
-        @description 
-      */
-      prevAuto: function () {
-        var el = this;
-        var slide = el.slides[0];
-        var lastSlide = el.slides[el.slides.length - 1].el;
-        // HORIZONTAL - Decrease first slide size to simulate the translate animation
-        if (el.direction == "horizontal") {
-          slide.el.classList.remove("eon-swiper-auto-size");
-        } else {
-          // VERTICAL - Translate each slide to the new position
-          // ** Size based animations are not valid since their causes scroll container issues
-          for (var i = 0; i < el.slides.length; i++) {
-            var sld = el.slides[i].el;
-            el._translate(sld, (i - 1) * sld[el._misc.sizeProperty]);
-          }
-        }
-        // Wait until the translate animation has ended
-        setTimeout(function () {
-          // Move element to the first position of the queue
-          el._refs.wrapper.insertBefore(lastSlide, slide.el);
-          var slideOut = el.slides.pop();
-          el.slides.unshift(slideOut);
-          slide = el.slides[0];
-          // HORIZONTAL - Set the first slide size to its previous value
-          if (el.direction == "horizontal") {
-            // Increase first hidden slide size
-            slide.el.classList.add("eon-swiper-auto-size");
-          } else {
-            el._translate(slide.el, -200);
-          }
-          // Trigger onPrevCalled event
-          eon.triggerCallback("onPrevCalled", el, el, [slideOut.el]);
-        }, el.transition);
-        // Trigger the new translation
-        setTimeout(function () {
-          el.prev();
-        }, el.duration);
-      },
-      /*
-        @function slideTo
-        @description Slide to the previous slide element
-        @param {Number} index [Translate target slide index]
-      */
-      slideTo: function (index, cancelAnim) {
-        var el = this;
-        // Get current slide index
-        var currentIndex = el.slides.indexOf(el.currentSlide);
-        // Update current element
-        el.currentSlide = el.slides[index];
-        // Get new y/z position
-        var swiperHeight = el._getNumProperty(el._misc.styleSizeProperty);
-        var newPos = swiperHeight * (index);
-        // Cancel animation 
-        if (cancelAnim) {
-          var currentTransition = el._refs.wrapper.style.transition;
-          el._refs.wrapper.style.transition = "none";
-        }
-        // Translate element
-        el._translate(el._refs.wrapper, -newPos);
-        if (cancelAnim) {
-          setTimeout(function () {
-            el._refs.wrapper.style.transition = currentTransition;
-          }, 0);
-        }
-        // Activate slide related thumbnail
-        el._activateThumbnail(el.thumbnails[index]);
-        // Trigger onSlideChange event
-        eon.triggerCallback("onSlideChange", el, el, [currentIndex, index]);
-      },
-      /*
-        @function add
-        @description Add swiper slide element
-        @param {Object} slide [Slide element to be appended]
-      */
-      add: function (slide) {
-        var el = this;
-        var slideFragment = document.createDocumentFragment();
-        slideFragment.appendChild(slide);
-        if (!el._refs.wrapper) {
-          el.appendChild(slideFragment);
-        } else {
-          el._refs.wrapper.appendChild(slideFragment);
-          // Update max slide value
-          el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
-        }
-      }
-    },
     onCreated: function () {
       var el = this;
       // Swiper events
       eon.createCallback("onSlideChange", el);
       eon.createCallback("onDragStarted", el);
-      eon.createCallback("onDragStoped", el);
+      eon.createCallback("onDragStopped", el);
       eon.createCallback("onPrevCalled", el);
       eon.createCallback("onNextCalled", el);
       eon.createCallback("onSwipeEnd", el);
@@ -1598,7 +1589,7 @@
       el._setUp();
       // Swiper elements container
       var fragment = document.createDocumentFragment();
-      setTimeout(() => {
+      setTimeout(function() {
         // Build main swiper structure
         el._buildWrapper(fragment);
         // Build swiper pagination controller

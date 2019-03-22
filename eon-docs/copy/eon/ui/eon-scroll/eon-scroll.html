@@ -6,79 +6,98 @@
     name: "eon-scroll",
     style: "eon-scroll.css",
 
-    privateProperties: {
-      /*
-      @property (private) {Object} _refs
-      @description Object with references
-      */
-      refs: {
-        value: {}
-      },
-      /*
-      @property (private) {Object} _misc
-      @description Object with useful information
-      */
-      misc: {
-        value: {}
-      },
-    },
     properties: {
       /*
-      @property {String} type
-      @description Indicates the allowed scrolls, auto/horizontal/vertical
+        @property {String} type
+        @description Indicates the allowed scrolls, auto/horizontal/vertical
       */
       type: {
         value: "auto",
         reflect: true
       },
       /*
-      @property {Boolean} fill
-      @description Indicates whether the scroll will autofill its container or grow according to its content until it fills its container
+        @property {Boolean} fill
+        @description Indicates whether the scroll will autofill its container or grow according to its content until it fills its container
       */
       fill: {
         value: true,
         reflect: true
       },
       /*
-      @property {Number} thickness
-      @description Indicates the thickness for the scroll rails
+        @property {Number} thickness
+        @description Indicates the thickness for the scroll rails
       */
       thickness: {
         value: 15,
         reflect: true
       },
       /*
-      @property {Boolean} arrowScrolls
-      @description Indicates whether we want arrow scrolls or not
+        @property {Boolean} arrowScrolls
+        @description Indicates whether we want arrow scrolls or not
       */
       arrowScrolls: {
         value: false,
         reflect: true
       },
       /*
-      @property {String} static
-      @description Indicates whether we want some scroll rails to be always visible or not, none/horizontal/vertical/both
+        @property {String} static
+        @description Indicates whether we want some scroll rails to be always visible or not, none/horizontal/vertical/both
       */
       static: {
         value: false,
         reflect: true
       },
       /*
-      @property {String} autoGrowth
-      @description Indicates whether the scroll grows with the parent or the parent grows with the scroll content
+        @property {Boolean} square
+        @description Indicates whether we want some scroll rails to be always visible or not, none/horizontal/vertical/both
+      */
+      square: {
+        value: false,
+        reflect: true
+      },
+      /*
+        @property {String} autoGrowth
+        @description Indicates whether the scroll grows with the parent or the parent grows with the scroll content
       */
       autoGrowth: {
         value: false,
         reflect: true
       }
     },
+    privateProperties: {
+      /*
+        @property (private) {Object} _refs
+        @description Object with references
+      */
+      refs: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _misc
+        @description Object with useful information
+      */
+      misc: {
+        value: {}
+      },
+    },
+    functions: {
+      /*
+        @function scrollTo
+        @description Scrolls to a given position
+        @param {Number} scrollTop
+        @param {Number} scrollLeft
+        @param {Boolean} smooth [Whether the user wants a transition while scrolling to the request position]
+      */
+      scrollTo: function (scrollTop, scrollLeft, smooth) {
+        this._performScroll(scrollTop, scrollLeft, smooth);
+      }
+    },
     privateFunctions: {
       /*
-      @function (private) _setupMisc
-      @description Creates basic miscellaneous variables to be used by the element
+        @function (private) _setupMisc
+        @description Creates basic miscellaneous variables to be used by the element
       */
       setupMisc: function () {
-
         var el = this;
 
         el._misc.scrollBarSpace = eon.util.getBrowserScrollBarWidth();
@@ -93,7 +112,7 @@
 
         el._misc.mouse = {};
 
-        // Default miliseconds for the scrollbars to hide
+        // Default milliseconds for the scrollbars to hide
         el._misc.hideScrollbarsMs = 1000;
 
         // Threshold for the scrollbars to be shown when moving the mouse
@@ -122,8 +141,8 @@
 
       },
       /*
-      @function (private) _definePublicProperties
-      @description Creates definitions for some public properties
+        @function (private) _definePublicProperties
+        @description Creates definitions for some public properties
       */
       definePublicProperties: function () {
 
@@ -201,8 +220,8 @@
 
       },
       /*
-      @function (private) _setupScrolling
-      @description Prepares the scrolling for the element
+        @function (private) _setupScrolling
+        @description Prepares the scrolling for the element
       */
       setupScrolling: function () {
 
@@ -217,7 +236,7 @@
           // By default we want smooth scrolling
           el.classList.add("eon-scroll-smooth");
 
-          // This class will hide the arrowsand the square to make it similar to webkits native
+          // This class will hide the arrows and the square to make it similar to webkit native ones
           if (el._isChromeDevice()) {
             el.classList.add("eon-scroll-chrome-device");
           }
@@ -254,14 +273,12 @@
           el.classList.add("eon-scroll-native");
 
         }
-
       },
       /*
-      @function (private) _setupOnScrolledEvent
-      @description Sets up the onScrolledEvent
+        @function (private) _setupOnScrolledEvent
+        @description Sets up the onScrolledEvent
       */
       setupOnScrolledEvent: function () {
-
         var el = this;
 
         // Scroll event that triggers our updates
@@ -284,11 +301,10 @@
           eon.triggerCallback("onScrolled", el, el, [{ scrollTop: el.content.scrollTop, scrollLeft: el.content.scrollLeft }]);
 
         });
-
       },
       /*
-      @function (private) _setupPointerEvents
-      @description Sets up the basic Events
+        @function (private) _setupPointerEvents
+        @description Sets up the basic Events
       */
       setupPointerEvents: function () {
 
@@ -335,24 +351,23 @@
           el._misc.pointerOut = true;
         });
 
-        // On pointerup we want to strop either the railscroll or the arrowscroll
+        // On pointerup we want to stop either the railscroll or the arrowscroll
         document.addEventListener("pointerup", function () {
           el._handleArrowScrollStop();
           el._handleRailScrollStop();
         });
-
       },
       /*
-      @function (private) _createContent
-      @description Creates the content node and saves its reference
+        @function (private) _createContent
+        @description Creates the content node and saves its reference
       */
       createContent: function () {
         this.content = document.createElement("div");
         this.content.classList.add("eon-scroll-content");
       },
       /*
-      @function (private) _createChromeDeviceRule
-      @description Creates a CSS Rule for the webkit device case
+        @function (private) _createChromeDeviceRule
+        @description Creates a CSS Rule for the webkit device case
       */
       createChromeDeviceRule: function () {
         if (!eon.rules.ChromeDevice && this._isChromeDevice()) {
@@ -361,11 +376,10 @@
         }
       },
       /*
-      @function (private) _appendContent
-      @description Takes the source content and moves it to our content node
+        @function (private) _appendContent
+        @description Takes the source content and moves it to our content node
       */
       appendContent: function () {
-
         var el = this;
         var sourceNodes = this.getSourceElements();
 
@@ -375,14 +389,12 @@
         }
 
         el.appendChild(el.content);
-
       },
       /*
-      @function (private) _assignSize
-      @description Depending on the settings provided by the user and our container we will add some style
+        @function (private) _assignSize
+        @description Depending on the settings provided by the user and our container we will add some style
       */
       assignSize: function () {
-
         var el = this;
         var fn = function () {
 
@@ -435,9 +447,7 @@
             el.content.style.flexGrow = 1;
 
           }
-
         }
-
         if (el.parentNode.nodeType == 1) {
           fn();
         } else {
@@ -445,14 +455,12 @@
             fn();
           });
         }
-
       },
       /*
-      @function (private) _setupResizeListeners
-      @description Creates the resize listener and the content scrollHeight/scrollWidth watcher
+        @function (private) _setupResizeListeners
+        @description Creates the resize listener and the content scrollHeight/scrollWidth watcher
       */
       setupResizeListeners: function () {
-
         var el = this;
 
         el._misc.resize.lastHeight = el.offsetHeight;
@@ -477,7 +485,6 @@
             }
 
           }
-
         });
 
         // This resize listener is meant to handle the window resize triggered when the user zooms in/out the browser and the 
@@ -527,14 +534,12 @@
         });
 
         el._createContentResizeWatcher();
-
       },
       /*
-      @function (private) _createContentResizeWatcher
-      @description Creates the content scrollHeight/scrollWidth watcher
+        @function (private) _createContentResizeWatcher
+        @description Creates the content scrollHeight/scrollWidth watcher
       */
       createContentResizeWatcher: function () {
-
         var el = this;
 
         // Assigns the current content scrollHeight that will be compared in the animation frame
@@ -573,11 +578,10 @@
 
         // Inits the requestAnimationFrame watcher
         el._misc.contentResize.watcher = window.requestAnimationFrame(el._misc.contentResize.watchFn);
-
       },
       /*
-      @function (private) _handleVerticalResize
-      @description Handles the vertical resizing 
+        @function (private) _handleVerticalResize
+        @description Handles the vertical resizing 
       */
       handleVerticalResize: function () {
 
@@ -586,7 +590,7 @@
 
         // If the vertical scroll is not event created
         if (!el._misc.vertical.created) {
-          //  If we have vertical scrollable conten
+          //  If we have vertical scrollable content
           if (hasVerticalScroll) {
             // Then create it
             el._setupVerticalScroll();
@@ -618,7 +622,7 @@
 
                 }
 
-                // Update evertything horizontal scroll related
+                // Update everything horizontal scroll related
                 el._assignHorizontalScrollSize();
                 el._updateHorizontalScrollBar();
 
@@ -633,7 +637,7 @@
             if (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) {
               // Then deactivate it
               el._refs.square.classList.remove("eon-scroll-active");
-              // And update evertything horizontal scroll related
+              // And update everything horizontal scroll related
               el._assignHorizontalScrollSize();
               el._updateHorizontalScrollBar();
 
@@ -644,11 +648,10 @@
           el._updateVerticalScrollBar();
 
         }
-
       },
       /*
-      @function (private) _handleHorizontalResize
-      @description Handles the horizontal resizing 
+        @function (private) _handleHorizontalResize
+        @description Handles the horizontal resizing 
       */
       handleHorizontalResize: function () {
 
@@ -658,7 +661,7 @@
         // If the horizontal scroll is not event created
         if (!el._misc.horizontal.created) {
 
-          //  If we have horizontal scrollable conten
+          //  If we have horizontal scrollable content
           if (hasHorizontalScroll) {
             // Then create it
             el._setupHorizontalScroll();
@@ -691,7 +694,7 @@
 
                 }
 
-                // Update evertything vertical scroll related
+                // Update everything vertical scroll related
                 el._assignVerticalScrollSize();
                 el._updateVerticalScrollBar();
 
@@ -707,7 +710,7 @@
             if (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) {
               // Then deactivate it
               el._refs.square.classList.remove("eon-scroll-active");
-              // And update evertything horizontal scroll related
+              // And update everything horizontal scroll related
               el._assignVerticalScrollSize();
               el._updateVerticalScrollBar();
             }
@@ -717,14 +720,12 @@
           el._updateHorizontalScrollBar();
 
         }
-
       },
       /*
-      @function (private) _setupScrollBars
-      @description Based on some parameters, creates the scrollbars
+        @function (private) _setupScrollBars
+        @description Based on some parameters, creates the scrollbars
       */
       setupScrollBars: function () {
-
         var el = this;
 
         var hasVerticalScroll = (el.content.scrollHeight > el.content.offsetHeight);
@@ -744,22 +745,24 @@
         if (hasHorizontalScroll && el._isAllowedToHaveScroll("horizontal")) {
           el._setupHorizontalScroll();
         }
-
       },
       /*
-    @function (private) _setupSquare
-    @description Sets up the square separating both scrolls
-    */
+        @function (private) _setupSquare
+        @description Sets up the square separating both scrolls
+      */
       setupSquare: function () {
-
         var el = this;
         var square = document.createElement("div");
 
         square.classList.add("eon-scroll-square", "eon-bg6", "eon-scroll-active");
 
-        // If the user specificied the display of the scrollbars to be static then we do so on the square aswell
+        // If the user specified the display of the scrollbars to be static then we do so on the square as well
         if (eon.util.isTrue(el.static)) {
           square.classList.add("eon-scroll-static");
+        }
+
+        if (!eon.util.isTrue(el.square)) {
+          square.style.display = "none";
         }
 
         //The square width and height depends on the vertical and horizontal scroll thickness
@@ -773,8 +776,8 @@
         el._misc.square.created = true;
       },
       /*
-      @function (private) _setupVerticalScroll
-      @description Sets up the vertical scroll
+        @function (private) _setupVerticalScroll
+        @description Sets up the vertical scroll
       */
       setupVerticalScroll: function () {
 
@@ -818,8 +821,8 @@
 
       },
       /*
-      @function (private) _setupHorizontalScroll
-      @description Sets up the horizontal scroll
+        @function (private) _setupHorizontalScroll
+        @description Sets up the horizontal scroll
       */
       setupHorizontalScroll: function () {
 
@@ -860,7 +863,7 @@
       /*
        @function (private) _createVerticalScroll
        @description Creates the vertical scroll nodes structure
-       */
+      */
       createVerticalScroll: function () {
         var el = this;
 
@@ -907,12 +910,11 @@
         // Assigns the sizes for the scroll
         el._assignVerticalScrollSize();
         el._updateVerticalScrollBar();
-
       },
       /*
-       @function (private) _createHorizontalScroll
-       @description Creates the horizontal scroll nodes structure
-       */
+        @function (private) _createHorizontalScroll
+        @description Creates the horizontal scroll nodes structure
+      */
       createHorizontalScroll: function () {
         var el = this;
 
@@ -959,11 +961,10 @@
         // Assigns the sizes for the scroll
         el._assignHorizontalScrollSize();
         el._updateHorizontalScrollBar();
-
       },
       /*
-      @function (private) _createVerticalScrollArrows
-      @description Creates the vertical arrow scrolls nodes structure
+        @function (private) _createVerticalScrollArrows
+        @description Creates the vertical arrow scrolls nodes structure
       */
       createVerticalScrollArrows: function () {
 
@@ -1004,14 +1005,12 @@
 
         el._refs.verticalScroll.insertBefore(upButton, el._refs.verticalRail);
         el._refs.verticalScroll.appendChild(downButton);
-
       },
       /*
-      @function (private) _createHorizontalScrollArrows
-      @description Creates the vertical arrow scrolls nodes structure
+        @function (private) _createHorizontalScrollArrows
+        @description Creates the vertical arrow scrolls nodes structure
       */
       createHorizontalScrollArrows: function () {
-
         var el = this;
 
         var leftButton = document.createElement("div");
@@ -1049,17 +1048,15 @@
 
         el._refs.horizontalScroll.insertBefore(leftButton, el._refs.horizontalRail);
         el._refs.horizontalScroll.appendChild(rightButton);
-
       },
       /*
-      @function (private) _handleArrowScroll
-      @description Handles the scrolling of the arrow
-      @param {Object} e [Event]
-      @param {String} type
-      @param {String} direction
+        @function (private) _handleArrowScroll
+        @description Handles the scrolling of the arrow
+        @param {Object} e [Event]
+        @param {String} type
+        @param {String} direction
       */
       handleArrowScroll: function (e, type, direction) {
-
         var el = this;
 
         // We trigger the scrolls when the mouse button trigger is the left one
@@ -1106,8 +1103,8 @@
         }
       },
       /*
-      @function (private) _handleArrowScrollStop
-      @description Handles the mouseup event when the user is scrolling with the arrows and clears the interval
+        @function (private) _handleArrowScrollStop
+        @description Handles the mouseup event when the user is scrolling with the arrows and clears the interval
       */
       handleArrowScrollStop: function () {
         var el = this;
@@ -1117,13 +1114,12 @@
         }
       },
       /*
-      @function (private) _handleRailScroll
-      @description Handles the length of the vertical scroll
-      @param {Object} e
-      @param {String} type
+        @function (private) _handleRailScroll
+        @description Handles the length of the vertical scroll
+        @param {Object} e
+        @param {String} type
       */
       handleRailScroll: function (e, type) {
-
         var el = this;
 
         //We trigger the scrolls when the mouse button trigger is the left one
@@ -1202,11 +1198,10 @@
           }, 10);
 
         }
-
       },
       /*
-      @function (private) _handleRailScrollStop
-      @description Handles the mouseup event when the user is scrolling while clicking on the rail and clears the interval
+        @function (private) _handleRailScrollStop
+        @description Handles the mouseup event when the user is scrolling while clicking on the rail and clears the interval
       */
       handleRailScrollStop: function () {
         var el = this;
@@ -1216,25 +1211,24 @@
         }
       },
       /*
-      @function (private) _assignVerticalScrollSize
-      @description Handles the height of the vertical scroll
+        @function (private) _assignVerticalScrollSize
+        @description Handles the height of the vertical scroll
       */
       assignVerticalScrollSize: function () {
         this._refs.verticalScroll.style.height = (this._misc.square.created && this._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + this._getThickness() + "px)" : "100%";
       },
       /*
-      @function (private) _assignVerticalScrollSize
-      @description Handles the height of the horizontal scroll
+        @function (private) _assignVerticalScrollSize
+        @description Handles the height of the horizontal scroll
       */
       assignHorizontalScrollSize: function () {
         this._refs.horizontalScroll.style.width = (this._misc.square.created && this._refs.square.classList.contains("eon-scroll-active")) ? "calc(100% - " + this._getThickness() + "px)" : "100%";
       },
       /*
-      @function (private) _updateVerticalScrollStatus
-      @description Depending on the scroll bar size if its exceeds the rail limits it means there is no active scroll
+        @function (private) _updateVerticalScrollStatus
+        @description Depending on the scroll bar size if its exceeds the rail limits it means there is no active scroll
       */
       updateVerticalScrollStatus: function () {
-
         var el = this;
 
         if (el._misc.vertical.created) {
@@ -1246,14 +1240,12 @@
           }
 
         }
-
       },
       /*
-      @function (private) _updateHorizontalScrollStatus
-      @description Depending on the scroll bar size if its exceeds the rail limits it means there is no active scroll
+        @function (private) _updateHorizontalScrollStatus
+        @description Depending on the scroll bar size if its exceeds the rail limits it means there is no active scroll
       */
       updateHorizontalScrollStatus: function () {
-
         var el = this;
 
         if (el._misc.horizontal.created) {
@@ -1265,49 +1257,44 @@
           }
 
         }
-
       },
       /*
-      @function (private) _updateVerticalScrollBar
-      @description Updates the vertical scroll bar
+        @function (private) _updateVerticalScrollBar
+        @description Updates the vertical scroll bar
       */
       updateVerticalScrollBar: function () {
-
         var el = this;
 
         el._assignVerticalScrollBarSize();
         el._updateVerticalScrollBarPosition();
-
       },
       /*
-       @function (private) _updateHorizontalScrollBar
-       @description Updates the horizontal scroll bar
-       */
+        @function (private) _updateHorizontalScrollBar
+        @description Updates the horizontal scroll bar
+      */
       updateHorizontalScrollBar: function () {
-
         var el = this;
 
         el._assignHorizontalScrollBarSize();
         el._updateHorizontalScrollBarPosition();
-
       },
       /*
-      @function (private) _assignVerticalScrollSize
-      @description Handles the length of the vertical bar
+        @function (private) _assignVerticalScrollSize
+        @description Handles the length of the vertical bar
       */
       assignVerticalScrollBarSize: function () {
         this._refs.verticalBar.style.height = Math.ceil(this._refs.verticalRail.getBoundingClientRect().height / (this.content.scrollHeight / this.content.getBoundingClientRect().height)) + "px";
       },
       /*
-      @function (private) _assignVerticalScrollSize
-      @description Handles the length of the horizontal bar
+        @function (private) _assignVerticalScrollSize
+        @description Handles the length of the horizontal bar
       */
       assignHorizontalScrollBarSize: function () {
         this._refs.horizontalBar.style.width = Math.ceil(this._refs.horizontalRail.getBoundingClientRect().width / (this.content.scrollWidth / this.content.getBoundingClientRect().width)) + "px";
       },
       /*
-      @function (private) _updateVerticalBarPosition
-      @description Updates the vertical bar position based on the content scrollTop
+        @function (private) _updateVerticalBarPosition
+        @description Updates the vertical bar position based on the content scrollTop
       */
       updateVerticalScrollBarPosition: function () {
         var el = this;
@@ -1317,11 +1304,10 @@
         var proportionalScrollBarTop = Math.ceil(scrollTopProportion * (el._refs.verticalRail.offsetHeight - el._refs.verticalBar.offsetHeight));
 
         el._refs.verticalBar.style.transform = "translate3d( 0, " + proportionalScrollBarTop + "px, 0)";
-
       },
       /*
-      @function (private) _updateHorizontalScrollBarPosition
-      @description Updates the vertical bar position based on the content scrollLeft
+        @function (private) _updateHorizontalScrollBarPosition
+        @description Updates the vertical bar position based on the content scrollLeft
       */
       updateHorizontalScrollBarPosition: function () {
         var el = this;
@@ -1331,15 +1317,13 @@
         var proportionalScrollBarLeft = Math.ceil(scrollLeftProportion * (el._refs.horizontalRail.offsetWidth - el._refs.horizontalBar.offsetWidth));
 
         el._refs.horizontalBar.style.transform = "translate3d(" + proportionalScrollBarLeft + "px, 0, 0)";
-
       },
       /*
-      @function (private) _handleVerticalDragStart
-      @description Handles the start of the dragging
-      @param {Object} e [Event]
+        @function (private) _handleVerticalDragStart
+        @description Handles the start of the dragging
+        @param {Object} e [Event]
       */
       handleVerticalDragStart: function (e) {
-
         var el = this;
 
         if (e.button == 0) {
@@ -1348,15 +1332,13 @@
           el._misc.vertical.drag.active = true;
           el._misc.vertical.drag.start = e.clientY - el._refs.verticalBar.getBoundingClientRect().top;
         }
-
       },
       /*
-      @function (private) _handleHorizontalDragStart
-      @description Handles the start of the dragging
-      @param {Object} e [Event]
+        @function (private) _handleHorizontalDragStart
+        @description Handles the start of the dragging
+        @param {Object} e [Event]
       */
       handleHorizontalDragStart: function (e) {
-
         var el = this;
 
         if (e.button == 0) {
@@ -1365,15 +1347,13 @@
           el._misc.horizontal.drag.active = true;
           el._misc.horizontal.drag.start = e.clientX - el._refs.horizontalBar.getBoundingClientRect().left;
         }
-
       },
       /*
-      @function (private) _handleVerticalDrag
-      @description Handles the dragging of the vertical scroll bar
-      @param {Object} e [Event]
+        @function (private) _handleVerticalDrag
+        @description Handles the dragging of the vertical scroll bar
+        @param {Object} e [Event]
       */
       handleVerticalDrag: function (e) {
-
         var el = this;
 
         // Only do stuff is the dragging is active
@@ -1407,15 +1387,13 @@
           }
 
         }
-
       },
       /*
-      @function (private) _handleHorizontalDrag
-      @description Handles the dragging of the horizontal scroll bar
-      @param {Object} e [Event]
+        @function (private) _handleHorizontalDrag
+        @description Handles the dragging of the horizontal scroll bar
+        @param {Object} e [Event]
       */
       handleHorizontalDrag: function (e) {
-
         var el = this;
 
         // Only do stuff is the dragging is active
@@ -1449,15 +1427,13 @@
           }
 
         }
-
       },
       /*
-      @function (private) _handleVerticalDrag
-      @description Handles the drag of the vertical scroll bar
-      @param {Object} e [Event]
+        @function (private) _handleVerticalDrag
+        @description Handles the drag of the vertical scroll bar
+        @param {Object} e [Event]
       */
       handleVerticalDragEnd: function (e) {
-
         var el = this;
 
         if (!el._isCursorInsideScroll(e) && el._misc.vertical.drag.active == true) {
@@ -1465,15 +1441,13 @@
         }
 
         el._misc.vertical.drag.active = false;
-
       },
       /*
-      @function (private) _handleHorizontalDragEnd
-      @description Handles the drag of the horizontal scroll bar
-      @param {Object} e [Event]
+        @function (private) _handleHorizontalDragEnd
+        @description Handles the drag of the horizontal scroll bar
+        @param {Object} e [Event]
       */
       handleHorizontalDragEnd: function (e) {
-
         var el = this;
 
         if (!el._isCursorInsideScroll(e) && el._misc.horizontal.drag.active == true) {
@@ -1481,24 +1455,22 @@
         }
 
         el._misc.horizontal.drag.active = false;
-
       },
       /*
-      @function (private) {Boolean} _isCursorInsideScroll
-      @description Returns whether the pointer is inside the scrolling area or not
-      @param {Object} e [Event]
+        @function (private) {Boolean} _isCursorInsideScroll
+        @description Returns whether the pointer is inside the scrolling area or not
+        @param {Object} e [Event]
       */
       isCursorInsideScroll: function (e) {
         var rect = this.getBoundingClientRect();
         return (e.clientX > rect.left && e.clientX < rect.right && e.clientY > rect.top && e.clientY < rect.bottom);
       },
       /*
-      @function (private) _showScrollbars
-      @description Shows the scrollbars
-      @param {Number} hideScrollbarsMs [Miliseconds for the scrollbars to hide again after being displayed]
+        @function (private) _showScrollbars
+        @description Shows the scrollbars
+        @param {Number} hideScrollbarsMs [Milliseconds for the scrollbars to hide again after being displayed]
       */
       showScrollbars: function (hideScrollbarsMs) {
-
         var el = this;
 
         // If there was a timeout for the scrollbars to hide we clear it
@@ -1519,27 +1491,25 @@
           el._refs.square.classList.add("eon-scroll-visible");
         }
 
-        // If we recieve the hideScrollbarsMs parameter we pass the parameter to the hideScrollbars function to hide all on the requested time
+        // If we receive the hideScrollbarsMs parameter we pass the parameter to the hideScrollbars function to hide all on the requested time
         if (hideScrollbarsMs) {
           el._hideScrollbars(hideScrollbarsMs);
         }
-
       },
       /*
-      @function (private) _hideScrollbars
-      @description Hides the scrollbars
-      @param {Number} miliseconds [Miliseconds for the scrollbars to hide]
+        @function (private) _hideScrollbars
+        @description Hides the scrollbars
+        @param {Number} milliseconds [Milliseconds for the scrollbars to hide]
       */
-      hideScrollbars: function (miliseconds) {
-
+      hideScrollbars: function (milliseconds) {
         var el = this;
 
-        miliseconds = miliseconds ? miliseconds : 0;
+        milliseconds = milliseconds ? milliseconds : 0;
 
         // Clears any hideScrollbarsTimeout if there was one waiting to be triggered
         clearTimeout(el._misc.hideScrollbarsTimeout);
 
-        // Creates a new timeout with the given mileseconds
+        // Creates a new timeout with the given milliseconds
         el._misc.hideScrollbarsTimeout = setTimeout(function () {
 
           // Hides the vertical scroll if its created, active and its not static (Since this means its always displayed)
@@ -1557,16 +1527,14 @@
             el._refs.square.classList.remove("eon-scroll-visible");
           }
 
-        }, miliseconds);
-
+        }, milliseconds);
       },
       /*
-      @function (private) {Boolean} _isAllowedToHaveScroll
-      @description Returns whether that specified scroll type is allowed to exists based on the element setup
-      @param {String} scrollType
+        @function (private) {Boolean} _isAllowedToHaveScroll
+        @description Returns whether that specified scroll type is allowed to exists based on the element setup
+        @param {String} scrollType
       */
       isAllowedToHaveScroll: function (scrollType) {
-
         var el = this;
         var returnBoolean = false;
 
@@ -1579,18 +1547,17 @@
         return returnBoolean;
       },
       /*
-      @function (private) {Number} _getThickness
-      @description Returns the proper thickness depending on the scenario
+        @function (private) {Number} _getThickness
+        @description Returns the proper thickness depending on the scenario
       */
       getThickness: function () {
         return !this._isChromeDevice() ? this.thickness : parseInt(this.thickness) / 3;
       },
       /*
-      @function (private) {Number} _getVerticalScrollableSize
-      @description Returns the vertical scrollable amount
+        @function (private) {Number} _getVerticalScrollableSize
+        @description Returns the vertical scrollable amount
       */
       getVerticalScrollableSize: function () {
-
         var el = this;
         var scrollable = 0;
 
@@ -1602,11 +1569,10 @@
         return Math.floor(scrollable);
       },
       /*
-      @function (private) {Number} _getHorizontalScrollableSize
-      @description Returns the horizontal scrollable amount
+        @function (private) {Number} _getHorizontalScrollableSize
+        @description Returns the horizontal scrollable amount
       */
       getHorizontalScrollableSize: function () {
-
         var el = this;
         var scrollable = 0;
 
@@ -1618,14 +1584,13 @@
         return Math.floor(scrollable);
       },
       /*
-      @function (private) _performScroll
-      @description Performs the scroll action with the given parameters
-      @param {Number} top
-      @param {Number} left
-      @param {Boolean} smooth
+        @function (private) _performScroll
+        @description Performs the scroll action with the given parameters
+        @param {Number} top
+        @param {Number} left
+        @param {Boolean} smooth
       */
       performScroll: function (top, left, smooth) {
-
         var el = this;
 
         // If no parameter is passed we take the current one
@@ -1651,15 +1616,13 @@
           }
 
         }
-
       },
       /*
-      @function (private) _performVerticalSmoothScroll
-      @description Scrolls to the given position smoothly
-      @param {Number} top
+        @function (private) _performVerticalSmoothScroll
+        @description Scrolls to the given position smoothly
+        @param {Number} top
       */
       performVerticalSmoothScroll: function (top) {
-
         var el = this;
 
         var positive = top > el.content.scrollTop ? true : false;
@@ -1672,7 +1635,7 @@
         // Removes the smooth scroll class
         el.classList.remove("vc-scroll-smooth");
 
-        // If there is a previous animation frame still runing we cancel it
+        // If there is a previous animation frame still running we cancel it
         cancelAnimationFrame(el._misc.smoothScroll.vertical.animationFrame);
 
         // Makes sure the top number does not exceeds neither the maximum nor the minimum scroll
@@ -1713,15 +1676,13 @@
 
         // Inits the requestAnimationFrame
         el._misc.smoothScroll.vertical.animationFrame = window.requestAnimationFrame(el._misc.smoothScroll.vertical.fn);
-
       },
       /*
-      @function (private) _performHorizontalSmoothScroll
-      @description Scrolls to the given position smoothly
-      @param {Number} left
+        @function (private) _performHorizontalSmoothScroll
+        @description Scrolls to the given position smoothly
+        @param {Number} left
       */
       performHorizontalSmoothScroll: function (left) {
-
         var el = this;
 
         var positive = left > el.content.scrollLeft ? true : false;
@@ -1730,26 +1691,26 @@
         // Removes the smooth scroll class
         el.classList.remove("eon-scroll-smooth");
 
-        // If there is a previous animation frame still runing we cancel it
+        // If there is a previous animation frame still running we cancel it
         cancelAnimationFrame(el._misc.smoothScroll.horizontal.animationFrame);
 
         // Makes sure the left number does not exceeds neither the maximum nor the minimum scroll
         left = left > el._getHorizontalScrollableSize() ? el._getHorizontalScrollableSize() : left;
         left = left < 0 ? 0 : left;
 
-        // Creates the function that will scroll unitl it reached the desired position
+        // Creates the function that will scroll until it reached the desired position
         el._misc.smoothScroll.horizontal.fn = function () {
 
           // If there is place for us to scroll
           if ((positive && el.content.scrollLeft < left) || (!positive && el.content.scrollLeft > left)) {
 
-            // If its scrolling down and it hasn reach its destination
+            // If its scrolling down and it hasn't reach its destination
             if ((positive && el.content.scrollLeft < left)) {
-              // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
+              // If it can still scroll our established amount then it does it, if there is less space then scrolls to the final position
               el.content.scrollLeft = (left - el.content.scrollLeft) > el._misc.smoothScroll.amount ? el.content.scrollLeft + el._misc.smoothScroll.amount : left;
-              // If its scrolling up and it hasn reach its destination
+              // If its scrolling up and it hasn't reach its destination
             } else if (!positive && el.content.scrollLeft > left) {
-              // If it can still scroll our stablished amount then it does it, if there is less space then scrolls to the final position
+              // If it can still scroll our established amount then it does it, if there is less space then scrolls to the final position
               el.content.scrollLeft = (el.content.scrollLeft - left) > el._misc.smoothScroll.amount ? el.content.scrollLeft - el._misc.smoothScroll.amount : 0;
             }
 
@@ -1771,21 +1732,19 @@
 
         // Inits the requestAnimationFrame
         el._misc.smoothScroll.horizontal.animationFrame = window.requestAnimationFrame(el._misc.smoothScroll.horizontal.fn);
-
       },
       /*
-      @function (private) _isChromeDevice
-      @description Triggered when thickness has changed, updates everything according to the new one
+        @function (private) _isChromeDevice
+        @description Triggered when thickness has changed, updates everything according to the new one
       */
       isChromeDevice: function () {
         return eon.util.getBrowserScrollBarWidth() == 0 && eon.util.getBrowser() == "Chrome";
       },
       /*
-      @function (private) _updateThickness
-      @description Triggered when thickness has changed, updates everything according to the new one
+        @function (private) _updateThickness
+        @description Triggered when thickness has changed, updates everything according to the new one
       */
       updateThickness: function () {
-
         var el = this;
 
         if (el._misc.square.created) {
@@ -1833,24 +1792,9 @@
           el._refs.horizontalBar.style.width = Math.ceil((el._refs.horizontalRail.offsetWidth / (el.content.scrollWidth / el.offsetWidth))) + "px";
         }
 
-
       },
     },
-    functions: {
-      /*
-      @function scrollTo
-      @description Scrolls to a given position
-      @param {Number} scrollTop
-      @param {Number} scrollLeft
-      @param {Boolean} smooth [Whether the user wants a transition while scrolling to the request position]
-      */
-      scrollTo: function (scrollTop, scrollLeft, smooth) {
-        this._performScroll(scrollTop, scrollLeft, smooth);
-      },
-    },
-
     onCreated: function () {
-
       var el = this;
 
       // Creates a callbacks for the user to use
@@ -1862,11 +1806,9 @@
       el._createContent();
 
       el._createChromeDeviceRule();
-
     },
 
     onInit: function () {
-
       var el = this;
 
       el._appendContent();
@@ -1874,19 +1816,14 @@
 
       el._definePublicProperties();
       el._setupScrolling();
-
     },
 
     onPropertyChanged: function (key, oldVal, newVal) {
-
       var el = this;
 
       if (key == "thickness") {
         el._updateThickness();
       }
-
     }
-
   });
-
 </script>

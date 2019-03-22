@@ -8,22 +8,6 @@
       "../eon-scroll",
       "../eon-section"
     ],
-    privateProperties: {
-      /*
-        @property (private) {Object} _refs 
-        @description Quick access to the panel structure nodes references
-      */
-      refs: {
-        value: {}
-      },
-      /*
-        @property (private) {Object} _misc 
-        @description Internal used data
-      */
-      misc: {
-        value: {}
-      }
-    },
     properties: {
       /*
         @property {String} href
@@ -130,6 +114,91 @@
       defaultStyle: {
         value: true,
         reflect: true
+      }
+    },
+    privateProperties: {
+      /*
+        @property (private) {Object} _refs 
+        @description Quick access to the panel structure nodes references
+      */
+      refs: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _misc 
+        @description Internal used data
+      */
+      misc: {
+        value: {}
+      }
+    },
+    functions: {
+      /*
+        @function render
+        @description Extract content from template and remove it from DOM
+        @param {Number} index [Template identifier]
+      */
+      render: function (index) {
+        var el = this;
+        var tmp, i;
+        var tmps = el._refs.templates;
+        // Partial render
+        if (index === 0 || index) {
+          tmp = tmps[index];
+          // Remove template
+          el._removeTemplate(tmp);
+          delete tmps[index];
+        } else {
+          var keys = Object.keys(tmps);
+          for (i = 0; i < keys.length; i++) {
+            tmp = tmps[keys[i]];
+            // Remove template
+            el._removeTemplate(tmp);
+            delete tmps[keys[i]];
+          }
+        }
+      },
+      /*
+        @function importContent
+        @description Import remote content
+        @param {Object} fragment [Document fragment used to append imported content into]
+      */
+      importContent: function (fragment) {
+        var el = this;
+        fragment = !fragment ? document.createDocumentFragment() : fragment;
+        // Import content if not loaded yet.
+        if (el.href && !el._misc.loaded) {
+          // Request content file
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", el.href, true);
+          xhr.setRequestHeader("Content-Type", "application/json");
+          // Callback
+          xhr.onload = function (e) {
+            // If operation has been completed - ready state 4
+            if (this.readyState !== 4) { return };
+            // Response status successfully completed - status 200
+            if (this.status !== 200) { return };
+            // Allow execute imported html scripts
+            fragment = eon.fragmentFromString(xhr.responseText);
+            // Extract script nodes that belong to template elements for deferring their execution
+            var nodes = el._deferScripts(fragment);
+            el._appendContent(nodes);
+            el._misc.loaded = true;
+          };
+          // Execute request
+          xhr.send();
+        }
+      },
+      /*
+        @function refresh
+        @description Remove current content and re-import content
+      */
+      refresh: function () {
+        var el = this;
+        // Remove previous content 
+        el._refs.wrapper.content.innerHTML = "";
+        // Import panel content from specific source
+        el._importContent();
       }
     },
     privateFunctions: {
@@ -252,7 +321,6 @@
           }
         }
       },
-
       /*
         @function (private) _setUpHeader
         @description Set header dimensions
@@ -277,9 +345,9 @@
         });
       },
       /*
-         @function (private) _configureGrowingHeader
-         @description Create or remove scroll listener for growing header functionality
-         @param {Boolean} remove [Whether or not listener should be removed]
+        @function (private) _configureGrowingHeader
+        @description Create or remove scroll listener for growing header functionality
+        @param {Boolean} remove [Whether or not listener should be removed]
        */
       configureGrowingHeader: function (remove) {
         var el = this;
@@ -476,75 +544,6 @@
         var el = this;
         el["__" + eventName] = [];
         el["__" + eventName + "__triggered"] = false;
-      }
-    },
-    functions: {
-      /*
-        @function render
-        @description Extract content from template and remove it from DOM
-        @param {Number} index [Template identifier]
-      */
-      render: function (index) {
-        var el = this;
-        var tmp, i;
-        var tmps = el._refs.templates;
-        // Partial render
-        if (index === 0 || index) {
-          tmp = tmps[index];
-          // Remove template
-          el._removeTemplate(tmp);
-          delete tmps[index];
-        } else {
-          var keys = Object.keys(tmps);
-          for (i = 0; i < keys.length; i++) {
-            tmp = tmps[keys[i]];
-            // Remove template
-            el._removeTemplate(tmp);
-            delete tmps[keys[i]];
-          }
-        }
-      },
-      /*
-        @function importContent
-        @description Import remote content
-        @param {Object} fragment [Document fragment used to append imported content into]
-      */
-      importContent: function (fragment) {
-        var el = this;
-        fragment = !fragment ? document.createDocumentFragment() : fragment;
-        // Import content if not loaded yet.
-        if (el.href && !el._misc.loaded) {
-          // Request content file
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", el.href, true);
-          xhr.setRequestHeader("Content-Type", "application/json");
-          // Callback
-          xhr.onload = function (e) {
-            // If operation has been completed - ready state 4
-            if (this.readyState !== 4) { return };
-            // Response status successfully completed - status 200
-            if (this.status !== 200) { return };
-            // Allow execute imported html scripts
-            fragment = eon.fragmentFromString(xhr.responseText);
-            // Extract script nodes that belong to template elements for deferring their execution
-            var nodes = el._deferScripts(fragment);
-            el._appendContent(nodes);
-            el._misc.loaded = true;
-          };
-          // Execute request
-          xhr.send();
-        }
-      },
-      /*
-        @function refresh
-        @description Remove current content and re-import content
-      */
-      refresh: function () {
-        var el = this;
-        // Remove previous content 
-        el._refs.wrapper.content.innerHTML = "";
-        // Import panel content from specific source
-        el._importContent();
       }
     },
     onCreated: function () {

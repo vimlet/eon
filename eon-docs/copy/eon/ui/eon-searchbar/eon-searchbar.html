@@ -20,7 +20,7 @@
 
     name: "eon-searchbar",
     style: "eon-searchbar.css",
-    
+
     themed: false,
     properties: {
       /*
@@ -40,54 +40,39 @@
         @description Object with references
       */
       refs: {
-          value: {}
+        value: {}
       },
       /*
-      @property {object} fields
-      @description Node reference to the fields container
+        @property {object} fields
+        @description Node reference to the fields container
       */
       fields: {
         value: {},
         reflect: false
       },
       /*
-      @property {object} filters
-      @description Reference to the filters
+        @property {object} filters
+        @description Reference to the filters
       */
       filters: {
         value: undefined,
         reflect: false
       },
       /*
-      @property fieldsArray
-      @description Contains the fields to be used on the search
+        @property fieldsArray
+        @description Contains the fields to be used on the search
       */
       fieldsArray: {
         value: [],
         reflect: false
       }
     },
-    privateFunctions: {
-      /*
-        @function (private) _setDefaultStyle
-        @description Check if the default element style should be applied
-      */
-      setDefaultStyle: function () {
-        var el = this;
-        // Check default style configuration
-        if (!eon.util.isTrue(el.defaultStyle)) {
-          // Remove default style
-          el._refs.searchbar.remove("eon-spaced-container");
-        }
-      }
-    },
     functions: {
       /*
-      @function setup
-      @description Here we setup everything we need for the element
+        @function setup
+        @description Here we setup everything we need for the element
       */
       setup: function () {
-
         var el = this;
 
         el.setupSourceNodes();
@@ -98,7 +83,6 @@
         eon.registerPathListener(el);
       },
       setupSourceNodes: function () {
-
         var el = this;
         var sourceNodes = el.getSourceElements();
 
@@ -111,15 +95,13 @@
             el._fieldsArray.push(sourceNodes[i]);
           }
         }
-
       },
       /*
-      @function setupEvents
-      @description Sets up the event listeners needed
-      @param {param_type} param_name [param_description]
+        @function setupEvents
+        @description Sets up the event listeners needed
+        @param {param_type} param_name [param_description]
       */
       setupEvents: function () {
-
         var el = this;
 
         //Creates the customBlur event listener
@@ -140,8 +122,8 @@
         };
       },
       /*
-      @function setupFilters
-      @description Sets up the filters dropdown with the user provided elements
+        @function setupFilters
+        @description Sets up the filters dropdown with the user provided elements
       */
       setupFilters: function () {
 
@@ -160,36 +142,36 @@
         }
       },
       /*
-      @function setupFields
-      @description Sets up the user provided elements as fields, we encapsulate them and add some style to it
+        @function setupFields
+        @description Sets up the user provided elements as fields, we encapsulate them and add some style to it
       */
       setupFields: function () {
+        var el = this;
 
-        var fieldsContainer = this.querySelector(".eon-searchbar-fields");
+        var fieldsContainer = el.querySelector(".eon-searchbar-fields");
         var fragment = document.createDocumentFragment();
         var field;
 
-        while (this._fieldsArray.length > 0) {
+        while (el._fieldsArray.length > 0) {
 
           field = document.createElement("div");
           field.classList.add("eon-searchbar-field");
-          field.appendChild(this._fieldsArray[0]);
+          field.appendChild(el._fieldsArray[0]);
 
           fragment.appendChild(field);
-          this._fieldsArray.splice(0, 1);
+          el._fieldsArray.splice(0, 1);
 
         }
 
         fieldsContainer.appendChild(fragment);
 
-        this._fields = fieldsContainer;
+        el._fields = fieldsContainer;
       },
       /*
-      @function search
-      @description When the search function is triggered we also trigger the onSearch callback
+        @function search
+        @description When the search function is triggered we also trigger the onSearch callback
       */
       search: function () {
-
         var el = this;
 
         var filters = el._filters ? el._filters.querySelectorAll("*[name]") : 0;
@@ -223,8 +205,8 @@
         eon.triggerCallback("onSearch", el, el, [filtersObj]);
       },
       /*
-      @function customBlur
-      @description Hides the filters dropdown
+        @function customBlur
+        @description Hides the filters dropdown
       */
       customBlur: function (e) {
 
@@ -241,9 +223,9 @@
         }
       },
       /*
-      @function toggleFilters
-      @description Toggles the visibility of the filters dropdown
-      @param {object} e [event]
+        @function toggleFilters
+        @description Toggles the visibility of the filters dropdown
+        @param {object} e [event]
       */
       toggleFilters: function (e) {
 
@@ -258,10 +240,26 @@
         e.stopPropagation();
       }
     },
+    privateFunctions: {
+      /*
+        @function (private) _setDefaultStyle
+        @description Check if the default element style should be applied
+      */
+      setDefaultStyle: function () {
+        var el = this;
+        // Check default style configuration
+        if (!eon.util.isTrue(el.defaultStyle)) {
+          // Remove default style
+          el._refs.searchbar.remove("eon-spaced-container");
+        }
+      }
+    },
     onCreated: function () {
-      eon.createCallback("onSearch", this);
-      this._refs.main = this.template.querySelector(".eon-searchbar-main");
-      this._refs.searchbar = this.template.querySelector(".eon-searchbar-searchbar");
+      var el = this;
+
+      eon.createCallback("onSearch", el);
+      el._refs.main = el.template.querySelector(".eon-searchbar-main");
+      el._refs.searchbar = el.template.querySelector(".eon-searchbar-searchbar");
     },
     onTransformed: function () {
       // ** Apply default items positioning style

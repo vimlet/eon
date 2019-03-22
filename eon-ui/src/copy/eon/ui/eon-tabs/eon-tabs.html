@@ -35,56 +35,227 @@
     dependencies: [
       "../eon-stack"
     ],
-    privateProperties: {
-      /*
-      @property (private) {Object} _misc
-      @description Object with useful information
-      */
-      misc: {
-        value: {}
-      },
-      /*
-      @property (private) {Object} _refs
-      @description Object with references to relevant element nodes
-      */
-      refs: {
-        value: {},
-        reflect: false
-      }
-    },
+  
     properties: {
       /*
-      @property {Boolean} dragging
-      @description Whether the user wants the tabs to be draggables or not
+        @property {Boolean} dragging
+        @description Whether the user wants the tabs to be draggable or not
       */
       dragging: {
         value: false,
         reflect: true
       },
       /*
-      @property {String} tabsScroll
-      @description Position in which the user wants the tabs scrolls located
+        @property {String} tabsScroll
+        @description Position in which the user wants the tabs scrolls located
       */
       tabsScroll: {
         value: "right",
         reflect: true
       },
       /*
-      @property {String} closable
-      @description Whether the single tabs have the option to be closed or not
+        @property {String} closable
+        @description Whether the single tabs have the option to be closed or not
       */
       closable: {
         value: "true",
         reflect: true
       },
     },
+    privateProperties: {
+      /*
+        @property (private) {Object} _misc
+        @description Object with useful information
+      */
+      misc: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _refs
+        @description Object with references to relevant element nodes
+      */
+      refs: {
+        value: {},
+        reflect: false
+      }
+    },
+    functions: {
+      /*
+        @function addPanel
+        @description Creates a tab for the provided panel
+        @param {Object} panel
+      */
+      addPanel: function (panel) {
+        var el = this;
+
+        el._refs.stack.addPanel(panel);
+
+        tab = el._createPanelTab(panel);
+
+        tab.dataset.order = el._refs.stack._misc.indexedPanels.length - 1;
+
+        el._misc.tabs[tab.dataset.panel] = tab;
+
+        el._refs.tabsWrapper.appendChild(tab);
+
+        el._handleTabsScrollsStatus();
+      },
+      /*
+        @function select
+        @description Unselects the current tab and selects the requested one
+        @param {String} name
+      */
+      select: function (name) {
+        this._unselectActiveTab();
+        this._selectTab(name);
+      },
+      /*
+        @function close
+        @description Closes the requested tab and selects its sibling
+        @param {String} name
+        @param {Object} e
+      */
+      close: function (name, e) {
+        var el = this;
+        var tab = el._misc.tabs[name];
+
+        if (e) {
+          e.stopPropagation();
+        }
+
+        //If the tab we are closing is the one we have selected then we have to fin a sibling to selected once we removed the tab
+        //Else just remove the tab
+        if (tab.classList.contains("eon-tabs-selected")) {
+
+          var siblingTab = this._getSiblingTab(tab);
+
+          el._wipeout(name);
+
+          // If there are still tabs in the tabsContainer then select it
+          if (siblingTab) {
+            el._selectTab(siblingTab.dataset.panel);
+          }
+
+        } else {
+          el._wipeout(name);
+        }
+
+        el._reorderTabs();
+        el._handleTabsScrollsStatus();
+        eon.triggerCallback("onTabRemoved", el, el, [tab]);
+      },
+      /*
+        @function hide
+        @description Hides the requested tab and selects its sibling
+        @param {String} name
+        @param {Object} e
+      */
+      hide: function (name, e) {
+        var el = this;
+        var tab = el._misc.tabs[name];
+
+        if (e) {
+          e.stopPropagation();
+        }
+
+        //If the tab we are closing is the one we have selected then we have to fin a sibling to selected once we removed the tab
+        //Else just remove the tab
+        if (tab.classList.contains("eon-tabs-selected")) {
+
+          var siblingTab = this._getSiblingTab(tab);
+
+          tab.classList.remove("eon-tabs-selected", "eon-bg2-active");
+          tab.classList.add("eon-bg2-hoverable");
+
+          el._hide(name);
+
+          // If there are still tabs in the tabsContainer then select it
+          if (siblingTab) {
+            el._selectTab(siblingTab.dataset.panel);
+          }
+
+        } else {
+          el._hide(name);
+        }
+
+        el._reorderTabs();
+        el._handleTabsScrollsStatus();
+      },
+      /*
+        @function restore
+        @description Restores the requested tab
+        @param {String} name
+        @param {Object} e
+      */
+      restore: function (name) {
+        var el = this;
+
+        if (el._misc.hiddenTabs[name]) {
+
+          el._refs.tabsWrapper.appendChild(el._misc.hiddenTabs[name]);
+          delete el._misc.hiddenTabs[name];
+
+        }
+
+        el._reorderTabs();
+        el._handleTabsScrollsStatus();
+      },
+      /*
+        @function scroll
+        @description Handles the tabs scrolling
+        @param {String} direction
+      */
+      scroll: function (direction) {
+        var el = this;
+
+        if (el._refs.tabsScrolls.classList.contains("enabled")) {
+
+          var tabsRegion = el._refs.tabsRegion;
+          var tabsWrapperLeft = el._refs.tabsWrapper.style.left ? parseInt(el._refs.tabsWrapper.style.left) : 0;
+          var scrollableAmount = el._refs.tabsWrapper.offsetWidth - tabsRegion.offsetWidth;
+          var tabWidth = 200;
+          var finalLeft;
+
+          if (el._refs.tabsWrapper.offsetWidth > tabsRegion.offsetWidth) {
+
+            if (direction == "right") {
+
+              finalLeft = Math.abs(tabsWrapperLeft - tabWidth);
+              finalLeft = (scrollableAmount - finalLeft) < tabWidth / 2 ? scrollableAmount : finalLeft;
+
+            } else {
+
+              finalLeft = tabsWrapperLeft == 0 ? 0 : Math.abs(tabsWrapperLeft + tabWidth);
+              finalLeft = finalLeft < tabWidth / 2 ? 0 : finalLeft;
+
+            }
+
+            el._refs.tabsWrapper.style.left = -finalLeft + "px";
+          }
+        }
+      },
+      /*
+        @function {Object} getActivePanel
+        @description Returns the active panel
+      */
+      getActivePanel: function () {
+        return this._refs.stack.getActivePanel();
+      },
+      /*
+        @function {Object} getPanel
+        @description Returns the requested panel
+        @param {String} name
+      */
+      getPanel: function (name) {
+        return this._refs.stack.getPanel(name);
+      }
+    },
     privateFunctions: {
       /*
-      @function (private) _setupRefs
-      @description Creates references to relevant nodes
+        @function (private) _setupRefs
+        @description Creates references to relevant nodes
       */
       setupRefs: function () {
-
         var el = this;
 
         el._refs.leftScroll = el.template.querySelector(".eon-tabs-leftScroll");
@@ -98,14 +269,12 @@
         el._refs.contentsSection = el.template.querySelector(".eon-tabs-contentsSection");
 
         el._refs.stack = document.createElement("eon-stack");
-
       },
       /*
-      @function (private) _setupTabs
-      @description Appends the stack component and creates the corresponding panel tabs
+        @function (private) _setupTabs
+        @description Appends the stack component and creates the corresponding panel tabs
       */
       setupTabs: function () {
-
         var el = this;
 
         el.appendChild(el._refs.stack);
@@ -137,14 +306,12 @@
           el._handleTabsScrollsStatus();
 
         });
-
       },
       /*
-      @function (private) _setupScrolls
-      @description Sets up the scrolls positions and its events
+        @function (private) _setupScrolls
+        @description Sets up the scrolls positions and its events
       */
       setupScrolls: function () {
-
         var el = this;
         var scrollsType = el.getAttribute("tabs-scroll");
 
@@ -164,15 +331,13 @@
             el._refs.tabsScrolls.style.display = "none";
             break;
           default:
-
         }
       },
       /*
-      @function (private) _setupDragging
-      @description Sets up some basic steps for the dragging to take place
+        @function (private) _setupDragging
+        @description Sets up some basic steps for the dragging to take place
       */
       setupDragging: function () {
-
         var el = this;
 
         if (eon.util.isTrue(el.dragging)) {
@@ -186,11 +351,10 @@
           }, false);
 
         }
-
       },
       /*
-      @function (private) _importPanels
-      @description Searches the panels and appends them in the stack element
+        @function (private) _importPanels
+        @description Searches the panels and appends them in the stack element
       */
       importPanels: function () {
 
@@ -204,11 +368,10 @@
           }
 
         }
-
       },
       /*
-      @function (private) _handleTabsScrollsStatus
-      @description Enables/disabled the tabs scroll
+        @function (private) _handleTabsScrollsStatus
+        @description Enables/disabled the tabs scroll
       */
       handleTabsScrollsStatus: function () {
         var el = this;
@@ -232,12 +395,11 @@
         }, 0);
       },
       /*
-      @function (private) _selectTab
-      @description Makes the requested tab visible and shows its content
-      @param {String} name
+        @function (private) _selectTab
+        @description Makes the requested tab visible and shows its content
+        @param {String} name
       */
       selectTab: function (name) {
-
         var el = this;
 
         el._refs.stack.swapToPanel(name);
@@ -247,11 +409,10 @@
         eon.triggerCallback("onTabSelected", el, el, [el._refs.stack._misc.panels[name]]);
       },
       /*
-      @function (private) _unselectActiveTab
-      @description Deselects the tab that is currently selected
+        @function (private) _unselectActiveTab
+        @description Deselects the tab that is currently selected
       */
       unselectActiveTab: function () {
-
         var el = this;
         var tab = el._misc.tabs[el._refs.stack._misc.activePanel.name];
 
@@ -259,16 +420,14 @@
         tab.classList.remove("eon-tabs-selected");
         tab.classList.remove("eon-bg2-active");
         tab.classList.add("eon-bg2-hoverable");
-
       },
       /*
-      @function (private) _handleDragStart
-      @description Handles the start of the tab dragging
-      @param {Object} e [event]
-      @param {Object} tab
+        @function (private) _handleDragStart
+        @description Handles the start of the tab dragging
+        @param {Object} e [event]
+        @param {Object} tab
       */
       handleDragStart: function (e, tab) {
-
         var el = this;
 
         el._misc.dragging.source = tab;
@@ -281,15 +440,13 @@
         if (e.dataTransfer.setDragImage) {
           e.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
         }
-
       },
       /*
-      @function (private) _handleDragOver
-      @description Handles the mouse over event when dragging over the tabs
-      @param {Object} e [event]
+        @function (private) _handleDragOver
+        @description Handles the mouse over event when dragging over the tabs
+        @param {Object} e [event]
       */
       handleDragOver: function (e, tab) {
-
         var el = this;
 
         if (el._misc.isDragging) {
@@ -318,12 +475,11 @@
         return false;
       },
       /*
-      @function (private) _handleDragEnd
-      @description Handles the drag end and adds the tab to its new location
-      @param {Object} e [event]
+        @function (private) _handleDragEnd
+        @description Handles the drag end and adds the tab to its new location
+        @param {Object} e [event]
       */
       handleDragEnd: function (e) {
-
         var el = this;
 
         if (e.stopPropagation) {
@@ -344,32 +500,27 @@
           el._misc.isDragging = false;
 
           el._reorderTabs();
-
         }
 
         return false;
       },
       /*
-      @function (private) _reorderTabs
-      @description Reasigns an order to the tabs
+        @function (private) _reorderTabs
+        @description Reassigns an order to the tabs
       */
       reorderTabs: function () {
-
         var tabs = this._refs.tabsWrapper.querySelectorAll(".eon-tabs-tab");
 
         if (tabs) {
-
           for (var i = 0; i < tabs.length; i++) {
             tabs[i].dataset.order = i;
           }
-
         }
-
       },
       /*
-      @function (private) {Object} _getSiblingTab
-      @description Returns a sibling for the requested tab
-      @param {Object} tab
+        @function (private) {Object} _getSiblingTab
+        @description Returns a sibling for the requested tab
+        @param {Object} tab
       */
       getSiblingTab: function (tab) {
         var tabs = this._refs.tabsWrapper.querySelectorAll('.eon-tabs-tab');
@@ -389,12 +540,11 @@
         return siblingTab;
       },
       /*
-      @function (private) _wipeout
-      @description Completely removes the tab from the dom and its panel
-      @param {String} name
+        @function (private) _wipeout
+        @description Completely removes the tab from the dom and its panel
+        @param {String} name
       */
       wipeout: function (name) {
-
         var el = this;
         var tab = el._misc.tabs[name];
 
@@ -402,29 +552,25 @@
           el._refs.stack.wipeout(tab.dataset.panel);
           tab.parentNode.removeChild(tab);
         }
-
       },
       /*
-      @function (private) _hide
-      @description Removes the tab from the DOM but saves it in our object so that it can be restored again
-      @param {String} name
+        @function (private) _hide
+        @description Removes the tab from the DOM but saves it in our object so that it can be restored again
+        @param {String} name
       */
       hide: function (name) {
-
         var el = this;
         var tab = el._misc.tabs[name];
 
         el._misc.hiddenTabs[name] = tab;
         tab.parentNode.removeChild(tab);
-
       },
       /*
-      @function (private) {Object} _createPanelTab
-      @description Creates a tab for the provided panel
-      @param {Object} panel
+        @function (private) {Object} _createPanelTab
+        @description Creates a tab for the provided panel
+        @param {Object} panel
       */
       createPanelTab: function (panel) {
-
         var el = this;
 
         var tab = document.createElement("div");
@@ -455,14 +601,12 @@
         el._createTabEvents(tab);
 
         return tab;
-
       },
       /*
-      @function (private) _createTabEvents
-      @description Creates all the events for the tab (click, close, drag...)
+        @function (private) _createTabEvents
+        @description Creates all the events for the tab (click, close, drag...)
       */
       createTabEvents: function (tab) {
-
         var el = this;
 
         // Assigns an event for the tab when clicked
@@ -492,9 +636,7 @@
               tab.classList.add("eon-bg2-hoverable");
             }
           });
-
         }
-
         // Check if we need to assign dragging related events
         if (eon.util.isTrue(el.dragging)) {
 
@@ -514,199 +656,10 @@
           tab.addEventListener("dragend", function (e) {
             el._handleDragEnd(e, tab);
           });
-
         }
-
-      },
-    },
-    functions: {
-      /*
-      @function addPanel
-      @description Creates a tab for the provided panel
-      @param {Object} panel
-      */
-      addPanel: function (panel) {
-
-        var el = this;
-
-        el._refs.stack.addPanel(panel);
-
-        tab = el._createPanelTab(panel);
-
-        tab.dataset.order = el._refs.stack._misc.indexedPanels.length - 1;
-
-        el._misc.tabs[tab.dataset.panel] = tab;
-
-        el._refs.tabsWrapper.appendChild(tab);
-
-        el._handleTabsScrollsStatus();
-
-      },
-      /*
-      @function select
-      @description Unselects the current tab and selects the requested one
-      @param {String} name
-      */
-      select: function (name) {
-        this._unselectActiveTab();
-        this._selectTab(name);
-      },
-      /*
-      @function close
-      @description Closes the requested tab and selects its sibling
-      @param {String} name
-      @param {Object} e
-      */
-      close: function (name, e) {
-
-        var el = this;
-        var tab = el._misc.tabs[name];
-
-        if (e) {
-          e.stopPropagation();
-        }
-
-        //If the tab we are closing is the one we have selected then we have to fin a sibling to selected once we removed the tab
-        //Else just remove the tab
-        if (tab.classList.contains("eon-tabs-selected")) {
-
-          var siblingTab = this._getSiblingTab(tab);
-
-          el._wipeout(name);
-
-          // If there are still tabs in the tabsContainer then select it
-          if (siblingTab) {
-            el._selectTab(siblingTab.dataset.panel);
-          }
-
-        } else {
-
-          el._wipeout(name);
-
-        }
-
-        el._reorderTabs();
-        el._handleTabsScrollsStatus();
-        eon.triggerCallback("onTabRemoved", el, el, [tab]);
-      },
-      /*
-      @function hide
-      @description Hides the requested tab and selects its sibling
-      @param {String} name
-      @param {Object} e
-      */
-      hide: function (name, e) {
-
-        var el = this;
-        var tab = el._misc.tabs[name];
-
-        if (e) {
-          e.stopPropagation();
-        }
-
-        //If the tab we are closing is the one we have selected then we have to fin a sibling to selected once we removed the tab
-        //Else just remove the tab
-        if (tab.classList.contains("eon-tabs-selected")) {
-
-          var siblingTab = this._getSiblingTab(tab);
-
-          tab.classList.remove("eon-tabs-selected", "eon-bg2-active");
-          tab.classList.add("eon-bg2-hoverable");
-
-          el._hide(name);
-
-          // If there are still tabs in the tabsContainer then select it
-          if (siblingTab) {
-            el._selectTab(siblingTab.dataset.panel);
-          }
-
-        } else {
-
-          el._hide(name);
-
-        }
-
-        el._reorderTabs();
-        el._handleTabsScrollsStatus();
-      },
-      /*
-      @function restore
-      @description Restores the requested tab
-      @param {String} name
-      @param {Object} e
-      */
-      restore: function (name) {
-
-        var el = this;
-
-        if (el._misc.hiddenTabs[name]) {
-
-          el._refs.tabsWrapper.appendChild(el._misc.hiddenTabs[name]);
-          delete el._misc.hiddenTabs[name];
-
-        }
-
-        el._reorderTabs();
-        el._handleTabsScrollsStatus();
-
-      },
-      /*
-      @function scroll
-      @description Handles the tabs scrolling
-      @param {String} direction
-      */
-      scroll: function (direction) {
-
-        var el = this;
-
-        if (el._refs.tabsScrolls.classList.contains("enabled")) {
-
-          var tabsRegion = el._refs.tabsRegion;
-          var tabsWrapperLeft = el._refs.tabsWrapper.style.left ? parseInt(el._refs.tabsWrapper.style.left) : 0;
-          var scrollableAmount = el._refs.tabsWrapper.offsetWidth - tabsRegion.offsetWidth;
-          var tabWidth = 200;
-          var finalLeft;
-
-          if (el._refs.tabsWrapper.offsetWidth > tabsRegion.offsetWidth) {
-
-            if (direction == "right") {
-
-              finalLeft = Math.abs(tabsWrapperLeft - tabWidth);
-              finalLeft = (scrollableAmount - finalLeft) < tabWidth / 2 ? scrollableAmount : finalLeft;
-
-            } else {
-
-              finalLeft = tabsWrapperLeft == 0 ? 0 : Math.abs(tabsWrapperLeft + tabWidth);
-              finalLeft = finalLeft < tabWidth / 2 ? 0 : finalLeft;
-
-            }
-
-            el._refs.tabsWrapper.style.left = -finalLeft + "px";
-
-          }
-
-        }
-
-      },
-      /*
-      @function {Object} getActivePanel
-      @description Returns the active panel
-      */
-      getActivePanel: function () {
-        return this._refs.stack.getActivePanel();
-      },
-      /*
-      @function {Object} getPanel
-      @description Returns the requested panel
-      @param {String} name
-      */
-      getPanel: function (name) {
-        return this._refs.stack.getPanel(name);
-      },
-
+      }
     },
     onCreated: function () {
-
       var el = this;
 
       el._misc.tabs = {};
@@ -717,10 +670,8 @@
 
       eon.createCallback("onTabSelected", el);
       eon.createCallback("onTabRemoved", el);
-
     },
     onTransformed: function () {
-
       var el = this;
 
       el._importPanels();
@@ -732,8 +683,6 @@
       eon.addResizeListener(el._refs.tabsRegion, el.tagName + el.uid, function () {
         el._handleTabsScrollsStatus();
       });
-
     }
   });
-
 </script>

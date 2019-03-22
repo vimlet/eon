@@ -68,18 +68,18 @@ This element is a combination of the well known slider and image gallery compone
     </doc-showcase>
   </template>
   <template type="css">
-    .blue {
-      background-color: #7296bb !important;
-    }
-    .yellow {
-      background-color: #bb9772;
-    }
-    .green {
-      background-color: #76bb72 !important;
-    }
-    .red {
-      background-color: #b36a6a;
-    }
+  .blue {
+    background-color: #7296bb !important;
+  }
+  .yellow {
+    background-color: #bb9772;
+  }
+  .green {
+    background-color: #76bb72 !important;
+  }
+  .red {
+    background-color: #b36a6a;
+  }
   </template>
   <template type="footer">
      {"button":{"action":"changeTheme", "icon":"theme"}}

@@ -8,22 +8,6 @@
       "../eon-scroll",
       "../eon-section"
     ],
-    privateProperties: {
-      /*
-        @property (private) {Object} _refs 
-        @description Quick access to the panel structure nodes references
-      */
-      refs: {
-        value: {}
-      },
-      /*
-        @property (private) {Object} _misc 
-        @description Internal used data
-      */
-      misc: {
-        value: {}
-      }
-    },
     properties: {
       /*
         @property {String} href
@@ -132,6 +116,91 @@
         reflect: true
       }
     },
+    privateProperties: {
+      /*
+        @property (private) {Object} _refs 
+        @description Quick access to the panel structure nodes references
+      */
+      refs: {
+        value: {}
+      },
+      /*
+        @property (private) {Object} _misc 
+        @description Internal used data
+      */
+      misc: {
+        value: {}
+      }
+    },
+    functions: {
+      /*
+        @function render
+        @description Extract content from template and remove it from DOM
+        @param {Number} index [Template identifier]
+      */
+      render: function (index) {
+        var el = this;
+        var tmp, i;
+        var tmps = el._refs.templates;
+        // Partial render
+        if (index === 0 || index) {
+          tmp = tmps[index];
+          // Remove template
+          el._removeTemplate(tmp);
+          delete tmps[index];
+        } else {
+          var keys = Object.keys(tmps);
+          for (i = 0; i < keys.length; i++) {
+            tmp = tmps[keys[i]];
+            // Remove template
+            el._removeTemplate(tmp);
+            delete tmps[keys[i]];
+          }
+        }
+      },
+      /*
+        @function importContent
+        @description Import remote content
+        @param {Object} fragment [Document fragment used to append imported content into]
+      */
+      importContent: function (fragment) {
+        var el = this;
+        fragment = !fragment ? document.createDocumentFragment() : fragment;
+        // Import content if not loaded yet.
+        if (el.href && !el._misc.loaded) {
+          // Request content file
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", el.href, true);
+          xhr.setRequestHeader("Content-Type", "application/json");
+          // Callback
+          xhr.onload = function (e) {
+            // If operation has been completed - ready state 4
+            if (this.readyState !== 4) { return };
+            // Response status successfully completed - status 200
+            if (this.status !== 200) { return };
+            // Allow execute imported html scripts
+            fragment = eon.fragmentFromString(xhr.responseText);
+            // Extract script nodes that belong to template elements for deferring their execution
+            var nodes = el._deferScripts(fragment);
+            el._appendContent(nodes);
+            el._misc.loaded = true;
+          };
+          // Execute request
+          xhr.send();
+        }
+      },
+      /*
+        @function refresh
+        @description Remove current content and re-import content
+      */
+      refresh: function () {
+        var el = this;
+        // Remove previous content 
+        el._refs.wrapper.content.innerHTML = "";
+        // Import panel content from specific source
+        el._importContent();
+      }
+    },
     privateFunctions: {
       /*
         @function (private) _setDefaultStyle
@@ -160,7 +229,7 @@
         var el = this;
         // Check panel structure
         el._refs.header = el.source.querySelector("[type='header']");
-        if(el._refs.header) {
+        if (el._refs.header) {
           el._setUpSections();
         } else {
           el._setUpSimple();
@@ -176,7 +245,7 @@
         var el = this;
         // Create content section if not exists
         el._refs.content = el.source.querySelector("[type='content']");
-        if(!el._refs.content) {
+        if (!el._refs.content) {
           el._refs.content = document.createElement("eon-section");
           el._refs.content.setAttribute("type", "content");
           el.appendChild(el._refs.content);
@@ -238,21 +307,20 @@
       */
       moveContentToSection: function () {
         var el = this;
-        if(el._refs.header && !el._refs.content.children[0]) {
+        if (el._refs.header && !el._refs.content.children[0]) {
           var srcNodes = el.getSourceElements();
           while (srcNodes.length) {
             // Build nodes structure
             srcNode = srcNodes.shift();
             // Append nodes to section
-            if (!srcNode.isEqualNode(el._refs.header) 
-                && !srcNode.isEqualNode(el._refs.content)
-                && !srcNode.isEqualNode(el._refs.wrapper)) {
+            if (!srcNode.isEqualNode(el._refs.header)
+              && !srcNode.isEqualNode(el._refs.content)
+              && !srcNode.isEqualNode(el._refs.wrapper)) {
               el._refs.content.appendChild(srcNode);
             }
           }
         }
       },
-      
       /*
         @function (private) _setUpHeader
         @description Set header dimensions
@@ -263,7 +331,7 @@
         var el = this;
         // Add new header class to header element
         // ** Use events to make sure sections creations
-        el.onReady(function(){
+        el.onReady(function () {
           if (el._refs.header.headerHeight) {
             // Update header height
             el._refs.header.style.height = el._refs.header.headerHeight;
@@ -277,9 +345,9 @@
         });
       },
       /*
-         @function (private) _configureGrowingHeader
-         @description Create or remove scroll listener for growing header functionality
-         @param {Boolean} remove [Whether or not listener should be removed]
+        @function (private) _configureGrowingHeader
+        @description Create or remove scroll listener for growing header functionality
+        @param {Boolean} remove [Whether or not listener should be removed]
        */
       configureGrowingHeader: function (remove) {
         var el = this;
@@ -287,7 +355,7 @@
         var isHeaderTall = false;
         var scrollContainer;
         // Scroll content listener
-        if(eon.util.isTrue(el.allowScroll)) {
+        if (eon.util.isTrue(el.allowScroll)) {
           if (el._refs.wrapper.onCreated) {
             el._refs.wrapper.onScrolled(growingHeaderListener);
           } else {
@@ -339,7 +407,7 @@
           el.importContent(documentFragment);
         } else if (!el.href) {
           // Extract script nodes that belong to template elements for deferring their execution
-          if(el._refs.header) {
+          if (el._refs.header) {
             var nodes = el._deferScripts(el._refs.content);
           } else {
             var nodes = el._deferScripts(el);
@@ -417,7 +485,7 @@
         }
         // Move templates to the assigned content container 
         if (reAppend) {
-          if(el._refs.header) {
+          if (el._refs.header) {
             // Append content nodes to the scroll container 
             el._refs.wrapper.content.appendChild(fragment);
             // Append scroll to the content section 
@@ -478,75 +546,6 @@
         el["__" + eventName + "__triggered"] = false;
       }
     },
-    functions: {
-      /*
-        @function render
-        @description Extract content from template and remove it from DOM
-        @param {Number} index [Template identifier]
-      */
-      render: function (index) {
-        var el = this;
-        var tmp, i;
-        var tmps = el._refs.templates;
-        // Partial render
-        if (index === 0 || index) {
-          tmp = tmps[index];
-          // Remove template
-          el._removeTemplate(tmp);
-          delete tmps[index];
-        } else {
-          var keys = Object.keys(tmps);
-          for (i = 0; i < keys.length; i++) {
-            tmp = tmps[keys[i]];
-            // Remove template
-            el._removeTemplate(tmp);
-            delete tmps[keys[i]];
-          }
-        }
-      },
-      /*
-        @function importContent
-        @description Import remote content
-        @param {Object} fragment [Document fragment used to append imported content into]
-      */
-      importContent: function (fragment) {
-        var el = this;
-        fragment = !fragment ? document.createDocumentFragment() : fragment;
-        // Import content if not loaded yet.
-        if (el.href && !el._misc.loaded) {
-          // Request content file
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", el.href, true);
-          xhr.setRequestHeader("Content-Type", "application/json");
-          // Callback
-          xhr.onload = function (e) {
-            // If operation has been completed - ready state 4
-            if (this.readyState !== 4) { return };
-            // Response status successfully completed - status 200
-            if (this.status !== 200) { return };
-            // Allow execute imported html scripts
-            fragment = eon.fragmentFromString(xhr.responseText);
-            // Extract script nodes that belong to template elements for deferring their execution
-            var nodes = el._deferScripts(fragment);
-            el._appendContent(nodes);
-            el._misc.loaded = true;
-          };
-          // Execute request
-          xhr.send();
-        }
-      },
-      /*
-        @function refresh
-        @description Remove current content and re-import content
-      */
-      refresh: function () {
-        var el = this;
-        // Remove previous content 
-        el._refs.wrapper.content.innerHTML = "";
-        // Import panel content from specific source
-        el._importContent();
-      }
-    },
     onCreated: function () {
       var el = this;
       // Create content related callbacks
@@ -562,19 +561,19 @@
       el._misc = {};
       // Make sure the content is located inside de content section
       el._moveContentToSection();
-      
+
     },
     onTransformed: function () {
       var el = this;
       // Import panel content from specific source
       el._importContent();
       // Append the scrollable content wrapper to the content section
-      if(el._refs.header) {
+      if (el._refs.header) {
         if (!el._refs.wrapper.isEqualNode(el._refs.content)) {
           el.appendChild(el._refs.content);
         }
       } else {
-        if (!el._refs.wrapper.isEqualNode(el)) { 
+        if (!el._refs.wrapper.isEqualNode(el)) {
           el.appendChild(el._refs.wrapper);
         }
       }
