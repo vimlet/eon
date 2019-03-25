@@ -16,7 +16,7 @@ First install [NodeJS](https://nodejs.org), then run on the terminal
 npm install @vimlet/eon-cli -g   
 ```
 
-Once eon-cli is done installing, running the init command will get you the latest version of Eon in the current working directory and provide you with a template project if you choose so.
+Once [eon-cli](#!version=latest&mode=tutorial&file=entries%2FIntroduction%2Feon-cli.md) is done installing, running the init command will get you the latest version of Eon in the current working directory and provide you with a template project if you choose so.
 
 ```
 eon-cli init

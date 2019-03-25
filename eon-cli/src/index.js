@@ -11,10 +11,10 @@ cli
 .value("i", "install", "Installs eon or dependency")
 .value("p", "path", "Specifies dependency path")
 .value(null, "clear", "Removes various elements")
-.flag(null, "init", "Initialize a vComet project")
+.flag(null, "init", "Initializes an eon project")
 .flag(null, "prune", "Removes unused dependencies")
 .flag(null, "--no-save", "Prevents eon.json generation")
-.flag(null, "help", "Display this help")
+.flag(null, "help", "Displays this help")
 .parse(process.argv);
 
 if (Object.keys(cli.result).length == 0 || cli.result.help) {

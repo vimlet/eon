@@ -1,3 +1,50 @@
+[eon-cli]<>
+
+eon-cli is a module that works as an assistant to download and install eon.js within your project. You may prefer another method to accomplish this task, but this tool provides the easiest way to download and install eon.js, but overall, to keep it updated. 
+
+To start using eon-cli, you need to install [NodeJS](https://nodejs.org) first, then run this command on the terminal to install the module:
+
+```[javascript]
+npm install @vimlet/eon-cli -g
+```
+
+To import Eon.js in your project, just run a terminal inside it and run:
+
+```[javascript]
+eon-cli install
+```
+
+eon-cli will download the latest eon version and will create a file called `eon-json` with the default configuration. You can edit this file to change de default configuration whenever you want. Use the properties below:
+
+- **path**: the eon installation directory.
+
+- **eon**: eon version to be downloaded and installed.
+
+- **ignore**: The directories to be ignored when updating the eon version. 
+
+
+This means that you are able to keep your eon custom components while eon core and the base ui components are updated (only if your eon custom components have been created inside de eon framework directory).
+
+You can install any Eon version available using `@` between the word `eon` and the specific version:
+
+```[javascript]
+eon-cli install eon@release-1.0.8
+```
+
+Here are the operations you will find on `eon-cli` module:
+
+- **install**: Downloads and installs the specific Eon version within the directory either specified in the eon.json file. If no eon.json file is generated, `eon-cli` creates its own.
+
+- **init**: Creates a common web application project structure with a configured node `express` server and a simple `index.html`. It imports eon.js as the `install` command does.
+
+- **prune**: Removes unused versions packages and dependencies.
+
+- **--no-save**: Prevent the creation of the eon.json file when installing Eon. 
+
+- **clear**: Remove several elements (cache). 
+
+- **help**: Displays `eon-cli` help. 
+
 [Components]<>
 
 ## What are eon components?
@@ -177,7 +224,7 @@ Now you can use your custom Eon component importing in a declaratively or progra
 
 Now we have mastered the basics of Eon component creation, we can play with components configuration.
 
-When declaring a new component through `eon.element` function you can pass an config object as parameter, where the name, style, properties and functions can be declared and callbacks to element life-cycle can be used to add additional behaviour.
+When declaring a new component through `eon.element` function you can pass a config object as a parameter, where the name, style, properties, and functions can be declared and callbacks to element life-cycle can be used to add additional behavior.
 
 There are other options to declare the component:
 
@@ -207,8 +254,116 @@ There are other options to declare the component:
 
   });
 </script>
-
 ```
+
+[Visibility]<>
+
+In this section, we will show two ways of declaring properties and functions that enriches the eon elements API in terms of legibility and usability. The eon element `config` includes the properties below: 
+
+- **properties**: object used to store the properties the user will has direct access to from the eon element reference. 
+
+- **functions**: object used to store the functions the user will has direct access to from the eon element reference.
+
+- **privateProperties**: object used to store the internal used properties. The user has no need to use them to harness the eon element functionality.  
+
+- **privateFunctions**: object used to store the internal used functions. The user has no need to use them to harness the eon element functionality.  
+
+```[html]
+<script>
+  eon.element({
+
+    name: "custom-element",
+    style: "custom-element.css"
+
+    properties: {
+      customProperty: "I'm a custom property"
+    },
+
+    privateProperties: function() {
+      customProperty: "I'm a custom private property"
+    }
+
+    functions: {
+      customFunction: function() {
+          console.log("I'm a custom function");
+      }
+    },
+  
+    privateFunctions: {
+      customFunction: function() {
+          console.log("I'm a custom private function");
+      }
+    }
+
+  });
+</script>
+```
+
+All the items added to these objects are accessed using the same name used to declare them except the `private` ones. Let's see how we would access them reusing the previous custom element example:
+
+```[html]
+<body>
+
+  <custom-element></custom-element>
+  
+  <script>
+    var customEl = document.querySelector("custom-element);
+
+    console.log("Public property: ", customEl.customProperty);
+    // This will log: "Public property: I'm a custom property"
+
+    console.log("Private property: ", customEl._customProperty);
+    // This will log: "Private property: I'm a custom private function"
+  </script>
+
+</body>
+```
+
+As you can see, there are no limitations in terms of accessibility of both types of properties. But using the private mode (accessing properties with the `_` prefix) helps you separate which ones you want the users to work with and which ones you are declaring for internal use only.
+
+[Reflection]<>
+
+The element public properties accepts a configuration object as a value to provide a way to bind the element property to the `HTML` node attribute. This means that any changes made to the attribute or the property value will be reflected on the other. 
+
+```[html]
+<script>
+  eon.element({
+
+    name: "custom-element",
+
+    properties: {
+      customProperty: {
+        value: "I'm a custom property",
+        reflect: true
+      }
+    }
+    
+  });
+</script>
+```
+
+It is as simple as setting the property `reflect` to `true`. Here is a snippet that represents this behavior:
+
+```[html]
+<body>
+
+  <custom-element></custom-element>
+  
+  <script>
+    var customEl = document.querySelector("custom-element);
+
+    console.log("Public property: ", customEl.customProperty);
+    // This will log: "Public property: I'm a custom property"g
+
+    customEl.setAttribute("customProperty", "I'm a reflected value");
+
+    console.log("Public property: ", customEl.customProperty);
+    // This will log: "Public property: I'm a reflected value"
+  </script>
+
+</body>
+```
+
 
 [Life-cycle]<>
 
@@ -577,4 +732,5 @@ Changing Eon's theme will also trigger the `onThemeChanged` callback, which give
   })
 </script>
 ```
+
 
