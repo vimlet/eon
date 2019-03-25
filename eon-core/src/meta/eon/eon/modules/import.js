@@ -432,7 +432,7 @@ eon.handleLinksAppend = function () {
 eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
-    var dependencyName, dependencyPath, dependencyFile;
+    var dependencyName, dependencyPath, dependencyFile, relativeToParent;
 
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
@@ -441,8 +441,9 @@ eon.handleConfigDependencies = function (name) {
             dependencyPath = elementConfig.dependencies[j].charAt(0) == "@" ? eon.getBasePathUrl(elementConfig.dependencies[j]) : elementConfig.dependencies[j];
             if (!(dependencyName in eon.imports.templates)) {
                 hasDependencies = true;
+                relativeToParent = elementConfig.dependencies[j].charAt(0) == "@" || elementConfig.dependencies[j].charAt(0) == "/" ? false : true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
-                dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
+                dependencyFile = !relativeToParent ? dependencyPath : eon.imports.paths[name] + dependencyPath;
                 eon.import(dependencyFile);
             }
         }

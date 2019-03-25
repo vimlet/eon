@@ -2,9 +2,9 @@ const { suite, test } = intern.getInterface("tdd");
 const { assert } = intern.getPlugin("chai");
 
 suite("eon-core", () => {
-    test("Dependencies", ({ remote }) => {
+    test("Imports", ({ remote }) => {
         return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
-            dependenciesTest(callback);
+            importsTest(callback);
         }).then(function (value) {
             assert.strictEqual(value, true);
         });
