@@ -328,7 +328,7 @@ eon.createAttributesObserver = function (el, config) {
     // First we check if we have attributes to observe
     if (observeAttributesKeys.length > 0) {
 
-        var key, property, privateProperty, value;
+        var key, property, privateProperty;
 
         // For each observe attribute if check which value should be assign to it
         for (var i = 0; i < observeAttributesKeys.length; i++) {
@@ -346,21 +346,7 @@ eon.createAttributesObserver = function (el, config) {
             } else {
 
                 if (config.properties[property].reflectDefault) {
-
-                    value = el.hasOwnProperty(privateProperty) ? el[privateProperty] : "";
-
-                    // This is done in the onInit callback since we cannot set an attribute in the onCreated one
-                    el.onInit(function () {
-
-                        // Only sets the attribute if the value is not of object type
-                        if (typeof value != "object") {
-                            el.setAttribute(key, value);
-                        } else {
-                            el.removeAttribute(key);
-                        }
-
-                    });
-
+                    eon.handleReflectDefaultProperty(el, key, property);
                 }
 
             }
@@ -396,6 +382,24 @@ eon.createAttributesObserver = function (el, config) {
     }
 
 };
+
+eon.handleReflectDefaultProperty = function (el, key, property) {
+    
+    var value = el.hasOwnProperty("__" + property) ? el["__" + property] : "";
+    
+    // This is done in the onInit callback since we cannot set an attribute in the onCreated one
+    el.onInit(function () {
+
+        // Only sets the attribute if the value is not of object type
+        if (typeof value != "object") {
+            el.setAttribute(key, value);
+        } else {
+            el.removeAttribute(key);
+        }
+
+    });
+
+}
 
 eon.handleProperty = function (el, config, reflectProperties, observeProperties, property) {
 
