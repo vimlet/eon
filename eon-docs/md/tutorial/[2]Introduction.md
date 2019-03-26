@@ -323,7 +323,7 @@ As you can see, there are no limitations in terms of accessibility of both types
 
 [Reflection]<>
 
-The element public properties accepts a configuration object as a value to provide a way to bind the element property to the `HTML` node attribute. This means that any changes made to the attribute or the property value will be reflected on the other. 
+The element public properties accept a configuration object as a value to provide a way to bind the element property to the `HTML` node attribute. This means that any changes made to the attribute or the property value will be reflected on the other. 
 
 ```[html]
 <script>
@@ -352,17 +352,45 @@ It is as simple as setting the property `reflect` to `true`. Here is a snippet t
   <script>
     var customEl = document.querySelector("custom-element);
 
-    console.log("Public property: ", customEl.customProperty);
-    // This will log: "Public property: I'm a custom property"g
+    console.log(customEl.customProperty);
+    // This will log: "I'm a custom property"
 
     customEl.setAttribute("customProperty", "I'm a reflected value");
 
-    console.log("Public property: ", customEl.customProperty);
-    // This will log: "Public property: I'm a reflected value"
+    console.log(customEl.customProperty);
+    // This will log: "I'm a reflected value"
   </script>
 
 </body>
 ```
+
+Indeed, this is a powerful functionality but, you will probably discover that as long as you add public properties to your custom element, its DOM node representation starts piling up attributes that stain the DOM. To remove this inconvenience, you have at your service the `reflectDefault` property. This property
+defines if the element specific property with its default value should have its attribute representation, therefore if it should be visible in the DOM from the very first time.
+
+Below we set a property as `reflectDefault: true` indicating that it will be visible as an attribute in the DOM node representation.
+
+```[html]
+<script>
+  eon.element({
+
+    name: "custom-element",
+
+    properties: {
+      customProperty: {
+        value: "I'm a custom property",
+        reflect: true,
+        reflectDefault: true
+      }
+    }
+    
+  });
+</script>
+```
+```[html]
+<custom-element custom-property="I'm a custom property"></custom-element>
+```
+
+It is important to mention that by default, the properties not assigned by the user won't be visible in the DOM unless the user set them during the running process. This does not imply any change in the normal reflect behavior. 
 
 
 [Life-cycle]<>
