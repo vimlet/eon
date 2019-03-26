@@ -236,6 +236,7 @@ There are other options to declare the component:
   eon.element({
 
     name: "custom-element",
+    style: "custom-element.css",
 
     properties: {
       customProperty: "I'm a custom property"
@@ -272,7 +273,6 @@ In this section, we will show two ways of declaring properties and functions tha
   eon.element({
 
     name: "custom-element",
-    style: "custom-element.css"
 
     properties: {
       customProperty: "I'm a custom property"
@@ -293,7 +293,6 @@ In this section, we will show two ways of declaring properties and functions tha
           console.log("I'm a custom private function");
       }
     }
-
   });
 </script>
 ```
@@ -308,11 +307,11 @@ All the items added to these objects are accessed using the same name used to de
   <script>
     var customEl = document.querySelector("custom-element);
 
-    console.log("Public property: ", customEl.customProperty);
     // This will log: "Public property: I'm a custom property"
+    console.log("Public property: ", customEl.customProperty);
 
-    console.log("Private property: ", customEl._customProperty);
     // This will log: "Private property: I'm a custom private function"
+    console.log("Private property: ", customEl._customProperty);
   </script>
 
 </body>
@@ -351,13 +350,13 @@ It is as simple as setting the property `reflect` to `true`. Here is a snippet t
   <script>
     var customEl = document.querySelector("custom-element);
 
-    console.log(customEl.customProperty);
     // This will log: "I'm a custom property"
+    console.log(customEl.customProperty);
 
     customEl.setAttribute("customProperty", "I'm a reflected value");
 
-    console.log(customEl.customProperty);
     // This will log: "I'm a reflected value"
+    console.log(customEl.customProperty);
   </script>
 
 </body>
@@ -762,4 +761,42 @@ Changing Eon's theme will also trigger the `onThemeChanged` callback, which give
 </script>
 ```
 
+[Util-Functions]<>
 
+Eon provides specific DOM navigation utilities and others. See the core API for more details. Here we expose those which we think are the most relevant:
+
+## Navigation
+
+Eon has its own way to perform DOM queries: 
+
+```[javascript]
+// Same as vanilla JS querySelector();
+document.$1("custom-element");
+// Same as vanilla JS querySelectorAll();
+document.$("custom-element");
+```
+
+It looks like other frameworks implementation except for the syntax, but what actually makes Eon implementation stands out is its respectful behavior. Eon checks if another framework, imported in the same project, is using the same syntax and, in this case, Eon gives way to perform the query. Otherwise, Eon takes control of the query operation.
+
+If you want Eon to handle all the queries without conflicts, you have the encapsulated version. Just use `eon.$` and `eon.$1`.
+
+In addition, Eon offers a way to navigate through Eon elements:
+
+```[html]
+<body>
+
+  <eon-form>
+    <button><button>
+  </eon-form>
+
+  <script>
+    var button = document.$1("button");
+    // This returns the eon-form element
+    button.getEnclosingComponent();
+  </script>
+
+</body>
+  
+```
+
+This utility is really handy especially when you want to access a parent Eon element from any node, and there's a lot of intermediate elements that do not belong to eon and extend the path between the node and the target parent.
