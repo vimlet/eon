@@ -390,6 +390,7 @@ Below we set a property as `reflectDefault: true` indicating that it will be vis
 
 It is important to mention that by default, the properties not assigned by the user won't be visible in the DOM unless the user set them during the running process. This does not imply any change in the normal reflect behavior. 
 
+You might be thinking about how to monitor the automatic changes made by the reflect behavior. Well, Eon provides a bunch of events, which include the [onPropertyChanged](#!version=latest&mode=tutorial&file=entries%2FIntroduction.md&link=Life-cycle) and [onAttributeChanged](#!version=latest&mode=tutorial&file=entries%2FIntroduction.md&link=Life-cycle) which you can hook to. Also, you can listen to a property value change even if `reflect = false`, setting the property `observe = true`. 
 
 [Life-cycle]<>
 
@@ -430,6 +431,8 @@ Recurrent events might be triggered more than once:
 - **onAttributeChanged** - Triggers each time an attribute is changed.
 
 - **onDataChanged** - Triggers each time data property is changed.
+
+Note that all the recurrent events except `onAttached` and `onDetached` events, do not trigger until the element is ready (this means when the `onReady` event has been triggered).
 
 [State]<>
 
