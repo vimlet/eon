@@ -20,7 +20,7 @@ eon-cli will download the latest eon version and will create a file called `eon-
 
 - **eon**: eon version to be downloaded and installed.
 
-- **ignore**: The directories to be ignored when updating the eon version. 
+- **ignore**: the directories to be ignored when updating the eon version. 
 
 
 This means that you are able to keep your eon custom components while eon core and the base ui components are updated (only if your eon custom components have been created inside de eon framework directory).
@@ -39,9 +39,9 @@ Here are the operations you will find on `eon-cli` module:
 
 - **prune**: Removes unused versions packages and dependencies.
 
-- **--no-save**: Prevent the creation of the eon.json file when installing Eon. 
+- **--no-save**: Prevents the creation of the eon.json file when installing Eon. 
 
-- **clear**: Remove several elements (cache). 
+- **clear**: Removes several elements (cache). 
 
 - **help**: Displays `eon-cli` help. 
 
@@ -53,34 +53,34 @@ Eon components are the individual parts of what your application is composed of,
 
 ## What can I build with them?
 
-About anything indeed, but most of them fall in one of this three categories, functional components, visual components or a mix of both.
+About anything indeed, but most of them fall in one of these three categories, functional components, visual components or a mix of both.
 
-- Functional components - components that provide logic assets, no visuals are involved. An example could be a component that handles websocket connections.
+- Functional components - components that provide logic assets, no visuals are involved. An example could be a component that handles WebSocket connections.
 
 - Visual components - components that provide visual assets, no logic is needed. An example could be a component that handles layout.
 
-- Mixed components - this are by far the most common scenario, where you would like to provide a tied relation between behavior logic and visual elements.
+- Mixed components - this is by far the most common scenario, where you would like to provide a tied relation between behavior, logic, and visual elements.
 An example could be a dialog.
 
-Please note this are conceptual definitions, all components are handled in the same way by Eon.
+Please note these are conceptual definitions, all components are handled in the same way by Eon.
 
 ## Advantages of composition
 
-By splitting a complex problem such as an application in small parts or components we can tackle each of them individually, making development cleaner and faster since each part solves an specific part of the puzzle, which can be improved and reused to perfection.
+By splitting a complex problem such as an application in small parts or components we can tackle each of them individually, making development cleaner and faster since each part solves a specific part of the puzzle, which can be improved and reused to perfection.
 
 [Imports]<>
 
-In order to be able to use Eon components, first they must be imported, since this operation is fully asynchronous its recommended to declare component imports on the `head` section. You may access to the wide library of components under the `ui` directory or any other custom element in a directory of your choice.
+In order to be able to use Eon components, first, they must be imported since this operation is fully asynchronous its recommended to declare component imports on the `head` section. You may access the wide library of components under the `ui` directory or any other custom element in a directory of your choice.
 
-To import a Eon component, simply call the **eon.import(path)** function with the component **relative path** as the argument. 
+To import an Eon component, simply call the **eon.import(path)** function with the component **relative path** as the argument. 
 
 **Things to have in mind while importing Eon components:**
 
 - Always import components inside head tags when possible.
 - The path argument accepts both, a single path or an array of paths.
-- The path argument can be both an .html file or a directory, as long as that directory contains an .html file with the same name.
+- The path argument can be both a .html file or a directory, as long as that directory contains a .html file with the same name.
 - The path is always relative to the eon.basePath, which defaults to eon.js file.
-- The .html filename, must mach the custom element tag name.
+- The .html filename must match the custom element tag name.
 
 These are all **valid** ways of importing the same file:
 
@@ -120,11 +120,11 @@ Although the import function can be called multiple times its recommend to use t
 
 [Usage]<>
 
-Eon imported components can be used **declaratively** using html tags or **programmatically** creating and appending elements to the DOM with javascript.
+Eon imported components can be used **declaratively** using HTML tags or **programmatically** creating and appending elements to the DOM with javascript.
 
 ## Declarative
 
-To use Eon components declaratively simply use their name tag as any other regular html element eg. `<div>, <span>, etc...`
+To use Eon components declaratively simply use their name tag as any other regular HTML element eg. `<div>, <span>, etc...`
 
 ```[html]
 <body>
@@ -144,7 +144,7 @@ The programmatic approach is preferred when Eon components need to be added or m
 </script>
 ```
 
-Since imports are asynchronous Eon components properties and functions are declare dynamically and in order to ensure they are accessible we need use a `onCreated` callback.
+Since imports are asynchronous Eon components properties and functions are declare dynamically and in order to ensure they are accessible we need to use an `onCreated` callback.
 
 ```[html]
 <script>
@@ -166,7 +166,7 @@ Eon comes with a full set of well tested and flexible components that will cover
 
 ## Basic structure
 
-1. Create an empty html file in the desired directory, note `filename must match the tag name of your component in lowercase with at least one hyphen`.
+1. Create an empty HTML file in the desired directory, note `filename must match the tag name of your component in lowercase with at least one hyphen`.
 
 ```
 custom/custom-element/custom-element.html
@@ -180,7 +180,7 @@ custom/custom-element/custom-element.html
 </template>
 ```
 
-3. Add `<script>` tag, this is where we will register the behaviour of our element by calling eon.element function.
+3. Add `<script>` tag, this is where we will register the behavior of our element by calling `eon.element` function.
 
 ```[html]
 <script>
@@ -188,7 +188,7 @@ custom/custom-element/custom-element.html
 </script>
 ```
 
-4. You can also add a `<style>` tag to the file but this is not mandatory specially since most of the style will be handled by the theming mechanism.
+4. You can also add a `<style>` tag to the file but this is not mandatory especially since most of the style will be handled by the theming mechanism.
 
 ```[html]
 <style>
@@ -236,7 +236,6 @@ There are other options to declare the component:
   eon.element({
 
     name: "custom-element",
-    style: "custom-element.css"
 
     properties: {
       customProperty: "I'm a custom property"
@@ -260,9 +259,9 @@ There are other options to declare the component:
 
 In this section, we will show two ways of declaring properties and functions that enriches the eon elements API in terms of legibility and usability. The eon element `config` includes the properties below: 
 
-- **properties**: object used to store the properties the user will has direct access to from the eon element reference. 
+- **properties**: object used to store the properties the user will have direct access to from the eon element reference. 
 
-- **functions**: object used to store the functions the user will has direct access to from the eon element reference.
+- **functions**: object used to store the functions the user will have direct access to from the eon element reference.
 
 - **privateProperties**: object used to store the internal used properties. The user has no need to use them to harness the eon element functionality.  
 
@@ -364,8 +363,7 @@ It is as simple as setting the property `reflect` to `true`. Here is a snippet t
 </body>
 ```
 
-Indeed, this is a powerful functionality but, you will probably discover that as long as you add public properties to your custom element, its DOM node representation starts piling up attributes that stain the DOM. To remove this inconvenience, you have at your service the `reflectDefault` property. This property
-defines if the element specific property with its default value should have its attribute representation, therefore if it should be visible in the DOM from the very first time.
+Indeed, this is a powerful functionality but, you will probably discover that as long as you add public properties to your custom element, its DOM node representation starts piling up attributes that stain the DOM. To remove this inconvenience, you have at your service the `reflectDefault` property. This property defines if the element specific property with its default value should have its attribute representation, therefore if it should be visible in the DOM from the very first time.
 
 Below we set a property as `reflectDefault: true` indicating that it will be visible as an attribute in the DOM node representation.
 
@@ -395,7 +393,7 @@ It is important to mention that by default, the properties not assigned by the u
 
 [Life-cycle]<>
 
-Eon components pass through a series of events that determine their life-cycle. Understanding this events is crucial for an optimal performance implementation. 
+Eon components pass through a series of events that determine their life-cycle. Understanding these events is crucial for optimal performance implementation. 
 
 ## Sequential events
 
@@ -409,9 +407,9 @@ Events by execution order:
 
 - **onTransformed** - Triggers after transform, which mean its template fragment and source fragment has been imported to the dom using element slotting approach.
 
-- **onRender** - Triggers after **ALL** elements have been transformed. This is the main event to define element behaviour with trickle flow where parents triggers always before its children.
+- **onRender** - Triggers after **ALL** elements have been transformed. This is the main event to define element behavior with trickle flow where parents trigger always before its children.
 
-- **onBubbleRender** - Triggers after **ALL** elements has been transformed and rendered. This is an auxiliary event to define element behaviour with an inverse rendering order. Triggers with a bubble flow where children always triggers before its parents.
+- **onBubbleRender** - Triggers after **ALL** elements has been transformed and rendered. This is an auxiliary event to define element behavior with an inverse rendering order. Triggers with a bubble flow where children always trigger before its parents.
 
 - **onReady** - Triggers after all events are completed.
 
@@ -551,15 +549,15 @@ eon.object.assignToPath(yourObject, propertyPath, propertyNewValue);
 
 [Interpolation]<>
 
-Eon template engine makes usage of interpolation in order to provide a powerful and handy way of data binding and scripting.
-This allows components to display changeable data in the right place without having to manually update each value. It also provides logic driven content such as conditional or loop based content, in fact it so powerful that any javascript logic can be written inside the interpolation tags and it will be executed in a safe sandboxed environment.
+Eon template engine makes use of interpolation in order to provide a powerful and handy way of data binding and scripting.
+This allows components to display changeable data in the right place without having to manually update each value. It also provides logic driven content such as conditional or loop based content. In fact, it so powerful that any javascript logic can be written inside the interpolation tags and it will be executed in a safe sandboxed environment.
  
 
 ## Basic Usage
 
 Interpolation is represented by `{{ }}` tags and must be written inside the element template. It's also mandatory to set parse to 'true' on the element config.
 
-Sometimes specific behaviour can be triggered with the use of shorthands, this are special tokens that are preceded by `{{`. Examples of this are echo shorthand `{{=` and bind shorthand `{{@`.
+Sometimes specific behavior can be triggered with the use of shorthands, these are special tokens that are preceded by `{{`. Examples of this are echo shorthand `{{=` and bind shorthand `{{@`.
 
 In order to get started with interpolation we are going to explore a basic data binding example, but note this is just one of its many usages.
 
@@ -649,7 +647,7 @@ Hello I'm a text!
 
 ## Scripting
 
-Since Eon template engine treats interpolated code as plain sanboxed javascript you can exploit it to your own advantage and create logic based content.
+Since Eon template engine treats interpolated code as plain sandboxed javascript you can exploit it to your own advantage and create logic based content.
 
 ```[html]
 <template>  
@@ -664,7 +662,7 @@ Since Eon template engine treats interpolated code as plain sanboxed javascript 
 </template>
 ```
 
-This would output
+This would output:
 
 ```
 I'm text1
@@ -673,17 +671,17 @@ I'm text1
 I'm text2
 ```
 
-Interpolated code inside a template share the same scope, so its possible to declare a variable in one block and use it in another.
+The interpolated code inside a template share the same scope, so it's possible to declare a variable in one block and use it in another.
 
-Its also important to note interpolated code will render only once per element to enhance performance, this wont affect the data bind mechanism.
+It's also important to note interpolated code will render only once per element to enhance performance, this won't affect the data bind mechanism.
 
 [Slotting]<>
 
-Many Eon elements can act like containers for other elements and some of this elements need to be placed on a specific part of its container structure.
+Many Eon elements can act as containers for other elements and some of these elements need to be placed on a specific part of its container structure.
 Placing things on a specific place might be easy programmatically through JavaScript but things get messy quickly when we try to do the same declaratively.
 Slotting aims to provide a simple solution to place any element inside its Eon container through the attribute `slot` and CSS selectors.
 
-For example, imagine we had simple container element named 'eon-container':
+For example, imagine we had a simple container element named 'eon-container':
 
 ```[html]
 <template>
@@ -704,7 +702,7 @@ Once imported, in order to use it, we could do this:
 ```
 
 This would display the element eon-container with a direct child span.
-Now lets say we want to place it inside the div with the class eon-container-parent instead. We can do so simply by using the `slot` attribute and a simple css selector.
+Now let's say we want to place it inside the div with the class eon-container-parent instead. We can do so simply by using the `slot` attribute and a simple CSS selector.
 
 ```[html]
 <eon-container>
