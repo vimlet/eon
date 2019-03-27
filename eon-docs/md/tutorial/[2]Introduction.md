@@ -882,7 +882,7 @@ To overcome this complex task, Eon defines the `registerPathListener` function t
 ```
 
 ## Custom element navigation
-When you are creating your own Eon component you might need to access constantly to its template nodes references along your code. This task could make your processing performance to decrease. That's why Eon let you specify what nodes of the templates must be stored as references.
+When you are creating your own Eon component you might need to access constantly to its template nodes references along your code. This task could make your processing performance to decrease. That's why Eon lets you specify what nodes of the templates must be stored as references.
 
 ```[html]
 <style>
