@@ -90,6 +90,13 @@
       */
       scrollTo: function (scrollTop, scrollLeft, smooth) {
         this._performScroll(scrollTop, scrollLeft, smooth);
+      },
+      /*
+        @function update
+        @description Recalculates scroll bar size
+      */
+      update: function () {
+        this._misc.resize.fn();
       }
     },
     privateFunctions: {
@@ -466,8 +473,7 @@
         el._misc.resize.lastHeight = el.offsetHeight;
         el._misc.resize.lastWidth = el.offsetWidth;
 
-        eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
-
+        el._misc.resize.fn = function () {
           // Only do stuff if it has offsetParent, that means the eon-scroll is not hidden by display none, in which case we 
           // do not want to take the resize into account
           if (el.offsetParent) {
@@ -485,7 +491,9 @@
             }
 
           }
-        });
+        }
+
+        eon.addResizeListener(el, el.nodeName.toLowerCase(), el._misc.resize.fn);
 
         // This resize listener is meant to handle the window resize triggered when the user zooms in/out the browser and the 
         // native scroll bar sizes may be affected

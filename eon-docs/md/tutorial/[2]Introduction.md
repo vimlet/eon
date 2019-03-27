@@ -766,7 +766,6 @@ Changing Eon's theme will also trigger the `onThemeChanged` callback, which give
 Eon provides specific DOM navigation utilities and others. See the core API for more details. Here we expose those which we think are the most relevant:
 
 ## Navigation
-
 Eon has its own way to perform DOM queries: 
 
 ```[javascript]
@@ -780,7 +779,7 @@ It looks like other frameworks implementation except for the syntax, but what ac
 
 If you want Eon to handle all the queries without conflicts, you have the encapsulated version. Just use `eon.$` and `eon.$1`.
 
-In addition, Eon offers a way to navigate through Eon elements:
+In addition, Eon offers a way to navigate through Eon elements. In particular a way to obtain the first Eon parent element: 
 
 ```[html]
 <body>
@@ -793,10 +792,120 @@ In addition, Eon offers a way to navigate through Eon elements:
     var button = document.$1("button");
     // This returns the eon-form element
     button.getEnclosingComponent();
+    // This returns the eon-form element
+    eon.getEnclosingComponent(button);
   </script>
 
 </body>
   
 ```
 
-This utility is really handy especially when you want to access a parent Eon element from any node, and there's a lot of intermediate elements that do not belong to eon and extend the path between the node and the target parent.
+This utility is really handy especially when you want to access a parent Eon element from any node, and there's a lot of intermediate elements that do not belong to Eon and extend the path between the node and the target parent. 
+
+## Custom events
+Nowadays, building a web application requires full user interaction support, so the presence of events connections has become a necessity. With Eon, create custom events and register callbacks for them is very simple and intuitive.
+
+Eon's custom events creation works with two main functions: 
+
+- `createCallback`: creates a new connectable event for a specific node.
+- `triggerCallback`: fires an event, therefore, runs all its registered callbacks.
+
+When a custom event is created, a new function is added to the target element with the name of the event (e.g. event name: "onClick", function name: element.onClick). This function accepts a callback function as a parameter and it registers a new callback every time it is called.
+
+Let's see this in action. In the code below we declare a simple `div` element representing an agenda and a `button` element that will let us interact with it:
+
+```[html]
+<body>
+
+  <div id="agenda"><div>
+
+  <button onclick="logContactName()"></button>
+
+</body>
+
+```
+
+Here, we create a custom event called `onBuilt` that will be triggered when all the contacts have been added to the agenda, that is when the agenda has been built.
+
+```[html]
+<script>
+  var agenda = document.$1("#agenda");
+  
+  // Create a new event
+  eon.createCallback("onBuilt", agenda);
+  
+  // Add a new contact
+  var contact = document.createElement("div");
+  contact.innerHTML = "John";
+  agenda.appendChild(contact);
+
+  // Fires the onBuilt event
+  eon.triggerCallback("onBuilt", agenda);
+</script>
+
+```
+
+Now we will declare the function that will log the first contact name every time the button is clicked.
+
+```[javascript]
+function logContactName() {
+  // Registers a new callback
+  agenda.onBuilt(function(){
+    // Logs: "John"
+    console.log("First contact name: agenda.children[0].innerHTML);
+  });
+};
+```
+
+As you could expect, this functionality works with Eon elements, so, you can create custom events inside an Eon element configuration or elsewhere in your HTML code. 
+
+## Events propagation monitoring
+Events bubbling and capturing are powerful behaviors that enrich the way we work with events. It allows us to track the elements involved in an event firing. But, there is a use case where it lacks and it is related to the way some complex elements structure deal with events. Sometimes we need to detect when an element crossways in the path of a mouse/touch event listener of another element. 
+
+Here is when the HTML Event object comes to the rescue with a function called `getComposedPath`. This function returns an Array of the objects on which that event listeners will be invoked. Unluckily, we have no way to detect an element which has no listener for that event, and even if it would do what we want, this implementation is only supported in a few browsers and platforms.
+
+To overcome this complex task, Eon defines the `registerPathListener` function that lets us monitor if an element is on the path of the mouse/touch events. 
+
+```[javascript]
+  var element = document.$1("div"); 
+
+  // Register our 'div' element
+  eon.registerPathListener(element);
+
+  document.addEventListener("click", function(){
+
+    // Is the 'div' on documents click path?
+    console.log(element.isOnPath);
+
+  });
+
+```
+
+## Custom element navigation
+When you are creating your own Eon component you might need to access constantly to its template nodes references along your code. This task could make your processing performance to decrease. That's why Eon let you specify what nodes of the templates must be stored as references.
+
+```[html]
+<style>
+  custom-element {
+    color: blue;
+  }
+</style>
+
+<template>
+  <div eon-reference="container">
+    <div eon-reference="header"></div>
+    <div eon-reference="content"></div>
+  </div>
+</template>
+
+<script>
+  eon.element({
+    name: "custom-element",
+
+    onCreated: function() {
+      // This logs the specified nodes references
+      console.log(this.refs.container, this.refs.header, this.refs.content);
+    }
+  });
+</script>
+```
