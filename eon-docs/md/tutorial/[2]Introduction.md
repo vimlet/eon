@@ -761,7 +761,7 @@ Changing Eon's theme will also trigger the `onThemeChanged` callback, which give
 </script>
 ```
 
-[Util-Functions]<>
+[Utilities]<>
 
 Eon provides specific DOM navigation utilities and others. See the core API for more details. Here we expose those which we think are the most relevant:
 
