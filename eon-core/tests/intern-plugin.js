@@ -31,8 +31,12 @@ intern.on("afterRun", () => {
       fs.unlinkSync(testingbot_tunnel_pid);
     }
 
-    serverHttp.close(function() {
+    if(intern.config.leaveRemoteOpen) {
       resolve();
-    });
+    } else {
+      serverHttp.close(function() {
+        resolve();
+      });
+    }
   });
 });

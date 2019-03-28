@@ -14,34 +14,36 @@
   <script src="eon/eon.js"></script>
 
   <script>
-    eon.import([
-      "eon/ui/eon-component-1",
-      "@ui/eon-component-4"
-    ]);
+    // eon.import([
+    //   "eon/ui/eon-component-1",
+    //   "@ui/eon-component-4"
+    // ]);
+    eon.import("eon/ui/eon-component-2");
   </script>
 
 </head>
 
 <body>
 
-  <eon-component-1 label="Label"></eon-component-1>
+  <!-- <eon-component-2 label="COMP-2"></eon-component-2>
+  <eon-component-2 label="COMP-2"></eon-component-2> -->
 
   <script>
 
     // Tests that onPropertyChanged is triggered properly
     function importsTest(callback) {
-      
+
       eon.onImportsReady(function () {
         // We know that for this scenario the are only 4 imported components, 2 of them being included as part of eon, 
         // the component that we are importing (eon-component-1) and its dependency (eon-component-2)
-          callback(Object.keys(eon.imports.config).length == 7);
+        callback(Object.keys(eon.imports.config).length == 7);
       });
 
     }
 
     // Tests that onPropertyChanged is triggered properly
     function propertyChangedTest(callback) {
-      
+
       var component = document.querySelector("eon-component-1");
 
       component.onPropertyChanged(function (property, oldVal, newVal) {
@@ -53,6 +55,91 @@
       });
 
     }
+
+    function performanceTest(callback) {
+
+      eon.items = 10000;
+
+      // IMPORT TEST
+      var fragment = document.createDocumentFragment();
+      var element;
+
+      for (var i = 0; i < eon.items; i++) {
+          element = document.createElement("eon-component-2");
+          // element.label = "Button";
+          // element.style.display = "inline-block";
+          // element.style.margin = "5px";
+          fragment.appendChild(element);
+      }
+
+      console.time("ready");
+
+      document.body.appendChild(fragment);
+
+      // eon.onReady(function () {
+      //   console.timeEnd("ready");
+      // })
+
+      // // PROGRAMMATIC TEST
+      // var element = "eon-component-2";
+      // var fragment = document.createDocumentFragment();
+      // var template = document.createDocumentFragment();
+      // var div = document.createElement("div");
+
+      // div.innerHTML = "Test!";
+      // div.style.backgroundColor = "yellow";
+      // div.style.margin = "5px";
+
+      // template.appendChild(div);
+
+      // // HACKING EON
+      // // eon.imports.templates[element] = template;
+      // // eon.declare(element);
+      // // eon.element(element, {});
+
+      // // Items creation
+      // var item;
+
+      // for (var i = 0; i < eon.items; i++) {
+      //   item = document.createElement(element);
+      //   // item.template = template.cloneNode(true);
+      //   fragment.appendChild(item);
+      // }
+
+      // // 
+
+      // console.time("ready");
+
+      // document.body.appendChild(fragment);
+
+      // // ADITIONAL ITEMS TO TEST NEW TRANSFORM VARIABLE QUEUE
+
+      // setTimeout(function () {
+
+      //   var aditionalFragment = document.createDocumentFragment();
+      //   var additionalItem;
+
+      //   for (var j = 0; j < 10000; j++) {
+      //     additionalItem = document.createElement("eon-component-2");
+      //     aditionalFragment.appendChild(additionalItem);
+      //   }
+
+      //   // console.time("ready");
+
+
+      //   document.body.appendChild(fragment);
+
+      //   console.time("ready");
+        
+      //   document.body.appendChild(aditionalFragment);
+
+      // }, 500);
+
+    }
+
+    // console.time("ready");
+
+    performanceTest();
 
   </script>
 
