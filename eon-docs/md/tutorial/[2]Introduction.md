@@ -867,22 +867,22 @@ Here is when the HTML Event object comes to the rescue with a function called `g
 To overcome this complex task, Eon defines the `registerPathListener` function that lets us monitor if an element is on the path of the mouse/touch events. 
 
 ```[javascript]
-  var element = document.$1("div"); 
+var element = document.$1("div"); 
 
-  // Register our 'div' element
-  eon.registerPathListener(element);
+// Register our 'div' element
+eon.registerPathListener(element);
 
-  document.addEventListener("click", function(){
+document.addEventListener("click", function(){
 
-    // Is the 'div' on documents click path?
-    console.log(element.isOnPath);
+  // Is the 'div' on documents click path?
+  console.log(element.isOnPath);
 
-  });
+});
 
 ```
 
 ## Custom element navigation
-When you are creating your own Eon component you might need to access constantly to its template nodes references along your code. This task could make your processing performance to decrease. That's why Eon lets you specify what nodes of the templates must be stored as references.
+When you are creating your own Eon element you might need to access constantly to its template nodes references across your code. This task could reduce your processing performance. That's why Eon lets you specify which nodes of the templates must be stored as references, decreasing the times you search for them.
 
 ```[html]
 <style>
@@ -909,3 +909,5 @@ When you are creating your own Eon component you might need to access constantly
   });
 </script>
 ```
+
+As a consequence, these references are available, wherever the element they belong to, is instantiated.
