@@ -1,6 +1,6 @@
 
 eon.element = function (param1, param2) {
-    
+
     var config, stylePath, name;
 
     if (param2) {
@@ -146,7 +146,7 @@ eon.generateSourceFragment = function (el) {
 };
 
 eon.prepareElement = function (el, callback) {
-    
+
     // Mark element as first attach
     el.isFirstAttach = true;
 
@@ -256,7 +256,7 @@ eon.collectObserveData = function (el, config) {
     el.__observeProperties = {};
     el.__observeAttributes = {};
     el.__reflectProperties = {};
-    
+
     // Assigns each index of the array to the object
     eon.addObserveFromArray(el.__observeProperties, config.observeProperties);
     eon.addObserveFromArray(el.__observeAttributes, config.observeAttributes);
@@ -384,9 +384,9 @@ eon.createAttributesObserver = function (el, config) {
 };
 
 eon.handleReflectDefaultProperty = function (el, key, property) {
-    
+
     var value = el.hasOwnProperty("__" + property) ? el["__" + property] : "";
-    
+
     // This is done in the onInit callback since we cannot set an attribute in the onCreated one
     el.onInit(function () {
 
@@ -572,9 +572,9 @@ eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 };
 
 eon.transform = function (el, config) {
-    
+
     if (!eon.registry.isTransformed(el)) {
-        
+
         // Gets the theme that will be used for this element, if it has none we set a default theme and return it
         // We pass the config so that if the element has themed: "false" but the element has a theme specified by the user it turns it into "true"
         var theme = eon.initElementTheme(el, config);
@@ -590,12 +590,22 @@ eon.transform = function (el, config) {
         eon.importElementTheme(config, name, theme);
 
         // Prepares th element to change its theme in case eon theme changes
-        eon.setupEonThemeListener(el, config)
+        eon.setupEonThemeListener(el, config);
 
         // Adds the element to the transformQueue
-        setTimeout(function () {
+        if (eon.registry.transformedQueueBreak) {
+            
+            eon.registry.transformedQueueBreak = false;
+
+            setTimeout(function () {
+                eon.triggerTransformed(el, config);
+            }, 0);
+
+        } else {
+
             eon.triggerTransformed(el, config);
-        }, 0);
+
+        }
 
     }
 
@@ -630,7 +640,7 @@ eon.setupEonThemeListener = function (el, config) {
 
         var elementName = el.nodeName.toLowerCase();
         var elementTheme = document.body.hasAttribute("theme") != "" ? document.body.getAttribute("theme") : el.theme;
-        
+
         // It will only change and attempt to import the new elements theme if matches the body one and 
         // if it is not strictly specified by the user
         if (elementTheme && !el.__specificTheme) {
@@ -724,28 +734,38 @@ eon.fragmentFromString = function (str) {
 };
 
 eon.generateElementTemplate = function (el) {
+
     var name = el.nodeName.toLowerCase();
-    var template = eon.imports.templates[name];
-    var clone = document.createElement("template");
 
-    // All the content related checks are made to improve compatibility with browsers that do not support template
-    clone.content = document.createDocumentFragment();
+    // It will only enter here once per element type, it will create a template clone for all the other components to copy
+    if (!eon.registry.isTemplateRegistered(name)) {
+        
+        var template = eon.imports.templates[name];
+        var clone = document.createElement("template");
 
-    if (template) {
+        // All the content related checks are made to improve compatibility with browsers that do not support template
+        clone.content = document.createDocumentFragment();
 
-        if (!template.content) {
-            template.content = eon.fragmentFromString(template.innerHTML);
+        if (template) {
+
+            if (!template.content) {
+                template.content = eon.fragmentFromString(template.innerHTML);
+            }
+
+            clone = template.cloneNode(true);
+
+            if (!clone.content) {
+                clone.content = eon.fragmentFromString(clone.innerHTML);
+            }
+
         }
 
-        clone = template.cloneNode(true);
-
-        if (!clone.content) {
-            clone.content = eon.fragmentFromString(clone.innerHTML);
-        }
+        eon.registry.registerTemplate(name, clone.content);
 
     }
 
-    el.template = clone.content;
+    el.template = eon.registry.elementTemplates[name].cloneNode(true);
+
 };
 
 eon.appendElementTemplate = function (el) {
@@ -754,7 +774,7 @@ eon.appendElementTemplate = function (el) {
 };
 
 eon.generateElementReferences = function (el) {
-    
+
     var nodes = el.template.querySelectorAll("[eon-ref]");
     var node;
 
@@ -854,9 +874,9 @@ eon.triggerTransformed = function (el, config) {
 
         // Timeout forces triggerRender to wait child onTransformed
         // When render and bubbleRender are finished, it triggers onReady
-        setTimeout(function () {
+        // setTimeout(function () {
             eon.registry.triggerRenders();
-        }, 0);
+        // }, 0);
 
     });
 

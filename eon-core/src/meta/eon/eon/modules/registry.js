@@ -5,7 +5,10 @@ eon.registry.renderQueue = [];
 eon.registry.bubbleRenderQueue = [];
 eon.registry.readyQueue = [];
 
+eon.registry.transformedQueueBreak = true;
+
 eon.registry.elementThemes = {};
+eon.registry.elementTemplates = {};
 eon.registry.elementCounters = {};
 eon.registry.elementRegistry = {};
 
@@ -119,11 +122,13 @@ eon.registry.addToReadyQueue = function (el, fn) {
 eon.registry.triggerRenders = function () {
 
   if (eon.registry.registeredElements == eon.registry.elementStatus.transformed.length) {
+
+    eon.registry.transformedQueueBreak = true;
     
     eon.registry.triggerRenderCallbacks();
     eon.registry.triggerBubbleRenderCallbacks();
     eon.registry.triggerReadyCallbacks();
-
+    
     // Trigger global onReady
     eon.onImportsReady(function () {
       eon.triggerCallback("onReady", eon);
@@ -178,6 +183,18 @@ eon.registry.isThemeRegistered = function (tagName, theme) {
   return !eon.registry.elementThemes[theme]
     ? false
     : eon.registry.elementThemes[theme][tagName];
+};
+
+eon.registry.registerTemplate = function (tagName, template) {
+  if (!eon.registry.elementTemplates[tagName]) {
+    eon.registry.elementTemplates[tagName] = {};
+  }
+
+  eon.registry.elementTemplates[tagName] = template;
+};
+
+eon.registry.isTemplateRegistered = function (tagName) {
+  return !eon.registry.elementTemplates[tagName] ? false : true;
 };
 
 eon.registry.getUidFull = function (el) {
