@@ -892,9 +892,9 @@ When you are creating your own Eon element you might need to access constantly t
 </style>
 
 <template>
-  <div eon-reference="container">
-    <div eon-reference="header"></div>
-    <div eon-reference="content"></div>
+  <div eon-ref="container">
+    <div eon-ref="header"></div>
+    <div eon-ref="content"></div>
   </div>
 </template>
 
