@@ -64,7 +64,7 @@ eon.getCurrentScript = function() {
   };
   
   eon.__setBase = function() {
-    var path = eon.getCurrentScript().replace("/eon.js", "");
+    var path = eon.getCurrentScript().replace(new RegExp("(\\/[^\\/]+)\\/?$"), "");
     path = path.replace(/.*:\/\//g, "");
     path = path.split("/");
     path = path.slice(1, path.length);
@@ -3305,7 +3305,9 @@ eon.insertImport = function (href) {
     var elementName;
 
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
+
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
+    href = href.charAt(0) == "@" ? eon.getBasePathUrl(href) : href;
 
     if (!(elementName in eon.imports.templates)) {
 
@@ -3692,23 +3694,30 @@ eon.handleLinksAppend = function () {
 eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
-    var dependencyName, dependencyPath, dependencyFile;
+    var dependencyName, dependencyPath, dependencyFile, relativeToParent;
 
     // Loop through dependencies path and import new ones
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
             dependencyName = elementConfig.dependencies[j].match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase();
-            dependencyPath = elementConfig.dependencies[j].charAt(0) == "/" ? eon.basePath + elementConfig.dependencies[j] : elementConfig.dependencies[j];
+            dependencyPath = elementConfig.dependencies[j].charAt(0) == "@" ? eon.getBasePathUrl(elementConfig.dependencies[j]) : elementConfig.dependencies[j];
             if (!(dependencyName in eon.imports.templates)) {
                 hasDependencies = true;
+                relativeToParent = elementConfig.dependencies[j].charAt(0) == "@" || elementConfig.dependencies[j].charAt(0) == "/" ? false : true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
-                dependencyFile = elementConfig.dependencies[j].charAt(0) == "/" ? dependencyPath : eon.imports.paths[name] + dependencyPath;
+                dependencyFile = !relativeToParent ? dependencyPath : eon.imports.paths[name] + dependencyPath;
                 eon.import(dependencyFile);
             }
         }
     }
 
     return hasDependencies;
+}
+
+eon.getBasePathUrl = function (url) {
+    
+    url = url.substring(1);
+    return eon.basePath + "/" + url;
 }
 
 // If there are no imports in the document we will trigger onImportsReady event immediately
@@ -3728,6 +3737,8 @@ eon.registry.readyQueue = [];
 eon.registry.elementThemes = {};
 eon.registry.elementCounters = {};
 eon.registry.elementRegistry = {};
+
+eon.registry.registeredElements = 0;
 
 eon.registry.elementStatus = {
   declared: [],
@@ -3768,6 +3779,8 @@ eon.registry.registerElement = function (el) {
       el: el,
       status: "created"
     };
+
+    eon.registry.registeredElements++;
 
     // InnerHTML support
   } else if (uid && (!el.uid || !el.getAttribute("uid"))) {
@@ -3834,7 +3847,7 @@ eon.registry.addToReadyQueue = function (el, fn) {
 
 eon.registry.triggerRenders = function () {
 
-  if (Object.keys(eon.registry.elementStatus.attached).length == eon.registry.elementStatus.transformed.length) {
+  if (eon.registry.registeredElements == eon.registry.elementStatus.transformed.length) {
     
     eon.registry.triggerRenderCallbacks();
     eon.registry.triggerBubbleRenderCallbacks();
@@ -3917,7 +3930,7 @@ eon.registry.updateElementStatus = function (el, status) {
 
       eon.registry.elementStatus[status][uidFull] = el;
 
-      if (eon.registry.elementStatus.ready.length != Object.keys(eon.registry.elementStatus.attached).length) {
+      if (eon.registry.elementStatus.ready.length != eon.registry.registeredElements) {
         eon["__onReady__triggered"] = false;
       }
 
@@ -4651,6 +4664,8 @@ eon.parse = function (el, config) {
     eon.defineOverlayCreation(el);
     eon.definePlaceholderCreation(el);
 
+    eon.createAttributesObserver(el, config);
+
     eon.triggerAllCallbackEvents(el, config, "onParsed");
     eon.registry.updateElementStatus(el, "parsed");
 
@@ -4805,33 +4820,25 @@ eon.createAttributesObserver = function (el, config) {
     // First we check if we have attributes to observe
     if (observeAttributesKeys.length > 0) {
 
-        var property, privateProperty, value;
+        var key, property, privateProperty;
 
         // For each observe attribute if check which value should be assign to it
         for (var i = 0; i < observeAttributesKeys.length; i++) {
 
-            property = eon.util.hyphenToCamelCase(observeAttributesKeys[i]);
+            key = observeAttributesKeys[i].slice(0);
+            property = eon.util.hyphenToCamelCase(key);
             privateProperty = "__" + property;
 
             // If the attribute already has a value we assign this value to its corresponding property
-            if (el.getAttribute(observeAttributesKeys[i])) {
+            if (el.getAttribute(key)) {
 
-                el[privateProperty] = el.getAttribute(observeAttributesKeys[i]);
+                el[privateProperty] = el.getAttribute(key);
 
                 // If the attribute has no value we check if the property has it, if not we assign it an empty value
             } else {
 
                 if (config.properties[property].reflectDefault) {
-
-                    value = el.hasOwnProperty(privateProperty) ? el[privateProperty] : "";
-
-                    // Only sets the attribute if the value is not of object type
-                    if (typeof value != "object") {
-                        el.setAttribute(observeAttributesKeys[i], value);
-                    } else {
-                        el.removeAttribute(observeAttributesKeys[i]);
-                    }
-
+                    eon.handleReflectDefaultProperty(el, key, property);
                 }
 
             }
@@ -4867,6 +4874,24 @@ eon.createAttributesObserver = function (el, config) {
     }
 
 };
+
+eon.handleReflectDefaultProperty = function (el, key, property) {
+    
+    var value = el.hasOwnProperty("__" + property) ? el["__" + property] : "";
+    
+    // This is done in the onInit callback since we cannot set an attribute in the onCreated one
+    el.onInit(function () {
+
+        // Only sets the attribute if the value is not of object type
+        if (typeof value != "object") {
+            el.setAttribute(key, value);
+        } else {
+            el.removeAttribute(key);
+        }
+
+    });
+
+}
 
 eon.handleProperty = function (el, config, reflectProperties, observeProperties, property) {
 
@@ -5220,6 +5245,21 @@ eon.appendElementTemplate = function (el) {
     delete el.template;
 };
 
+eon.generateElementReferences = function (el) {
+    
+    var nodes = el.template.querySelectorAll("[eon-ref]");
+    var node;
+
+    el._ref = el._ref || {};
+
+    for (var i = 0; i < nodes.length; i++) {
+        node = nodes[i];
+        el._ref[node.getAttribute("eon-ref")] = node;
+        node.removeAttribute("eon-ref");
+    }
+
+};
+
 eon.initSourceCallbacks = function (el) {
     // Creates the getSourceElements function even if it has no source elements
     el.getSourceNodes = function () {
@@ -5415,6 +5455,9 @@ eon.declare = function (name, baseElement) {
             // Generates an instance of the element template and assigns it as a property of the element so we can easily access from anywhere
             eon.generateElementTemplate(el);
 
+            // Searches elements tagged to have its reference saved inside the component template 
+            eon.generateElementReferences(el);
+
             // Sets a css rule with the provided display by the config, if no display is provided it will have display block by default
             eon.initializeDisplay(el, config);
             
@@ -5451,8 +5494,6 @@ eon.declare = function (name, baseElement) {
 
                 // Registers the element and generates uid
                 eon.registry.registerElement(el);
-
-                eon.createAttributesObserver(el, config);
 
                 // Updates the references for the source nodes
                 eon.updateSourceCallbacks(el);
@@ -6221,31 +6262,12 @@ eon.util.mapToObject = function (map) {
 };
 
 
-/**
- * :::::::::::::::::::::
- * Progressive Web App
- * :::::::::::::::::::::
- * 
- * > Home screen access - manifest.json
- * > Offline mode - service-worker.js
- * 
- * *** SERVICE WORKERS *** 
- * . Service Worker is an experimental technology. New browsers versions are supporting it
- * by default but its functionality is not guaranteed for now.
- *  
- * . An HTTPS implementation is needed to work with service workers.
- * Localhost is considered a secure origin by browsers as well
- * 
- * ***************************
- * 
- */
-
 eon.cache = eon.cache || {};
 
-eon.cache.config = eon.cache.config || {};
+eon.cache.config = eon.cache.config || false;
 
- // Check if eon has any cache strategy
- if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
+// Check if eon has any cache strategy
+if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
   // Check service worker existence
   (function (proxied) {
     ServiceWorkerContainer.prototype.register = function () {
@@ -6258,14 +6280,14 @@ eon.cache.config = eon.cache.config || {};
 
   eon.onReady(function () {
     // Check service worker existence
-    if(!navigator.serviceWorker._registered) {
+    if (!navigator.serviceWorker._registered) {
 
       // Register eon service worker
       navigator.serviceWorker
         .register(eon.basePath + '/modules/cache-sw.js')
         .then(function () {
           console.log('[ServiceWorker] Registered');
-      });
+        });
 
     }
   });
@@ -6277,39 +6299,51 @@ eon.cache.open = function (cb) {
 
   // Check browser cache storage existence
   if ('caches' in window) {
-
     // Create cache
     caches.open(eon.cache.config.name).then(function (cache) {
       // Cache config
       cb(null, cache);
+    }).catch(function (error) {
+      // Handles exceptions that arise from open().
+      console.error('Error in cache open:', error);
+      throw error;
     });
-
   }
 }
 
 eon.cache.add = function (request, options, cb) {
   var config = eon.cache.config;
 
-  // Conditions
-  var excluded = config.exclude && (options && config.exclude.indexOf(options.name) > -1);
-  var requestAll = config.requests && config.requests.indexOf("*") > -1;
-  var included = requestAll || !options || (options && config.requests && config.requests.indexOf(options.name) > -1);
+  if (config) {
+    // Conditions
+    var excluded = config.exclude && (options && config.exclude.indexOf(options.name) > -1);
+    var requestAll = config.requests && config.requests.indexOf("*") > -1;
+    var included = requestAll || !options || (options && config.requests && config.requests.indexOf(options.name) > -1);
 
-  // Check cache config
-  if (!excluded && included) {
-    // Check eon-cache reference existence
-    if (!eon.cache.ref) {
-      eon.cache.open(function (error, cache) {
-        eon.cache.ref = eon.cache.ref || cache;
-        // Check if the file has been cached already
-        cache.match(request).then(function (cached) {
-          if(!cached) {
-            cache.add(request).then(function () {    
-              if (cb) { cb(null, request) }
-            });
-          }
-        });
-      });
+    // Check cache config
+    if (!excluded && included) {
+      // Check eon-cache reference existence
+      if (!eon.cache.ref) {
+        eon.cache.open(function (error, cache) {
+          eon.cache.ref = eon.cache.ref || cache;
+          // Check if the file has been cached already
+          cache.match(request).then(function (cached) {
+            if (!cached) {
+              cache.add(request).then(function () {
+                if (cb) { cb(null, request) }
+              }).catch(function (error) {
+                // Handles exceptions that arise from add().
+                console.error('Error in add handler:', error);
+                throw error;
+              });
+            }
+          }).catch(function (error) {
+            // Handles exceptions that arise from match().
+            console.error('Error in cache match:', error);
+            throw error;
+          });
+        })
+      }
     }
   }
 }
