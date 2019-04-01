@@ -5,7 +5,7 @@ eon.dataDiff = function (config) {
   /*
     TODO
     - Map object implementation
-    - Store states support
+    - Old states storage support
     - Order sensitive
   */
 
@@ -50,7 +50,7 @@ eon.dataDiff = function (config) {
   */
   this._operations = [];
 
-  
+
   // ## Public Functions ##
 
   /*
