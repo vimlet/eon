@@ -9,11 +9,8 @@ eon.dataDiff = function (config) {
     - Order sensitive
   */
 
-  /* 
-    ##########
-    Public Properties
-    ##########
-  */
+  // ## Public Properties ##
+
   /*
     @property {Array} states
     @description Stored previous data states
@@ -45,11 +42,7 @@ eon.dataDiff = function (config) {
   */
   this.delete = config.delete;
 
-  /* 
-    ##########
-    Private Properties
-    ##########
-  */
+  // ## Private Properties ##
 
   /*
     @property (private) {Object} _operations
@@ -57,11 +50,8 @@ eon.dataDiff = function (config) {
   */
   this._operations = [];
 
-  /* 
-    ##########
-    Public Functions
-    ##########
-  */
+  
+  // ## Public Functions ##
 
   /*
     @function commit
@@ -101,12 +91,7 @@ eon.dataDiff = function (config) {
     // Default delete 
   };
 
-
-  /* 
-    ##########
-    Private Functions
-    ##########
-  */
+  // ## Private Functions ##
 
   /*
     @function (private) _diff
