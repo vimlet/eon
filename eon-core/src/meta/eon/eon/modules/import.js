@@ -21,24 +21,33 @@ eon.imports.paths = eon.imports.paths || {};
 eon.imports.config = eon.imports.config || {};
 eon.imports.errors = eon.imports.errors || {};
 
-// Imports the requested custom element file, admits arrays and strings
+/*
+@function import
+@description Imports the requested custom element file, admits arrays and strings
+@param {Object} param
+*/
 eon.import = function (param) {
 
     if (param.constructor === Array) {
 
         for (var i = 0; i < param.length; i++) {
-            eon.insertImport(param[i]);
+            eon.requestImport(param[i]);
         }
 
     } else if (param.constructor === String) {
 
-        eon.insertImport(param);
+        eon.requestImport(param);
 
     }
 
 };
 
-eon.insertImport = function (href) {
+/*
+@function requestImport
+@description Takes the component name and path, then declares the component and requests the .html file with ajax
+@param {Object} href
+*/
+eon.requestImport = function (href) {
 
     var elementName;
 
@@ -70,7 +79,7 @@ eon.insertImport = function (href) {
 
                 if (obj.xhr.status == 200) {
 
-                    eon.insertFragment(elementName, obj.responseText);
+                    eon.prepareComponent(elementName, obj.responseText);
 
                 } else {
 
@@ -94,7 +103,13 @@ eon.insertImport = function (href) {
 
 };
 
-eon.insertFragment = function (elementName, content) {
+/*
+@function prepareComponent
+@description Creates a fragment from the responseText and stores the scripts, links and template to append them when the DOM is ready
+@param {Object} elementName
+@param {String} content
+*/
+eon.prepareComponent = function (elementName, content) {
     
     var importFragment = eon.fragmentFromString(content);
 
@@ -189,6 +204,10 @@ eon.insertFragment = function (elementName, content) {
     });
 };
 
+/*
+@function handleDependencies
+@description Loops through the stored configs to search for independencies and it also parses the component template
+*/
 eon.handleDependencies = function () {
 
     // Automated dependencies and interpolation
@@ -207,7 +226,7 @@ eon.handleDependencies = function () {
         }
 
         // Handle interpolation
-        eon.handleTemplateInterpolation(elementNames[i]);
+        eon.parseTemplate(elementNames[i]);
     }
 
     return hasPendingImports;
@@ -215,14 +234,22 @@ eon.handleDependencies = function () {
 };
 
 
-// Handle template interpolation
-eon.handleTemplateInterpolation = function (name) {
+/*
+@function parseTemplate
+@description Parses the component template
+@param {String} name
+*/
+eon.parseTemplate = function (name) {
     if (eon.imports.config[name].parse) {
         eon.interpolation.prepare(eon.imports.templates[name]);
     }
 };
 
-// Imports specific componentes themes if specified
+
+/*
+@function importSchemaThemes
+@description Takes eon's themaSchema and reads it to import the requested specific themes
+*/
 eon.importSchemaThemes = function () {
 
     if (eon.themeSchema) {
@@ -263,6 +290,11 @@ eon.importSchemaThemes = function () {
 
 };
 
+/*
+@function importMainTheme
+@description Imports the main css file of the specified theme
+@param {String} theme
+*/
 eon.importMainTheme = function (theme) {
 
     if (theme && !eon.registry.isThemeRegistered("main", theme)) {
@@ -287,6 +319,13 @@ eon.importMainTheme = function (theme) {
 
 };
 
+/*
+@function importElementTheme
+@description Imports the component css file of the specified theme
+@param {Object} config
+@param {String} name
+@param {String} theme
+*/
 eon.importElementTheme = function (config, name, theme) {
 
     if (theme && config.themed && !eon.registry.isThemeRegistered(name, theme)) {
@@ -310,13 +349,16 @@ eon.importElementTheme = function (config, name, theme) {
     }
 };
 
+/*
+@function handleStyleAppend
+@description Takes the style made of all the components style and appends it to the document
+*/
 eon.handleStyleAppend = function () {
 
     if (eon.imports.style != "") {
 
         var combinedStyle = document.createElement("style");
 
-        combinedStyle.setAttribute("data-eon", "element-styles")
         combinedStyle.innerHTML = eon.imports.style;
 
         // Resets style to avoid css rules style replication
@@ -328,6 +370,13 @@ eon.handleStyleAppend = function () {
 
 };
 
+/*
+@function handleScriptsAppend
+@description Appends the components scripts, since this is a recursive function and it may stop to 
+continue in another moment it uses its both paremeters to continue where it stopped
+@param {Number} elementIndex
+@param {Number} scriptIndex
+*/
 eon.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
     var elementNames = Object.keys(eon.imports.scripts);
@@ -390,6 +439,10 @@ eon.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
 };
 
+/*
+@function removeScriptsReadyScripts
+@description Removes all the scripts from the head that are no longer needed
+*/
 eon.removeScriptsReadyScripts = function () {
     var el = this;
     var scriptReadyScripts = document.head.querySelectorAll("script[scriptsready-script]");
@@ -399,6 +452,10 @@ eon.removeScriptsReadyScripts = function () {
     }
 };
 
+/*
+@function handleLinksAppend
+@description Appends the components links
+*/
 eon.handleLinksAppend = function () {
 
     var elementNames = Object.keys(eon.imports.links);
@@ -428,7 +485,12 @@ eon.handleLinksAppend = function () {
 
 };
 
-// Handle config dependencies
+/*
+@function {Boolean} handleConfigDependencies
+@description Checks the dependencies for a given component config. If there are dependencies to import  path and requests an 
+import, it will also return a Boolean representing whether it has dependencies or not
+@param {String} name
+*/
 eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
@@ -452,6 +514,11 @@ eon.handleConfigDependencies = function (name) {
     return hasDependencies;
 }
 
+/*
+@function {String} getBasePathUrl
+@description Returns a new url created with the base path
+@param {String} url
+*/
 eon.getBasePathUrl = function (url) {
     
     url = url.substring(1);
