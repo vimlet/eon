@@ -15,11 +15,6 @@ eon.dataDiff = function (config) {
   */
   this.storeStates = config.hasOwnProperty("storeStates") ? config.storeStates : 0;
   /*
-    @property {Boolean} orderSensitive
-    @description Whether or not the keys order matters
-  */
-  // this.orderSensitive = config.hasOwnProperty("orderSensitive") ? config.orderSensitive : false;
-  /*
     @property {Function} create
     @description Create operation
   */
@@ -96,14 +91,15 @@ eon.dataDiff = function (config) {
     @param {Object} oldItems
   */
   this._diff = function (items, oldItems) {
-    self.counter = -1;
+    var counter = -1;
+    var oldCounter = -1;
     // Loop through properties in object 1
     items.forEach(function (value, key) {
-      self.counter++;
+      counter++;
       // Check property exists on both objects
       if (!oldItems.has(key)) {
         // :: Create item
-        self._storeOperation("create", key, self.counter, value, null);
+        self._storeOperation("create", key, counter, value, null);
       } else {
         // switch (typeof (items[key])) {
         switch (typeof (value)) {
@@ -112,31 +108,32 @@ eon.dataDiff = function (config) {
             value
             if (!self._compare(value, oldItems.get(key))) {
               // :: Update item
-              self._storeOperation("update", key, self.counter, value, oldItems.get(key));
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
             break;
           // Compare function code
           case "function":
             if (typeof (oldItems.get(key)) != "undefined" || (value.toString() != oldItems.get(key).toString())) {
               // :: Update item
-              self._storeOperation("update",key, self.counter, value, oldItems.get(key));
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
             break;
           // Compare values
           default:
             if (value != oldItems.get(key)) {
               // :: Update item
-              self._storeOperation("update", key, self.counter, value, oldItems.get(key));
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
         }
       }
     });
     // Check oldItems for any extra properties
     oldItems.forEach(function (value, key) {
+      oldCounter++;
       // * Undefined properties are considered nonexistent
       if (typeof (value) == "undefined" || !items.has(key)) {
         // :: Delete item
-        self._storeOperation("delete", key, self.counter, items.get(key), value);
+        self._storeOperation("delete", key, oldCounter, items.get(key), value);
       };
     });
     return true;
