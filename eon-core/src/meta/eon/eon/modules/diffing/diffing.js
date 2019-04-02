@@ -14,22 +14,7 @@ eon.dataDiff = function (config) {
     @description Whether or not the previous states should be stored
   */
   this.storeStates = config.hasOwnProperty("storeStates") ? config.storeStates : 0;
-  /*
-    @property {Function} create
-    @description Create operation
-  */
-  this.create = config.create;
-  /*
-    @property {Function} update
-    @description Update operation
-  */
-  this.update = config.update;
-  /*
-    @property {Boolean} delete
-    @description Delete operation
-  */
-  this.delete = config.delete;
-
+  
   // ## Private Properties ##
 
   /*
@@ -62,7 +47,7 @@ eon.dataDiff = function (config) {
     @description Create operation fallback
     @param {Object} data
   */
-  this.create = this.create.constructor === Function ? this.create : function (data) {
+  this.create = config.create.constructor === Function ? config.create : function (data) {
     // Default create 
   };
   /*
@@ -70,7 +55,7 @@ eon.dataDiff = function (config) {
     @description Update operation fallback
     @param {Object} data
   */
-  this.update = this.update.constructor === Function ? this.update : function (data) {
+  this.update = config.update.constructor === Function ? config.update : function (data) {
     // Default update 
   };
   /*
@@ -78,7 +63,7 @@ eon.dataDiff = function (config) {
     @description Delete operation fallback
     @param {Object} data
   */
-  this.delete = this.delete.constructor === Function ? this.delete : function (data) {
+  this.delete = config.delete.constructor === Function ? config.delete : function (data) {
     // Default delete 
   };
 

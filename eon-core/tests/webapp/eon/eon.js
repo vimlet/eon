@@ -7432,13 +7432,6 @@ eon.dataDiff = function (config) {
 
   var self = this;
 
-  /*
-    TODO
-    - Map object implementation
-    - Old states storage support
-    - Order sensitive
-  */
-
   // ## Public Properties ##
 
   /*
@@ -7447,31 +7440,11 @@ eon.dataDiff = function (config) {
   */
   this.states = [];
   /*
-    @property {Boolean} storeStates
-    @description Whether the previous states should be stored
+    @property {Boolean} storeStates (TEMP)
+    @description Whether or not the previous states should be stored
   */
-  this.storeStates = config.storeStates;
-  /*
-    @property {Boolean} orderSensitive
-    @description Whether the keys order matters
-  */
-  this.orderSensitive = config.orderSensitive;
-  /*
-    @property {Function} create
-    @description Create operation
-  */
-  this.create = config.create;
-  /*
-    @property {Function} update
-    @description Update operation
-  */
-  this.update = config.update;
-  /*
-    @property {Boolean} delete
-    @description Delete operation
-  */
-  this.delete = config.delete;
-
+  this.storeStates = config.hasOwnProperty("storeStates") ? config.storeStates : 0;
+  
   // ## Private Properties ##
 
   /*
@@ -7490,10 +7463,13 @@ eon.dataDiff = function (config) {
     @param {Object} oldData
   */
   this.commit = function (data, oldData) {
-    if (data) {
-      self._diff(data, oldData);
-      self._process();
-    }
+    // Convert into Map object
+    eon.util.objectToMap(data);
+    eon.util.objectToMap(oldData);
+    // Compare and persist data
+    self._diff(data, oldData);
+    self._processState();
+    self._saveState(data);
   };
 
   /*
@@ -7501,7 +7477,7 @@ eon.dataDiff = function (config) {
     @description Create operation fallback
     @param {Object} data
   */
-  this.create = this.create || function (data) {
+  this.create = config.create.constructor === Function ? config.create : function (data) {
     // Default create 
   };
   /*
@@ -7509,7 +7485,7 @@ eon.dataDiff = function (config) {
     @description Update operation fallback
     @param {Object} data
   */
-  this.update = this.update || function (data) {
+  this.update = config.update.constructor === Function ? config.update : function (data) {
     // Default update 
   };
   /*
@@ -7517,7 +7493,7 @@ eon.dataDiff = function (config) {
     @description Delete operation fallback
     @param {Object} data
   */
-  this.delete = this.delete || function (data) {
+  this.delete = config.delete.constructor === Function ? config.delete : function (data) {
     // Default delete 
   };
 
@@ -7530,50 +7506,56 @@ eon.dataDiff = function (config) {
     @param {Object} oldItems
   */
   this._diff = function (items, oldItems) {
+    var counter = -1;
+    var oldCounter = -1;
     // Loop through properties in object 1
-    for (var key in items) {
+    items.forEach(function (value, key) {
+      counter++;
       // Check property exists on both objects
-      if (!oldItems.hasOwnProperty(key)) {
+      if (!oldItems.has(key)) {
         // :: Create item
-        self._create(key, items[key], null);
+        self._storeOperation("create", key, counter, value, null);
       } else {
-        switch (typeof (items[key])) {
+        // switch (typeof (items[key])) {
+        switch (typeof (value)) {
           // Deep compare objects
           case "object":
-            if (!self._compare(items[key], oldItems[key])) {
+            value
+            if (!self._compare(value, oldItems.get(key))) {
               // :: Update item
-              self._update(key, items[key], oldItems[key]);
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
             break;
           // Compare function code
           case "function":
-            if (typeof (oldItems[key]) != "undefined" || (items[key].toString() != oldItems[key].toString())) {
+            if (typeof (oldItems.get(key)) != "undefined" || (value.toString() != oldItems.get(key).toString())) {
               // :: Update item
-              self._update(key, items[key], oldItems[key]);
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
             break;
           // Compare values
           default:
-            if (items[key] != oldItems[key]) {
+            if (value != oldItems.get(key)) {
               // :: Update item
-              self._update(key, items[key], oldItems[key]);
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
         }
       }
-    }
+    });
     // Check oldItems for any extra properties
-    for (var key in oldItems) {
+    oldItems.forEach(function (value, key) {
+      oldCounter++;
       // * Undefined properties are considered nonexistent
-      if (typeof (oldItems[key]) == "undefined" || !items.hasOwnProperty(key)) {
+      if (typeof (value) == "undefined" || !items.has(key)) {
         // :: Delete item
-        self._delete(key, items[key], oldItems[key]);
+        self._storeOperation("delete", key, oldCounter, items.get(key), value);
       };
-    }
+    });
     return true;
   }
   /*
     @function (private) _compare
-    @description Whether there are differences between objects keys
+    @description Whether or not there are differences between objects keys
     @param {Object} items
     @param {Object} oldItems
   */
@@ -7582,18 +7564,18 @@ eon.dataDiff = function (config) {
     for (var key in items) {
       // Check property exists on both objects
       if (items.hasOwnProperty(key) !== oldItems.hasOwnProperty(key)) return false;
-        switch (typeof (items[key])) {
-          // Deep compare objects
-          case "object":
-            if (!self._compare(items[key], oldItems[key])) return false;
-            break;
-          // Compare function code
-          case "function":
-            if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) return false;
-            break;
-          // Compare values
-          default:
-            if (items[key] != oldItems[key]) return false;
+      switch (typeof (items[key])) {
+        // Deep compare objects
+        case "object":
+          if (!self._compare(items[key], oldItems[key])) return false;
+          break;
+        // Compare function code
+        case "function":
+          if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) return false;
+          break;
+        // Compare values
+        default:
+          if (items[key] != oldItems[key]) return false;
       }
     }
     // Check old not matched keys
@@ -7603,10 +7585,10 @@ eon.dataDiff = function (config) {
     return true;
   }
   /*
-    @function (private) _process
+    @function (private) _processState
     @description Process data operations
   */
-  this._process = function () {
+  this._processState = function () {
     self._operations.forEach(function (operation) {
       switch (operation.type) {
         case "create":
@@ -7621,49 +7603,34 @@ eon.dataDiff = function (config) {
     });
   }
   /*
+    @function (private) _saveState
+    @description Save state
+    @param {Map} data
+  */
+  this._saveState = function (data) {
+    if (typeof self.storeStates === "number" && self.storeStates > 0) {
+      // Check state storage limit
+      if (self.states.length >= self.storeStates) {
+        // Remove first position state
+        self.states.shift();
+      }
+      self.states.push(data);
+    }
+  }
+  /*
     @function (private) _create
-    @description Store create operation
+    @description Store operation
+    @param {type} type
     @param {Key} key
     @param {Value} value
     @param {Value} oldValue
   */
-  this._create = function (key, value, oldValue) {
+  this._storeOperation = function (type, key, position, value, oldValue) {
     // Default create 
     self._operations.push({
-      type: "create",
+      type: type,
       key: key,
-      newValue: value,
-      oldValue: oldValue
-    });
-  };
-  /*
-    @function (private) _update
-    @description Store update operation
-    @param {Key} key
-    @param {Value} value
-    @param {Value} oldValue
-  */
-  this._update = function (key, value, oldValue) {
-    // Default update 
-    self._operations.push({
-      type: "update",
-      key: key,
-      newValue: value,
-      oldValue: oldValue
-    });
-  };
-  /*
-    @function (private) _delete
-    @description Store delete operation
-    @param {Key} key
-    @param {Value} value
-    @param {Value} oldValue
-  */
-  this._delete = function (key, value, oldValue) {
-    // Default delete 
-    self._operations.push({
-      type: "delete",
-      key: key,
+      position: position,
       newValue: value,
       oldValue: oldValue
     });

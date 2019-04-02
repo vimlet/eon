@@ -18,4 +18,12 @@ suite("eon-core", () => {
     //     });
 
     // });
+    test("Data Diffing", ({ remote }) => {
+      return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+        dataDiffingTest(callback);
+      }).then(function (value) {
+          assert.strictEqual(value, true);
+      });
+
+  });
 });
