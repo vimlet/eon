@@ -2,13 +2,6 @@ eon.dataDiff = function (config) {
 
   var self = this;
 
-  /*
-    TODO
-    - Map object implementation
-    - Old states storage support
-    - Order sensitive
-  */
-
   // ## Public Properties ##
 
   /*
@@ -17,15 +10,15 @@ eon.dataDiff = function (config) {
   */
   this.states = [];
   /*
-    @property {Boolean} storeStates
-    @description Whether the previous states should be stored
+    @property {Boolean} storeStates (TEMP)
+    @description Whether or not the previous states should be stored
   */
-  this.storeStates = config.storeStates;
+  this.storeStates = config.hasOwnProperty("storeStates") ? config.storeStates : 0;
   /*
     @property {Boolean} orderSensitive
-    @description Whether the keys order matters
+    @description Whether or not the keys order matters
   */
-  this.orderSensitive = config.orderSensitive;
+  // this.orderSensitive = config.hasOwnProperty("orderSensitive") ? config.orderSensitive : false;
   /*
     @property {Function} create
     @description Create operation
@@ -60,10 +53,18 @@ eon.dataDiff = function (config) {
     @param {Object} oldData
   */
   this.commit = function (data, oldData) {
-    if (data) {
+    var isObject = data.constructor === Object && oldData.constructor === Object;
+    var isMap = data.constructor === Map && oldData.constructor === Map;
+
+    // Map is alrady order sensitive...
+    if (isObject && !self.orderSensitive) {
       self._diff(data, oldData);
-      self._process();
+    } else if (isMap || self.orderSensitive) {
+      self._diffMap(data, oldData);
     }
+
+    self._processState();
+    self._saveState(data);
   };
 
   /*
@@ -92,6 +93,51 @@ eon.dataDiff = function (config) {
   };
 
   // ## Private Functions ##
+
+  this._diffMap = function (items, oldItems) {
+    // Loop through properties in object 1
+    items.forEach(function(value, key) {
+      // Check property exists on both objects
+      if (!oldItems.has(key)) {
+        // :: Create item
+        self._create(key, value, null);
+      } else {
+        // switch (typeof (items[key])) {
+        switch (typeof (value)) {
+          // Deep compare objects
+          case "object":
+            value 
+            if (!self._compare(value, oldItems.get(key))) {
+              // :: Update item
+              self._update(key, value, oldItems.get(key));
+            };
+            break;
+          // Compare function code
+          case "function":
+            if (typeof (oldItems.get(key)) != "undefined" || (value.toString() != oldItems.get(key).toString())) {
+              // :: Update item
+              self._update(key, value, oldItems.get(key));
+            };
+            break;
+          // Compare values
+          default:
+            if (value != oldItems.get(key)) {
+              // :: Update item
+              self._update(key, value, oldItems.get(key));
+            };
+        }
+      }
+    });
+    // Check oldItems for any extra properties
+    oldItems.forEach(function(value, key) {
+      // * Undefined properties are considered nonexistent
+      if (typeof (value) == "undefined" || !items.has(key)) {
+        // :: Delete item
+        self._delete(key, items.get(key), value);
+      };
+    });
+    return true;
+  }
 
   /*
     @function (private) _diff
@@ -143,7 +189,7 @@ eon.dataDiff = function (config) {
   }
   /*
     @function (private) _compare
-    @description Whether there are differences between objects keys
+    @description Whether or not there are differences between objects keys
     @param {Object} items
     @param {Object} oldItems
   */
@@ -173,10 +219,10 @@ eon.dataDiff = function (config) {
     return true;
   }
   /*
-    @function (private) _process
+    @function (private) _processState
     @description Process data operations
   */
-  this._process = function () {
+  this._processState = function () {
     self._operations.forEach(function (operation) {
       switch (operation.type) {
         case "create":
@@ -189,6 +235,20 @@ eon.dataDiff = function (config) {
           self.delete(operation);
       }
     });
+  }
+  /*
+    @function (private) _saveState
+    @description Save state
+  */
+  this._saveState = function (data) {
+    if(typeof self.storeStates === "number" && self.storeStates > 0) {  
+      // Check state storage limit
+      if(self.states.length >= self.storeStates) {
+        // Remove first position state
+        self.states.shift();
+      }
+      self.states.push(data);
+    }
   }
   /*
     @function (private) _create
