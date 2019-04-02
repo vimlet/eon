@@ -1,3 +1,8 @@
+/*
+@function  declare
+@description Creates the element class
+@param {Object} baseElement
+*/
 eon.constructClass = function (baseElement) {
   // Class adpater
   var classAdapter = function () {
@@ -50,9 +55,5 @@ eon.constructClass = function (baseElement) {
       newVal
     ]);
   };
-  // TODO future callback implementation
-  // classAdapter.prototype.adoptedCallback = function() {
-  //
-  // };
   return classAdapter;
 };

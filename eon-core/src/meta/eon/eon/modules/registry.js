@@ -28,7 +28,11 @@ eon.registry.elementStatus = {
 // Register eon ready callback
 eon.createCallback("onReady", eon, "ready");
 
-// Register element
+/*
+@function {String} registerElement
+@description Register the element, gives it an uid and registers its status to created
+@param {Object} el
+*/
 eon.registry.registerElement = function (el) {
   var name = el.tagName.toLowerCase();
   var uid = el.uid ? el.uid : el.getAttribute("uid");
@@ -73,10 +77,22 @@ eon.registry.registerElement = function (el) {
   return uidFull;
 };
 
+/*
+@function triggerTransformed
+@description Triggers the transform callback for the component of the given index
+@param {Number} index
+*/
 eon.registry.triggerTransformed = function (index) {
   eon.registry.transformedQueue[index].fn.apply(eon.registry.transformedQueue[index].el);
 };
 
+/*
+@function addToTransformedQueue
+@description Adds the component to the transform queue, appending its triggerTransformed call into the DOM with a script tag
+@param {Object} el
+@param {Object} elementDoc
+@param {Function} fn
+*/
 eon.registry.addToTransformedQueue = function (el, elementDoc, fn) {
   var script = document.createElement("script");
   var index;
@@ -98,6 +114,12 @@ eon.registry.addToTransformedQueue = function (el, elementDoc, fn) {
   elementDoc.querySelector("head").appendChild(script);
 };
 
+/*
+@function addToRenderQueue
+@description Adds the component to the render queue
+@param {Object} el
+@param {Function} fn
+*/
 eon.registry.addToRenderQueue = function (el, fn) {
   eon.registry.renderQueue.push({
     el: el,
@@ -105,6 +127,12 @@ eon.registry.addToRenderQueue = function (el, fn) {
   });
 };
 
+/*
+@function addToBubbleRenderQueue
+@description Adds the component to the bubble render queue
+@param {Object} el
+@param {Function} fn
+*/
 eon.registry.addToBubbleRenderQueue = function (el, fn) {
   eon.registry.bubbleRenderQueue.push({
     el: el,
@@ -112,6 +140,12 @@ eon.registry.addToBubbleRenderQueue = function (el, fn) {
   });
 };
 
+/*
+@function addToReadyQueue
+@description Adds the component to the ready queue
+@param {Object} el
+@param {Function} fn
+*/
 eon.registry.addToReadyQueue = function (el, fn) {
   eon.registry.readyQueue.push({
     el: el,
@@ -119,6 +153,10 @@ eon.registry.addToReadyQueue = function (el, fn) {
   });
 };
 
+/*
+@function triggerRenders
+@description Attempts to trigger all the render callbacks for all the components if all of them are transformed
+*/
 eon.registry.triggerRenders = function () {
 
   if (eon.registry.registeredElements == eon.registry.elementStatus.transformed.length) {
@@ -138,6 +176,10 @@ eon.registry.triggerRenders = function () {
 
 };
 
+/*
+@function triggerRenderCallbacks
+@description Triggers the render callbacks from the render queue
+*/
 eon.registry.triggerRenderCallbacks = function () {
   // Clone queue and clear
   var auxQueue = eon.registry.renderQueue.slice();
@@ -149,6 +191,10 @@ eon.registry.triggerRenderCallbacks = function () {
   }
 };
 
+/*
+@function triggerBubbleRenderCallbacks
+@description Triggers the bubble render callbacks from the bubble render queue
+*/
 eon.registry.triggerBubbleRenderCallbacks = function () {
   // Clone queue and clear
   var auxQueue = eon.registry.bubbleRenderQueue.slice();
@@ -160,6 +206,10 @@ eon.registry.triggerBubbleRenderCallbacks = function () {
   }
 };
 
+/*
+@function triggerReadyCallbacks
+@description Triggers the ready callbacks from the ready queue
+*/
 eon.registry.triggerReadyCallbacks = function () {
   // Clone queue and clear
   var auxQueue = eon.registry.readyQueue.slice();
@@ -171,6 +221,12 @@ eon.registry.triggerReadyCallbacks = function () {
   }
 };
 
+/*
+@function registerTheme
+@description Registers the specified theme
+@param {String} tagName
+@param {String} theme
+*/
 eon.registry.registerTheme = function (tagName, theme) {
   if (!eon.registry.elementThemes[theme]) {
     eon.registry.elementThemes[theme] = {};
@@ -179,12 +235,24 @@ eon.registry.registerTheme = function (tagName, theme) {
   eon.registry.elementThemes[theme][tagName] = true;
 };
 
+/*
+@function {Boolean} isThemeRegistered
+@description Checks if the provided theme has already been registered
+@param {String} tagName
+@param {String} theme
+*/
 eon.registry.isThemeRegistered = function (tagName, theme) {
   return !eon.registry.elementThemes[theme]
     ? false
     : eon.registry.elementThemes[theme][tagName];
 };
 
+/*
+@function registerTemplate
+@description Saves the template for the given component node
+@param {String} tagName
+@param {Object} template
+*/
 eon.registry.registerTemplate = function (tagName, template) {
   if (!eon.registry.elementTemplates[tagName]) {
     eon.registry.elementTemplates[tagName] = {};
@@ -193,10 +261,20 @@ eon.registry.registerTemplate = function (tagName, template) {
   eon.registry.elementTemplates[tagName] = template;
 };
 
+/*
+@function {Boolean} isTemplateRegistered
+@description Checks if the given component has already registered a template
+@param {String} tagName
+*/
 eon.registry.isTemplateRegistered = function (tagName) {
   return !eon.registry.elementTemplates[tagName] ? false : true;
 };
 
+/*
+@function {String} getUidFull
+@description Returns the full UID for the provided component
+@param {Object} el
+*/
 eon.registry.getUidFull = function (el) {
   var uid = el.uid ? el.uid : el.getAttribute("uid");
   var fullUid;
@@ -208,6 +286,12 @@ eon.registry.getUidFull = function (el) {
   return fullUid;
 };
 
+/*
+@function updateElementStatus
+@description Registers a new status for the given component
+@param {Object} el
+@param {String} status
+*/
 eon.registry.updateElementStatus = function (el, status) {
 
   if (status != "parsed") {
@@ -236,6 +320,11 @@ eon.registry.updateElementStatus = function (el, status) {
 
 };
 
+/*
+@function isAttached
+@description Whether the component is attached or not
+@param {Object} el
+*/
 eon.registry.isAttached = function (el) {
   return (
     eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
@@ -243,6 +332,11 @@ eon.registry.isAttached = function (el) {
   );
 };
 
+/*
+@function isImported
+@description Whether the component is imported or not
+@param {Object} el
+*/
 eon.registry.isImported = function (el) {
   return (
     eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
@@ -250,6 +344,11 @@ eon.registry.isImported = function (el) {
   );
 };
 
+/*
+@function isTransformed
+@description Whether the component is transformed or not
+@param {Object} el
+*/
 eon.registry.isTransformed = function (el) {
   return (
     eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
@@ -257,6 +356,11 @@ eon.registry.isTransformed = function (el) {
   );
 };
 
+/*
+@function isRendered
+@description Whether the component is rendered or not
+@param {Object} el
+*/
 eon.registry.isRendered = function (el) {
   return (
     eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
@@ -264,6 +368,11 @@ eon.registry.isRendered = function (el) {
   );
 };
 
+/*
+@function isBubbleRendered
+@description Whether the component is bubble rendered or not
+@param {Object} el
+*/
 eon.registry.isBubbleRendered = function (el) {
   return (
     eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&
@@ -271,6 +380,11 @@ eon.registry.isBubbleRendered = function (el) {
   );
 };
 
+/*
+@function isReady
+@description Whether the component is ready or not
+@param {Object} el
+*/
 eon.registry.isReady = function (el) {
   return (
     eon.registry.elementRegistry[eon.registry.getUidFull(el)] &&

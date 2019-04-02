@@ -1,13 +1,24 @@
-
+/*
+@function  element
+@description This function comes with the element script, it handles the element style insertion and saves the config,
+it accepts two parameters to accept a wider variety of calls
+@param {Object} param1
+@param {Object} param2
+*/
 eon.element = function (param1, param2) {
 
     var config, stylePath, name;
 
+    // If a second parameter is provided then we check if its an object with the config inside, or 
+    // it is the config itself, if its none then we assign an empty object as the config,
+    // in this case the first parameter will always be the component name
     if (param2) {
 
         config = param2.config ? param2.config : param2.constructor === Object ? param2 : {};
         name = param1;
 
+    // If no second paremeter is provided then the first parameter may either be an object with the name and config inside 
+    // or be the config itself with the name as one of its keys
     } else {
 
         config = param1.config ? param1.config : param1.constructor === Object ? param1 : {};
@@ -40,12 +51,23 @@ eon.element = function (param1, param2) {
 
 };
 
+/*
+@function {Object} define
+@description Wrapper function of the define function
+@param {Object} config
+*/
 eon.define = function (config) {
     eon.amd.define(function () {
         return config;
     });
 };
 
+/*
+@function {Object} createElement
+@description Allows the user to create custom elements directly providing a config object to add aditional functions, properties and callbacks
+@param {String} name
+@param {Object} config
+*/
 eon.createElement = function (name, config) {
 
     var el = document.createElement(name);
@@ -86,14 +108,29 @@ eon.createElement = function (name, config) {
 
 };
 
+/*
+@function  hideElement
+@description Assigns the class to the element to hide it
+@param {Object} el
+*/
 eon.hideElement = function (el) {
     el.classList.add("eon-until-rendered");
 };
 
+/*
+@function  unhideElement
+@description Removes the class to the element to make it visible
+@param {Object} el
+*/
 eon.unhideElement = function (el) {
     el.classList.remove("eon-until-rendered");
 };
 
+/*
+@function  declareCallbacks
+@description Creates all the callbacks that the element may trigger through its life cycle
+@param {Object} el
+*/
 eon.declareCallbacks = function (el) {
     // Creates the callback needed for the element
     eon.createCallback("onCreated", el, "ready");
@@ -107,12 +144,20 @@ eon.declareCallbacks = function (el) {
     eon.createCallback("onDataChanged", el);
 };
 
+/*
+@function  generateSourceFragment
+@description Creates the source fragment and moves all the child elements into it
+@param {Object} el
+*/
 eon.generateSourceFragment = function (el) {
 
     el.source = document.createDocumentFragment();
 
+    // If there are no childs, its means whether that it doesnt and wont have childs, or that it has not been processed by the browser yet,
+    // either way we create a mutation observer to listen to child node changes, this observer will be disconnected on the "onAttached" callback.
+    // Else just loops through its nodes and append them to the source fragment
     if (el.childNodes.length == 0) {
-        // Chrome only
+        
         var observer = new MutationObserver(function (mutations) {
 
             mutations.forEach(function (mutation) {
@@ -145,6 +190,12 @@ eon.generateSourceFragment = function (el) {
 
 };
 
+/*
+@function  prepareElement
+@description Recieves a callback for the element creation process and waits until all the imports are ready to trigger it
+@param {Object} el
+@param {Function} callback
+*/
 eon.prepareElement = function (el, callback) {
 
     // Mark element as first attach
@@ -157,6 +208,12 @@ eon.prepareElement = function (el, callback) {
 
 };
 
+/*
+@function  parse
+@description Assigns all the properties, attributes and some usefull functions to the element
+@param {Object} el
+@param {Object} config
+*/
 eon.parse = function (el, config) {
     // Creates object properties for the element with data about the properties/attributes to be observed
     eon.collectObserveData(el, config);
@@ -167,11 +224,13 @@ eon.parse = function (el, config) {
     eon.importPublic(el, config);
     eon.importPrivate(el, config);
 
+    // Defines usefull functions for the component
     eon.definePath(el);
     eon.defineParentComponent(el);
     eon.defineOverlayCreation(el);
     eon.definePlaceholderCreation(el);
 
+    // Creates a proxy so that when the user changes the attribute it will take care of the callbacks
     eon.createAttributesObserver(el, config);
 
     eon.triggerAllCallbackEvents(el, config, "onParsed");
@@ -179,10 +238,20 @@ eon.parse = function (el, config) {
 
 };
 
+/*
+@function  definePath
+@description Assigns the importPath property to the component
+@param {Object} el
+*/
 eon.definePath = function (el) {
     el.importPath = eon.imports.paths[el.nodeName.toLowerCase()];
 };
 
+/*
+@function  defineParentComponent
+@description Assigns the parentComponent property that will provide the nearest enclosing eon component
+@param {Object} el
+*/
 eon.defineParentComponent = function (el) {
 
     var propDescriptor = {};
@@ -198,6 +267,11 @@ eon.defineParentComponent = function (el) {
 
 };
 
+/*
+@function  defineOverlayCreation
+@description Provides the component with a function that will allow an overlay creation
+@param {Object} el
+*/
 eon.defineOverlayCreation = function (el) {
 
     // Defines the function for the element
@@ -227,6 +301,12 @@ eon.defineOverlayCreation = function (el) {
     };
 
 };
+
+/*
+@function  definePlaceholderCreation
+@description Provides the component with a function that will allow an overlay creation
+@param {Object} el
+*/
 eon.definePlaceholderCreation = function (el) {
 
     // Defines the function for the element
@@ -251,16 +331,18 @@ eon.definePlaceholderCreation = function (el) {
 
 };
 
+/*
+@function  collectObserveData
+@description Loops through the private and public properties to save the ones that will be observed/reflected in their corresponding arrays
+@param {Object} el
+@param {Object} config
+*/
 eon.collectObserveData = function (el, config) {
 
     el.__observeProperties = {};
     el.__observeAttributes = {};
     el.__reflectProperties = {};
-
-    // Assigns each index of the array to the object
-    eon.addObserveFromArray(el.__observeProperties, config.observeProperties);
-    eon.addObserveFromArray(el.__observeAttributes, config.observeAttributes);
-
+    
     // Reads properties object to add them to the observe object if needed
     if (config.properties) {
 
@@ -311,16 +393,12 @@ eon.collectObserveData = function (el, config) {
 
 };
 
-eon.addObserveFromArray = function (observeObj, observeArray) {
-
-    observeArray = observeArray ? observeArray : [];
-
-    for (var i = 0; i < observeArray.length; i++) {
-        observeObj[observeArray[i]] = true;
-    }
-
-};
-
+/*
+@function  createAttributesObserver
+@description Takes the attributes that will be observed and creates a proxy for the setAttribute function to listen to their changes
+@param {Object} el
+@param {Object} config
+*/
 eon.createAttributesObserver = function (el, config) {
 
     var observeAttributesKeys = Object.keys(el.__observeAttributes);
@@ -383,6 +461,14 @@ eon.createAttributesObserver = function (el, config) {
 
 };
 
+/*
+@function  handleReflectDefaultProperty
+@description For the default reflected properties, the element waits until the onInit callback to set the corresponding attribute, 
+both attribute and property keys are provided since they can be different when having camel/hyphen cases
+@param {Object} el
+@param {String} key [Attribute key]
+@param {String} property [Property key]
+*/
 eon.handleReflectDefaultProperty = function (el, key, property) {
 
     var value = el.hasOwnProperty("__" + property) ? el["__" + property] : "";
@@ -401,6 +487,15 @@ eon.handleReflectDefaultProperty = function (el, key, property) {
 
 }
 
+/*
+@function handleProperty
+@description Creates properties descriptors for all the properties to be observed or reflected
+@param {Object} el
+@param {Object} config
+@param {Array} reflectProperties
+@param {Array} observeProperties
+@param {String} property
+*/
 eon.handleProperty = function (el, config, reflectProperties, observeProperties, property) {
 
     var key = property.key;
@@ -432,6 +527,15 @@ eon.handleProperty = function (el, config, reflectProperties, observeProperties,
     }
 };
 
+/*
+@function createPropDescriptor
+@description Creates properties descriptors for all the properties to be observed or reflected
+@param {Object} el
+@param {Object} config
+@param {String} key
+@param {Value} value
+@param {String} property
+*/
 eon.createPropDescriptor = function (el, config, key, value, reflect) {
     var propDescriptor = {};
     // Redirect get and set to __key
@@ -465,6 +569,12 @@ eon.createPropDescriptor = function (el, config, key, value, reflect) {
     return propDescriptor;
 };
 
+/*
+@function importData
+@description Assigns the data provided by the config to the component
+@param {Object} el
+@param {Object} config
+*/
 eon.importData = function (el, config) {
 
     el.data = {};
@@ -475,6 +585,13 @@ eon.importData = function (el, config) {
 
 }
 
+
+/*
+@function importLocale
+@description Assigns the locale provided by the config to the component
+@param {Object} el
+@param {Object} config
+*/
 eon.importLocale = function (el, config) {
 
     el.locale = {};
@@ -485,6 +602,12 @@ eon.importLocale = function (el, config) {
 
 }
 
+/*
+@function importPublic
+@description Takes all the public functions/properties and assigns them to the component
+@param {Object} el
+@param {Object} config
+*/
 eon.importPublic = function (el, config) {
 
     if (config.properties) {
@@ -511,6 +634,12 @@ eon.importPublic = function (el, config) {
 
 };
 
+/*
+@function importPrivate
+@description Takes all the private functions/properties and assigns them to the component
+@param {Object} el
+@param {Object} config
+*/
 eon.importPrivate = function (el, config) {
 
     if (config.privateProperties) {
@@ -534,6 +663,11 @@ eon.importPrivate = function (el, config) {
 
 };
 
+/*
+@function  importTemplateClasses
+@description If classes are specified in the element template, these are moved into the actual element
+@param {Object} el
+*/
 eon.importTemplateClasses = function (el) {
 
     var template = eon.imports.templates[el.tagName.toLowerCase()];
@@ -552,6 +686,14 @@ eon.importTemplateClasses = function (el) {
 
 };
 
+/*
+@function triggerAllCallbackEvents
+@description Triggers all the functions for the callback, including the one provided by the config
+@param {Object} el
+@param {Object} config
+@param {String} callback
+@param {Array} params
+*/
 eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 
     eon.debug.log("triggerAllCallbackEvents", callback);
@@ -571,6 +713,12 @@ eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 
 };
 
+/*
+@function transform
+@description Appends the element template, imports the needed themes for the component and creates the eon.theme change listener
+@param {Object} el
+@param {Object} config
+*/
 eon.transform = function (el, config) {
 
     if (!eon.registry.isTransformed(el)) {
@@ -611,10 +759,18 @@ eon.transform = function (el, config) {
 
 };
 
+/*
+@function initElementTheme
+@description Sets a theme to the component if non was specified
+@param {Object} el
+@param {Object} config
+*/
 eon.initElementTheme = function (el, config) {
 
     var theme = eon.theme;
 
+    // This will allows us to know when the component theme is given manually by the user,
+    // this will also help not to change the theme on eon.theme change
     el.__specificTheme = el.hasAttribute("theme") || el.theme ? true : false;
 
     theme = document.body.dataset.theme ? document.body.dataset.theme : theme;
@@ -632,6 +788,12 @@ eon.initElementTheme = function (el, config) {
     return theme;
 }
 
+/*
+@function setupEonThemeListener
+@description Creates a callback to get fired when eon theme changes
+@param {Object} el
+@param {Object} config
+*/
 eon.setupEonThemeListener = function (el, config) {
 
     // When eon theme changes it also changes the element's theme attribute and 
@@ -657,6 +819,11 @@ eon.setupEonThemeListener = function (el, config) {
 
 }
 
+/*
+@function slot
+@description Takes the source nodes with the "slot" attribute and moves them into the target template element
+@param {Object} el
+*/
 eon.slot = function (el) {
 
     var sourceNodes = el.getSourceNodes();
@@ -714,7 +881,13 @@ eon.slot = function (el) {
 
 };
 
+/*
+@function {Object} fragmentFromString
+@description Takes a string and returns a fragment with the string being part as its DOM
+@param {Object} string
+*/
 eon.fragmentFromString = function (str) {
+    // Crossbrowser compatibility
     // Test createContextualFragment support
     if (!("__supportsContextualFragment" in eon)) {
         try {
@@ -733,6 +906,11 @@ eon.fragmentFromString = function (str) {
     }
 };
 
+/*
+@function  generateElementTemplate
+@description Creates and assigns the template of the element
+@param {Object} el
+*/
 eon.generateElementTemplate = function (el) {
 
     var name = el.nodeName.toLowerCase();
@@ -768,11 +946,21 @@ eon.generateElementTemplate = function (el) {
 
 };
 
+/*
+@function  appendElementTemplate
+@description Appends the element template
+@param {Object} el
+*/
 eon.appendElementTemplate = function (el) {
     el.appendChild(el.template);
     delete el.template;
 };
 
+/*
+@function generateElementReferences
+@description Searches elements tagged inside the component template to have its reference saved
+@param {Object} el
+*/
 eon.generateElementReferences = function (el) {
 
     var nodes = el.template.querySelectorAll("[eon-ref]");
@@ -788,6 +976,11 @@ eon.generateElementReferences = function (el) {
 
 };
 
+/*
+@function  initSourceCallbacks
+@description Creates callbacks so that the user can retrieve either the source nodes or the source elements
+@param {Object} el
+*/
 eon.initSourceCallbacks = function (el) {
     // Creates the getSourceElements function even if it has no source elements
     el.getSourceNodes = function () {
@@ -811,6 +1004,11 @@ eon.initSourceCallbacks = function (el) {
 
 };
 
+/*
+@function updateSourceCallbacks
+@description Updates the source callbacks in case some of the source nodes have been moved before
+@param {Object} el
+*/
 eon.updateSourceCallbacks = function (el) {
 
     var sourceNodes = el.source.childNodes;
@@ -842,6 +1040,12 @@ eon.updateSourceCallbacks = function (el) {
 
 }
 
+/*
+@function triggerTransformed
+@description Triggers the onTransformed callback and adds the component to all the render queues
+@param {Object} el
+@param {Object} config
+*/
 eon.triggerTransformed = function (el, config) {
 
     eon.domReady(function () {
@@ -874,14 +1078,18 @@ eon.triggerTransformed = function (el, config) {
 
         // Timeout forces triggerRender to wait child onTransformed
         // When render and bubbleRender are finished, it triggers onReady
-        // setTimeout(function () {
             eon.registry.triggerRenders();
-        // }, 0);
 
     });
 
 };
 
+/*
+@function initializeDisplay
+@description Sets a css rule with the display provided by the config, if no display is provided it will have display block by default
+@param {Object} el
+@param {Object} config
+*/
 eon.initializeDisplay = function (el, config) {
 
     var name = el.nodeName.toLowerCase();
@@ -902,6 +1110,13 @@ eon.initializeDisplay = function (el, config) {
 
 };
 
+
+/*
+@function registerResizeListeners
+@description Creates the onResize callbacks for the component
+@param {Object} el
+@param {Object} config
+*/
 eon.registerResizeListeners = function (el, config) {
 
     // If it has onResize callback on its config we create the onResize callback

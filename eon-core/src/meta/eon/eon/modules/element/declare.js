@@ -1,5 +1,12 @@
+/*
+@function  declare
+@description First function to get fired when an import is requested but before the import ajax request is 
+actually triggered, constructs the elements class, hides the element and prepares its structure and processes that the element will go through
+@param {String} name
+@param {Object} baseElement
+*/
 eon.declare = function (name, baseElement) {
-    
+
     // Specifies HTML element interface
     var baseElement = baseElement ? baseElement : HTMLElement;
 
@@ -10,15 +17,15 @@ eon.declare = function (name, baseElement) {
     elementClass.onCreated(function () {
 
         var el = this;
-        
+
         eon.declareCallbacks(el);
 
         eon.generateSourceFragment(el);
 
-        eon.initSourceCallbacks(el); 
+        eon.initSourceCallbacks(el);
 
         eon.prepareElement(el, function () {
-            
+
             var config = eon.imports.config[el.nodeName.toLowerCase()];
 
             // Adds eon element default config properties and functions 
@@ -32,12 +39,12 @@ eon.declare = function (name, baseElement) {
 
             // Sets a css rule with the provided display by the config, if no display is provided it will have display block by default
             eon.initializeDisplay(el, config);
-            
+
             eon.triggerAllCallbackEvents(el, config, "onCreated");
             eon.registry.updateElementStatus(el, "created");
-            
+
         });
-        
+
         eon.registry.updateElementStatus(el, "declared");
 
     });
@@ -50,9 +57,8 @@ eon.declare = function (name, baseElement) {
 
             var config = eon.imports.config[el.nodeName.toLowerCase()];
 
-            // TODO: should also provide attribute check
             if (el.isFirstAttach) {
-                
+
                 el.isFirstAttach = false;
 
                 eon.importTemplateClasses(el);
@@ -69,12 +75,12 @@ eon.declare = function (name, baseElement) {
 
                 // Updates the references for the source nodes
                 eon.updateSourceCallbacks(el);
-                
+
                 // Moves source-template elements to eon-template-clone elements by slot attribute query selector string
                 // Unslotted source-template elements will be appended to eon-clone root
                 // Note dynamic things that should be slotted must be added onCreated
                 eon.slot(el);
-                
+
                 // Callback for the first time that the element has been attached, no template imported, only created and parsed
                 eon.triggerAllCallbackEvents(el, config, "onInit");
 
@@ -98,13 +104,12 @@ eon.declare = function (name, baseElement) {
 
     });
 
+    // The parentComponent property is set to null when detached of the DOM, but this value will be set again once the element is attached
     elementClass.onDetached(function () {
         this.__parentComponent = null;
     });
 
-    elementClass.onAttributeChanged(function (attrName, oldVal, newVal) {
-
-    });
+    elementClass.onAttributeChanged(function (attrName, oldVal, newVal) {});
 
     customElements.define(name, elementClass);
 
