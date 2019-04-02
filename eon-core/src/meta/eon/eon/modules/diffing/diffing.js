@@ -67,7 +67,7 @@ eon.dataDiff = function (config) {
     @description Create operation fallback
     @param {Object} data
   */
-  this.create = this.create.constructor === Function || function (data) {
+  this.create = this.create.constructor === Function ? this.create : function (data) {
     // Default create 
   };
   /*
@@ -75,7 +75,7 @@ eon.dataDiff = function (config) {
     @description Update operation fallback
     @param {Object} data
   */
-  this.update = this.update.constructor === Function || function (data) {
+  this.update = this.update.constructor === Function ? this.update : function (data) {
     // Default update 
   };
   /*
@@ -83,7 +83,7 @@ eon.dataDiff = function (config) {
     @description Delete operation fallback
     @param {Object} data
   */
-  this.delete = this.delete.constructor === Function || function (data) {
+  this.delete = this.delete.constructor === Function ? this.delete : function (data) {
     // Default delete 
   };
 
