@@ -6,7 +6,11 @@ eon.interpolation.globalScope = eon.interpolation.globalScope || eon;
 eon.interpolation.globalScope.data = eon.interpolation.globalScope.data || {};
 eon.interpolation.globalScope.locale = eon.interpolation.globalScope.locale || {};
 
-// Replaces all the echo/script for its corresponding elements and prepares them
+/*
+@function prepare
+@description Replaces all the echo/script for its corresponding elements and prepares them
+@param {Object} template
+*/
 eon.interpolation.prepare = function (template) {
 
   // Extend vimlet.meta
@@ -65,7 +69,12 @@ eon.interpolation.prepare = function (template) {
   return template;
 };
 
-// Handles all the initial state of the data and variable elements
+/*
+@function init
+@description Handles all the initial state of the data and variable elements
+@param {Object} el
+@param {Object} config
+*/
 eon.interpolation.init = function (el, config) {
 
   var sources = {};
@@ -164,8 +173,12 @@ eon.interpolation.init = function (el, config) {
 
 };
 
-// Creates the descriptor for the data object itself and for all its properties
-// eon.interpolation.setupDataPropDescriptors = function (el, config) {
+/*
+@function setupDataPropDescriptors
+@description Creates the descriptor for the data object itself and for all its properties
+@param {Object} source
+@param {String} sourceName
+*/
 eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
 
   var scope = source.scope;
@@ -181,7 +194,15 @@ eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
   eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName);
 }
 
-// Simple property descriptor creation that in case its changed it will trigger our internal callback
+/*
+@function {Object} createPropDescriptor
+@description Simple property descriptor creation that in case its changed it will trigger our internal callback
+@param {Object} scope
+@param {Object} keyOwnerObj
+@param {String} key
+@param {String} keyPath
+@param {Value} value
+*/
 eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyPath, value) {
   var propDescriptor = {};
 
@@ -204,7 +225,13 @@ eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyP
   return propDescriptor;
 }
 
-// When the property we want to observer is an object we create its descriptor and ones for its properties
+/*
+@function createObjectPropDescriptors
+@description When the property we want to observer is an object we create its descriptor and ones for its properties
+@param {Object} el
+@param {Object} obj
+@param {String} keyPath
+*/
 eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
   var value;
 
@@ -232,7 +259,13 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
   }
 }
 
-// Creates the private onDataChanged callback to handle the public one
+/*
+@function setupDataChangeCallback
+@description Creates the private onDataChanged callback to handle the public one
+@param {Object} el
+@param {Object} source
+@param {Object} config
+*/
 eon.interpolation.setupDataChangeCallback = function (el, source, config) {
   var scope = source.scope;
 
@@ -256,7 +289,15 @@ eon.interpolation.setupDataChangeCallback = function (el, source, config) {
 
 }
 
-// Takes all the properties from data, finds its variable and sets its value
+/*
+@function interpolate
+@description Takes all the properties from data, finds its variable and sets its value
+@param {Object} el
+@param {Object} source
+@param {Object} obj
+@param {Object} interpolations
+@param {String} bind
+*/
 eon.interpolation.interpolate = function (el, source, obj, interpolations, bind) {
   var key, i, variableBind, variable;
 
@@ -294,7 +335,16 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
   }
 }
 
-// Handles the situation when a whole object has been changed
+/*
+@function handleObjectChange
+@description Handles the situation when a whole object has been changed
+@param {Object} el
+@param {Object} scope
+@param {String} keyPath
+@param {Object} oldData
+@param {Object} newData
+@param {Object} config
+*/
 eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, newData, config) {
   var checked = {};
 
@@ -331,7 +381,17 @@ eon.interpolation.handleVariableChange = function (el, scope, keyPath, oldVal, n
   eon.triggerAllCallbackEvents(scope, config ? config : {}, "onDataChanged", [interpolationPath, oldVal, newVal]);
 }
 
-// Compares the old data with the new one and triggers the changes
+/*
+@function handleObjectChange
+@description Compares the old data with the new one and triggers the changes
+@param {Object} el
+@param {Object} scope
+@param {String} keyPath
+@param {Object} oldData
+@param {Object} newData
+@param {Object} checked
+@param {Object} config
+*/
 eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, newData, checked, config) {
   var newVal;
   // Loops through the oldData
@@ -357,7 +417,16 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
   return checked;
 }
 
-// Compares the data with the already checked object
+/*
+@function handleObjectChange
+@description Compares the data with the already checked object
+@param {Object} el
+@param {Object} scope
+@param {String} keyPath
+@param {Object} data
+@param {Object} checked
+@param {Object} config
+*/
 eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, checked, config) {
   var oldVal;
   // Loops through data

@@ -3284,24 +3284,33 @@ eon.imports.paths = eon.imports.paths || {};
 eon.imports.config = eon.imports.config || {};
 eon.imports.errors = eon.imports.errors || {};
 
-// Imports the requested custom element file, admits arrays and strings
+/*
+@function import
+@description Imports the requested custom element file, admits arrays and strings
+@param {Object} param
+*/
 eon.import = function (param) {
 
     if (param.constructor === Array) {
 
         for (var i = 0; i < param.length; i++) {
-            eon.insertImport(param[i]);
+            eon.requestImport(param[i]);
         }
 
     } else if (param.constructor === String) {
 
-        eon.insertImport(param);
+        eon.requestImport(param);
 
     }
 
 };
 
-eon.insertImport = function (href) {
+/*
+@function requestImport
+@description Takes the component name and path, then declares the component and requests the .html file with ajax
+@param {Object} href
+*/
+eon.requestImport = function (href) {
 
     var elementName;
 
@@ -3333,7 +3342,7 @@ eon.insertImport = function (href) {
 
                 if (obj.xhr.status == 200) {
 
-                    eon.insertFragment(elementName, obj.responseText);
+                    eon.prepareComponent(elementName, obj.responseText);
 
                 } else {
 
@@ -3357,7 +3366,13 @@ eon.insertImport = function (href) {
 
 };
 
-eon.insertFragment = function (elementName, content) {
+/*
+@function prepareComponent
+@description Creates a fragment from the responseText and stores the scripts, links and template to append them when the DOM is ready
+@param {Object} elementName
+@param {String} content
+*/
+eon.prepareComponent = function (elementName, content) {
     
     var importFragment = eon.fragmentFromString(content);
 
@@ -3452,6 +3467,10 @@ eon.insertFragment = function (elementName, content) {
     });
 };
 
+/*
+@function handleDependencies
+@description Loops through the stored configs to search for independencies and it also parses the component template
+*/
 eon.handleDependencies = function () {
 
     // Automated dependencies and interpolation
@@ -3470,7 +3489,7 @@ eon.handleDependencies = function () {
         }
 
         // Handle interpolation
-        eon.handleTemplateInterpolation(elementNames[i]);
+        eon.parseTemplate(elementNames[i]);
     }
 
     return hasPendingImports;
@@ -3478,14 +3497,22 @@ eon.handleDependencies = function () {
 };
 
 
-// Handle template interpolation
-eon.handleTemplateInterpolation = function (name) {
+/*
+@function parseTemplate
+@description Parses the component template
+@param {String} name
+*/
+eon.parseTemplate = function (name) {
     if (eon.imports.config[name].parse) {
         eon.interpolation.prepare(eon.imports.templates[name]);
     }
 };
 
-// Imports specific componentes themes if specified
+
+/*
+@function importSchemaThemes
+@description Takes eon's themaSchema and reads it to import the requested specific themes
+*/
 eon.importSchemaThemes = function () {
 
     if (eon.themeSchema) {
@@ -3526,6 +3553,11 @@ eon.importSchemaThemes = function () {
 
 };
 
+/*
+@function importMainTheme
+@description Imports the main css file of the specified theme
+@param {String} theme
+*/
 eon.importMainTheme = function (theme) {
 
     if (theme && !eon.registry.isThemeRegistered("main", theme)) {
@@ -3550,6 +3582,13 @@ eon.importMainTheme = function (theme) {
 
 };
 
+/*
+@function importElementTheme
+@description Imports the component css file of the specified theme
+@param {Object} config
+@param {String} name
+@param {String} theme
+*/
 eon.importElementTheme = function (config, name, theme) {
 
     if (theme && config.themed && !eon.registry.isThemeRegistered(name, theme)) {
@@ -3573,13 +3612,16 @@ eon.importElementTheme = function (config, name, theme) {
     }
 };
 
+/*
+@function handleStyleAppend
+@description Takes the style made of all the components style and appends it to the document
+*/
 eon.handleStyleAppend = function () {
 
     if (eon.imports.style != "") {
 
         var combinedStyle = document.createElement("style");
 
-        combinedStyle.setAttribute("data-eon", "element-styles")
         combinedStyle.innerHTML = eon.imports.style;
 
         // Resets style to avoid css rules style replication
@@ -3591,6 +3633,13 @@ eon.handleStyleAppend = function () {
 
 };
 
+/*
+@function handleScriptsAppend
+@description Appends the components scripts, since this is a recursive function and it may stop to 
+continue in another moment it uses its both paremeters to continue where it stopped
+@param {Number} elementIndex
+@param {Number} scriptIndex
+*/
 eon.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
     var elementNames = Object.keys(eon.imports.scripts);
@@ -3653,6 +3702,10 @@ eon.handleScriptsAppend = function (elementIndex, scriptIndex) {
 
 };
 
+/*
+@function removeScriptsReadyScripts
+@description Removes all the scripts from the head that are no longer needed
+*/
 eon.removeScriptsReadyScripts = function () {
     var el = this;
     var scriptReadyScripts = document.head.querySelectorAll("script[scriptsready-script]");
@@ -3662,6 +3715,10 @@ eon.removeScriptsReadyScripts = function () {
     }
 };
 
+/*
+@function handleLinksAppend
+@description Appends the components links
+*/
 eon.handleLinksAppend = function () {
 
     var elementNames = Object.keys(eon.imports.links);
@@ -3691,7 +3748,12 @@ eon.handleLinksAppend = function () {
 
 };
 
-// Handle config dependencies
+/*
+@function {Boolean} handleConfigDependencies
+@description Checks the dependencies for a given component config. If there are dependencies to import  path and requests an 
+import, it will also return a Boolean representing whether it has dependencies or not
+@param {String} name
+*/
 eon.handleConfigDependencies = function (name) {
     var hasDependencies = false;
     var elementConfig = eon.imports.config[name];
@@ -3715,6 +3777,11 @@ eon.handleConfigDependencies = function (name) {
     return hasDependencies;
 }
 
+/*
+@function {String} getBasePathUrl
+@description Returns a new url created with the base path
+@param {String} url
+*/
 eon.getBasePathUrl = function (url) {
     
     url = url.substring(1);
@@ -4139,7 +4206,11 @@ eon.interpolation.globalScope = eon.interpolation.globalScope || eon;
 eon.interpolation.globalScope.data = eon.interpolation.globalScope.data || {};
 eon.interpolation.globalScope.locale = eon.interpolation.globalScope.locale || {};
 
-// Replaces all the echo/script for its corresponding elements and prepares them
+/*
+@function prepare
+@description Replaces all the echo/script for its corresponding elements and prepares them
+@param {Object} template
+*/
 eon.interpolation.prepare = function (template) {
 
   // Extend vimlet.meta
@@ -4198,7 +4269,12 @@ eon.interpolation.prepare = function (template) {
   return template;
 };
 
-// Handles all the initial state of the data and variable elements
+/*
+@function init
+@description Handles all the initial state of the data and variable elements
+@param {Object} el
+@param {Object} config
+*/
 eon.interpolation.init = function (el, config) {
 
   var sources = {};
@@ -4297,8 +4373,12 @@ eon.interpolation.init = function (el, config) {
 
 };
 
-// Creates the descriptor for the data object itself and for all its properties
-// eon.interpolation.setupDataPropDescriptors = function (el, config) {
+/*
+@function setupDataPropDescriptors
+@description Creates the descriptor for the data object itself and for all its properties
+@param {Object} source
+@param {String} sourceName
+*/
 eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
 
   var scope = source.scope;
@@ -4314,7 +4394,15 @@ eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
   eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName);
 }
 
-// Simple property descriptor creation that in case its changed it will trigger our internal callback
+/*
+@function {Object} createPropDescriptor
+@description Simple property descriptor creation that in case its changed it will trigger our internal callback
+@param {Object} scope
+@param {Object} keyOwnerObj
+@param {String} key
+@param {String} keyPath
+@param {Value} value
+*/
 eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyPath, value) {
   var propDescriptor = {};
 
@@ -4337,7 +4425,13 @@ eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyP
   return propDescriptor;
 }
 
-// When the property we want to observer is an object we create its descriptor and ones for its properties
+/*
+@function createObjectPropDescriptors
+@description When the property we want to observer is an object we create its descriptor and ones for its properties
+@param {Object} el
+@param {Object} obj
+@param {String} keyPath
+*/
 eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
   var value;
 
@@ -4365,7 +4459,13 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
   }
 }
 
-// Creates the private onDataChanged callback to handle the public one
+/*
+@function setupDataChangeCallback
+@description Creates the private onDataChanged callback to handle the public one
+@param {Object} el
+@param {Object} source
+@param {Object} config
+*/
 eon.interpolation.setupDataChangeCallback = function (el, source, config) {
   var scope = source.scope;
 
@@ -4389,7 +4489,15 @@ eon.interpolation.setupDataChangeCallback = function (el, source, config) {
 
 }
 
-// Takes all the properties from data, finds its variable and sets its value
+/*
+@function interpolate
+@description Takes all the properties from data, finds its variable and sets its value
+@param {Object} el
+@param {Object} source
+@param {Object} obj
+@param {Object} interpolations
+@param {String} bind
+*/
 eon.interpolation.interpolate = function (el, source, obj, interpolations, bind) {
   var key, i, variableBind, variable;
 
@@ -4427,7 +4535,16 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
   }
 }
 
-// Handles the situation when a whole object has been changed
+/*
+@function handleObjectChange
+@description Handles the situation when a whole object has been changed
+@param {Object} el
+@param {Object} scope
+@param {String} keyPath
+@param {Object} oldData
+@param {Object} newData
+@param {Object} config
+*/
 eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, newData, config) {
   var checked = {};
 
@@ -4464,7 +4581,17 @@ eon.interpolation.handleVariableChange = function (el, scope, keyPath, oldVal, n
   eon.triggerAllCallbackEvents(scope, config ? config : {}, "onDataChanged", [interpolationPath, oldVal, newVal]);
 }
 
-// Compares the old data with the new one and triggers the changes
+/*
+@function handleObjectChange
+@description Compares the old data with the new one and triggers the changes
+@param {Object} el
+@param {Object} scope
+@param {String} keyPath
+@param {Object} oldData
+@param {Object} newData
+@param {Object} checked
+@param {Object} config
+*/
 eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, newData, checked, config) {
   var newVal;
   // Loops through the oldData
@@ -4490,7 +4617,16 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
   return checked;
 }
 
-// Compares the data with the already checked object
+/*
+@function handleObjectChange
+@description Compares the data with the already checked object
+@param {Object} el
+@param {Object} scope
+@param {String} keyPath
+@param {Object} data
+@param {Object} checked
+@param {Object} config
+*/
 eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, checked, config) {
   var oldVal;
   // Loops through data
@@ -7291,6 +7427,249 @@ eon.data.MemoryAdapter = function () {
   return baseAdapter;
 }
 
+
+eon.dataDiff = function (config) {
+
+  var self = this;
+
+  /*
+    TODO
+    - Map object implementation
+    - Old states storage support
+    - Order sensitive
+  */
+
+  // ## Public Properties ##
+
+  /*
+    @property {Array} states
+    @description Stored previous data states
+  */
+  this.states = [];
+  /*
+    @property {Boolean} storeStates
+    @description Whether the previous states should be stored
+  */
+  this.storeStates = config.storeStates;
+  /*
+    @property {Boolean} orderSensitive
+    @description Whether the keys order matters
+  */
+  this.orderSensitive = config.orderSensitive;
+  /*
+    @property {Function} create
+    @description Create operation
+  */
+  this.create = config.create;
+  /*
+    @property {Function} update
+    @description Update operation
+  */
+  this.update = config.update;
+  /*
+    @property {Boolean} delete
+    @description Delete operation
+  */
+  this.delete = config.delete;
+
+  // ## Private Properties ##
+
+  /*
+    @property (private) {Object} _operations
+    @description Diffing result operations
+  */
+  this._operations = [];
+
+
+  // ## Public Functions ##
+
+  /*
+    @function commit
+    @description Compare and process data
+    @param {Object} data
+    @param {Object} oldData
+  */
+  this.commit = function (data, oldData) {
+    if (data) {
+      self._diff(data, oldData);
+      self._process();
+    }
+  };
+
+  /*
+    @function create
+    @description Create operation fallback
+    @param {Object} data
+  */
+  this.create = this.create || function (data) {
+    // Default create 
+  };
+  /*
+    @function update
+    @description Update operation fallback
+    @param {Object} data
+  */
+  this.update = this.update || function (data) {
+    // Default update 
+  };
+  /*
+    @function delete
+    @description Delete operation fallback
+    @param {Object} data
+  */
+  this.delete = this.delete || function (data) {
+    // Default delete 
+  };
+
+  // ## Private Functions ##
+
+  /*
+    @function (private) _diff
+    @description Store differences between objects
+    @param {Object} items
+    @param {Object} oldItems
+  */
+  this._diff = function (items, oldItems) {
+    // Loop through properties in object 1
+    for (var key in items) {
+      // Check property exists on both objects
+      if (!oldItems.hasOwnProperty(key)) {
+        // :: Create item
+        self._create(key, items[key], null);
+      } else {
+        switch (typeof (items[key])) {
+          // Deep compare objects
+          case "object":
+            if (!self._compare(items[key], oldItems[key])) {
+              // :: Update item
+              self._update(key, items[key], oldItems[key]);
+            };
+            break;
+          // Compare function code
+          case "function":
+            if (typeof (oldItems[key]) != "undefined" || (items[key].toString() != oldItems[key].toString())) {
+              // :: Update item
+              self._update(key, items[key], oldItems[key]);
+            };
+            break;
+          // Compare values
+          default:
+            if (items[key] != oldItems[key]) {
+              // :: Update item
+              self._update(key, items[key], oldItems[key]);
+            };
+        }
+      }
+    }
+    // Check oldItems for any extra properties
+    for (var key in oldItems) {
+      // * Undefined properties are considered nonexistent
+      if (typeof (oldItems[key]) == "undefined" || !items.hasOwnProperty(key)) {
+        // :: Delete item
+        self._delete(key, items[key], oldItems[key]);
+      };
+    }
+    return true;
+  }
+  /*
+    @function (private) _compare
+    @description Whether there are differences between objects keys
+    @param {Object} items
+    @param {Object} oldItems
+  */
+  this._compare = function (items, oldItems) {
+    // Loop through properties in object 1
+    for (var key in items) {
+      // Check property exists on both objects
+      if (items.hasOwnProperty(key) !== oldItems.hasOwnProperty(key)) return false;
+        switch (typeof (items[key])) {
+          // Deep compare objects
+          case "object":
+            if (!self._compare(items[key], oldItems[key])) return false;
+            break;
+          // Compare function code
+          case "function":
+            if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) return false;
+            break;
+          // Compare values
+          default:
+            if (items[key] != oldItems[key]) return false;
+      }
+    }
+    // Check old not matched keys
+    for (var key in oldItems) {
+      if (typeof (items[key]) == "undefined") return false;
+    }
+    return true;
+  }
+  /*
+    @function (private) _process
+    @description Process data operations
+  */
+  this._process = function () {
+    self._operations.forEach(function (operation) {
+      switch (operation.type) {
+        case "create":
+          self.create(operation);
+          break;
+        case "update":
+          self.update(operation);
+          break;
+        default:
+          self.delete(operation);
+      }
+    });
+  }
+  /*
+    @function (private) _create
+    @description Store create operation
+    @param {Key} key
+    @param {Value} value
+    @param {Value} oldValue
+  */
+  this._create = function (key, value, oldValue) {
+    // Default create 
+    self._operations.push({
+      type: "create",
+      key: key,
+      newValue: value,
+      oldValue: oldValue
+    });
+  };
+  /*
+    @function (private) _update
+    @description Store update operation
+    @param {Key} key
+    @param {Value} value
+    @param {Value} oldValue
+  */
+  this._update = function (key, value, oldValue) {
+    // Default update 
+    self._operations.push({
+      type: "update",
+      key: key,
+      newValue: value,
+      oldValue: oldValue
+    });
+  };
+  /*
+    @function (private) _delete
+    @description Store delete operation
+    @param {Key} key
+    @param {Value} value
+    @param {Value} oldValue
+  */
+  this._delete = function (key, value, oldValue) {
+    // Default delete 
+    self._operations.push({
+      type: "delete",
+      key: key,
+      newValue: value,
+      oldValue: oldValue
+    });
+  };
+
+}
 
 
 eon.validator = eon.validator || {};
