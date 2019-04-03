@@ -57,6 +57,9 @@ eon.requestImport = function (href) {
     href = href.charAt(0) == "@" ? eon.getBasePathUrl(href) : href;
 
     if (!(elementName in eon.imports.templates)) {
+        
+        // Everytime a new import is requested we reset the onImportsReady triggered state
+        eon.__onImportsReady__triggered = false;
 
         // Increment total
         eon.imports.total++;

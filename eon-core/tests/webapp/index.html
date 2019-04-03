@@ -7,30 +7,15 @@
   <title>Page Title</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script>
-    var testData = {};
-  </script>
-
   <script src="eon/eon.js"></script>
-
-  <script>
-    // eon.import("eon/ui/eon-component-1");
-    // eon.import([
-    //   "eon/ui/eon-component-1",
-    //   "@ui/eon-component-4"
-    // ]);
-    // eon.import("eon/ui/eon-component-2");
-  </script>
 
 </head>
 
 <body>
 
-  <!-- <eon-component-1 label="COMP-1"></eon-component-1> -->
-
   <script>
 
-    // Tests that onPropertyChanged is triggered properly
+    // Tests the impots are working properly
     function importsTest(callback) {
 
       eon.import([
@@ -39,8 +24,9 @@
       ]);
 
       eon.onImportsReady(function () {
-        // We know that for this scenario the are only 4 imported components, 2 of them being included as part of eon, 
-        // the component that we are importing (eon-component-1) and its dependency (eon-component-2)
+        // We know that for this scenario the are only 7 imported components, 2 of them being included as part of eon, 
+        // the components that we are importing (eon-component-4, eon-component-1) and its dependencies (eon-component-2, eon-component-3, eon-custom-1)
+        console.log('Object.keys(eon.imports.config).length', Object.keys(eon.imports.config).length);
         callback(Object.keys(eon.imports.config).length == 7);
       });
 
@@ -48,11 +34,11 @@
 
     // Tests that onPropertyChanged is triggered properly
     function propertyChangedTest(callback) {
-
+      
       eon.import("eon/ui/eon-component-1");
 
       eon.onImportsReady(function () {
-
+        
         var component = document.createElement("eon-component-1");
 
         component.label = "Label";
@@ -75,8 +61,9 @@
     function performanceTest(callback) {
 
       var fragment = document.createDocumentFragment();
-      var amount = 5000;
-      var element;
+      var amount = 10000;
+      var maxMiliseconds = 2500;
+      var element, start;
 
       eon.import("eon/ui/eon-component-2");
 
@@ -85,12 +72,12 @@
         fragment.appendChild(element);
       }
 
-      console.time("ready");
+      start = Date.now();
 
       document.body.appendChild(fragment);
 
       eon.onReady(function () {
-        console.timeEnd("ready");
+        callback((Date.now() - start) < maxMiliseconds);
       });
 
     }
