@@ -34,11 +34,11 @@
 
     // Tests that onPropertyChanged is triggered properly
     function propertyChangedTest(callback) {
-      
+
       eon.import("eon/ui/eon-component-1");
 
-      eon.onImportsReady(function () {
-        
+      eon.onReady(function () {
+
         var component = document.createElement("eon-component-1");
 
         component.label = "Label";
@@ -67,18 +67,22 @@
 
       eon.import("eon/ui/eon-component-2");
 
-      for (var i = 0; i < amount; i++) {
-        element = document.createElement("eon-component-2");
-        fragment.appendChild(element);
-      }
-
-      start = Date.now();
-
-      document.body.appendChild(fragment);
-
       eon.onReady(function () {
-        callback((Date.now() - start) < maxMiliseconds);
-      });
+
+        for (var i = 0; i < amount; i++) {
+          element = document.createElement("eon-component-2");
+          fragment.appendChild(element);
+        }
+
+        start = Date.now();
+
+        document.body.appendChild(fragment);
+
+        eon.onReady(function () {
+          callback((Date.now() - start) < maxMiliseconds);
+        });
+
+      })
 
     }
 
@@ -93,42 +97,96 @@
 
     function dataDiffingCommitTest(callback) {
       // Test operations object
-      var operations = {create: 0, update: 0, delete: 0};
+      var operations = { create: 0, update: 0, delete: 0 };
 
       var oldData = new Map();
-      oldData.set(0, {name: "Sam", age: 40});
-      oldData.set(1, {name: "Will", age: 17});
-      oldData.set(2, {name: "Sarah", age: 20});
-      oldData.set(3, {name: "John", age: 22});
-      oldData.set(4, {name: "Kane", age: 12});
+      oldData.set(0, { name: "Sam", age: 40 });
+      oldData.set(1, { name: "Will", age: 17 });
+      oldData.set(2, { name: "Sarah", age: 20 });
+      oldData.set(3, { name: "John", age: 22 });
+      oldData.set(4, { name: "Kane", age: 12 });
 
       var data = new Map();
-      data.set(0, {name: "Sam", age: 40});
-      data.set(1, {name: "William", age: 17});
-      data.set(2, {name: "Sarah", age: 20});
-      data.set(5, {name: "Steve", age: 88});
-      
+      data.set(0, { name: "Sam", age: 40 });
+      data.set(1, { name: "William", age: 17 });
+      data.set(2, { name: "Sarah", age: 20 });
+      data.set(5, { name: "Steve", age: 88 });
+
       // Declare diffing operation functions 
       var diffObj = new eon.dataDiff({
         storeStates: 10,
-        create: function(data){
+        create: function (data) {
           operations.create++;
         },
-        update: function(data){
+        update: function (data) {
           operations.update++;
         },
-        delete: function(data){
+        delete: function (data) {
           operations.delete++;
         }
       });
-      
+
       diffObj.commit(data, oldData);
 
       // Check expected operations
-      callback(operations.create == 1 
-            && operations.update == 1
-            && operations.delete == 2);
+      callback(operations.create == 1
+        && operations.update == 1
+        && operations.delete == 2);
     }
+
+    function resizeTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-2"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-2");
+
+        component.label = "Label";
+
+        component.onResize(function () {
+          if (component.offsetHeight == 100) {
+            callback(true);
+          }
+        });
+
+        document.body.appendChild(component);
+
+        eon.onReady(function () {
+          component.style.height = "100px";
+        });
+
+      });
+
+    }
+
+    // function templateReferencesTest(callback) {
+
+    //   eon.import([
+    //     "eon/ui/eon-component-1"
+    //   ]);
+
+    //   eon.onReady(function () {
+
+    //     var component = document.createElement("eon-component-1");
+
+    //     document.body.appendChild(component);
+
+    //     eon.onReady(function () {
+    //       callback(component._refs.label ? true : false);
+    //     });
+
+    //   });
+
+    // }
+
+    // setTimeout(() => {
+    //   templateReferencesTest(function(){});
+    // }, 500);
+    
+
   </script>
 
 </body>

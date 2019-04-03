@@ -7432,8 +7432,8 @@ eon.element = function (param1, param2) {
         config = param2.config ? param2.config : param2.constructor === Object ? param2 : {};
         name = param1;
 
-    // If no second paremeter is provided then the first parameter may either be an object with the name and config inside 
-    // or be the config itself with the name as one of its keys
+        // If no second paremeter is provided then the first parameter may either be an object with the name and config inside 
+        // or be the config itself with the name as one of its keys
     } else {
 
         config = param1.config ? param1.config : param1.constructor === Object ? param1 : {};
@@ -7547,6 +7547,7 @@ eon.unhideElement = function (el) {
 @param {Object} el
 */
 eon.declareCallbacks = function (el) {
+
     // Creates the callback needed for the element
     eon.createCallback("onCreated", el, "ready");
     eon.createCallback("onInit", el, "ready");
@@ -7557,6 +7558,9 @@ eon.declareCallbacks = function (el) {
     eon.createCallback("onPropertyChanged", el);
     eon.createCallback("onAttributeChanged", el);
     eon.createCallback("onDataChanged", el);
+
+    eon.createResizeCallbacks(el);
+
 };
 
 /*
@@ -7572,7 +7576,7 @@ eon.generateSourceFragment = function (el) {
     // either way we create a mutation observer to listen to child node changes, this observer will be disconnected on the "onAttached" callback.
     // Else just loops through its nodes and append them to the source fragment
     if (el.childNodes.length == 0) {
-        
+
         var observer = new MutationObserver(function (mutations) {
 
             mutations.forEach(function (mutation) {
@@ -7757,7 +7761,7 @@ eon.collectObserveData = function (el, config) {
     el.__observeProperties = {};
     el.__observeAttributes = {};
     el.__reflectProperties = {};
-    
+
     // Reads properties object to add them to the observe object if needed
     if (config.properties) {
 
@@ -8157,7 +8161,7 @@ eon.transform = function (el, config) {
 
         // Adds the element to the transformQueue
         if (eon.registry.transformedQueueBreak) {
-            
+
             eon.registry.transformedQueueBreak = false;
 
             setTimeout(function () {
@@ -8332,7 +8336,7 @@ eon.generateElementTemplate = function (el) {
 
     // It will only enter here once per element type, it will create a template clone for all the other components to copy
     if (!eon.registry.isTemplateRegistered(name)) {
-        
+
         var template = eon.imports.templates[name];
         var clone = document.createElement("template");
 
@@ -8381,14 +8385,14 @@ eon.generateElementReferences = function (el) {
     var nodes = el.template.querySelectorAll("[eon-ref]");
     var node;
 
-    el._ref = el._ref || {};
-
+    el._refs = el._refs || {};
+    
     for (var i = 0; i < nodes.length; i++) {
         node = nodes[i];
-        el._ref[node.getAttribute("eon-ref")] = node;
+        el._refs[node.getAttribute("eon-ref")] = node;
         node.removeAttribute("eon-ref");
     }
-
+    console.log('generateElementReferences', el._refs);
 };
 
 /*
@@ -8493,7 +8497,7 @@ eon.triggerTransformed = function (el, config) {
 
         // Timeout forces triggerRender to wait child onTransformed
         // When render and bubbleRender are finished, it triggers onReady
-            eon.registry.triggerRenders();
+        eon.registry.triggerRenders();
 
     });
 
@@ -8527,59 +8531,45 @@ eon.initializeDisplay = function (el, config) {
 
 
 /*
-@function registerResizeListeners
+@function createResizeCallbacks
 @description Creates the onResize callbacks for the component
 @param {Object} el
-@param {Object} config
 */
-eon.registerResizeListeners = function (el, config) {
+eon.createResizeCallbacks = function (el) {
 
-    // If it has onResize callback on its config we create the onResize callback
-    if (config.onResize) {
+    // Else all eon elements will have this pseudo onResize callback, this callback will create
+    // the real resize callback once its called for the first time
+    el.onResize = function (callback) {
+        // Once the pseudo callback has been called we set it to null so that it can create the real one
+        el.onResize = null;
 
+        eon.createCallback("onResize", el);
+        
+        // Once the element is ready, it will add the listener
         el.onReady(function () {
 
-            eon.createCallback("onResize", el);
-
+            var config = eon.imports.config[el.nodeName.toLowerCase()];
+            
             eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
                 eon.triggerAllCallbackEvents(el, config, "onResize", []);
             });
 
+            el.onResize(callback);
+
         });
-
-    } else {
-
-        // Else all eon elements will have this pseudo onResize callback, this callback will create
-        // the real resize callback once its called for the first time
-        el.onResize = function (callback) {
-            // Once the pseudo callback has been called we set it to null so that it can create the real one
-            el.onResize = null;
-
-            eon.createCallback("onResize", el);
-
-            // Once the element is ready, it will add the listener
-            el.onReady(function () {
-
-                eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
-                    eon.triggerAllCallbackEvents(el, config, "onResize", []);
-                });
-
-                el.onResize(callback);
-
-            });
-
-        }
 
     }
 
-    // Once the element is ready, it will add the listener
+    // onWindowResize callback creation
     el.onReady(function () {
+
+        var config = eon.imports.config[el.nodeName.toLowerCase()];
 
         eon.createCallback("onWindowResize", el);
 
-        eon.onResize(function () {
+        window.addEventListener("resize", function () {
             eon.triggerAllCallbackEvents(el, config, "onWindowResize", []);
-        }, el);
+        });
 
     });
 
@@ -8672,9 +8662,6 @@ eon.declare = function (name, baseElement) {
 
                 // Interpolation data bind
                 eon.interpolation.init(el, config);
-
-                // Creates the on resize callbacks handler for the element
-                eon.registerResizeListeners(el, config);
 
                 // Begins the transformation process
                 eon.transform(el, config);
