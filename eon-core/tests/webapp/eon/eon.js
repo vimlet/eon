@@ -7431,6 +7431,7 @@ eon.data.MemoryAdapter = function () {
 eon.dataDiff = function (config) {
 
   var self = this;
+  config = !config || config.constructor !== Object ? {} : config;
 
   // ## Public Properties ##
 
@@ -7477,7 +7478,7 @@ eon.dataDiff = function (config) {
     @description Create operation fallback
     @param {Object} data
   */
-  this.create = config.create.constructor === Function ? config.create : function (data) {
+  this.create = config.create && config.create.constructor === Function ? config.create : function (data) {
     // Default create 
   };
   /*
@@ -7485,7 +7486,7 @@ eon.dataDiff = function (config) {
     @description Update operation fallback
     @param {Object} data
   */
-  this.update = config.update.constructor === Function ? config.update : function (data) {
+  this.update = config.update && config.update.constructor === Function ? config.update : function (data) {
     // Default update 
   };
   /*
@@ -7493,7 +7494,7 @@ eon.dataDiff = function (config) {
     @description Delete operation fallback
     @param {Object} data
   */
-  this.delete = config.delete.constructor === Function ? config.delete : function (data) {
+  this.delete = config.delete && config.delete.constructor === Function ? config.delete : function (data) {
     // Default delete 
   };
 
