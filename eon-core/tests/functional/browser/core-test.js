@@ -26,4 +26,18 @@ suite("eon-core", () => {
         });
 
     });
+    test("Data diffing instance", ({ remote }) => {
+        return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+          dataDiffingInstanceTest(callback);
+        }).then(function (value) {
+          assert.strictEqual(value, true);
+        });
+      });
+      test("Data diffing commit", ({ remote }) => {
+        return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+          dataDiffingCommitTest(callback);
+        }).then(function (value) {
+          assert.strictEqual(value, true);
+        });
+      });
 });

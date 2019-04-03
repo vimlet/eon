@@ -82,6 +82,53 @@
 
     }
 
+    function dataDiffingInstanceTest(callback) {
+      try {
+        new eon.dataDiff();
+        callback(true);
+      } catch (error) {
+        callback(false);
+      }
+    }
+
+    function dataDiffingCommitTest(callback) {
+      // Test operations object
+      var operations = {create: 0, update: 0, delete: 0};
+
+      var oldData = new Map();
+      oldData.set(0, {name: "Sam", age: 40});
+      oldData.set(1, {name: "Will", age: 17});
+      oldData.set(2, {name: "Sarah", age: 20});
+      oldData.set(3, {name: "John", age: 22});
+      oldData.set(4, {name: "Kane", age: 12});
+
+      var data = new Map();
+      data.set(0, {name: "Sam", age: 40});
+      data.set(1, {name: "William", age: 17});
+      data.set(2, {name: "Sarah", age: 20});
+      data.set(5, {name: "Steve", age: 88});
+      
+      // Declare diffing operation functions 
+      var diffObj = new eon.dataDiff({
+        storeStates: 10,
+        create: function(data){
+          operations.create++;
+        },
+        update: function(data){
+          operations.update++;
+        },
+        delete: function(data){
+          operations.delete++;
+        }
+      });
+      
+      diffObj.commit(data, oldData);
+
+      // Check expected operations
+      callback(operations.create == 1 
+            && operations.update == 1
+            && operations.delete == 2);
+    }
   </script>
 
 </body>
