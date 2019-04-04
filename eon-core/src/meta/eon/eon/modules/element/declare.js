@@ -87,9 +87,6 @@ eon.declare = function (name, baseElement) {
                 // Interpolation data bind
                 eon.interpolation.init(el, config);
 
-                // Creates the on resize callbacks handler for the element
-                eon.registerResizeListeners(el, config);
-
                 // Begins the transformation process
                 eon.transform(el, config);
 

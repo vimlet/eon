@@ -5971,6 +5971,9 @@ eon.requestImport = function (href) {
     href = href.charAt(0) == "@" ? eon.getBasePathUrl(href) : href;
 
     if (!(elementName in eon.imports.templates)) {
+        
+        // Everytime a new import is requested we reset the onImportsReady triggered state
+        eon.__onImportsReady__triggered = false;
 
         // Increment total
         eon.imports.total++;
@@ -7429,8 +7432,8 @@ eon.element = function (param1, param2) {
         config = param2.config ? param2.config : param2.constructor === Object ? param2 : {};
         name = param1;
 
-    // If no second paremeter is provided then the first parameter may either be an object with the name and config inside 
-    // or be the config itself with the name as one of its keys
+        // If no second paremeter is provided then the first parameter may either be an object with the name and config inside 
+        // or be the config itself with the name as one of its keys
     } else {
 
         config = param1.config ? param1.config : param1.constructor === Object ? param1 : {};
@@ -7544,6 +7547,7 @@ eon.unhideElement = function (el) {
 @param {Object} el
 */
 eon.declareCallbacks = function (el) {
+
     // Creates the callback needed for the element
     eon.createCallback("onCreated", el, "ready");
     eon.createCallback("onInit", el, "ready");
@@ -7554,6 +7558,9 @@ eon.declareCallbacks = function (el) {
     eon.createCallback("onPropertyChanged", el);
     eon.createCallback("onAttributeChanged", el);
     eon.createCallback("onDataChanged", el);
+
+    eon.createResizeCallbacks(el);
+
 };
 
 /*
@@ -7569,7 +7576,7 @@ eon.generateSourceFragment = function (el) {
     // either way we create a mutation observer to listen to child node changes, this observer will be disconnected on the "onAttached" callback.
     // Else just loops through its nodes and append them to the source fragment
     if (el.childNodes.length == 0) {
-        
+
         var observer = new MutationObserver(function (mutations) {
 
             mutations.forEach(function (mutation) {
@@ -7754,7 +7761,7 @@ eon.collectObserveData = function (el, config) {
     el.__observeProperties = {};
     el.__observeAttributes = {};
     el.__reflectProperties = {};
-    
+
     // Reads properties object to add them to the observe object if needed
     if (config.properties) {
 
@@ -8154,7 +8161,7 @@ eon.transform = function (el, config) {
 
         // Adds the element to the transformQueue
         if (eon.registry.transformedQueueBreak) {
-            
+
             eon.registry.transformedQueueBreak = false;
 
             setTimeout(function () {
@@ -8329,7 +8336,7 @@ eon.generateElementTemplate = function (el) {
 
     // It will only enter here once per element type, it will create a template clone for all the other components to copy
     if (!eon.registry.isTemplateRegistered(name)) {
-        
+
         var template = eon.imports.templates[name];
         var clone = document.createElement("template");
 
@@ -8378,14 +8385,14 @@ eon.generateElementReferences = function (el) {
     var nodes = el.template.querySelectorAll("[eon-ref]");
     var node;
 
-    el._ref = el._ref || {};
-
+    el._refs = el._refs || {};
+    
     for (var i = 0; i < nodes.length; i++) {
         node = nodes[i];
-        el._ref[node.getAttribute("eon-ref")] = node;
+        el._refs[node.getAttribute("eon-ref")] = node;
         node.removeAttribute("eon-ref");
     }
-
+    console.log('generateElementReferences', el._refs);
 };
 
 /*
@@ -8490,7 +8497,7 @@ eon.triggerTransformed = function (el, config) {
 
         // Timeout forces triggerRender to wait child onTransformed
         // When render and bubbleRender are finished, it triggers onReady
-            eon.registry.triggerRenders();
+        eon.registry.triggerRenders();
 
     });
 
@@ -8524,59 +8531,45 @@ eon.initializeDisplay = function (el, config) {
 
 
 /*
-@function registerResizeListeners
+@function createResizeCallbacks
 @description Creates the onResize callbacks for the component
 @param {Object} el
-@param {Object} config
 */
-eon.registerResizeListeners = function (el, config) {
+eon.createResizeCallbacks = function (el) {
 
-    // If it has onResize callback on its config we create the onResize callback
-    if (config.onResize) {
+    // Else all eon elements will have this pseudo onResize callback, this callback will create
+    // the real resize callback once its called for the first time
+    el.onResize = function (callback) {
+        // Once the pseudo callback has been called we set it to null so that it can create the real one
+        el.onResize = null;
 
+        eon.createCallback("onResize", el);
+        
+        // Once the element is ready, it will add the listener
         el.onReady(function () {
 
-            eon.createCallback("onResize", el);
-
+            var config = eon.imports.config[el.nodeName.toLowerCase()];
+            
             eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
                 eon.triggerAllCallbackEvents(el, config, "onResize", []);
             });
 
+            el.onResize(callback);
+
         });
-
-    } else {
-
-        // Else all eon elements will have this pseudo onResize callback, this callback will create
-        // the real resize callback once its called for the first time
-        el.onResize = function (callback) {
-            // Once the pseudo callback has been called we set it to null so that it can create the real one
-            el.onResize = null;
-
-            eon.createCallback("onResize", el);
-
-            // Once the element is ready, it will add the listener
-            el.onReady(function () {
-
-                eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
-                    eon.triggerAllCallbackEvents(el, config, "onResize", []);
-                });
-
-                el.onResize(callback);
-
-            });
-
-        }
 
     }
 
-    // Once the element is ready, it will add the listener
+    // onWindowResize callback creation
     el.onReady(function () {
+
+        var config = eon.imports.config[el.nodeName.toLowerCase()];
 
         eon.createCallback("onWindowResize", el);
 
-        eon.onResize(function () {
+        window.addEventListener("resize", function () {
             eon.triggerAllCallbackEvents(el, config, "onWindowResize", []);
-        }, el);
+        });
 
     });
 
@@ -8669,9 +8662,6 @@ eon.declare = function (name, baseElement) {
 
                 // Interpolation data bind
                 eon.interpolation.init(el, config);
-
-                // Creates the on resize callbacks handler for the element
-                eon.registerResizeListeners(el, config);
 
                 // Begins the transformation process
                 eon.transform(el, config);
@@ -10082,14 +10072,8 @@ eon.data.MemoryAdapter = function () {
 eon.dataDiff = function (config) {
 
   var self = this;
-
-  /*
-    TODO
-    - Map object implementation
-    - Old states storage support
-    - Order sensitive
-  */
-
+  config = !config || config.constructor !== Object ? {} : config;
+  
   // ## Public Properties ##
 
   /*
@@ -10098,31 +10082,11 @@ eon.dataDiff = function (config) {
   */
   this.states = [];
   /*
-    @property {Boolean} storeStates
-    @description Whether the previous states should be stored
+    @property {Boolean} storeStates (TEMP)
+    @description Whether or not the previous states should be stored
   */
-  this.storeStates = config.storeStates;
-  /*
-    @property {Boolean} orderSensitive
-    @description Whether the keys order matters
-  */
-  this.orderSensitive = config.orderSensitive;
-  /*
-    @property {Function} create
-    @description Create operation
-  */
-  this.create = config.create;
-  /*
-    @property {Function} update
-    @description Update operation
-  */
-  this.update = config.update;
-  /*
-    @property {Boolean} delete
-    @description Delete operation
-  */
-  this.delete = config.delete;
-
+  this.storeStates = config.hasOwnProperty("storeStates") ? config.storeStates : 0;
+  
   // ## Private Properties ##
 
   /*
@@ -10141,10 +10105,13 @@ eon.dataDiff = function (config) {
     @param {Object} oldData
   */
   this.commit = function (data, oldData) {
-    if (data) {
-      self._diff(data, oldData);
-      self._process();
-    }
+    // Convert into Map object
+    eon.util.objectToMap(data);
+    eon.util.objectToMap(oldData);
+    // Compare and persist data
+    self._diff(data, oldData);
+    self._processState();
+    self._saveState(data);
   };
 
   /*
@@ -10152,7 +10119,7 @@ eon.dataDiff = function (config) {
     @description Create operation fallback
     @param {Object} data
   */
-  this.create = this.create || function (data) {
+  this.create = config.create && config.create.constructor === Function ? config.create : function (data) {
     // Default create 
   };
   /*
@@ -10160,7 +10127,7 @@ eon.dataDiff = function (config) {
     @description Update operation fallback
     @param {Object} data
   */
-  this.update = this.update || function (data) {
+  this.update = config.update && config.update.constructor === Function ? config.update : function (data) {
     // Default update 
   };
   /*
@@ -10168,7 +10135,7 @@ eon.dataDiff = function (config) {
     @description Delete operation fallback
     @param {Object} data
   */
-  this.delete = this.delete || function (data) {
+  this.delete = config.delete && config.delete.constructor === Function ? config.delete : function (data) {
     // Default delete 
   };
 
@@ -10181,50 +10148,56 @@ eon.dataDiff = function (config) {
     @param {Object} oldItems
   */
   this._diff = function (items, oldItems) {
+    var counter = -1;
+    var oldCounter = -1;
     // Loop through properties in object 1
-    for (var key in items) {
+    items.forEach(function (value, key) {
+      counter++;
       // Check property exists on both objects
-      if (!oldItems.hasOwnProperty(key)) {
+      if (!oldItems.has(key)) {
         // :: Create item
-        self._create(key, items[key], null);
+        self._storeOperation("create", key, counter, value, null);
       } else {
-        switch (typeof (items[key])) {
+        // switch (typeof (items[key])) {
+        switch (typeof (value)) {
           // Deep compare objects
           case "object":
-            if (!self._compare(items[key], oldItems[key])) {
+            value
+            if (!self._compare(value, oldItems.get(key))) {
               // :: Update item
-              self._update(key, items[key], oldItems[key]);
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
             break;
           // Compare function code
           case "function":
-            if (typeof (oldItems[key]) != "undefined" || (items[key].toString() != oldItems[key].toString())) {
+            if (typeof (oldItems.get(key)) != "undefined" || (value.toString() != oldItems.get(key).toString())) {
               // :: Update item
-              self._update(key, items[key], oldItems[key]);
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
             break;
           // Compare values
           default:
-            if (items[key] != oldItems[key]) {
+            if (value != oldItems.get(key)) {
               // :: Update item
-              self._update(key, items[key], oldItems[key]);
+              self._storeOperation("update", key, counter, value, oldItems.get(key));
             };
         }
       }
-    }
+    });
     // Check oldItems for any extra properties
-    for (var key in oldItems) {
+    oldItems.forEach(function (value, key) {
+      oldCounter++;
       // * Undefined properties are considered nonexistent
-      if (typeof (oldItems[key]) == "undefined" || !items.hasOwnProperty(key)) {
+      if (typeof (value) == "undefined" || !items.has(key)) {
         // :: Delete item
-        self._delete(key, items[key], oldItems[key]);
+        self._storeOperation("delete", key, oldCounter, items.get(key), value);
       };
-    }
+    });
     return true;
   }
   /*
     @function (private) _compare
-    @description Whether there are differences between objects keys
+    @description Whether or not there are differences between objects keys
     @param {Object} items
     @param {Object} oldItems
   */
@@ -10233,18 +10206,18 @@ eon.dataDiff = function (config) {
     for (var key in items) {
       // Check property exists on both objects
       if (items.hasOwnProperty(key) !== oldItems.hasOwnProperty(key)) return false;
-        switch (typeof (items[key])) {
-          // Deep compare objects
-          case "object":
-            if (!self._compare(items[key], oldItems[key])) return false;
-            break;
-          // Compare function code
-          case "function":
-            if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) return false;
-            break;
-          // Compare values
-          default:
-            if (items[key] != oldItems[key]) return false;
+      switch (typeof (items[key])) {
+        // Deep compare objects
+        case "object":
+          if (!self._compare(items[key], oldItems[key])) return false;
+          break;
+        // Compare function code
+        case "function":
+          if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) return false;
+          break;
+        // Compare values
+        default:
+          if (items[key] != oldItems[key]) return false;
       }
     }
     // Check old not matched keys
@@ -10254,10 +10227,10 @@ eon.dataDiff = function (config) {
     return true;
   }
   /*
-    @function (private) _process
+    @function (private) _processState
     @description Process data operations
   */
-  this._process = function () {
+  this._processState = function () {
     self._operations.forEach(function (operation) {
       switch (operation.type) {
         case "create":
@@ -10272,49 +10245,34 @@ eon.dataDiff = function (config) {
     });
   }
   /*
+    @function (private) _saveState
+    @description Save state
+    @param {Map} data
+  */
+  this._saveState = function (data) {
+    if (typeof self.storeStates === "number" && self.storeStates > 0) {
+      // Check state storage limit
+      if (self.states.length >= self.storeStates) {
+        // Remove first position state
+        self.states.shift();
+      }
+      self.states.push(data);
+    }
+  }
+  /*
     @function (private) _create
-    @description Store create operation
+    @description Store operation
+    @param {type} type
     @param {Key} key
     @param {Value} value
     @param {Value} oldValue
   */
-  this._create = function (key, value, oldValue) {
+  this._storeOperation = function (type, key, position, value, oldValue) {
     // Default create 
     self._operations.push({
-      type: "create",
+      type: type,
       key: key,
-      newValue: value,
-      oldValue: oldValue
-    });
-  };
-  /*
-    @function (private) _update
-    @description Store update operation
-    @param {Key} key
-    @param {Value} value
-    @param {Value} oldValue
-  */
-  this._update = function (key, value, oldValue) {
-    // Default update 
-    self._operations.push({
-      type: "update",
-      key: key,
-      newValue: value,
-      oldValue: oldValue
-    });
-  };
-  /*
-    @function (private) _delete
-    @description Store delete operation
-    @param {Key} key
-    @param {Value} value
-    @param {Value} oldValue
-  */
-  this._delete = function (key, value, oldValue) {
-    // Default delete 
-    self._operations.push({
-      type: "delete",
-      key: key,
+      position: position,
       newValue: value,
       oldValue: oldValue
     });

@@ -7,33 +7,15 @@
   <title>Page Title</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script>
-    var testData = {};
-  </script>
-
   <script src="eon/eon.js"></script>
-
-  <script>
-    // eon.import([
-    //     "@ui/eon-component-4"
-    //   ]);
-    // eon.import("eon/ui/eon-component-1");
-    // eon.import([
-    //   "eon/ui/eon-component-1",
-    //   "@ui/eon-component-4"
-    // ]);
-    // eon.import("eon/ui/eon-component-2");
-  </script>
 
 </head>
 
 <body>
 
-  <!-- <eon-component-1 label="COMP-1"></eon-component-1> -->
-
   <script>
 
-    // Tests that onPropertyChanged is triggered properly
+    // Tests the impots are working properly
     function importsTest(callback) {
 
       eon.import([
@@ -42,8 +24,9 @@
       ]);
 
       eon.onImportsReady(function () {
-        // We know that for this scenario the are only 4 imported components, 2 of them being included as part of eon, 
-        // the component that we are importing (eon-component-1) and its dependency (eon-component-2)
+        // We know that for this scenario the are only 7 imported components, 2 of them being included as part of eon, 
+        // the components that we are importing (eon-component-4, eon-component-1) and its dependencies (eon-component-2, eon-component-3, eon-custom-1)
+        console.log('Object.keys(eon.imports.config).length', Object.keys(eon.imports.config).length);
         callback(Object.keys(eon.imports.config).length == 7);
       });
 
@@ -54,7 +37,7 @@
 
       eon.import("eon/ui/eon-component-1");
 
-      eon.onImportsReady(function () {
+      eon.onReady(function () {
 
         var component = document.createElement("eon-component-1");
 
@@ -78,23 +61,28 @@
     function performanceTest(callback) {
 
       var fragment = document.createDocumentFragment();
-      var amount = 5000;
-      var element;
+      var amount = 10000;
+      var maxMiliseconds = 2500;
+      var element, start;
 
       eon.import("eon/ui/eon-component-2");
 
-      for (var i = 0; i < amount; i++) {
-        element = document.createElement("eon-component-2");
-        fragment.appendChild(element);
-      }
-
-      console.time("ready");
-
-      document.body.appendChild(fragment);
-
       eon.onReady(function () {
-        console.timeEnd("ready");
-      });
+
+        for (var i = 0; i < amount; i++) {
+          element = document.createElement("eon-component-2");
+          fragment.appendChild(element);
+        }
+
+        start = Date.now();
+
+        document.body.appendChild(fragment);
+
+        eon.onReady(function () {
+          callback((Date.now() - start) < maxMiliseconds);
+        });
+
+      })
 
     }
 
@@ -109,42 +97,96 @@
 
     function dataDiffingCommitTest(callback) {
       // Test operations object
-      var operations = {create: 0, update: 0, delete: 0};
+      var operations = { create: 0, update: 0, delete: 0 };
 
       var oldData = new Map();
-      oldData.set(0, {name: "Sam", age: 40});
-      oldData.set(1, {name: "Will", age: 17});
-      oldData.set(2, {name: "Sarah", age: 20});
-      oldData.set(3, {name: "John", age: 22});
-      oldData.set(4, {name: "Kane", age: 12});
+      oldData.set(0, { name: "Sam", age: 40 });
+      oldData.set(1, { name: "Will", age: 17 });
+      oldData.set(2, { name: "Sarah", age: 20 });
+      oldData.set(3, { name: "John", age: 22 });
+      oldData.set(4, { name: "Kane", age: 12 });
 
       var data = new Map();
-      data.set(0, {name: "Sam", age: 40});
-      data.set(1, {name: "William", age: 17});
-      data.set(2, {name: "Sarah", age: 20});
-      data.set(5, {name: "Steve", age: 88});
-      
+      data.set(0, { name: "Sam", age: 40 });
+      data.set(1, { name: "William", age: 17 });
+      data.set(2, { name: "Sarah", age: 20 });
+      data.set(5, { name: "Steve", age: 88 });
+
       // Declare diffing operation functions 
       var diffObj = new eon.dataDiff({
         storeStates: 10,
-        create: function(data){
+        create: function (data) {
           operations.create++;
         },
-        update: function(data){
+        update: function (data) {
           operations.update++;
         },
-        delete: function(data){
+        delete: function (data) {
           operations.delete++;
         }
       });
-      
+
       diffObj.commit(data, oldData);
 
       // Check expected operations
-      callback(operations.create == 1 
-            && operations.update == 1
-            && operations.delete == 2);
+      callback(operations.create == 1
+        && operations.update == 1
+        && operations.delete == 2);
     }
+
+    function resizeTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-2"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-2");
+
+        component.label = "Label";
+
+        component.onResize(function () {
+          if (component.offsetHeight == 100) {
+            callback(true);
+          }
+        });
+
+        document.body.appendChild(component);
+
+        eon.onReady(function () {
+          component.style.height = "100px";
+        });
+
+      });
+
+    }
+
+    // function templateReferencesTest(callback) {
+
+    //   eon.import([
+    //     "eon/ui/eon-component-1"
+    //   ]);
+
+    //   eon.onReady(function () {
+
+    //     var component = document.createElement("eon-component-1");
+
+    //     document.body.appendChild(component);
+
+    //     eon.onReady(function () {
+    //       callback(component._refs.label ? true : false);
+    //     });
+
+    //   });
+
+    // }
+
+    // setTimeout(() => {
+    //   templateReferencesTest(function(){});
+    // }, 500);
+    
+
   </script>
 
 </body>
