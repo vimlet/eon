@@ -35,8 +35,8 @@ eon.dataDiff = function (config) {
   */
   this.commit = function (data, oldData) {
     // Convert into Map object
-    eon.util.objectToMap(data);
-    eon.util.objectToMap(oldData);
+    data = eon.util.objectToMap(data);
+    oldData = eon.util.objectToMap(oldData);
     // Compare and persist data
     self._diff(data, oldData);
     self._processState();
@@ -172,6 +172,8 @@ eon.dataDiff = function (config) {
           self.delete(operation);
       }
     });
+    // Reset operations store
+    self._operations = [];
   }
   /*
     @function (private) _saveState
