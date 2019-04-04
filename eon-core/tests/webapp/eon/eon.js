@@ -3320,9 +3320,10 @@ eon.requestImport = function (href) {
     href = href.charAt(0) == "@" ? eon.getBasePathUrl(href) : href;
 
     if (!(elementName in eon.imports.templates)) {
-        
-        // Everytime a new import is requested we reset the onImportsReady triggered state
+
+        // Everytime a new import is requested we reset the onReady and onImportsReady triggered state
         eon.__onImportsReady__triggered = false;
+        eon.__onReady__triggered = false;
 
         // Increment total
         eon.imports.total++;
@@ -3376,7 +3377,7 @@ eon.requestImport = function (href) {
 @param {String} content
 */
 eon.prepareComponent = function (elementName, content) {
-    
+
     var importFragment = eon.fragmentFromString(content);
 
     var i;
@@ -3432,7 +3433,7 @@ eon.prepareComponent = function (elementName, content) {
     eon.domReady(function () {
 
         eon.imports.count++;
-        
+
         if (!eon.imports.ready && eon.imports.count == eon.imports.total) {
 
             // Appends all elements combined style
@@ -3458,6 +3459,10 @@ eon.prepareComponent = function (elementName, content) {
                     eon.importSchemaThemes();
 
                     eon.triggerCallback('onImportsReady', eon);
+                    // Once the imports are done, if all the registered elements are ready then it we trigger the onReady callback
+                    if (eon.registry.registeredElements == eon.registry.elementStatus.ready.length) {
+                        eon.triggerCallback("onReady", eon);
+                    }
 
                 } else {
                     eon.__onScriptsReady__triggered = false;
@@ -3786,7 +3791,7 @@ eon.handleConfigDependencies = function (name) {
 @param {String} url
 */
 eon.getBasePathUrl = function (url) {
-    
+
     url = url.substring(1);
     return eon.basePath + "/" + url;
 }
@@ -5741,7 +5746,7 @@ eon.generateElementReferences = function (el) {
         el._refs[node.getAttribute("eon-ref")] = node;
         node.removeAttribute("eon-ref");
     }
-    console.log('generateElementReferences', el._refs);
+    
 };
 
 /*
@@ -5948,7 +5953,7 @@ eon.declare = function (name, baseElement) {
         eon.generateSourceFragment(el);
 
         eon.initSourceCallbacks(el);
-
+        
         eon.prepareElement(el, function () {
 
             var config = eon.imports.config[el.nodeName.toLowerCase()];
@@ -5985,6 +5990,9 @@ eon.declare = function (name, baseElement) {
             if (el.isFirstAttach) {
 
                 el.isFirstAttach = false;
+                // Once a new element is attached for the first time we set the onReady 
+                // callback triggered property to false until all the elements are ready again
+                eon.__onReady__triggered = false;
 
                 eon.importTemplateClasses(el);
 

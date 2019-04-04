@@ -47,11 +47,11 @@ suite("eon-core", () => {
           assert.strictEqual(value, true);
         });
       });
-    //   test("Template references", ({ remote }) => {
-    //     return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
-    //       templateReferencesTest(callback);
-    //     }).then(function (value) {
-    //       assert.strictEqual(value, true);
-    //     });
-    //   });
+      test("Template references", ({ remote }) => {
+        return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+          templateReferencesTest(callback);
+        }).then(function (value) {
+          assert.strictEqual(value, true);
+        });
+      });
 });

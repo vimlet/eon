@@ -23,7 +23,7 @@ eon.declare = function (name, baseElement) {
         eon.generateSourceFragment(el);
 
         eon.initSourceCallbacks(el);
-
+        
         eon.prepareElement(el, function () {
 
             var config = eon.imports.config[el.nodeName.toLowerCase()];
@@ -60,6 +60,9 @@ eon.declare = function (name, baseElement) {
             if (el.isFirstAttach) {
 
                 el.isFirstAttach = false;
+                // Once a new element is attached for the first time we set the onReady 
+                // callback triggered property to false until all the elements are ready again
+                eon.__onReady__triggered = false;
 
                 eon.importTemplateClasses(el);
 

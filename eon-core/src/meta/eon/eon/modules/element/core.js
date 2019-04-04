@@ -977,7 +977,7 @@ eon.generateElementReferences = function (el) {
         el._refs[node.getAttribute("eon-ref")] = node;
         node.removeAttribute("eon-ref");
     }
-    console.log('generateElementReferences', el._refs);
+    
 };
 
 /*
