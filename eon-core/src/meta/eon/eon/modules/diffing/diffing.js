@@ -172,6 +172,8 @@ eon.dataDiff = function (config) {
           self.delete(operation);
       }
     });
+    // Reset operations store
+    self._operations = [];
   }
   /*
     @function (private) _saveState
