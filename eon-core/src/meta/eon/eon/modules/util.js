@@ -199,13 +199,13 @@ eon.ajax = function (url, options, cb) {
   options.password = options.password || null;
   options.cacheBusting = "cacheBusting" in options ? options.cacheBusting : false;
 
-  url = options.cacheBusting? eon.getCacheBustedUrl(url) : url;
+  url = options.cacheBusting ? eon.getCacheBustedUrl(url) : url;
 
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {
     if (this.readyState == 4) {
       var success = this.status >= 200 && this.status < 300;
-      if(cb) {
+      if (cb) {
         cb(success, {
           url: url,
           method: options.method,
@@ -250,10 +250,10 @@ eon.setLocale = function (url, options) {
 
   options = options ? options : {};
 
-  eon.ajax(url, options, function(success, obj) {
-    
+  eon.ajax(url, options, function (success, obj) {
+
     if (success) {
-      
+
       var jsonObj = JSON.parse(obj.responseText);
 
       if (jsonObj) {
@@ -271,13 +271,17 @@ eon.setLocale = function (url, options) {
  * @param  {[type]}  [description]
  */
 eon.util.arrayToMap = function (array) {
-  var map = new Map();
+  var result = new Map();
 
-  for (var i = 0; i < array.length; i++) {
-    map.set(i.toString(), array[i]);
+  if (array.constructor === Map) {
+    result = array;
+  } else if (array.constructor === Array) {
+    for (var i = 0; i < array.length; i++) {
+      result.set(i.toString(), array[i]);
+    }
   }
 
-  return map;
+  return result;
 };
 
 /**
@@ -287,8 +291,12 @@ eon.util.arrayToMap = function (array) {
 eon.util.objectToMap = function (object) {
   var map = new Map();
 
-  for(var key in object){
-    map.set(key, object[key]);
+  if (object.constructor === Map) {
+    map = object;
+  } else {
+    for (var key in object) {
+      map.set(key, object[key]);
+    }
   }
 
   return map;
@@ -299,8 +307,14 @@ eon.util.objectToMap = function (object) {
  */
 eon.util.mapToObject = function (map) {
   var obj = Object.create(null);
-  map.forEach(function (value, key, mapObj) {
-    mapObj[key] = value;
-});
+
+  if (map.constructor === Map) {
+    obj = map;
+  } else if (map.constructor === Object) {
+    map.forEach(function (value, key, mapObj) {
+      mapObj[key] = value;
+    });
+  }
+
   return obj;
 };
