@@ -8,7 +8,6 @@ eon.registry.readyQueue = [];
 eon.registry.transformedQueueBreak = true;
 
 eon.registry.elementThemes = {};
-eon.registry.elementTemplates = {};
 eon.registry.elementCounters = {};
 eon.registry.elementRegistry = {};
 
@@ -245,29 +244,6 @@ eon.registry.isThemeRegistered = function (tagName, theme) {
   return !eon.registry.elementThemes[theme]
     ? false
     : eon.registry.elementThemes[theme][tagName];
-};
-
-/*
-@function registerTemplate
-@description Saves the template for the given component node
-@param {String} tagName
-@param {Object} template
-*/
-eon.registry.registerTemplate = function (tagName, template) {
-  if (!eon.registry.elementTemplates[tagName]) {
-    eon.registry.elementTemplates[tagName] = {};
-  }
-
-  eon.registry.elementTemplates[tagName] = template;
-};
-
-/*
-@function {Boolean} isTemplateRegistered
-@description Checks if the given component has already registered a template
-@param {String} tagName
-*/
-eon.registry.isTemplateRegistered = function (tagName) {
-  return !eon.registry.elementTemplates[tagName] ? false : true;
 };
 
 /*

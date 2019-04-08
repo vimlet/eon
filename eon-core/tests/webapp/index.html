@@ -26,7 +26,6 @@
       eon.onImportsReady(function () {
         // We know that for this scenario the are only 7 imported components, 2 of them being included as part of eon, 
         // the components that we are importing (eon-component-4, eon-component-1) and its dependencies (eon-component-2, eon-component-3, eon-custom-1)
-        console.log('Object.keys(eon.imports.config).length', Object.keys(eon.imports.config).length);
         callback(Object.keys(eon.imports.config).length == 7);
       });
 
@@ -62,7 +61,7 @@
 
       var fragment = document.createDocumentFragment();
       var amount = 10000;
-      var maxMiliseconds = 2500;
+      var maxMiliseconds = 3000;
       var element, start;
 
       eon.import("eon/ui/eon-component-2");
@@ -176,6 +175,49 @@
 
         eon.onReady(function () {
           callback(component._refs.label ? true : false);
+        });
+
+      });
+
+    }
+
+    function bindingTest(callback) {
+
+      eon.data.gender = "Female";
+
+      eon.import([
+        "eon/ui/eon-component-4"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-4");
+
+        document.body.appendChild(component);
+
+        eon.onReady(function () {
+
+          var colorVariable = component.querySelector('[bind="color"]');
+          var ageVariable = component.querySelector('[bind="person.age"]');
+          var genderVariable = component.querySelector('[bind="gender"]');
+          var nameVariable = component.querySelector('[bind="brother.name"]');
+          var localeVariable = component.querySelector('[bind="locale.name"]');
+          var basicBind, dynamicBindChange, basicGlobalBind, dynamicGlobalBind, localeBind, passesTest;
+
+          component.locale.name = "Nombre";
+          component.data.person.age = "20";
+          eon.data.brother.name = "Jon";
+
+          basicBind = colorVariable && colorVariable.innerHTML == "Red" ? true : false;
+          dynamicBindChange = ageVariable && ageVariable.innerHTML == "20" ? true : false;
+          basicGlobalBind = genderVariable && genderVariable.innerHTML == "Female" ? true : false;
+          dynamicGlobalBind = nameVariable && nameVariable.innerHTML == "Jon" ? true : false;
+          localeBind = localeVariable && localeVariable.innerHTML == "Nombre" ? true : false;
+          
+          passesTest = basicBind && dynamicBindChange && basicGlobalBind && dynamicGlobalBind && localeBind;
+          
+          callback(passesTest);
+
         });
 
       });

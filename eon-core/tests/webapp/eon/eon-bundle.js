@@ -6464,7 +6464,6 @@ eon.registry.readyQueue = [];
 eon.registry.transformedQueueBreak = true;
 
 eon.registry.elementThemes = {};
-eon.registry.elementTemplates = {};
 eon.registry.elementCounters = {};
 eon.registry.elementRegistry = {};
 
@@ -6701,29 +6700,6 @@ eon.registry.isThemeRegistered = function (tagName, theme) {
   return !eon.registry.elementThemes[theme]
     ? false
     : eon.registry.elementThemes[theme][tagName];
-};
-
-/*
-@function registerTemplate
-@description Saves the template for the given component node
-@param {String} tagName
-@param {Object} template
-*/
-eon.registry.registerTemplate = function (tagName, template) {
-  if (!eon.registry.elementTemplates[tagName]) {
-    eon.registry.elementTemplates[tagName] = {};
-  }
-
-  eon.registry.elementTemplates[tagName] = template;
-};
-
-/*
-@function {Boolean} isTemplateRegistered
-@description Checks if the given component has already registered a template
-@param {String} tagName
-*/
-eon.registry.isTemplateRegistered = function (tagName) {
-  return !eon.registry.elementTemplates[tagName] ? false : true;
 };
 
 /*
@@ -8336,38 +8312,28 @@ eon.fragmentFromString = function (str) {
 @param {Object} el
 */
 eon.generateElementTemplate = function (el) {
-
     var name = el.nodeName.toLowerCase();
+    var template = eon.imports.templates[name];
+    var clone = document.createElement("template");
 
-    // It will only enter here once per element type, it will create a template clone for all the other components to copy
-    if (!eon.registry.isTemplateRegistered(name)) {
+    // All the content related checks are made to improve compatibility with browsers that do not support template
+    clone.content = document.createDocumentFragment();
 
-        var template = eon.imports.templates[name];
-        var clone = document.createElement("template");
+    if (template) {
 
-        // All the content related checks are made to improve compatibility with browsers that do not support template
-        clone.content = document.createDocumentFragment();
-
-        if (template) {
-
-            if (!template.content) {
-                template.content = eon.fragmentFromString(template.innerHTML);
-            }
-
-            clone = template.cloneNode(true);
-
-            if (!clone.content) {
-                clone.content = eon.fragmentFromString(clone.innerHTML);
-            }
-
+        if (!template.content) {
+            template.content = eon.fragmentFromString(template.innerHTML);
         }
 
-        eon.registry.registerTemplate(name, clone.content);
+        clone = template.cloneNode(true);
+
+        if (!clone.content) {
+            clone.content = eon.fragmentFromString(clone.innerHTML);
+        }
 
     }
 
-    el.template = eon.registry.elementTemplates[name].cloneNode(true);
-
+    el.template = clone.content;
 };
 
 /*
@@ -9314,13 +9280,13 @@ eon.ajax = function (url, options, cb) {
   options.password = options.password || null;
   options.cacheBusting = "cacheBusting" in options ? options.cacheBusting : false;
 
-  url = options.cacheBusting? eon.getCacheBustedUrl(url) : url;
+  url = options.cacheBusting ? eon.getCacheBustedUrl(url) : url;
 
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {
     if (this.readyState == 4) {
       var success = this.status >= 200 && this.status < 300;
-      if(cb) {
+      if (cb) {
         cb(success, {
           url: url,
           method: options.method,
@@ -9365,10 +9331,10 @@ eon.setLocale = function (url, options) {
 
   options = options ? options : {};
 
-  eon.ajax(url, options, function(success, obj) {
-    
+  eon.ajax(url, options, function (success, obj) {
+
     if (success) {
-      
+
       var jsonObj = JSON.parse(obj.responseText);
 
       if (jsonObj) {
@@ -9386,13 +9352,17 @@ eon.setLocale = function (url, options) {
  * @param  {[type]}  [description]
  */
 eon.util.arrayToMap = function (array) {
-  var map = new Map();
+  var result = new Map();
 
-  for (var i = 0; i < array.length; i++) {
-    map.set(i.toString(), array[i]);
+  if (array.constructor === Map) {
+    result = array;
+  } else if (array.constructor === Array) {
+    for (var i = 0; i < array.length; i++) {
+      result.set(i.toString(), array[i]);
+    }
   }
 
-  return map;
+  return result;
 };
 
 /**
@@ -9402,8 +9372,12 @@ eon.util.arrayToMap = function (array) {
 eon.util.objectToMap = function (object) {
   var map = new Map();
 
-  for(var key in object){
-    map.set(key, object[key]);
+  if (object.constructor === Map) {
+    map = object;
+  } else {
+    for (var key in object) {
+      map.set(key, object[key]);
+    }
   }
 
   return map;
@@ -9414,9 +9388,15 @@ eon.util.objectToMap = function (object) {
  */
 eon.util.mapToObject = function (map) {
   var obj = Object.create(null);
-  map.forEach(function (value, key, mapObj) {
-    mapObj[key] = value;
-});
+
+  if (map.constructor === Map) {
+    obj = map;
+  } else if (map.constructor === Object) {
+    map.forEach(function (value, key, mapObj) {
+      mapObj[key] = value;
+    });
+  }
+
   return obj;
 };
 
@@ -10114,8 +10094,8 @@ eon.dataDiff = function (config) {
   */
   this.commit = function (data, oldData) {
     // Convert into Map object
-    eon.util.objectToMap(data);
-    eon.util.objectToMap(oldData);
+    data = eon.util.objectToMap(data);
+    oldData = eon.util.objectToMap(oldData);
     // Compare and persist data
     self._diff(data, oldData);
     self._processState();
@@ -10251,6 +10231,8 @@ eon.dataDiff = function (config) {
           self.delete(operation);
       }
     });
+    // Reset operations store
+    self._operations = [];
   }
   /*
     @function (private) _saveState

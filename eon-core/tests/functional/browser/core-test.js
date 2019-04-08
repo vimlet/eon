@@ -54,4 +54,11 @@ suite("eon-core", () => {
           assert.strictEqual(value, true);
         });
       });
+      test("Binding", ({ remote }) => {
+        return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+          bindingTest(callback);
+        }).then(function (value) {
+          assert.strictEqual(value, true);
+        });
+      });
 });

@@ -916,38 +916,28 @@ eon.fragmentFromString = function (str) {
 @param {Object} el
 */
 eon.generateElementTemplate = function (el) {
-
     var name = el.nodeName.toLowerCase();
+    var template = eon.imports.templates[name];
+    var clone = document.createElement("template");
 
-    // It will only enter here once per element type, it will create a template clone for all the other components to copy
-    if (!eon.registry.isTemplateRegistered(name)) {
+    // All the content related checks are made to improve compatibility with browsers that do not support template
+    clone.content = document.createDocumentFragment();
 
-        var template = eon.imports.templates[name];
-        var clone = document.createElement("template");
+    if (template) {
 
-        // All the content related checks are made to improve compatibility with browsers that do not support template
-        clone.content = document.createDocumentFragment();
-
-        if (template) {
-
-            if (!template.content) {
-                template.content = eon.fragmentFromString(template.innerHTML);
-            }
-
-            clone = template.cloneNode(true);
-
-            if (!clone.content) {
-                clone.content = eon.fragmentFromString(clone.innerHTML);
-            }
-
+        if (!template.content) {
+            template.content = eon.fragmentFromString(template.innerHTML);
         }
 
-        eon.registry.registerTemplate(name, clone.content);
+        clone = template.cloneNode(true);
+
+        if (!clone.content) {
+            clone.content = eon.fragmentFromString(clone.innerHTML);
+        }
 
     }
 
-    el.template = eon.registry.elementTemplates[name].cloneNode(true);
-
+    el.template = clone.content;
 };
 
 /*
