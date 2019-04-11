@@ -6,6 +6,9 @@ eon.interpolation.globalScope = eon.interpolation.globalScope || eon;
 eon.interpolation.globalScope.data = eon.interpolation.globalScope.data || {};
 eon.interpolation.globalScope.locale = eon.interpolation.globalScope.locale || {};
 
+eon.createCallback("onDataChanged", eon.interpolation.globalScope);
+eon.createCallback("onLocaleChanged", eon.interpolation.globalScope);
+
 /*
 @function prepare
 @description Replaces all the echo/script for its corresponding elements and prepares them
@@ -81,7 +84,7 @@ eon.interpolation.init = function (el, config) {
 
   sources.element = {};
   sources.global = {};
-  
+
   // First of all checks if there is a data specified in the element config, if so, it creates the source
   if (Object.keys(el.data).length > 0) {
 
@@ -97,9 +100,9 @@ eon.interpolation.init = function (el, config) {
   if (!config.parse) {
 
     if (sources.element.data) {
-      
-      eon.interpolation.setupDataChangeCallback(el, sources.element.data, config);
-      eon.interpolation.setupDataPropDescriptors(sources.element.data, "data");
+
+      eon.interpolation.setupListenerCallback(el, sources.element.data, config);
+      eon.interpolation.defineProperties(sources.element.data, "data");
 
     }
 
@@ -108,11 +111,16 @@ eon.interpolation.init = function (el, config) {
     var variables = el.template.querySelectorAll("eon-variable");
     var currentVariable;
 
-    var isGlobal, scope, source, sourceType;
-    var bindString, bindValue, root;
+    var isGlobal, scope, source, sourceType, interpolations;
+    var bindString, bindValue, isUndefined, root;
 
     eon.interpolation.globalScope.__interpolations = eon.interpolation.globalScope.__interpolations || {};
+    eon.interpolation.globalScope.__interpolations.data = eon.interpolation.globalScope.__interpolations.data || {};
+    eon.interpolation.globalScope.__interpolations.locale = eon.interpolation.globalScope.__interpolations.locale || {};
+
     el.__interpolations = el.__interpolations || {};
+    el.__interpolations.data = el.__interpolations.data || {};
+    el.__interpolations.locale = el.__interpolations.locale || {};
 
     // Loops all the inner element variables
     for (var i = 0; i < variables.length; i++) {
@@ -129,11 +137,14 @@ eon.interpolation.init = function (el, config) {
 
       // Reads if there is already a value on the source if there is not then it assigns an empty string
       bindValue = eon.object.readFromPath(root, bindString);
-      bindValue = typeof bindValue == "undefined" ? "" : bindValue;
-
+      isUndefined = typeof bindValue == "undefined";
+      bindValue = isUndefined ? "" : bindValue;
+      
       // Reassigns the value to the source, in case there was no value
-      eon.object.assignToPath(root, bindString, bindValue);
-
+      if (isUndefined) {
+        eon.object.assignToPath(root, bindString, bindValue);
+      }
+      
       sourceType = isGlobal ? "global" : "element";
 
       // Creates the source object
@@ -143,7 +154,6 @@ eon.interpolation.init = function (el, config) {
         sources[sourceType][sourceName].scope = scope;
         sources[sourceType][sourceName].obj = scope[sourceName];
         sources[sourceType][sourceName].isGlobal = isGlobal;
-
         sources[sourceType][sourceName].isLocale = (sourceName == "locale");
 
       }
@@ -160,10 +170,11 @@ eon.interpolation.init = function (el, config) {
       for (var j = 0; j < sourceKeys.length; j++) {
 
         source = sources[sourceTypeKeys[i]][sourceKeys[j]];
+        interpolations = source.isLocale ? source.scope.__interpolations.locale : source.scope.__interpolations.data;
 
-        eon.interpolation.setupDataChangeCallback(el, source, config);
-        eon.interpolation.setupDataPropDescriptors(source, sourceKeys[j]);
-        eon.interpolation.interpolate(el, source, source.obj, source.scope.__interpolations);
+        eon.interpolation.setupListenerCallback(el, source, config);
+        eon.interpolation.defineProperties(source, sourceKeys[j]);
+        eon.interpolation.interpolate(el, source, source.obj, interpolations);
 
       }
 
@@ -174,12 +185,12 @@ eon.interpolation.init = function (el, config) {
 };
 
 /*
-@function setupDataPropDescriptors
+@function defineProperties
 @description Creates the descriptor for the data object itself and for all its properties
 @param {Object} source
 @param {String} sourceName
 */
-eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
+eon.interpolation.defineProperties = function (source, sourceName) {
 
   var scope = source.scope;
 
@@ -187,11 +198,11 @@ eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
   Object.defineProperty(
     scope,
     sourceName,
-    eon.interpolation.createPropDescriptor(scope, scope, sourceName, "", scope[sourceName])
+    eon.interpolation.createPropDescriptor(scope, scope, sourceName, "", scope[sourceName], source.isLocale)
   );
 
   // Loops through all the keys of the object
-  eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName);
+  eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName, source.isLocale);
 }
 
 /*
@@ -203,7 +214,7 @@ eon.interpolation.setupDataPropDescriptors = function (source, sourceName) {
 @param {String} keyPath
 @param {Value} value
 */
-eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyPath, value) {
+eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyPath, value, isLocale) {
   var propDescriptor = {};
 
   // Update property value
@@ -215,8 +226,9 @@ eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyP
   };
 
   propDescriptor.set = function (value) {
-    // Trigger onDataChanged
-    eon.triggerCallback("_onDataChanged", scope, scope, [keyPath + key, keyOwnerObj["__" + key], value]);
+    // Trigger callback
+    var callbackName = isLocale ? "_onLocaleChanged" : "_onDataChanged";
+    eon.triggerCallback(callbackName, scope, scope, [keyPath + key, keyOwnerObj["__" + key], value]);
 
     // Update property value
     keyOwnerObj["__" + key] = value;
@@ -232,7 +244,7 @@ eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyP
 @param {Object} obj
 @param {String} keyPath
 */
-eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
+eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLocale) {
   var value;
 
   keyPath = keyPath + ".";
@@ -247,40 +259,42 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath) {
       Object.defineProperty(
         obj,
         key,
-        eon.interpolation.createPropDescriptor(el, obj, key, keyPath, value)
+        eon.interpolation.createPropDescriptor(el, obj, key, keyPath, value, isLocale)
       );
 
       // If the value is an Object then we update the keyPath and create the propDescriptors
       if (value && value.constructor === Object) {
         keyPath = keyPath + key;
-        eon.interpolation.createObjectPropDescriptors(el, value, keyPath);
+        eon.interpolation.createObjectPropDescriptors(el, value, keyPath, isLocale);
       }
     }
   }
 }
 
 /*
-@function setupDataChangeCallback
-@description Creates the private onDataChanged callback to handle the public one
+@function setupListenerCallback
+@description Creates the private onDataChanged and onLocaleChange callbacks to handle the public ones
 @param {Object} el
 @param {Object} source
 @param {Object} config
 */
-eon.interpolation.setupDataChangeCallback = function (el, source, config) {
+eon.interpolation.setupListenerCallback = function (el, source, config) {
   var scope = source.scope;
-
+  var isLocale = source.isLocale ? true : false;
+  var callbackName = source.isLocale ? "_onLocaleChanged" : "_onDataChanged";
+  
   // If the private callback doesnt exist creates it
-  if (!scope._onDataChanged) {
-
-    eon.createCallback("_onDataChanged", scope);
+  if (!scope[callbackName]) {
+    
+    eon.createCallback(callbackName, scope);
 
     // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
-    scope._onDataChanged(function (keyPath, oldVal, newVal) {
+    scope[callbackName](function (keyPath, oldVal, newVal) {
       
       if (newVal.constructor === Object) {
-        eon.interpolation.handleObjectChange(el, scope, keyPath, oldVal, newVal, config);
+        eon.interpolation.handleObjectChange(el, scope, keyPath, oldVal, newVal, config, isLocale);
       } else {
-        eon.interpolation.handleVariableChange(el, scope, keyPath, oldVal, newVal, config);
+        eon.interpolation.handleVariableChange(scope, keyPath, oldVal, newVal, config, isLocale);
       }
 
     });
@@ -310,7 +324,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
         bind = bind ? bind + "." + key : key;
         interpolations[key] = interpolations[key] ? interpolations[key] : {};
 
-        eon.interpolation.interpolate(el, source, obj[key], interpolations[key], bind);
+        eon.interpolation.interpolate(el, source, obj[key], interpolations[key], bind); 
 
       } else {
 
@@ -318,7 +332,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
         variableBind = source.isLocale ? "locale." + variableBind : variableBind;
 
         interpolations[key] = interpolations[key] ? interpolations[key] : [];
-
+        
         // Looks for the variables matching the binding
         Array.prototype.push.apply(interpolations[key], el.template.querySelectorAll(
           'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
@@ -345,10 +359,11 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
 @param {Object} newData
 @param {Object} config
 */
-eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, newData, config) {
+eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, newData, config, isLocale) {
   var checked = {};
+  var callbackName = isLocale ? "onLocaleChanged" : "onDataChanged";
 
-  eon.triggerAllCallbackEvents(el, config, "onDataChanged", [keyPath, oldData, newData]);
+  eon.triggerAllCallbackEvents(el, config, callbackName, [keyPath, oldData, newData]);
 
   // Checks differences between the old and the new data
   checked = eon.interpolation.backwardDataDiffing(el, scope, keyPath, oldData, newData, checked, config);
@@ -359,17 +374,19 @@ eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, ne
 }
 
 // Handles the value change of the variable element and triggers onDataChanged
-eon.interpolation.handleVariableChange = function (el, scope, keyPath, oldVal, newVal, config) {
+eon.interpolation.handleVariableChange = function (scope, keyPath, oldVal, newVal, config, isLocale) {
   var pathArray = keyPath.split(".");
+  var callbackName = isLocale ? "onLocaleChanged" : "onDataChanged";
+  var interpolations = isLocale ? scope.__interpolations.locale : scope.__interpolations.data;
   var interpolationPath;
   var variablesToChange;
-
+  
   // Removes the first index of the pathArray, that corresponds to "data", which we dont need for the interpolations
   pathArray.shift();
   // Sets the path back together withouth data
   interpolationPath = pathArray.join(".");
   // Takes the variable elements for the path
-  variablesToChange = eon.object.readFromPath(scope.__interpolations, interpolationPath);
+  variablesToChange = eon.object.readFromPath(interpolations, interpolationPath);
 
   // If it has variable elements changes its value 
   if (variablesToChange) {
@@ -377,12 +394,12 @@ eon.interpolation.handleVariableChange = function (el, scope, keyPath, oldVal, n
       variablesToChange[i].textContent = newVal;
     }
   }
-
-  eon.triggerAllCallbackEvents(scope, config ? config : {}, "onDataChanged", [interpolationPath, oldVal, newVal]);
+  
+  eon.triggerAllCallbackEvents(scope, config ? config : {}, callbackName, [interpolationPath, oldVal, newVal]);
 }
 
 /*
-@function handleObjectChange
+@function backwardDataDiffing
 @description Compares the old data with the new one and triggers the changes
 @param {Object} el
 @param {Object} scope
@@ -405,7 +422,7 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
         // If there is no such property on the new Data we set it as an empty string
         newVal = newData ? newData[key] : "";
         // Handles the variable change
-        eon.interpolation.handleVariableChange(el, scope, keyPath + "." + key, oldData[key], newVal, config);
+        eon.interpolation.handleVariableChange(scope, keyPath + "." + key, oldData[key], newVal, config);
 
         if (newData && newData.hasOwnProperty(key)) {
           checked[key] = newData[key];
@@ -418,7 +435,7 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
 }
 
 /*
-@function handleObjectChange
+@function forwardDataDiffing
 @description Compares the data with the already checked object
 @param {Object} el
 @param {Object} scope
@@ -440,7 +457,7 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
         oldVal = checked ? checked[key] : "";
         // To only trigger variable change for properties that are not already checked/triggered
         if ((checked && !checked.hasOwnProperty(key)) || !checked) {
-          eon.interpolation.handleVariableChange(el, scope, keyPath + "." + key, oldVal, data[key], config);
+          eon.interpolation.handleVariableChange(scope, keyPath + "." + key, oldVal, data[key], config);
         }
       }
     }

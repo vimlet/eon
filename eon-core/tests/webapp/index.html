@@ -61,7 +61,7 @@
 
       var fragment = document.createDocumentFragment();
       var amount = 10000;
-      var maxMiliseconds = 3000;
+      var maxMiliseconds = 4000;
       var element, start;
 
       eon.import("eon/ui/eon-component-2");
@@ -192,8 +192,10 @@
       eon.onReady(function () {
 
         var component = document.createElement("eon-component-4");
+        var component2 = document.createElement("eon-component-4");
 
         document.body.appendChild(component);
+        document.body.appendChild(component2);
 
         eon.onReady(function () {
 
@@ -202,21 +204,152 @@
           var genderVariable = component.querySelector('[bind="gender"]');
           var nameVariable = component.querySelector('[bind="brother.name"]');
           var localeVariable = component.querySelector('[bind="locale.name"]');
+          
+          var genderVariable2 = component2.querySelector('[bind="gender"]');
+
           var basicBind, dynamicBindChange, basicGlobalBind, dynamicGlobalBind, localeBind, passesTest;
 
           component.locale.name = "Nombre";
           component.data.person.age = "20";
           eon.data.brother.name = "Jon";
+          eon.data.gender = "Male";
 
-          basicBind = colorVariable && colorVariable.innerHTML == "Red" ? true : false;
-          dynamicBindChange = ageVariable && ageVariable.innerHTML == "20" ? true : false;
-          basicGlobalBind = genderVariable && genderVariable.innerHTML == "Female" ? true : false;
-          dynamicGlobalBind = nameVariable && nameVariable.innerHTML == "Jon" ? true : false;
-          localeBind = localeVariable && localeVariable.innerHTML == "Nombre" ? true : false;
-          
+          basicBind = colorVariable.innerHTML == "Red" ? true : false;
+          dynamicBindChange = ageVariable.innerHTML == "20" ? true : false;
+          // Checks if by changing the global gender variable it changes both variables
+          basicGlobalBind = genderVariable.innerHTML == "Male" && genderVariable2.innerHTML == "Male"? true : false;
+          dynamicGlobalBind = nameVariable.innerHTML == "Jon" ? true : false;
+          localeBind = localeVariable.innerHTML == "Nombre" ? true : false;
+
           passesTest = basicBind && dynamicBindChange && basicGlobalBind && dynamicGlobalBind && localeBind;
-          
+
           callback(passesTest);
+
+        });
+
+      });
+
+    }
+
+    function dataChangedTest(callback) {
+
+      eon.data.gender = "Female";
+      eon.locale.gender = "Gender";
+
+      eon.import([
+        "eon/ui/eon-component-4"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-4");
+        var component2 = document.createElement("eon-component-4");
+        var component3 = document.createElement("eon-component-4");
+
+        var testData = {
+
+          comp1DataChangedCount: 0,
+          comp2DataChangedCount: 0,
+          comp3DataChangedCount: 0,
+          comp1LocalChangedCount: 0,
+          comp2LocalChangedCount: 0,
+          comp3LocalChangedCount: 0,
+          eonDataChangedCount: 0,
+          eonLocaleChangedCount: 0,
+
+        };
+
+        var finishTest = function () {
+
+          var comp1DCount = testData.comp1DataChangedCount == 1;
+          var comp1LCount = testData.comp1LocalChangedCount == 1;
+
+          var comp2DCount = testData.comp2DataChangedCount == 2;
+          var comp2LCount = testData.comp2LocalChangedCount == 1;
+
+          var comp3DCount = testData.comp3DataChangedCount == 3;
+          var comp3LCount = testData.comp3LocalChangedCount == 2;
+
+          var eonDataChangedCount = testData.eonDataChangedCount == 2;
+          var eonLocaleChangedCount = testData.eonLocaleChangedCount == 1;
+          
+          if (comp1DCount && comp2DCount && comp3DCount && comp1LCount && comp2LCount && comp3LCount && eonDataChangedCount && eonLocaleChangedCount) {
+            callback(true);
+          }
+
+        };
+
+        // COMPONENT 1
+        component.onDataChanged(function (keyPath, previousVal, newVal) {
+          testData.comp1DataChangedCount++;
+          finishTest();
+        });
+
+        component.onLocaleChanged(function (keyPath, previousVal, newVal) {
+          testData.comp1LocalChangedCount++;
+          finishTest();
+        });
+
+        // COMPONENT 2
+        component2.onDataChanged(function (keyPath, previousVal, newVal) {
+          testData.comp2DataChangedCount++;
+          finishTest();
+        });
+
+        component2.onLocaleChanged(function (keyPath, previousVal, newVal) {
+          testData.comp2LocalChangedCount++;
+          finishTest();
+        });
+
+        // COMPONENT 3
+        component3.onDataChanged(function (keyPath, previousVal, newVal) {
+          testData.comp3DataChangedCount++;
+          finishTest();
+        });
+
+        component3.onLocaleChanged(function (keyPath, previousVal, newVal) {
+          testData.comp3LocalChangedCount++;
+          finishTest();
+        });
+
+        // EON
+        eon.onDataChanged(function (keyPath, previousVal, newVal) {
+          testData.eonDataChangedCount++;
+          finishTest();
+        });
+
+        eon.onLocaleChanged(function (keyPath, previousVal, newVal) {
+          testData.eonLocaleChangedCount++;
+          finishTest();
+        });
+
+        document.body.appendChild(component);
+        document.body.appendChild(component2);
+        document.body.appendChild(component3);
+
+        eon.onReady(function () {
+
+          var basicBind, dynamicBindChange, basicGlobalBind, dynamicGlobalBind, localeBind, passesTest;
+
+          component.locale.name = "Nombre";
+          component.data.person.age = "20";
+
+          component2.locale.name = "Nome";
+          component2.data.color = "Blue";
+          component2.data.person.age = "31";
+
+          component3.locale.name = "Prénom";
+          component3.locale.name = "Név";
+          component3.data.color = "Yellow";
+          component3.data.color = "Green";
+          component3.data.person.age = "17";
+
+          eon.data.brother.name = "Jon";
+
+          setTimeout(function () {
+            eon.data.brother.name = "Aegon";
+            eon.locale.gender = "Genero";
+          }, 500);
 
         });
 

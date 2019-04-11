@@ -143,6 +143,7 @@ eon.declareCallbacks = function (el) {
     eon.createCallback("onPropertyChanged", el);
     eon.createCallback("onAttributeChanged", el);
     eon.createCallback("onDataChanged", el);
+    eon.createCallback("onLocaleChanged", el);
 
     eon.createResizeCallbacks(el);
 
@@ -668,6 +669,16 @@ eon.importPrivate = function (el, config) {
 };
 
 /*
+@function importResize
+@description Takes all the resize functions from the element config and adds them to the onResize callbacks queue
+@param {Object} el
+@param {Object} config
+*/
+eon.importResize = function (el, config) {
+
+};
+
+/*
 @function  importTemplateClasses
 @description If classes are specified in the element template, these are moved into the actual element
 @param {Object} el
@@ -961,13 +972,13 @@ eon.generateElementReferences = function (el) {
     var node;
 
     el._refs = el._refs || {};
-    
+
     for (var i = 0; i < nodes.length; i++) {
         node = nodes[i];
         el._refs[node.getAttribute("eon-ref")] = node;
         node.removeAttribute("eon-ref");
     }
-    
+
 };
 
 /*
@@ -1117,14 +1128,14 @@ eon.createResizeCallbacks = function (el) {
     el.onResize = function (callback) {
         // Once the pseudo callback has been called we set it to null so that it can create the real one
         el.onResize = null;
-
-        eon.createCallback("onResize", el);
         
+        eon.createCallback("onResize", el);
+
         // Once the element is ready, it will add the listener
         el.onReady(function () {
 
             var config = eon.imports.config[el.nodeName.toLowerCase()];
-            
+
             eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
                 eon.triggerAllCallbackEvents(el, config, "onResize", []);
             });
@@ -1135,12 +1146,28 @@ eon.createResizeCallbacks = function (el) {
 
     }
 
-    // onWindowResize callback creation
+    // If the pseudo onResize callback has not been triggered by the time the element is Ready 
+    // and the element has an onResize callback in its config we create the proper callback
     el.onReady(function () {
 
         var config = eon.imports.config[el.nodeName.toLowerCase()];
 
-        eon.createCallback("onWindowResize", el);
+        if (!el.__onResize && config.onResize) {
+
+            eon.addResizeListener(el, el.nodeName.toLowerCase(), function () {
+                eon.triggerAllCallbackEvents(el, config, "onResize", []);
+            });
+
+        }
+
+    })
+
+    // onWindowResize callback creation
+    eon.createCallback("onWindowResize", el);
+
+    el.onReady(function () {
+
+        var config = eon.imports.config[el.nodeName.toLowerCase()];
 
         window.addEventListener("resize", function () {
             eon.triggerAllCallbackEvents(el, config, "onWindowResize", []);

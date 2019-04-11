@@ -10,14 +10,6 @@ suite("eon-core", () => {
         });
 
     });
-    test("Property changes", ({ remote }) => {
-        return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
-            propertyChangedTest(callback);
-        }).then(function (value) {
-            assert.strictEqual(value, true);
-        });
-
-    });
     test("Performance", ({ remote }) => {
         return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
             performanceTest(callback);
@@ -61,4 +53,19 @@ suite("eon-core", () => {
           assert.strictEqual(value, true);
         });
       });
+      test("Data & Locale changes", ({ remote }) => {
+        return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+          dataChangedTest(callback);
+        }).then(function (value) {
+          assert.strictEqual(value, true);
+        });
+      });
+      test("Property changes", ({ remote }) => {
+        return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+            propertyChangedTest(callback);
+        }).then(function (value) {
+            assert.strictEqual(value, true);
+        });
+
+    });
 });
