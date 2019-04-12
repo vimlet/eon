@@ -429,7 +429,9 @@ Recurrent events might be triggered more than once:
 
 - **onAttributeChanged** - Triggers each time an attribute is changed.
 
-- **onDataChanged** - Triggers each time data property is changed.
+- **onDataChanged** - Triggers each time a data property is changed.
+
+- **onLocaleChanged** - Triggers each time a locale property is changed.
 
 Note that all the recurrent events except `onAttached` and `onDetached` events, do not trigger until the element is ready (this means when the `onReady` event has been triggered).
 
@@ -549,6 +551,30 @@ eon.object.assignToPath(yourObject, propertyPath, propertyNewValue);
 </script>
 ```
 
+## Global Data
+
+Although you can use your data object in any of your components, there might be circunstances in which you might prefer changing your values in one place to affect all the varibles in the same document at the same time, for these scenarios we also provide a global Data object for you to use, this Data will be accesible from Eon, which is its default scope. This scope can be changed easily if desired. this change must be done before Eon is imported:
+
+```[javascript]
+<script>
+  var eon = {
+    interpolation: {
+      globalScope: myScope
+    }
+  }
+</script>
+```
+
+This scope will also have its corresponding onDataChanged callback.
+
+```[javascript]
+<script>
+  myScope.onDataChanged(function (keyPath, oldVal, newVal) {
+    console.log("Global Data changed.", "Key:", keyPath, ", Previous:", oldVal, ", New:", newVal);
+  });
+</script>
+```
+
 [Interpolation]<>
 
 Eon template engine makes use of interpolation in order to provide a powerful and handy way of data binding and scripting.
@@ -623,6 +649,14 @@ or as stated, using the shorthand
 
 This is possible because Eon template engine treats interpolated code as plain javascript, but provides handy functions like bind(data) and echo(string) as well as its respective shorthands which speeds daily development.
 
+Here you also have an example of a global binding:
+
+```[html]
+<template>
+  Hello {{@global name }}!
+</template>
+```
+
 ## Understanding echo "="
 
 The function echo(string) outputs text to the template, and it can be used with `=` shorthand.
@@ -676,6 +710,61 @@ I'm text2
 The interpolated code inside a template share the same scope, so it's possible to declare a variable in one block and use it in another.
 
 It's also important to note interpolated code will render only once per element to enhance performance, this won't affect the data bind mechanism.
+
+[Locale]<>
+
+Another object provided by Eon that works exactly as Data does, but it is given with the purpose of having another scope for operations such as changing the language of your document. Combining both Locale and Data you can achieve great results when trying to fill the texts of your application, with locale you could swap the language easily when giving the locale object a new object value, while you could change specific texts or fields when doing the same thing with data.
+
+## Locale component declaration
+
+As you can see there is no actual difference between data and locale:
+
+```[html]
+<script>
+eon.element({
+
+  name: "eon-component",
+
+  parse: true,
+
+  locale: {
+      color: "Couleur";
+      name: "Prénom";
+  },
+
+  onLocaleChanged: function (keyPath, oldVal, newVal) {
+      console.log("Key:", keyPath, ", Previous:", oldVal, ", New:", newVal);
+  }
+
+});
+</script>
+```
+
+## Binding
+
+The binding process is the same as when using data, but you have to specify we are in the locale context:
+
+```[html]
+<template>
+  Hello {{@ locale.name }}!
+</template>
+```
+
+Locale can also work with the global scope and has its own callback to capture the moment in which any property changes:
+
+```[html]
+<template>
+  Hello {{@global locale.name }}!
+</template>
+```
+
+```[javascript]
+<script>
+  myScope.onLocaleChanged(function (keyPath, oldVal, newVal) {
+    console.log("Global locale changed.", "Key:", keyPath, ", Previous:", oldVal, ", New:", newVal);
+  });
+</script>
+```
 
 [Slotting]<>
 
