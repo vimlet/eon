@@ -9,6 +9,8 @@
 <strong>Fast, Light & Productive UX</strong>
 </p>
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1b3bcf2d99514377b2687c5d1157c449)](https://app.codacy.com/app/lethevimlet/eon?utm_source=github.com&utm_medium=referral&utm_content=vimlet/eon&utm_campaign=Badge_Grade_Dashboard)
+
 eon is an **ultra light and fast web framework** that focuses on user experience and developer experience, allowing you to create intuitive interfaces across any device with little effort. eon harness state of the art technologies to provide a smooth developing experience without compromising **compatibility and performance**, so you can stay highly productive while retaining full control of your user interface. 
 
 Bundled with eon there is a comprehensive library of **flexible and themeable** components that will suit most of your needs but you can also create your own with ease. 
@@ -16,8 +18,6 @@ Bundled with eon there is a comprehensive library of **flexible and themeable** 
 At is heart eon takes care of the hassles of user interface creation, effectively simplifying a plethora of issues that any interface designer faces in a daily basis (compatibility, performance, responsiveness, data binding, extensibility...) so you can stay focused on what really matters, your app!
 
 ## Features
-
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1b3bcf2d99514377b2687c5d1157c449)](https://app.codacy.com/app/lethevimlet/eon?utm_source=github.com&utm_medium=referral&utm_content=vimlet/eon&utm_campaign=Badge_Grade_Dashboard)
 
 * **Light:** Core of less than 16kb (minified and gzipped).
 * **Fast:** With its asynchronous patterns and natively supported specs.
