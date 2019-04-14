@@ -9,6 +9,7 @@
 <strong>Fast, Light & Productive UX</strong>
 </p>
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1b3bcf2d99514377b2687c5d1157c449)](https://app.codacy.com/app/lethevimlet/eon?utm_source=github.com&utm_medium=referral&utm_content=vimlet/eon&utm_campaign=Badge_Grade_Settings)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1b3bcf2d99514377b2687c5d1157c449)](https://app.codacy.com/app/lethevimlet/eon?utm_source=github.com&utm_medium=referral&utm_content=vimlet/eon&utm_campaign=Badge_Grade_Dashboard)
 
 eon is an **ultra light and fast web framework** that focuses on user experience and developer experience, allowing you to create intuitive interfaces across any device with little effort. eon harness state of the art technologies to provide a smooth developing experience without compromising **compatibility and performance**, so you can stay highly productive while retaining full control of your user interface. 
