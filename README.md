@@ -17,6 +17,8 @@ At is heart eon takes care of the hassles of user interface creation, effectivel
 
 ## Features
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1b3bcf2d99514377b2687c5d1157c449)](https://app.codacy.com/app/lethevimlet/eon?utm_source=github.com&utm_medium=referral&utm_content=vimlet/eon&utm_campaign=Badge_Grade_Dashboard)
+
 * **Light:** Core of less than 16kb (minified and gzipped).
 * **Fast:** With its asynchronous patterns and natively supported specs.
 * **Intuitive:** The DOM is your API; HTML and JavaScript are enough to work with eon.
