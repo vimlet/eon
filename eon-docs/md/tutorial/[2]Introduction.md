@@ -1,4 +1,4 @@
-[eon-cli]<>
+[Cli]<>
 
 eon-cli is a module that works as an assistant to download and install eon.js within your project. You may prefer another method to accomplish this task, but this tool provides the easiest way to download and install eon.js, but overall, to keep it updated. 
 
@@ -715,7 +715,7 @@ It's also important to note interpolated code will render only once per element 
 
 Another object provided by Eon that works exactly as Data does, but it is given with the purpose of having another scope for operations such as changing the language of your document. Combining both Locale and Data you can achieve great results when trying to fill the texts of your application, with locale you could swap the language easily when giving the locale object a new object value, while you could change specific texts or fields when doing the same thing with data.
 
-## Locale component declaration
+## Component declaration
 
 As you can see there is no actual difference between data and locale:
 
