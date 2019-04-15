@@ -59,7 +59,7 @@ eon.triggerCallback = function (callback, obj, scope, args) {
       var callbackFunctions = obj["__" + callback];
 
       // If the callback is of "ready" type we make a copy of the functions queue to trigger them and then clear the callback queue
-      if (obj["__" + callback + "__type"] == "ready") {
+      if (obj["__" + callback + "__type"] === "ready") {
         callbackFunctions = obj["__" + callback].slice(0);
         obj["__" + callback] = [];
       }

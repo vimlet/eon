@@ -203,7 +203,7 @@ eon.interpolation.defineProperties = function (source, sourceName) {
 
   // Loops through all the keys of the object
   eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName, source.isLocale);
-}
+};
 
 /*
 @function {Object} createPropDescriptor
@@ -235,7 +235,7 @@ eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyP
   };
 
   return propDescriptor;
-}
+};
 
 /*
 @function createObjectPropDescriptors
@@ -269,7 +269,7 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLo
       }
     }
   }
-}
+};
 
 /*
 @function setupListenerCallback
@@ -301,7 +301,7 @@ eon.interpolation.setupListenerCallback = function (el, source, config) {
 
   }
 
-}
+};
 
 /*
 @function interpolate
@@ -347,7 +347,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
       }
     }
   }
-}
+};
 
 /*
 @function handleObjectChange
@@ -371,7 +371,7 @@ eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, ne
   // Checks differences between the new and the old data, escaping the already checked ones
   eon.interpolation.forwardDataDiffing(el, scope, keyPath, newData, checked, config);
   eon.interpolation.createObjectPropDescriptors(scope, newData, keyPath, config);
-}
+};
 
 // Handles the value change of the variable element and triggers onDataChanged
 eon.interpolation.handleVariableChange = function (scope, keyPath, oldVal, newVal, config, isLocale) {
@@ -396,7 +396,7 @@ eon.interpolation.handleVariableChange = function (scope, keyPath, oldVal, newVa
   }
   
   eon.triggerAllCallbackEvents(scope, config ? config : {}, callbackName, [interpolationPath, oldVal, newVal]);
-}
+};
 
 /*
 @function backwardDataDiffing
@@ -432,7 +432,7 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
   }
 
   return checked;
-}
+};
 
 /*
 @function forwardDataDiffing
@@ -462,4 +462,4 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
       }
     }
   }
-}
+};

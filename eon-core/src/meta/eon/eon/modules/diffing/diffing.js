@@ -120,7 +120,7 @@ eon.dataDiff = function (config) {
       if (typeof (value) == "undefined" || !items.has(key)) {
         // :: Delete item
         self._storeOperation("delete", key, oldCounter, items.get(key), value);
-      };
+      }
     });
     return true;
   }

@@ -715,7 +715,7 @@ eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 
     // This "if" is created for the porpuse of not allowing onPropertyChanged and onAttributeChanged
     // to be triggered once the element is render, this is so we dont have to use el.onRender() inside this callback to not crash
-    if (!((callback == "onPropertyChanged" || callback == "onAttributeChanged") && eon.registry.isRendered(el) != true)) {
+    if (!((callback === "onPropertyChanged" || callback === "onAttributeChanged") && eon.registry.isRendered(el) != true)) {
 
         if (config[callback]) {
             config[callback].apply(el, params);

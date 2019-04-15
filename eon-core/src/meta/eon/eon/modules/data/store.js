@@ -35,7 +35,7 @@ eon.store = function () {
     // Trigger user callback once VPA has been loaded
     eon.triggerCallback("onLoaded", el, el, [el]);
 
-  };
+  }
   /*
       @function (private) _cloneFunctions
       @description 
@@ -45,7 +45,7 @@ eon.store = function () {
     Object.assign(el, adapter);
     // Get BaseAdapter prototype functions
     Object.assign(el, adapter.constructor.prototype);
-  };
+  }
   /*
       @function (private) _createDataDescriptor
       @description 
@@ -68,4 +68,4 @@ eon.store = function () {
       }
     );
   }
-}
+};

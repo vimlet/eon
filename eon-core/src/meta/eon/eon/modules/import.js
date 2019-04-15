@@ -186,7 +186,7 @@ eon.prepareComponent = function (elementName, content) {
                 var hasPendingImports = eon.handleDependencies();
 
                 // If there are no more dependencies to handle trigger onImportsReady
-                if (!hasPendingImports && !eon.imports.ready && eon.imports.count == eon.imports.total && eon.imports.total == Object.keys(eon.imports.config).length) {
+                if (!hasPendingImports && !eon.imports.ready && eon.imports.count === eon.imports.total && eon.imports.total === Object.keys(eon.imports.config).length) {
 
                     eon.imports.ready = true;
 

@@ -120,28 +120,28 @@ eon.endpoint = function (type, url) {
     @function send
     @description Query data source
   */
-  this.send = type == "graphHTTP" ? function (queryString, cb) {
+  this.send = type === "graphHTTP" ? function (queryString, cb) {
     el.query(queryString, cb);
   } : this.send;
   /*
     @function query
     @description Query data source
   */
-  this.query = type == "graphHTTP" ? function (queryString, cb) {
+  this.query = type === "graphHTTP" ? function (queryString, cb) {
     graphHTTPQuery(queryString, cb);
   } : this.query;
   /*
     @function mutation
     @description Update data source
    */
-  this.mutation = type == "graphHTTP" ? function (queryString, cb) {
+  this.mutation = type === "graphHTTP" ? function (queryString, cb) {
     graphHTTPMutation(queryString, cb);
   } : this.query;
   /*
     @function subscribe
     @description Subscribe
    */
-  this.subscribe = type == "graphSockets" ? function (queryString, cb) {
+  this.subscribe = type === "graphSockets" ? function (queryString, cb) {
     // Check graphQL protocol based on
     graphSocketsSubscription(queryString, cb);
   } : this.subscribe;

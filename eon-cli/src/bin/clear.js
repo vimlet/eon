@@ -15,7 +15,7 @@ module.exports = function (result) {
 
     if (clearArguments[result.clear]) {
         // Remove .eon 
-        if (result.clear.toLowerCase() == "cache") {
+        if (result.clear.toLowerCase() === "cache") {
             var deletePath = path.join(os.homedir(), ".eon");
     
             rimraf.sync(deletePath);

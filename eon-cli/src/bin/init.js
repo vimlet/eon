@@ -75,8 +75,8 @@ module.exports = function (result) {
 function handleVersion(cb) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
+        if (this.readyState === 4) {
+            if (this.status === 200) {
                 var responseObject = JSON.parse(xhttp.responseText);
                 var templateName = responseObject.assets[0].name;
 
