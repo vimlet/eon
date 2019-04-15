@@ -9,6 +9,11 @@
 <strong>Fast, Light & Productive UX</strong>
 </p>
 
+![GitHub release](https://img.shields.io/github/release/vimlet/eon.svg)
+![Travis (.org) branch](https://img.shields.io/travis/vimlet/eon/master.svg)
+![Codacy grade](https://img.shields.io/codacy/grade/1b3bcf2d99514377b2687c5d1157c449.svg)
+![GitHub](https://img.shields.io/github/license/vimlet/eon.svg)
+
 eon is an **ultra light and fast web framework** that focuses on user experience and developer experience, allowing you to create intuitive interfaces across any device with little effort. eon harness state of the art technologies to provide a smooth developing experience without compromising **compatibility and performance**, so you can stay highly productive while retaining full control of your user interface. 
 
 Bundled with eon there is a comprehensive library of **flexible and themeable** components that will suit most of your needs but you can also create your own with ease. 
