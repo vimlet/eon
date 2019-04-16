@@ -5120,7 +5120,7 @@ vimlet.meta = vimlet.meta || {};
 
     return str;
 
-  }
+  };
 
   // Initialize tags
   vimlet.meta.__setTags = function () {
@@ -5536,7 +5536,7 @@ eon.triggerCallback = function (callback, obj, scope, args) {
       var callbackFunctions = obj["__" + callback];
 
       // If the callback is of "ready" type we make a copy of the functions queue to trigger them and then clear the callback queue
-      if (obj["__" + callback + "__type"] == "ready") {
+      if (obj["__" + callback + "__type"] === "ready") {
         callbackFunctions = obj["__" + callback].slice(0);
         obj["__" + callback] = [];
       }
@@ -6100,7 +6100,7 @@ eon.prepareComponent = function (elementName, content) {
                 var hasPendingImports = eon.handleDependencies();
 
                 // If there are no more dependencies to handle trigger onImportsReady
-                if (!hasPendingImports && !eon.imports.ready && eon.imports.count == eon.imports.total && eon.imports.total == Object.keys(eon.imports.config).length) {
+                if (!hasPendingImports && !eon.imports.ready && eon.imports.count === eon.imports.total && eon.imports.total === Object.keys(eon.imports.config).length) {
 
                     eon.imports.ready = true;
 
@@ -6859,7 +6859,7 @@ eon.interpolation.prepare = function (template) {
         global = eon.util.isTrue(global) ? true : false;
 
         // If rootPath is provided we split it
-        rootPath = rootPath && rootPath != "" ? rootPath.split(".") : rootPath;
+        rootPath = rootPath && rootPath !== "" ? rootPath.split(".") : rootPath;
 
         // If the first element of the rootPath is either "data" or "global"
         if (rootPath && ((rootPath[0] == "data" && !global) || (rootPath[0] == "global"))) {
@@ -6989,7 +6989,7 @@ eon.interpolation.init = function (el, config) {
         sources[sourceType][sourceName].scope = scope;
         sources[sourceType][sourceName].obj = scope[sourceName];
         sources[sourceType][sourceName].isGlobal = isGlobal;
-        sources[sourceType][sourceName].isLocale = (sourceName == "locale");
+        sources[sourceType][sourceName].isLocale = (sourceName === "locale");
 
       }
 
@@ -7038,7 +7038,7 @@ eon.interpolation.defineProperties = function (source, sourceName) {
 
   // Loops through all the keys of the object
   eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName, source.isLocale);
-}
+};
 
 /*
 @function {Object} createPropDescriptor
@@ -7070,7 +7070,7 @@ eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyP
   };
 
   return propDescriptor;
-}
+};
 
 /*
 @function createObjectPropDescriptors
@@ -7104,7 +7104,7 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLo
       }
     }
   }
-}
+};
 
 /*
 @function setupListenerCallback
@@ -7136,7 +7136,7 @@ eon.interpolation.setupListenerCallback = function (el, source, config) {
 
   }
 
-}
+};
 
 /*
 @function interpolate
@@ -7182,7 +7182,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
       }
     }
   }
-}
+};
 
 /*
 @function handleObjectChange
@@ -7206,7 +7206,7 @@ eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, ne
   // Checks differences between the new and the old data, escaping the already checked ones
   eon.interpolation.forwardDataDiffing(el, scope, keyPath, newData, checked, config);
   eon.interpolation.createObjectPropDescriptors(scope, newData, keyPath, config);
-}
+};
 
 // Handles the value change of the variable element and triggers onDataChanged
 eon.interpolation.handleVariableChange = function (scope, keyPath, oldVal, newVal, config, isLocale) {
@@ -7231,7 +7231,7 @@ eon.interpolation.handleVariableChange = function (scope, keyPath, oldVal, newVa
   }
   
   eon.triggerAllCallbackEvents(scope, config ? config : {}, callbackName, [interpolationPath, oldVal, newVal]);
-}
+};
 
 /*
 @function backwardDataDiffing
@@ -7267,7 +7267,7 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
   }
 
   return checked;
-}
+};
 
 /*
 @function forwardDataDiffing
@@ -7297,7 +7297,7 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
       }
     }
   }
-}
+};
 
 eon.createCallback("onThemeChanged", eon);
 
@@ -8128,7 +8128,7 @@ eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 
     // This "if" is created for the porpuse of not allowing onPropertyChanged and onAttributeChanged
     // to be triggered once the element is render, this is so we dont have to use el.onRender() inside this callback to not crash
-    if (!((callback == "onPropertyChanged" || callback == "onAttributeChanged") && eon.registry.isRendered(el) != true)) {
+    if (!((callback === "onPropertyChanged" || callback === "onAttributeChanged") && eon.registry.isRendered(el) != true)) {
 
         if (config[callback]) {
             config[callback].apply(el, params);
@@ -9469,7 +9469,7 @@ if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
       navigator.serviceWorker
         .register(eon.basePath + '/modules/cache-sw.js')
         .then(function () {
-          console.log('[ServiceWorker] Registered');
+          console.log("[ServiceWorker] Registered");
         });
 
     }
@@ -9481,14 +9481,14 @@ eon.cache.open = function (cb) {
   eon.cache.config.name = eon.cache.config.name || "eon-cache";
 
   // Check browser cache storage existence
-  if ('caches' in window) {
+  if ("caches" in window) {
     // Create cache
     caches.open(eon.cache.config.name).then(function (cache) {
       // Cache config
       cb(null, cache);
     }).catch(function (error) {
       // Handles exceptions that arise from open().
-      console.error('Error in cache open:', error);
+      console.error("Error in cache open:", error);
       throw error;
     });
   }
@@ -9516,13 +9516,13 @@ eon.cache.add = function (request, options, cb) {
                 if (cb) { cb(null, request) }
               }).catch(function (error) {
                 // Handles exceptions that arise from add().
-                console.error('Error in add handler:', error);
+                console.error("Error in add handler:", error);
                 throw error;
               });
             }
           }).catch(function (error) {
             // Handles exceptions that arise from match().
-            console.error('Error in cache match:', error);
+            console.error("Error in cache match:", error);
             throw error;
           });
         })
@@ -9617,7 +9617,7 @@ eon.store = function () {
     // Trigger user callback once VPA has been loaded
     eon.triggerCallback("onLoaded", el, el, [el]);
 
-  };
+  }
   /*
       @function (private) _cloneFunctions
       @description 
@@ -9627,7 +9627,7 @@ eon.store = function () {
     Object.assign(el, adapter);
     // Get BaseAdapter prototype functions
     Object.assign(el, adapter.constructor.prototype);
-  };
+  }
   /*
       @function (private) _createDataDescriptor
       @description 
@@ -9650,7 +9650,7 @@ eon.store = function () {
       }
     );
   }
-}
+};
 
 
 eon.endpoint = function (type, url) {
@@ -9774,28 +9774,28 @@ eon.endpoint = function (type, url) {
     @function send
     @description Query data source
   */
-  this.send = type == "graphHTTP" ? function (queryString, cb) {
+  this.send = type === "graphHTTP" ? function (queryString, cb) {
     el.query(queryString, cb);
   } : this.send;
   /*
     @function query
     @description Query data source
   */
-  this.query = type == "graphHTTP" ? function (queryString, cb) {
+  this.query = type === "graphHTTP" ? function (queryString, cb) {
     graphHTTPQuery(queryString, cb);
   } : this.query;
   /*
     @function mutation
     @description Update data source
    */
-  this.mutation = type == "graphHTTP" ? function (queryString, cb) {
+  this.mutation = type === "graphHTTP" ? function (queryString, cb) {
     graphHTTPMutation(queryString, cb);
   } : this.query;
   /*
     @function subscribe
     @description Subscribe
    */
-  this.subscribe = type == "graphSockets" ? function (queryString, cb) {
+  this.subscribe = type === "graphSockets" ? function (queryString, cb) {
     // Check graphQL protocol based on
     graphSocketsSubscription(queryString, cb);
   } : this.subscribe;
@@ -10212,7 +10212,7 @@ eon.dataDiff = function (config) {
             if (value != oldItems.get(key)) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
-            };
+            }
         }
       }
     });
@@ -10223,7 +10223,7 @@ eon.dataDiff = function (config) {
       if (typeof (value) == "undefined" || !items.has(key)) {
         // :: Delete item
         self._storeOperation("delete", key, oldCounter, items.get(key), value);
-      };
+      }
     });
     return true;
   }
@@ -10448,9 +10448,9 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
         } else {
 
-            var year = valueObj.year != undefined ? valueObj.year : 0;
-            var month = valueObj.month != undefined ? (valueObj.month - 1) : 0;
-            var day = valueObj.day != undefined ? valueObj.day : 1;
+            var year = valueObj.year !== undefined ? valueObj.year : 0;
+            var month = valueObj.month !== undefined ? (valueObj.month - 1) : 0;
+            var day = valueObj.day !== undefined ? valueObj.day : 1;
 
             // Turns the date into epoch so that we are able to compare dates
             var epochDate = new Date(year, month, day).getTime();
@@ -10461,9 +10461,9 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
                 var minDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
 
-                var minYear = minDateObj.year != undefined ? minDateObj.year : 0;
-                var minMonth = minDateObj.month != undefined ? (minDateObj.month - 1) : 0;
-                var minDay = minDateObj.day != undefined ? minDateObj.day : 1;
+                var minYear = minDateObj.year !== undefined ? minDateObj.year : 0;
+                var minMonth = minDateObj.month !== undefined ? (minDateObj.month - 1) : 0;
+                var minDay = minDateObj.day !== undefined ? minDateObj.day : 1;
 
                 minEpochDate = new Date(minYear, minMonth, minDay).getTime();
                 
@@ -10476,9 +10476,9 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
                 var maxDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
 
-                var maxYear = maxDateObj.year != undefined ? maxDateObj.year : 0;
-                var maxMonth = maxDateObj.month != undefined ? (maxDateObj.month - 1) : 0;
-                var maxDay = maxDateObj.day != undefined ? maxDateObj.day : 1;
+                var maxYear = maxDateObj.year !== undefined ? maxDateObj.year : 0;
+                var maxMonth = maxDateObj.month !== undefined ? (maxDateObj.month - 1) : 0;
+                var maxDay = maxDateObj.day !== undefined ? maxDateObj.day : 1;
 
                 maxEpochDate = new Date(maxYear, maxMonth, maxDay).getTime();
                 isInvalid = epochDate > maxEpochDate ? true : isInvalid;

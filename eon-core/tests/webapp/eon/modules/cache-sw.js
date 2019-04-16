@@ -38,10 +38,10 @@ self.addEventListener('fetch', function (e) {
   var url = new URL(req.url); // ** Not supported on IE
   // Check same origin sources
   if (url.origin === location.origin) {
-    if(debug) { console.log('eon cache first'); }
+    if(debug) { console.log("eon cache first"); }
     e.respondWith(cacheFirst(req));
   } else {
-    if(debug) { console.log('eon net and cache'); }
+    if(debug) { console.log("eon net and cache"); }
     e.respondWith(networkAndCache(req));
   }
 });
@@ -54,7 +54,7 @@ function cacheFirst(req) {
     return cache.match(req).then(function (cached) {
       return cached || fetch(req);
     });
-  })
+  });
 }
 
 /*
