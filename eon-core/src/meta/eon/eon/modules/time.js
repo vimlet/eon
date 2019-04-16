@@ -1,7 +1,7 @@
 eon.time = eon.time || {};
 
 eon.time.isLeapYear = function (year) {
-  return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 };
 
 eon.time.getDaysInMonth = function (year, month) {
@@ -51,7 +51,7 @@ eon.time.getFirstWeekMonday = function (locale, year, month, format) {
   var firstWeekDay = eon.time.getFirstWeekDay(locale, year, month, format);
   var weekPosition = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].indexOf(firstWeekDay);
   // Check first month reached
-  if (month == 0) {
+  if (month === 0) {
     month = 11;
     year--;
   } else {

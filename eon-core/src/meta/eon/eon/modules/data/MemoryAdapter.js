@@ -251,4 +251,4 @@ eon.data.MemoryAdapter = function () {
   var baseAdapter = eon.vpa.createBaseAdapter(queryHandler);
   baseAdapter._memory = memory;
   return baseAdapter;
-}
+};

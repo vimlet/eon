@@ -161,7 +161,7 @@ eon.generateSourceFragment = function (el) {
     // If there are no childs, its means whether that it doesnt and wont have childs, or that it has not been processed by the browser yet,
     // either way we create a mutation observer to listen to child node changes, this observer will be disconnected on the "onAttached" callback.
     // Else just loops through its nodes and append them to the source fragment
-    if (el.childNodes.length == 0) {
+    if (el.childNodes.length === 0) {
 
         var observer = new MutationObserver(function (mutations) {
 
@@ -365,7 +365,7 @@ eon.collectObserveData = function (el, config) {
             }
 
             // If the property has reflect but its value is of type object we set reflect to false
-            if (config.properties[propertiesKeys[i]].reflect && typeof config.properties[propertiesKeys[i]].value == "object") {
+            if (config.properties[propertiesKeys[i]].reflect && typeof config.properties[propertiesKeys[i]].value === "object") {
                 config.properties[propertiesKeys[i]].reflect = false;
             }
 
@@ -998,7 +998,7 @@ eon.initSourceCallbacks = function (el) {
         var sourceElements = [];
         for (var i = 0; i < sourceNodes.length; i++) {
             // NodeType 1 means its an Html element
-            if (sourceNodes[i].nodeType == 1) {
+            if (sourceNodes[i].nodeType === 1) {
                 sourceElements.push(sourceNodes[i]);
             }
 
@@ -1034,7 +1034,7 @@ eon.updateSourceCallbacks = function (el) {
 
         for (var i = 0; i < sourceNodes.length; i++) {
             // NodeType 1 means its an Html element
-            if (sourceNodes[i].nodeType == 1) {
+            if (sourceNodes[i].nodeType === 1) {
                 sourceElements.push(sourceNodes[i]);
             }
 

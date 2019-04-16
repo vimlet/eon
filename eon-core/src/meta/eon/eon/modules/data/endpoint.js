@@ -8,7 +8,7 @@ eon.endpoint = function (type, url) {
   /* Resources url */
   this.url = url;
   /* GraphQL Web Sockets based use only */
-  this.socket = type == "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
+  this.socket = type === "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
   this.socket = ~["WebSockets", "graphSockets"].indexOf(type) ? new WebSocket(this.url) : this.socket;
 
   /* 
@@ -23,7 +23,7 @@ eon.endpoint = function (type, url) {
     @function get
     @description Read data resource // Read all data resources
   */
-  this.get = type == "rest" ? function (id, cb) {
+  this.get = type === "rest" ? function (id, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;
     el.composedUrl += id ? "/" + id : "";
@@ -58,7 +58,7 @@ eon.endpoint = function (type, url) {
     @function post
     @description Create data resource
   */
-  this.post = type == "rest" ? function (data, cb) {
+  this.post = type === "rest" ? function (data, cb) {
     // Check resource id and set url
     if (data) {
       // Set up request
@@ -76,7 +76,7 @@ eon.endpoint = function (type, url) {
     @function delete
     @description Delete data resource
   */
-  this.delete = type == "rest" ? function (id, cb) {
+  this.delete = type === "rest" ? function (id, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;
     el.composedUrl += id ? "/" + id : "";
@@ -98,7 +98,7 @@ eon.endpoint = function (type, url) {
     @function send
     @description Send data
   */
-  this.send = type == "WebSockets" ? function (data) {
+  this.send = type === "WebSockets" ? function (data) {
     el.socket.send(data);
   } : this.send;
 

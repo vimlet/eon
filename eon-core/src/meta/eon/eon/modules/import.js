@@ -363,7 +363,7 @@ eon.importElementTheme = function (config, name, theme) {
 */
 eon.handleStyleAppend = function () {
 
-    if (eon.imports.style != "") {
+    if (eon.imports.style !== "") {
 
         var combinedStyle = document.createElement("style");
 
@@ -398,7 +398,7 @@ eon.handleScriptsAppend = function (elementIndex, scriptIndex) {
         elementScriptsKeys = Object.keys(elementScripts);
 
         // If it has to resume a previous scripts append we start from that index
-        for (var j = (resume && i == elementIndex) ? scriptIndex : 0; j < elementScriptsKeys.length; j++) {
+        for (var j = (resume && i === elementIndex) ? scriptIndex : 0; j < elementScriptsKeys.length; j++) {
 
             resume = false;
 

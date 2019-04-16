@@ -141,7 +141,7 @@ document.$1 = document.$1 || eon.$1;
   self.getEnclosingComponent = function (el) {
     while (
       el.parentNode &&
-      Object.prototype.toString.call(el.parentNode) != "[object HTMLDocument]"
+      Object.prototype.toString.call(el.parentNode) !== "[object HTMLDocument]"
     ) {
       el = el.parentNode;
 

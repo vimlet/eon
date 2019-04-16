@@ -255,7 +255,7 @@ eon.registry.getUidFull = function (el) {
   var uid = el.uid ? el.uid : el.getAttribute("uid");
   var fullUid;
 
-  if (typeof el != "string" && uid) {
+  if (typeof el !== "string" && uid) {
     fullUid = el.tagName.toLowerCase() + "-" + uid;
   }
 
@@ -270,11 +270,11 @@ eon.registry.getUidFull = function (el) {
 */
 eon.registry.updateElementStatus = function (el, status) {
 
-  if (status != "parsed") {
+  if (status !== "parsed") {
 
     var uidFull = eon.registry.getUidFull(el);
 
-    if (status == "attached") {
+    if (status === "attached") {
 
       eon.registry.elementStatus[status][uidFull] = el;
 
@@ -282,13 +282,13 @@ eon.registry.updateElementStatus = function (el, status) {
         eon["__onReady__triggered"] = false;
       }
 
-    } else if (status != "detached") {
+    } else if (status !== "detached") {
 
       eon.registry.elementStatus[status].push(el);
       
     }
 
-    if (status != "created" && status != "declared") {
+    if (status !== "created" && status !== "declared") {
       eon.registry.elementRegistry[uidFull][status] = true;
     }
 

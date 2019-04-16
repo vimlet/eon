@@ -24,7 +24,7 @@ module.exports = function (result) {
         console.log("\nWelcome to eon\n");
 
         var downloadTemplate = readlineSync.question("Initialize project with a template? [yes] ");
-        if (downloadTemplate.trim() == "" || downloadTemplate.toLowerCase().indexOf("y") == 0) {
+        if (downloadTemplate.trim() === "" || downloadTemplate.toLowerCase().indexOf("y") === 0) {
             try {
                 templateName = handleVersion.sync(null);
                 downloadAndExtractTemplate.sync(null, releaseURL, templateName, projectPath);
@@ -32,7 +32,7 @@ module.exports = function (result) {
                 // Call to install eon
                 install.sync(null, { install: true });
 
-                console.log('\x1b[96m', '\nTo start the server, type "npm start"');
+                console.log("\x1b[96m", "\nTo start the server, type \"npm start\"");
                 console.log("\x1b[0m"); // Reset color + newLine
 
             } catch (error) {
@@ -50,7 +50,7 @@ module.exports = function (result) {
             };
 
             var eonVersion = readlineSync.question("\neon version? [latest] ");
-            if(eonVersion.trim() != "" && eonVersion.toLowerCase() != "latest") {
+            if(eonVersion.trim() !== "" && eonVersion.toLowerCase() !== "latest") {
                 eonJsonObject.eon = eonVersion;
             }
 
