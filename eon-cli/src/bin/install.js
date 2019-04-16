@@ -189,8 +189,8 @@ function checkPackageExists(name, version, cb) {
 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
-    if (this.readyState == 4) {
-      if (this.status == 200) {
+    if (this.readyState === 4) {
+      if (this.status === 200) {
         cb(null);
       } else {
         cb('Version "' + version + '" not valid');
@@ -210,8 +210,8 @@ function getLatestEonRelease(cb) {
 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
-    if (this.readyState == 4) {
-      if (this.status == 200) {
+    if (this.readyState === 4) {
+      if (this.status === 200) {
         var responseObject = JSON.parse(xhttp.responseText);
         cb(null, responseObject.tag_name);
       } else {
@@ -384,8 +384,8 @@ function getGitHubDownloadURL(name, version, cb) {
 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
-    if (this.readyState == 4) {
-      if (this.status == 200) {
+    if (this.readyState === 4) {
+      if (this.status === 200) {
         var responseObject = JSON.parse(xhttp.responseText);
         var asset;
         for (var i = 0; i < responseObject.assets.length; i++) {
