@@ -24,7 +24,7 @@ eon.interpolation.prepare = function (template) {
         global = eon.util.isTrue(global) ? true : false;
 
         // If rootPath is provided we split it
-        rootPath = rootPath && rootPath != "" ? rootPath.split(".") : rootPath;
+        rootPath = rootPath && rootPath !== "" ? rootPath.split(".") : rootPath;
 
         // If the first element of the rootPath is either "data" or "global"
         if (rootPath && ((rootPath[0] == "data" && !global) || (rootPath[0] == "global"))) {
@@ -154,7 +154,7 @@ eon.interpolation.init = function (el, config) {
         sources[sourceType][sourceName].scope = scope;
         sources[sourceType][sourceName].obj = scope[sourceName];
         sources[sourceType][sourceName].isGlobal = isGlobal;
-        sources[sourceType][sourceName].isLocale = (sourceName == "locale");
+        sources[sourceType][sourceName].isLocale = (sourceName === "locale");
 
       }
 

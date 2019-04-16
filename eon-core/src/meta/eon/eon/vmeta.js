@@ -79,7 +79,7 @@ vimlet.meta = vimlet.meta || {};
 
     return str;
 
-  }
+  };
 
   // Initialize tags
   vimlet.meta.__setTags = function () {

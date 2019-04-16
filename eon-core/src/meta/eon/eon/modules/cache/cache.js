@@ -22,7 +22,7 @@ if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
       navigator.serviceWorker
         .register(eon.basePath + '/modules/cache-sw.js')
         .then(function () {
-          console.log('[ServiceWorker] Registered');
+          console.log("[ServiceWorker] Registered");
         });
 
     }
@@ -34,14 +34,14 @@ eon.cache.open = function (cb) {
   eon.cache.config.name = eon.cache.config.name || "eon-cache";
 
   // Check browser cache storage existence
-  if ('caches' in window) {
+  if ("caches" in window) {
     // Create cache
     caches.open(eon.cache.config.name).then(function (cache) {
       // Cache config
       cb(null, cache);
     }).catch(function (error) {
       // Handles exceptions that arise from open().
-      console.error('Error in cache open:', error);
+      console.error("Error in cache open:", error);
       throw error;
     });
   }
@@ -69,13 +69,13 @@ eon.cache.add = function (request, options, cb) {
                 if (cb) { cb(null, request) }
               }).catch(function (error) {
                 // Handles exceptions that arise from add().
-                console.error('Error in add handler:', error);
+                console.error("Error in add handler:", error);
                 throw error;
               });
             }
           }).catch(function (error) {
             // Handles exceptions that arise from match().
-            console.error('Error in cache match:', error);
+            console.error("Error in cache match:", error);
             throw error;
           });
         })

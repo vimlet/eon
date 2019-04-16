@@ -109,7 +109,7 @@ eon.dataDiff = function (config) {
             if (value != oldItems.get(key)) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
-            };
+            }
         }
       }
     });

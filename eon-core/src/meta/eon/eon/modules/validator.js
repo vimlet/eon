@@ -132,9 +132,9 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
         } else {
 
-            var year = valueObj.year != undefined ? valueObj.year : 0;
-            var month = valueObj.month != undefined ? (valueObj.month - 1) : 0;
-            var day = valueObj.day != undefined ? valueObj.day : 1;
+            var year = valueObj.year !== undefined ? valueObj.year : 0;
+            var month = valueObj.month !== undefined ? (valueObj.month - 1) : 0;
+            var day = valueObj.day !== undefined ? valueObj.day : 1;
 
             // Turns the date into epoch so that we are able to compare dates
             var epochDate = new Date(year, month, day).getTime();
@@ -145,9 +145,9 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
                 var minDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
 
-                var minYear = minDateObj.year != undefined ? minDateObj.year : 0;
-                var minMonth = minDateObj.month != undefined ? (minDateObj.month - 1) : 0;
-                var minDay = minDateObj.day != undefined ? minDateObj.day : 1;
+                var minYear = minDateObj.year !== undefined ? minDateObj.year : 0;
+                var minMonth = minDateObj.month !== undefined ? (minDateObj.month - 1) : 0;
+                var minDay = minDateObj.day !== undefined ? minDateObj.day : 1;
 
                 minEpochDate = new Date(minYear, minMonth, minDay).getTime();
                 
@@ -160,9 +160,9 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
                 var maxDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
 
-                var maxYear = maxDateObj.year != undefined ? maxDateObj.year : 0;
-                var maxMonth = maxDateObj.month != undefined ? (maxDateObj.month - 1) : 0;
-                var maxDay = maxDateObj.day != undefined ? maxDateObj.day : 1;
+                var maxYear = maxDateObj.year !== undefined ? maxDateObj.year : 0;
+                var maxMonth = maxDateObj.month !== undefined ? (maxDateObj.month - 1) : 0;
+                var maxDay = maxDateObj.day !== undefined ? maxDateObj.day : 1;
 
                 maxEpochDate = new Date(maxYear, maxMonth, maxDay).getTime();
                 isInvalid = epochDate > maxEpochDate ? true : isInvalid;

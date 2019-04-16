@@ -107,7 +107,7 @@ function deletePackages() {
   // Deletes core
   if (!eonJsonObject.core && actualPackages.core) {
     fs.readdirSync(localPath).forEach(function (file) {
-      if (file != "custom" && file != "ui" && file != "version.json") {
+      if (file !== "custom" && file !== "ui" && file !== "version.json") {
         filePath = path.join(localPath, file);
         console.log("Removing: " + filePath);
         // Using rimraf to avoid fs-extra not-empty errors
