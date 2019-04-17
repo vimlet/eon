@@ -47,7 +47,7 @@ eon.element = function (param1, param2) {
     }
 
     eon.imports.config[name.toLowerCase()] = config;
-    eon.triggerCallback('onScriptsReady', eon);
+    eon.triggerCallback("onScriptsReady", eon);
 
 };
 
@@ -1032,7 +1032,7 @@ eon.updateSourceCallbacks = function (el) {
         return Array.prototype.slice.call(sourceElements);
     }
 
-}
+};
 
 /*
 @function triggerTransformed
@@ -1149,7 +1149,7 @@ eon.createResizeCallbacks = function (el) {
 
         }
 
-    })
+    });
 
     // onWindowResize callback creation
     eon.createCallback("onWindowResize", el);

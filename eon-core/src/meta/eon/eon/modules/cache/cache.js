@@ -45,7 +45,7 @@ eon.cache.open = function (cb) {
       throw error;
     });
   }
-}
+};
 
 eon.cache.add = function (request, options, cb) {
   var config = eon.cache.config;
@@ -66,7 +66,7 @@ eon.cache.add = function (request, options, cb) {
           cache.match(request).then(function (cached) {
             if (!cached) {
               cache.add(request).then(function () {
-                if (cb) { cb(null, request) };
+                if (cb) { cb(null, request); };
               }).catch(function (error) {
                 // Handles exceptions that arise from add().
                 console.error("Error in add handler:", error);
@@ -78,7 +78,7 @@ eon.cache.add = function (request, options, cb) {
             console.error("Error in cache match:", error);
             throw error;
           });
-        })
+        });
       }
     }
   }

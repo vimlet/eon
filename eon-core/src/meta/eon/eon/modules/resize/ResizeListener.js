@@ -15,17 +15,17 @@ eon.resizeObserver = function (callback) {
       }
     }
     elm.observables.push(newObservable);
-  }
+  };
 
   elm.unobserve = function (el) {
     elm.observables = elm.observables.filter(function (obj) {
       return obj.el !== el;
     });
-  }
+  };
 
   elm.disconnect = function () {
     elm.observables = [];
-  }
+  };
 
   elm.check = function () {
     var changedEntries = elm.observables.filter(function (obj) {
@@ -43,7 +43,7 @@ eon.resizeObserver = function (callback) {
       elm.callback(changedEntries);
     }
     window.requestAnimationFrame(elm.boundCheck);
-  }
+  };
   //  class ResizeObserver {
   function constructor(callback) {
     elm.observables = [];

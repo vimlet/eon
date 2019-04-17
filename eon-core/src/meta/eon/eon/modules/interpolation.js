@@ -335,7 +335,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
         
         // Looks for the variables matching the binding
         Array.prototype.push.apply(interpolations[key], el.template.querySelectorAll(
-          'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
+          "eon-variable[bind=\"" + variableBind + "\"][global=\"" + source.isGlobal + "\"]"
         ));
 
         // For each variable found previously sets its value

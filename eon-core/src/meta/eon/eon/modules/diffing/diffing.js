@@ -122,7 +122,7 @@ eon.dataDiff = function (config) {
       }
     });
     return true;
-  }
+  };
   /*
     @function (private) _compare
     @description Whether or not there are differences between objects keys
@@ -164,7 +164,7 @@ eon.dataDiff = function (config) {
       }
     }
     return true;
-  }
+  };
   /*
     @function (private) _processState
     @description Process data operations
@@ -184,7 +184,7 @@ eon.dataDiff = function (config) {
     });
     // Reset operations store
     self._operations = [];
-  }
+  };
   /*
     @function (private) _saveState
     @description Save state
@@ -199,7 +199,7 @@ eon.dataDiff = function (config) {
       }
       self.states.push(data);
     }
-  }
+  };
   /*
     @function (private) _create
     @description Store operation

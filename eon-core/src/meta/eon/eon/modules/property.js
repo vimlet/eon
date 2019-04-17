@@ -40,7 +40,7 @@ eon.defineElementProperty = function (el, key, value) {
 
     eon.registry.elements[eon.registry.getUidFull(el)][key] = value;
 
-}
+};
 
 eon.defineElementComplexProperty = function (el, config, key, value, reflect) {
 

@@ -8,12 +8,12 @@ eon.validator.addSchema = function (id, schema) {
         // Saves the schema with the given id
         eon.validator.schemas[id] = schema;
     }
-}
+};
 
 eon.validator.containsSchema = function (id) {
     // Returns whether there is already a schema id or not
     return eon.validator.schemas[id] ? true : false;
-}
+};
 
 eon.validator.validate = function (data, schema) {
 
@@ -44,7 +44,7 @@ eon.validator.validate = function (data, schema) {
 
     return undefined;
 
-}
+};
 
 eon.validator.loopProperties = function (schema, callback) {
 
@@ -60,7 +60,7 @@ eon.validator.loopProperties = function (schema, callback) {
 
     }
 
-}
+};
 
 eon.validator.validateRequiredField = function (property, schema, data, errorObj) {
 
@@ -74,7 +74,7 @@ eon.validator.validateRequiredField = function (property, schema, data, errorObj
         eon.validator.fillErrorObj(property, "Required", errorObj);
     }
 
-}
+};
 
 eon.validator.validateStringField = function (property, schema, data, errorObj) {
 
@@ -104,7 +104,7 @@ eon.validator.validateStringField = function (property, schema, data, errorObj) 
 
     }
 
-}
+};
 
 eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
@@ -179,7 +179,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
     }
 
-}
+};
 
 eon.validator.validateNumericField = function (property, schema, data, errorObj) {
 
@@ -211,7 +211,7 @@ eon.validator.validateNumericField = function (property, schema, data, errorObj)
 
     }
 
-}
+};
 
 eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
@@ -239,7 +239,7 @@ eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
     }
 
-}
+};
 
 eon.validator.validateObjectField = function (property, schema, data, errorObj) {
 
@@ -269,7 +269,7 @@ eon.validator.validateObjectField = function (property, schema, data, errorObj) 
 
     }
 
-}
+};
 
 eon.validator.fillErrorObj = function (property, errorMessage, errorObj) {
     !errorObj[property] ? errorObj[property] = [errorMessage] : errorObj[property].push(errorMessage);

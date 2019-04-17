@@ -23,7 +23,7 @@ eon.util.firstToLowerCase = function (str) {
  * @return {[type]}     [description]
  */
 eon.util.camelToHyphenCase = function (str) {
-  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 };
 /**
  * Replaces the hyphens cases for camels
