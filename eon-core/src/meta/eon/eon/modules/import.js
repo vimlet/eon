@@ -54,7 +54,7 @@ eon.requestImport = function (href) {
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
 
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
-    href = href.charAt(0) == "@" ? eon.getBasePathUrl(href) : href;
+    href = href.charAt(0) === "@" ? eon.getBasePathUrl(href) : href;
 
     if (!(elementName in eon.imports.templates)) {
 
@@ -81,7 +81,7 @@ eon.requestImport = function (href) {
                 // Cache
                 eon.cache.add(obj.url, { name: elementName });
 
-                if (obj.xhr.status == 200) {
+                if (obj.xhr.status === 200) {
 
                     eon.prepareComponent(elementName, obj.responseText);
 
@@ -171,7 +171,7 @@ eon.prepareComponent = function (elementName, content) {
 
         eon.imports.count++;
 
-        if (!eon.imports.ready && eon.imports.count == eon.imports.total) {
+        if (!eon.imports.ready && eon.imports.count === eon.imports.total) {
 
             // Appends all elements combined style
             eon.handleStyleAppend();
@@ -197,7 +197,7 @@ eon.prepareComponent = function (elementName, content) {
 
                     eon.triggerCallback('onImportsReady', eon);
                     // Once the imports are done, if all the registered elements are ready then it we trigger the onReady callback
-                    if (eon.registry.registeredElements == eon.registry.elementStatus.ready.length) {
+                    if (eon.registry.registeredElements === eon.registry.elementStatus.ready.length) {
                         eon.triggerCallback("onReady", eon);
                     }
 
@@ -508,10 +508,10 @@ eon.handleConfigDependencies = function (name) {
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
             dependencyName = elementConfig.dependencies[j].match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase();
-            dependencyPath = elementConfig.dependencies[j].charAt(0) == "@" ? eon.getBasePathUrl(elementConfig.dependencies[j]) : elementConfig.dependencies[j];
+            dependencyPath = elementConfig.dependencies[j].charAt(0) === "@" ? eon.getBasePathUrl(elementConfig.dependencies[j]) : elementConfig.dependencies[j];
             if (!(dependencyName in eon.imports.templates)) {
                 hasDependencies = true;
-                relativeToParent = elementConfig.dependencies[j].charAt(0) == "@" || elementConfig.dependencies[j].charAt(0) == "/" ? false : true;
+                relativeToParent = elementConfig.dependencies[j].charAt(0) === "@" || elementConfig.dependencies[j].charAt(0) === "/" ? false : true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
                 dependencyFile = !relativeToParent ? dependencyPath : eon.imports.paths[name] + dependencyPath;
                 eon.import(dependencyFile);
@@ -531,11 +531,11 @@ eon.getBasePathUrl = function (url) {
 
     url = url.substring(1);
     return eon.basePath + "/" + url;
-}
+};
 
 // If there are no imports in the document we will trigger onImportsReady event immediately
 eon.domReady(function () {
-    if (!eon.imports || (eon.imports && eon.imports.total == 0)) {
+    if (!eon.imports || (eon.imports && eon.imports.total === 0)) {
         eon.triggerCallback("onImportsReady", eon);
     }
 });

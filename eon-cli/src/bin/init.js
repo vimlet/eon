@@ -70,7 +70,7 @@ module.exports = function (result) {
 
 
 
-}
+};
 
 function handleVersion(cb) {
     var xhttp = new XMLHttpRequest();
@@ -90,7 +90,7 @@ function handleVersion(cb) {
     xhttp.open("GET", versionURL, true);
     xhttp.setRequestHeader("User-Agent", "vimlet");
     xhttp.send();
-}
+};
 
 function downloadAndExtractTemplate(releaseURL, templateName, projectPath, cb) {
     var downloadPath = path.join(os.homedir(), ".eon", "template");
@@ -117,4 +117,4 @@ function downloadAndExtractTemplate(releaseURL, templateName, projectPath, cb) {
         });
     }
 
-}
+};

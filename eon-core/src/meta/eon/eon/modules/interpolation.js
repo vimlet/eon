@@ -313,9 +313,9 @@ eon.interpolation.setupListenerCallback = function (el, source, config) {
 @param {String} bind
 */
 eon.interpolation.interpolate = function (el, source, obj, interpolations, bind) {
-  var key, i, variableBind, variable;
+  var i, variableBind, variable;
 
-  for (key in obj) {
+  for (var key in obj) {
     // We only want take into account the keys that are not used for the descriptor
     if (key.indexOf("__") == -1) {
       // If the property is an object the call ourselfs again to loop through our keys

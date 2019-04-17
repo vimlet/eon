@@ -63,7 +63,7 @@ function supportGitCredentials() {
     try {
       var gitConfigString = fs.readFileSync(gitConfigPath).toString();
       var match = new RegExp("(http[s]*:\\/\\/)(.+:[^@]+)", "g").exec(gitConfigString);
-      if (match && match.length == 3) {
+      if (match && match.length === 3) {
         gh_credentials = match[2];
       }
     } catch (error) {
@@ -119,7 +119,7 @@ function handleRemoteVersions(value, noSave, cb) {
       try {
         var packageVersion = getLatestEonRelease.sync(null);
 
-        if (!eonJsonObject.eon || eonJsonObject.eon == "latest") {
+        if (!eonJsonObject.eon || eonJsonObject.eon === "latest") {
           eonJsonObject.eon = packageVersion;
         }
 
@@ -133,10 +133,10 @@ function handleRemoteVersions(value, noSave, cb) {
       var packageName = valueArray[0].toLowerCase();
       var packageVersion;
 
-      if (packageName == "eon") {
+      if (packageName === "eon") {
         try {
 
-          if (valueArray.length == 2) {
+          if (valueArray.length === 2) {
             checkPackageExists.sync(null, packageName, valueArray[1]);
             packageVersion = valueArray[1];
           } else {
@@ -155,7 +155,7 @@ function handleRemoteVersions(value, noSave, cb) {
       } else {
         singlePackageMode = true;
         singlePackageName = packageName;
-        packageVersion = valueArray.length == 2 ? valueArray[1] : getLatestDependencyRelease(packageName);
+        packageVersion = valueArray.length === 2 ? valueArray[1] : getLatestDependencyRelease(packageName);
 
         if (!eonJsonObject.dependencies) {
           eonJsonObject.dependencies = {};
@@ -415,7 +415,7 @@ function cleanLocal(name) {
   if (fs.existsSync(localPath)) {
     var filePath;
 
-    if (name == "eon") {
+    if (name === "eon") {
       var ignoreArray = eonJsonObject.ignore;
       fs.readdirSync(localPath).forEach(function (file) {
 

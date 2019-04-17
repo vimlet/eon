@@ -181,7 +181,7 @@ eon.util.getBrowserScrollBarWidth = function () {
 };
 
 eon.util.isTrue = function (a) {
-  return a == true || a == "true";
+  return a === true || a === "true";
 };
 
 eon.util.isTouchScreen = function () {
@@ -203,7 +203,7 @@ eon.ajax = function (url, options, cb) {
 
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {
-    if (this.readyState == 4) {
+    if (this.readyState === 4) {
       var success = this.status >= 200 && this.status < 300;
       if (cb) {
         cb(success, {

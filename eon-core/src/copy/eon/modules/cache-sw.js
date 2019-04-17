@@ -1,5 +1,5 @@
 
-var CACHE = 'eon-cache';
+var CACHE = "eon-cache";
 
 var debug = false;
 
@@ -12,7 +12,7 @@ var filesToCache = [
 /*
 * -- Install
 */
-self.addEventListener('install', function (e) {
+self.addEventListener("install", function (e) {
   if(debug) { console.log("[ServiceWorker] Install"); }
   e.waitUntil(
     caches.open(CACHE).then(function (cache) {
@@ -25,7 +25,7 @@ self.addEventListener('install', function (e) {
 /*
 * -- Activate
 */
-self.addEventListener('activate', function (e) {
+self.addEventListener("activate", function (e) {
   if(debug) { console.log("[ServiceWorker] Activated"); }
   self.clients.claim();
 });
@@ -33,7 +33,7 @@ self.addEventListener('activate', function (e) {
 /*
 * -- Fetch
 */
-self.addEventListener('fetch', function (e) {
+self.addEventListener("fetch", function (e) {
   var req = e.request;
   var url = new URL(req.url); // ** Not supported on IE
   // Check same origin sources

@@ -29,7 +29,7 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath != "") {
+    if (stylePath !== "") {
 
         var link = document.createElement("link");
 
@@ -353,7 +353,7 @@ eon.collectObserveData = function (el, config) {
 
         var propertiesKeys = Object.keys(config.properties);
 
-        for (i = 0; i < propertiesKeys.length; i++) {
+        for (var i = 0; i < propertiesKeys.length; i++) {
             // Add observe to observeProperties
             if (config.properties[propertiesKeys[i]].observe) {
                 el.__observeProperties[propertiesKeys[i]] = true;
@@ -382,7 +382,7 @@ eon.collectObserveData = function (el, config) {
 
         var privatePropertiesKeys = Object.keys(config.privateProperties);
 
-        for (i = 0; i < privatePropertiesKeys.length; i++) {
+        for (var i = 0; i < privatePropertiesKeys.length; i++) {
             // Add observe to observeProperties
             if (config.privateProperties[privatePropertiesKeys[i]].observe) {
                 el.__observeProperties["_" + privatePropertiesKeys[i]] = true;
@@ -482,7 +482,7 @@ eon.handleReflectDefaultProperty = function (el, key, property) {
     el.onInit(function () {
 
         // Only sets the attribute if the value is not of object type
-        if (typeof value != "object") {
+        if (typeof value !== "object") {
             el.setAttribute(key, value);
         } else {
             el.removeAttribute(key);
@@ -552,7 +552,7 @@ eon.createPropDescriptor = function (el, config, key, value, reflect) {
         if (reflect) {
             // Trigger onAttributeChanged, note this will trigger also onPropertyChanged if needed
             // Only sets the attribute if the value is not of object type
-            if (typeof value != "object") {
+            if (typeof value !== "object") {
                 el.setAttribute(eon.util.camelToHyphenCase(key), value);
             } else {
                 el.removeAttribute(eon.util.camelToHyphenCase(key));
@@ -669,16 +669,6 @@ eon.importPrivate = function (el, config) {
 };
 
 /*
-@function importResize
-@description Takes all the resize functions from the element config and adds them to the onResize callbacks queue
-@param {Object} el
-@param {Object} config
-*/
-eon.importResize = function (el, config) {
-
-};
-
-/*
 @function  importTemplateClasses
 @description If classes are specified in the element template, these are moved into the actual element
 @param {Object} el
@@ -687,7 +677,7 @@ eon.importTemplateClasses = function (el) {
 
     var template = eon.imports.templates[el.tagName.toLowerCase()];
 
-    if (template && template.classList.length != 0) {
+    if (template && template.classList.length !== 0) {
 
         var elClassesArray = Array.prototype.slice.call(el.classList);
         var templateClassesArray = Array.prototype.slice.call(template.classList);
@@ -697,7 +687,6 @@ eon.importTemplateClasses = function (el) {
         el.setAttribute("class", elClassesArray.join(" "));
 
     }
-
 
 };
 
@@ -715,7 +704,7 @@ eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 
     // This "if" is created for the porpuse of not allowing onPropertyChanged and onAttributeChanged
     // to be triggered once the element is render, this is so we dont have to use el.onRender() inside this callback to not crash
-    if (!((callback === "onPropertyChanged" || callback === "onAttributeChanged") && eon.registry.isRendered(el) != true)) {
+    if (!((callback === "onPropertyChanged" || callback === "onAttributeChanged") && eon.registry.isRendered(el) !== true)) {
 
         if (config[callback]) {
             config[callback].apply(el, params);

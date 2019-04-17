@@ -67,7 +67,7 @@ eon.validator.validateRequiredField = function (property, schema, data, errorObj
     var propertySchema = schema.properties[property];
     var isRequired = (schema.required && schema.required.indexOf(property) > -1) || eon.util.isTrue(propertySchema.required);
 
-    var isInvalid = ((!data[property] || data[property] == "") && isRequired);
+    var isInvalid = ((!data[property] || data[property] === "") && isRequired);
 
     // If if does not meet any of the requirements then it fills the error object with the proper information
     if (isInvalid) {
@@ -80,7 +80,7 @@ eon.validator.validateStringField = function (property, schema, data, errorObj) 
 
     var propertySchema = schema.properties[property];
 
-    if (propertySchema.type == "string" && data.hasOwnProperty(property)) {
+    if (propertySchema.type === "string" && data.hasOwnProperty(property)) {
 
         // MaxLength
         var hasMaxLength = propertySchema.hasOwnProperty("maxLength") && (parseInt(propertySchema.maxLength) > 0);
@@ -110,7 +110,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
 
-    if (propertySchema.type == "date" && data.hasOwnProperty(property)) {
+    if (propertySchema.type === "date" && data.hasOwnProperty(property)) {
 
         // Takes the format of the schema, if there is no format in the schema it takes a default format work with
         var format = propertySchema.format ? propertySchema.format : "YYYY-MM-DD";
@@ -185,7 +185,7 @@ eon.validator.validateNumericField = function (property, schema, data, errorObj)
 
     var propertySchema = schema.properties[property];
 
-    if ((propertySchema.type == "integer" || propertySchema.type == "number") && data.hasOwnProperty(property)) {
+    if ((propertySchema.type === "integer" || propertySchema.type === "number") && data.hasOwnProperty(property)) {
 
         var value = parseFloat(data[property]);
 
@@ -217,7 +217,7 @@ eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
 
-    if (propertySchema.type == "array" && data.hasOwnProperty(property)) {
+    if (propertySchema.type === "array" && data.hasOwnProperty(property)) {
 
         var valuesArray = data[property].filter(function (value) {
             return value != false;
@@ -245,7 +245,7 @@ eon.validator.validateObjectField = function (property, schema, data, errorObj) 
 
     var propertySchema = schema.properties[property];
 
-    if (propertySchema.type == "object" && data.hasOwnProperty(property)) {
+    if (propertySchema.type === "object" && data.hasOwnProperty(property)) {
 
         var propertyData = data[property];
         var nestedErrorObj = {};
@@ -263,7 +263,7 @@ eon.validator.validateObjectField = function (property, schema, data, errorObj) 
 
         });
 
-        if (Object.keys(errorObj[property]) == 0) {
+        if (Object.keys(errorObj[property]) === 0) {
             delete errorObj[property];
         }
 

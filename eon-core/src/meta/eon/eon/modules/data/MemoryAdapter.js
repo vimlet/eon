@@ -186,7 +186,7 @@ eon.data.MemoryAdapter = function () {
     var merge = function (obj) {
       for (var prop in obj) {
         if (obj.hasOwnProperty(prop)) {
-          if (obj[prop] && typeof obj[prop] == 'object') {
+          if (obj[prop] && typeof obj[prop] === "object") {
             merged[prop] = deepMerge(merged[prop], obj[prop]);
           }
           else {

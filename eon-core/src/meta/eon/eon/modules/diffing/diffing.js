@@ -95,14 +95,14 @@ eon.dataDiff = function (config) {
             if (!self._compare(value, oldItems.get(key))) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
-            };
+            }
             break;
           // Compare function code
           case "function":
             if (typeof (oldItems.get(key)) != "undefined" || (value.toString() != oldItems.get(key).toString())) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
-            };
+            }
             break;
           // Compare values
           default:
@@ -134,24 +134,35 @@ eon.dataDiff = function (config) {
     // Loop through properties in object 1
     for (var key in items) {
       // Check property exists on both objects
-      if (items.hasOwnProperty(key) !== oldItems.hasOwnProperty(key)) return false;
+      if (items.hasOwnProperty(key) !== oldItems.hasOwnProperty(key)) {
+        return false
+      }
+
       switch (typeof (items[key])) {
         // Deep compare objects
         case "object":
-          if (!self._compare(items[key], oldItems[key])) return false;
+          if (!self._compare(items[key], oldItems[key])) {
+            return false
+          }
           break;
         // Compare function code
         case "function":
-          if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) return false;
+          if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) {
+            return false
+          }
           break;
         // Compare values
         default:
-          if (items[key] != oldItems[key]) return false;
+          if (items[key] != oldItems[key]) {
+            return false
+          }
       }
     }
     // Check old not matched keys
     for (var key in oldItems) {
-      if (typeof (items[key]) == "undefined") return false;
+      if (typeof (items[key]) == "undefined") {
+        return false
+      };
     }
     return true;
   }
