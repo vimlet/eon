@@ -38,7 +38,7 @@ eon.interpolation.prepare = function (template) {
 
         }
 
-        this.echo('<eon-variable bind="' + keyPath + '" global="' + global + '"></eon-variable>');
+        this.echo("<eon-variable bind=\"" + keyPath + "\" global=\"" + global + "\"></eon-variable>");
       }
     };
   }

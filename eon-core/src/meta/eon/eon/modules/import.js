@@ -520,7 +520,7 @@ eon.handleConfigDependencies = function (name) {
     }
 
     return hasDependencies;
-}
+};
 
 /*
 @function {String} getBasePathUrl

@@ -40,4 +40,4 @@ eon.domReady(function () {
 
   });
 
-})
+});

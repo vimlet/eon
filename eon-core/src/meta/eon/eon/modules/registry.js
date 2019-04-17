@@ -158,7 +158,7 @@ eon.registry.addToReadyQueue = function (el, fn) {
 */
 eon.registry.triggerRenders = function () {
 
-  if (eon.registry.registeredElements == eon.registry.elementStatus.transformed.length) {
+  if (eon.registry.registeredElements === eon.registry.elementStatus.transformed.length) {
 
     eon.registry.transformedQueueBreak = true;
     
@@ -278,7 +278,7 @@ eon.registry.updateElementStatus = function (el, status) {
 
       eon.registry.elementStatus[status][uidFull] = el;
 
-      if (eon.registry.elementStatus.ready.length != eon.registry.registeredElements) {
+      if (eon.registry.elementStatus.ready.length !== eon.registry.registeredElements) {
         eon["__onReady__triggered"] = false;
       }
 

@@ -91,7 +91,6 @@ eon.dataDiff = function (config) {
         switch (typeof (value)) {
           // Deep compare objects
           case "object":
-            value
             if (!self._compare(value, oldItems.get(key))) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
@@ -106,7 +105,7 @@ eon.dataDiff = function (config) {
             break;
           // Compare values
           default:
-            if (value != oldItems.get(key)) {
+            if (value !== oldItems.get(key)) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
             }
@@ -147,7 +146,7 @@ eon.dataDiff = function (config) {
           break;
         // Compare function code
         case "function":
-          if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) {
+          if (typeof (oldItems[key]) === "undefined" || (key !== "compare" && items[key].toString() != oldItems[key].toString())) {
             return false;
           }
           break;

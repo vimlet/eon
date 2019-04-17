@@ -21,7 +21,7 @@ module.exports = function (result) {
             rimraf.sync(deletePath);
         }
     } else {
-        console.log('\nInvalid "clear" argument [' + Object.keys(clearArguments).toString() + ']\n');
+        console.log("\nInvalid \"clear\" argument [" + Object.keys(clearArguments).toString() + "]\n");
     }
 
 };

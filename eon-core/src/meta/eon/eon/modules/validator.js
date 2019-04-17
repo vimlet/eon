@@ -126,7 +126,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
         var isInvalid;
 
         // If it does not follow the same format then it is no valid
-        if (value != schemaValue) {
+        if (value !== schemaValue) {
 
             isInvalid = true;
 
@@ -273,4 +273,4 @@ eon.validator.validateObjectField = function (property, schema, data, errorObj) 
 
 eon.validator.fillErrorObj = function (property, errorMessage, errorObj) {
     !errorObj[property] ? errorObj[property] = [errorMessage] : errorObj[property].push(errorMessage);
-}
+};

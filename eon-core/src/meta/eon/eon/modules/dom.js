@@ -286,7 +286,7 @@ document.$1 = document.$1 || eon.$1;
     for (var i = 0; i < classes.length; i++) {
         cls = classes[i];
   
-        if(cls.selectorText == className){
+        if(cls.selectorText === className){
         return true;
         }
     }

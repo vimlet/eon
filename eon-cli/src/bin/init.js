@@ -55,8 +55,8 @@ module.exports = function (result) {
             }
 
             var eonPath = readlineSync.question("\neon path? [eon] ");
-            if (eonPath.trim() == "") {
-                eonPath = "eon"
+            if (eonPath.trim() === "") {
+                eonPath = "eon";
             }
             eonJsonObject.path = eonPath;
 

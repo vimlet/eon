@@ -5,7 +5,7 @@
 
 eon.polyfills.injectPolyfill = function (url) {
   url = eon.cacheBusting || eon.pollyfillCacheBusting ? eon.getCacheBustedUrl(url) : url;
-  document.write('<script type="text/javascript" src="' + url + '"></script>');
+  document.write("<script type=\"text/javascript\" src=\"" + url + "\"></script>");
 };
 
 eon.polyfills.needCustomElementsPolyfill = function () {
@@ -46,21 +46,22 @@ eon.polyfills.needObjectAssignPolyfill = function () {
 };
 
 eon.polyfills.needLocaleStringPolyfill = function () {
-  return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
-}
+  return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) !== "Wed");
+};
 
 eon.polyfills.needPromisesPolyfill = function () {
   if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
     return false;
   }
   return true;
-}
+};
+
 eon.polyfills.needClassListAddPolyfill = function () {
   var div = document.createElement("div");
   div.classList.add("class1", "class2");
 
   return div.classList.contains("class2") ? false : true;
-}
+};
 
 // ############################################################################################
 // POLYFILL IMPORTS

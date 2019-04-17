@@ -38,7 +38,7 @@ eon.endpoint = function (type, url) {
     @function put
     @description Overwrite data resource // create if not exists
   */
-  this.put = type == "rest" ? function (id, data, cb) {
+  this.put = type === "rest" ? function (id, data, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;
     el.composedUrl += id ? "/" + id : "";
@@ -189,4 +189,4 @@ eon.endpoint = function (type, url) {
   function graphSocketsSubscription(queryString) {
     el.socket.send("subscription:" + queryString);
   }
-}
+};

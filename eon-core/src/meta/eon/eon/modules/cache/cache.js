@@ -3,7 +3,7 @@ eon.cache = eon.cache || {};
 eon.cache.config = eon.cache.config || false;
 
 // Check if eon has any cache strategy
-if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
+if ("serviceWorker" in navigator && Object.keys(eon.cache.config).length) {
   // Check service worker existence
   (function (proxied) {
     ServiceWorkerContainer.prototype.register = function () {
@@ -20,7 +20,7 @@ if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
 
       // Register eon service worker
       navigator.serviceWorker
-        .register(eon.basePath + '/modules/cache-sw.js')
+        .register(eon.basePath + "/modules/cache-sw.js")
         .then(function () {
           console.log("[ServiceWorker] Registered");
         });
@@ -66,7 +66,7 @@ eon.cache.add = function (request, options, cb) {
           cache.match(request).then(function (cached) {
             if (!cached) {
               cache.add(request).then(function () {
-                if (cb) { cb(null, request) }
+                if (cb) { cb(null, request) };
               }).catch(function (error) {
                 // Handles exceptions that arise from add().
                 console.error("Error in add handler:", error);
@@ -82,4 +82,4 @@ eon.cache.add = function (request, options, cb) {
       }
     }
   }
-}
+};
