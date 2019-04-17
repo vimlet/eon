@@ -1,5 +1,5 @@
 eon.createPropertyObserver = function (property, obj, callback, pollingRate) {
-  if (typeof pollingRate == "undefined") {
+  if (typeof pollingRate === "undefined") {
     pollingRate = 300;
   }
   obj.propertyObservers = obj.propertyObservers || {};
@@ -18,7 +18,7 @@ eon.createPropertyObserver = function (property, obj, callback, pollingRate) {
   if (startObserver) {
     var args;
     obj.propertyObservers[property].observer = setInterval(function () {
-      if (obj.propertyObservers[property].value != obj[property]) {
+      if (obj.propertyObservers[property].value !== obj[property]) {
         //  De-reference oldValue if its type is object
         if (typeof obj.propertyObservers[property].value == "object") {
           args = [

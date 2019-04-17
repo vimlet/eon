@@ -57,4 +57,4 @@ eon.resizeObserver = function (callback) {
     elm.callback = callback;
   }
   constructor(callback);
-}
+};

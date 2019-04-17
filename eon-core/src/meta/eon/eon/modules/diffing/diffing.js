@@ -135,34 +135,34 @@ eon.dataDiff = function (config) {
     for (var key in items) {
       // Check property exists on both objects
       if (items.hasOwnProperty(key) !== oldItems.hasOwnProperty(key)) {
-        return false
+        return false;
       }
 
       switch (typeof (items[key])) {
         // Deep compare objects
         case "object":
           if (!self._compare(items[key], oldItems[key])) {
-            return false
+            return false;
           }
           break;
         // Compare function code
         case "function":
           if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) {
-            return false
+            return false;
           }
           break;
         // Compare values
         default:
           if (items[key] != oldItems[key]) {
-            return false
+            return false;
           }
       }
     }
     // Check old not matched keys
     for (var key in oldItems) {
       if (typeof (items[key]) == "undefined") {
-        return false
-      };
+        return false;
+      }
     }
     return true;
   }
@@ -220,4 +220,4 @@ eon.dataDiff = function (config) {
     });
   };
 
-}
+};

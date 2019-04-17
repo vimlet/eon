@@ -195,7 +195,7 @@ eon.prepareComponent = function (elementName, content) {
                     // Reads the themeSchema and imports the requested files
                     eon.importSchemaThemes();
 
-                    eon.triggerCallback('onImportsReady', eon);
+                    eon.triggerCallback("onImportsReady", eon);
                     // Once the imports are done, if all the registered elements are ready then it we trigger the onReady callback
                     if (eon.registry.registeredElements === eon.registry.elementStatus.ready.length) {
                         eon.triggerCallback("onReady", eon);

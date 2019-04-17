@@ -6,7 +6,7 @@ eon.util = eon.util || {};
  */
 eon.util.firstToUpperCase = function (str) {
   return str.substring(0, 1).toUpperCase() + str.substring(1);
-}
+};
 /**
  * Set first string character to lower case
  * @param  {[type]} str [description]

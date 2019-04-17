@@ -246,7 +246,7 @@ vimlet.meta = vimlet.meta || {};
       sandbox.__output = "";
       sandbox.__basePath = basepath;
 
-      if (vimlet.meta.engine == "node") {
+      if (vimlet.meta.engine === "node") {
         var script = new require_vm.Script(s);
         script.runInContext(sandbox);
       } else {

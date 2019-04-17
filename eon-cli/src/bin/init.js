@@ -117,4 +117,4 @@ function downloadAndExtractTemplate(releaseURL, templateName, projectPath, cb) {
         });
     }
 
-};
+}

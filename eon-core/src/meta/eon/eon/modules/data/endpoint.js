@@ -51,7 +51,7 @@ eon.endpoint = function (type, url) {
       // Send request
       eon.ajax(el.composedUrl, options, cb);
     } else {
-      console.error('No resource id found');
+      console.error("No resource id found");
     }
   } : this.put;
   /*
@@ -69,7 +69,7 @@ eon.endpoint = function (type, url) {
       // Send request
       eon.ajax(el.url, options, cb);
     } else {
-      console.error('No resource data found');
+      console.error("No resource data found");
     }
   } : this.post;
   /*
@@ -88,7 +88,7 @@ eon.endpoint = function (type, url) {
       // Send request
       eon.ajax(el.composedUrl, options, cb);
     } else {
-      console.error('No resource id found');
+      console.error("No resource id found");
     }
   } : this.delete;
 

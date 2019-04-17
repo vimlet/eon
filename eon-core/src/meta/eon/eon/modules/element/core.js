@@ -630,10 +630,10 @@ eon.importPublic = function (el, config) {
     }
 
     if (config.functions) {
-        var keys = Object.keys(config.functions);
+        var fnKeys = Object.keys(config.functions);
 
-        for (var i = 0; i < keys.length; i++) {
-            el[keys[i]] = config.functions[keys[i]];
+        for (var i = 0; i < fnKeys.length; i++) {
+            el[fnKeys[i]] = config.functions[fnKeys[i]];
         }
     }
 
@@ -659,10 +659,10 @@ eon.importPrivate = function (el, config) {
     }
 
     if (config.privateFunctions) {
-        var keys = Object.keys(config.privateFunctions);
+        var privateFnKeys = Object.keys(config.privateFunctions);
 
-        for (var i = 0; i < keys.length; i++) {
-            el["_" + keys[i]] = config.privateFunctions[keys[i]];
+        for (var i = 0; i < privateFnKeys.length; i++) {
+            el["_" + privateFnKeys[i]] = config.privateFunctions[privateFnKeys[i]];
         }
     }
 
@@ -805,7 +805,7 @@ eon.setupEonThemeListener = function (el, config) {
     eon.onThemeChanged(function (previousTheme, newTheme) {
 
         var elementName = el.nodeName.toLowerCase();
-        var elementTheme = document.body.hasAttribute("theme") != "" ? document.body.getAttribute("theme") : el.theme;
+        var elementTheme = document.body.hasAttribute("theme") !== "" ? document.body.getAttribute("theme") : el.theme;
 
         // It will only change and attempt to import the new elements theme if matches the body one and 
         // if it is not strictly specified by the user
@@ -1133,7 +1133,7 @@ eon.createResizeCallbacks = function (el) {
 
         });
 
-    }
+    };
 
     // If the pseudo onResize callback has not been triggered by the time the element is Ready 
     // and the element has an onResize callback in its config we create the proper callback

@@ -220,7 +220,7 @@ eon.validator.validateArrayField = function (property, schema, data, errorObj) {
     if (propertySchema.type === "array" && data.hasOwnProperty(property)) {
 
         var valuesArray = data[property].filter(function (value) {
-            return value != false;
+            return value !== false;
         });
 
         var hasMinItems = propertySchema.hasOwnProperty("minItems");

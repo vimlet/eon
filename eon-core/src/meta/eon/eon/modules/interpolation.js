@@ -27,7 +27,7 @@ eon.interpolation.prepare = function (template) {
         rootPath = rootPath && rootPath !== "" ? rootPath.split(".") : rootPath;
 
         // If the first element of the rootPath is either "data" or "global"
-        if (rootPath && ((rootPath[0] == "data" && !global) || (rootPath[0] == "global"))) {
+        if (rootPath && ((rootPath[0] === "data" && !global) || (rootPath[0] === "global"))) {
 
           // Removes the data/global from the path
           rootPath.shift();
@@ -52,7 +52,7 @@ eon.interpolation.prepare = function (template) {
 
         var keyPath = params.length > 1 ? params[1] : params[0];
         var rootPath = params.length > 1 ? params[0] : undefined;
-        var global = rootPath && rootPath.split(".")[0] == "global" ? true : false;
+        var global = rootPath && rootPath.split(".")[0] === "global" ? true : false;
 
         keyPath = "\"" + keyPath + "\"";
         rootPath = rootPath ? "\"" + rootPath + "\"" : rootPath;
@@ -131,13 +131,13 @@ eon.interpolation.init = function (el, config) {
       isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
       bindString = currentVariable.getAttribute("bind");
       scope = isGlobal ? eon.interpolation.globalScope : el;
-      sourceName = bindString.split(".")[0] == "locale" ? "locale" : "data";
+      sourceName = bindString.split(".")[0] === "locale" ? "locale" : "data";
 
-      root = sourceName != "locale" ? scope[sourceName] : scope;
+      root = sourceName !== "locale" ? scope[sourceName] : scope;
 
       // Reads if there is already a value on the source if there is not then it assigns an empty string
       bindValue = eon.object.readFromPath(root, bindString);
-      isUndefined = typeof bindValue == "undefined";
+      isUndefined = typeof bindValue === "undefined";
       bindValue = isUndefined ? "" : bindValue;
       
       // Reassigns the value to the source, in case there was no value
@@ -251,7 +251,7 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLo
 
   for (var key in obj) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
+    if (key.indexOf("__") === -1) {
       value = obj[key];
 
       obj["__" + key] = value;
@@ -317,7 +317,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
 
   for (var key in obj) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
+    if (key.indexOf("__") === -1) {
       // If the property is an object the call ourselfs again to loop through our keys
       if (obj[key] && obj[key].constructor === Object) {
 
@@ -414,7 +414,7 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
   // Loops through the oldData
   for (var key in oldData) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
+    if (key.indexOf("__") === -1) {
       // If the property is an object, we enter this function again for that object
       if (oldData[key].constructor === Object) {
         checked[key] = eon.interpolation.backwardDataDiffing(el, scope, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config);
@@ -449,7 +449,7 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
   // Loops through data
   for (var key in data) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
+    if (key.indexOf("__") === -1) {
       // If the property is an object, we enter this function again for that object
       if (data[key].constructor === Object) {
         eon.interpolation.forwardDataDiffing(el, scope, keyPath + "." + key, data[key], checked ? checked[key] : checked, config);

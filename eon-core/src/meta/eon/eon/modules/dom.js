@@ -26,7 +26,7 @@ HTMLElement.prototype.getEnclosingComponent = function () {
     } else {
 
       nodeName = parentNode.nodeName.toLowerCase();
-      parentNode = nodeName == "body" ? undefined : parentNode.parentNode;
+      parentNode = nodeName === "body" ? undefined : parentNode.parentNode;
 
     }
 
