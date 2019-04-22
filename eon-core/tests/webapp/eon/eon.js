@@ -52,7 +52,7 @@ eon.pollyfillCacheBusting = "pollyfillCacheBusting" in eon ? eon.pollyfillCacheB
 
 eon.getCacheBustedUrl = function (url) {
   return url + "?ecb=" + (+ new Date);
-}
+};
 
 eon.getCurrentScript = function() {
     if (document.currentScript) {
@@ -110,7 +110,7 @@ eon.addViewportMeta = "addViewportMeta" in eon? eon.addViewportMeta : true;
 
 if (eon.addViewportMeta) {
     document.write(
-        '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
     );
 }
     
@@ -121,7 +121,7 @@ if (eon.addViewportMeta) {
 
 eon.polyfills.injectPolyfill = function (url) {
   url = eon.cacheBusting || eon.pollyfillCacheBusting ? eon.getCacheBustedUrl(url) : url;
-  document.write('<script type="text/javascript" src="' + url + '"></script>');
+  document.write("<script type=\"text/javascript\" src=\"" + url + "\"></script>");
 };
 
 eon.polyfills.needCustomElementsPolyfill = function () {
@@ -162,21 +162,22 @@ eon.polyfills.needObjectAssignPolyfill = function () {
 };
 
 eon.polyfills.needLocaleStringPolyfill = function () {
-  return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) != "Wed");
-}
+  return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) !== "Wed");
+};
 
 eon.polyfills.needPromisesPolyfill = function () {
   if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
     return false;
   }
   return true;
-}
+};
+
 eon.polyfills.needClassListAddPolyfill = function () {
   var div = document.createElement("div");
   div.classList.add("class1", "class2");
 
   return div.classList.contains("class2") ? false : true;
-}
+};
 
 // ############################################################################################
 // POLYFILL IMPORTS
@@ -2503,7 +2504,7 @@ vimlet.meta = vimlet.meta || {};
   };
 
   vimlet.meta.__getFile = function (path, callback) {
-    if (vimlet.meta.engine == "node") {
+    if (vimlet.meta.engine === "node") {
       // node command
       if (!require_fs) {
         require_fs = require("fs");
@@ -2556,7 +2557,7 @@ vimlet.meta = vimlet.meta || {};
   vimlet.meta.__createSandbox = function (scope) {
     var sandbox = eval.call(null, "this");
 
-    if (vimlet.meta.engine == "node") {
+    if (vimlet.meta.engine === "node") {
       if (!require_vm) {
         require_vm = require("vm");
       }
@@ -2603,7 +2604,7 @@ vimlet.meta = vimlet.meta || {};
   };
 
   vimlet.meta.__destroySandbox = function (sandbox) {
-    if (vimlet.meta.engine == "browser") {
+    if (vimlet.meta.engine === "browser") {
       var iframe = sandbox.frameElement;
       iframe.parentNode.removeChild(iframe);
     }
@@ -2636,7 +2637,7 @@ vimlet.meta = vimlet.meta || {};
       sandbox.__output = "";
       sandbox.__basePath = basepath;
 
-      if (vimlet.meta.engine == "node") {
+      if (vimlet.meta.engine === "node") {
         var script = new require_vm.Script(s);
         script.runInContext(sandbox);
       } else {
@@ -2953,7 +2954,7 @@ HTMLElement.prototype.getEnclosingComponent = function () {
     } else {
 
       nodeName = parentNode.nodeName.toLowerCase();
-      parentNode = nodeName == "body" ? undefined : parentNode.parentNode;
+      parentNode = nodeName === "body" ? undefined : parentNode.parentNode;
 
     }
 
@@ -3068,7 +3069,7 @@ document.$1 = document.$1 || eon.$1;
   self.getEnclosingComponent = function (el) {
     while (
       el.parentNode &&
-      Object.prototype.toString.call(el.parentNode) != "[object HTMLDocument]"
+      Object.prototype.toString.call(el.parentNode) !== "[object HTMLDocument]"
     ) {
       el = el.parentNode;
 
@@ -3213,7 +3214,7 @@ document.$1 = document.$1 || eon.$1;
     for (var i = 0; i < classes.length; i++) {
         cls = classes[i];
   
-        if(cls.selectorText == className){
+        if(cls.selectorText === className){
         return true;
         }
     }
@@ -3317,7 +3318,7 @@ eon.requestImport = function (href) {
     elementName = (href.indexOf(".html") > -1) ? href.match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase() : href.match(/[^\/]*$/g)[0].toLowerCase();
 
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
-    href = href.charAt(0) == "@" ? eon.getBasePathUrl(href) : href;
+    href = href.charAt(0) === "@" ? eon.getBasePathUrl(href) : href;
 
     if (!(elementName in eon.imports.templates)) {
 
@@ -3344,7 +3345,7 @@ eon.requestImport = function (href) {
                 // Cache
                 eon.cache.add(obj.url, { name: elementName });
 
-                if (obj.xhr.status == 200) {
+                if (obj.xhr.status === 200) {
 
                     eon.prepareComponent(elementName, obj.responseText);
 
@@ -3434,7 +3435,7 @@ eon.prepareComponent = function (elementName, content) {
 
         eon.imports.count++;
 
-        if (!eon.imports.ready && eon.imports.count == eon.imports.total) {
+        if (!eon.imports.ready && eon.imports.count === eon.imports.total) {
 
             // Appends all elements combined style
             eon.handleStyleAppend();
@@ -3458,9 +3459,9 @@ eon.prepareComponent = function (elementName, content) {
                     // Reads the themeSchema and imports the requested files
                     eon.importSchemaThemes();
 
-                    eon.triggerCallback('onImportsReady', eon);
+                    eon.triggerCallback("onImportsReady", eon);
                     // Once the imports are done, if all the registered elements are ready then it we trigger the onReady callback
-                    if (eon.registry.registeredElements == eon.registry.elementStatus.ready.length) {
+                    if (eon.registry.registeredElements === eon.registry.elementStatus.ready.length) {
                         eon.triggerCallback("onReady", eon);
                     }
 
@@ -3626,7 +3627,7 @@ eon.importElementTheme = function (config, name, theme) {
 */
 eon.handleStyleAppend = function () {
 
-    if (eon.imports.style != "") {
+    if (eon.imports.style !== "") {
 
         var combinedStyle = document.createElement("style");
 
@@ -3661,7 +3662,7 @@ eon.handleScriptsAppend = function (elementIndex, scriptIndex) {
         elementScriptsKeys = Object.keys(elementScripts);
 
         // If it has to resume a previous scripts append we start from that index
-        for (var j = (resume && i == elementIndex) ? scriptIndex : 0; j < elementScriptsKeys.length; j++) {
+        for (var j = (resume && i === elementIndex) ? scriptIndex : 0; j < elementScriptsKeys.length; j++) {
 
             resume = false;
 
@@ -3771,10 +3772,10 @@ eon.handleConfigDependencies = function (name) {
     if (elementConfig.dependencies) {
         for (var j = 0; j < elementConfig.dependencies.length; j++) {
             dependencyName = elementConfig.dependencies[j].match(/[^\/]*$/g)[0].replace(".html", "").toLowerCase();
-            dependencyPath = elementConfig.dependencies[j].charAt(0) == "@" ? eon.getBasePathUrl(elementConfig.dependencies[j]) : elementConfig.dependencies[j];
+            dependencyPath = elementConfig.dependencies[j].charAt(0) === "@" ? eon.getBasePathUrl(elementConfig.dependencies[j]) : elementConfig.dependencies[j];
             if (!(dependencyName in eon.imports.templates)) {
                 hasDependencies = true;
-                relativeToParent = elementConfig.dependencies[j].charAt(0) == "@" || elementConfig.dependencies[j].charAt(0) == "/" ? false : true;
+                relativeToParent = elementConfig.dependencies[j].charAt(0) === "@" || elementConfig.dependencies[j].charAt(0) === "/" ? false : true;
                 dependencyPath = (dependencyPath.indexOf(".html") > -1) ? dependencyPath : dependencyPath + "/" + dependencyName + ".html";
                 dependencyFile = !relativeToParent ? dependencyPath : eon.imports.paths[name] + dependencyPath;
                 eon.import(dependencyFile);
@@ -3783,7 +3784,7 @@ eon.handleConfigDependencies = function (name) {
     }
 
     return hasDependencies;
-}
+};
 
 /*
 @function {String} getBasePathUrl
@@ -3794,11 +3795,11 @@ eon.getBasePathUrl = function (url) {
 
     url = url.substring(1);
     return eon.basePath + "/" + url;
-}
+};
 
 // If there are no imports in the document we will trigger onImportsReady event immediately
 eon.domReady(function () {
-    if (!eon.imports || (eon.imports && eon.imports.total == 0)) {
+    if (!eon.imports || (eon.imports && eon.imports.total === 0)) {
         eon.triggerCallback("onImportsReady", eon);
     }
 });
@@ -3963,7 +3964,7 @@ eon.registry.addToReadyQueue = function (el, fn) {
 */
 eon.registry.triggerRenders = function () {
 
-  if (eon.registry.registeredElements == eon.registry.elementStatus.transformed.length) {
+  if (eon.registry.registeredElements === eon.registry.elementStatus.transformed.length) {
 
     eon.registry.transformedQueueBreak = true;
     
@@ -4060,7 +4061,7 @@ eon.registry.getUidFull = function (el) {
   var uid = el.uid ? el.uid : el.getAttribute("uid");
   var fullUid;
 
-  if (typeof el != "string" && uid) {
+  if (typeof el !== "string" && uid) {
     fullUid = el.tagName.toLowerCase() + "-" + uid;
   }
 
@@ -4075,25 +4076,25 @@ eon.registry.getUidFull = function (el) {
 */
 eon.registry.updateElementStatus = function (el, status) {
 
-  if (status != "parsed") {
+  if (status !== "parsed") {
 
     var uidFull = eon.registry.getUidFull(el);
 
-    if (status == "attached") {
+    if (status === "attached") {
 
       eon.registry.elementStatus[status][uidFull] = el;
 
-      if (eon.registry.elementStatus.ready.length != eon.registry.registeredElements) {
+      if (eon.registry.elementStatus.ready.length !== eon.registry.registeredElements) {
         eon["__onReady__triggered"] = false;
       }
 
-    } else if (status != "detached") {
+    } else if (status !== "detached") {
 
       eon.registry.elementStatus[status].push(el);
       
     }
 
-    if (status != "created" && status != "declared") {
+    if (status !== "created" && status !== "declared") {
       eon.registry.elementRegistry[uidFull][status] = true;
     }
 
@@ -4176,7 +4177,7 @@ eon.registry.isReady = function (el) {
 // Trigger global onReady
 eon.onImportsReady(function () {
 
-  if (eon.registry.elementStatus.declared.length == 0) {
+  if (eon.registry.elementStatus.declared.length === 0) {
     eon.triggerCallback("onReady", eon);
   }
 
@@ -4211,18 +4212,18 @@ eon.interpolation.prepare = function (template) {
         rootPath = rootPath && rootPath !== "" ? rootPath.split(".") : rootPath;
 
         // If the first element of the rootPath is either "data" or "global"
-        if (rootPath && ((rootPath[0] == "data" && !global) || (rootPath[0] == "global"))) {
+        if (rootPath && ((rootPath[0] === "data" && !global) || (rootPath[0] === "global"))) {
 
           // Removes the data/global from the path
           rootPath.shift();
           // Joins the remaining path
           rootPath = rootPath.join(".");
 
-          keyPath = rootPath != "" ? rootPath + "." + keyPath : keyPath;
+          keyPath = rootPath !== "" ? rootPath + "." + keyPath : keyPath;
 
         }
 
-        this.echo('<eon-variable bind="' + keyPath + '" global="' + global + '"></eon-variable>');
+        this.echo("<eon-variable bind=\"" + keyPath + "\" global=\"" + global + "\"></eon-variable>");
       }
     };
   }
@@ -4236,7 +4237,7 @@ eon.interpolation.prepare = function (template) {
 
         var keyPath = params.length > 1 ? params[1] : params[0];
         var rootPath = params.length > 1 ? params[0] : undefined;
-        var global = rootPath && rootPath.split(".")[0] == "global" ? true : false;
+        var global = rootPath && rootPath.split(".")[0] === "global" ? true : false;
 
         keyPath = "\"" + keyPath + "\"";
         rootPath = rootPath ? "\"" + rootPath + "\"" : rootPath;
@@ -4315,13 +4316,13 @@ eon.interpolation.init = function (el, config) {
       isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
       bindString = currentVariable.getAttribute("bind");
       scope = isGlobal ? eon.interpolation.globalScope : el;
-      sourceName = bindString.split(".")[0] == "locale" ? "locale" : "data";
+      sourceName = bindString.split(".")[0] === "locale" ? "locale" : "data";
 
-      root = sourceName != "locale" ? scope[sourceName] : scope;
+      root = sourceName !== "locale" ? scope[sourceName] : scope;
 
       // Reads if there is already a value on the source if there is not then it assigns an empty string
       bindValue = eon.object.readFromPath(root, bindString);
-      isUndefined = typeof bindValue == "undefined";
+      isUndefined = typeof bindValue === "undefined";
       bindValue = isUndefined ? "" : bindValue;
       
       // Reassigns the value to the source, in case there was no value
@@ -4435,7 +4436,7 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLo
 
   for (var key in obj) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
+    if (key.indexOf("__") === -1) {
       value = obj[key];
 
       obj["__" + key] = value;
@@ -4497,11 +4498,11 @@ eon.interpolation.setupListenerCallback = function (el, source, config) {
 @param {String} bind
 */
 eon.interpolation.interpolate = function (el, source, obj, interpolations, bind) {
-  var key, i, variableBind, variable;
+  var i, variableBind, variable;
 
-  for (key in obj) {
+  for (var key in obj) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
+    if (key.indexOf("__") === -1) {
       // If the property is an object the call ourselfs again to loop through our keys
       if (obj[key] && obj[key].constructor === Object) {
 
@@ -4519,7 +4520,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
         
         // Looks for the variables matching the binding
         Array.prototype.push.apply(interpolations[key], el.template.querySelectorAll(
-          'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
+          "eon-variable[bind=\"" + variableBind + "\"][global=\"" + source.isGlobal + "\"]"
         ));
 
         // For each variable found previously sets its value
@@ -4598,7 +4599,7 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
   // Loops through the oldData
   for (var key in oldData) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
+    if (key.indexOf("__") === -1) {
       // If the property is an object, we enter this function again for that object
       if (oldData[key].constructor === Object) {
         checked[key] = eon.interpolation.backwardDataDiffing(el, scope, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config);
@@ -4633,7 +4634,7 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
   // Loops through data
   for (var key in data) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
+    if (key.indexOf("__") === -1) {
       // If the property is an object, we enter this function again for that object
       if (data[key].constructor === Object) {
         eon.interpolation.forwardDataDiffing(el, scope, keyPath + "." + key, data[key], checked ? checked[key] : checked, config);
@@ -4791,7 +4792,7 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath != "") {
+    if (stylePath !== "") {
 
         var link = document.createElement("link");
 
@@ -4809,7 +4810,7 @@ eon.element = function (param1, param2) {
     }
 
     eon.imports.config[name.toLowerCase()] = config;
-    eon.triggerCallback('onScriptsReady', eon);
+    eon.triggerCallback("onScriptsReady", eon);
 
 };
 
@@ -4923,7 +4924,7 @@ eon.generateSourceFragment = function (el) {
     // If there are no childs, its means whether that it doesnt and wont have childs, or that it has not been processed by the browser yet,
     // either way we create a mutation observer to listen to child node changes, this observer will be disconnected on the "onAttached" callback.
     // Else just loops through its nodes and append them to the source fragment
-    if (el.childNodes.length == 0) {
+    if (el.childNodes.length === 0) {
 
         var observer = new MutationObserver(function (mutations) {
 
@@ -5090,7 +5091,7 @@ eon.definePlaceholderCreation = function (el) {
             placeholder.type = el.nodeName.toLowerCase();
             placeholder.ownerId = eon.registry.getUidFull(el);
 
-        })
+        });
 
         return placeholder;
 
@@ -5115,7 +5116,7 @@ eon.collectObserveData = function (el, config) {
 
         var propertiesKeys = Object.keys(config.properties);
 
-        for (i = 0; i < propertiesKeys.length; i++) {
+        for (var i = 0; i < propertiesKeys.length; i++) {
             // Add observe to observeProperties
             if (config.properties[propertiesKeys[i]].observe) {
                 el.__observeProperties[propertiesKeys[i]] = true;
@@ -5127,7 +5128,7 @@ eon.collectObserveData = function (el, config) {
             }
 
             // If the property has reflect but its value is of type object we set reflect to false
-            if (config.properties[propertiesKeys[i]].reflect && typeof config.properties[propertiesKeys[i]].value == "object") {
+            if (config.properties[propertiesKeys[i]].reflect && typeof config.properties[propertiesKeys[i]].value === "object") {
                 config.properties[propertiesKeys[i]].reflect = false;
             }
 
@@ -5144,16 +5145,16 @@ eon.collectObserveData = function (el, config) {
 
         var privatePropertiesKeys = Object.keys(config.privateProperties);
 
-        for (i = 0; i < privatePropertiesKeys.length; i++) {
+        for (var j = 0; j < privatePropertiesKeys.length; j++) {
             // Add observe to observeProperties
-            if (config.privateProperties[privatePropertiesKeys[i]].observe) {
-                el.__observeProperties["_" + privatePropertiesKeys[i]] = true;
+            if (config.privateProperties[privatePropertiesKeys[j]].observe) {
+                el.__observeProperties["_" + privatePropertiesKeys[j]] = true;
             }
 
             // Add reflect to observeAttributes
-            if (config.privateProperties[privatePropertiesKeys[i]].reflect) {
-                el.__observeAttributes[eon.util.camelToHyphenCase(privatePropertiesKeys[i])] = true;
-                el.__reflectProperties["_" + privatePropertiesKeys[i]] = true;
+            if (config.privateProperties[privatePropertiesKeys[j]].reflect) {
+                el.__observeAttributes[eon.util.camelToHyphenCase(privatePropertiesKeys[j])] = true;
+                el.__reflectProperties["_" + privatePropertiesKeys[j]] = true;
             }
         }
     }
@@ -5244,7 +5245,7 @@ eon.handleReflectDefaultProperty = function (el, key, property) {
     el.onInit(function () {
 
         // Only sets the attribute if the value is not of object type
-        if (typeof value != "object") {
+        if (typeof value !== "object") {
             el.setAttribute(key, value);
         } else {
             el.removeAttribute(key);
@@ -5314,7 +5315,7 @@ eon.createPropDescriptor = function (el, config, key, value, reflect) {
         if (reflect) {
             // Trigger onAttributeChanged, note this will trigger also onPropertyChanged if needed
             // Only sets the attribute if the value is not of object type
-            if (typeof value != "object") {
+            if (typeof value !== "object") {
                 el.setAttribute(eon.util.camelToHyphenCase(key), value);
             } else {
                 el.removeAttribute(eon.util.camelToHyphenCase(key));
@@ -5392,10 +5393,10 @@ eon.importPublic = function (el, config) {
     }
 
     if (config.functions) {
-        var keys = Object.keys(config.functions);
+        var fnKeys = Object.keys(config.functions);
 
-        for (var i = 0; i < keys.length; i++) {
-            el[keys[i]] = config.functions[keys[i]];
+        for (var j = 0; j < fnKeys.length; j++) {
+            el[fnKeys[j]] = config.functions[fnKeys[j]];
         }
     }
 
@@ -5421,22 +5422,12 @@ eon.importPrivate = function (el, config) {
     }
 
     if (config.privateFunctions) {
-        var keys = Object.keys(config.privateFunctions);
+        var privateFnKeys = Object.keys(config.privateFunctions);
 
-        for (var i = 0; i < keys.length; i++) {
-            el["_" + keys[i]] = config.privateFunctions[keys[i]];
+        for (var j = 0; j < privateFnKeys.length; j++) {
+            el["_" + privateFnKeys[j]] = config.privateFunctions[privateFnKeys[j]];
         }
     }
-
-};
-
-/*
-@function importResize
-@description Takes all the resize functions from the element config and adds them to the onResize callbacks queue
-@param {Object} el
-@param {Object} config
-*/
-eon.importResize = function (el, config) {
 
 };
 
@@ -5449,7 +5440,7 @@ eon.importTemplateClasses = function (el) {
 
     var template = eon.imports.templates[el.tagName.toLowerCase()];
 
-    if (template && template.classList.length != 0) {
+    if (template && template.classList.length !== 0) {
 
         var elClassesArray = Array.prototype.slice.call(el.classList);
         var templateClassesArray = Array.prototype.slice.call(template.classList);
@@ -5459,7 +5450,6 @@ eon.importTemplateClasses = function (el) {
         el.setAttribute("class", elClassesArray.join(" "));
 
     }
-
 
 };
 
@@ -5477,7 +5467,7 @@ eon.triggerAllCallbackEvents = function (el, config, callback, params) {
 
     // This "if" is created for the porpuse of not allowing onPropertyChanged and onAttributeChanged
     // to be triggered once the element is render, this is so we dont have to use el.onRender() inside this callback to not crash
-    if (!((callback === "onPropertyChanged" || callback === "onAttributeChanged") && eon.registry.isRendered(el) != true)) {
+    if (!((callback === "onPropertyChanged" || callback === "onAttributeChanged") && eon.registry.isRendered(el) !== true)) {
 
         if (config[callback]) {
             config[callback].apply(el, params);
@@ -5578,7 +5568,7 @@ eon.setupEonThemeListener = function (el, config) {
     eon.onThemeChanged(function (previousTheme, newTheme) {
 
         var elementName = el.nodeName.toLowerCase();
-        var elementTheme = document.body.hasAttribute("theme") != "" ? document.body.getAttribute("theme") : el.theme;
+        var elementTheme = document.body.hasAttribute("theme") !== "" ? document.body.getAttribute("theme") : el.theme;
 
         // It will only change and attempt to import the new elements theme if matches the body one and 
         // if it is not strictly specified by the user
@@ -5760,7 +5750,7 @@ eon.initSourceCallbacks = function (el) {
         var sourceElements = [];
         for (var i = 0; i < sourceNodes.length; i++) {
             // NodeType 1 means its an Html element
-            if (sourceNodes[i].nodeType == 1) {
+            if (sourceNodes[i].nodeType === 1) {
                 sourceElements.push(sourceNodes[i]);
             }
 
@@ -5796,7 +5786,7 @@ eon.updateSourceCallbacks = function (el) {
 
         for (var i = 0; i < sourceNodes.length; i++) {
             // NodeType 1 means its an Html element
-            if (sourceNodes[i].nodeType == 1) {
+            if (sourceNodes[i].nodeType === 1) {
                 sourceElements.push(sourceNodes[i]);
             }
 
@@ -5805,7 +5795,7 @@ eon.updateSourceCallbacks = function (el) {
         return Array.prototype.slice.call(sourceElements);
     }
 
-}
+};
 
 /*
 @function triggerTransformed
@@ -5906,7 +5896,7 @@ eon.createResizeCallbacks = function (el) {
 
         });
 
-    }
+    };
 
     // If the pseudo onResize callback has not been triggered by the time the element is Ready 
     // and the element has an onResize callback in its config we create the proper callback
@@ -5922,7 +5912,7 @@ eon.createResizeCallbacks = function (el) {
 
         }
 
-    })
+    });
 
     // onWindowResize callback creation
     eon.createCallback("onWindowResize", el);
@@ -6056,7 +6046,7 @@ eon.declare = function (name, baseElement) {
 };
 
 eon.createPropertyObserver = function (property, obj, callback, pollingRate) {
-  if (typeof pollingRate == "undefined") {
+  if (typeof pollingRate === "undefined") {
     pollingRate = 300;
   }
   obj.propertyObservers = obj.propertyObservers || {};
@@ -6075,7 +6065,7 @@ eon.createPropertyObserver = function (property, obj, callback, pollingRate) {
   if (startObserver) {
     var args;
     obj.propertyObservers[property].observer = setInterval(function () {
-      if (obj.propertyObservers[property].value != obj[property]) {
+      if (obj.propertyObservers[property].value !== obj[property]) {
         //  De-reference oldValue if its type is object
         if (typeof obj.propertyObservers[property].value == "object") {
           args = [
@@ -6119,7 +6109,7 @@ eon.removePropertyObserver = function (property, obj) {
 eon.time = eon.time || {};
 
 eon.time.isLeapYear = function (year) {
-  return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 };
 
 eon.time.getDaysInMonth = function (year, month) {
@@ -6169,7 +6159,7 @@ eon.time.getFirstWeekMonday = function (locale, year, month, format) {
   var firstWeekDay = eon.time.getFirstWeekDay(locale, year, month, format);
   var weekPosition = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].indexOf(firstWeekDay);
   // Check first month reached
-  if (month == 0) {
+  if (month === 0) {
     month = 11;
     year--;
   } else {
@@ -6350,17 +6340,17 @@ eon.resizeObserver = eon.resizeObserver || {};
       }
     }
     elm.observables.push(newObservable);
-  }
+  };
 
   elm.unobserve = function (el) {
     elm.observables = elm.observables.filter(function (obj) {
       return obj.el !== el;
     });
-  }
+  };
 
   elm.disconnect = function () {
     elm.observables = [];
-  }
+  };
 
   elm.check = function () {
     var changedEntries = elm.observables.filter(function (obj) {
@@ -6378,7 +6368,7 @@ eon.resizeObserver = eon.resizeObserver || {};
       elm.callback(changedEntries);
     }
     window.requestAnimationFrame(elm.boundCheck);
-  }
+  };
   //  class ResizeObserver {
   function constructor(callback) {
     elm.observables = [];
@@ -6392,7 +6382,7 @@ eon.resizeObserver = eon.resizeObserver || {};
     elm.callback = callback;
   }
   constructor(callback);
-}
+};
 
 }).apply(eon);
 
@@ -6423,8 +6413,6 @@ element.__resizeObservers[key].observe(element);
 
 } else {
 
-eon.onReady(function () {
-
 element._resizeMutationObservers = element._resizeMutationObservers || {};
 
 // If there is already a resizeListener with that key,
@@ -6437,8 +6425,6 @@ delete element._resizeMutationObservers[key];
 // Creates the resizeObserver for the element with the provided callback
 element._resizeMutationObservers[key] = new eon.resizeObserver(fn);
 element._resizeMutationObservers[key].observe(element);
-
-});
 
 }
 
@@ -6480,7 +6466,7 @@ eon.util = eon.util || {};
  */
 eon.util.firstToUpperCase = function (str) {
   return str.substring(0, 1).toUpperCase() + str.substring(1);
-}
+};
 /**
  * Set first string character to lower case
  * @param  {[type]} str [description]
@@ -6497,7 +6483,7 @@ eon.util.firstToLowerCase = function (str) {
  * @return {[type]}     [description]
  */
 eon.util.camelToHyphenCase = function (str) {
-  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 };
 /**
  * Replaces the hyphens cases for camels
@@ -6655,7 +6641,7 @@ eon.util.getBrowserScrollBarWidth = function () {
 };
 
 eon.util.isTrue = function (a) {
-  return a == true || a == "true";
+  return a === true || a === "true";
 };
 
 eon.util.isTouchScreen = function () {
@@ -6677,7 +6663,7 @@ eon.ajax = function (url, options, cb) {
 
   var xhr = options.xhr || new XMLHttpRequest();
   xhr.onreadystatechange = function () {
-    if (this.readyState == 4) {
+    if (this.readyState === 4) {
       var success = this.status >= 200 && this.status < 300;
       if (cb) {
         cb(success, {
@@ -6799,7 +6785,7 @@ eon.cache = eon.cache || {};
 eon.cache.config = eon.cache.config || false;
 
 // Check if eon has any cache strategy
-if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
+if ("serviceWorker" in navigator && Object.keys(eon.cache.config).length) {
   // Check service worker existence
   (function (proxied) {
     ServiceWorkerContainer.prototype.register = function () {
@@ -6816,7 +6802,7 @@ if ('serviceWorker' in navigator && Object.keys(eon.cache.config).length) {
 
       // Register eon service worker
       navigator.serviceWorker
-        .register(eon.basePath + '/modules/cache-sw.js')
+        .register(eon.basePath + "/modules/cache-sw.js")
         .then(function () {
           console.log("[ServiceWorker] Registered");
         });
@@ -6841,7 +6827,7 @@ eon.cache.open = function (cb) {
       throw error;
     });
   }
-}
+};
 
 eon.cache.add = function (request, options, cb) {
   var config = eon.cache.config;
@@ -6862,7 +6848,7 @@ eon.cache.add = function (request, options, cb) {
           cache.match(request).then(function (cached) {
             if (!cached) {
               cache.add(request).then(function () {
-                if (cb) { cb(null, request) }
+                if (cb) { cb(null, request); }
               }).catch(function (error) {
                 // Handles exceptions that arise from add().
                 console.error("Error in add handler:", error);
@@ -6874,11 +6860,11 @@ eon.cache.add = function (request, options, cb) {
             console.error("Error in cache match:", error);
             throw error;
           });
-        })
+        });
       }
     }
   }
-}
+};
 
 eon.history = eon.history || {};
 
@@ -7011,7 +6997,7 @@ eon.endpoint = function (type, url) {
   /* Resources url */
   this.url = url;
   /* GraphQL Web Sockets based use only */
-  this.socket = type == "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
+  this.socket = type === "graphSockets" && !this.socket ? new WebSocket(this.url) : this.socket;
   this.socket = ~["WebSockets", "graphSockets"].indexOf(type) ? new WebSocket(this.url) : this.socket;
 
   /* 
@@ -7026,7 +7012,7 @@ eon.endpoint = function (type, url) {
     @function get
     @description Read data resource // Read all data resources
   */
-  this.get = type == "rest" ? function (id, cb) {
+  this.get = type === "rest" ? function (id, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;
     el.composedUrl += id ? "/" + id : "";
@@ -7041,7 +7027,7 @@ eon.endpoint = function (type, url) {
     @function put
     @description Overwrite data resource // create if not exists
   */
-  this.put = type == "rest" ? function (id, data, cb) {
+  this.put = type === "rest" ? function (id, data, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;
     el.composedUrl += id ? "/" + id : "";
@@ -7054,14 +7040,14 @@ eon.endpoint = function (type, url) {
       // Send request
       eon.ajax(el.composedUrl, options, cb);
     } else {
-      console.error('No resource id found');
+      console.error("No resource id found");
     }
   } : this.put;
   /*
     @function post
     @description Create data resource
   */
-  this.post = type == "rest" ? function (data, cb) {
+  this.post = type === "rest" ? function (data, cb) {
     // Check resource id and set url
     if (data) {
       // Set up request
@@ -7072,14 +7058,14 @@ eon.endpoint = function (type, url) {
       // Send request
       eon.ajax(el.url, options, cb);
     } else {
-      console.error('No resource data found');
+      console.error("No resource data found");
     }
   } : this.post;
   /*
     @function delete
     @description Delete data resource
   */
-  this.delete = type == "rest" ? function (id, cb) {
+  this.delete = type === "rest" ? function (id, cb) {
     // Check resource id and set url
     el.composedUrl = el.url;
     el.composedUrl += id ? "/" + id : "";
@@ -7091,7 +7077,7 @@ eon.endpoint = function (type, url) {
       // Send request
       eon.ajax(el.composedUrl, options, cb);
     } else {
-      console.error('No resource id found');
+      console.error("No resource id found");
     }
   } : this.delete;
 
@@ -7101,7 +7087,7 @@ eon.endpoint = function (type, url) {
     @function send
     @description Send data
   */
-  this.send = type == "WebSockets" ? function (data) {
+  this.send = type === "WebSockets" ? function (data) {
     el.socket.send(data);
   } : this.send;
 
@@ -7192,7 +7178,7 @@ eon.endpoint = function (type, url) {
   function graphSocketsSubscription(queryString) {
     el.socket.send("subscription:" + queryString);
   }
-}
+};
 
 eon.data = eon.data || {};
 
@@ -7382,7 +7368,7 @@ eon.data.MemoryAdapter = function () {
     var merge = function (obj) {
       for (var prop in obj) {
         if (obj.hasOwnProperty(prop)) {
-          if (obj[prop] && typeof obj[prop] == 'object') {
+          if (obj[prop] && typeof obj[prop] === "object") {
             merged[prop] = deepMerge(merged[prop], obj[prop]);
           }
           else {
@@ -7447,7 +7433,7 @@ eon.data.MemoryAdapter = function () {
   var baseAdapter = eon.vpa.createBaseAdapter(queryHandler);
   baseAdapter._memory = memory;
   return baseAdapter;
-}
+};
 
 
 eon.dataDiff = function (config) {
@@ -7543,22 +7529,21 @@ eon.dataDiff = function (config) {
         switch (typeof (value)) {
           // Deep compare objects
           case "object":
-            value
             if (!self._compare(value, oldItems.get(key))) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
-            };
+            }
             break;
           // Compare function code
           case "function":
-            if (typeof (oldItems.get(key)) != "undefined" || (value.toString() != oldItems.get(key).toString())) {
+            if (typeof (oldItems.get(key)) !== "undefined" || (value.toString() != oldItems.get(key).toString())) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
-            };
+            }
             break;
           // Compare values
           default:
-            if (value != oldItems.get(key)) {
+            if (value !== oldItems.get(key)) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
             }
@@ -7575,7 +7560,7 @@ eon.dataDiff = function (config) {
       }
     });
     return true;
-  }
+  };
   /*
     @function (private) _compare
     @description Whether or not there are differences between objects keys
@@ -7586,27 +7571,38 @@ eon.dataDiff = function (config) {
     // Loop through properties in object 1
     for (var key in items) {
       // Check property exists on both objects
-      if (items.hasOwnProperty(key) !== oldItems.hasOwnProperty(key)) return false;
+      if (items.hasOwnProperty(key) !== oldItems.hasOwnProperty(key)) {
+        return false;
+      }
+
       switch (typeof (items[key])) {
         // Deep compare objects
         case "object":
-          if (!self._compare(items[key], oldItems[key])) return false;
+          if (!self._compare(items[key], oldItems[key])) {
+            return false;
+          }
           break;
         // Compare function code
         case "function":
-          if (typeof (oldItems[key]) == "undefined" || (key != "compare" && items[key].toString() != oldItems[key].toString())) return false;
+          if (typeof (oldItems[key]) === "undefined" || (key !== "compare" && items[key].toString() !== oldItems[key].toString())) {
+            return false;
+          }
           break;
         // Compare values
         default:
-          if (items[key] != oldItems[key]) return false;
+          if (items[key] !== oldItems[key]) {
+            return false;
+          }
       }
     }
     // Check old not matched keys
     for (var key in oldItems) {
-      if (typeof (items[key]) == "undefined") return false;
+      if (typeof (items[key]) === "undefined") {
+        return false;
+      }
     }
     return true;
-  }
+  };
   /*
     @function (private) _processState
     @description Process data operations
@@ -7626,7 +7622,7 @@ eon.dataDiff = function (config) {
     });
     // Reset operations store
     self._operations = [];
-  }
+  };
   /*
     @function (private) _saveState
     @description Save state
@@ -7641,7 +7637,7 @@ eon.dataDiff = function (config) {
       }
       self.states.push(data);
     }
-  }
+  };
   /*
     @function (private) _create
     @description Store operation
@@ -7661,7 +7657,7 @@ eon.dataDiff = function (config) {
     });
   };
 
-}
+};
 
 
 eon.validator = eon.validator || {};
@@ -7673,12 +7669,12 @@ eon.validator.addSchema = function (id, schema) {
         // Saves the schema with the given id
         eon.validator.schemas[id] = schema;
     }
-}
+};
 
 eon.validator.containsSchema = function (id) {
     // Returns whether there is already a schema id or not
     return eon.validator.schemas[id] ? true : false;
-}
+};
 
 eon.validator.validate = function (data, schema) {
 
@@ -7709,7 +7705,7 @@ eon.validator.validate = function (data, schema) {
 
     return undefined;
 
-}
+};
 
 eon.validator.loopProperties = function (schema, callback) {
 
@@ -7725,27 +7721,27 @@ eon.validator.loopProperties = function (schema, callback) {
 
     }
 
-}
+};
 
 eon.validator.validateRequiredField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
     var isRequired = (schema.required && schema.required.indexOf(property) > -1) || eon.util.isTrue(propertySchema.required);
 
-    var isInvalid = ((!data[property] || data[property] == "") && isRequired);
+    var isInvalid = ((!data[property] || data[property] === "") && isRequired);
 
     // If if does not meet any of the requirements then it fills the error object with the proper information
     if (isInvalid) {
         eon.validator.fillErrorObj(property, "Required", errorObj);
     }
 
-}
+};
 
 eon.validator.validateStringField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
 
-    if (propertySchema.type == "string" && data.hasOwnProperty(property)) {
+    if (propertySchema.type === "string" && data.hasOwnProperty(property)) {
 
         // MaxLength
         var hasMaxLength = propertySchema.hasOwnProperty("maxLength") && (parseInt(propertySchema.maxLength) > 0);
@@ -7769,13 +7765,13 @@ eon.validator.validateStringField = function (property, schema, data, errorObj) 
 
     }
 
-}
+};
 
 eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
 
-    if (propertySchema.type == "date" && data.hasOwnProperty(property)) {
+    if (propertySchema.type === "date" && data.hasOwnProperty(property)) {
 
         // Takes the format of the schema, if there is no format in the schema it takes a default format work with
         var format = propertySchema.format ? propertySchema.format : "YYYY-MM-DD";
@@ -7791,7 +7787,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
         var isInvalid;
 
         // If it does not follow the same format then it is no valid
-        if (value != schemaValue) {
+        if (value !== schemaValue) {
 
             isInvalid = true;
 
@@ -7844,13 +7840,13 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
     }
 
-}
+};
 
 eon.validator.validateNumericField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
 
-    if ((propertySchema.type == "integer" || propertySchema.type == "number") && data.hasOwnProperty(property)) {
+    if ((propertySchema.type === "integer" || propertySchema.type === "number") && data.hasOwnProperty(property)) {
 
         var value = parseFloat(data[property]);
 
@@ -7876,16 +7872,16 @@ eon.validator.validateNumericField = function (property, schema, data, errorObj)
 
     }
 
-}
+};
 
 eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
 
-    if (propertySchema.type == "array" && data.hasOwnProperty(property)) {
+    if (propertySchema.type === "array" && data.hasOwnProperty(property)) {
 
         var valuesArray = data[property].filter(function (value) {
-            return value != false;
+            return value !== false;
         });
 
         var hasMinItems = propertySchema.hasOwnProperty("minItems");
@@ -7904,13 +7900,13 @@ eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
     }
 
-}
+};
 
 eon.validator.validateObjectField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
 
-    if (propertySchema.type == "object" && data.hasOwnProperty(property)) {
+    if (propertySchema.type === "object" && data.hasOwnProperty(property)) {
 
         var propertyData = data[property];
         var nestedErrorObj = {};
@@ -7928,17 +7924,17 @@ eon.validator.validateObjectField = function (property, schema, data, errorObj) 
 
         });
 
-        if (Object.keys(errorObj[property]) == 0) {
+        if (Object.keys(errorObj[property]) === 0) {
             delete errorObj[property];
         }
 
     }
 
-}
+};
 
 eon.validator.fillErrorObj = function (property, errorMessage, errorObj) {
     !errorObj[property] ? errorObj[property] = [errorMessage] : errorObj[property].push(errorMessage);
-}
+};
 
 
 
@@ -8005,7 +8001,7 @@ eon.domReady(function () {
 
   });
 
-})
+});
 
 
   
