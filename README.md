@@ -4,7 +4,6 @@
 </a>
 </p>
 
-
 <p align="center">
 <strong>Fast, Light & Productive UX</strong>
 </p>
