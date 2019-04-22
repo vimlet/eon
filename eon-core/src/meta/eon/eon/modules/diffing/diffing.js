@@ -159,7 +159,7 @@ eon.dataDiff = function (config) {
     }
     // Check old not matched keys
     for (var key in oldItems) {
-      if (typeof (items[key]) == "undefined") {
+      if (typeof (items[key]) === "undefined") {
         return false;
       }
     }

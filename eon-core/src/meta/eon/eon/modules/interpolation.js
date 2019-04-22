@@ -34,7 +34,7 @@ eon.interpolation.prepare = function (template) {
           // Joins the remaining path
           rootPath = rootPath.join(".");
 
-          keyPath = rootPath != "" ? rootPath + "." + keyPath : keyPath;
+          keyPath = rootPath !== "" ? rootPath + "." + keyPath : keyPath;
 
         }
 

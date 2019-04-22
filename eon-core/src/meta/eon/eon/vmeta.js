@@ -166,7 +166,7 @@ vimlet.meta = vimlet.meta || {};
   vimlet.meta.__createSandbox = function (scope) {
     var sandbox = eval.call(null, "this");
 
-    if (vimlet.meta.engine == "node") {
+    if (vimlet.meta.engine === "node") {
       if (!require_vm) {
         require_vm = require("vm");
       }
@@ -213,7 +213,7 @@ vimlet.meta = vimlet.meta || {};
   };
 
   vimlet.meta.__destroySandbox = function (sandbox) {
-    if (vimlet.meta.engine == "browser") {
+    if (vimlet.meta.engine === "browser") {
       var iframe = sandbox.frameElement;
       iframe.parentNode.removeChild(iframe);
     }

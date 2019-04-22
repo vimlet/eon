@@ -328,7 +328,7 @@ eon.definePlaceholderCreation = function (el) {
             placeholder.type = el.nodeName.toLowerCase();
             placeholder.ownerId = eon.registry.getUidFull(el);
 
-        })
+        });
 
         return placeholder;
 
@@ -382,16 +382,16 @@ eon.collectObserveData = function (el, config) {
 
         var privatePropertiesKeys = Object.keys(config.privateProperties);
 
-        for (var i = 0; i < privatePropertiesKeys.length; i++) {
+        for (var j = 0; j < privatePropertiesKeys.length; j++) {
             // Add observe to observeProperties
-            if (config.privateProperties[privatePropertiesKeys[i]].observe) {
-                el.__observeProperties["_" + privatePropertiesKeys[i]] = true;
+            if (config.privateProperties[privatePropertiesKeys[j]].observe) {
+                el.__observeProperties["_" + privatePropertiesKeys[j]] = true;
             }
 
             // Add reflect to observeAttributes
-            if (config.privateProperties[privatePropertiesKeys[i]].reflect) {
-                el.__observeAttributes[eon.util.camelToHyphenCase(privatePropertiesKeys[i])] = true;
-                el.__reflectProperties["_" + privatePropertiesKeys[i]] = true;
+            if (config.privateProperties[privatePropertiesKeys[j]].reflect) {
+                el.__observeAttributes[eon.util.camelToHyphenCase(privatePropertiesKeys[j])] = true;
+                el.__reflectProperties["_" + privatePropertiesKeys[j]] = true;
             }
         }
     }
@@ -632,8 +632,8 @@ eon.importPublic = function (el, config) {
     if (config.functions) {
         var fnKeys = Object.keys(config.functions);
 
-        for (var i = 0; i < fnKeys.length; i++) {
-            el[fnKeys[i]] = config.functions[fnKeys[i]];
+        for (var j = 0; j < fnKeys.length; j++) {
+            el[fnKeys[j]] = config.functions[fnKeys[j]];
         }
     }
 
