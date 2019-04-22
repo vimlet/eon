@@ -98,7 +98,7 @@ eon.dataDiff = function (config) {
             break;
           // Compare function code
           case "function":
-            if (typeof (oldItems.get(key)) != "undefined" || (value.toString() != oldItems.get(key).toString())) {
+            if (typeof (oldItems.get(key)) !== "undefined" || (value.toString() != oldItems.get(key).toString())) {
               // :: Update item
               self._storeOperation("update", key, counter, value, oldItems.get(key));
             }
@@ -146,13 +146,13 @@ eon.dataDiff = function (config) {
           break;
         // Compare function code
         case "function":
-          if (typeof (oldItems[key]) === "undefined" || (key !== "compare" && items[key].toString() != oldItems[key].toString())) {
+          if (typeof (oldItems[key]) === "undefined" || (key !== "compare" && items[key].toString() !== oldItems[key].toString())) {
             return false;
           }
           break;
         // Compare values
         default:
-          if (items[key] != oldItems[key]) {
+          if (items[key] !== oldItems[key]) {
             return false;
           }
       }

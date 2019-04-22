@@ -113,7 +113,7 @@ vimlet.meta = vimlet.meta || {};
   };
 
   vimlet.meta.__getFile = function (path, callback) {
-    if (vimlet.meta.engine == "node") {
+    if (vimlet.meta.engine === "node") {
       // node command
       if (!require_fs) {
         require_fs = require("fs");

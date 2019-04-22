@@ -661,8 +661,8 @@ eon.importPrivate = function (el, config) {
     if (config.privateFunctions) {
         var privateFnKeys = Object.keys(config.privateFunctions);
 
-        for (var i = 0; i < privateFnKeys.length; i++) {
-            el["_" + privateFnKeys[i]] = config.privateFunctions[privateFnKeys[i]];
+        for (var j = 0; j < privateFnKeys.length; j++) {
+            el["_" + privateFnKeys[j]] = config.privateFunctions[privateFnKeys[j]];
         }
     }
 
