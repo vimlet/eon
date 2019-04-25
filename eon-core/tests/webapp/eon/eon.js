@@ -4650,6 +4650,8 @@ eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, check
 };
 
 eon.createCallback("onThemeChanged", eon);
+// This is a private callback for Eon to change all the component themes before the actual and public onThemeChanged callback is triggered
+eon.createCallback("_onThemeChanged", eon);
 
 document.addEventListener("DOMContentLoaded", function (event) {
 
@@ -4692,6 +4694,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eon.importMainTheme(value);
         }
 
+        // It triggers the private onThemeChanged callback to change all the components theme, then it fires the public eon's onThemeChanged
+        eon.triggerCallback("_onThemeChanged", eon, null, [eon.__theme, value]);
         eon.triggerCallback("onThemeChanged", eon, null, [eon.__theme, value]);
         eon.__theme = value;
       });
@@ -4837,30 +4841,14 @@ eon.createElement = function (name, config) {
 
     if (config) {
 
+        eon.importPublic(el, config);
+
         var callbacks = ["onCreated", "onInit", "onTransformed", "onRender", "onBubbleRender", "onReady"];
 
         for (var i = 0; i < callbacks.length; i++) {
+
             if (config[callbacks[i]]) {
                 el[callbacks[i]](config[callbacks[i]]);
-            }
-        }
-
-        if (config.functions) {
-
-            var functions = Object.keys(config.functions);
-
-            for (var j = 0; j < functions.length; j++) {
-                el[functions[j]] = config.functions[functions[j]];
-            }
-
-        }
-
-        if (config.properties) {
-
-            var properties = Object.keys(config.properties);
-
-            for (var k = 0; k < properties.length; k++) {
-                el[properties[k]] = config.properties[properties[k]];
             }
 
         }
@@ -5111,6 +5099,13 @@ eon.collectObserveData = function (el, config) {
     el.__observeAttributes = {};
     el.__reflectProperties = {};
 
+    // Adds theme as reflected property
+    config.properties = config.properties ? config.properties : {};
+    config.properties.theme = {
+        value: "",
+        reflect: true
+    };
+
     // Reads properties object to add them to the observe object if needed
     if (config.properties) {
 
@@ -5310,8 +5305,9 @@ eon.createPropDescriptor = function (el, config, key, value, reflect) {
     propDescriptor.get = function () {
         return el["__" + key];
     };
-
+    
     propDescriptor.set = function (value) {
+        
         if (reflect) {
             // Trigger onAttributeChanged, note this will trigger also onPropertyChanged if needed
             // Only sets the attribute if the value is not of object type
@@ -5565,8 +5561,8 @@ eon.setupEonThemeListener = function (el, config) {
 
     // When eon theme changes it also changes the element's theme attribute and 
     // if the theme file is not imported it also imports it
-    eon.onThemeChanged(function (previousTheme, newTheme) {
-
+    eon._onThemeChanged(function (previousTheme, newTheme) {
+        
         var elementName = el.nodeName.toLowerCase();
         var elementTheme = document.body.hasAttribute("theme") !== "" ? document.body.getAttribute("theme") : el.theme;
 
@@ -5880,7 +5876,7 @@ eon.createResizeCallbacks = function (el) {
     el.onResize = function (callback) {
         // Once the pseudo callback has been called we set it to null so that it can create the real one
         el.onResize = null;
-        
+
         eon.createCallback("onResize", el);
 
         // Once the element is ready, it will add the listener

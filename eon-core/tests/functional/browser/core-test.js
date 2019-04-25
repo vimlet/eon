@@ -68,4 +68,28 @@ suite("eon-core", () => {
     });
 
   });
+  test("Slot", ({ remote }) => {
+    remote.setExecuteAsyncTimeout(20000);
+    return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+      slotTest(callback);
+    }).then(function (value) {
+      assert.strictEqual(value, true);
+    });
+  });
+  test("Custom creation", ({ remote }) => {
+    remote.setExecuteAsyncTimeout(20000);
+    return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+      slotTest(callback);
+    }).then(function (value) {
+      assert.strictEqual(value, true);
+    });
+  });
+  test("Theme listener", ({ remote }) => {
+    remote.setExecuteAsyncTimeout(20000);
+    return remote.get(intern.config.remoteUrl + "/index.html").sleep(1000).executeAsync(function (callback) {
+      themeListenerTest(callback);
+    }).then(function (value) {
+      assert.strictEqual(value, true);
+    });
+  });
 });

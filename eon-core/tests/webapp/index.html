@@ -204,7 +204,7 @@
           var genderVariable = component.querySelector('[bind="gender"]');
           var nameVariable = component.querySelector('[bind="brother.name"]');
           var localeVariable = component.querySelector('[bind="locale.name"]');
-          
+
           var genderVariable2 = component2.querySelector('[bind="gender"]');
 
           var basicBind, dynamicBindChange, basicGlobalBind, dynamicGlobalBind, localeBind, passesTest;
@@ -217,7 +217,7 @@
           basicBind = colorVariable.innerHTML == "Red" ? true : false;
           dynamicBindChange = ageVariable.innerHTML == "20" ? true : false;
           // Checks if by changing the global gender variable it changes both variables
-          basicGlobalBind = genderVariable.innerHTML == "Male" && genderVariable2.innerHTML == "Male"? true : false;
+          basicGlobalBind = genderVariable.innerHTML == "Male" && genderVariable2.innerHTML == "Male" ? true : false;
           dynamicGlobalBind = nameVariable.innerHTML == "Jon" ? true : false;
           localeBind = localeVariable.innerHTML == "Nombre" ? true : false;
 
@@ -272,7 +272,7 @@
 
           var eonDataChangedCount = testData.eonDataChangedCount == 2;
           var eonLocaleChangedCount = testData.eonLocaleChangedCount == 1;
-          
+
           if (comp1DCount && comp2DCount && comp3DCount && comp1LCount && comp2LCount && comp3LCount && eonDataChangedCount && eonLocaleChangedCount) {
             callback(true);
           }
@@ -352,6 +352,120 @@
           }, 500);
 
         });
+
+      });
+
+    }
+
+    function slotTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-1"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-1");
+        var div = document.createElement("div");
+
+        component.label = "Slot test";
+        div.setAttribute("slot", ".eon-component-1-wrapper");
+        div.id = "slottedDiv";
+
+        component.appendChild(div);
+        document.body.appendChild(component);
+
+        eon.onReady(function () {
+          var slottedDiv = component.querySelector("#slottedDiv");
+          var componentWrapper = component.querySelector(".eon-component-1-wrapper");
+          callback(slottedDiv && slottedDiv.parentNode.isEqualNode(componentWrapper));
+        });
+
+      });
+
+    }
+
+    function customCreationTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-1"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = eon.createElement("eon-component-1", {
+
+          functions: {
+            updateStatus: function (status) {
+              this.status = status;
+            }
+          },
+          properties: {
+            status: {
+              value: "declared"
+            }
+          },
+          onCreated: function () {
+            if (this.status === "declared") {
+              this.updateStatus("created");
+            }
+          },
+          onInit: function () {
+            if (this.status === "created") {
+              this.updateStatus("initiated");
+            }
+          },
+          onTransformed: function () {
+            if (this.status === "initiated") {
+              this.updateStatus("transformed");
+            }
+          },
+          onRender: function () {
+            if (this.status === "transformed") {
+              this.updateStatus("rendered");
+            }
+          },
+          onBubbleRender: function () {
+            if (this.status === "rendered") {
+              this.updateStatus("bubbleRendered");
+            }
+          },
+          onReady: function () {
+            callback(this.status === "bubbleRendered");
+          },
+
+        });
+
+        component.label = "Custom creation test";
+        document.body.appendChild(component);
+
+      });
+
+    }
+
+    function themeListenerTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-1"
+      ]);
+
+      var component1, component2;
+
+      eon.onThemeChanged(function (previousTheme, newTheme) {
+        callback(newTheme === "noire" && component1.theme === "claro" && component2.theme === "noire");
+      });
+
+      eon.onReady(function () {
+
+        component1 = document.createElement("eon-component-1");
+        component2 = document.createElement("eon-component-1");
+
+        component1.theme = "claro";
+
+        document.body.appendChild(component1);
+        document.body.appendChild(component2);
+
+        eon.theme = "noire";
 
       });
 

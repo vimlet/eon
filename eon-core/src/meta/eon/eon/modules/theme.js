@@ -1,4 +1,6 @@
 eon.createCallback("onThemeChanged", eon);
+// This is a private callback for Eon to change all the component themes before the actual and public onThemeChanged callback is triggered
+eon.createCallback("_onThemeChanged", eon);
 
 document.addEventListener("DOMContentLoaded", function (event) {
 
@@ -41,6 +43,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eon.importMainTheme(value);
         }
 
+        // It triggers the private onThemeChanged callback to change all the components theme, then it fires the public eon's onThemeChanged
+        eon.triggerCallback("_onThemeChanged", eon, null, [eon.__theme, value]);
         eon.triggerCallback("onThemeChanged", eon, null, [eon.__theme, value]);
         eon.__theme = value;
       });
