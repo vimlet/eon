@@ -281,75 +281,60 @@
 
       },
       /*
-      @function (private) {Boolean} _validate
-      @description Reads the schema and and the data object and compares/validates them
-      @param {Object} data
-      */
-      validate: function (data) {
+     @function {Boolean} formValidate
+     @description Updates fields to invalid
+     @param {Object} data
+     */
+      formValidate: function (el, schema, data) {
+        var error = eon.validator.validate(data, schema);
+        if (error) {
+          var fields = Object.keys(data);
+          var field, element;
 
-        var el = this;
+          for (var i = 0; i < fields.length; i++) {
 
-        if (el.schema && eon.validator.containsSchema(el.schema)) {
+            field = fields[i];
+            element = el.querySelector('[name="' + field + '"]');
 
-          el.onSchemaLoaded(function () {
+            if (element && element.eon && element.hasOwnProperty("invalid")) {
+              if (error[field]) {
+                var description = "";
 
-            var error;
-
-            data = data ? data : el.getData();
-            error = eon.validator.validate(data, el.schema);
-
-            if (error) {
-
-              var fields = Object.keys(data);
-              var field, element;
-
-              for (var i = 0; i < fields.length; i++) {
-
-                field = fields[i];
-                element = el.querySelector('[name="' + field + '"]');
-
-                if (element && element.eon && element.hasOwnProperty("invalid")) {
-
-                  if (error[field]) {
-
-                    var description = "";
-
-                    for (var j = 0; j < error[field].length; j++) {
-
-                      description = description != "" ? description + "\r\n" : description;
-                      description = description != "" ? description + error[field][j] : error[field][j];
-
-                    }
-
-                    element.updateDescription(description);
-                    element.invalid = true;
-
-                  } else {
-
-                    if (element.invalid) {
-
-                      element.resetDescription();
-                      element.invalid = false;
-
-                    }
-
-                  }
-
+                for (var j = 0; j < error[field].length; j++) {
+                  description = description != "" ? description + "\r\n" : description;
+                  description = description != "" ? description + error[field][j] : error[field][j];
                 }
 
+                element.updateDescription(description);
+                element.invalid = true;
+              } else if (element.invalid) {
+                element.resetDescription();
+                element.invalid = false;
               }
-
             }
-
-          });
-
+          }
         }
-
-      },
+      }
 
     },
 
     functions: {
+      /*
+     @function {Boolean} validate
+     @description Reads the schema and and the data object and compares/validates them
+     @param {Object} data
+     */
+      validate: function (schema, data) {
+        var el = this;
+        data = data ? data : el.getData();
+        if (schema) {
+          el._formValidate(el, schema, data);
+        } else if (el.schema && eon.validator.containsSchema(el.schema)) {
+          el.onSchemaLoaded(function () {
+            el._formValidate(el, schema, data);
+          });
+        }
+      },
       /*
       @function {Object} getData 
       @description Return form values as an object
