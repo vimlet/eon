@@ -313,6 +313,7 @@
               }
             }
           }
+          return error;
         }
       }
 
@@ -324,14 +325,16 @@
      @description Reads the schema and and the data object and compares/validates them
      @param {Object} data
      */
-      validate: function (schema, data) {
+      validate: function (schema, data, cb) {
         var el = this;
         data = data ? data : el.getData();
         if (schema) {
-          el._formValidate(el, schema, data);
+          var error = el._formValidate(el, schema, data);
+          cb(error);
         } else if (el.schema && eon.validator.containsSchema(el.schema)) {
           el.onSchemaLoaded(function () {
-            el._formValidate(el, schema, data);
+            var error = el._formValidate(el, schema, data);
+            cb(error);
           });
         }
       },
