@@ -572,11 +572,10 @@
       */
       initValue: function () {
         var el = this;
-
-        el._misc.initialText = el.value != "" ? el.value : el._misc.initialText;
-
-        if (el._misc.initialText != "") {
-
+        el._misc.initialText = !el.value ? el._misc.initialText : el.value;
+        
+        if (!el._misc.initialText) {
+          
           if (el._misc.initialText.length > parseInt(el.maxLength)) {
             el._misc.initialText = el._misc.initialText.substring(0, el.maxLength);
           }
@@ -865,6 +864,8 @@
             el._refs.input.value = el.value;
           });
         }
+        // ** TODO
+        el._animateLabel();
       },
       /*
         @function (private) _updateInvalid
@@ -880,7 +881,9 @@
     onCreated: function () {
       var el = this;
 
-      el._misc.initialText = this.source.textContent;
+      el._misc.initialText = el.source.textContent;
+      el._misc.initialText = el.source.textContent.replace(/\s/g,'').length > 0 ? el._misc.initialText : "";
+      
       el._misc.descriptionText = "";
 
       el.value = el.value == "" && el._misc.initialText != "" ? el._misc.initialText : el.value;

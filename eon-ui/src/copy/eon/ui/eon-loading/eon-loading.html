@@ -49,6 +49,14 @@
       color: {
         value: "",
         reflect: true
+      },
+      /*
+        @property {String} animation 
+        @description 
+      */
+      animation: {
+        value: "",
+        reflect: true
       }
     },
     privateProperties: {
@@ -72,7 +80,7 @@
         el.classList.add("eon-loading-active");
         el._refs.loading.classList.add("eon-loading-noTransition", "eon-loading-visible");
         // Show loading rotator
-        el._refs.rotator.classList.add("eon-loading-visible");
+        el._refs.rotator.classList.remove("eon-loading-hidden");
         // On IE browser
         if (eon.util.getBrowser() == "IE") {
           el._refs.loading.appendChild(el._refs.rotator);
@@ -92,14 +100,16 @@
       hide: function () {
         var el = this;
         // Hide loading rotator
-        el._refs.rotator.classList.remove("eon-loading-visible");
+        el._refs.rotator.classList.add("eon-loading-hidden");
         // Hide loading mask
         el.style.backgroundColor = "transparent";
         el._refs.loading.classList.remove("eon-loading-noTransition", "eon-loading-visible");
+      
         eon.triggerCallback("onHide", this);
         // After hidden animation, change element display to none
         setTimeout(function () {
           el._refs.loading.classList.add("eon-loading-hidden");
+          el._refs.loading.classList.remove("eon-loading-visible");
           el.classList.remove("eon-loading-active");
         }, 1000);
       }
@@ -115,7 +125,7 @@
         el._refs.rotator = el.template.querySelector(".eon-loading-rotator");
         // Get svg children
         var srcEls = el.getSourceElements();
-        if (srcEls[0] && srcEls[0].tagName == "svg") {
+        if (srcEls[0] && el.animation == "svg") {
           el._refs.rotator.style.display = "none";
           el._refs.rotator = srcEls[0];
           el._refs.loading.appendChild(el._refs.rotator);

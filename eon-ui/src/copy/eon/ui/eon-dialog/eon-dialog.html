@@ -348,12 +348,12 @@
       */
       addContent: function () {
         var el = this;
-
+        
         el._refs.userContent = el._refs.userContent ? el._refs.userContent : document.createElement("eon-section");
-
+        
         el._refs.userContent.type = "content";
         el._refs.userContent.classList.add("eon-dialog-content", "eon-spaced-container");
-
+        
         el.content = el._refs.userContent;
       },
 
@@ -386,6 +386,7 @@
               el.removeChild(el.footer);
             }
           }
+
         });
 
       },
@@ -1206,6 +1207,7 @@
             setTimeout(function () {
               // Forces scroll update
               el._refs.scroll.update();
+              el._misc.openRendered = true;
             }, 300);
           }, 0);
 
@@ -1228,40 +1230,44 @@
       */
       close: function () {
         var el = this;
-        // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
-        el._misc.firstOpen = false;
+        // ** TODO Check if the dialog is completely opened
+        if (el._misc.openRendered) {
+          // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
+          el._misc.firstOpen = false;
 
-        eon.triggerCallback("onClose", el);
+          eon.triggerCallback("onClose", el);
 
-        el.classList.remove("eon-dialog-visible");
-        el.classList.remove("eon-dialog-scaled");
+          el.classList.remove("eon-dialog-visible");
+          el.classList.remove("eon-dialog-scaled");
 
-        setTimeout(function () {
-          el.classList.add("eon-dialog-hide");
-          el._refs.placeholder.parentNode.insertBefore(el, el._refs.placeholder);
-          el._refs.placeholder.parentNode.removeChild(el._refs.placeholder);
-        }, 100);
+          el._misc.openRendered = false;
+
+          setTimeout(function () {
+            el.classList.add("eon-dialog-hide");
+            el._refs.placeholder.parentNode.insertBefore(el, el._refs.placeholder);
+            el._refs.placeholder.parentNode.removeChild(el._refs.placeholder);
+          }, 100);
 
 
-        if (el._refs.overlay && el._refs.overlay.parentNode) {
-          el._refs.overlay.parentNode.removeChild(el._refs.overlay);
-          el.style.opacity = 0;
+          if (el._refs.overlay && el._refs.overlay.parentNode) {
+            el._refs.overlay.parentNode.removeChild(el._refs.overlay);
+            el.style.opacity = 0;
+          }
+
+          if (el.dataset.status == "maximized") {
+            el.classList.add("eon-dialog-hide");
+            el._refs.maximizeButton.classList.remove("vicon-restore");
+            el._refs.maximizeButton.classList.add("vicon-maximize");
+          }
+
+          if (el.dataset.status == "minimized") {
+            el.classList.add("eon-dialog-hide");
+            el.classList.remove("eon-dialog-minimized");
+          }
+
+          el.dataset.status = "";
+          eon.triggerCallback("onClosed", el);
         }
-
-        if (el.dataset.status == "maximized") {
-          el.classList.add("eon-dialog-hide");
-          el._refs.maximizeButton.classList.remove("vicon-restore");
-          el._refs.maximizeButton.classList.add("vicon-maximize");
-        }
-
-        if (el.dataset.status == "minimized") {
-          el.classList.add("eon-dialog-hide");
-          el.classList.remove("eon-dialog-minimized");
-        }
-
-        el.dataset.status = "";
-        eon.triggerCallback("onClosed", el);
-
       },
 
     },

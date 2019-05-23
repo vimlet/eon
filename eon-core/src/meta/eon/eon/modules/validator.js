@@ -66,33 +66,34 @@ eon.validator.validateRequiredField = function (property, schema, data, errorObj
 
     var propertySchema = schema.properties[property];
     var isRequired = (schema.required && schema.required.indexOf(property) > -1) || eon.util.isTrue(propertySchema.required);
-
-    var isInvalid = ((!data[property] || data[property] === "") && isRequired);
+    var propertyValue = eon.object.readFromPath(data, property);
+    var isInvalid = ((propertyValue == undefined || propertyValue == "") && isRequired);
 
     // If if does not meet any of the requirements then it fills the error object with the proper information
     if (isInvalid) {
         eon.validator.fillErrorObj(property, "Required", errorObj);
     }
 
-};
+}
 
 eon.validator.validateStringField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if (propertySchema.type === "string" && data.hasOwnProperty(property)) {
+    if (propertySchema.type == "string" && propertyValue != undefined) {
 
         // MaxLength
         var hasMaxLength = propertySchema.hasOwnProperty("maxLength") && (parseInt(propertySchema.maxLength) > 0);
-        var exceedsMaxLength = data[property].length > parseInt(propertySchema.maxLength);
+        var exceedsMaxLength = propertyValue.length > parseInt(propertySchema.maxLength);
 
         // MinLength
         var hasMinLength = propertySchema.hasOwnProperty("minLength") && (parseInt(propertySchema.maxLength) > 0);
-        var exceedsMinLength = data[property].length < parseInt(propertySchema.minLength);
+        var exceedsMinLength = propertyValue.length < parseInt(propertySchema.minLength);
 
         // Pattern
         var hasPattern = propertySchema.hasOwnProperty("pattern");
-        var matchesPattern = new RegExp(propertySchema.pattern).test(data[property]);
+        var matchesPattern = new RegExp(propertySchema.pattern).test(propertyValue);
 
         var isInvalid = (hasPattern && !matchesPattern) || (hasMaxLength && exceedsMaxLength) || (hasMinLength && exceedsMinLength);
 
@@ -104,19 +105,20 @@ eon.validator.validateStringField = function (property, schema, data, errorObj) 
 
     }
 
-};
+}
 
 eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if (propertySchema.type === "date" && data.hasOwnProperty(property)) {
+    if (propertySchema.type == "date" && propertyValue != undefined) {
 
         // Takes the format of the schema, if there is no format in the schema it takes a default format work with
         var format = propertySchema.format ? propertySchema.format : "YYYY-MM-DD";
 
         // Takes the data value
-        var value = data[property];
+        var value = propertyValue;
         // Turns that value into an object with day,month and year properties
         var valueObj = eon.time.getDateObjectFromString(value, format);
         // Takes the object and applies the schema format to see if both values (the value and the schema value) are the same,
@@ -126,15 +128,15 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
         var isInvalid;
 
         // If it does not follow the same format then it is no valid
-        if (value !== schemaValue) {
+        if (value != schemaValue) {
 
             isInvalid = true;
 
         } else {
 
-            var year = valueObj.year !== undefined ? valueObj.year : 0;
-            var month = valueObj.month !== undefined ? (valueObj.month - 1) : 0;
-            var day = valueObj.day !== undefined ? valueObj.day : 1;
+            var year = valueObj.year != undefined ? valueObj.year : 0;
+            var month = valueObj.month != undefined ? (valueObj.month - 1) : 0;
+            var day = valueObj.day != undefined ? valueObj.day : 1;
 
             // Turns the date into epoch so that we are able to compare dates
             var epochDate = new Date(year, month, day).getTime();
@@ -145,12 +147,12 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
                 var minDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
 
-                var minYear = minDateObj.year !== undefined ? minDateObj.year : 0;
-                var minMonth = minDateObj.month !== undefined ? (minDateObj.month - 1) : 0;
-                var minDay = minDateObj.day !== undefined ? minDateObj.day : 1;
+                var minYear = minDateObj.year != undefined ? minDateObj.year : 0;
+                var minMonth = minDateObj.month != undefined ? (minDateObj.month - 1) : 0;
+                var minDay = minDateObj.day != undefined ? minDateObj.day : 1;
 
                 minEpochDate = new Date(minYear, minMonth, minDay).getTime();
-                
+
                 isInvalid = epochDate < minEpochDate ? true : isInvalid;
 
             }
@@ -160,9 +162,9 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
                 var maxDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
 
-                var maxYear = maxDateObj.year !== undefined ? maxDateObj.year : 0;
-                var maxMonth = maxDateObj.month !== undefined ? (maxDateObj.month - 1) : 0;
-                var maxDay = maxDateObj.day !== undefined ? maxDateObj.day : 1;
+                var maxYear = maxDateObj.year != undefined ? maxDateObj.year : 0;
+                var maxMonth = maxDateObj.month != undefined ? (maxDateObj.month - 1) : 0;
+                var maxDay = maxDateObj.day != undefined ? maxDateObj.day : 1;
 
                 maxEpochDate = new Date(maxYear, maxMonth, maxDay).getTime();
                 isInvalid = epochDate > maxEpochDate ? true : isInvalid;
@@ -179,15 +181,16 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
     }
 
-};
+}
 
 eon.validator.validateNumericField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if ((propertySchema.type === "integer" || propertySchema.type === "number") && data.hasOwnProperty(property)) {
+    if ((propertySchema.type == "integer" || propertySchema.type == "number") && propertyValue != undefined) {
 
-        var value = parseFloat(data[property]);
+        var value = parseFloat(propertyValue);
 
         // MultipleOf
         var hasMultipleOf = propertySchema.hasOwnProperty("multipleOf");
@@ -196,7 +199,7 @@ eon.validator.validateNumericField = function (property, schema, data, errorObj)
         // Maximum
         var hasMaximum = propertySchema.hasOwnProperty("maximum");
         var exceedsMaximum = propertySchema.exclusiveMaximum ? (value >= propertySchema.maximum) : (value > propertySchema.maximum);
-        
+
         // Minimum
         var hasMinimum = propertySchema.hasOwnProperty("minimum");
         var exceedsMinimum = propertySchema.exclusiveMinimum ? (value <= propertySchema.minimum) : (value < propertySchema.minimum);
@@ -211,16 +214,17 @@ eon.validator.validateNumericField = function (property, schema, data, errorObj)
 
     }
 
-};
+}
 
 eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if (propertySchema.type === "array" && data.hasOwnProperty(property)) {
+    if (propertySchema.type == "array" && propertyValue != undefined) {
 
-        var valuesArray = data[property].filter(function (value) {
-            return value !== false;
+        var valuesArray = propertyValue.filter(function (value) {
+            return value != false;
         });
 
         var hasMinItems = propertySchema.hasOwnProperty("minItems");
@@ -239,15 +243,16 @@ eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
     }
 
-};
+}
 
 eon.validator.validateObjectField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if (propertySchema.type === "object" && data.hasOwnProperty(property)) {
+    if (propertySchema.type == "object" && propertyValue != undefined) {
 
-        var propertyData = data[property];
+        var propertyData = propertyValue;
         var nestedErrorObj = {};
 
         errorObj[property] = nestedErrorObj;
@@ -263,14 +268,14 @@ eon.validator.validateObjectField = function (property, schema, data, errorObj) 
 
         });
 
-        if (Object.keys(errorObj[property]) === 0) {
+        if (Object.keys(errorObj[property]) == 0) {
             delete errorObj[property];
         }
 
     }
 
-};
+}
 
 eon.validator.fillErrorObj = function (property, errorMessage, errorObj) {
     !errorObj[property] ? errorObj[property] = [errorMessage] : errorObj[property].push(errorMessage);
-};
+}
