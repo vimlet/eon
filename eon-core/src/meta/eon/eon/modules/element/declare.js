@@ -88,7 +88,7 @@ eon.declare = function (name, baseElement) {
                 eon.triggerAllCallbackEvents(el, config, "onInit");
 
                 // Interpolation data bind
-                eon.interpolation.init(el, config);
+                eon.interpolation.bind(el, config);
 
                 // Begins the transformation process
                 eon.transform(el, config);

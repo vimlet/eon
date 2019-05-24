@@ -17,6 +17,14 @@ eon.domReady(function () {
 
         privateFunctions: {},
 
+        onTransformed: function () {
+            console.log('transformed', this, this.__binded);
+            if (!this.__binded) {
+                eon.interpolation.bindWildVariable(this);
+            }
+
+        }
+
     });
 
 });

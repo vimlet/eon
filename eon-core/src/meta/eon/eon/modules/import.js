@@ -185,6 +185,9 @@ eon.prepareComponent = function (elementName, content) {
                 // Handles the dependencies and returns a boolean for whether there are pending imports or not
                 var hasPendingImports = eon.handleDependencies();
 
+                // Handle interpolation
+                eon.parseTemplate(elementName);
+
                 // If there are no more dependencies to handle trigger onImportsReady
                 if (!hasPendingImports && !eon.imports.ready && eon.imports.count === eon.imports.total && eon.imports.total === Object.keys(eon.imports.config).length) {
 
@@ -233,8 +236,6 @@ eon.handleDependencies = function () {
             hasPendingImports = true;
         }
 
-        // Handle interpolation
-        eon.parseTemplate(elementNames[i]);
     }
 
     return hasPendingImports;

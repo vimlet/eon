@@ -6,6 +6,10 @@ eon.interpolation.globalScope = eon.interpolation.globalScope || eon;
 eon.interpolation.globalScope.data = eon.interpolation.globalScope.data || {};
 eon.interpolation.globalScope.locale = eon.interpolation.globalScope.locale || {};
 
+eon.interpolation.globalScope.__interpolations = eon.interpolation.globalScope.__interpolations || {};
+eon.interpolation.globalScope.__interpolations.data = eon.interpolation.globalScope.__interpolations.data || {};
+eon.interpolation.globalScope.__interpolations.locale = eon.interpolation.globalScope.__interpolations.locale || {};
+
 eon.createCallback("onDataChanged", eon.interpolation.globalScope);
 eon.createCallback("onLocaleChanged", eon.interpolation.globalScope);
 
@@ -73,95 +77,84 @@ eon.interpolation.prepare = function (template) {
 };
 
 /*
+    @function init
+    @description Handles all the initial state of the data and variable elements
+    @param {Object} el
+    @param {Object} config
+    */
+// eon.interpolation.init = function (el, config) {
+
+//   eon.interpolation.initBindAttributes(el);
+
+// }
+/*
+@function initBindAttributes
+@description Checks if there are bind attributes in the component
+@param {Object} el
+*/
+eon.interpolation.bindAttributes = function (el) {
+
+  if (el.nodeName.toLowerCase() != "eon-variable") {
+
+    // First we create an empty clone of the element
+    var emptyClone = el.cloneNode(true);
+
+    emptyClone.innerHTML = "";
+
+    if (emptyClone.outerHTML.indexOf("bind:") > -1) {
+
+      el.__bindAttributes = {};
+
+      for (var i = 0; i < el.attributes.length; i++) {
+
+        if (el.attributes[i].name.indexOf("bind:") > -1) {
+          el.__bindAttributes[el.attributes[i].name.replace("bind:", "")] = el.attributes[i].value;
+          el.removeAttribute(el.attributes[i].name);
+        }
+
+      }
+    }
+  }
+
+}
+/*
 @function init
 @description Handles all the initial state of the data and variable elements
 @param {Object} el
 @param {Object} config
 */
-eon.interpolation.init = function (el, config) {
+eon.interpolation.bind = function (el, config) {
 
-  var sources = {};
+  if (el.nodeName.toLowerCase() != "eon-variable") {
 
-  sources.element = {};
-  sources.global = {};
+    var sources = {};
 
-  // First of all checks if there is a data specified in the element config, if so, it creates the source
-  if (Object.keys(el.data).length > 0) {
-
-    sources.element.data = {};
-    sources.element.data.scope = el;
-    sources.element.data.obj = el.data;
-    sources.element.data.isGlobal = false;
-    sources.element.data.isLocale = false;
-
-  }
-
-  // If parse is not enabled then we will try to create onDataChanged callback if data exists on the component
-  if (!config.parse) {
-
-    if (sources.element.data) {
-
-      eon.interpolation.setupListenerCallback(el, sources.element.data, config);
-      eon.interpolation.defineProperties(sources.element.data, "data");
-
-    }
-
-  } else {
-
-    var variables = el.template.querySelectorAll("eon-variable");
-    var currentVariable;
-
-    var isGlobal, scope, source, sourceType, interpolations;
-    var bindString, bindValue, isUndefined, root;
-
-    eon.interpolation.globalScope.__interpolations = eon.interpolation.globalScope.__interpolations || {};
-    eon.interpolation.globalScope.__interpolations.data = eon.interpolation.globalScope.__interpolations.data || {};
-    eon.interpolation.globalScope.__interpolations.locale = eon.interpolation.globalScope.__interpolations.locale || {};
+    sources.element = {};
+    sources.global = {};
 
     el.__interpolations = el.__interpolations || {};
     el.__interpolations.data = el.__interpolations.data || {};
     el.__interpolations.locale = el.__interpolations.locale || {};
 
-    // Loops all the inner element variables
-    for (var i = 0; i < variables.length; i++) {
+    // First of all checks if there is a data specified in the element config, if so, it creates the source
+    if (Object.keys(el.data).length > 0) {
 
-      currentVariable = variables[i];
-
-      // Sets some basic variables to be used later on
-      isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
-      bindString = currentVariable.getAttribute("bind");
-      scope = isGlobal ? eon.interpolation.globalScope : el;
-      sourceName = bindString.split(".")[0] == "locale" ? "locale" : "data";
-
-      root = sourceName != "locale" ? scope[sourceName] : scope;
-
-      // Reads if there is already a value on the source if there is not then it assigns an empty string
-      bindValue = eon.object.readFromPath(root, bindString);
-      isUndefined = typeof bindValue == "undefined";
-      bindValue = isUndefined ? "" : bindValue;
-
-      // Reassigns the value to the source, in case there was no value
-      if (isUndefined) {
-        eon.object.assignToPath(root, bindString, bindValue);
-      }
-
-      sourceType = isGlobal ? "global" : "element";
-
-      // Creates the source object
-      if (!sources[sourceType][sourceName]) {
-
-        sources[sourceType][sourceName] = {};
-        sources[sourceType][sourceName].scope = scope;
-        sources[sourceType][sourceName].obj = scope[sourceName];
-        sources[sourceType][sourceName].isGlobal = isGlobal;
-        sources[sourceType][sourceName].isLocale = (sourceName == "locale");
-
-      }
+      sources.element.data = {};
+      sources.element.data.scope = el;
+      sources.element.data.obj = el.data;
+      sources.element.data.isGlobal = false;
+      sources.element.data.isLocale = false;
 
     }
 
+    console.log(el, el._onDataChanged);
+
+    eon.interpolation.bindVariables(el, sources);
+
+
+
     var sourceTypeKeys = Object.keys(sources);
-    var sourceKeys;
+    var sourceKeys, source, interpolations;
 
     for (var i = 0; i < sourceTypeKeys.length; i++) {
 
@@ -180,7 +173,132 @@ eon.interpolation.init = function (el, config) {
 
     }
 
+
+    if (sources.element.data) {
+
+      eon.interpolation.setupListenerCallback(el, sources.element.data, config);
+      eon.interpolation.defineProperties(sources.element.data, "data");
+
+    }
+
+    console.log(el, el._onDataChanged);
+
   }
+
+};
+
+/*
+@function defineProperties
+@description Creates the descriptor for the data object itself and for all its properties
+@param {Object} source
+@param {String} sourceName
+*/
+eon.interpolation.bindVariables = function (el, sources) {
+
+  var variables = el.template.querySelectorAll("eon-variable");
+
+  // Loops all the inner element variables
+  for (var i = 0; i < variables.length; i++) {
+    eon.interpolation.bindVariable(el, sources, variables[i]);
+  }
+
+};
+
+/*
+@function defineProperties
+@description Creates the descriptor for the data object itself and for all its properties
+@param {Object} source
+@param {String} sourceName
+*/
+eon.interpolation.bindVariable = function (el, sources, variable) {
+
+  var isGlobal, scope, sourceType;
+  var bindString, bindValue, isUndefined, root;
+
+  // Sets some basic variables to be used later on
+  isGlobal = eon.util.isTrue(variable.getAttribute("global"));
+  bindString = variable.getAttribute("bind");
+  scope = isGlobal ? eon.interpolation.globalScope : el;
+  sourceName = bindString.split(".")[0] == "locale" ? "locale" : "data";
+
+  root = sourceName != "locale" ? scope[sourceName] : scope;
+
+  // Reads if there is already a value on the source if there is not then it assigns an empty string
+  bindValue = eon.object.readFromPath(root, bindString);
+  isUndefined = typeof bindValue == "undefined";
+  bindValue = isUndefined ? "" : bindValue;
+
+  // Reassigns the value to the source, in case there was no value
+  if (isUndefined) {
+    eon.object.assignToPath(root, bindString, bindValue);
+  }
+
+  sourceType = isGlobal ? "global" : "element";
+
+  // Creates the source object
+  if (!sources[sourceType][sourceName]) {
+
+    sources[sourceType][sourceName] = {};
+    sources[sourceType][sourceName].scope = scope;
+    sources[sourceType][sourceName].obj = scope[sourceName];
+    sources[sourceType][sourceName].isGlobal = isGlobal;
+    sources[sourceType][sourceName].isLocale = (sourceName == "locale");
+
+  }
+
+  variable.__binded = true;
+
+};
+
+/*
+@function defineProperties
+@description Creates the descriptor for the data object itself and for all its properties
+@param {Object} source
+@param {String} sourceName
+*/
+eon.interpolation.bindWildVariable = function (variable) {
+
+  var isLocale, scope;
+  var bindString, bindValue, isUndefined, root;
+
+  bindString = variable.getAttribute("bind");
+  scope = eon.interpolation.globalScope;
+  isLocale = bindString.split(".")[0] == "locale" ? true : false;
+  sourceName = isLocale ? "locale" : "data";
+
+  root = sourceName != "locale" ? scope[sourceName] : scope;
+
+  // Reads if there is already a value on the source if there is not then it assigns an empty string
+  bindValue = eon.object.readFromPath(root, bindString);
+  isUndefined = typeof bindValue == "undefined";
+  bindValue = isUndefined ? "" : bindValue;
+
+  // Reassigns the value to the source, in case there was no value
+  if (isUndefined) {
+      eon.object.assignToPath(root, bindString, bindValue);
+  }
+  
+  interpolations = isLocale ? eon.interpolation.globalScope.__interpolations.locale : eon.interpolation.globalScope.__interpolations.data;
+  variableBind = bindString.split(".");
+
+  if (variableBind[0] == "locale") {
+      variableBind.shift();
+      variableBind = variableBind.join(".");
+  } else {
+      variableBind = bindString;
+  }
+
+  var bindedInterpolations = eon.object.readFromPath(interpolations, variableBind);
+
+  if (!bindedInterpolations) {
+      eon.object.assignToPath(interpolations, variableBind, []);
+      bindedInterpolations = eon.object.readFromPath(interpolations, variableBind);
+  }
+
+  bindedInterpolations.push(variable)
+  variable.textContent = bindValue;
+
+  variable.__binded = true;
 
 };
 
@@ -335,7 +453,7 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
         variableBind = source.isLocale ? "locale." + variableBind : variableBind;
 
         interpolations[key] = interpolations[key] ? interpolations[key] : [];
-
+        console.log('source', source);
         // Looks for the variables matching the binding
         Array.prototype.push.apply(interpolations[key], el.template.querySelectorAll(
           'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
