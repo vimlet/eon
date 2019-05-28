@@ -13,7 +13,16 @@ eon.domReady(function () {
 
         display: "inline-block",
 
-        properties: {},
+        properties: {
+            bind: {
+                value: "",
+                reflect: true
+            },
+            global: {
+                value: "",
+                reflect: true
+            }
+        },
 
         privateFunctions: {},
 

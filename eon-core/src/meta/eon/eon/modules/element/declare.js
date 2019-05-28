@@ -84,11 +84,11 @@ eon.declare = function (name, baseElement) {
                 // Note dynamic things that should be slotted must be added onCreated
                 eon.slot(el);
 
-                // Callback for the first time that the element has been attached, no template imported, only created and parsed
-                eon.triggerAllCallbackEvents(el, config, "onInit");
-
                 // Interpolation data bind
                 eon.interpolation.bind(el, config);
+
+                // Callback for the first time that the element has been attached, no template imported, only created and parsed
+                eon.triggerAllCallbackEvents(el, config, "onInit");
 
                 // Begins the transformation process
                 eon.transform(el, config);
