@@ -956,7 +956,7 @@ eon.generateElementReferences = function (el) {
 
     for (var i = 0; i < nodes.length; i++) {
         node = nodes[i];
-        el._refs[node.getAttribute("eon-ref")] = node;
+        eon.object.assignToPath(el._refs, node.getAttribute("eon-ref"), node);
         node.removeAttribute("eon-ref");
     }
 
