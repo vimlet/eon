@@ -10,6 +10,8 @@ eon.interpolation.globalScope.__bindings = eon.interpolation.globalScope.__bindi
 eon.interpolation.globalScope.__bindings.data = eon.interpolation.globalScope.__bindings.data || {};
 eon.interpolation.globalScope.__bindings.locale = eon.interpolation.globalScope.__bindings.locale || {};
 
+eon.interpolation.globalScope.__attributeBindings = eon.interpolation.globalScope.__attributeBindings || {};
+
 eon.interpolation.sourcesQueue = eon.interpolation.sourcesQueue || [];
 
 eon.createCallback("onDataChanged", eon.interpolation.globalScope);
@@ -160,6 +162,7 @@ eon.interpolation.bindAttributes = function (el, sources, config) {
 
     // First we create a clone of the element
     var emptyClone = el.cloneNode(true);
+    var attributesToRemoveQueue = [];
     // Now we empty it so we kind search among all its attributes
     emptyClone.innerHTML = "";
 
@@ -169,9 +172,15 @@ eon.interpolation.bindAttributes = function (el, sources, config) {
         // if we find attributes with the bind:prefix we bind it
         if (el.attributes[i].name.indexOf("bind:") > -1) {
           eon.interpolation.bindAttribute(el, sources, el.attributes[i].name, el.attributes[i].value, config);
+          attributesToRemoveQueue.push(el.attributes[i].name);
         }
 
       }
+
+      for (var j = 0; j < attributesToRemoveQueue.length; j++) {
+        el.removeAttribute(attributesToRemoveQueue[j]);
+      }
+
     }
   }
 
@@ -236,9 +245,6 @@ eon.interpolation.bindAttribute = function (el, sources, attributeName, attribut
     attribute: attributeFinalName,
     component: el
   });
-
-  // Removes the prefixed attribute
-  el.removeAttribute(attributeName);
 
 };
 

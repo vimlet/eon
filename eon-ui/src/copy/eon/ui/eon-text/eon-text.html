@@ -573,9 +573,9 @@
       initValue: function () {
         var el = this;
         el._misc.initialText = !el.value ? el._misc.initialText : el.value;
-        
+
         if (!el._misc.initialText) {
-          
+
           if (el._misc.initialText.length > parseInt(el.maxLength)) {
             el._misc.initialText = el._misc.initialText.substring(0, el.maxLength);
           }
@@ -868,6 +868,14 @@
         el._animateLabel();
       },
       /*
+        @function (private) _updatePlaceholder
+        @description Updates the placeholder
+      */
+      updatePlaceholder: function () {
+        var placeHolderElement = this.type != "area" ? this._refs.input : this._refs.editableArea;
+        placeHolderElement.setAttribute("placeholder", this.placeholder);
+      },
+      /*
         @function (private) _updateInvalid
         @description Updates the invalid status
       */
@@ -882,8 +890,8 @@
       var el = this;
 
       el._misc.initialText = el.source.textContent;
-      el._misc.initialText = el.source.textContent.replace(/\s/g,'').length > 0 ? el._misc.initialText : "";
-      
+      el._misc.initialText = el.source.textContent.replace(/\s/g, '').length > 0 ? el._misc.initialText : "";
+
       el._misc.descriptionText = "";
 
       el.value = el.value == "" && el._misc.initialText != "" ? el._misc.initialText : el.value;
@@ -922,6 +930,9 @@
           break;
         case "value":
           this._updateValue();
+          break;
+        case "placeholder":
+          this._updatePlaceholder();
           break;
         case "invalid":
           this._updateInvalid();
