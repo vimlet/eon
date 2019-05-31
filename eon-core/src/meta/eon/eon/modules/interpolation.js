@@ -547,8 +547,8 @@ eon.interpolation.setupListenerCallback = function (source, config) {
 @param {String} bind
 */
 eon.interpolation.interpolateValues = function (el, source, obj, interpolations, bind) {
-  var key, i, variableBind, variable;
   var root = bind;
+  var newRoot, key, i, variableBind, variable;
 
   for (key in obj) {
     // We only want take into account the keys that are not used for the descriptor
@@ -556,11 +556,11 @@ eon.interpolation.interpolateValues = function (el, source, obj, interpolations,
       // If the property is an object the call ourselfs again to loop through our keys
       if (obj[key] && obj[key].constructor === Object) {
 
-        root = bind ? bind + "." + key : key;
+        newRoot = bind ? bind + "." + key : key;
 
         interpolations[key] = interpolations[key] ? interpolations[key] : {};
 
-        eon.interpolation.interpolateValues(el, source, obj[key], interpolations[key], root);
+        eon.interpolation.interpolateValues(el, source, obj[key], interpolations[key], newRoot);
 
       } else {
 
