@@ -140,8 +140,12 @@ eon.time.getDateObjectFromString = function (value, format) {
   var dayIndex = splittedFormat.indexOf(dayFormat);
   var monthIndex = splittedFormat.indexOf(monthFormat);
   var yearIndex = splittedFormat.indexOf(yearFormat);
+  
+  var dayValue = splittedValue[dayIndex] != "Invalid Date" ? splittedValue[dayIndex] : null;
+  var monthValue = splittedValue[monthIndex] != "Invalid Date" ? splittedValue[monthIndex] : null;
+  var yearValue = splittedValue[yearIndex] != "Invalid Date" ? splittedValue[yearIndex] : null;
 
-  return { day: splittedValue[dayIndex], month: splittedValue[monthIndex], year: splittedValue[yearIndex] };
+  return { day: dayValue, month: monthValue, year: yearValue };
 
 };
 
