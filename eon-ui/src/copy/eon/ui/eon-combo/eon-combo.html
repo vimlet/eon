@@ -285,6 +285,17 @@
 
         });
 
+        el._refs.scroll.content.addEventListener("pointerenter", function (e) {
+
+          var previousSelectedItem = el._refs.dropDown.querySelector(".eon-combo-selected");
+          var selectedItem = el._misc.items[el.value];
+
+          if (previousSelectedItem) {
+            previousSelectedItem.classList.remove("eon-combo-selected");
+          }
+
+        });
+
         el._refs.dropDown.appendChild(el._refs.scroll);
 
         if (eon.util.isTrue(el.filter)) {
@@ -302,7 +313,7 @@
             // When the device modal input is focused, it shows the keyboard, this keyboard triggers onWindowResize, 
             // since onWindowResize we want to hide the dropdown this variable helps us know
             //  if the resize event was triggered by the input or the window manually resizing
-            
+
             el._misc.modal.inputFocus = true;
           }, false);
 
@@ -581,7 +592,6 @@
       setupItem: function (item) {
 
         var el = this;
-
         item.onRender(function () {
 
           var span = document.createElement("span");
@@ -621,7 +631,7 @@
 
         el._misc.items = {};
         el._refs.scroll.content.innerHTML = "";
-        
+
         storeData.forEach(function (value, key, map) {
           item = document.createElement("eon-item");
 
@@ -629,7 +639,7 @@
           item.dataset.matches = true;
           item.value = storeData.get(key)[el.idProperty];
           item.displayValue = storeData.get(key)[displayProperty];
-          
+
           el._misc.items[item.value] = item;
 
           el._misc.items[item.value].style.cursor = "pointer";
@@ -773,8 +783,8 @@
 
         //Loop to find matches and hide those that do not match
         for (var i = 0; i < items.length; i++) {
-          
-          if (!items[i].hasAttribute("display-value") || !(items[i].hasAttribute("display-value") && value!== "" && items[i].getAttribute("display-value").toLowerCase().match(regex))) {
+
+          if (!items[i].hasAttribute("display-value") || !(items[i].hasAttribute("display-value") && value !== "" && items[i].getAttribute("display-value").toLowerCase().match(regex))) {
 
             if (!items[i].classList.contains("hidden")) {
               items[i].classList.add("hidden");
@@ -793,7 +803,7 @@
         }
 
         var matchedItems = el._refs.dropDown.querySelectorAll('[data-matches="true"]');
-        
+
         if (matchedItems.length == 0) {
 
           el._showMatchingError();
@@ -931,6 +941,36 @@
 
       },
       /*
+      @function (private) _scrollToSelectedItem
+      @description Scrolls to the currently selected item
+      */
+      scrollToSelectedItem: function () {
+        var el = this;
+        var selectedItem = el._misc.items[el.value];
+        if (selectedItem) {
+          setTimeout(function () {
+            var middlePosition = selectedItem.offsetTop + selectedItem.offsetHeight;
+            var scrollPosition = el._refs.scroll.content.scrollHeight > middlePosition ? selectedItem.offsetTop - selectedItem.offsetHeight : selectedItem.offsetTop;
+            el._refs.scroll.scrollTop = scrollPosition;
+          }, 0);
+        }
+      },
+      /*
+      @function (private) _highlightCurrentItem
+      @description Scrolls to the currently selected item
+      */
+      highlightCurrentItem: function () {
+        var el = this;
+        var previousSelectedItem = el._refs.dropDown.querySelector(".eon-combo-selected");
+        var selectedItem = el._misc.items[el.value];
+
+        if (previousSelectedItem) {
+          previousSelectedItem.classList.remove("eon-combo-selected");
+        }
+
+        selectedItem.classList.add("eon-combo-selected");
+      },
+      /*
       @function (private) _updateLabel
       @description Updates the label node with the new label
       */
@@ -1004,7 +1044,7 @@
 
         var el = this;
         var item = el._misc.items[el.value];
-        
+
         if (item) {
 
           var value = item.value;
@@ -1117,6 +1157,8 @@
 
         var el = this;
 
+        eon.triggerCallback("onExpand", el, el);
+
         el._assignDropdownStyle();
 
         el._refs.scroll.scrollTop = 0;
@@ -1131,6 +1173,9 @@
 
         el._animateExpand();
         el._animateLabel();
+
+        el._highlightCurrentItem();
+        el._scrollToSelectedItem();
 
       },
       /*
@@ -1221,6 +1266,7 @@
 
       eon.createCallback("onSelect", el);
       eon.createCallback("onSelected", el);
+      eon.createCallback("onExpand", el);
 
     },
 
