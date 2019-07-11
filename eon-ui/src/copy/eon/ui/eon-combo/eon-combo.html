@@ -287,11 +287,11 @@
 
         el._refs.scroll.content.addEventListener("pointerenter", function (e) {
 
-          var previousSelectedItem = el._refs.dropDown.querySelector(".eon-combo-selected");
+          var previousSelectedItem = el._refs.dropDown.querySelector(".eon-combo-highlighted");
           var selectedItem = el._misc.items[el.value];
 
           if (previousSelectedItem) {
-            previousSelectedItem.classList.remove("eon-combo-selected");
+            previousSelectedItem.classList.remove("eon-combo-highlighted");
           }
 
         });
@@ -359,11 +359,13 @@
 
             if (!el.isOnPath && !el._refs.dropDown.isOnPath) {
               // When blur occurs and no item has been selected when clear the input
-              // if (el.value == "") {
-              //     el._refs.input.value = "";
-              // }
 
-              el._refs.input.value = el.displayValue;
+              if (el.value != el._refs.input.value && el._misc.displayValueItems[el._refs.input.value]) {
+                el.value = el._misc.displayValueItems[el._refs.input.value].value;
+              } else {
+                el._refs.input.value = el.displayValue;
+              }
+
             }
 
           });
@@ -411,6 +413,7 @@
 
         el._misc.modal = {};
         el._misc.items = {};
+        el._misc.displayValueItems = {};
         el._misc.descriptionText = "";
 
       },
@@ -490,9 +493,9 @@
 
         // If the user manages the scroll we close the overlay
         window.addEventListener("scroll", function (e) {
-          if (el._misc.modal.active && !el._refs.overlay.classList.contains("eon-combo-device")) {
-            el.shrink();
-          }
+          // if (el._misc.modal.active && !el._refs.overlay.classList.contains("eon-combo-device")) {
+          //   el.shrink();
+          // }
         });
 
         // This behavior is only supported on iOS 10 and beyond
@@ -571,6 +574,7 @@
 
             el._setupItem(item);
 
+            el._misc.displayValueItems[item.displayValue.toString().toLowerCase()] = item;
             el._misc.items[item.value] = item;
 
             itemsDocFragment.appendChild(item);
@@ -580,7 +584,6 @@
           el._refs.scroll.content.appendChild(itemsDocFragment);
 
           el._initValue();
-
         }
 
       },
@@ -640,14 +643,12 @@
           item.value = storeData.get(key)[el.idProperty];
           item.displayValue = storeData.get(key)[displayProperty];
 
+          el._misc.displayValueItems[item.displayValue.toString().toLowerCase()] = item;
+
           el._misc.items[item.value] = item;
-
           el._misc.items[item.value].style.cursor = "pointer";
-
           el._misc.items[item.value].onRender(function () {
-
             var span = document.createElement("span");
-
             span.innerHTML = this.displayValue;
             this.appendChild(span);
             this.addEventListener("click", function () { el.select(this) });
@@ -709,6 +710,61 @@
 
       },
       /*
+      @function (private) _setupLabelAnimation
+      @description Inits label animation classes and style
+      */
+      setupKeyboardEvents: function () {
+
+        var el = this;
+
+        document.addEventListener('keydown', function (e) {
+
+          if (el._misc.modal.active) {
+
+            switch (e.keyCode) {
+              // UP
+              case 38:
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (el._misc.highlightedItem && el._misc.highlightedItem.previousSibling) {
+                  el._highlighItem(el._misc.highlightedItem.previousSibling);
+                  el._scrollToItem(el._misc.highlightedItem);
+                }
+
+                break;
+              // DOWN
+              case 40:
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (el._misc.highlightedItem && el._misc.highlightedItem.nextSibling) {
+                  el._highlighItem(el._misc.highlightedItem.nextSibling);
+                  el._scrollToItem(el._misc.highlightedItem);
+                }
+
+                break;
+              // ENTER
+              case 13:
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (el._misc.highlightedItem) {
+                  el.select(el._misc.highlightedItem)
+                }
+
+                break;
+            }
+
+          }
+
+        });
+
+      },
+      /*
       @function (private) _animateLabel
       @description Depending on the focus state animates the label or not
       */
@@ -754,13 +810,18 @@
       filter: function () {
 
         var el = this;
+        var value = el._misc.modal.inputFocus ? el._refs.modalInput.value.toLowerCase() : el._refs.input.value.toLowerCase();
 
         //Check if its already expanded, if its not then expand it
         if (!el._misc.modal.active) {
           el.expand();
         }
 
-        el._filterItems();
+        if (value != "") {
+          el._filterItems();
+        } else {
+          el._undoFilter();
+        }
 
         el._value = "";
         // el.displayValue = "";
@@ -811,6 +872,10 @@
         } else {
 
           el._hideMatchingError();
+
+          if (matchedItems.length == 1) {
+            el._highlighItem(matchedItems[0]);
+          }
 
         }
 
@@ -941,34 +1006,37 @@
 
       },
       /*
-      @function (private) _scrollToSelectedItem
+      @function (private) _scrollToItem
       @description Scrolls to the currently selected item
       */
-      scrollToSelectedItem: function () {
+      scrollToItem: function (item) {
         var el = this;
-        var selectedItem = el._misc.items[el.value];
-        if (selectedItem) {
+
+        if (item) {
           setTimeout(function () {
-            var middlePosition = selectedItem.offsetTop + selectedItem.offsetHeight;
-            var scrollPosition = el._refs.scroll.content.scrollHeight > middlePosition ? selectedItem.offsetTop - selectedItem.offsetHeight : selectedItem.offsetTop;
+            var middlePosition = item.offsetTop + item.offsetHeight;
+            var scrollPosition = el._refs.scroll.content.scrollHeight > middlePosition ? item.offsetTop - item.offsetHeight : item.offsetTop;
             el._refs.scroll.scrollTop = scrollPosition;
           }, 0);
         }
       },
       /*
-      @function (private) _highlightCurrentItem
+      @function (private) _highlighItem
       @description Scrolls to the currently selected item
       */
-      highlightCurrentItem: function () {
+      highlighItem: function (item) {
         var el = this;
-        var previousSelectedItem = el._refs.dropDown.querySelector(".eon-combo-selected");
-        var selectedItem = el._misc.items[el.value];
 
-        if (previousSelectedItem) {
-          previousSelectedItem.classList.remove("eon-combo-selected");
+        if (el._misc.highlightedItem) {
+          el._misc.highlightedItem.classList.remove("eon-combo-highlighted");
+          el._misc.highlightedItem = null;
         }
 
-        selectedItem.classList.add("eon-combo-selected");
+        if (item) {
+          item.classList.add("eon-combo-highlighted");
+          el._misc.highlightedItem = item;
+        }
+
       },
       /*
       @function (private) _updateLabel
@@ -1089,6 +1157,7 @@
         var el = this;
 
         el._misc.items[item.value] = item;
+        el._misc.displayValueItems[item.displayValue.toString().toLowerCase()] = item;
 
         item.onRender(function () {
           var span = document.createElement("span");
@@ -1174,8 +1243,8 @@
         el._animateExpand();
         el._animateLabel();
 
-        el._highlightCurrentItem();
-        el._scrollToSelectedItem();
+        el._highlighItem(el._misc.items[el.value]);
+        el._scrollToItem(el._misc.items[el.value]);
 
       },
       /*
@@ -1297,6 +1366,7 @@
       el._initDefault();
 
       el._setupLabelAnimation();
+      el._setupKeyboardEvents();
 
       if (declarativePlaceholder) el._refs.input.placeholder = declarativePlaceholder;
 
