@@ -64,50 +64,59 @@ eon.time.getFirstWeekMonday = function (locale, year, month, format) {
 };
 
 eon.time.getDateWithFormat = function (date, format, locale) {
-  var dayFormat = format.match(/[d|D]{1,2}/)
-    ? format.match(/[d|D]{1,2}/)[0]
-    : undefined;
-  var monthFormat = format.match(/[M]{1,4}/)
-    ? format.match(/[M]{1,4}/)[0]
-    : undefined;
-  var yearFormat = format.match(/[y|Y]{2,4}/)
-    ? format.match(/[y|Y]{2,4}/)[0]
-    : undefined;
-  var dayType, monthType, yearType, dayString, monthString, yearString;
-  if (yearFormat) {
-    yearType = yearFormat.length > 1 ? "numeric" : "2-digit";
-    yearString = formatedMonth = date.toLocaleString([locale], {
-      year: yearType
-    });
-    format = format.replace(yearFormat, yearString);
+
+  if (date) {
+
+      var dayFormat = format.match(/[d|D]{1,2}/)
+          ? format.match(/[d|D]{1,2}/)[0]
+          : undefined;
+      var monthFormat = format.match(/[M]{1,4}/)
+          ? format.match(/[M]{1,4}/)[0]
+          : undefined;
+      var yearFormat = format.match(/[y|Y]{2,4}/)
+          ? format.match(/[y|Y]{2,4}/)[0]
+          : undefined;
+      var dayType, monthType, yearType, dayString, monthString, yearString;
+      if (yearFormat) {
+          yearType = yearFormat.length > 1 ? "numeric" : "2-digit";
+          yearString = formatedMonth = date.toLocaleString([locale], {
+              year: yearType
+          });
+          format = format.replace(yearFormat, yearString);
+      }
+      if (dayFormat) {
+          dayType = dayFormat.length > 1 ? "2-digit" : "numeric";
+          dayString = formatedMonth = date.toLocaleString([locale], {
+              day: dayType
+          });
+          format = format.replace(dayFormat, dayString);
+      }
+      if (monthFormat) {
+          switch (monthFormat.length) {
+              case 1:
+                  monthType = "numeric";
+                  break;
+              case 3:
+                  monthType = "short";
+                  break;
+              case 4:
+                  monthType = "long";
+                  break;
+              default:
+                  monthType = "2-digit";
+          }
+          monthString = formatedMonth = date.toLocaleString([locale], {
+              month: monthType
+          });
+          format = format.replace(monthFormat, monthString);
+      }
+
+      return format;
+
   }
-  if (dayFormat) {
-    dayType = dayFormat.length > 1 ? "2-digit" : "numeric";
-    dayString = formatedMonth = date.toLocaleString([locale], {
-      day: dayType
-    });
-    format = format.replace(dayFormat, dayString);
-  }
-  if (monthFormat) {
-    switch (monthFormat.length) {
-      case 1:
-        monthType = "numeric";
-        break;
-      case 3:
-        monthType = "short";
-        break;
-      case 4:
-        monthType = "long";
-        break;
-      default:
-        monthType = "2-digit";
-    }
-    monthString = formatedMonth = date.toLocaleString([locale], {
-      month: monthType
-    });
-    format = format.replace(monthFormat, monthString);
-  }
-  return format;
+
+  return null;
+  
 };
 
 eon.time.getFormatSeparator = function (format) {
