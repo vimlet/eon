@@ -1,15 +1,17 @@
 module.exports = {
-    "outputBase": "build",
-    "inputBase": "src",
-    "clean": false,
-    "log": true,
-    "output": {
-      "**": {
-        "parse": false,
-        "input": {
-          "meta/**.vmt": true
-        }
+  "clean": true,
+  "log": true,
+  "output": {
+    "build/**": {
+      "use": async function (entry) {
+        entry.fileName = entry.fileName.replace(".vmt", "");
+        return entry;
       },
+      "input": {
+        "parse": true,
+        "src/meta/**.vmt": true
+      }
+    },
     //   "**": [
     //     {
     //       "clean": false,
@@ -36,5 +38,5 @@ module.exports = {
     //       }
     //     }
     //   ]
-    }
-  };
+  }
+};
