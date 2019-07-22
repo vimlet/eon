@@ -1,0 +1,92 @@
+<template>
+    <div eon-ref="label" class="eon-component-1-label"></div>
+    <div class="eon-component-1-wrapper">
+        <eon-component-2></eon-component-2>
+    </div>
+</template>
+
+<script>
+    eon.element({
+
+        name: "eon-component-1",
+        style: "eon-component-1.css",
+        dependencies: [
+            "@ui/eon-component-2",
+            "eon-component-3",
+            "/eon/custom/eon-custom-1"
+        ],
+
+        themed: true,
+
+        properties: {
+            label: {
+                value: "",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            }
+        },
+
+        functions: {
+
+        },
+
+        privateFunctions: {
+
+            saveReferences: function () {
+
+                var el = this;
+
+                el._refs.wrapper = el.template.querySelector(".eon-component-1-wrapper");
+                el._refs.childComponent = el.template.querySelector("eon-component-2");
+            },
+
+            handleLabelChange: function (property, oldVal, newVal) {
+                
+                var el = this;
+
+                el._refs.label.innerHTML = el.label;
+                console.log("Property Changed:", property, oldVal, newVal);
+
+            }
+
+        },
+
+        onCreated: function () {
+            var el = this;
+            el._saveReferences();
+        },
+
+        onInit: function () {
+            var el = this;
+            el._refs.label.innerHTML = el.label;
+            el.style.display = "inline-block";
+            el.style.margin = "5px";
+            el.style.padding = "5px";
+            el.style.backgroundColor = "gray";
+        },
+
+        onRender: function () {
+        },
+
+        onBubbleRender: function () {
+        },
+
+        onReady: function () {
+        },
+
+        onPropertyChanged: function (property, oldVal, newVal) {
+            var el = this;
+            
+            switch (property) {
+                case "label":
+                    el._handleLabelChange(property, oldVal, newVal);
+                    break;
+            }
+        }
+    });
+</script>
