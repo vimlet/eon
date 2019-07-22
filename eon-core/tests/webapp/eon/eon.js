@@ -3449,6 +3449,9 @@ eon.prepareComponent = function (elementName, content) {
                 // Handles the dependencies and returns a boolean for whether there are pending imports or not
                 var hasPendingImports = eon.handleDependencies();
 
+                // Handle interpolation
+                eon.parseTemplate(elementName);
+
                 // If there are no more dependencies to handle trigger onImportsReady
                 if (!hasPendingImports && !eon.imports.ready && eon.imports.count === eon.imports.total && eon.imports.total === Object.keys(eon.imports.config).length) {
 
@@ -3497,8 +3500,6 @@ eon.handleDependencies = function () {
             hasPendingImports = true;
         }
 
-        // Handle interpolation
-        eon.parseTemplate(elementNames[i]);
     }
 
     return hasPendingImports;
@@ -4191,6 +4192,14 @@ eon.interpolation.globalScope = eon.interpolation.globalScope || eon;
 eon.interpolation.globalScope.data = eon.interpolation.globalScope.data || {};
 eon.interpolation.globalScope.locale = eon.interpolation.globalScope.locale || {};
 
+eon.interpolation.globalScope.__bindings = eon.interpolation.globalScope.__bindings || {};
+eon.interpolation.globalScope.__bindings.data = eon.interpolation.globalScope.__bindings.data || {};
+eon.interpolation.globalScope.__bindings.locale = eon.interpolation.globalScope.__bindings.locale || {};
+
+eon.interpolation.globalScope.__attributeBindings = eon.interpolation.globalScope.__attributeBindings || {};
+
+eon.interpolation.sourcesQueue = eon.interpolation.sourcesQueue || [];
+
 eon.createCallback("onDataChanged", eon.interpolation.globalScope);
 eon.createCallback("onLocaleChanged", eon.interpolation.globalScope);
 
@@ -4205,25 +4214,8 @@ eon.interpolation.prepare = function (template) {
   if (!vimlet.meta.sandbox) {
     vimlet.meta.sandbox = {
       "bind": function (keyPath, rootPath, global) {
-
-        global = eon.util.isTrue(global) ? true : false;
-
-        // If rootPath is provided we split it
-        rootPath = rootPath && rootPath !== "" ? rootPath.split(".") : rootPath;
-
-        // If the first element of the rootPath is either "data" or "global"
-        if (rootPath && ((rootPath[0] === "data" && !global) || (rootPath[0] === "global"))) {
-
-          // Removes the data/global from the path
-          rootPath.shift();
-          // Joins the remaining path
-          rootPath = rootPath.join(".");
-
-          keyPath = rootPath !== "" ? rootPath + "." + keyPath : keyPath;
-
-        }
-
-        this.echo("<eon-variable bind=\"" + keyPath + "\" global=\"" + global + "\"></eon-variable>");
+        var params = eon.interpolation.getVariableParams(keyPath, rootPath, global);
+        this.echo('<eon-variable bind="' + params.keyPath + '" global="' + params.global + '"></eon-variable>');
       }
     };
   }
@@ -4231,19 +4223,8 @@ eon.interpolation.prepare = function (template) {
   if (!vimlet.meta.shortcut) {
     vimlet.meta.shortcut = {
       "@": function (s) {
-
-        // Transforms the string argument into our binding parameters
-        var params = s.split(" ");
-
-        var keyPath = params.length > 1 ? params[1] : params[0];
-        var rootPath = params.length > 1 ? params[0] : undefined;
-        var global = rootPath && rootPath.split(".")[0] === "global" ? true : false;
-
-        keyPath = "\"" + keyPath + "\"";
-        rootPath = rootPath ? "\"" + rootPath + "\"" : rootPath;
-        params = "[ " + keyPath + ", " + rootPath + ", " + global + "]";
-
-        return "bind.apply(undefined, " + params + ");";
+        var params = eon.interpolation.getStringParams(s);
+        return "bind.apply(undefined, [ " + params.keyPath + ", " + params.rootPath + ", " + params.global + "]);";
       }
     };
   }
@@ -4258,114 +4239,368 @@ eon.interpolation.prepare = function (template) {
 };
 
 /*
-@function init
-@description Handles all the initial state of the data and variable elements
-@param {Object} el
-@param {Object} config
+@function {Object} getStringParams
+@description Takes a string and extracts its information in the form of an object with a keyPath, rootPath and whether its global or not
+@param {String} string
 */
-eon.interpolation.init = function (el, config) {
+eon.interpolation.getStringParams = function (string) {
 
-  var sources = {};
+  var params = string.split(" ");
 
-  sources.element = {};
-  sources.global = {};
+  var keyPath = params.length > 1 ? params[1] : params[0];
+  var rootPath = params.length > 1 ? params[0] : undefined;
+  var global = rootPath && rootPath.split(".")[0] == "global" ? true : false;
 
-  // First of all checks if there is a data specified in the element config, if so, it creates the source
-  if (Object.keys(el.data).length > 0) {
+  // Adds commas to the variables
+  keyPath = "\"" + keyPath + "\"";
+  rootPath = rootPath ? "\"" + rootPath + "\"" : rootPath;
 
-    sources.element.data = {};
-    sources.element.data.scope = el;
-    sources.element.data.obj = el.data;
-    sources.element.data.isGlobal = false;
-    sources.element.data.isLocale = false;
+  return { keyPath: keyPath, rootPath: rootPath, global: global };
+};
+
+/*
+@function {Object} getVariableParams
+@description Receives a keyPath, rootPath and whether its global or not and returns an object with keyPath and Global to be set to eon-variable
+@param {String} keyPath
+@param {String} rootPath
+@param {Boolean} global
+*/
+eon.interpolation.getVariableParams = function (keyPath, rootPath, global) {
+
+  global = eon.util.isTrue(global) ? true : false;
+
+  // If rootPath is provided we split it
+  rootPath = rootPath && rootPath != "" ? rootPath.split(".") : rootPath;
+
+  // If the first element of the rootPath is either "data" or "global"
+  if (rootPath && ((rootPath[0] == "data" && !global) || (rootPath[0] == "global"))) {
+
+    // Removes the data/global from the path
+    rootPath.shift();
+    // Joins the remaining path
+    rootPath = rootPath.join(".");
+    // Creates the final keyPath depending on the rootPath
+    keyPath = rootPath != "" ? rootPath + "." + keyPath : keyPath;
 
   }
 
-  // If parse is not enabled then we will try to create onDataChanged callback if data exists on the component
-  if (!config.parse) {
+  return { keyPath: keyPath, global: global };
 
-    if (sources.element.data) {
+};
 
-      eon.interpolation.setupListenerCallback(el, sources.element.data, config);
-      eon.interpolation.defineProperties(sources.element.data, "data");
+/*
+@function bind
+@description Receives a keyPath, rootPath and whether its global or not and returns an object with keyPath and Global to be set to eon-variable
+@param {Object} el
+@param {Object} config
+*/
+eon.interpolation.bind = function (el, config) {
 
-    }
+  if (el.nodeName.toLowerCase() != "eon-variable") {
 
-  } else {
+    var sources = {};
 
-    var variables = el.template.querySelectorAll("eon-variable");
-    var currentVariable;
+    sources.element = {};
+    sources.global = {};
 
-    var isGlobal, scope, source, sourceType, interpolations;
-    var bindString, bindValue, isUndefined, root;
+    el.__bindings = el.__bindings || {};
+    el.__bindings.data = el.__bindings.data || {};
+    el.__bindings.locale = el.__bindings.locale || {};
 
-    eon.interpolation.globalScope.__interpolations = eon.interpolation.globalScope.__interpolations || {};
-    eon.interpolation.globalScope.__interpolations.data = eon.interpolation.globalScope.__interpolations.data || {};
-    eon.interpolation.globalScope.__interpolations.locale = eon.interpolation.globalScope.__interpolations.locale || {};
+    el.__attributeBindings = el.__attributeBindings || {};
+    el.__attributeBindings.element = el.__attributeBindings.element || {};
+    el.__attributeBindings.global = el.__attributeBindings.global || {};
 
-    el.__interpolations = el.__interpolations || {};
-    el.__interpolations.data = el.__interpolations.data || {};
-    el.__interpolations.locale = el.__interpolations.locale || {};
+    // First of all checks if there is a data specified in the element config, if so, it creates the source
+    if (Object.keys(el.data).length > 0) {
 
-    // Loops all the inner element variables
-    for (var i = 0; i < variables.length; i++) {
-
-      currentVariable = variables[i];
-
-      // Sets some basic variables to be used later on
-      isGlobal = eon.util.isTrue(currentVariable.getAttribute("global"));
-      bindString = currentVariable.getAttribute("bind");
-      scope = isGlobal ? eon.interpolation.globalScope : el;
-      sourceName = bindString.split(".")[0] === "locale" ? "locale" : "data";
-
-      root = sourceName !== "locale" ? scope[sourceName] : scope;
-
-      // Reads if there is already a value on the source if there is not then it assigns an empty string
-      bindValue = eon.object.readFromPath(root, bindString);
-      isUndefined = typeof bindValue === "undefined";
-      bindValue = isUndefined ? "" : bindValue;
-      
-      // Reassigns the value to the source, in case there was no value
-      if (isUndefined) {
-        eon.object.assignToPath(root, bindString, bindValue);
-      }
-      
-      sourceType = isGlobal ? "global" : "element";
-
-      // Creates the source object
-      if (!sources[sourceType][sourceName]) {
-
-        sources[sourceType][sourceName] = {};
-        sources[sourceType][sourceName].scope = scope;
-        sources[sourceType][sourceName].obj = scope[sourceName];
-        sources[sourceType][sourceName].isGlobal = isGlobal;
-        sources[sourceType][sourceName].isLocale = (sourceName === "locale");
-
-      }
+      sources.element.data = {};
+      sources.element.data.scope = el;
+      sources.element.data.obj = el.data;
+      sources.element.data.isGlobal = false;
+      sources.element.data.isLocale = false;
+      sources.element.data.config = config ? config : null;
+      sources.element.data.component = el;
 
     }
 
-    var sourceTypeKeys = Object.keys(sources);
-    var sourceKeys;
+    eon.interpolation.bindAttributes(el, sources, config);
+    eon.interpolation.bindVariables(el, sources, config);
 
+    eon.interpolation.sourcesQueue.push(sources);
+
+    eon.interpolation.interpolate();
+
+  }
+
+};
+
+/*
+@function bindAttributes
+@description Checks if there are bind attributes in the component
+@param {Object} el
+@param {Object} sources
+@param {Object} config
+*/
+eon.interpolation.bindAttributes = function (el, sources, config) {
+
+  if (el.nodeName.toLowerCase() != "eon-variable") {
+
+    // First we create a clone of the element
+    var emptyClone = el.cloneNode(true);
+    var attributesToRemoveQueue = [];
+    // Now we empty it so we kind search among all its attributes
+    emptyClone.innerHTML = "";
+
+    if (emptyClone.outerHTML.indexOf("bind:") > -1) {
+
+      for (var i = 0; i < el.attributes.length; i++) {
+        // if we find attributes with the bind:prefix we bind it
+        if (el.attributes[i].name.indexOf("bind:") > -1) {
+          eon.interpolation.bindAttribute(el, sources, el.attributes[i].name, el.attributes[i].value, config);
+          attributesToRemoveQueue.push(el.attributes[i].name);
+        }
+
+      }
+
+      for (var j = 0; j < attributesToRemoveQueue.length; j++) {
+        el.removeAttribute(attributesToRemoveQueue[j]);
+      }
+
+    }
+  }
+
+};
+
+/*
+@function bindAttribute
+@description Creates the descriptor for the data object itself and for all its properties
+@param {Object} source
+@param {String} sourceName
+*/
+eon.interpolation.bindAttribute = function (el, sources, attributeName, attributeValue, config) {
+
+  var attributeFinalName = attributeName.replace("bind:", "");
+  var params = eon.interpolation.getStringParams(attributeValue);
+  var variableParams = eon.interpolation.getVariableParams(params.keyPath, params.rootPath, params.global);
+  var bindString = variableParams.keyPath.replace(/\"/g, "");
+
+  var isGlobal, isLocale, scope, sourceType;
+  var bindValue, isUndefined, root;
+
+  // Sets some basic variables to be used later on
+  isGlobal = params.global;
+  isLocale = bindString.split(".")[0] == "locale";
+  scope = isGlobal ? eon.interpolation.globalScope : el;
+  sourceName = isLocale ? "locale" : "data";
+
+  scope.__attributeBindings = scope.__attributeBindings || {};
+  root = sourceName != "locale" ? scope[sourceName] : scope;
+
+  // Reads if there is already a value on the source if there is not then it assigns an empty string
+  bindValue = eon.object.readFromPath(root, bindString);
+  isUndefined = typeof bindValue == "undefined";
+  bindValue = isUndefined ? "" : bindValue;
+
+  // Reassigns the value to the source, in case there was no value
+  if (isUndefined) {
+    eon.object.assignToPath(root, bindString, bindValue);
+  }
+
+  sourceType = isGlobal ? "global" : "element";
+
+  // Creates the source object
+  if (!sources[sourceType][sourceName]) {
+
+    sources[sourceType][sourceName] = {};
+    sources[sourceType][sourceName].scope = scope;
+    sources[sourceType][sourceName].obj = scope[sourceName];
+    sources[sourceType][sourceName].isGlobal = isGlobal;
+    sources[sourceType][sourceName].isLocale = (sourceName == "locale");
+    sources[sourceType][sourceName].config = config;
+    sources[sourceType][sourceName].component = el;
+
+  }
+
+  // Since we want the whole path wether its been or not specified by the user we add "data." if needed
+  bindString = !isLocale && bindString.split(".")[0] != "data" ? "data." + bindString : bindString;
+
+  // Saves the component as well as the attribute so that when the value changes we have enough information the also change the attribute
+  scope.__attributeBindings[bindString] = scope.__attributeBindings[bindString] ? scope.__attributeBindings[bindString] : [];
+  scope.__attributeBindings[bindString].push({
+    attribute: attributeFinalName,
+    component: el
+  });
+
+};
+
+/*
+@function bindVariables
+@description Binds all the eon-variables contained inside a component template
+@param {Object} el
+@param {Object} source
+@param {Object} config
+*/
+eon.interpolation.bindVariables = function (el, sources, config) {
+
+  var variables = el.template.querySelectorAll("eon-variable");
+
+  // Loops all the inner element variables
+  for (var i = 0; i < variables.length; i++) {
+    eon.interpolation.bindVariable(el, sources, variables[i], config);
+  }
+
+};
+
+/*
+@function bindVariable
+@description Creates the descriptor for the data object itself and for all its properties
+@param {Object} el
+@param {Object} source
+@param {Object} variable
+@param {Object} config
+*/
+eon.interpolation.bindVariable = function (el, sources, variable, config) {
+
+  var isGlobal, scope, sourceType;
+  var bindString, bindValue, isUndefined, root;
+
+  // Sets some basic variables to be used later on
+  isGlobal = eon.util.isTrue(variable.getAttribute("global"));
+  bindString = variable.getAttribute("bind");
+  scope = isGlobal ? eon.interpolation.globalScope : el;
+  sourceName = bindString.split(".")[0] == "locale" ? "locale" : "data";
+
+  root = sourceName != "locale" ? scope[sourceName] : scope;
+
+  // Reads if there is already a value on the source if there is not then it assigns an empty string
+  bindValue = eon.object.readFromPath(root, bindString);
+  isUndefined = typeof bindValue == "undefined";
+  bindValue = isUndefined ? "" : bindValue;
+
+  // Reassigns the value to the source, in case there was no value
+  if (isUndefined) {
+    eon.object.assignToPath(root, bindString, bindValue);
+  }
+
+  sourceType = isGlobal ? "global" : "element";
+
+  // Creates the source object
+  if (!sources[sourceType][sourceName]) {
+
+    sources[sourceType][sourceName] = {};
+    sources[sourceType][sourceName].scope = scope;
+    sources[sourceType][sourceName].obj = scope[sourceName];
+    sources[sourceType][sourceName].isGlobal = isGlobal;
+    sources[sourceType][sourceName].isLocale = (sourceName == "locale");
+    sources[sourceType][sourceName].config = config;
+    sources[sourceType][sourceName].component = el;
+
+  }
+
+  // Marks the variable as binded so on its onTransformed callback it knows its not a wild variable that has not been binded
+  variable.__binded = true;
+
+};
+
+/*
+@function interpolate
+@description Takes the sources queue and loops it create listeners, define setters/getters and interpolate values
+*/
+eon.interpolation.interpolate = function () {
+
+  var sources, sourceTypeKeys;
+  var sourceKeys, source, scope, interpolations;
+
+  // Loops the queue
+  for (var k = 0; k < eon.interpolation.sourcesQueue.length; k++) { 
+
+    sources = eon.interpolation.sourcesQueue[k];
+    sourceTypeKeys = Object.keys(eon.interpolation.sourcesQueue[k])
+
+    // Loops the source types saved into the source object
     for (var i = 0; i < sourceTypeKeys.length; i++) {
 
       sourceKeys = Object.keys(sources[sourceTypeKeys[i]]);
 
+      // Then for each source creaes the listener, setters/getters and interpolate values
       for (var j = 0; j < sourceKeys.length; j++) {
 
         source = sources[sourceTypeKeys[i]][sourceKeys[j]];
-        interpolations = source.isLocale ? source.scope.__interpolations.locale : source.scope.__interpolations.data;
 
-        eon.interpolation.setupListenerCallback(el, source, config);
+        scope = source.scope;
+        interpolations = source.isLocale ? source.scope.__bindings.locale : source.scope.__bindings.data;
+
+        eon.interpolation.setupListenerCallback(source, source.config);
         eon.interpolation.defineProperties(source, sourceKeys[j]);
-        eon.interpolation.interpolate(el, source, source.obj, interpolations);
+        eon.interpolation.interpolateValues(scope, source, source.obj, interpolations);
 
       }
 
     }
 
+    // If a data source was created for the element we define the setters/getters too
+    if (sources.element.data) {
+
+      eon.interpolation.setupListenerCallback(sources.element.data, source.config);
+      eon.interpolation.defineProperties(sources.element.data, "data");
+
+    }
+
   }
+
+  // Empties the sources queue
+  eon.interpolation.sourcesQueue = [];
+
+};
+
+/*
+@function bindWildVariable
+@description This functions is meant for the eon-variables that are not contained in an eon-component
+@param {Object} variable
+*/
+eon.interpolation.bindWildVariable = function (variable) {
+
+  var isLocale, scope, bindString, bindValue, isUndefined, root, interpolations, bindedInterpolations;
+
+  bindString = variable.getAttribute("bind");
+  scope = eon.interpolation.globalScope;
+  isLocale = bindString.split(".")[0] == "locale" ? true : false;
+  sourceName = isLocale ? "locale" : "data";
+
+  root = sourceName != "locale" ? scope[sourceName] : scope;
+
+  // Reads if there is already a value on the source if there is not then it assigns an empty string
+  bindValue = eon.object.readFromPath(root, bindString);
+  isUndefined = typeof bindValue == "undefined";
+  bindValue = isUndefined ? "" : bindValue;
+
+  // Reassigns the value to the source, in case there was no value
+  if (isUndefined) {
+    eon.object.assignToPath(root, bindString, bindValue);
+  }
+
+  interpolations = isLocale ? eon.interpolation.globalScope.__bindings.locale : eon.interpolation.globalScope.__bindings.data;
+  variableBind = bindString.split(".");
+
+  if (variableBind[0] == "locale") {
+    variableBind.shift();
+    variableBind = variableBind.join(".");
+  } else {
+    variableBind = bindString;
+  }
+
+  bindedInterpolations = eon.object.readFromPath(interpolations, variableBind);
+
+  if (!bindedInterpolations) {
+    bindedInterpolations = [];
+    eon.object.assignToPath(interpolations, variableBind, bindedInterpolations);
+  }
+
+  bindedInterpolations.push(variable)
+  variable.textContent = bindValue;
+
+  variable.__binded = true;
 
 };
 
@@ -4388,7 +4623,7 @@ eon.interpolation.defineProperties = function (source, sourceName) {
 
   // Loops through all the keys of the object
   eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName, source.isLocale);
-};
+}
 
 /*
 @function {Object} createPropDescriptor
@@ -4420,7 +4655,7 @@ eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyP
   };
 
   return propDescriptor;
-};
+}
 
 /*
 @function createObjectPropDescriptors
@@ -4436,7 +4671,7 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLo
 
   for (var key in obj) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") === -1) {
+    if (key.indexOf("__") == -1) {
       value = obj[key];
 
       obj["__" + key] = value;
@@ -4454,7 +4689,7 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLo
       }
     }
   }
-};
+}
 
 /*
 @function setupListenerCallback
@@ -4463,30 +4698,30 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLo
 @param {Object} source
 @param {Object} config
 */
-eon.interpolation.setupListenerCallback = function (el, source, config) {
+eon.interpolation.setupListenerCallback = function (source, config) {
   var scope = source.scope;
   var isLocale = source.isLocale ? true : false;
   var callbackName = source.isLocale ? "_onLocaleChanged" : "_onDataChanged";
-  
+
   // If the private callback doesnt exist creates it
   if (!scope[callbackName]) {
-    
+
     eon.createCallback(callbackName, scope);
 
     // When any data changes (incluiding data itself), we manage the onDataChanged triggers depending on the situation
     scope[callbackName](function (keyPath, oldVal, newVal) {
-      
+
       if (newVal.constructor === Object) {
-        eon.interpolation.handleObjectChange(el, scope, keyPath, oldVal, newVal, config, isLocale);
+        eon.interpolation.handleObjectChange(source, keyPath, oldVal, newVal, config, isLocale);
       } else {
-        eon.interpolation.handleVariableChange(scope, keyPath, oldVal, newVal, config, isLocale);
+        eon.interpolation.handleVariableChange(source, keyPath, oldVal, newVal, config, isLocale);
       }
 
     });
 
   }
 
-};
+}
 
 /*
 @function interpolate
@@ -4497,31 +4732,47 @@ eon.interpolation.setupListenerCallback = function (el, source, config) {
 @param {Object} interpolations
 @param {String} bind
 */
-eon.interpolation.interpolate = function (el, source, obj, interpolations, bind) {
-  var i, variableBind, variable;
+eon.interpolation.interpolateValues = function (el, source, obj, interpolations, bind) {
+  var root = bind;
+  var newRoot, key, i, variableBind, variable;
 
-  for (var key in obj) {
+  for (key in obj) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") === -1) {
+    if (key.indexOf("__") == -1) {
       // If the property is an object the call ourselfs again to loop through our keys
       if (obj[key] && obj[key].constructor === Object) {
 
-        bind = bind ? bind + "." + key : key;
+        newRoot = bind ? bind + "." + key : key;
+
         interpolations[key] = interpolations[key] ? interpolations[key] : {};
 
-        eon.interpolation.interpolate(el, source, obj[key], interpolations[key], bind); 
+        eon.interpolation.interpolateValues(el, source, obj[key], interpolations[key], newRoot);
 
       } else {
 
-        variableBind = bind ? bind + "." + key : key;
+        var attributes;
+
+        variableBind = root ? root + "." + key : key;
         variableBind = source.isLocale ? "locale." + variableBind : variableBind;
 
         interpolations[key] = interpolations[key] ? interpolations[key] : [];
-        
-        // Looks for the variables matching the binding
-        Array.prototype.push.apply(interpolations[key], el.template.querySelectorAll(
-          "eon-variable[bind=\"" + variableBind + "\"][global=\"" + source.isGlobal + "\"]"
-        ));
+
+        // If the variables are contain inside a component we add the to the interpolations array
+        if (source.component) {
+
+          Array.prototype.push.apply(interpolations[key], source.component.template.querySelectorAll(
+            'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
+          ));
+
+          variableBind = !source.isLocale && variableBind.split(".")[0] != "data" ? "data." + variableBind : variableBind;
+          attributes = source.scope.__attributeBindings[variableBind] || [];
+
+          // For each attribute found previously sets its value
+          for (var j = 0; j < attributes.length; j++) {
+            attributes[j].component.setAttribute(attributes[j].attribute, obj[key]);
+          }
+
+        }
 
         // For each variable found previously sets its value
         for (i = 0; i < interpolations[key].length; i++) {
@@ -4544,34 +4795,37 @@ eon.interpolation.interpolate = function (el, source, obj, interpolations, bind)
 @param {Object} newData
 @param {Object} config
 */
-eon.interpolation.handleObjectChange = function (el, scope, keyPath, oldData, newData, config, isLocale) {
+eon.interpolation.handleObjectChange = function (source, keyPath, oldData, newData, config, isLocale) {
+  var scope = source.scope;
   var checked = {};
   var callbackName = isLocale ? "onLocaleChanged" : "onDataChanged";
 
-  eon.triggerAllCallbackEvents(el, config, callbackName, [keyPath, oldData, newData]);
+  eon.triggerAllCallbackEvents(scope, config, callbackName, [keyPath, oldData, newData]);
 
   // Checks differences between the old and the new data
-  checked = eon.interpolation.backwardDataDiffing(el, scope, keyPath, oldData, newData, checked, config);
+  checked = eon.interpolation.backwardDataDiffing(source, keyPath, oldData, newData, checked, config, isLocale);
 
   // Checks differences between the new and the old data, escaping the already checked ones
-  eon.interpolation.forwardDataDiffing(el, scope, keyPath, newData, checked, config);
+  eon.interpolation.forwardDataDiffing(source, keyPath, newData, checked, config, isLocale);
   eon.interpolation.createObjectPropDescriptors(scope, newData, keyPath, config);
-};
+}
 
 // Handles the value change of the variable element and triggers onDataChanged
-eon.interpolation.handleVariableChange = function (scope, keyPath, oldVal, newVal, config, isLocale) {
+eon.interpolation.handleVariableChange = function (source, keyPath, oldVal, newVal, config, isLocale) {
+  var scope = source.scope;
   var pathArray = keyPath.split(".");
   var callbackName = isLocale ? "onLocaleChanged" : "onDataChanged";
-  var interpolations = isLocale ? scope.__interpolations.locale : scope.__interpolations.data;
+  var interpolations = isLocale ? scope.__bindings.locale : scope.__bindings.data;
   var interpolationPath;
-  var variablesToChange;
-  
+  var variablesToChange, attributesToChange;
+
   // Removes the first index of the pathArray, that corresponds to "data", which we dont need for the interpolations
   pathArray.shift();
-  // Sets the path back together withouth data
+  // Sets the path back together without data
   interpolationPath = pathArray.join(".");
   // Takes the variable elements for the path
   variablesToChange = eon.object.readFromPath(interpolations, interpolationPath);
+  attributesToChange = scope.__attributeBindings[keyPath];
 
   // If it has variable elements changes its value 
   if (variablesToChange) {
@@ -4579,14 +4833,20 @@ eon.interpolation.handleVariableChange = function (scope, keyPath, oldVal, newVa
       variablesToChange[i].textContent = newVal;
     }
   }
-  
+
+  // If it has attributes then changes its values
+  if (attributesToChange) {
+    for (var j = 0; j < attributesToChange.length; j++) {
+      attributesToChange[j].component.setAttribute(attributesToChange[j].attribute, newVal);
+    }
+  }
+
   eon.triggerAllCallbackEvents(scope, config ? config : {}, callbackName, [interpolationPath, oldVal, newVal]);
-};
+}
 
 /*
 @function backwardDataDiffing
 @description Compares the old data with the new one and triggers the changes
-@param {Object} el
 @param {Object} scope
 @param {String} keyPath
 @param {Object} oldData
@@ -4594,20 +4854,22 @@ eon.interpolation.handleVariableChange = function (scope, keyPath, oldVal, newVa
 @param {Object} checked
 @param {Object} config
 */
-eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, newData, checked, config) {
+eon.interpolation.backwardDataDiffing = function (source, keyPath, oldData, newData, checked, config, isLocale) {
   var newVal;
   // Loops through the oldData
   for (var key in oldData) {
+
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") === -1) {
+    if (key.indexOf("__") == -1) {
       // If the property is an object, we enter this function again for that object
       if (oldData[key].constructor === Object) {
-        checked[key] = eon.interpolation.backwardDataDiffing(el, scope, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config);
+        checked[key] = eon.interpolation.backwardDataDiffing(source, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config, isLocale);
       } else {
         // If there is no such property on the new Data we set it as an empty string
         newVal = newData ? newData[key] : "";
+
         // Handles the variable change
-        eon.interpolation.handleVariableChange(scope, keyPath + "." + key, oldData[key], newVal, config);
+        eon.interpolation.handleVariableChange(source, keyPath + "." + key, oldData[key], newVal, config, isLocale);
 
         if (newData && newData.hasOwnProperty(key)) {
           checked[key] = newData[key];
@@ -4617,37 +4879,36 @@ eon.interpolation.backwardDataDiffing = function (el, scope, keyPath, oldData, n
   }
 
   return checked;
-};
+}
 
 /*
 @function forwardDataDiffing
 @description Compares the data with the already checked object
-@param {Object} el
 @param {Object} scope
 @param {String} keyPath
 @param {Object} data
 @param {Object} checked
 @param {Object} config
 */
-eon.interpolation.forwardDataDiffing = function (el, scope, keyPath, data, checked, config) {
+eon.interpolation.forwardDataDiffing = function (source, keyPath, data, checked, config, isLocale) {
   var oldVal;
   // Loops through data
   for (var key in data) {
     // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") === -1) {
+    if (key.indexOf("__") == -1) {
       // If the property is an object, we enter this function again for that object
       if (data[key].constructor === Object) {
-        eon.interpolation.forwardDataDiffing(el, scope, keyPath + "." + key, data[key], checked ? checked[key] : checked, config);
+        eon.interpolation.forwardDataDiffing(source, keyPath + "." + key, data[key], checked ? checked[key] : checked, config, isLocale);
       } else {
         oldVal = checked ? checked[key] : "";
         // To only trigger variable change for properties that are not already checked/triggered
         if ((checked && !checked.hasOwnProperty(key)) || !checked) {
-          eon.interpolation.handleVariableChange(scope, keyPath + "." + key, oldVal, data[key], config);
+          eon.interpolation.handleVariableChange(source, keyPath + "." + key, oldVal, data[key], config, isLocale);
         }
       }
     }
   }
-};
+}
 
 eon.createCallback("onThemeChanged", eon);
 // This is a private callback for Eon to change all the component themes before the actual and public onThemeChanged callback is triggered
@@ -5465,7 +5726,7 @@ eon.triggerAllCallbackEvents = function (el, config, callback, params) {
     // to be triggered once the element is render, this is so we dont have to use el.onRender() inside this callback to not crash
     if (!((callback === "onPropertyChanged" || callback === "onAttributeChanged") && eon.registry.isRendered(el) !== true)) {
 
-        if (config[callback]) {
+        if (config && config[callback]) {
             config[callback].apply(el, params);
         }
 
@@ -5723,7 +5984,7 @@ eon.generateElementReferences = function (el) {
 
     for (var i = 0; i < nodes.length; i++) {
         node = nodes[i];
-        el._refs[node.getAttribute("eon-ref")] = node;
+        eon.object.assignToPath(el._refs, node.getAttribute("eon-ref"), node);
         node.removeAttribute("eon-ref");
     }
 
@@ -6010,11 +6271,11 @@ eon.declare = function (name, baseElement) {
                 // Note dynamic things that should be slotted must be added onCreated
                 eon.slot(el);
 
+                // Interpolation data bind
+                eon.interpolation.bind(el, config);
+
                 // Callback for the first time that the element has been attached, no template imported, only created and parsed
                 eon.triggerAllCallbackEvents(el, config, "onInit");
-
-                // Interpolation data bind
-                eon.interpolation.init(el, config);
 
                 // Begins the transformation process
                 eon.transform(el, config);
@@ -6168,50 +6429,59 @@ eon.time.getFirstWeekMonday = function (locale, year, month, format) {
 };
 
 eon.time.getDateWithFormat = function (date, format, locale) {
-  var dayFormat = format.match(/[d|D]{1,2}/)
-    ? format.match(/[d|D]{1,2}/)[0]
-    : undefined;
-  var monthFormat = format.match(/[M]{1,4}/)
-    ? format.match(/[M]{1,4}/)[0]
-    : undefined;
-  var yearFormat = format.match(/[y|Y]{2,4}/)
-    ? format.match(/[y|Y]{2,4}/)[0]
-    : undefined;
-  var dayType, monthType, yearType, dayString, monthString, yearString;
-  if (yearFormat) {
-    yearType = yearFormat.length > 1 ? "numeric" : "2-digit";
-    yearString = formatedMonth = date.toLocaleString([locale], {
-      year: yearType
-    });
-    format = format.replace(yearFormat, yearString);
+
+  if (date) {
+
+      var dayFormat = format.match(/[d|D]{1,2}/)
+          ? format.match(/[d|D]{1,2}/)[0]
+          : undefined;
+      var monthFormat = format.match(/[M]{1,4}/)
+          ? format.match(/[M]{1,4}/)[0]
+          : undefined;
+      var yearFormat = format.match(/[y|Y]{2,4}/)
+          ? format.match(/[y|Y]{2,4}/)[0]
+          : undefined;
+      var dayType, monthType, yearType, dayString, monthString, yearString;
+      if (yearFormat) {
+          yearType = yearFormat.length > 1 ? "numeric" : "2-digit";
+          yearString = formatedMonth = date.toLocaleString([locale], {
+              year: yearType
+          });
+          format = format.replace(yearFormat, yearString);
+      }
+      if (dayFormat) {
+          dayType = dayFormat.length > 1 ? "2-digit" : "numeric";
+          dayString = formatedMonth = date.toLocaleString([locale], {
+              day: dayType
+          });
+          format = format.replace(dayFormat, dayString);
+      }
+      if (monthFormat) {
+          switch (monthFormat.length) {
+              case 1:
+                  monthType = "numeric";
+                  break;
+              case 3:
+                  monthType = "short";
+                  break;
+              case 4:
+                  monthType = "long";
+                  break;
+              default:
+                  monthType = "2-digit";
+          }
+          monthString = formatedMonth = date.toLocaleString([locale], {
+              month: monthType
+          });
+          format = format.replace(monthFormat, monthString);
+      }
+
+      return format;
+
   }
-  if (dayFormat) {
-    dayType = dayFormat.length > 1 ? "2-digit" : "numeric";
-    dayString = formatedMonth = date.toLocaleString([locale], {
-      day: dayType
-    });
-    format = format.replace(dayFormat, dayString);
-  }
-  if (monthFormat) {
-    switch (monthFormat.length) {
-      case 1:
-        monthType = "numeric";
-        break;
-      case 3:
-        monthType = "short";
-        break;
-      case 4:
-        monthType = "long";
-        break;
-      default:
-        monthType = "2-digit";
-    }
-    monthString = formatedMonth = date.toLocaleString([locale], {
-      month: monthType
-    });
-    format = format.replace(monthFormat, monthString);
-  }
-  return format;
+
+  return null;
+  
 };
 
 eon.time.getFormatSeparator = function (format) {
@@ -6244,8 +6514,12 @@ eon.time.getDateObjectFromString = function (value, format) {
   var dayIndex = splittedFormat.indexOf(dayFormat);
   var monthIndex = splittedFormat.indexOf(monthFormat);
   var yearIndex = splittedFormat.indexOf(yearFormat);
+  
+  var dayValue = splittedValue[dayIndex] != "Invalid Date" ? splittedValue[dayIndex] : null;
+  var monthValue = splittedValue[monthIndex] != "Invalid Date" ? splittedValue[monthIndex] : null;
+  var yearValue = splittedValue[yearIndex] != "Invalid Date" ? splittedValue[yearIndex] : null;
 
-  return { day: splittedValue[dayIndex], month: splittedValue[monthIndex], year: splittedValue[yearIndex] };
+  return { day: dayValue, month: monthValue, year: yearValue };
 
 };
 
@@ -7723,33 +7997,34 @@ eon.validator.validateRequiredField = function (property, schema, data, errorObj
 
     var propertySchema = schema.properties[property];
     var isRequired = (schema.required && schema.required.indexOf(property) > -1) || eon.util.isTrue(propertySchema.required);
-
-    var isInvalid = ((!data[property] || data[property] === "") && isRequired);
+    var propertyValue = eon.object.readFromPath(data, property);
+    var isInvalid = ((propertyValue == undefined || propertyValue == "") && isRequired);
 
     // If if does not meet any of the requirements then it fills the error object with the proper information
     if (isInvalid) {
         eon.validator.fillErrorObj(property, "Required", errorObj);
     }
 
-};
+}
 
 eon.validator.validateStringField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if (propertySchema.type === "string" && data.hasOwnProperty(property)) {
+    if (propertySchema.type == "string" && propertyValue != undefined) {
 
         // MaxLength
         var hasMaxLength = propertySchema.hasOwnProperty("maxLength") && (parseInt(propertySchema.maxLength) > 0);
-        var exceedsMaxLength = data[property].length > parseInt(propertySchema.maxLength);
+        var exceedsMaxLength = propertyValue.length > parseInt(propertySchema.maxLength);
 
         // MinLength
         var hasMinLength = propertySchema.hasOwnProperty("minLength") && (parseInt(propertySchema.maxLength) > 0);
-        var exceedsMinLength = data[property].length < parseInt(propertySchema.minLength);
+        var exceedsMinLength = propertyValue.length < parseInt(propertySchema.minLength);
 
         // Pattern
         var hasPattern = propertySchema.hasOwnProperty("pattern");
-        var matchesPattern = new RegExp(propertySchema.pattern).test(data[property]);
+        var matchesPattern = new RegExp(propertySchema.pattern).test(propertyValue);
 
         var isInvalid = (hasPattern && !matchesPattern) || (hasMaxLength && exceedsMaxLength) || (hasMinLength && exceedsMinLength);
 
@@ -7761,19 +8036,20 @@ eon.validator.validateStringField = function (property, schema, data, errorObj) 
 
     }
 
-};
+}
 
 eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if (propertySchema.type === "date" && data.hasOwnProperty(property)) {
+    if (propertySchema.type == "date" && propertyValue != undefined) {
 
         // Takes the format of the schema, if there is no format in the schema it takes a default format work with
         var format = propertySchema.format ? propertySchema.format : "YYYY-MM-DD";
 
         // Takes the data value
-        var value = data[property];
+        var value = propertyValue;
         // Turns that value into an object with day,month and year properties
         var valueObj = eon.time.getDateObjectFromString(value, format);
         // Takes the object and applies the schema format to see if both values (the value and the schema value) are the same,
@@ -7783,15 +8059,15 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
         var isInvalid;
 
         // If it does not follow the same format then it is no valid
-        if (value !== schemaValue) {
+        if (value != schemaValue) {
 
             isInvalid = true;
 
         } else {
 
-            var year = valueObj.year !== undefined ? valueObj.year : 0;
-            var month = valueObj.month !== undefined ? (valueObj.month - 1) : 0;
-            var day = valueObj.day !== undefined ? valueObj.day : 1;
+            var year = valueObj.year != undefined ? valueObj.year : 0;
+            var month = valueObj.month != undefined ? (valueObj.month - 1) : 0;
+            var day = valueObj.day != undefined ? valueObj.day : 1;
 
             // Turns the date into epoch so that we are able to compare dates
             var epochDate = new Date(year, month, day).getTime();
@@ -7802,12 +8078,12 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
                 var minDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
 
-                var minYear = minDateObj.year !== undefined ? minDateObj.year : 0;
-                var minMonth = minDateObj.month !== undefined ? (minDateObj.month - 1) : 0;
-                var minDay = minDateObj.day !== undefined ? minDateObj.day : 1;
+                var minYear = minDateObj.year != undefined ? minDateObj.year : 0;
+                var minMonth = minDateObj.month != undefined ? (minDateObj.month - 1) : 0;
+                var minDay = minDateObj.day != undefined ? minDateObj.day : 1;
 
                 minEpochDate = new Date(minYear, minMonth, minDay).getTime();
-                
+
                 isInvalid = epochDate < minEpochDate ? true : isInvalid;
 
             }
@@ -7817,9 +8093,9 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
                 var maxDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
 
-                var maxYear = maxDateObj.year !== undefined ? maxDateObj.year : 0;
-                var maxMonth = maxDateObj.month !== undefined ? (maxDateObj.month - 1) : 0;
-                var maxDay = maxDateObj.day !== undefined ? maxDateObj.day : 1;
+                var maxYear = maxDateObj.year != undefined ? maxDateObj.year : 0;
+                var maxMonth = maxDateObj.month != undefined ? (maxDateObj.month - 1) : 0;
+                var maxDay = maxDateObj.day != undefined ? maxDateObj.day : 1;
 
                 maxEpochDate = new Date(maxYear, maxMonth, maxDay).getTime();
                 isInvalid = epochDate > maxEpochDate ? true : isInvalid;
@@ -7836,15 +8112,16 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
 
     }
 
-};
+}
 
 eon.validator.validateNumericField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if ((propertySchema.type === "integer" || propertySchema.type === "number") && data.hasOwnProperty(property)) {
+    if ((propertySchema.type == "integer" || propertySchema.type == "number") && propertyValue != undefined) {
 
-        var value = parseFloat(data[property]);
+        var value = parseFloat(propertyValue);
 
         // MultipleOf
         var hasMultipleOf = propertySchema.hasOwnProperty("multipleOf");
@@ -7853,7 +8130,7 @@ eon.validator.validateNumericField = function (property, schema, data, errorObj)
         // Maximum
         var hasMaximum = propertySchema.hasOwnProperty("maximum");
         var exceedsMaximum = propertySchema.exclusiveMaximum ? (value >= propertySchema.maximum) : (value > propertySchema.maximum);
-        
+
         // Minimum
         var hasMinimum = propertySchema.hasOwnProperty("minimum");
         var exceedsMinimum = propertySchema.exclusiveMinimum ? (value <= propertySchema.minimum) : (value < propertySchema.minimum);
@@ -7868,16 +8145,17 @@ eon.validator.validateNumericField = function (property, schema, data, errorObj)
 
     }
 
-};
+}
 
 eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if (propertySchema.type === "array" && data.hasOwnProperty(property)) {
+    if (propertySchema.type == "array" && propertyValue != undefined) {
 
-        var valuesArray = data[property].filter(function (value) {
-            return value !== false;
+        var valuesArray = propertyValue.filter(function (value) {
+            return value != false;
         });
 
         var hasMinItems = propertySchema.hasOwnProperty("minItems");
@@ -7896,15 +8174,16 @@ eon.validator.validateArrayField = function (property, schema, data, errorObj) {
 
     }
 
-};
+}
 
 eon.validator.validateObjectField = function (property, schema, data, errorObj) {
 
     var propertySchema = schema.properties[property];
+    var propertyValue = eon.object.readFromPath(data, property);
 
-    if (propertySchema.type === "object" && data.hasOwnProperty(property)) {
+    if (propertySchema.type == "object" && propertyValue != undefined) {
 
-        var propertyData = data[property];
+        var propertyData = propertyValue;
         var nestedErrorObj = {};
 
         errorObj[property] = nestedErrorObj;
@@ -7920,17 +8199,17 @@ eon.validator.validateObjectField = function (property, schema, data, errorObj) 
 
         });
 
-        if (Object.keys(errorObj[property]) === 0) {
+        if (Object.keys(errorObj[property]) == 0) {
             delete errorObj[property];
         }
 
     }
 
-};
+}
 
 eon.validator.fillErrorObj = function (property, errorMessage, errorObj) {
     !errorObj[property] ? errorObj[property] = [errorMessage] : errorObj[property].push(errorMessage);
-};
+}
 
 
 
@@ -7948,9 +8227,26 @@ eon.domReady(function () {
 
         display: "inline-block",
 
-        properties: {},
+        properties: {
+            bind: {
+                value: "",
+                reflect: true
+            },
+            global: {
+                value: "",
+                reflect: true
+            }
+        },
 
         privateFunctions: {},
+
+        onTransformed: function () {
+            
+            if (!this.__binded) {
+                eon.interpolation.bindWildVariable(this);
+            }
+
+        }
 
     });
 

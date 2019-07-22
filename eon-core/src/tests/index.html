@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="eon/eon.js"></script>
+
+</head>
+
+<body>
+
+  <script>
+
+    function importsTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-1",
+        "@ui/eon-component-4"
+      ]);
+
+      eon.onImportsReady(function () {
+        // We know that for this scenario the are only 7 imported components, 2 of them being included as part of eon, 
+        // the components that we are importing (eon-component-4, eon-component-1) and its dependencies (eon-component-2, eon-component-3, eon-custom-1)
+        callback(Object.keys(eon.imports.config).length == 7);
+      });
+
+    }
+
+    function propertyChangedTest(callback) {
+
+      eon.import("eon/ui/eon-component-1");
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-1");
+
+        component.label = "Label";
+
+        document.body.appendChild(component);
+
+        component.onPropertyChanged(function (property, oldVal, newVal) {
+          callback(property == "label");
+        });
+
+        component.onReady(function () {
+          component.label = "Changed Label";
+        });
+
+      })
+
+    }
+
+    function performanceTest(callback) {
+
+      var fragment = document.createDocumentFragment();
+      var amount = 10000;
+      var maxMiliseconds = 4000;
+      var element, start;
+
+      eon.import("eon/ui/eon-component-2");
+
+      eon.onReady(function () {
+
+        for (var i = 0; i < amount; i++) {
+          element = document.createElement("eon-component-2");
+          fragment.appendChild(element);
+        }
+
+        start = Date.now();
+
+        document.body.appendChild(fragment);
+
+        eon.onReady(function () {
+          callback((Date.now() - start) < maxMiliseconds);
+        });
+
+      })
+
+    }
+
+    function dataDiffingInstanceTest(callback) {
+      try {
+        new eon.dataDiff();
+        callback(true);
+      } catch (error) {
+        callback(false);
+      }
+    }
+
+    function dataDiffingCommitTest(callback) {
+      // Test operations object
+      var operations = { create: 0, update: 0, delete: 0 };
+
+      var oldData = new Map();
+      oldData.set(0, { name: "Sam", age: 40 });
+      oldData.set(1, { name: "Will", age: 17 });
+      oldData.set(2, { name: "Sarah", age: 20 });
+      oldData.set(3, { name: "John", age: 22 });
+      oldData.set(4, { name: "Kane", age: 12 });
+
+      var data = new Map();
+      data.set(0, { name: "Sam", age: 40 });
+      data.set(1, { name: "William", age: 17 });
+      data.set(2, { name: "Sarah", age: 20 });
+      data.set(5, { name: "Steve", age: 88 });
+
+      // Declare diffing operation functions 
+      var diffObj = new eon.dataDiff({
+        storeStates: 10,
+        create: function (data) {
+          operations.create++;
+        },
+        update: function (data) {
+          operations.update++;
+        },
+        delete: function (data) {
+          operations.delete++;
+        }
+      });
+
+      diffObj.commit(data, oldData);
+
+      // Check expected operations
+      callback(operations.create == 1
+        && operations.update == 1
+        && operations.delete == 2);
+    }
+
+    function resizeTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-2"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-2");
+
+        component.label = "Label";
+
+        component.onResize(function () {
+          if (component.offsetHeight == 100) {
+            callback(true);
+          }
+        });
+
+        document.body.appendChild(component);
+
+        eon.onReady(function () {
+          component.style.height = "100px";
+        });
+
+      });
+
+    }
+
+    function templateReferencesTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-1"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-1");
+
+        document.body.appendChild(component);
+
+        eon.onReady(function () {
+          callback(component._refs.label ? true : false);
+        });
+
+      });
+
+    }
+
+    function bindingTest(callback) {
+
+      eon.data.gender = "Female";
+
+      eon.import([
+        "eon/ui/eon-component-4"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-4");
+        var component2 = document.createElement("eon-component-4");
+
+        document.body.appendChild(component);
+        document.body.appendChild(component2);
+
+        eon.onReady(function () {
+
+          var colorVariable = component.querySelector('[bind="color"]');
+          var ageVariable = component.querySelector('[bind="person.age"]');
+          var genderVariable = component.querySelector('[bind="gender"]');
+          var nameVariable = component.querySelector('[bind="brother.name"]');
+          var localeVariable = component.querySelector('[bind="locale.name"]');
+
+          var genderVariable2 = component2.querySelector('[bind="gender"]');
+
+          var basicBind, dynamicBindChange, basicGlobalBind, dynamicGlobalBind, localeBind, passesTest;
+
+          component.locale.name = "Nombre";
+          component.data.person.age = "20";
+          eon.data.brother.name = "Jon";
+          eon.data.gender = "Male";
+
+          basicBind = colorVariable.innerHTML == "Red" ? true : false;
+          dynamicBindChange = ageVariable.innerHTML == "20" ? true : false;
+          // Checks if by changing the global gender variable it changes both variables
+          basicGlobalBind = genderVariable.innerHTML == "Male" && genderVariable2.innerHTML == "Male" ? true : false;
+          dynamicGlobalBind = nameVariable.innerHTML == "Jon" ? true : false;
+          localeBind = localeVariable.innerHTML == "Nombre" ? true : false;
+
+          passesTest = basicBind && dynamicBindChange && basicGlobalBind && dynamicGlobalBind && localeBind;
+
+          callback(passesTest);
+
+        });
+
+      });
+
+    }
+
+    function dataChangedTest(callback) {
+
+      eon.data.gender = "Female";
+      eon.locale.gender = "Gender";
+
+      eon.import([
+        "eon/ui/eon-component-4"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-4");
+        var component2 = document.createElement("eon-component-4");
+        var component3 = document.createElement("eon-component-4");
+
+        var testData = {
+
+          comp1DataChangedCount: 0,
+          comp2DataChangedCount: 0,
+          comp3DataChangedCount: 0,
+          comp1LocalChangedCount: 0,
+          comp2LocalChangedCount: 0,
+          comp3LocalChangedCount: 0,
+          eonDataChangedCount: 0,
+          eonLocaleChangedCount: 0,
+
+        };
+
+        var finishTest = function () {
+
+          var comp1DCount = testData.comp1DataChangedCount == 1;
+          var comp1LCount = testData.comp1LocalChangedCount == 1;
+
+          var comp2DCount = testData.comp2DataChangedCount == 2;
+          var comp2LCount = testData.comp2LocalChangedCount == 1;
+
+          var comp3DCount = testData.comp3DataChangedCount == 3;
+          var comp3LCount = testData.comp3LocalChangedCount == 2;
+
+          var eonDataChangedCount = testData.eonDataChangedCount == 2;
+          var eonLocaleChangedCount = testData.eonLocaleChangedCount == 1;
+
+          if (comp1DCount && comp2DCount && comp3DCount && comp1LCount && comp2LCount && comp3LCount && eonDataChangedCount && eonLocaleChangedCount) {
+            callback(true);
+          }
+
+        };
+
+        // COMPONENT 1
+        component.onDataChanged(function (keyPath, previousVal, newVal) {
+          testData.comp1DataChangedCount++;
+          finishTest();
+        });
+
+        component.onLocaleChanged(function (keyPath, previousVal, newVal) {
+          testData.comp1LocalChangedCount++;
+          finishTest();
+        });
+
+        // COMPONENT 2
+        component2.onDataChanged(function (keyPath, previousVal, newVal) {
+          testData.comp2DataChangedCount++;
+          finishTest();
+        });
+
+        component2.onLocaleChanged(function (keyPath, previousVal, newVal) {
+          testData.comp2LocalChangedCount++;
+          finishTest();
+        });
+
+        // COMPONENT 3
+        component3.onDataChanged(function (keyPath, previousVal, newVal) {
+          testData.comp3DataChangedCount++;
+          finishTest();
+        });
+
+        component3.onLocaleChanged(function (keyPath, previousVal, newVal) {
+          testData.comp3LocalChangedCount++;
+          finishTest();
+        });
+
+        // EON
+        eon.onDataChanged(function (keyPath, previousVal, newVal) {
+          testData.eonDataChangedCount++;
+          finishTest();
+        });
+
+        eon.onLocaleChanged(function (keyPath, previousVal, newVal) {
+          testData.eonLocaleChangedCount++;
+          finishTest();
+        });
+
+        document.body.appendChild(component);
+        document.body.appendChild(component2);
+        document.body.appendChild(component3);
+
+        eon.onReady(function () {
+
+          var basicBind, dynamicBindChange, basicGlobalBind, dynamicGlobalBind, localeBind, passesTest;
+
+          component.locale.name = "Nombre";
+          component.data.person.age = "20";
+
+          component2.locale.name = "Nome";
+          component2.data.color = "Blue";
+          component2.data.person.age = "31";
+
+          component3.locale.name = "Prénom";
+          component3.locale.name = "Név";
+          component3.data.color = "Yellow";
+          component3.data.color = "Green";
+          component3.data.person.age = "17";
+
+          eon.data.brother.name = "Jon";
+
+          setTimeout(function () {
+            eon.data.brother.name = "Aegon";
+            eon.locale.gender = "Genero";
+          }, 500);
+
+        });
+
+      });
+
+    }
+
+    function slotTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-1"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = document.createElement("eon-component-1");
+        var div = document.createElement("div");
+
+        component.label = "Slot test";
+        div.setAttribute("slot", ".eon-component-1-wrapper");
+        div.id = "slottedDiv";
+
+        component.appendChild(div);
+        document.body.appendChild(component);
+
+        eon.onReady(function () {
+          var slottedDiv = component.querySelector("#slottedDiv");
+          var componentWrapper = component.querySelector(".eon-component-1-wrapper");
+          callback(slottedDiv && slottedDiv.parentNode.isEqualNode(componentWrapper));
+        });
+
+      });
+
+    }
+
+    function customCreationTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-1"
+      ]);
+
+      eon.onReady(function () {
+
+        var component = eon.createElement("eon-component-1", {
+
+          functions: {
+            updateStatus: function (status) {
+              this.status = status;
+            }
+          },
+          properties: {
+            status: {
+              value: "declared"
+            }
+          },
+          onCreated: function () {
+            if (this.status === "declared") {
+              this.updateStatus("created");
+            }
+          },
+          onInit: function () {
+            if (this.status === "created") {
+              this.updateStatus("initiated");
+            }
+          },
+          onTransformed: function () {
+            if (this.status === "initiated") {
+              this.updateStatus("transformed");
+            }
+          },
+          onRender: function () {
+            if (this.status === "transformed") {
+              this.updateStatus("rendered");
+            }
+          },
+          onBubbleRender: function () {
+            if (this.status === "rendered") {
+              this.updateStatus("bubbleRendered");
+            }
+          },
+          onReady: function () {
+            callback(this.status === "bubbleRendered");
+          },
+
+        });
+
+        component.label = "Custom creation test";
+        document.body.appendChild(component);
+
+      });
+
+    }
+
+    function themeListenerTest(callback) {
+
+      eon.import([
+        "eon/ui/eon-component-1"
+      ]);
+
+      var component1, component2;
+
+      eon.onThemeChanged(function (previousTheme, newTheme) {
+        callback(newTheme === "noire" && component1.theme === "claro" && component2.theme === "noire");
+      });
+
+      eon.onReady(function () {
+
+        component1 = document.createElement("eon-component-1");
+        component2 = document.createElement("eon-component-1");
+
+        component1.theme = "claro";
+
+        document.body.appendChild(component1);
+        document.body.appendChild(component2);
+
+        eon.theme = "noire";
+
+      });
+
+    }
+
+  </script>
+
+</body>
+
+</html>
