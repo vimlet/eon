@@ -5971,7 +5971,7 @@ eon.requestImport = function (href) {
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
     href = href.charAt(0) === "@" ? eon.getBasePathUrl(href) : href;
 
-    if (!(elementName in eon.imports.templates)) {
+    if (!(elementName in eon.imports.templates) && (!eon.build || !eon.build[elementName])) {
 
         // Everytime a new import is requested we reset the onReady and onImportsReady triggered state
         eon.__onImportsReady__triggered = false;
@@ -7708,7 +7708,8 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath !== "") {
+    // If the element is being part of a builded file then the style will come with it so we wont import it
+    if (stylePath !== "" && (!eon.build || !eon.build[name])) {
 
         var link = document.createElement("link");
 
@@ -8952,6 +8953,41 @@ eon.declare = function (name, baseElement) {
     customElements.define(name, elementClass);
 
 };
+
+(function () {
+
+    if (eon.build) {
+
+        var names = Object.keys(eon.build);
+
+        for (var i = 0; i < names.length; i++) {
+
+            var name = names[i];
+            var path = eon.build[name].path;
+
+            path = (path.indexOf(".html") > -1) ? path : path + "/" + name + ".html";
+            path = path.charAt(0) === "@" ? eon.getBasePathUrl(path) : path;
+            
+            eon.__onImportsReady__triggered = false;
+            eon.__onReady__triggered = false;
+
+            eon.imports.total++;
+
+            // Avoid duplicated imports while waiting XMLHttpRequest callback.
+            eon.imports.templates[name] = null;
+
+            // Saves the paths of the imported elements
+            eon.imports.paths[name] = path.substring(0, path.length - path.match(/[^\/]*$/g)[0].length);
+            
+            eon.declare(name);
+            eon.prepareComponent(name, eon.build[name].content);
+
+        }
+
+    }
+
+})();
+
 
 eon.createPropertyObserver = function (property, obj, callback, pollingRate) {
   if (typeof pollingRate === "undefined") {

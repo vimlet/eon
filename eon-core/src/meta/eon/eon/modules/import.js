@@ -56,7 +56,7 @@ eon.requestImport = function (href) {
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
     href = href.charAt(0) === "@" ? eon.getBasePathUrl(href) : href;
 
-    if (!(elementName in eon.imports.templates)) {
+    if (!(elementName in eon.imports.templates) && (!eon.build || !eon.build[elementName])) {
 
         // Everytime a new import is requested we reset the onReady and onImportsReady triggered state
         eon.__onImportsReady__triggered = false;

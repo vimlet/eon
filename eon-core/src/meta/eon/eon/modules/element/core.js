@@ -29,7 +29,8 @@ eon.element = function (param1, param2) {
     stylePath = config.style ? config.style : "";
 
     // If the user provided a style path then we create its link and append it
-    if (stylePath !== "") {
+    // If the element is being part of a builded file then the style will come with it so we wont import it
+    if (stylePath !== "" && (!eon.build || !eon.build[name])) {
 
         var link = document.createElement("link");
 
