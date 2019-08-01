@@ -1,0 +1,370 @@
+<template>
+    <div class="app-combobox-label" eon-ref="label"></div>
+    <eon-combo eon-ref="combobox"></eon-combo>
+</template>
+
+<script>
+    eon.element({
+        name: "app-combobox",
+        style: "app-combobox.css",
+        dependencies: [
+            "@ui/eon-combo"
+        ],
+        properties: {
+            /*
+            @property {String} name
+            @description Name to identify the element in a form
+            */
+            name: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {string} filter
+            @description Whether the input will be enabled to filter the dropdown options
+            */
+            filter: {
+                value: "false",
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+            @property {string} placeholder
+            @description Sets the placeholder for the input while there is no value
+            */
+            placeholder: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {string} label 
+            @description Text that appears at the top of the element to identify the component
+            */
+            label: {
+                value: "",
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+            @property {string} displayProperty
+            @description Property that will be used to get the displayValue in case a store has been provided
+            */
+            displayProperty: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {string} value
+            @description The value of the dropdown
+            */
+            value: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {string} displayValue
+            @description The displayValue of the selected item
+            */
+            displayValue: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {String} default
+            @description Value of the element when the element is reseted, if will also be the value of the element if no value is provided
+            */
+            default: {
+                value: "",
+                reflect: true
+            },
+            /*
+            @property {Boolean} inline 
+            @description Space that occupies the button inside its parent container.
+            */
+            inline: {
+                value: true,
+                reflect: true,
+                reflectDefault: true
+            },
+            /*
+            @property {string} readonly
+            @description Toggles the readonly status of the element
+            */
+            readonly: {
+                value: false,
+                reflect: true
+            },
+            /*
+            @property {String} disabled
+            @description Toggles the disabled status of the element
+            */
+            disabled: {
+                value: false,
+                reflect: true
+            },
+            /*
+            @property {String} tooltip
+            @description Text to be shown for the element
+            */
+            tooltip: {
+                value: "",
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {Boolean} invalid
+            @description Whether the element meets the requirements or not
+            */
+            invalid: {
+                value: false,
+                reflect: true,
+                reflectDefault: false
+            },
+            /*
+            @property {String} labelAnim
+            @description Whether the label will have animation or not
+            */
+            labelAnim: {
+                value: true,
+                reflect: true
+            },
+            /*
+            @property {Boolean} store
+            @description Reference to the inner store
+            */
+            store: {
+                value: false,
+                reflect: true
+            },
+            // @html-attribute fixedLabel (public) [If set, the combobox will always show the same label no matter its value]
+            fixedLabel: {
+                value: "",
+                reflect: true
+            },
+            // @html-attribute items (public) [All combobox items]
+            items: {
+                value: "",
+                observe: true
+            },
+            // @html-attribute dropdownAlign (public) [Align of dropdown. It can be left or right. Default "left"]
+            dropdownAlign: {
+                value: "left",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {}
+            }
+        },
+
+        functions: {
+            // @function addItem (public) [Add item to combobox]
+            addItem: function (item) {
+                var el = this;
+                el._refs.combobox.addItem(item);
+                if (!Array.isArray(el.items)) {
+                    el.items = [];
+                }
+                el.items.push(item);
+            },
+            /*
+            @function select
+            @description Sets the item as the inputs value and hide the options div
+            @param {string} value
+            */
+            select: function (value) {
+                var el = this;
+                el.items.forEach(function (item) {
+                    if (item.value == value) {
+                        el._refs.combobox.select(item);
+                    }
+                });
+            },
+            // @function reset (public) [Empty the menu]
+            reset: function () {
+                var el = this;
+                el.items = [];
+                el._refs.combobox.reset();
+                for (var key in el._refs.combobox._misc.items) {
+                    if (el._refs.combobox._misc.items[key].parentNode) {
+                        el._refs.combobox._misc.items[key].parentNode.removeChild(el._refs.combobox._misc
+                            .items[key]);
+                    }
+                }
+                el._refs.combobox._misc.items.length = 0;
+            },
+            // @function removeItemByValue (public) [Remove an item from combobox] @param value [It can be a single value or an array to remove several items]
+            removeItemByValue: function (value) {
+                var el = this;
+                if (Array.isArray(value)) {
+                    for (var key in el._refs.combobox._misc.items) {
+                        if (value.indexOf(el._refs.combobox._misc.items[key].value) >= 0) {  
+                            if (el._refs.combobox._misc
+                                .items[key].parentNode) {
+                                el._refs.combobox._misc.items[key].parentNode.removeChild(el._refs.combobox
+                                    ._misc
+                                    .items[key]);
+                                delete el._refs.combobox._misc.items[key];
+                            }
+                        }
+                    }
+                } else {
+                    for (var key in el._refs.combobox._misc.items) {
+                        if (el._refs.combobox._misc.items[key].value == value && el._refs.combobox._misc
+                            .items[key].parentNode) {
+                            el._refs.combobox._misc.items[key].parentNode.removeChild(el._refs.combobox._misc
+                                .items[key]);
+                            delete el._refs.combobox._misc.items[key];
+                        }
+                    }
+                }
+            },
+            // @function removeItem (public) [Remove an item from combobox] @param item [It can be a single item or an array to remove several items]
+            removeItem: function (item) {
+                var el = this;
+                if (Array.isArray(item)) {
+                    var values = [];
+                    item.forEach(function (it) {
+                        values.push(it.value);
+                    });                    
+                    for (var key in el._refs.combobox._misc.items) {                        
+                        if (values.indexOf(el._refs.combobox._misc.items[key].value) >= 0) {                            
+                            if (el._refs.combobox._misc
+                                .items[key].parentNode) {
+                                el._refs.combobox._misc.items[key].parentNode.removeChild(el._refs.combobox
+                                    ._misc
+                                    .items[key]);
+                                delete el._refs.combobox._misc.items[key];
+                            }
+                        }
+                    }
+                } else if(item){
+                    for (var key in el._refs.combobox._misc.items) {
+                        if (el._refs.combobox._misc.items[key].value == item.value && el._refs.combobox._misc
+                            .items[key].parentNode) {
+                            el._refs.combobox._misc.items[key].parentNode.removeChild(el._refs.combobox._misc
+                                .items[key]);
+                            delete el._refs.combobox._misc.items[key];
+                        }
+                    }
+                }
+            }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUp();
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                el._setupCombobox();
+                if (el.fixedLabel) {
+                    el._setFixedLabel(el.fixedLabel);
+                }
+            },
+            // @function _setupCombobox (private) [Initalize eon-combo]
+            setupCombobox: function () {
+                var el = this;
+                el._setEonComboboxValue();
+                el._refs.combobox.onSelected(function (item) {
+                    el.value = item.value;
+                    el.label = item.displayValue || item.value;
+                    el.displayValue = el.label;
+                    eon.triggerCallback("onSelected", el, el, [item]);
+                });
+                el._refs.combobox._refs.dropDown.classList.add("app-combobox-dropdown-width");
+                el._refs.label.addEventListener("click", function (e) {
+                    el._refs.combobox.expand();
+                });
+            },
+            // @function _setEonComboboxValue (private) [Pass values to eon-combo]
+            setEonComboboxValue: function () {
+                var el = this;
+                el._refs.combobox.name = el.name;
+                el._refs.combobox.filter = el.filter;
+                el._refs.combobox.placeholder = el.placeholder;
+                el._refs.combobox.label = el.label;
+                el._refs.combobox.displayProperty = el.displayProperty;
+                el._refs.combobox.value = el.value;
+                el._refs.combobox.displayValue = el.displayValue;
+                el._refs.combobox.default = el.default;
+                el._refs.combobox.inline = el.inline;
+                el._refs.combobox.readonly = el.readonly;
+                el._refs.combobox.disabled = el.disabled;
+                el._refs.combobox.tooltip = el.tooltip;
+                el._refs.combobox.invalid = el.invalid;
+                el._refs.combobox.labelAnim = el.labelAnim;
+                el._refs.combobox.store = el.store;
+                el._refs.combobox.dropdownAlign = el.dropdownAlign;
+            },
+            // @function _setValue (private) [Set value]
+            setValue: function () {
+                var el = this;
+                if (!el.fixedLabel) {
+                    el._refs.label.innerHTML = "";
+                    el._refs.label.innerText = el._refs.combobox.displayValue || el._refs.combobox.value;
+                }
+            },
+            // @function _setFixedLabel (private) [Modify fixed label]
+            setFixedLabel: function (value) {
+                var el = this;
+                el._refs.label.innerHTML = "";
+                el._refs.label.innerText = value;
+            }
+        },
+
+        onCreated: function () {
+            var el = this;
+            eon.createCallback("onSelected", el);
+        },
+
+        onInit: function () {
+            var el = this;
+            var srcNodes = el.getSourceElements();
+            while (srcNodes.length) {
+                srcNode = srcNodes.shift();                
+                el._refs.combobox.appendChild(srcNode);
+            }
+        },
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        },
+
+        onPropertyChanged: function (key, oldVal, newVal) {
+            var el = this;
+            switch (key) {
+                case "label":
+                    el._refs.combobox.label = newVal;
+                    break;
+                case "disabled":
+                    el._refs.combobox.disabled = newVal;
+                    break;
+                case "readonly":
+                    el._refs.combobox.readonly = newVal;
+                    break;
+                case "value":
+                    el._refs.combobox.value = newVal;
+                    el._setValue(newVal);
+                    break;
+                case "invalid":
+                    el._refs.combobox.invalid = newVal;
+                    break;
+                case "fixedLabel":
+                    el._setFixedLabel(newVal);
+                    break;
+            }
+        }
+
+
+    });
+</script>

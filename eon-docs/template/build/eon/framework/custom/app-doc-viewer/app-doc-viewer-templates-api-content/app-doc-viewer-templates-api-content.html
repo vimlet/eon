@@ -1,0 +1,71 @@
+<template>
+</template>
+
+
+<script>
+    eon.element({
+        name: "app-doc-viewer-templates-api-content",
+        style: "app-doc-viewer-templates-api-content.css",
+        dependencies: [
+            "@ui/eon-scroll",
+            "@../custom/app-table",
+            "@../custom/app-go-top"
+        ],
+        properties: {
+            // @html-property value (public) [Selected value]
+            value: {
+                value: "",
+                observe: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {
+                    folderNodeOrderRegex: new RegExp("\\[\\d+\\]", "gm")
+                }
+            }
+        },
+
+        functions: {
+            // @function togglePrivate (public) [Hide/Show private elements]
+            togglePrivate: function () {
+                var el = this;
+                el._misc.private.forEach(function (private) {
+                    private.classList.toggle("app-doc-viewer-private-display-none");
+                });
+            },
+            // @function goTo (public) [Scroll to id position] @param id
+            goTo(id) {
+                var el = this;                
+                el._refs.scroll.scrollTo(el.querySelector("#" + id).offsetTop, null, 0.0);
+            }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUp();
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                el._refs.scroll = el._refs.scroll || el.querySelector("eon-scroll");
+                el._misc.private = el.querySelectorAll(".app-doc-viewer-templates-api-private");
+                el.querySelector("#api-content-goTop").scroll = el._refs.scroll;
+            }
+        },
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        }
+
+
+
+    });
+</script>

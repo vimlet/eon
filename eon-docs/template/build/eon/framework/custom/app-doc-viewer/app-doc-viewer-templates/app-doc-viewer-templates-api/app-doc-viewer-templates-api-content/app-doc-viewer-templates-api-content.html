@@ -1,0 +1,362 @@
+<template>
+</template>
+
+
+<script>
+    eon.element({
+        name: "app-doc-viewer-templates-api-content",
+        style: "app-doc-viewer-templates-api-content.css",
+        dependencies: [
+            "../../../../../eon/ui/eon-scroll",
+            "../../../../app-table",
+            "@../custom/app-go-top"
+        ],
+        properties: {
+            // @html-property value (public) [Selected value]
+            value: {
+                value: "",
+                observe: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {
+                    folderNodeOrderRegex: new RegExp("\\[\\d+\\]", "gm")
+                }
+            }
+        },
+
+        functions: {
+            // @function setValue (public) @param value
+            // setValue: function (value) {
+            //     var el = this;
+            //     el.reset();
+            //     var title = value.path;
+            //     if (title.indexOf("\\") >= 0) {
+            //         title = title.substring(title.lastIndexOf("\\") + 1);
+            //     }
+            //     el._refs.title.innerHTML = title;
+            //     var header = "";
+            //     value.header.forEach(function (head) {
+            //         header = header + head;
+            //     });
+            //     el._refs.header.innerHTML = header;
+            //     el._setProperties(value.properties);
+            //     el._setFunctions(value.methods);
+            //     el._setHtmlAttributes(value.htmlAttributes);
+            // },
+            // @function togglePrivate (public) [Hide/Show private elements]
+            togglePrivate: function () {
+                var el = this;
+                el._misc.private.forEach(function (private) {
+                    private.classList.toggle("app-doc-viewer-private-display-none");
+                });
+            },
+            // @function goTo (public) [Scroll to id position] @param id
+            goTo(id) {
+                var el = this;                
+                el._refs.scroll.scrollTo(el.querySelector("#" + id).offsetTop, null, 0.0);
+            },
+            // @function reset (public) [Empty the menu] 
+            // reset: function () {
+            //     var el = this;
+            //     el._refs.title.innerHTML = "";
+            //     el._refs.header.innerHTML = "";
+            //     el._refs.properties.innerHTML = "None";
+            //     el._refs.propertiesPrivate.innerHTML = "None";
+            //     el._refs.htmlAttributes.innerHTML = "None";
+            //     el._refs.htmlAttributesPrivate.innerHTML = "None";
+            //     el._refs.functions.innerHTML = "None";
+            //     el._refs.functionsPrivate.innerHTML = "None";
+            //     el._refs.details.innerHTML = "";
+            //     el._refs.detailsPrivate.innerHTML = "";
+            // }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUp();
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                el._refs.scroll = el._refs.scroll || el.querySelector("eon-scroll");
+                el._misc.private = el.querySelectorAll(".app-doc-viewer-templates-api-private");
+                // console.log(el._misc.private);
+                
+                // if (el.value) {
+                //     el.setValue(el.value);
+                // }
+                // el._misc.private = [];
+                // el._misc.private.push(el._refs.propertiesPrivateBlock);
+                // el._misc.private.push(el._refs.functionsPrivateBlock);
+                // el._misc.private.push(el._refs.htmlAttributesPrivateBlock);
+                // el._refs.goTop.scroll = el._refs.scroll;
+                el.querySelector("#api-content-goTop").scroll = el._refs.scroll;
+            },
+            // @function _setProperties (private) [Set up properties]
+            // setProperties: function (data) {
+            //     var el = this;
+            //     var table = document.createElement("app-table");
+            //     table.columntitle = "Property, Type, Description";
+            //     table.columnwidth = "200px, 200px, calc(100% - 400px)";
+            //     var tablePrivate = document.createElement("app-table");
+            //     tablePrivate.columntitle = "Property, Type, Description";
+            //     tablePrivate.columnwidth = "200px, 200px, calc(100% - 400px)";
+            //     var hasProperties = false;
+            //     var hasPrivateProperties = false;
+            //     data.forEach(function (property) {
+            //         var row = document.createElement("eon-row");
+            //         var nameCell = document.createElement("eon-cell");
+            //         nameCell.innerText = property.name;
+            //         row.appendChild(nameCell);
+            //         var typeCell = document.createElement("eon-cell");
+            //         typeCell.classList.add("vimlet-doc-type");
+            //         typeCell.innerText = property.type;
+            //         row.appendChild(typeCell);
+            //         var descriptionCell = document.createElement("eon-cell");
+            //         descriptionCell.classList.add("vimlet-doc-description");
+            //         descriptionCell.innerText = property.description;
+            //         row.appendChild(descriptionCell);
+            //         row.id = "app-doc-viewer-property-" + property.name;
+            //         if (property.scope == "private") {
+            //             hasPrivateProperties = true;
+            //             tablePrivate.appendChild(row);
+            //         } else {
+            //             hasProperties = true;
+            //             table.appendChild(row);
+            //         }
+            //     });
+            //     if (hasProperties) {
+            //         el._refs.properties.innerHTML = "";
+            //         el._refs.properties.appendChild(table);
+            //     }
+            //     if (hasPrivateProperties) {
+            //         el._refs.propertiesPrivate.innerHTML = "";
+            //         el._refs.propertiesPrivate.appendChild(tablePrivate);
+            //     }
+            // },
+            // @function _setHtmlAttributes (private) [Set up html attributes]
+            // setHtmlAttributes: function (data) {
+            //     var el = this;
+            //     var table = document.createElement("app-table");
+            //     table.columntitle = "Attribute, Type, Description";
+            //     table.columnwidth = "200px, 200px, calc(100% - 400px)";
+            //     var tablePrivate = document.createElement("app-table");
+            //     tablePrivate.columntitle = "Attribute, Type, Description";
+            //     tablePrivate.columnwidth = "200px, 200px, calc(100% - 400px)";
+            //     var hasHtmlAttribute = false;
+            //     var hasPrivateHtmlAttribute = false;
+            //     data.forEach(function (attribute) {
+            //         var row = document.createElement("eon-row");
+            //         var nameCell = document.createElement("eon-cell");
+            //         nameCell.innerText = attribute.name;
+            //         row.appendChild(nameCell);
+            //         var typeCell = document.createElement("eon-cell");
+            //         typeCell.classList.add("vimlet-doc-type");
+            //         typeCell.innerText = attribute.type;
+            //         row.appendChild(typeCell);
+            //         var descriptionCell = document.createElement("eon-cell");
+            //         descriptionCell.classList.add("vimlet-doc-description");
+            //         descriptionCell.innerText = attribute.description;
+            //         row.appendChild(descriptionCell);
+            //         row.id = "app-doc-viewer-htmlAttribute-" + attribute.name;
+            //         if (attribute.scope == "private") {
+            //             hasPrivateHtmlAttribute = true;
+            //             tablePrivate.appendChild(row);
+            //         } else {
+            //             hasHtmlAttribute = true;
+            //             table.appendChild(row);
+            //         }
+            //     });
+            //     if (hasHtmlAttribute) {
+            //         el._refs.htmlAttributes.innerHTML = "";
+            //         el._refs.htmlAttributes.appendChild(table);
+            //     }
+            //     if (hasPrivateHtmlAttribute) {
+            //         el._refs.htmlAttributesPrivate.innerHTML = "";
+            //         el._refs.htmlAttributesPrivate.appendChild(tablePrivate);
+            //     }
+            // },
+            // @function _setFunctions (private) [Set up functions]
+            // setFunctions: function (data) {
+            //     var el = this;
+            //     var table = document.createElement("app-table");
+            //     table.columntitle = "Function, Return, Description";
+            //     table.columnwidth = "200px, 200px, calc(100% - 400px)";
+            //     var tablePrivate = document.createElement("app-table");
+            //     tablePrivate.columntitle = "Function, Return, Description";
+            //     tablePrivate.columnwidth = "200px, 200px, calc(100% - 400px)";
+            //     var hasFunctions = false;
+            //     var hasPrivateFunctions = false;
+            //     data.forEach(function (method) {
+            //         var row = document.createElement("eon-row");
+            //         var nameCell = document.createElement("eon-cell");
+            //         nameCell.innerText = method.name;
+            //         nameCell.setAttribute("onclick",
+            //             "document.querySelector('app-doc-viewer-templates-api-content').goTo('app-doc-viewer-function-" +
+            //             method.name + "');");
+            //         row.appendChild(nameCell);
+            //         var typeCell = document.createElement("eon-cell");
+            //         typeCell.classList.add("vimlet-doc-type");
+            //         typeCell.innerText = method.return;
+            //         row.appendChild(typeCell);
+            //         var descriptionCell = document.createElement("eon-cell");
+            //         descriptionCell.classList.add("vimlet-doc-description");
+            //         descriptionCell.innerText = method.description;
+            //         row.appendChild(descriptionCell);
+            //         if (method.scope == "private") {
+            //             hasPrivateFunctions = true;
+            //             tablePrivate.appendChild(row);
+            //         } else {
+            //             hasFunctions = true;
+            //             table.appendChild(row);
+            //         }
+            //     });
+            //     if (hasFunctions) {
+            //         el._refs.functions.innerHTML = "";
+            //         el._refs.functions.appendChild(table);
+            //     }
+            //     if (hasPrivateFunctions) {
+            //         el._refs.functionsPrivate.innerHTML = "";
+            //         el._refs.functionsPrivate.appendChild(tablePrivate);
+            //     }
+            //     el._setDetails(data);
+            // },
+            // @function _setDetails (private) [Set function details] @param data
+            // setDetails: function (data) {
+            //     var el = this;
+            //     var fragment = document.createDocumentFragment();
+            //     var fragmentPrivate = document.createDocumentFragment();
+            //     data.forEach(function (method) {
+            //         var title = document.createElement("div");
+            //         title.innerText = method.name;
+            //         title.id = "app-doc-viewer-function-" + method.name;
+            //         title.classList.add("app-doc-viewer-api-t3",
+            //             "app-doc-viewer-templates-api-content-details-title");
+            //         var description = document.createElement("div");
+            //         description.innerText = method.description;
+            //         description.classList.add("vimlet-doc-description");
+            //         if (method.scope == "private") {
+            //             fragmentPrivate.appendChild(title);
+            //             fragmentPrivate.appendChild(description);
+            //         } else {
+            //             fragment.appendChild(title);
+            //             fragment.appendChild(description);
+            //         }
+            //         el._setDetailsParam(method, fragment, fragmentPrivate);
+            //         el._setDetailsReturn(method, fragment, fragmentPrivate);
+            //         el._setDetailsExceptions(method, fragment, fragmentPrivate);
+            //     });
+            //     el._refs.details.appendChild(fragment);
+            //     el._refs.detailsPrivate.appendChild(fragmentPrivate);
+            // },
+            // // @function _setDetailsParam (private) [Set details parameters] @param method @param fragment [Where to append public function parameters] @param fragmentPrivate [Where to append private function parameters]
+            // setDetailsParam(method, fragment, fragmentPrivate) {
+            //     var el = this;
+            //     if (method.params.length > 0) {
+            //         var table = document.createElement("app-table");
+            //         table.columntitle = "Parameter, Type, Description";
+            //         table.columnwidth = "200px, 200px, calc(100% - 400px)";
+            //         method.params.forEach(function (param) {
+            //             var row = document.createElement("eon-row");
+            //             var nameCell = document.createElement("eon-cell");
+            //             nameCell.innerText = param.name;
+            //             row.appendChild(nameCell);
+            //             var typeCell = document.createElement("eon-cell");
+            //         typeCell.classList.add("vimlet-doc-type");
+            //             typeCell.innerText = param.type; 
+            //             row.appendChild(typeCell);
+            //             var descriptionCell = document.createElement("eon-cell");
+            //             descriptionCell.classList.add("vimlet-doc-description");
+            //             descriptionCell.innerText = param.description;
+            //             row.appendChild(descriptionCell);
+            //             table.appendChild(row);
+            //         });
+            //         if (method.scope == "private") {
+            //             fragmentPrivate.appendChild(table);
+            //         } else {
+            //             fragment.appendChild(table);
+            //         }
+            //     }
+            // },
+            // // @function _setDetailsReturn (private) [Set details return] @param method @param fragment [Where to append public function parameters] @param fragmentPrivate [Where to append private function parameters]
+            // setDetailsReturn(method, fragment, fragmentPrivate) {
+            //     var el = this;
+            //     if (method.return) {
+            //         var table = document.createElement("app-table");
+            //         table.columntitle = "Return,  Description";
+            //         table.columnwidth = "200px, calc(100% - 200px)";
+            //         var row = document.createElement("eon-row");
+            //         var nameCell = document.createElement("eon-cell");
+            //         nameCell.innerText = method.return.type;
+            //         row.appendChild(nameCell);
+            //         var descriptionCell = document.createElement("eon-cell");
+            //         descriptionCell.classList.add("vimlet-doc-description");
+            //         descriptionCell.innerText = method.return.description;
+            //         row.appendChild(descriptionCell);
+            //         table.appendChild(row);
+            //         if (method.scope == "private") {
+            //             fragmentPrivate.appendChild(table);
+            //         } else {
+            //             fragment.appendChild(table);
+            //         }
+            //     }
+            // },
+            // // @function _setDetailsExceptions (private) [Set details exceptions] @param method @param fragment [Where to append public function parameters] @param fragmentPrivate [Where to append private function parameters]
+            // setDetailsExceptions(method, fragment, fragmentPrivate) {
+            //     var el = this;
+            //     if (method.exceptions.length > 0) {
+            //         var table = document.createElement("app-table");
+            //         if (method.exceptions.length > 0) {
+            //             var table = document.createElement("app-table");
+            //             table.columntitle = "Exception, Type, Description";
+            //             table.columnwidth = "200px, 200px, calc(100% - 400px)";
+            //             method.exceptions.forEach(function (exception) {
+            //                 var row = document.createElement("eon-row");
+            //                 var nameCell = document.createElement("eon-cell");
+            //                 nameCell.innerText = exception.name;
+            //                 row.appendChild(nameCell);
+            //                 var typeCell = document.createElement("eon-cell");
+            //                 typeCell.innerText = exception.type;
+            //                 row.appendChild(typeCell);
+            //                 var descriptionCell = document.createElement("eon-cell");
+            //                 descriptionCell.classList.add("vimlet-doc-description");
+            //                 descriptionCell.innerText = exception.description;
+            //                 row.appendChild(descriptionCell);
+            //                 table.appendChild(row);
+            //             });
+            //             if (method.scope == "private") {
+            //                 fragmentPrivate.appendChild(table);
+            //             } else {
+            //                 fragment.appendChild(table);
+            //             }
+            //         }
+            //     }
+            // }
+        },
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        },
+
+        // onPropertyChanged: function (attrName, oldVal, newVal) {
+        //     var el = this;
+        //     switch (attrName) {
+        //         case "value":
+        //             this.setValue(newVal);
+        //             break;
+        //     }
+        // }
+
+
+
+    });
+</script>

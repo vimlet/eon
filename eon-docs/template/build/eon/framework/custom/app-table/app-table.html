@@ -1,0 +1,315 @@
+<template>
+
+</template>
+
+<script>
+    eon.element({
+        name: "app-table",
+        style: "app-table.css",
+        dependencies: [],
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {}
+            },
+            // @html-attribute resize (private)
+            resize: {
+                value: {}
+            },
+            // @html-attribute columns (private)
+            columns: {
+                value: []
+            },
+            // @html-attribute rows (private)
+            rows: {
+                value: []
+            },
+            // @html-attribute rowsData (private)
+            rowsData: {
+                value: []
+            }
+        },
+        properties: {
+            // @html-attribute columnwidth (public)
+            columnwidth: {
+                value: "",
+                reflect: true
+            },
+            // @html-attribute columntitle (public)
+            columntitle: {
+                value: "",
+                reflect: true
+            },
+            // @html-attribute parentcomponent (public)
+            parentcomponent: {
+                value: ""
+            }
+        },
+        functions: {
+            // @function addRow (public) @param row {object}
+            addRow: function (row) {
+                var el = this;
+                var cRow = [];
+                for (var columnI = 0; columnI < row.data.length; columnI++) {
+                    var cell = document.createElement("div");
+                    cell.classList.add("app-table-cell");
+                    el._misc.cells.push(cell);
+                    var rowIndex = "row-" + el._misc.rowCount;
+                    cell.classList.add(rowIndex);
+                    if (row.id && columnI === 0) {
+                        cell.id = row.id;
+                    }
+                    cell.innerHTML = row.data[columnI].value;
+                    if (row.data[columnI].onclick) {                        
+                        cell.classList.add("app-table-cell-clickable");
+                        cell.classList.add("app-doc-text-link");
+                        var functionClick;
+                        if(typeof row.data[columnI].onclick === "function"){
+                            functionClick = row.data[columnI].onclick;
+                        }else{
+                        el._misc.temp = row.data[columnI].onclick;
+                            functionClick = function(){eval(el._misc.temp)};
+                        }                        
+                        cell.addEventListener("click", functionClick);
+                    }
+                    if (row.data[columnI].color) {
+                        cell.style.color = row.data[columnI].color;
+                    }
+                    if (row.data[columnI].class) {
+                        cell.classList.add(row.data[columnI].class);
+                    }
+                    var columnIndex = "app-table-column-" + columnI;
+                    el._refs.table.querySelector("." + columnIndex).appendChild(cell);
+                    cRow.push(cell);
+                }
+                el._misc.rowCount++;
+                el._rows.push(cRow);
+                el.adjustRowHeight();
+            },
+            // @function cleanTable (public) [Remove all table cells but keep headers]
+            cleanTable: function () {
+                var el = this;
+                el._misc.cells.forEach(function (cell) {
+                    cell.parentElement.removeChild(cell);
+                });
+                el._misc.cells = [];
+                el._rows = [];
+                el._misc.rowCount = 0;
+            },
+            // @function adjustRowHeight (public) 
+            adjustRowHeight() {
+                var el = this;
+                el._rows.forEach(function (row) {
+                    var maxHeight = 0;
+                    row.forEach(function (cell) {
+                        cell.style.height = "auto";
+                        if (cell.offsetHeight > maxHeight) {
+                            maxHeight = cell.offsetHeight;
+                        }
+                    });
+                    row.forEach(function (cell) {
+                        cell.style.height = maxHeight + "px";
+                    });
+                });
+            }
+        },
+        privateFunctions: {
+            // @function _initMisc (private) 
+            initMisc: function () {
+                var el = this;
+                el._misc.columnInitialWidth = [];
+                el._misc.rowCount = 0;
+                el._misc.cMinWidth = 100;
+                el._misc.cells = [];
+            },
+            // @function _getColumnInitialWidth (private) [Get start column width]
+            getColumnInitialWidth: function () { // Column initial with can be given as parameters cWith or split equally
+                var el = this;
+                if (el.columnwidth) {
+                    el.columnwidth = el.columnwidth.split(",");
+                    for (var columnwidthI = 0; columnwidthI < el.columnwidth.length; columnwidthI++) {
+                        el.columnwidth[columnwidthI] = el.columnwidth[columnwidthI].trim();
+                    }
+                }
+                if (el.columnwidth && el.columnwidth.length === el.headTitles.length) {
+                    el._misc.columnInitialWidth = el.columnwidth;
+                } else {
+                    el._misc.columnInitialWidth = [];
+                    el.columnWidth = el._refs.table.offsetWidth / el.headTitles.length;
+                    for (var columnI = 0; columnI < el.headTitles.length; columnI++) {
+                        el._misc.columnInitialWidth.push(el.columnWidth);
+                    }
+                }
+            },
+            // @function _setColumns (private) [Set columns with their drawers]
+            setColumns: function () {
+                var el = this;
+                el._columns = [];
+                for (var titleI = 0; titleI < el.headTitles.length; titleI++) {
+                    var column = document.createElement("div");
+                    column.classList.add("app-table-column");
+                    var columnIndex = "app-table-column-" + titleI;
+                    column.classList.add(columnIndex);
+                    column.setAttribute("columnId", titleI);
+                    column.setAttribute("style", "width:" + el._misc.columnInitialWidth[titleI]);
+                    if (titleI < el.headTitles.length - 1) {
+                        var resizer = document.createElement("div");
+                        resizer.classList.add("app-table-resizer");
+                        resizer.setAttribute("draggable", true);
+                        resizer.addEventListener("mousedown", function (e) {
+                            el._resize.columnDiv = this.parentElement;
+                            el._resize.initialWidth = this.parentElement.offsetWidth;
+                            el._resize.columnsInitialWidth = [];
+                            el._columns.forEach(function (c) {
+                                el._resize.columnsInitialWidth.push(c.offsetWidth);
+                            });
+
+                            el._resize.initialPos = e.pageX;
+
+                            el._resizeColumn();
+                        });
+                        column.appendChild(resizer);
+                    }
+                    el._columns.push(column);
+                    el._refs.table.appendChild(column);
+                }
+                el._setHeader();
+            },
+            // @function _setHeader (private) 
+            setHeader: function () {
+                var el = this;
+                for (var titleI = 0; titleI < this.headTitles.length; titleI++) {
+                    var title = document.createElement("div");
+                    title.classList.add("app-table-title");
+                    title.innerHTML = this.headTitles[titleI];
+                    var columnIndex = "app-table-column-" + titleI;
+                    el._refs.table.querySelector("." + columnIndex).appendChild(title);
+                }
+                el._setData();
+            },
+            // @function _setData (private) 
+            setData: function () {                
+                var el = this;
+                el._misc.rowCount = 0;
+                el._rows = [];
+                el._rowsData.forEach(function (row) {
+                    el.addRow(row);
+                });
+                setTimeout(function () {
+                    el.adjustRowHeight();
+                }, 0);
+            },
+            // @function _resizeColumn (private) 
+            resizeColumn: function () {
+                var el = this;
+                el._resize.active = true;
+                window.addEventListener("mousemove", function (e) {
+                    if (el._resize.active == true) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        var cursorResize = e.pageX - el._resize.initialPos;
+                        var newWidth = el._resize.initialWidth + cursorResize;
+                        if (newWidth > el._misc.cMinWidth) {
+                            el._resize.columnDiv.setAttribute("style", "width:" + newWidth + "px;");
+
+                            // Current column index
+                            var currentColumnI = parseInt(el._resize.columnDiv.getAttribute(
+                                "columnid"));
+                            // Amount of column to the right of current
+                            var rightColumnsCount = el._columns.length - (currentColumnI + 1);
+                            // Width to modify each column to the right
+                            var offSetColumnWidth = cursorResize / rightColumnsCount;
+
+                            for (var columnI = (currentColumnI + 1); columnI < el._columns
+                                .length; columnI++) {
+                                // Current column width + offSetWidth
+                                var ccolumnwidth = el._resize.columnsInitialWidth[columnI] -
+                                    offSetColumnWidth;
+                                el._columns[columnI].setAttribute("style", "width:" + ccolumnwidth +
+                                    "px;");
+                            }
+                            el.adjustRowHeight();
+                        }
+                    }
+                });
+                window.addEventListener("mouseup", function (e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (el._resize.active == true) {
+                        el._resize.active = false;
+                    }
+                });
+            },
+            // @function _setupDeclarativeTable (private) [Set up a table from its declarative content]
+            setupDeclarativeTable: function () {
+                var el = this;
+                var fragment = document.createDocumentFragment();
+                el._refs.table = document.createElement("div");
+                el._refs.table.classList.add("app-table-content");
+                var rows = el.querySelectorAll("eon-row");
+                if (rows.length <= 0) {
+                    rows = el.getSourceElements();
+                    rows.forEach(function(r){ 
+                        r.parentNode.removeChild(r);     
+                    });
+                }                
+                fragment.appendChild(el._refs.table);
+                el._rowsData = [];
+                rows.forEach(function (row) {
+                    var columns = row.querySelectorAll("eon-cell");                    
+                    var columnData = {};
+                    if (row.id) {
+                        columnData.id = row.id;
+                    }
+                    columnData.data = []
+                    columns.forEach(function (column) {                    
+                        columnData.data.push({
+                            value: column.innerHTML,
+                            // onclick: column.onclick,
+                            onclick: column.onclick || column.getAttribute("onclick"),
+                            class: column.className
+                        });
+                    });
+                    el._rowsData.push(columnData);
+                });
+                el.headTitles = el.columntitle.replace(/\s/g, '').split(",");
+                el._getColumnInitialWidth();
+                el._setColumns();
+
+                // Empty table and generate table parent div
+                el.innerHTML = "";
+                el.appendChild(fragment);
+                setTimeout(function () {
+                    el.onReady(function () {
+                        eon.triggerCallback("ondrawn", el, el, [el]);
+                        el.adjustRowHeight();
+                    });
+                }, 0);
+            }
+        },
+
+
+        onCreated: function () {
+            var el = this;
+            el._initMisc();
+            eon.createCallback("ondrawn", this);
+
+        },
+
+        onInit: function () {
+            var el = this;
+            el._setupDeclarativeTable();
+        },
+
+        onResize: function (event) {
+            var el = this;
+            el.adjustRowHeight();
+        },
+
+
+
+    });
+</script>

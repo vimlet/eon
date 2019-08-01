@@ -1,0 +1,134 @@
+<template>
+    <eon-scroll eon-ref="scroll">
+        <pre eon-ref="pre"><code eon-ref="code"></code></pre>
+    </eon-scroll>
+    <link href="framework/custom/app-code/prism/prism.css" rel="stylesheet" />
+    <link href="framework/custom/app-code/vs-dark.css" rel="stylesheet" />
+</template>
+
+
+<script>
+    /*
+    @header Highlighter for html <code>. It wraps a string within <pre><code></code></pre> and higlight it.
+    */
+    eon.element({
+
+        name: "app-code",
+        style: "app-code.css",
+        dependencies: [],
+        properties: {
+            // @html-attribute value (public)
+            value: {
+                value: "",
+                reflect: false
+            },
+            // @html-attribute language (public)
+            language: {
+                value: "none",
+                reflect: true
+            },
+            // @html-attribute lineNumbers (public) [Show or hide lineNumbers, default true]
+            lineNumbers: {
+                value: "true",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {}
+            }
+        },
+
+        functions: {
+            // @function highlight (public) [Higlight current codeblock]
+            highlight: function () {
+                var el = this;
+                Prism.highlightElement(el._refs.code);
+            },
+            // @function refresh (public) [Calculate size again]
+            refresh: function () {
+                var el = this;
+                el.highlight();
+                el._setWidth();
+            }
+        },
+
+        privateFunctions: {
+            // @function _init
+            init: function () {                
+                var el = this;
+                el._refs.scroll.thickness = 8;
+                el._setLanguage();
+                el._setLineNumbers();
+                el._refs.code.textContent = el.value;
+                setTimeout(function () {
+                    el.onResourcesLoad(function () {                        
+                        el.highlight();
+                        el._setWidth();
+                        eon.triggerCallback("oncodeready", el, el, [el]);
+                    });
+                }, 0);
+            },
+            //@function _setWidth (private) [Adjust pre width to content width]
+            setWidth: function () {
+                var el = this;
+                if (el._refs.pre.scrollWidth > el._refs.pre.clientWidth) {
+                    el._refs.pre.style.width = el._refs.pre.scrollWidth + "px";
+                    el._refs.pre.style.boxSizing = "initial";
+                }
+            },
+            //@function _setLanguage (private)
+            setLanguage: function () {
+                var el = this;
+                el._refs.pre.classList.add("language-" + el.language);
+                el._refs.code.classList.add("language-" + el.language);
+            },
+            //@function _setLineNumbers (private)
+            setLineNumbers: function () {
+                var el = this;
+                if (eon.util.isTrue(el.lineNumbers)) {
+                    el._refs.pre.classList.add("line-numbers");
+                }
+            },
+            // @function _innerCode (private) [Take code from inner and from html attributes]
+            innerCode: function () {
+                var el = this;
+                var sourceCode = el.getSourceElements();
+                if (sourceCode && sourceCode[0]) {
+                    el.value = el._unescape(sourceCode[0].innerHTML);
+                    sourceCode[0].parentNode.removeChild(sourceCode[0]);
+                }
+            },
+            // @function _unescape (private) [Unescape code]
+            unescape: function (str) {
+                str = str.replace(new RegExp("&amp;", "gm"), "&");
+                str = str.replace(new RegExp("&lt;", "gm"), "<");
+                str = str.replace(new RegExp("&gt;", "gm"), ">");
+                str = str.replace(new RegExp("&apos;", "gm"), "'");
+                str = str.replace(new RegExp('&quot;', "gm"), '"');
+                return str;
+            }
+        },
+
+        onCreated: function () {
+            var el = this;
+            eon.createCallback("oncodeready", this);
+            eon.createCallback("onResourcesLoad", this, "ready");
+            el._innerCode();
+            eon.amd.require([eon.basePath + "/../custom/app-code/prism/prism.js"], function () {
+                eon.triggerCallback("onResourcesLoad", el);
+            });
+        },
+
+        onReady: function () {
+            var el = this;
+            el._init();
+        }
+
+
+    });
+</script>

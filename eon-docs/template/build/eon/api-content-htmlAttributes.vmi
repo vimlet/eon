@@ -1,0 +1,66 @@
+            
+                        <% var publicHtmlAttributes = false %>
+                        <%
+                        var publicHtmlAttributesTable = '<app-table';
+                        publicHtmlAttributesTable += ' columntitle="Attribute, Type, Description"';
+                        publicHtmlAttributesTable += ' columnwidth="200px, 200px, calc(100% - 400px)">';
+                        data.htmlAttributes.forEach(function (elem) {
+                            if (!elem.scope || elem.scope != "private") {
+                                publicHtmlAttributes = true;                                
+                                var row = '<eon-row id="app-doc-viewer-htmlProp-'+ elem.name +'">';
+                                        row += '<eon-cell>';
+                                        row += elem.name;
+                                        row += '</eon-cell>';
+                                        row += '<eon-cell class="vimlet-doc-type">';
+                                        row += elem.type;
+                                        row += '</eon-cell>';
+                                        row += '<eon-cell class="vimlet-doc-description">';
+                                        row += elem.description;
+                                        row += '</eon-cell>';
+                                        row += '</eon-row>';
+                                        publicHtmlAttributesTable += row;
+                            }
+                     }); 
+                     publicHtmlAttributesTable += '</app-table>';
+                    %>
+                    <div class="app-doc-viewer-templates-api-content-block">
+                <div class="app-doc-viewer-api-t2"><% if(publicHtmlAttributes){echo("Html attributes");}%></div>
+                <div class="app-doc-viewer-templates-api-content-htmlAttributes" eon-ref="htmlAttributes">
+                        <% if(publicHtmlAttributes){echo(publicHtmlAttributesTable);
+                        } %>
+                </div>
+            </div>
+            <% var privateHtmlAttributes = false %>
+            <%
+            var privateHtmlAttributesTable = '<app-table';
+            privateHtmlAttributesTable += ' columntitle="Attribute, Type, Description"';
+            privateHtmlAttributesTable += ' columnwidth="200px, 200px, calc(100% - 400px)">';
+            data.htmlAttributes.forEach(function (elem) {
+                if (elem.scope && elem.scope == "private") {
+                    privateHtmlAttributes = true;                                
+                    var row = '<eon-row id="app-doc-viewer-htmlProp-'+ elem.name +'">';
+                            row += '<eon-cell>';
+                            row += elem.name;
+                            row += '</eon-cell>';
+                            row += '<eon-cell class="vimlet-doc-type">';
+                            row += elem.type;
+                            row += '</eon-cell>';
+                            row += '<eon-cell class="vimlet-doc-description">';
+                            row += elem.description;
+                            row += '</eon-cell>';
+                            row += '</eon-row>';
+                            privateHtmlAttributesTable += row;
+                }
+         }); 
+         privateHtmlAttributesTable += '</app-table>';
+        %>
+            <div class="app-doc-viewer-templates-api-content-block app-doc-viewer-private-display-none app-doc-viewer-templates-api-content-htmlAttributes-private-block app-doc-viewer-templates-api-private"
+                eon-ref="htmlAttributesPrivateBlock">
+                <div class="app-doc-viewer-api-t2"><% if(privateHtmlAttributes){echo("Private html attributes");
+                } %></div>
+                <div class="app-doc-viewer-templates-api-content-htmlAttributes-private"
+                    eon-ref="htmlAttributesPrivate">
+                    <% if(privateHtmlAttributes){echo(privateHtmlAttributesTable);
+                    } %>
+                </div>
+            </div>

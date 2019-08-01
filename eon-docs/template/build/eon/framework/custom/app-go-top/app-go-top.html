@@ -1,0 +1,93 @@
+<template>
+    <i class="vicon vicon-arrow-up"></i>
+</template>
+
+<script>
+    eon.element({
+        name: "app-go-top",
+        style: "app-go-top.css",
+        dependencies: [],
+        properties: {
+            // @html-property scroll (public) [Selected scroll]
+            scroll: {
+                value: "",
+                observe: true
+            },
+            // @html-property transition (public) [Transition speed to scroll top]
+            transition:{
+                value:"0",
+                reflect:true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {
+
+                }
+            }
+        },
+
+        functions: {
+            // @function setScroll (public) [Set scroll]
+            setScroll: function (scroll) {
+                var el = this;
+                scroll.onScrolled(function () {
+                    el._scrollFunction();
+                });
+            },
+            // @function goTop (public) [Scroll to the top] @param transition [Transition speed]
+            goTop: function (transition) {                
+                var el = this;
+                transition = transition || 0;
+                el.scroll.scrollTo(0, null, transition);
+            }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUp();
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;                
+                if (el.scroll && el.scroll != "") {
+                    el.setScroll(el.scroll);
+                }
+                el.addEventListener("click",function(e){
+                    el.goTop(parseFloat(el.transition));
+                });
+            },
+            // @function scrollFunction (private) [Show/hide button] 
+            scrollFunction: function () {
+                var el = this;                
+                if (el.scroll.scrollTop > 0) {
+                    el.classList.add("app-go-top-show");
+                } else {
+                    el.classList.remove("app-go-top-show");
+                }
+            }
+        },
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            var el = this;
+            switch (attrName) {
+                case "scroll":                
+                    this.setScroll(newVal);
+                    break;
+            }
+        }
+
+
+    });
+</script>

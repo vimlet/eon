@@ -1,0 +1,720 @@
+<%
+var scripts = "";
+var parseLater = [];
+ var regex={
+    line: new RegExp(
+                        "^.*\\s*$",
+                        "gm"
+                    ),
+    replacements: new RegExp(
+                        "@@\\[\\d+\\]@@",
+                        "g"
+                    ),
+    title: new RegExp(
+                        "^( *#+ +).*",
+                        "g"
+                    ),
+    br:new RegExp(
+                    "(\\r\\n|\\r|\\n){1}$",
+                    "gm"
+                    ),
+    singleLine:new RegExp(
+                        "^.*$",
+                        "gm"
+                    ),
+    inner: new RegExp(
+                        "\\[.*\\]",
+                        "gm"
+                    ),
+    navigationLink: new RegExp(
+                        "^\\[(?:(?!\\[)[\\s\\S])+\\]<(?:(?!<)[\\s\\S])*>",
+                        "gm"
+                    ),
+    unorderedList: new RegExp( 
+                        "^(- |\\* |\\+ ).*",
+                        "g"
+                    ),
+    orderedList: new RegExp(
+                        "^(\\d+\\. ).*",
+                        "gm"
+                    ),
+    codeBlock: new RegExp(
+                        "```(?:(?!```)[\\s\\S])*```",
+                        "g"
+                    ),
+    codeBlockLanguage: new RegExp(
+                        "^\\[(?:(?!\\[)[\\s\\S])*\\](\\r\\n|\\r|\\n){1}",
+                        "g"
+                    ),
+    whiteLines: new RegExp(
+                        "^[ \\t]+$",
+                        "gm"
+                    ),
+    plainCode: new RegExp(
+                        "\\*\\((?:(?!\\*\\()[\\s\\S])*\\)\\*",
+                        "g"
+                    ),
+    tip: new RegExp(
+                        "@`(?:(?!`)[\\s\\S])*`",
+                        "gm"
+                    ),
+    tipIcon: new RegExp(
+                        "^\\((?:(?!\\()[\\s\\S])*\\)",
+                        "g"
+                    ),
+    code: new RegExp(
+                        "`(?:(?!`)[\\s\\S])*`",
+                        "g"
+                    ),
+    video: new RegExp(
+                        "\\*\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])+\\)",
+                        "g"
+                    ),
+    videoImg: new RegExp(
+                        "\\[(?:(?!\\[)[\\s\\S])*\\]",
+                        "g"
+                    ),
+    videoSrc: new RegExp(
+                        "\\((?:(?!\\()[\\s\\S])+\\)",
+                        "g"
+                    ),
+    badge: new RegExp(
+                        "\\^\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])+\\)",
+                        "gm"
+                    ),
+    url: new RegExp(
+                        "\\(.*\\)",
+                        "gm"
+                    ),
+    urlTitle: new RegExp(
+                        "(\"|\').*(\"|\')",
+                        "gm"
+                    ),
+    imageLinkImg: new RegExp(
+                        "\\[!\\[(?:(?!\\[|\\[)[\\s\\S])*\\]",
+                        "gm"
+                    ),
+    imageLink: new RegExp(
+                        "\\[!\\[(?:(?!\\[|\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])*\\)\\]\\((?:(?!\\()[\\s\\S])*\\)",
+                        "gm"
+                    ),
+    image: new RegExp(
+                        "!\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])*\\)",
+                        "gm"
+                    ),
+    link: new RegExp(
+                        "\\[(?:(?!\\[)[\\s\\S])*\\]\\((?:(?!\\()[\\s\\S])*\\)",
+                        "gm"
+                    ),
+    hr: new RegExp(
+                        "(^(-|-\\s){3,}$|^(\\*|\\*\\s){3,}$)",
+                        "gm"
+                    ),
+    indented: new RegExp(
+                        "^ {4,}.+",
+                        "gm"
+                    ),
+    quotes: new RegExp(
+                        "^( *> *)",
+                        "gm"
+                    ),
+    script: new RegExp(
+                        "\\*\\[(?:(?!\\*\\[)[\\s\\S])*\\]\\*",
+                        "g"
+                    ),     
+    tableHeader: new RegExp(
+                        "^[>\\s]*\\|-+\\|(-+\\|)*$",
+                        "gm"
+                    ),
+    table: new RegExp(
+                        /^[ \t]*(>\s*){0,1}\|(?:(?!(\r\n|\r|\n))[\s\S])*\|[ \t]*(\r\n|\r|\n){1}^[ \t]*(>\s*){0,1}\|-+\|(-+\|)*[ \t]*(\r\n|\r|\n){1}^([ \t]*(>\s*){0,1}\|(?:(?!(\r\n|\r|\n))[\s\S])*\|[ \t]*(\r\n|\r|\n){1}){1,}/,
+                        "gm"
+                    ),
+    strong: new RegExp(
+                        "(\\*\\*\\S(?:(?!\\*)[\\s\\S])*\\S\\*\\*|__\\S(?:(?!\\_)[\\s\\S])*\\S__)",
+                        "g"
+                    ),
+    italic: new RegExp(
+                        "(\\*\\S(?:(?!\\*)[\\s\\S])*\\S\\*|_\\S(?:(?!\\_)[\\s\\S])*\\S_)",
+                        "g"
+                    )
+};
+%>
+<% 
+function parsePlainText(str){    
+    str = parseEmphasis(str);
+    return str;
+}
+function parseEmphasis(str) {
+    str = parseSingleEmphasis(str, "**", regex.strong, "strong");
+    str = parseSingleEmphasis(str, "*", regex.italic, "em");
+    return str;
+}
+function parseSingleEmphasis (str, tag, regex, element) {
+    var result = "";
+    result = str.replace(regex, function (data) {
+        var clean = cleanMatch(data, tag, tag);
+        return "<"+element+">" + clean + "</"+element+">";
+    });
+    return result;
+}
+
+function cleanMatch (match, open, close) {
+    match = match.trim();
+    match = match.substring(open.length, match.length - close.length).trim();
+    return match;
+}
+function getInner(tag) {
+    var matches = tag.match(regex.inner);
+    if (matches) {
+        tag = cleanMatch(matches[0], "[", "]");
+    } else {
+        tag = "";
+    }
+    return tag;
+}
+function replaceBrEnding(data){
+    return data.replace(regex.br, function (data) {
+        return "<br>";
+    });
+}
+function splitLanguage(tag) {
+    var result = "";
+    var matches = tag.match(regex.codeBlockLanguage);
+    if (matches) {
+        var language = cleanMatch(matches[0], "[", "]");
+        var cleanData = tag.replace(matches[0], "");
+        return [language, cleanData];
+    }
+    return [null, tag];
+}
+function linkResolve(path) {
+    var root = "/";
+    if (path && path.length > 0 && !path.includes("http")) {
+        path = decodeURIComponent(root) + path;
+    }
+    return path;
+}
+function easyWhiteSpaces(str) {
+    return str
+        .replace(/\r\n|\r/g, '\n')
+        .replace(/\t/g, '    ')
+        .replace(/\u00a0/g, ' ')
+        .replace(/\u2424/g, '\n');
+}
+function easyWhiteLines(str) {
+    return str.replace(regex.whiteLines, '');
+}
+function replaceEscaped(str) {
+    return str
+        .replace(/\\\!/g, '&#33;')
+        .replace(/\\\./g, '&#46;')
+        .replace(/\\\-/g, '&#45;')
+        .replace(/\\\+/g, '&#43;')
+        .replace(/\\\#/g, '&#35;')
+        .replace(/\\\)/g, '&#41;')
+        .replace(/\\\(/g, '&#40;')
+        .replace(/\\\}/g, '&#125;')
+        .replace(/\\\{/g, '&#123;')
+        .replace(/\\\]/g, '&#93;')
+        .replace(/\\\[/g, '&#91;')
+        .replace(/\\\_/g, '&#95;')
+        .replace(/\\\`/g, '&#96;')
+        .replace(/\\\\/g, '&#92;')
+        .replace(/\\\*/g, '&#42;');
+}
+function prepareData(str) {
+    str = replaceEscaped(str);
+    str = easyWhiteSpaces(str);
+    str = easyWhiteLines(str);
+    return str;
+}
+function splitIcon(tag) {
+    var el = this;
+    var result = "";
+    var matches = tag.match(regex.tipIcon);
+    if (matches) {
+        var icon = cleanMatch(matches[0], "(", ")");
+        var cleanData = tag.replace(matches[0], "");
+        return [icon, cleanData];
+    }
+    return [null, tag];
+}
+function videoImg(tag) {
+    var videoImgMatches = tag.match(regex.videoImg);
+    var result;
+    if (videoImgMatches) {
+        result = cleanMatch(videoImgMatches[0], "[", "]");
+        if (!result) {
+            result = null;
+        }
+    }
+    return result;
+}
+function videoSrc(tag) {
+    var result = "";
+    var videoSrcMatches = tag.match(regex.videoSrc);
+    if (videoSrcMatches) {
+        return cleanMatch(videoSrcMatches[0], "(", ")");
+    }
+}
+function getTitle(tag) {
+    var matches = tag.match(regex.urlTitle);
+    if (matches) {
+        tag = cleanMatch(matches[0], "'", "'").trim();
+    } else {
+        tag = null;
+    }
+    return tag;
+}
+function getUrl(tag) {
+    var matches = tag.match(regex.url);
+    if (matches) {
+        tag = cleanMatch(matches[0], "(", ")");
+    } else {
+        tag = "";
+    }
+    var title = getTitle(tag);
+    var url = tag.replace(regex.urlTitle, "").trim();
+    return [url, title];
+}
+function getParseLink(tag) {
+    var inner = getInner(tag);
+    var fullUrl = getUrl(tag);
+    return [inner, fullUrl[0], fullUrl[1]];
+}
+function sanitizeLink(link){
+    return link;
+}
+function splitImgLink(tag) {
+    var result = "";
+    var matches = tag.match(regex.imageLinkImg);
+    var parsedResult = [];
+    var img = cleanMatch(matches[0], "[", "]");
+    var imageLink = getParseLink(img);
+    var imageTitle = imageLink[2] || "";
+    var image = '<img src="' + linkResolve(imageLink[1]) + '" title="' + imageTitle + '" alt="' + imageLink[0] + '">';    
+    var link = cleanMatch(tag.replace(regex.imageLinkImg, ""), "(", ")", );
+    var imgLink = '<a href="' + sanitizeLink(link) + '">';
+    imgLink += image;
+    imgLink += '</a>';
+    return imgLink;
+}
+function escapeHTML(str){
+    str = str.replace(new RegExp("&","gm"), "&amp;");
+    str = str.replace(new RegExp("<","gm"), "&lt;");
+    str = str.replace(new RegExp(">","gm"), "&gt;");
+    str = str.replace(new RegExp("'","gm"), "&apos;");
+    str = str.replace(new RegExp('"',"gm"), "&quot;");
+    return str;
+}
+%>
+<% 
+function parseTitle(line){
+    match = line.match(regex.title);
+    if(match){
+        match = match[0];
+        var size = match.substring(0, match.indexOf(" ")).length;
+        var text = match.substring(match.indexOf(" ") + 1);
+        var className = "app-md-viewer-t" + size;
+        var result = '<div class="'+className+' app-md-viewer-t">' + text + '</div>';
+        return result;
+    }else{
+        return null;
+    }
+}
+function parseBr(data) {
+    return data.replace(regex.br, function (data) {
+        return '<div class="app-md-viewer-br"></div>';
+    });
+}
+function parseNavigationLink(data) {
+    var match = data.match(regex.navigationLink);
+    if(match){
+        match = match[0];
+        var inner = getInner(match);
+        var result = '<div class="app-md-viewer-t app-md-viewer-t1" id="' + inner + '">' + parsePlainText(inner) + '</div>';
+        navigationLinks.push(inner);
+        return result;
+    }else{
+        return null;
+    }
+}
+function parseUnorderedList(data) {
+    var match = data.match(regex.unorderedList);
+    if (match) {
+        match = match[0];
+        var text = match.substring(match.indexOf(" ") + 1);
+        var result = '<div class="app-md-viewer-unordered"><div class="app-md-viewer-unordered-dot"></div><div class="app-md-viewer-unordered-text">' + parsePlainText(text) + '</div></div>';
+        return result;
+    }else{
+            return null;
+    }
+}
+function parseOrderedList(data) {
+    var match = data.match(regex.orderedList);
+    if (match) {
+        match = match[0];
+        var text = match.substring(match.indexOf(" ") + 1);
+        var number = match.substring(0, match.indexOf(".") + 1);
+        var result = '<div class="app-md-viewer-ordered"><div class="app-md-viewer-ordered-index">'+number+'</div><div class="app-md-viewer-ordered-text">' + parsePlainText(text) + '</div></div>';
+        return result;
+    }else{
+            return null;
+    }
+}
+function parseCodeBlock(data) {
+    var result = "";
+    var matches = data.match(regex.codeBlock);
+    var codeBlockResults = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            var clean = cleanMatch(matches[i], "```", "```");
+            var splitted = splitLanguage(clean);
+            var appEditor = '<div class="app-md-viewer-code-container"><app-code language="'+splitted[0]+'"><code>'+ escapeHTML(splitted[1]) +'</code></app-code></div>';
+            codeBlockResults.push(appEditor);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.codeBlock, function () {
+        var count = parseLater.length;
+        parseLater[count] = codeBlockResults[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+function parseTable(data) {
+    var result = "";
+    var matches = data.match(regex.table);
+    var results = [];
+    if (matches) {
+        // Remove structure
+        for (var i = 0; i < matches.length; i++) {
+            matches[i] = matches[i].replace(regex.tableHeader, function () {
+                return "";
+            });
+            var isIndented = false;
+            matches[i] = matches[i].replace(new RegExp("^[ \\t]*(>\\s*){0,1}","gm"), function () {
+                isIndented = true;
+                return "";
+            });
+            var table ="";
+            if(isIndented){
+                table += '<div style="display:flex; flex-direction:row;"><span class="app-md-viewer-quote"></span>';
+            }
+            table += '<app-table ';
+            var matchLine = matches[i].match(regex.singleLine);
+            var title = cleanMatch(matchLine[0], "|", "|").split("|");
+            table += 'columntitle="';
+            title.forEach(function(t){
+                table+= t + ',';
+            });
+            table = table.substring(0, table.length - 1);
+            table += '">';
+            for(var j = 1; j<matchLine.length; j++){
+                if(matchLine[j] != ""){
+                    table += '<eon-row>'
+                    var content = cleanMatch(matchLine[j], "|", "|").split("|");
+                    content.forEach(function(c){
+                        table+= '<eon-cell>' + parsePlainText(c) + '</eon-cell>';
+                    });
+                    table +='</eon-row>';
+                }
+            }
+            table += '</app-table>';
+            if(isIndented){
+                table += '</div>';
+            }
+            results.push(table);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.table, function () {
+        var count = parseLater.length;
+        parseLater[count] = results[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+function parsePlainCode(data) {
+    var result = "";
+    var matches = data.match(regex.plainCode);
+    var plainCode = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            var clean = cleanMatch(matches[i], "*(", ")*");
+            plainCode.push(clean);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.plainCode, function () {
+        var count = parseLater.length;
+        parseLater[count] = plainCode[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+function parseTip(data) {
+    var result = "";
+    var matches = data.match(regex.tip);
+    var codeResults = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            var clean = cleanMatch(matches[i], "@`", "`");
+            var splitted = splitIcon(clean);
+            var icon = splitted[0] || "alert";
+            var tip = '<div class="app-md-viewer-tip"><div class="app-md-viewer-tip-icon vicon vicon-' + icon + '"></div><div class="app-md-viewer-tip-content">'+ splitted[1] +'</div></div>';
+            codeResults.push(tip);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.tip, function () {
+        var count = parseLater.length;
+        parseLater[count] = codeResults[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+function parseCode(data) {
+    var result = "";
+    var matches = data.match(regex.code);
+    var codeResults = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            var clean = cleanMatch(matches[i], "`", "`");
+            var splitted = splitLanguage(clean);
+            var code = '<code class="app-md-viewer-code">' + escapeHTML(splitted[1]) + '</code>'
+            codeResults.push(code);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.code, function () {
+        var count = parseLater.length;
+        parseLater[count] = codeResults[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+
+function parseVideo(data){
+    var result = "";
+    var matches = data.match(regex.video);
+    var results = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            var poster = videoImg(matches[i]) || '';
+            poster = linkResolve(poster);
+            var src = linkResolve(videoSrc(matches[i]));
+            var res = '<eon-video poster="' + poster + '" type="video/webm, video/mp4" src="' + src + '"></eon-video>';
+            results.push(res);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.video, function () {
+        var count = parseLater.length;
+        parseLater[count] = results[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+
+function parseBadge(data){
+    var result = "";
+    var matches = data.match(regex.badge);
+    var results = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            var linkData = getParseLink(matches[i]);
+            var title = linkData[2] || '';
+            var ref = sanitizeLink(linkData[1]);
+            var res = '<a class="app-md-viewer-badge" href="' + ref + '" title="' + title + '">' + linkData[0] + '</a>';
+            results.push(res);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.badge, function () {
+        var count = parseLater.length;
+        parseLater[count] = results[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+
+function parseImageLink(data){
+    var result = "";
+    var matches = data.match(regex.imageLink);
+    var results = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            results.push(splitImgLink(matches[i]));
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.imageLink, function () {
+        var count = parseLater.length;
+        parseLater[count] = results[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+
+function parseImages(data){
+    var result = "";
+    var matches = data.match(regex.image);
+    var results = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            var linkData = getParseLink(matches[i]);
+            var imageTitle = linkData[2] || "";
+            var image = '<img src="' + linkResolve(linkData[1]) + '" title="' + imageTitle + '" alt="' + linkData[0] + '">';  
+            results.push(image);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.image, function () {
+        var count = parseLater.length;
+        parseLater[count] = results[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+
+function parseLinks(data){
+    var result = "";
+    var matches = data.match(regex.link);
+    var results = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) { 
+            var linkData = getParseLink(matches[i]);
+            var title = linkData[2] || '';
+            var ref = sanitizeLink(linkData[1]);
+            var res = '<a href="' + ref + '" title="' + title + '">' + linkData[0] + '</a>';
+            results.push(res);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.link, function () {
+        var count = parseLater.length;
+        parseLater[count] = results[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+function parseHr(data){
+    var result = "";
+    var matches = data.match(regex.hr);
+    var results = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) { 
+            var res = '<hr>';
+            results.push(res);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.hr, function () {
+        var count = parseLater.length;
+        parseLater[count] = results[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+function parseQuotes(data){
+    var result = "";
+    var matches = data.match(regex.quotes);
+    var results = [];
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) { 
+            var res = '<span class="app-md-viewer-quote"></span>';
+            results.push(res);
+        }
+    }
+    var j = 0;
+    result = data.replace(regex.quotes, function () {
+        var count = parseLater.length;
+        parseLater[count] = results[j++];
+        return "@@[" + count + "]@@";
+    });
+    return result;
+}
+function parseScript(data){
+    var matches = data.match(regex.script);
+    if (matches) {
+        for (var i = 0; i < matches.length; i++) {
+            var clean = cleanMatch(matches[i], "*[", "]*");
+            scripts += clean;
+        }
+    }
+    return data.replace(regex.script, "");
+}
+%>
+<% 
+function executeRegex(line){
+    var title = parseTitle(line);
+    if(title){
+        return title;
+    }
+    var navigationLink = parseNavigationLink(line);
+    if(navigationLink){
+        return navigationLink;
+    }  
+    var unorderedList = parseUnorderedList(line);
+    if(unorderedList){
+        return unorderedList;
+    }  
+    var orderedList = parseOrderedList(line);
+    if(orderedList){
+        return orderedList;
+    }  
+    return line;
+}
+%>
+<% 
+function parseLine(line){
+    return executeRegex(line);
+}
+function parseBlocks(data){
+    data = parseTable(data);
+    data = parseCodeBlock(data);
+    data = parsePlainCode(data);
+    data = parseTip(data);
+    data = parseCode(data);
+    data = parseBr(data);
+    data = parseVideo(data);
+    data = parseBadge(data);
+    data = parseImageLink(data);
+    data = parseImages(data);
+    data = parseLinks(data);
+    data = parseHr(data);
+    data = parseQuotes(data);
+    data = parseScript(data);
+    return data;
+}
+function parseReplacements(data){   
+    return data.replace(regex.replacements, function (data) {
+        var count = cleanMatch(data,"@@[","]@@");
+        return parseLater[count];
+    });
+}
+%>
+<%
+var navigationLinks = [];
+var result = "";
+data = prepareData(data);
+data = parseBlocks(data);
+data = parsePlainText(data);
+var lines = data.match(regex.line);
+lines.forEach(function(line){
+    result += '<div>' + parseLine(line) + '</div>';
+});
+result = parseReplacements(result);
+scripts = scripts.replace(new RegExp("'","gm"), "&apos;").replace(new RegExp('"',"gm"), "&quot;");
+%>
+<app-doc-viewer-templates-article links="<%echo(navigationLinks);%>" script="<%echo(scripts);%>">
+    <eon-scroll thickness="8">
+        <div class="app-doc-viewer-templates-article-content app-doc-content-width" eon-ref="content">
+            <%= result %>
+            <div class="app-doc-viewer-templates-article-content-bottom"></div>
+        </div>
+    </eon-scroll>
+    <app-go-top></app-go-top>
+</app-doc-viewer-templates-article>
