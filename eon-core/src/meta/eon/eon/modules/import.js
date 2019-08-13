@@ -56,9 +56,13 @@ eon.requestImport = function (href) {
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
     href = href.charAt(0) === "@" ? eon.getBasePathUrl(href) : href;
 
-    if (!(elementName in eon.imports.templates) && (!eon.build || !eon.build[elementName])) {
+    if (!(elementName in eon.imports.templates) && (!eon.declared.all[elementName])) {
 
+        eon.declared.ajax[elementName] = true;
+        
         // Everytime a new import is requested we reset the onReady and onImportsReady triggered state
+        eon.imports.ready = false;
+        
         eon.__onImportsReady__triggered = false;
         eon.__onReady__triggered = false;
 

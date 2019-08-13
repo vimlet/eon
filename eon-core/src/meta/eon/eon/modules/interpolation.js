@@ -327,7 +327,7 @@ eon.interpolation.interpolate = function () {
   var sourceKeys, source, scope, interpolations;
 
   // Loops the queue
-  for (var k = 0; k < eon.interpolation.sourcesQueue.length; k++) { 
+  for (var k = 0; k < eon.interpolation.sourcesQueue.length; k++) {
 
     sources = eon.interpolation.sourcesQueue[k];
     sourceTypeKeys = Object.keys(eon.interpolation.sourcesQueue[k])
@@ -590,8 +590,14 @@ eon.interpolation.interpolateValues = function (el, source, obj, interpolations,
 
         // For each variable found previously sets its value
         for (i = 0; i < interpolations[key].length; i++) {
+
           variable = interpolations[key][i];
-          variable.textContent = obj[key];
+
+          if (!variable.__assignedInterpolationValue) {
+            variable.textContent = obj[key];
+            variable.__assignedInterpolationValue = true;
+          }
+
         }
 
       }

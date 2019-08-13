@@ -1,3 +1,8 @@
+eon.declared = {};
+eon.declared.all = {};
+eon.declared.ajax = {};
+eon.declared.build = {};
+
 /*
 @function  declare
 @description First function to get fired when an import is requested but before the import ajax request is 
@@ -7,110 +12,113 @@ actually triggered, constructs the elements class, hides the element and prepare
 */
 eon.declare = function (name, baseElement) {
 
-    // Specifies HTML element interface
-    var baseElement = baseElement ? baseElement : HTMLElement;
+        // Specifies HTML element interface
+        var baseElement = baseElement ? baseElement : HTMLElement;
 
-    // Constructs the element class
-    var elementClass = eon.constructClass(baseElement);
+        // Constructs the element class
+        var elementClass = eon.constructClass(baseElement);
 
-    // Element constructor: Important! never modify element attributes or children here
-    elementClass.onCreated(function () {
+        // Element constructor: Important! never modify element attributes or children here
+        elementClass.onCreated(function () {
 
-        var el = this;
+            var el = this;
 
-        eon.declareCallbacks(el);
+            eon.declareCallbacks(el);
 
-        eon.generateSourceFragment(el);
+            eon.generateSourceFragment(el);
 
-        eon.initSourceCallbacks(el);
-        
-        eon.prepareElement(el, function () {
+            eon.initSourceCallbacks(el);
 
-            var config = eon.imports.config[el.nodeName.toLowerCase()];
+            eon.prepareElement(el, function () {
 
-            // Adds eon element default config properties and functions 
-            eon.parse(el, config);
+                var config = eon.imports.config[el.nodeName.toLowerCase()];
 
-            // Generates an instance of the element template and assigns it as a property of the element so we can easily access from anywhere
-            eon.generateElementTemplate(el);
+                // Adds eon element default config properties and functions 
+                eon.parse(el, config);
 
-            // Searches elements tagged to have its reference saved inside the component template 
-            eon.generateElementReferences(el);
+                // Generates an instance of the element template and assigns it as a property of the element so we can easily access from anywhere
+                eon.generateElementTemplate(el);
 
-            // Sets a css rule with the provided display by the config, if no display is provided it will have display block by default
-            eon.initializeDisplay(el, config);
+                // Searches elements tagged to have its reference saved inside the component template 
+                eon.generateElementReferences(el);
 
-            eon.triggerAllCallbackEvents(el, config, "onCreated");
-            eon.registry.updateElementStatus(el, "created");
+                // Sets a css rule with the provided display by the config, if no display is provided it will have display block by default
+                eon.initializeDisplay(el, config);
+
+                eon.triggerAllCallbackEvents(el, config, "onCreated");
+                eon.registry.updateElementStatus(el, "created");
+
+            });
+
+            eon.registry.updateElementStatus(el, "declared");
 
         });
 
-        eon.registry.updateElementStatus(el, "declared");
+        elementClass.onAttached(function () {
 
-    });
+            var el = this;
 
-    elementClass.onAttached(function () {
+            el.onCreated(function () {
 
-        var el = this;
+                var config = eon.imports.config[el.nodeName.toLowerCase()];
 
-        el.onCreated(function () {
+                if (el.isFirstAttach) {
 
-            var config = eon.imports.config[el.nodeName.toLowerCase()];
+                    el.isFirstAttach = false;
+                    // Once a new element is attached for the first time we set the onReady 
+                    // callback triggered property to false until all the elements are ready again
+                    eon.__onReady__triggered = false;
 
-            if (el.isFirstAttach) {
+                    eon.importTemplateClasses(el);
 
-                el.isFirstAttach = false;
-                // Once a new element is attached for the first time we set the onReady 
-                // callback triggered property to false until all the elements are ready again
-                eon.__onReady__triggered = false;
+                    eon.hideElement(el);
 
-                eon.importTemplateClasses(el);
+                    // If it has an observer for the declaration of the element we disconnect it as we will no longer need it
+                    if (el.__onCreatedObserver) {
+                        el.__onCreatedObserver.disconnect();
+                    }
 
-                eon.hideElement(el);
+                    // Registers the element and generates uid
+                    eon.registry.registerElement(el);
 
-                // If it has an observer for the declaration of the element we disconnect it as we will no longer need it
-                if (el.__onCreatedObserver) {
-                    el.__onCreatedObserver.disconnect();
+                    // Updates the references for the source nodes
+                    eon.updateSourceCallbacks(el);
+
+                    // Moves source-template elements to eon-template-clone elements by slot attribute query selector string
+                    // Unslotted source-template elements will be appended to eon-clone root
+                    // Note dynamic things that should be slotted must be added onCreated
+                    eon.slot(el);
+
+                    // Interpolation data bind
+                    eon.interpolation.bind(el, config);
+
+                    // Callback for the first time that the element has been attached, no template imported, only created and parsed
+                    eon.triggerAllCallbackEvents(el, config, "onInit");
+
+                    // Begins the transformation process
+                    eon.transform(el, config);
+
                 }
 
-                // Registers the element and generates uid
-                eon.registry.registerElement(el);
+                eon.triggerAllCallbackEvents(el, config, "onAttached");
 
-                // Updates the references for the source nodes
-                eon.updateSourceCallbacks(el);
+                eon.registry.updateElementStatus(el, "attached");
+                eon.debug.log("adapterEvents", "onAttached");
 
-                // Moves source-template elements to eon-template-clone elements by slot attribute query selector string
-                // Unslotted source-template elements will be appended to eon-clone root
-                // Note dynamic things that should be slotted must be added onCreated
-                eon.slot(el);
-
-                // Interpolation data bind
-                eon.interpolation.bind(el, config);
-
-                // Callback for the first time that the element has been attached, no template imported, only created and parsed
-                eon.triggerAllCallbackEvents(el, config, "onInit");
-
-                // Begins the transformation process
-                eon.transform(el, config);
-
-            }
-
-            eon.triggerAllCallbackEvents(el, config, "onAttached");
-
-            eon.registry.updateElementStatus(el, "attached");
-            eon.debug.log("adapterEvents", "onAttached");
+            });
 
         });
 
-    });
+        // The parentComponent property is set to null when detached of the DOM, but this value will be set again once the element is attached
+        elementClass.onDetached(function () {
+            this.__parentComponent = null;
+        });
 
-    // The parentComponent property is set to null when detached of the DOM, but this value will be set again once the element is attached
-    elementClass.onDetached(function () {
-        this.__parentComponent = null;
-    });
+        elementClass.onAttributeChanged(function (attrName, oldVal, newVal) { });
 
-    elementClass.onAttributeChanged(function (attrName, oldVal, newVal) {});
+        customElements.define(name, elementClass);
 
-    customElements.define(name, elementClass);
+        // Avoids the component being declared a second time
+        eon.declared.all[name] = true;
 
 };

@@ -4,9 +4,6 @@ eon.domReady(function () {
     eon.imports.total++;
     eon.imports.count++;
 
-    // Declare element
-    eon.declare("eon-variable");
-
     eon.element({
 
         name: "eon-variable",
@@ -35,5 +32,8 @@ eon.domReady(function () {
         }
 
     });
+
+    // Declare element
+    eon.declare("eon-variable");
 
 });

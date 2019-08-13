@@ -4,9 +4,6 @@ eon.domReady(function () {
   eon.imports.total++;
   eon.imports.count++;
 
-  // Declare element
-  eon.declare("eon-placeholder");
-
   eon.element({
 
     name: "eon-placeholder",
@@ -39,5 +36,8 @@ eon.domReady(function () {
     }
 
   });
+
+  // Declare element
+  eon.declare("eon-placeholder");
 
 });

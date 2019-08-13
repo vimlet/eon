@@ -3320,9 +3320,13 @@ eon.requestImport = function (href) {
     href = (href.indexOf(".html") > -1) ? href : href + "/" + elementName + ".html";
     href = href.charAt(0) === "@" ? eon.getBasePathUrl(href) : href;
 
-    if (!(elementName in eon.imports.templates) && (!eon.build || !eon.build[elementName])) {
+    if (!(elementName in eon.imports.templates) && (!eon.declared.all[elementName])) {
 
+        eon.declared.ajax[elementName] = true;
+        
         // Everytime a new import is requested we reset the onReady and onImportsReady triggered state
+        eon.imports.ready = false;
+        
         eon.__onImportsReady__triggered = false;
         eon.__onReady__triggered = false;
 
@@ -4513,7 +4517,7 @@ eon.interpolation.interpolate = function () {
   var sourceKeys, source, scope, interpolations;
 
   // Loops the queue
-  for (var k = 0; k < eon.interpolation.sourcesQueue.length; k++) { 
+  for (var k = 0; k < eon.interpolation.sourcesQueue.length; k++) {
 
     sources = eon.interpolation.sourcesQueue[k];
     sourceTypeKeys = Object.keys(eon.interpolation.sourcesQueue[k])
@@ -4776,8 +4780,14 @@ eon.interpolation.interpolateValues = function (el, source, obj, interpolations,
 
         // For each variable found previously sets its value
         for (i = 0; i < interpolations[key].length; i++) {
+
           variable = interpolations[key][i];
-          variable.textContent = obj[key];
+
+          if (!variable.__assignedInterpolationValue) {
+            variable.textContent = obj[key];
+            variable.__assignedInterpolationValue = true;
+          }
+
         }
 
       }
@@ -5058,7 +5068,7 @@ eon.element = function (param1, param2) {
 
     // If the user provided a style path then we create its link and append it
     // If the element is being part of a builded file then the style will come with it so we wont import it
-    if (stylePath !== "" && (!eon.build || !eon.build[name])) {
+    if (stylePath !== "" && !eon.declared.build[name]) {
 
         var link = document.createElement("link");
 
@@ -6186,6 +6196,11 @@ eon.createResizeCallbacks = function (el) {
     });
 
 };
+eon.declared = {};
+eon.declared.all = {};
+eon.declared.ajax = {};
+eon.declared.build = {};
+
 /*
 @function  declare
 @description First function to get fired when an import is requested but before the import ajax request is 
@@ -6195,148 +6210,116 @@ actually triggered, constructs the elements class, hides the element and prepare
 */
 eon.declare = function (name, baseElement) {
 
-    // Specifies HTML element interface
-    var baseElement = baseElement ? baseElement : HTMLElement;
+        // Specifies HTML element interface
+        var baseElement = baseElement ? baseElement : HTMLElement;
 
-    // Constructs the element class
-    var elementClass = eon.constructClass(baseElement);
+        // Constructs the element class
+        var elementClass = eon.constructClass(baseElement);
 
-    // Element constructor: Important! never modify element attributes or children here
-    elementClass.onCreated(function () {
+        // Element constructor: Important! never modify element attributes or children here
+        elementClass.onCreated(function () {
 
-        var el = this;
+            var el = this;
 
-        eon.declareCallbacks(el);
+            eon.declareCallbacks(el);
 
-        eon.generateSourceFragment(el);
+            eon.generateSourceFragment(el);
 
-        eon.initSourceCallbacks(el);
-        
-        eon.prepareElement(el, function () {
+            eon.initSourceCallbacks(el);
 
-            var config = eon.imports.config[el.nodeName.toLowerCase()];
+            eon.prepareElement(el, function () {
 
-            // Adds eon element default config properties and functions 
-            eon.parse(el, config);
+                var config = eon.imports.config[el.nodeName.toLowerCase()];
 
-            // Generates an instance of the element template and assigns it as a property of the element so we can easily access from anywhere
-            eon.generateElementTemplate(el);
+                // Adds eon element default config properties and functions 
+                eon.parse(el, config);
 
-            // Searches elements tagged to have its reference saved inside the component template 
-            eon.generateElementReferences(el);
+                // Generates an instance of the element template and assigns it as a property of the element so we can easily access from anywhere
+                eon.generateElementTemplate(el);
 
-            // Sets a css rule with the provided display by the config, if no display is provided it will have display block by default
-            eon.initializeDisplay(el, config);
+                // Searches elements tagged to have its reference saved inside the component template 
+                eon.generateElementReferences(el);
 
-            eon.triggerAllCallbackEvents(el, config, "onCreated");
-            eon.registry.updateElementStatus(el, "created");
+                // Sets a css rule with the provided display by the config, if no display is provided it will have display block by default
+                eon.initializeDisplay(el, config);
+
+                eon.triggerAllCallbackEvents(el, config, "onCreated");
+                eon.registry.updateElementStatus(el, "created");
+
+            });
+
+            eon.registry.updateElementStatus(el, "declared");
 
         });
 
-        eon.registry.updateElementStatus(el, "declared");
+        elementClass.onAttached(function () {
 
-    });
+            var el = this;
 
-    elementClass.onAttached(function () {
+            el.onCreated(function () {
 
-        var el = this;
+                var config = eon.imports.config[el.nodeName.toLowerCase()];
 
-        el.onCreated(function () {
+                if (el.isFirstAttach) {
 
-            var config = eon.imports.config[el.nodeName.toLowerCase()];
+                    el.isFirstAttach = false;
+                    // Once a new element is attached for the first time we set the onReady 
+                    // callback triggered property to false until all the elements are ready again
+                    eon.__onReady__triggered = false;
 
-            if (el.isFirstAttach) {
+                    eon.importTemplateClasses(el);
 
-                el.isFirstAttach = false;
-                // Once a new element is attached for the first time we set the onReady 
-                // callback triggered property to false until all the elements are ready again
-                eon.__onReady__triggered = false;
+                    eon.hideElement(el);
 
-                eon.importTemplateClasses(el);
+                    // If it has an observer for the declaration of the element we disconnect it as we will no longer need it
+                    if (el.__onCreatedObserver) {
+                        el.__onCreatedObserver.disconnect();
+                    }
 
-                eon.hideElement(el);
+                    // Registers the element and generates uid
+                    eon.registry.registerElement(el);
 
-                // If it has an observer for the declaration of the element we disconnect it as we will no longer need it
-                if (el.__onCreatedObserver) {
-                    el.__onCreatedObserver.disconnect();
+                    // Updates the references for the source nodes
+                    eon.updateSourceCallbacks(el);
+
+                    // Moves source-template elements to eon-template-clone elements by slot attribute query selector string
+                    // Unslotted source-template elements will be appended to eon-clone root
+                    // Note dynamic things that should be slotted must be added onCreated
+                    eon.slot(el);
+
+                    // Interpolation data bind
+                    eon.interpolation.bind(el, config);
+
+                    // Callback for the first time that the element has been attached, no template imported, only created and parsed
+                    eon.triggerAllCallbackEvents(el, config, "onInit");
+
+                    // Begins the transformation process
+                    eon.transform(el, config);
+
                 }
 
-                // Registers the element and generates uid
-                eon.registry.registerElement(el);
+                eon.triggerAllCallbackEvents(el, config, "onAttached");
 
-                // Updates the references for the source nodes
-                eon.updateSourceCallbacks(el);
+                eon.registry.updateElementStatus(el, "attached");
+                eon.debug.log("adapterEvents", "onAttached");
 
-                // Moves source-template elements to eon-template-clone elements by slot attribute query selector string
-                // Unslotted source-template elements will be appended to eon-clone root
-                // Note dynamic things that should be slotted must be added onCreated
-                eon.slot(el);
-
-                // Interpolation data bind
-                eon.interpolation.bind(el, config);
-
-                // Callback for the first time that the element has been attached, no template imported, only created and parsed
-                eon.triggerAllCallbackEvents(el, config, "onInit");
-
-                // Begins the transformation process
-                eon.transform(el, config);
-
-            }
-
-            eon.triggerAllCallbackEvents(el, config, "onAttached");
-
-            eon.registry.updateElementStatus(el, "attached");
-            eon.debug.log("adapterEvents", "onAttached");
+            });
 
         });
 
-    });
+        // The parentComponent property is set to null when detached of the DOM, but this value will be set again once the element is attached
+        elementClass.onDetached(function () {
+            this.__parentComponent = null;
+        });
 
-    // The parentComponent property is set to null when detached of the DOM, but this value will be set again once the element is attached
-    elementClass.onDetached(function () {
-        this.__parentComponent = null;
-    });
+        elementClass.onAttributeChanged(function (attrName, oldVal, newVal) { });
 
-    elementClass.onAttributeChanged(function (attrName, oldVal, newVal) {});
+        customElements.define(name, elementClass);
 
-    customElements.define(name, elementClass);
+        // Avoids the component being declared a second time
+        eon.declared.all[name] = true;
 
 };
-
-(function () {
-
-    if (eon.build) {
-
-        var names = Object.keys(eon.build);
-
-        for (var i = 0; i < names.length; i++) {
-
-            var name = names[i];
-            var path = eon.build[name].path;
-
-            path = (path.indexOf(".html") > -1) ? path : path + "/" + name + ".html";
-            path = path.charAt(0) === "@" ? eon.getBasePathUrl(path) : path;
-            
-            eon.__onImportsReady__triggered = false;
-            eon.__onReady__triggered = false;
-
-            eon.imports.total++;
-
-            // Avoid duplicated imports while waiting XMLHttpRequest callback.
-            eon.imports.templates[name] = null;
-
-            // Saves the paths of the imported elements
-            eon.imports.paths[name] = path.substring(0, path.length - path.match(/[^\/]*$/g)[0].length);
-            
-            eon.declare(name);
-            eon.prepareComponent(name, eon.build[name].content);
-
-        }
-
-    }
-
-})();
-
 
 eon.createPropertyObserver = function (property, obj, callback, pollingRate) {
   if (typeof pollingRate === "undefined") {
@@ -8254,9 +8237,6 @@ eon.domReady(function () {
     eon.imports.total++;
     eon.imports.count++;
 
-    // Declare element
-    eon.declare("eon-variable");
-
     eon.element({
 
         name: "eon-variable",
@@ -8286,15 +8266,15 @@ eon.domReady(function () {
 
     });
 
+    // Declare element
+    eon.declare("eon-variable");
+
 });
 
 eon.domReady(function () {
 
   eon.imports.total++;
   eon.imports.count++;
-
-  // Declare element
-  eon.declare("eon-placeholder");
 
   eon.element({
 
@@ -8329,7 +8309,94 @@ eon.domReady(function () {
 
   });
 
+  // Declare element
+  eon.declare("eon-placeholder");
+
 });
+
+
+
+eon.processBuild = function (filePath) {
+
+    if (filePath) {
+
+        eon.ajax(filePath, null, function (success, obj) {
+
+            if (success) {
+
+                if (obj.xhr.status === 200) {
+
+                    var script = document.createElement("script");
+                    script.innerHTML = obj.responseText + "eon.declareBuildComponents();";
+                    document.body.appendChild(script);
+
+                }
+
+            }
+
+        });
+
+    } else {
+
+        eon.declareBuildComponents();
+
+    }
+
+}
+
+eon.declareBuildComponents = function () {
+
+    eon.declaredComponents = eon.declaredComponents || {};
+
+    if (eon.build) {
+
+        var names = Object.keys(eon.build);
+
+        for (var i = 0; i < names.length; i++) {
+
+            var name = names[i];
+
+            if (!eon.declared.all[name]) {
+
+                eon.declared.build[name] = true;
+
+                var path = eon.build[name].path;
+
+                path = (path.indexOf(".html") > -1) ? path : path + "/" + name + ".html";
+                path = path.charAt(0) === "@" ? eon.getBasePathUrl(path) : path;
+
+                // Every time a new import is requested we reset the onReady and onImportsReady triggered state
+                eon.imports.ready = false;
+
+                eon.__onImportsReady__triggered = false;
+                eon.__onReady__triggered = false;
+
+                eon.imports.total++;
+
+                // Avoid duplicated imports while waiting XMLHttpRequest callback.
+                eon.imports.templates[name] = null;
+
+                // Saves the paths of the imported elements
+                eon.imports.paths[name] = path.substring(0, path.length - path.match(/[^\/]*$/g)[0].length);
+
+                eon.declare(name);
+                eon.prepareComponent(name, eon.build[name].content);
+
+                // Removes it from eon.build so that in the next for loop we iterate less time
+                delete eon.build[name];
+
+            }
+
+        }
+
+    }
+
+}
+
+document.addEventListener("DOMContentLoaded", function (event) {
+    eon.processBuild();
+});
+
 
 
   
