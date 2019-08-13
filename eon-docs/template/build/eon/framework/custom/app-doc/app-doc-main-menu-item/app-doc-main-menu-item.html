@@ -1,0 +1,117 @@
+<template>
+    <div class="app-doc-main-menu-item-icon" eon-ref="icon"></div>
+    <div class="app-doc-main-menu-item-label" eon-ref="label"></div>
+    <div class="app-doc-main-menu-item-brief" eon-ref="brief"></div>
+</template>
+
+<script>
+    eon.element({
+        name: "app-doc-main-menu-item",
+        style: "app-doc-main-menu-item.css",
+        dependencies: [],
+        properties: {
+            // @html-attribute value (public)
+            value: {
+                value: "",
+                observe: true
+            },
+            // @html-attribute icon (public)
+            icon: {
+                value: "",
+                observe: true
+            },
+            // @html-attribute label (public)
+            label: {
+                value: "",
+                observe: true
+            },
+            // @html-attribute brief (public)
+            brief: {
+                value: "",
+                observe: true
+            },
+            // @html-attribute menuLink (public) [Each menu item button is linked to a menu button to call onclick]
+            menuLink: {
+                value: ""
+            },
+            // @html-attribute menu (public) [App menu]
+            menu:{
+                value:"",
+                observe:true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {}
+            }
+        },
+
+        functions: {
+            // @function setLabel (public) [Set label to button]
+            setLabel: function (value) {
+                var el = this;
+                el._refs.label.innerHTML = value;
+            },
+            // @function setIcon (public) [Set icon to button]
+            setIcon: function (value) {
+                var el = this;
+                el._refs.icon.classList.remove(el._misc.lastIcon);
+                el._misc.lastIcon = value;
+                el._refs.icon.classList.add("vicon-" + value);
+            },
+            // @function setBrief (public) [Set brief to button]
+            setBrief: function (value) {
+                var el = this;
+                el._refs.brief.innerHTML = value;
+            }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUp();
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                if (el.label) {
+                    el.setLabel(el.label);
+                }
+                if (el.icon) {
+                    el.setIcon(el.icon);
+                }
+                if (el.brief) {
+                    el.setBrief(el.brief);
+                }
+                el.addEventListener("click", function (e) {
+                    el.menu.value = el.value;
+                });
+            }
+        },
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        },
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            switch (attrName) {
+                case "label":
+                    this.setLabel(newVal);
+                    break;
+                case "icon":
+                    this.setIcon(newVal);
+                    break;
+                case "brief":
+                    this.setBrief(newVal);
+                    break;
+            }
+        }
+
+
+    });
+</script>

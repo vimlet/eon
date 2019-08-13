@@ -1,0 +1,320 @@
+<template>
+    <eon-tree eon-ref="tree"></eon-tree>
+</template>
+
+<script>
+    eon.element({
+        name: "app-doc-viewer-tree",
+        style: "app-doc-viewer-tree.css",
+        dependencies: [
+            "@ui/eon-tree"
+        ],
+        properties: {
+            // @param value (public) [Selected value]
+            value: {
+                value: "",
+                observe: true
+            },
+            // @html-attribute index (public) [Tree index object or tree index path]
+            index: {
+                value: "",
+                observe: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {
+                    folderNodeOrderRegex: new RegExp("\\[\\d+\\]", "gm"),
+                    order: 1
+                }
+            }
+        },
+
+        functions: {
+            // @function select (private) [Select item at tree] @param namePath @param link [Link in document]
+            select: function (namePath, link) {                
+                var el = this;
+                el._refs.tree.onReady(function () {
+                    el.onTreeReady(function () {
+                        var found = false;                        
+                        el._misc.nodes.forEach(function (node) {                            
+                            if (!link) {                                
+                                if (node.namePath == namePath) {                                    
+                                    found = true;
+                                    node.onReady(function () {                                        
+                                        el._refs.tree.selectNode(node);
+                                    });
+                                }
+                            } else {
+                                if (node.namePath == namePath && node.link ==
+                                    link) {
+                                        found = true;
+                                    node.onReady(function () {
+                                        el._refs.tree.selectNode(node);
+                                    });
+                                }
+                            }
+                        });
+                        setTimeout(function () {
+                            if (!found) {
+                                el.onReady(function () {                                    
+                                    document.querySelector("app-doc").noFound();
+                                });
+                            }
+                        }, 0);
+                    });
+                });
+            },
+            // @function reset (public) [Clear the tree]
+            reset: function () {
+                var el = this;
+                el._refs.tree.reset();
+            },
+            // @function selectFirst (public) [Select first tree entry] 
+            selectFirst: function () {
+                var el = this;
+                el.onTreeReady(function () {
+                    if (el._misc.nodes.length > 0) {
+                        el._misc.nodes[0].onReady(function () {
+                            el._refs.tree.selectNode(el._misc.nodes[0]);
+                        });
+                    }
+                });
+            },
+            // @function markNode (public) [Mark a node in the tree] @param id
+            markNode: function (id) {
+                var el = this;
+                el._refs.tree.onReady(function () {
+                    el.onTreeReady(function () {
+                        el._misc.nodes.forEach(function (node) {
+                            if (node.name == id) {
+                                node.onReady(function () {
+                                    el._refs.tree.markNode(node);
+                                });
+                            }
+                        });
+                    });
+                });
+            }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUp();
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                if (el.value) {
+                    el._setValue(el.value);
+                }
+            },
+            // @function _setValue (private) @param data
+            setValue: function (data) {
+                var el = this;
+                el.reset();
+                el._misc.nodes = [];
+                el._misc.folderAdded = []; // Store which folder I've added manually to avoid repetitions
+                el._refs.tree.setAttribute("icons", el._setTreeIcons(data.config));
+                el._refs.tree.setAttribute("join-dirs", true);
+                el._refs.tree.onReady(function () {
+                    el._refs.tree._refs.scroll.thickness = 8;
+                });
+                if (data.config && data.config.extension) {
+                    el._refs.tree.showExtension = true;
+                } else {
+                    el._refs.tree.showExtension = false;
+                }
+                el._misc.firstElem = null;
+                el._treeOnNodeSelected();
+                el._addTreeNodes(data);
+            },
+            // @function _addTreeNodes (private) {element} [Add all files to tree] @param data
+            addTreeNodes: function (data) {
+                var el = this;
+                el._refs.treeFragment = document.createDocumentFragment();
+                el._waitUntilTreeSetUp = data.files.length;
+                var treeData = []; // Manually update tree Fix.
+                data.files.forEach(function (tNode) {
+                    var elm = document.createElement("eon-tree-node");
+                    tNode = el._sanitizeNode(tNode);
+                    el._addSortedFolders(tNode, treeData);
+                    //Set node order and replace name[order]
+                    var nodeOrderRegex = new RegExp("^\\[\\d+\\]", "gm");
+                    var nodeNameMatches = tNode.name.match(nodeOrderRegex);
+                    if (nodeNameMatches) {
+                        var order = parseInt(el._cleanMatch(nodeNameMatches[0], "[", "]"));
+                        elm.order = order;
+                        tNode.name = tNode.name.replace(nodeOrderRegex,
+                            ""); // Remove order from tree node name
+                    }
+                    el._misc.firstElem = el._misc.firstElem || elm;
+                    elm = el._setNodeData(tNode, elm, data.config);
+                    el._misc.nodes.push(elm);
+                    treeData.push(elm);
+                    el._refs.treeFragment.appendChild(elm);
+                });
+                el._refs.tree.appendChild(el._refs.treeFragment);
+                el._refs.tree._misc.srcNodes = treeData;
+                eon.triggerCallback("onTreeReady", el);
+            },
+            // @function _setNodeData (private) [Set node path, name and real path] @param tNode @description Node data @param elm [Current tree node]
+            setNodeData: function (tNode, elm, config) {
+                var el = this;
+                // Set node data         
+                var realPath = tNode.path;
+                var cleanPath = tNode.path.replace(el._misc.folderNodeOrderRegex, "");
+                cleanPath = el._removeEntries(cleanPath);
+                elm.name = tNode.name;
+                elm.path = cleanPath; // Without [sort]
+                if (tNode.link) {
+                    elm.link = tNode.link;
+                    var pathNoExt = elm.path.substring(0, elm.path.indexOf("."));
+                    var pathExt = elm.path.substring(elm.path.indexOf("."));
+                    var pathWithLink = pathNoExt + "/" + elm.link + pathExt;
+                    elm.path = pathWithLink;
+                    elm.name = tNode.link;
+                    elm.order = el._misc.order;
+                    el._misc.order++;
+                }
+                elm = el._compactPaths(elm, config);
+                elm.realPath = realPath; // Real path with [sort] to find files at disk
+                elm.type = "file";
+                elm.namePath = tNode.namePath.replace(el._misc.folderNodeOrderRegex,
+                    ""); // Name path to show at url
+                return elm;
+            },
+            // @function _compactPaths (private) [Replace compact paths if any]
+            compactPaths: function (tNode, config) {
+                var el = this;
+                if (config && config.compactPaths) {
+                    config.compactPaths.forEach(function (cPath) {
+                        var pattern = new RegExp("^" + el._escapeRegExp(cPath) + ".*", "g");
+                        if (tNode.path.match(pattern)) {
+                            var split = tNode.path.split("/");
+                            var resultPath = cPath + "/.../" + split[split.length - 1];
+                            tNode.path = resultPath;
+                        }
+                    });
+                }
+                return tNode;
+            },
+            // @function _escapeRegExp (private) [Escape special characters for regex] @param str
+            escapeRegExp: function (str) {
+                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+            },
+            // @function removeEntries (private) [Remove entries folder from path] @param path
+            removeEntries: function (path) {
+                return path.substring(8, path.length);
+            },
+            // @function _sanitizeUrl [Replace \ with /] @param path
+            sanitizeUrl: function (path) {
+                return path.replace(/[/\\*]/g, "/");
+            },
+            // @function _sanitizeNode
+            sanitizeNode: function (node) {
+                var el = this;
+                node.name = el._sanitizeUrl(node.name);
+                node.path = el._sanitizeUrl(node.path);
+                node.namePath = el._sanitizeUrl(node.namePath);
+                return node;
+            },
+            // @function _addSortedFolders (private) [Add folders sorted manually to the tree] @param tNode
+            addSortedFolders: function (tNode, treeData) {
+                var el = this;
+                var pathWithoutFile;
+                if (tNode.link) {
+                    pathWithoutFile = tNode.path.substring(0, tNode.path.lastIndexOf("."));
+                } else {
+                    pathWithoutFile = tNode.path.substring(0, tNode.path.lastIndexOf("/"));
+                }
+                while (pathWithoutFile.match(el._misc.folderNodeOrderRegex)) {
+                    var folderNodeOrderRegexOnce = new RegExp("\\[\\d+\\]",
+                        ""); // Replace only first ocurrence per loop
+                    var firstOcurrencePath = new RegExp(
+                        "(?:(?!\\[\\d+\\])[\\s\\S])*\\/\\[\\d+\\](?:(?!\\/)[\\s\\S])*",
+                        ""); // Get path until first ocurrence of [sort]
+                    var pathToFirstOcurrence = pathWithoutFile.match(firstOcurrencePath);
+                    if (pathToFirstOcurrence) {
+                        var firstSort = pathToFirstOcurrence[0].match(folderNodeOrderRegexOnce);
+                        if (firstSort) {
+                            var currentOrder = parseInt(el._cleanMatch(firstSort[0], "[", "]"));
+                            var currentPath = pathToFirstOcurrence[0].replace(
+                                folderNodeOrderRegexOnce, "");
+                            if (el._misc.folderAdded.indexOf(currentPath) < 0) {
+                                el._misc.folderAdded.push(currentPath);
+                                var currentElm = document.createElement("eon-tree-node");
+                                currentElm.order = currentOrder;
+                                currentElm.type = "directory";
+                                currentPath = el._removeEntries(currentPath);
+                                currentElm.path = currentPath;
+                                treeData.push(currentElm);
+                                el._refs.treeFragment.appendChild(currentElm);
+                            }
+                        }
+                    }
+                    pathWithoutFile = pathWithoutFile.replace(folderNodeOrderRegexOnce, "");
+                }
+            },
+            // @function _cleanMatch (private) [Clean regex match] @param match @param open @param close
+            cleanMatch: function (match, open, close) {
+                match = match.trim();
+                match = match.substring(open.length, match.length - close.length).trim();
+                return match;
+            },
+            // @function _treeOnNodeSelected (private) [Open view when node selected]
+            treeOnNodeSelected: function () {
+                var el = this;
+                el._refs.tree.onNodeSelected(function () {
+                    if (el._refs.tree.selectedNode.type != "directory") {
+                        eon.triggerCallback("onSelected", el, null, [el, el._refs.tree
+                            .selectedNode
+                        ]);
+                    }
+                });
+            },
+            // @function _setTreeIcons (private) [Configure icons to be shown at tree] @param config
+            setTreeIcons: function (config) {
+                var el = this;
+                var treeIcons = "none";
+                if (config.arrowIcon && config.folderIcon) {
+                    treeIcons = "all";
+                } else if (config.arrowIcon) {
+                    treeIcons = "expand";
+                } else if (config.folderIcon) {
+                    treeIcons = "type";
+                }
+                return treeIcons;
+            }
+        },
+
+        onCreated: function () {
+            var el = this;
+            eon.createCallback("onSelected", el);
+            eon.createCallback("onTreeReady", el, "ready");
+        },
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            var el = this;
+            switch (attrName) {
+                case "value":
+                    this._setValue(newVal);
+                    break;
+            }
+        }
+
+
+
+    });
+</script>

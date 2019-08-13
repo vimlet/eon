@@ -1,0 +1,65 @@
+            <div class="app-doc-viewer-templates-api-content-block">
+                <div class="app-doc-viewer-api-t2">Properties</div>
+                <div class="app-doc-viewer-templates-api-content-properties" eon-ref="properties">
+                    <% var publicProp = false %>
+                    <%
+                    var publicPropTable = '<app-table';
+                    publicPropTable += ' columntitle="Property, Type, Description"';
+                    publicPropTable += ' columnwidth="200px, 200px, calc(100% - 400px)">';
+                    data.properties.forEach(function (elem) {
+                        if (!elem.scope || elem.scope != "private") {
+                            publicProp = true;                                
+                            var row = '<eon-row id="app-doc-viewer-property-'+ elem.name +'">';
+                                    row += '<eon-cell>';
+                                    row += elem.name;
+                                    row += '</eon-cell>';
+                                    row += '<eon-cell class="vimlet-doc-type">';
+                                    row += elem.type;
+                                    row += '</eon-cell>';
+                                    row += '<eon-cell class="vimlet-doc-description">';
+                                    row += elem.description;
+                                    row += '</eon-cell>';
+                                    row += '</eon-row>';
+                                    publicPropTable += row;
+                        }
+                 }); 
+                 publicPropTable += '</app-table>';
+                %>
+                    <% if(!publicProp){echo("None");}else{
+                        echo(publicPropTable);
+                    } %>
+                </div>
+            </div>
+            <div class="app-doc-viewer-templates-api-content-block app-doc-viewer-private-display-none app-doc-viewer-templates-api-content-properties-private-block app-doc-viewer-templates-api-private"
+                eon-ref="propertiesPrivateBlock">
+                <div class="app-doc-viewer-api-t2">Private properties</div>
+                <div class="app-doc-viewer-templates-api-content-properties-private" eon-ref="propertiesPrivate">
+                        <% var privateProp = false %>
+                        <%
+                        var privatePropTable = '<app-table';
+                        privatePropTable += ' columntitle="Property, Type, Description"';
+                        privatePropTable += ' columnwidth="200px, 200px, calc(100% - 400px)">';
+                        data.properties.forEach(function (elem) {
+                            if (elem.scope && elem.scope == "private") {
+                                privateProp = true;                                
+                                var row = '<eon-row id="app-doc-viewer-property-'+ elem.name +'">';
+                                        row += '<eon-cell>';
+                                        row += elem.name;
+                                        row += '</eon-cell>';
+                                        row += '<eon-cell class="vimlet-doc-type">';
+                                        row += elem.type;
+                                        row += '</eon-cell>';
+                                        row += '<eon-cell class="vimlet-doc-description">';
+                                        row += elem.description;
+                                        row += '</eon-cell>';
+                                        row += '</eon-row>';
+                                        privatePropTable += row;
+                            }
+                     }); 
+                     privatePropTable += '</app-table>';
+                    %>
+                        <% if(!privateProp){echo("None");}else{
+                            echo(privatePropTable);
+                        } %>
+                </div>
+            </div>

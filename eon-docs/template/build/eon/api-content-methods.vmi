@@ -1,0 +1,154 @@
+            <%
+                function getBrief(elem){                      
+                    var row = '<eon-row>';
+                            row += '<eon-cell onclick="document.querySelector(&quot;app-doc-viewer-templates-api-content&quot;).goTo(&quot;app-doc-viewer-function-' + elem.name + '&quot;);">';
+                           /*         row += '<eon-cell onclick="alert()">';*/
+                            row += elem.name;
+                            row += '</eon-cell>';
+                            row += '<eon-cell class="vimlet-doc-type">';
+                            row += elem.return;
+                            row += '</eon-cell>';
+                            row += '<eon-cell class="vimlet-doc-description">';
+                            row += elem.description;
+                            row += '</eon-cell>';
+                            row += '</eon-row>';
+                            return row;
+                }
+
+                function getContent(elem){                                                         
+                    var details = '';                                        
+                    details += '<div id="app-doc-viewer-function-' + elem.name + '" class="app-doc-viewer-api-t3 app-doc-viewer-templates-api-content-details-title">';
+                            details += elem.name + '(';
+                            if(elem.params.length > 0){ 
+                                elem.params.forEach(function(param){                    
+                                    details += '<span class="app-doc-viewer-textColorName">' + param.name + '</span>,';
+                                });
+                                details = details.substring(0, details.length -1);
+                            }
+                            details += ')';
+                            details += '</div>';                                    
+                            details += '<div class="vimlet-doc-description">';
+                                    details += elem.description;
+                                    details += '</div>';
+                    echo(details);
+
+                    if(elem.params.length > 0){                                        
+                        var publicFunctionsParamsTable = '<app-table';
+                        publicFunctionsParamsTable += ' columntitle="Parameter, Type, Description"';
+                        publicFunctionsParamsTable += ' columnwidth="200px, 200px, calc(100% - 400px)">';
+                        elem.params.forEach(function(param){                    
+                            var row = '<eon-row>';
+                                    row += '<eon-cell>';
+                                    row += param.name;
+                                    row += '</eon-cell>';
+                                    row += '<eon-cell class="vimlet-doc-type">';
+                                    row += param.type; 
+                                    row += '</eon-cell>';
+                                    row += '<eon-cell class="vimlet-doc-description">';
+                                    row += param.description;
+                                    row += '</eon-cell>';
+                                    row += '</eon-row>';
+                                    publicFunctionsParamsTable += row;
+                        });
+                        publicFunctionsParamsTable += '</app-table>';
+                        echo(publicFunctionsParamsTable);
+                    }
+
+                    if(elem.return){                                        
+                        var publicFunctionsReturnTable = '<app-table';
+                        publicFunctionsReturnTable += ' columntitle="Return,  Description"';
+                        publicFunctionsReturnTable += ' columnwidth="200px, calc(100% - 200px)">'; 
+                        var row = '<eon-row>';
+                                row += '<eon-cell>';
+                                row += elem.return.type;
+                                row += '</eon-cell>';
+                                row += '<eon-cell class="vimlet-doc-description">';
+                                    row += elem.return.description;
+                                row += '</eon-cell>';
+                                row += '</eon-row>';
+                                publicFunctionsReturnTable += row;
+                        publicFunctionsReturnTable += '</app-table>';
+                        echo(publicFunctionsReturnTable);
+                    }
+
+                    if(elem.exceptions.length > 0){                                        
+                        var publicFunctionsExceptionTable = '<app-table';
+                        publicFunctionsExceptionTable += ' columntitle="Exception, Type, Description"';
+                        publicFunctionsExceptionTable += ' columnwidth="200px, 200px, calc(100% - 400px)">';
+                        elem.exceptions.forEach(function(exception){                    
+                            var row = '<eon-row>';
+                                    row += '<eon-cell>';
+                                    row += exception.name;
+                                    row += '</eon-cell>';
+                                    row += '<eon-cell>';
+                                    row += exception.type; 
+                                    row += '</eon-cell>';
+                                    row += '<eon-cell class="vimlet-doc-description">';
+                                    row += exception.description;
+                                    row += '</eon-cell>';
+                                    row += '</eon-row>';
+                                    publicFunctionsExceptionTable += row;
+                        });
+                        publicFunctionsExceptionTable += '</app-table>';
+                        echo(publicFunctionsExceptionTable);
+                    }
+                }
+            %>
+            <div class="app-doc-viewer-templates-api-content-block">
+                <div class="app-doc-viewer-api-t2">Functions</div>
+                <div class="app-doc-viewer-templates-api-content-functions" eon-ref="functions">
+                        <% var publicFunctions = false %>
+                        <%
+                        var publicFunctionsTable = '<app-table';
+                        publicFunctionsTable += ' columntitle="Function, Return, Description"';
+                        publicFunctionsTable += ' columnwidth="200px, 200px, calc(100% - 400px)">';
+                        data.methods.forEach(function (elem) {
+                            if (!elem.scope || elem.scope != "private") {
+                                publicFunctions = true;                                
+                                var row = getBrief(elem);
+                                        publicFunctionsTable += row;
+                            }
+                     }); 
+                     publicFunctionsTable += '</app-table>';
+                    %>
+                        <% if(!publicFunctions){echo("None");}else{
+                            echo(publicFunctionsTable);
+                            echo('<div class="app-doc-viewer-api-t3">Details</div>');
+                            data.methods.forEach(function (elem) {
+                                if (!elem.scope || elem.scope != "private") {
+                                    getContent(elem);
+                                }
+                         }); 
+
+                        } %>
+                </div>
+            </div>
+            <div class="app-doc-viewer-templates-api-content-block app-doc-viewer-private-display-none app-doc-viewer-templates-api-content-functions-private-block app-doc-viewer-templates-api-private"
+                eon-ref="functionsPrivateBlock">
+                <div class="app-doc-viewer-api-t2">Private functions</div>
+                <div class="app-doc-viewer-templates-api-content-functions-private" eon-ref="functionsPrivate">
+                        <% var privateFunctions = false %>
+                        <%
+                        var privateFunctionsTable = '<app-table';
+                        privateFunctionsTable += ' columntitle="Function, Return, Description"';
+                        privateFunctionsTable += ' columnwidth="200px, 200px, calc(100% - 400px)">';
+                        data.methods.forEach(function (elem) {
+                            if (elem.scope && elem.scope == "private") {
+                                privateFunctions = true;                             
+                                var row = getBrief(elem);
+                                        privateFunctionsTable += row;
+                            }
+                     }); 
+                     privateFunctionsTable += '</app-table>';
+                    %>
+                        <% if(!privateFunctions){echo("None");}else{
+                            echo(privateFunctionsTable);
+                            echo('<div class="app-doc-viewer-api-t3">Details</div>');
+                            data.methods.forEach(function (elem) {
+                                if (elem.scope && elem.scope == "private") { 
+                                    getContent(elem);
+                                }
+                         }); 
+
+                        } %>
+                </div>

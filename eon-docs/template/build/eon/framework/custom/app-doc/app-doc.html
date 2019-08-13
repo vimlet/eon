@@ -1,0 +1,333 @@
+<template>
+    <app-loading type="eon" eon-ref="loading"></app-loading>
+    <div class="app-doc-menu vimlet-doc-header-menu">
+        <div class="app-separator"></div>
+        <app-menu class="app-doc-menu-buttons" fixed-label="Mode" eon-ref="menu"></app-menu>
+        <app-combobox class="app-doc-menu-version" eon-ref="version" dropdown-align="right"></app-combobox>
+    </div>
+    <eon-scroll class="app-doc-main-view-scroll" thickness="8" eon-ref="mainViewScroll">
+        <div class="app-doc-main-view" eon-ref="mainView"></div>
+    </eon-scroll>
+    <app-doc-viewer class="app-display-none" eon-ref="viewer"></app-doc-viewer>
+</template>
+
+<script>
+    eon.element({
+        name: "app-doc",
+        style: "app-doc.css",
+        dependencies: [
+            "@ui/eon-scroll",
+            "../app-loading",
+            "../app-combobox",
+            "../app-menu",
+            "../app-doc-viewer",
+            "app-doc-main-menu-item"
+        ],
+        properties: {
+            // @param value (public)
+            value: {
+                value: "",
+                observe: true
+            },
+            // @param version (public) [Current version show]
+            version: {
+                value: "",
+                reflect: true
+            },
+            // @params versions (public) [All versions data]
+            versions: {
+                value: {}
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {}
+            }
+        },
+
+        functions: {
+            // @function setValue (public) [Set value] @param value
+            setValue: function (value) {
+                var el = this;
+                if (value) {
+                    value = JSON.parse(value);
+                    el.versions = value.versions;
+                    el._hashControl();
+                    if (!el._misc.versionSet) {
+                        el._setVersion(value);
+                        el._misc.versionSet = true;
+                    }
+                    el._setMenu(value.versions[value.current]);
+                    var icon;
+                    if (value.versions[value.current].mainIcon) {
+                        icon = {
+                            img: el._refs.version.value + "/" + value.versions[value.current].mainIcon,
+                            link: value.versions[value.current].mainIconLink || "#"
+                        };
+                    } else {
+                        icon = {
+                            link: value.versions[value.current].mainIconLink || "#"
+                        };
+                    }
+                    el._refs.viewer.icon = icon;
+                }
+            },
+            // @function clearMainView (public) [Empty main view]
+            clearMainView: function () {
+                var el = this;
+                el._refs.menu.clear();
+                el._refs.mainView.innerHTML = "";
+                el._refs.mainView.classList.remove("app-doc-main-view-under-three");
+            },
+            // @function openView (public) [Open given view] @param path [Path to index of view. If none it is main view]
+            openView: function (path) {                
+                var el = this;
+                if (!path) {
+                    el._refs.mainViewScroll.classList.remove("app-display-none");
+                    el._refs.viewer.classList.add("app-display-none");
+                } else {
+                    el._refs.mainViewScroll.classList.add("app-display-none");
+                    el._refs.viewer.index = path + "/index.json";
+                    el._refs.viewer.classList.remove("app-display-none");
+                }
+            },
+            // @function noFound (public) [Handles no found file]
+            noFound: function () {
+                var el = this;                
+                el.openView(); // Go to main view
+                el._refs.loading.hide();
+            }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUp();
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                if (el.value) {
+                    el.setValue(el.value);
+                }
+                el._refs.version.onSelected(function (item) {
+                    el.clearMainView();
+                    var val = JSON.parse(el.value);
+                    val.current = el._refs.version.value;                    
+                    el.value = JSON.stringify(val);
+                    window.location.hash = "!version=" + encodeURIComponent(el._refs.version
+                    .displayValue);
+                    el.version = el._refs.version.value;
+                });
+
+                el._refs.menu.onSelected(function (menu, item) {
+                    el.openView(menu.value);
+                    el._addModeToUrl(item.link);
+                });
+                el._refs.viewer.onSelected(function (tree, item) {
+                    el._addFileToUrl(item.namePath, item.link);
+                });
+                el._refs.viewer.onSelectedLink(function (link) {
+                    el._addLinkToUrl(link);
+                });
+                el._refs.viewer.onTreeReady(function () {
+                    var hash = decodeURIComponent(window.location.hash);
+                    var file = hash.split("file=")[1] ? hash.split("file=")[1].split("&")[0] :
+                        null;
+                    if (!file) {
+                        el._refs.viewer.selectFirst();
+                    }
+                });
+                el._refs.viewer.onIdReached(function (id) {
+                    el._refs.viewer._markLink(id);
+                });
+                el._refs.viewer.onDraw(function (id) {
+                    el._refs.loading.hide();
+                });
+            },
+            // @function _addModeToUrl (private) [Add mode to url when a new section is open] @param name
+            addModeToUrl: function (name) {
+                var el = this;
+                var hash = decodeURIComponent(window.location.hash);
+                var mode = hash.split("mode=")[1] ? hash.split("mode=")[1].split("&")[0] :
+                    null;
+                if (mode != name) {
+                    window.location.hash = "!version=" + encodeURIComponent(el.version) + "&mode=" +
+                        encodeURIComponent(name);
+                }
+            },
+            // @function _addFileToUrl (private) [Add entry to url when a document is selected at the viewer] @param name @param link]
+            addFileToUrl: function (name, link) {
+                var el = this;
+                var hash = decodeURIComponent(window.location.hash);
+                var file = hash.split("file=")[1] ? hash.split("file=")[1].split("&")[0] :
+                    null;
+                var urlLink = hash.split("link=")[1] ? hash.split("link=")[1].split("&")[0] :
+                    null;
+
+                var newUrl;
+                if (file != name) {
+                    var cleanHash = hash.split("&file=")[0] ? hash.split("&file=")[0] : hash;
+                    cleanHash = cleanHash.substring(1);
+                    newUrl = cleanHash + "&file=" + encodeURIComponent(name);
+                } else {
+                    var cleanHash = hash.split("&link=")[0] ? hash.split("&link=")[0] : hash;
+                    newUrl = cleanHash.substring(1);
+                }
+                if (link) {
+                    newUrl = newUrl + "&link=" + encodeURIComponent(link);
+                }
+                if (newUrl) {
+                    window.location.hash = newUrl;
+                }
+            },
+            // @function _addLinkToUrl (private) [Modify url link] @param link
+            addLinkToUrl: function (link) {
+                var el = this;
+                var hash = decodeURIComponent(window.location.hash);
+                var cleanHash = hash.split("&link=")[0] ? hash.split("&link=")[0] :
+                    hash;
+                var urlLink = hash.split("&link=")[1] ? hash.split("&link=")[1].split("&")[0] :
+                    null;
+                if (urlLink != link) {
+                    window.location.hash = cleanHash + "&link=" + encodeURIComponent(link);
+                }
+            },
+            // @function _setVersion (private) [Set version control] @param value
+            setVersion: function (value) {
+                var el = this;
+                for (var key in value.versions) {
+                    var item = document.createElement("eon-item");
+                    item.value = key;
+                    item.displayValue = key;
+                    el._refs.version.addItem(item);
+                }
+                el._refs.version.value = value.current;
+                if (el._misc.goToVersion && el._misc.goToVersion != "") {
+                    setTimeout(function () {
+                        el._refs.version.select(el._misc.goToVersion);
+                    }, 0);
+                }
+            },
+            // @function _setMenu (private) [Set menu links] @param data
+            setMenu: function (data) {
+                var el = this;
+                var entries = data.entries;
+                if (Object.keys(entries).length < 4) {
+                    el._refs.mainView.classList.add("app-doc-main-view-under-three");
+                }
+                for (var key in entries) {
+                    var item = document.createElement("app-menu-item");
+                    var path = el._refs.version.value + "/" + key;
+                    item.value = path;
+                    item.label = entries[key].title;
+                    item.icon = entries[key].icon;
+                    item.link = key;
+                    el._setMainMenu(entries[key], key, path);
+                    el._refs.menu.addItem(item);
+                }
+            },
+            // @function _setMainMenu (private) [Set main menu links. Those are the buttons in the middle of the screen] @param data @param key @param path
+            setMainMenu: function (data, key, path) {
+                var el = this;
+                var item = document.createElement("app-doc-main-menu-item");
+                item.value = path;
+                item.label = data.title;
+                item.icon = data.icon;
+                item.brief = data.brief;
+                item.menu = el._refs.menu;
+                el._refs.mainView.appendChild(item);
+            },
+            // @function _hashControl (private) [Control if there are a hash in the url and redirect to the given place if so.]
+            hashControl: function () {
+                var el = this;
+                if (window.location.hash) {
+                    var hash = decodeURIComponent(window.location.hash);
+                    var version = hash.split("!version=")[1] ? hash.split("!version=")[1].split("&")[0] :
+                        null;
+                    var mode = hash.split("mode=")[1] ? hash.split("mode=")[1].split("&")[0] :
+                        null;
+                    var file = hash.split("file=")[1] ? hash.split("file=")[1].split("&")[0] :
+                        null;
+                    var link = hash.split("link=")[1] ? hash.split("link=")[1].split("&")[0] :
+                        null;
+                    if (version != el.version) {                        
+                        for (var key in el.versions) {
+                            if (version == key) {
+                                el._misc.goToVersion = version;
+                                el.version = version;                                
+                                // el.openView(); // Go to main view                                
+                            }
+                        }
+                        if (!el._misc.goToVersion || el._misc.goToVersion == "") {
+                            // TODO set version, note that it could be other params which shouldnt be deleted
+                            window.location.hash = "!version=" + encodeURIComponent(el.version);
+                        }
+                    }
+                    if (mode) {
+                        eon.onReady(function () {
+                            el._refs.menu.onReady(function () {                                
+                                el._refs.menu.selectByAttribute(mode, "link");
+                            });
+                        });
+                    }
+                    if (file) {
+                        eon.onReady(function () {
+                            el._refs.viewer.onReady(function () {                                
+                                el._refs.viewer.select(file, link);
+                            });
+                        });
+                    }
+                    if (!mode && !file) {                        
+                        el._refs.loading.hide();
+                    }
+                    eon.onReady(function () {
+                        el._refs.viewer.onReady(function () {
+                            el._refs.menu.onReady(function () {
+                                setTimeout(function () {
+                                    eon.triggerCallback("onHashDone", el);
+                                }, 0);
+                            });
+                        });
+                    });
+                } else {
+                    window.location.hash = "!version=" + encodeURIComponent(el.version);
+                    el._preventLoadingMask();
+                    el._refs.loading.hide();
+                }
+
+            },
+            // @function _preventLoadingMask (private) [Prevent loading mask to show on start]
+            preventLoadingMask: function () {
+                var el = this;
+                el._refs.loading.setAttribute("auto-start", "false");
+            }
+        },
+
+        onCreated: function () {
+            var el = this;
+            eon.createCallback("onHashDone", el);
+        },
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            var el = this;
+            switch (attrName) {
+                case "value":
+                    this.setValue(newVal);
+                    break;
+            }
+        }
+
+
+    });
+</script>

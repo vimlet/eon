@@ -1,0 +1,97 @@
+<template>
+    <div class="app-menu-box-label" eon-ref="label"></div>
+</template>
+
+<script>
+    eon.element({
+        name: "app-menu-box",
+        style: "app-menu-box.css",
+        dependencies: [
+            
+        ],
+        properties: {
+            // @param value (public) [Selected value]
+            value: {
+                value: "",
+                observe: true
+            },
+            // @param value (public) [Menu label]
+            label: {
+                value: "",
+                reflect: true
+            }
+        },
+
+        privateProperties: {
+            refs: {
+                value: {}
+            },
+            misc: {
+                value: {
+                    folderNodeOrderRegex: new RegExp("\\[\\d+\\]", "gm")
+                }
+            }
+        },
+
+        functions: {
+            // @function setValue (public) @param value
+            setValue:function(value){
+                var el = this;
+                console.log(value);
+                
+            },
+            // @function setLabel (public) [Set menu title] @param label
+            setLabel:function(label){
+                var el = this;
+                el._refs.label.innerHTML = label;
+            },
+            // @function toggle (public) [Expand or fold menu]
+            toggle:function(){
+                var el = this;
+
+            }
+        },
+
+        privateFunctions: {
+            // @function _init (private) [Initialize component]
+            init: function () {
+                var el = this;
+                el._setUp();
+            },
+            // @function _setUp (private) [Set up component]
+            setUp: function () {
+                var el = this;
+                if(el.value){
+                    el.setValue(el.value);
+                }
+                if(el.label){                    
+                    el.setLabel(el.label);
+                }
+                el._refs.label.addEventListener("click", function(){
+                    el.toggle();
+                });
+            }
+        },
+
+
+        onRender: function () {
+            var el = this;
+            el._init();
+        },
+
+        onPropertyChanged: function (attrName, oldVal, newVal) {
+            var el = this;
+            switch (attrName) {
+                case "value":                
+                    this.setValue(newVal);
+                    break;
+                case "label":                
+                    this.setLabel(newVal);
+                    break;
+            }
+        }
+
+
+
+    });
+</script>
