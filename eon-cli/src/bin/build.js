@@ -9,38 +9,45 @@ var { JSDOM } = jsdom;
 // Flat polyfill
 require("array-flat-polyfill");
 
-module.exports = async function (base, eonPath, input, output) {
+module.exports = async function (base, eonPath, input, output, prefix) {
     // TODO: Pass an actual path for the config, by default it will use eon.json
     var config = await readConfig(null);
     var build = {};
+    var filePath, outputPath;
 
     if (input) {
+        
+        // Creates the build config with the data provided by the user
+        var buildConfig = {
+            base: base,
+            location: eonPath,
+            prefix: prefix,
+            input: input,
+            output: output
+        };
 
+        filePath = base + "/" + input;
+        outputPath = output ? base + "/" + output : base + "/eon-build.js";
         build = {};
 
-        var inputPath = base + "/" + input;
-        var outputPath = output ? base + "/" + output : base + "/eon-build.js";
-
-        await includeFileImports(build, eonPath, path.join(process.cwd(), inputPath));
+        await includeFileImports(build, buildConfig, path.join(process.cwd(), filePath));
         await outputBuild(build, outputPath);
 
     } else if (config && config.build) {
 
         for (var i = 0; i < config.build.length; i++) {
 
-            var outputPath = config.build[i].output ? config.build[i].base + "/" + config.build[i].output : config.build[i].base + "/eon-build.js";
-            var eonPath = config.build[i].location;
-
             build = {};
+            outputPath = config.build[i].output ? config.build[i].base + "/" + config.build[i].output : config.build[i].base + "/eon-build.js";
 
             if (config.build[i].input) {
 
-                var inputPath = config.build[i].base + "/" + config.build[i].input;
-                await includeFileImports(build, eonPath, path.join(process.cwd(), inputPath));
+                filePath = config.build[i].base + "/" + config.build[i].input;
+                await includeFileImports(build, config.build[i], path.join(process.cwd(), filePath));
 
             } else if (config.build[i].imports) {
 
-                await includeImports(build, eonPath, config.build[i].base, config.build[i].imports);
+                await includeImports(build, config.build[i].base, eonPath, config.build[i].base, config.build[i].imports);
 
             }
             
@@ -66,14 +73,23 @@ async function readConfig(configPath) {
 
 }
 
-async function includeFileImports(build, eonPath, filePath) {
+async function includeFileImports(build, buildConfig, filePath) {
     var imports = await readImports(filePath);
-    await includeImports(build, eonPath, path.dirname(filePath), imports);
+
+    // If there is a prefix, we loop through imports to add the prefix to each import
+    // This is only needed in the root imports, not the dependencies
+    if (buildConfig.prefix) {
+        for (var i = 0; i < imports.length; i++) {
+            imports[i] = buildConfig.prefix + imports[i];
+        }
+    }
+
+    await includeImports(build, buildConfig.base, buildConfig.location, path.dirname(filePath), imports);
 }
 
-async function includeFileDependencies(build, eonPath, filePath) {
+async function includeFileDependencies(build, basePath, eonPath, filePath) {
     var dependencies = await readDependencies(filePath);
-    await includeImports(build, eonPath, path.dirname(filePath), dependencies, true);
+    await includeImports(build, basePath, eonPath, path.dirname(filePath), dependencies, true);
 }
 
 async function readImports(filePath) {
@@ -134,12 +150,12 @@ async function readDependencies(filePath) {
     return config.dependencies || [];
 }
 
-async function includeImports(build, eonPath, dirname, imports) {
+async function includeImports(build, basePath, eonPath, dirname, imports) {
 
     await Promise.all(imports.map(async (entry) => {
 
         var entryHTML = await getCorrectedInputPath(eonPath, entry);
-        var inputPath = path.join(dirname, entryHTML);
+        var inputPath = await hasEonRoot(entry) ? path.join(basePath, entryHTML) : path.join(dirname, entryHTML);
         var cssPath = inputPath.replace(".html", ".css");
         var componentName = path.basename(inputPath).replace(".html", "");
         var htmlFileExists = fs.existsSync(inputPath);
@@ -162,7 +178,7 @@ async function includeImports(build, eonPath, dirname, imports) {
                 path: entryHTML
             };
 
-            await includeFileDependencies(build, eonPath, inputPath);
+            await includeFileDependencies(build, basePath, eonPath, inputPath);
 
         }
 
@@ -176,7 +192,7 @@ async function getCorrectedInputPath(eonPath, inputPath) {
     inputPath = inputPath.charAt(0) !== "/" && inputPath.charAt(0) !== "@" && inputPath.charAt(0) !== "." ? "/" + inputPath : inputPath;
     inputPath = path.basename(inputPath).endsWith(".html") ? inputPath : path.join(inputPath, path.basename(inputPath) + ".html");
 
-    if (inputPath.charAt(0) === "@") {
+    if (await hasEonRoot(inputPath)) {
         inputPath = inputPath.substring(1);
         inputPath = eonPath + "/" + inputPath;
         inputPath = inputPath.replace(/\\/g, "/");
@@ -184,6 +200,10 @@ async function getCorrectedInputPath(eonPath, inputPath) {
 
     return inputPath;
 
+}
+
+async function hasEonRoot(inputPath) {
+    return inputPath.charAt(0) === "@";
 }
 
 async function outputBuild(build, outputPath) {

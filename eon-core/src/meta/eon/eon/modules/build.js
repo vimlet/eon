@@ -11,7 +11,7 @@ eon.processBuild = function (filePath) {
 
                     var script = document.createElement("script");
                     script.innerHTML = obj.responseText + "eon.declareBuildComponents();";
-                    document.body.appendChild(script);
+                    document.head.appendChild(script);
 
                 }
 

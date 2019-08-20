@@ -17,6 +17,7 @@ cli
 .value(null, "clear", "Removes various elements")
 .value(null, "base", "Main path from which input, base and output are relative to")
 .value(null, "location", "Path to the folder where eon.js is located, relative to the base path")
+.value(null, "prefix", "Path prefix for the input path")
 .value(null, "input", "Path of the file to be compiled")
 .value(null, "output", "Path for the compiled file")
 .flag(null, "build", "Reads the given file to read its imports and build a file")
@@ -40,7 +41,7 @@ if (Object.keys(cli.result).length === 0 || cli.result.help) {
 } else if(cli.result.publish) {
     publish(cli.result);
 } else if(cli.result.build) {
-    build(cli.result.base, cli.result.location, cli.result.input, cli.result.output);
+    build(cli.result.base, cli.result.location, cli.result.input, cli.result.output, cli.result.prefix);
 } else if(cli.result.version) {
     console.log(pjson.version);
 }
