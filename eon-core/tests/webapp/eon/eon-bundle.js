@@ -5943,19 +5943,53 @@ eon.imports.errors = eon.imports.errors || {};
 */
 eon.import = function (param) {
 
-    if (param.constructor === Array) {
+    if (eon.pendingBuilds && eon.pendingBuilds > 0) {
 
-        for (var i = 0; i < param.length; i++) {
-            eon.requestImport(param[i]);
+        eon.importsQueue = eon.importsQueue || [];
+
+        eon.importsQueue.push({
+            fn: function () {
+                eon.import(param);
+            },
+            triggered: false
+        });
+
+    } else {
+
+        if (param.constructor === Array) {
+
+            for (var i = 0; i < param.length; i++) {
+                eon.requestImport(param[i]);
+            }
+
+        } else if (param.constructor === String) {
+
+            eon.requestImport(param);
+
         }
-
-    } else if (param.constructor === String) {
-
-        eon.requestImport(param);
 
     }
 
 };
+
+/*
+@function resumeImports
+@description Resumes the imports that were waiting for the pending builds to finish
+*/
+eon.resumeImports = function () {
+
+    if (!eon.pendingBuilds || eon.pendingBuilds == 0) {
+
+        for (let i = 0; i < eon.importsQueue.length; i++) {
+            if (!eon.importsQueue[i].triggered) {
+                eon.importsQueue[i].fn();
+                eon.importsQueue[i].triggered = true;
+            }
+        }
+
+    }
+
+}
 
 /*
 @function requestImport
@@ -5974,10 +6008,10 @@ eon.requestImport = function (href) {
     if (!(elementName in eon.imports.templates) && (!eon.declared.all[elementName])) {
 
         eon.declared.ajax[elementName] = true;
-        
+
         // Everytime a new import is requested we reset the onReady and onImportsReady triggered state
         eon.imports.ready = false;
-        
+
         eon.__onImportsReady__triggered = false;
         eon.__onReady__triggered = false;
 
@@ -7320,7 +7354,7 @@ eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyP
 @param {String} keyPath
 */
 eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLocale) {
-  var value;
+  var value, newKeyPath;
 
   keyPath = keyPath + ".";
 
@@ -7339,8 +7373,8 @@ eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLo
 
       // If the value is an Object then we update the keyPath and create the propDescriptors
       if (value && value.constructor === Object) {
-        keyPath = keyPath + key;
-        eon.interpolation.createObjectPropDescriptors(el, value, keyPath, isLocale);
+        newKeyPath = keyPath + key;
+        eon.interpolation.createObjectPropDescriptors(el, value, newKeyPath, isLocale);
       }
     }
   }
@@ -10966,10 +11000,16 @@ eon.domReady(function () {
 });
 
 
-
+/*
+@function processBuild
+@description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
+@param {String} filePath
+*/
 eon.processBuild = function (filePath) {
 
     if (filePath) {
+
+      eon.pendingBuilds = eon.pendingBuilds ? eon.pendingBuilds + 1 : 1;
 
         eon.ajax(filePath, null, function (success, obj) {
 
@@ -10978,23 +11018,28 @@ eon.processBuild = function (filePath) {
                 if (obj.xhr.status === 200) {
 
                     var script = document.createElement("script");
-                    script.innerHTML = obj.responseText + "eon.declareBuildComponents();";
-                    document.body.appendChild(script);
+                    script.innerHTML = obj.responseText + "eon.declareBuildComponents();eon.pendingBuilds--;eon.resumeImports();";
+                    document.head.appendChild(script);
 
                 }
 
+            } else {
+              eon.pendingBuilds--;
+              eon.resumeImports();
             }
 
         });
 
     } else {
-
         eon.declareBuildComponents();
-
     }
 
 }
 
+/*
+@function declareBuildComponents
+@description Loops through eon.build and declares each component
+*/
 eon.declareBuildComponents = function () {
 
     eon.declaredComponents = eon.declaredComponents || {};

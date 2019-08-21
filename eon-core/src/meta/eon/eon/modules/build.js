@@ -1,7 +1,13 @@
-
+/*
+@function processBuild
+@description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
+@param {String} filePath
+*/
 eon.processBuild = function (filePath) {
 
     if (filePath) {
+
+      eon.pendingBuilds = eon.pendingBuilds ? eon.pendingBuilds + 1 : 1;
 
         eon.ajax(filePath, null, function (success, obj) {
 
@@ -10,23 +16,28 @@ eon.processBuild = function (filePath) {
                 if (obj.xhr.status === 200) {
 
                     var script = document.createElement("script");
-                    script.innerHTML = obj.responseText + "eon.declareBuildComponents();";
+                    script.innerHTML = obj.responseText + "eon.declareBuildComponents();eon.pendingBuilds--;eon.resumeImports();";
                     document.head.appendChild(script);
 
                 }
 
+            } else {
+              eon.pendingBuilds--;
+              eon.resumeImports();
             }
 
         });
 
     } else {
-
         eon.declareBuildComponents();
-
     }
 
 }
 
+/*
+@function declareBuildComponents
+@description Loops through eon.build and declares each component
+*/
 eon.declareBuildComponents = function () {
 
     eon.declaredComponents = eon.declaredComponents || {};

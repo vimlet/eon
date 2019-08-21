@@ -28,19 +28,53 @@ eon.imports.errors = eon.imports.errors || {};
 */
 eon.import = function (param) {
 
-    if (param.constructor === Array) {
+    if (eon.pendingBuilds && eon.pendingBuilds > 0) {
 
-        for (var i = 0; i < param.length; i++) {
-            eon.requestImport(param[i]);
+        eon.importsQueue = eon.importsQueue || [];
+
+        eon.importsQueue.push({
+            fn: function () {
+                eon.import(param);
+            },
+            triggered: false
+        });
+
+    } else {
+
+        if (param.constructor === Array) {
+
+            for (var i = 0; i < param.length; i++) {
+                eon.requestImport(param[i]);
+            }
+
+        } else if (param.constructor === String) {
+
+            eon.requestImport(param);
+
         }
-
-    } else if (param.constructor === String) {
-
-        eon.requestImport(param);
 
     }
 
 };
+
+/*
+@function resumeImports
+@description Resumes the imports that were waiting for the pending builds to finish
+*/
+eon.resumeImports = function () {
+
+    if (!eon.pendingBuilds || eon.pendingBuilds == 0) {
+
+        for (let i = 0; i < eon.importsQueue.length; i++) {
+            if (!eon.importsQueue[i].triggered) {
+                eon.importsQueue[i].fn();
+                eon.importsQueue[i].triggered = true;
+            }
+        }
+
+    }
+
+}
 
 /*
 @function requestImport
@@ -59,10 +93,10 @@ eon.requestImport = function (href) {
     if (!(elementName in eon.imports.templates) && (!eon.declared.all[elementName])) {
 
         eon.declared.ajax[elementName] = true;
-        
+
         // Everytime a new import is requested we reset the onReady and onImportsReady triggered state
         eon.imports.ready = false;
-        
+
         eon.__onImportsReady__triggered = false;
         eon.__onReady__triggered = false;
 
