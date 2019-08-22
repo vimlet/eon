@@ -3329,7 +3329,9 @@ eon.resumeImports = function () {
 
     if (!eon.pendingBuilds || eon.pendingBuilds == 0) {
 
-        for (let i = 0; i < eon.importsQueue.length; i++) {
+        eon.importsQueue = eon.importsQueue || [];
+
+        for (var i = 0; i < eon.importsQueue.length; i++) {
             if (!eon.importsQueue[i].triggered) {
                 eon.importsQueue[i].fn();
                 eon.importsQueue[i].triggered = true;
