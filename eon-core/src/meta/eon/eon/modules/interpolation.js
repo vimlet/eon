@@ -682,7 +682,7 @@ eon.interpolation.backwardDataDiffing = function (source, keyPath, oldData, newD
     // We only want take into account the keys that are not used for the descriptor
     if (key.indexOf("__") == -1) {
       // If the property is an object, we enter this function again for that object
-      if (oldData[key].constructor === Object) {
+      if (oldData[key] && oldData[key].constructor === Object) {
         checked[key] = eon.interpolation.backwardDataDiffing(source, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config, isLocale);
       } else {
         // If there is no such property on the new Data we set it as an empty string
@@ -717,7 +717,7 @@ eon.interpolation.forwardDataDiffing = function (source, keyPath, data, checked,
     // We only want take into account the keys that are not used for the descriptor
     if (key.indexOf("__") == -1) {
       // If the property is an object, we enter this function again for that object
-      if (data[key].constructor === Object) {
+      if (data[key] && data[key].constructor === Object) {
         eon.interpolation.forwardDataDiffing(source, keyPath + "." + key, data[key], checked ? checked[key] : checked, config, isLocale);
       } else {
         oldVal = checked ? checked[key] : "";
