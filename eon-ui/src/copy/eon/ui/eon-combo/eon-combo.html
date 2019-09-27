@@ -317,11 +317,6 @@
             el._misc.modal.inputFocus = true;
           }, false);
 
-          // el._refs.modalInput.addEventListener('blur', function (e) {
-          //     console.log('blur');
-          //   el._misc.modal.inputFocus = false;
-          // }, false);
-
           el._refs.modalInput.addEventListener("keyup", function (e) {
             el._filter();
           });
@@ -491,13 +486,6 @@
           e.stopPropagation();
         }, { passive: false });
 
-        // If the user manages the scroll we close the overlay
-        window.addEventListener("scroll", function (e) {
-          // if (el._misc.modal.active && !el._refs.overlay.classList.contains("eon-combo-device")) {
-          //   el.shrink();
-          // }
-        });
-
         // This behavior is only supported on iOS 10 and beyond
         if (iOS && iOS >= 10) {
 
@@ -642,7 +630,7 @@
           item.dataset.matches = true;
           item.value = storeData.get(key)[el.idProperty];
           item.displayValue = storeData.get(key)[displayProperty];
-
+         
           el._misc.displayValueItems[item.displayValue.toString().toLowerCase()] = item;
 
           el._misc.items[item.value] = item;
@@ -838,7 +826,7 @@
         var items = el._refs.dropDown.querySelectorAll("eon-item");
         var value = el._misc.modal.inputFocus ? el._refs.modalInput.value.toLowerCase() : el._refs.input.value.toLowerCase();
         var regex = value;
-
+        
         // Escape regex
         regex = regex.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 
@@ -938,9 +926,7 @@
 
         var el = this;
 
-        if (el.classList.contains("eon-combo-focus")) {
-          // el.shrink();
-        } else {
+        if (!el.classList.contains("eon-combo-focus")) {
           el.expand();
         }
       },
@@ -1139,7 +1125,7 @@
 
         var el = this;
         var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
-
+        
         el.classList[classListFn]("eon-combo-error");
 
       }
@@ -1192,7 +1178,7 @@
         if (typeof item === "string") {
           item = el._misc.items[item];
         }
-
+        
         eon.triggerCallback("onSelect", el, el, [item]);
 
         if (el.__onSelect[0]) {
@@ -1264,8 +1250,6 @@
             if (el._refs.overlay.parentNode) {
               el._refs.overlay.parentNode.removeChild(el._refs.overlay);
             }
-
-            el._filterItems();
 
             el._misc.modal.active = false;
             el._misc.modal.inputFocus = false;
