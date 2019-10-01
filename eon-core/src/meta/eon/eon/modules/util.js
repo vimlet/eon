@@ -147,6 +147,7 @@ eon.util.getBrowserScrollBarWidth = function () {
     outer.style.visibility = "hidden";
     outer.style.width = "100px";
     outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+    outer.classList.add("eonScrollWidthChecker");
 
     document.body.appendChild(outer);
 
