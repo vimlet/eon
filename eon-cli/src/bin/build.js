@@ -215,6 +215,7 @@ async function outputBuild(build, outputPath) {
     txt += "eon.build = Object.assign(eon.build,";
     txt += JSON.stringify(build);
     txt += ");";
+    txt += "eon.declareBuildComponents();";
 
     fs.writeFileSync(outputPath, txt);
 
