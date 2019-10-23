@@ -10,7 +10,7 @@
     name: "eon-button",
     style: "eon-button.css",
 
-    themed: true, 
+    themed: true,
 
     properties: {
       /*
@@ -280,7 +280,7 @@
           if (el.design == "filled") {
             el._refs.button.classList.add("eon-bg2-filled");
             el._refs.button.classList.remove("eon-bg2-filled-disabled", "eon-fg2-filled-disabled");
-          } 
+          }
 
         } else {
 
@@ -291,7 +291,7 @@
           if (el.design == "filled") {
             el._refs.button.classList.remove("eon-bg2-filled");
             el._refs.button.classList.add("eon-bg2-filled-disabled", "eon-fg2-filled-disabled");
-          } 
+          }
         }
       }
     },
@@ -299,24 +299,30 @@
     onCreated: function () {
       var el = this;
 
+      eon.createCallback("onClick", this);
+
       el._createRefs();
     },
 
     onInit: function () {
       var el = this;
-      
+
       el._setLabel();
       el._setDesign();
       el._updateDisabled();
       el._setupIcon(el.icon);
-      
+
       // When the button is a type form submit
       (el.type) ? el._refs.button.setAttribute("type", el.type) : null;
-      
+
       el.setAttribute("icon-position", el.iconPosition);
-      
+
+      el.addEventListener("click", function () {
+        eon.triggerCallback("onClick", el);
+      });
+
     },
-    
+
     onRender: function () {
       var el = this;
       el._setupLink();
