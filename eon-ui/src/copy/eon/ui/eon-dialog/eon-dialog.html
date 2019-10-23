@@ -119,26 +119,6 @@
         reflectDefault: false
       },
       /*
-        @property {String} width 
-        @description Dialog width.
-        Values can be: any of the width CSS values
-      */
-      width: {
-        value: "",
-        reflect: true,
-        reflectDefault: false
-      },
-      /*
-        @property {String} height 
-        @description Dialog height.
-        Values can be: any of the height CSS values
-      */
-      height: {
-        value: "",
-        reflect: true,
-        reflectDefault: false
-      },
-      /*
         @property {Number} minWidth 
         @description Dialog minimum width.
         Value must be int number.
@@ -180,6 +160,22 @@
         value: "false",
         reflect: true,
         reflectDefault: false
+      },
+      /*
+        @property {Boolean} openRendered 
+        @description 
+        Default: false
+      */
+      openRendered: {
+        value: false
+      },
+      /*
+        @property {Boolean} closeRendered 
+        @description 
+        Default: true
+      */
+      closeRendered: {
+        value: true
       },
       /*
         @property {Boolean} allowScroll
@@ -348,12 +344,12 @@
       */
       addContent: function () {
         var el = this;
-        
+
         el._refs.userContent = el._refs.userContent ? el._refs.userContent : document.createElement("eon-section");
-        
+
         el._refs.userContent.type = "content";
         el._refs.userContent.classList.add("eon-dialog-content", "eon-spaced-container");
-        
+
         el.content = el._refs.userContent;
       },
 
@@ -449,8 +445,8 @@
       */
       dragLimits: function () {
         var el = this;
-        windowWidth = window.innerWidth - el._misc.windowPadding;
-        windowHeight = window.innerHeight - el._misc.windowPadding;
+        windowWidth = document.documentElement.clientWidth - el._misc.windowPadding;
+        windowHeight = document.documentElement.clientHeight - el._misc.windowPadding;
 
         el.style.left = (el.offsetLeft < el._misc.windowPadding) ? el.style.left = el._misc.windowPadding + "px" : el.style.left;
         el.style.top = (el.offsetTop < el._misc.windowPadding) ? el.style.top = el._misc.windowPadding + "px" : el.style.top;
@@ -547,8 +543,8 @@
         var el = this;
         var minWidth = parseInt(window.getComputedStyle(el, null).minWidth);
         var minHeight = parseInt(window.getComputedStyle(el, null).minHeight);
-        var rightLimit = window.innerWidth - el._misc.windowPadding;
-        var bottomLimit = window.innerHeight - el._misc.windowPadding;
+        var rightLimit = document.documentElement.clientWidth - el._misc.windowPadding;
+        var bottomLimit = document.documentElement.clientHeight - el._misc.windowPadding;
         var newWidth, newHeight;
 
         switch (resizerName) {
@@ -601,8 +597,8 @@
         var el = this;
         var minWidth = parseInt(window.getComputedStyle(el, null).minWidth);
         var minHeight = parseInt(window.getComputedStyle(el, null).minHeight);
-        var rightLimit = window.innerWidth - el._misc.windowPadding;
-        var bottomLimit = window.innerHeight - el._misc.windowPadding;
+        var rightLimit = document.documentElement.clientWidth - el._misc.windowPadding;
+        var bottomLimit = document.documentElement.clientHeight - el._misc.windowPadding;
 
         var newWidth, newHeight;
 
@@ -854,7 +850,7 @@
       */
       verifyDeviceVersion: function () {
         var el = this;
-        var mobileCondition = ((window.innerWidth <= eon.mobileWidth || window.innerHeight <= eon.mobileWidth) && eon.util.isTouchScreen()) || navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i);
+        var mobileCondition = ((document.documentElement.clientWidth <= eon.mobileWidth || document.documentElement.clientHeight <= eon.mobileWidth) && eon.util.isTouchScreen()) || navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i);
 
         el.dataset.mobile = mobileCondition ? "true" : "false";
       },
@@ -986,12 +982,11 @@
       */
       assignCenterPosition: function () {
         var el = this;
-        var centerWidth = (window.innerWidth - el.offsetWidth) / 2;
-        var centerHeight = (window.innerHeight - el.offsetHeight) / 2;
+        var centerWidth = (document.documentElement.clientWidth - el.offsetWidth) / 2;
+        var centerHeight = (document.documentElement.clientHeight - el.offsetHeight) / 2;
 
         el.style.left = centerWidth + "px";
         el.style.top = centerHeight + "px";
-
       },
 
 
@@ -1035,15 +1030,15 @@
         var el = this;
 
         if (el._misc.firstOpen) {
-          el._misc.initialWidth = el.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el.offsetWidth;
-          el._misc.initialHeight = el.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el.offsetHeight;
+          el._misc.initialWidth = el.offsetWidth >= (document.documentElement.clientWidth - 20) ? "calc(100% - 40px)" : el.offsetWidth;
+          el._misc.initialHeight = el.offsetHeight >= (document.documentElement.clientHeight - 20) ? "calc(100% - 40px)" : el.offsetHeight;
         }
 
         // Prevents the scroll from exceeding the dialog since 
         // the dialog has no default size to limit the scroll on IE 
         if (eon.util.getBrowser() == "IE") {
-          el.style.width = el.offsetWidth >= (window.innerWidth - 20) ? "calc(100% - 20px)" : el.offsetWidth + "px";
-          el.style.height = el.offsetHeight >= (window.innerHeight - 20) ? "calc(100% - 20px)" : el.offsetHeight + "px";
+          el.style.width = el.offsetWidth >= (document.documentElement.clientWidth - 40) ? "calc(100% - 40px)" : el.offsetWidth + "px";
+          el.style.height = el.offsetHeight >= (document.documentElement.clientHeight - 40) ? "calc(100% - 40px)" : el.offsetHeight + "px";
         }
       },
 
@@ -1056,7 +1051,7 @@
 
         // Stores the windows previous window resize size and the resize after do window resize
         el._misc.previousWindowWidth = el._misc.newWindowWidth;
-        el._misc.newWindowWidth = window.innerWidth;
+        el._misc.newWindowWidth = document.documentElement.clientWidth;
 
         // Only when the dialog is visible and is neither minimized nor maximized.
         if (el.dataset.status == "" && el.classList.contains("eon-dialog-visible") && el.dataset.mobile == "false") {
@@ -1089,24 +1084,12 @@
       */
       handleDialogSize: function () {
         var el = this;
-
         // When the dialog width is bigger than window set it a percentage width
-        if (el.offsetWidth >= (window.innerWidth - 20) && !el._misc.sizeControl) {
-          el.style.width = "calc(100% - 20px)";
+        if (el.offsetWidth >= (document.documentElement.clientWidth - 40) && !el._misc.sizeControl) {
+          el.style.width = "calc(100% - 40px)";
           el._misc.sizeControl = true;
         }
 
-        // When the window grows back, the width of the dialog is restored
-        if (el.maxWidth != "auto") {
-          if (el.offsetWidth < (window.innerWidth - 20) && el.offsetWidth == el._misc.initialWidth && el._misc.sizeControl) {
-            el.style.width = "";
-            el._misc.sizeControl = false;
-          }
-
-        } else if (el.offsetWidth <= (window.innerWidth - 20) && el.offsetWidth >= el._misc.initialWidth && el._misc.sizeControl) {
-          el.style.width = "";
-          el._misc.sizeControl = false;
-        }
       },
 
       /*
@@ -1116,17 +1099,17 @@
       handleWindowEdges: function () {
         var el = this;
 
-        var isOnRightEdge = (el.offsetLeft + el.offsetWidth) >= (window.innerWidth - el._misc.windowPadding);
-        var isOnBottomEdge = (el.offsetTop + el.offsetHeight) >= (window.innerHeight - el._misc.windowPadding);
+        var isOnRightEdge = (el.offsetLeft + el.offsetWidth) >= (document.documentElement.clientWidth - el._misc.windowPadding);
+        var isOnBottomEdge = (el.offsetTop + el.offsetHeight) >= (document.documentElement.clientHeight - el._misc.windowPadding);
         var exceedsTopEdge = el.offsetTop < el._misc.windowPadding;
         var exceedsLeftEdge = el.offsetLeft < el._misc.windowPadding;
 
         if (isOnRightEdge || exceedsLeftEdge) {
-          el.style.left = window.innerWidth - (el.offsetWidth + el._misc.windowPadding) + "px";
+          el.style.left = document.documentElement.clientWidth - (el.offsetWidth + el._misc.windowPadding) + "px";
         }
 
         if (isOnBottomEdge || exceedsTopEdge) {
-          el.style.top = window.innerHeight - (el.offsetHeight + el._misc.windowPadding) + "px";
+          el.style.top = document.documentElement.clientHeight - (el.offsetHeight + el._misc.windowPadding) + "px";
         }
       },
 
@@ -1136,8 +1119,8 @@
       */
       limitPosition: function () {
         var el = this;
-        var exceedsWindowWidth = (parseInt(el.style.left) + el.offsetWidth) > (window.innerWidth - el._misc.windowPadding);
-        var exceedsWindowHeight = (parseInt(el.style.top) + el.offsetHeight) > (window.innerHeight - el._misc.windowPadding);
+        var exceedsWindowWidth = (parseInt(el.style.left) + el.offsetWidth) > (document.documentElement.clientWidth - el._misc.windowPadding);
+        var exceedsWindowHeight = (parseInt(el.style.top) + el.offsetHeight) > (document.documentElement.clientHeight - el._misc.windowPadding);
 
         // If exceeds the window size, we will move the dialog to axis 0 so that we can know which would be its real size on that axis, then we set back its top/left to the position
         // its should be placed keeping in mind its width/height when it has space to grow
@@ -1161,11 +1144,11 @@
             height = el.offsetHeight;
 
             if (exceedsWindowWidth) {
-              el.style.left = window.innerWidth - el._misc.windowPadding - width + "px";
+              el.style.left = document.documentElement.clientWidth - el._misc.windowPadding - width + "px";
             }
 
             if (exceedsWindowHeight) {
-              el.style.top = window.innerHeight - el._misc.windowPadding - height + "px";
+              el.style.top = document.documentElement.clientHeight - el._misc.windowPadding - height + "px";
             }
 
             el.style.opacity = 1;
@@ -1183,10 +1166,12 @@
       open: function () {
         var el = this;
 
-        if (!el.classList.contains("eon-dialog-visible")) {
+        if (!el.classList.contains("eon-dialog-visible") && el.closeRendered) {
           eon.triggerCallback("onOpen", el);
 
-          el._assignSize();
+          el.closeRendered = false;
+
+          el._assignSize(); //
           el._addOverlay();
 
           el.addEventListener("mousedown", function (e) {
@@ -1200,28 +1185,29 @@
           // To see the opening animation of the dialog
           setTimeout(function () {
             // The dialog will already have the final size.
+            el._registerInitialSize();
+            el._handleDialogSize();
+            el._limitPosition();
             el._setPosition();
             el.classList.add("eon-dialog-visible");
 
             // Fixes scale issues because it does not update DOM elements size 
             setTimeout(function () {
               // Forces scroll update
-              el._refs.scroll.update();
-              el._misc.openRendered = true;
+              if (eon.util.isTrue(el.allowScroll)) {
+                el._refs.scroll.update();
+              }
+              el.openRendered = true;
+              eon.triggerCallback("onOpenRendered", el);
+
             }, 300);
           }, 0);
-
 
           el.parentNode.insertBefore(el._refs.placeholder, el);
           document.body.appendChild(el);
 
-          el._handleDialogSize();
-          el._registerInitialSize();
-          el._limitPosition();
-
           eon.triggerCallback("onOpened", el);
         }
-
       },
 
       /*
@@ -1231,7 +1217,7 @@
       close: function () {
         var el = this;
         // ** TODO Check if the dialog is completely opened
-        if (el._misc.openRendered) {
+        if (el.openRendered) {
           // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
           el._misc.firstOpen = false;
 
@@ -1240,14 +1226,16 @@
           el.classList.remove("eon-dialog-visible");
           el.classList.remove("eon-dialog-scaled");
 
-          el._misc.openRendered = false;
+          el.openRendered = false;
 
           setTimeout(function () {
             el.classList.add("eon-dialog-hide");
             el._refs.placeholder.parentNode.insertBefore(el, el._refs.placeholder);
             el._refs.placeholder.parentNode.removeChild(el._refs.placeholder);
-          }, 100);
 
+            eon.triggerCallback("onCloseRendered", el);
+            el.closeRendered = true;
+          }, 100);
 
           if (el._refs.overlay && el._refs.overlay.parentNode) {
             el._refs.overlay.parentNode.removeChild(el._refs.overlay);
@@ -1278,8 +1266,10 @@
       // Create callbacks
       eon.createCallback("onOpen", el);
       eon.createCallback("onOpened", el);
+      eon.createCallback("onOpenRendered", el);
       eon.createCallback("onClose", el);
       eon.createCallback("onClosed", el);
+      eon.createCallback("onCloseRendered", el);
 
       el._createRefs();
 
@@ -1288,8 +1278,8 @@
       el._misc.scaled = {};
       el._misc.windowPadding = 5;
       el._misc.sizeControl = false;
-      el._misc.previousWindowWidth = window.innerWidth;
-      el._misc.newWindowWidth = window.innerWidth;
+      el._misc.previousWindowWidth = document.documentElement.clientWidth;
+      el._misc.newWindowWidth = document.documentElement.clientWidth;
 
       el._misc.firstOpen = true;
       el._misc.statusMaxi = false;

@@ -25,6 +25,28 @@
     display: none;
   }
 
+  /* TIME RELATED RULES */
+  @{element}[time="true"][inline="true"] {
+width: 260px;
+}
+@{element}[time="false"] .@{element}-subInput[data-field="hours"], 
+@{element}[time="false"] .@{element}-subInput[data-field="minutes"],
+@{element}[time="false"] .@{element}-timeSeparator {
+display: none;
+background: red;
+}
+/* CALENDAR TYPE RELATED */
+@{element}[type="calendar"][inline="false"] {
+  width: 100%;
+}
+@{element}[type="calendar"][inline="true"] {
+  min-width: 300px;
+  width: 300px;
+}
+@{element}[type="calendar"] .@{element}-footer {
+  display: none;
+}
+
   .@{element}-label {
     position: absolute;
     transform: translate3d(0,0,0);
@@ -82,24 +104,21 @@
     flex-basis: 0;
   }
   
-  .@{element}-subInputs div[data-field="day"], .@{element}-subInputs div[data-field="month"] {
+  .@{element}-subInput {
     text-align: center;
-  
     flex-basis: 0;
     flex-grow: 1;
-  }
-  
-  .@{element}-subInputs div[data-field="year"] {
-    text-align: center;
-  
-    flex-basis: 0;
-    flex-grow: 1.5;
-  }
-  
-  .@{element}-subInputs div[data-field] {
     transition: 0.3s all;
     outline: none;
     display: flex;
+  }
+  
+  .@{element}-subInputs div[data-field="year"] {
+    flex-grow: 1.5;
+  }
+  
+  .@{element}-subInputs div[data-field="hours"] {
+    margin-left: 10px;
   }
   
   .@{element}-subInput input {
@@ -125,7 +144,7 @@
       margin: 0;
   }
   
-  .@{element}-separator {
+  .@{element}-separator, .@{element}-timeSeparator {
     display: flex;
     padding: 0 5px;
   
@@ -232,14 +251,13 @@
 
 .@{element}-calendar {
   display: flex;
-
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
   position: relative;
   flex-direction: column;
-  min-height: 180px;
+  height: auto;
 }
 
 &[readonly="true"] .@{element}-calendar {
@@ -281,8 +299,9 @@
   position: relative;
   display: flex;
   width: 100%;
-  height: 18%;
-  max-height: 60px;
+  height: 50px;
+  // height: 18%;
+  // max-height: 60px;
   text-transform: capitalize;
   box-sizing: border-box;
 
@@ -296,7 +315,7 @@ div[data-disabled="true"]:hover  {
 }
 
 .@{element}-header .@{element}-hidden {
-  display: none;
+  display: none !important;
 }
 
 .@{element}-daysGridSelectors, .@{element}-monthsGridSelectors, .@{element}-yearsGridSelectors {
@@ -367,9 +386,9 @@ div[data-disabled="true"]:hover  {
   justify-content: flex-end;
 }
 
-.@{element}-previous, .@{element}-next, .@{element}-back, .@{element}-close {
+.@{element}-previous, .@{element}-next, .@{element}-toggle, .@{element}-close {
   display: flex;
-  width: 50%;
+  width: 50px;
   height: 100%;
   cursor: pointer;
   -webkit-transition: background-color 0.3s;
@@ -382,12 +401,28 @@ div[data-disabled="true"]:hover  {
   justify-content: center;
 }
 
+.@{element}-timeSwitch {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  -webkit-transition: background-color 0.3s;
+  -moz-transition: background-color 0.3s;
+  -o-transition: background-color 0.3s;
+  transition: background-color 0.3s;
+  align-items: center;
+  justify-content: center;
+}
+
 .@{element}-body {
   position: relative;
   display: flex;
   box-sizing: border-box;
   width: 100%;
-  padding: 0 5px 10px 5px;
+  padding: 10px;
 
   flex-grow: 1;
 }
@@ -412,6 +447,88 @@ div[data-disabled="true"]:hover  {
   cursor: default;
 }
 
+/* TIME SELECTOR */
+.@{element}-clockView {
+  position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.@{element}-clock {
+  display: flex;
+  align-items: center;
+  font-size: 35px;
+  width: 100%;
+  justify-content: space-evenly;
+}
+.@{element}-hour, .@{element}-minutes {
+  border-radius: 5px;
+  position: relative;
+}
+.@{element}-hour .@{element}-currentHour, .@{element}-timeDots, .@{element}-minutes  .@{element}-currentMinutes{
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.@{element}-hoursUp, .@{element}-minutesUp, .@{element}-hoursDown, .@{element}-minutesDown {
+  padding: 5px 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.@{element}-clock i {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.@{element}-clockType {
+  display: flex;
+  border-radius: 5px;
+  overflow: hidden;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
+}
+.@{element}-hour, .@{element}-minutes, .@{element}-clockType {
+  flex-grow: 1;
+  /* max-width: 62px; */
+  max-width: 20%;
+}
+.@{element}-amButton, .@{element}-pmButton {
+  padding: 10px 15px;
+  font-size: 22px;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.@{element}-footer {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 50px;
+}
+.@{element}-okButton {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+// GRIDS
 .@{element}-daysGrid {
   display: flex;
   flex-direction: column;

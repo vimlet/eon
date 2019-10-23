@@ -8,18 +8,36 @@
   <div class="eon-date-main eon-bg2 eon-fg1 eon-unselectable">
 
     <div class="eon-date-subInputs">
-      <div class="eon-date-subInput first">
-        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
+
+      <!-- DATE -->
+      <div class="eon-date-subInput" eon-ref="fields.first">
+        <input eon-ref="subInputs.first" placeholder="" type="number" autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false"></input>
       </div>
       <div class="eon-date-separator"></div>
-      <div class="eon-date-subInput second">
-        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
+      <div class="eon-date-subInput" eon-ref="fields.second">
+        <input eon-ref="subInputs.second" placeholder="" type="number" autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false"></input>
       </div>
       <div class="eon-date-separator"></div>
-      <div class="eon-date-subInput third">
-        <input placeholder="" type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></input>
+      <div class="eon-date-subInput" eon-ref="fields.third">
+        <input eon-ref="subInputs.third" placeholder="" type="number" autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false"></input>
       </div>
+
+      <!-- TIME -->
+      <div class="eon-date-subInput" data-field="hours" eon-ref="fields.hours" data-order="3">
+        <input eon-ref="subInputs.hours" placeholder="" type="number" autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false"></input>
+      </div>
+      <div class="eon-date-timeSeparator">:</div>
+      <div class="eon-date-subInput" data-field="minutes" eon-ref="fields.minutes" data-order="4">
+        <input eon-ref="subInputs.minutes" placeholder="" type="number" autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false"></input>
+      </div>
+
     </div>
+
     <i class="eon-date-button eon-fg2 eon-fg2-hoverable vicon vicon-calendar"></i>
 
   </div>
@@ -45,13 +63,57 @@
       </div>
 
       <div class="eon-date-rightNavigation">
-        <div class="eon-date-back eon-unselectable eon-date-hidden eon-fg1-hoverable">
-          <i class="vicon vicon-arrow-back"></i>
+        <div class="eon-date-toggle eon-unselectable eon-date-hidden eon-fg1-hoverable" eon-ref="toggle">
+          <i class="vicon vicon-clock" eon-ref="toggleIcon"></i>
         </div>
       </div>
     </div>
 
-    <div class="eon-date-body"> </div>
+    <div class="eon-date-body">
+
+      <div class="eon-date-clockView eon-sect1" eon-ref="clockView">
+        <div class="eon-date-clock">
+
+          <!-- CLOCK HOURS -->
+          <div class="eon-date-hour eon-sect3">
+            <div class="eon-date-hoursUp" eon-ref="hoursUp">
+              <i class="vicon vicon-chevron-up"></i>
+            </div>
+            <div class="eon-date-currentHour eon-bg9" eon-ref="currentHours">11</div>
+            <div class="eon-date-hoursDown" eon-ref="hoursDown">
+              <i class="vicon vicon-chevron-down"></i>
+            </div>
+          </div>
+
+          <!-- CLOCK MINUTES -->
+          <div class="eon-date-minutes eon-sect3">
+            <div class="eon-date-minutesUp" eon-ref="minutesUp">
+              <i class="vicon vicon-chevron-up"></i>
+            </div>
+            <div class="eon-date-currentMinutes eon-bg9" eon-ref="currentMinutes">30</div>
+            <div class="eon-date-minutesDown" eon-ref="minutesDown">
+              <i class="vicon vicon-chevron-down"></i>
+            </div>
+          </div>
+
+          <!-- CLOCK AM/PM SELECTOR -->
+          <div class="eon-date-clockType eon-sect3">
+            <div class="eon-date-amButton" eon-ref="amButton">AM</div>
+            <div class="eon-date-pmButton" eon-ref="pmButton">PM</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="eon-date-footer">
+
+      <div class="eon-date-okButton" eon-ref="okButton">
+        OK
+      </div>
+
+    </div>
 
   </div>
 
@@ -139,11 +201,35 @@
         reflect: true
       },
       /*
-      @property {String} selectable
-      @description Indicates the selectable values of the calendar (day, month and year)
+      @property {Boolean} dayPicking
+      @description Whether the user will be able to pick a day from the calendar
       */
-      selectable: {
-        value: "dmy",
+      dayPicking: {
+        value: true,
+        reflect: true,
+      },
+      /*
+      @property {Boolean} monthPicking
+      @description Whether the user will be able to pick a month from the calendar
+      */
+      monthPicking: {
+        value: true,
+        reflect: true,
+      },
+      /*
+      @property {Boolean} yearPicking
+      @description Whether the user will be able to pick a year from the calendar
+      */
+      yearPicking: {
+        value: true,
+        reflect: true,
+      },
+      /*
+      @property {String} time
+      @description Whether the component allows the user to pick the time for the date
+      */
+      time: {
+        value: "false",
         reflect: true,
         reflectDefault: true
       },
@@ -169,7 +255,7 @@
       @description Date format of the input
       */
       mask: {
-        value: "YYYYMMDD",
+        value: "DDMMYYYY",
         reflect: true
       },
       /*
@@ -209,7 +295,7 @@
       @description Indicates the format of the value
       */
       valueFormat: {
-        value: "YYYY-MM-DD",
+        value: "YYYY-MM-DD hh:mm",
         reflect: true
       },
       /*
@@ -307,7 +393,9 @@
 
         el.locale = (el.locale != undefined && el.locale != "") ? el.locale : navigator.language;
 
-        el._refs.calendar.setAttribute("selectable", el.selectable);
+        el._refs.calendar.setAttribute("day-picking", el.dayPicking);
+        el._refs.calendar.setAttribute("month-picking", el.monthPicking);
+        el._refs.calendar.setAttribute("year-picking", el.yearPicking);
 
         el._initDefault();
 
@@ -422,14 +510,21 @@
           el._goToNext(this);
         });
 
-        el._refs.calendar.querySelector(".eon-date-back").addEventListener(el._misc.downTrigger, function (e) {
+        el._refs.toggle.addEventListener(el._misc.downTrigger, function (e) {
+
           e.stopPropagation();
           e.preventDefault();
-          el._goBack(this);
+
+          if (el._misc.currentView == el._refs.clockView) {
+            el._showDaysGrid();
+          } else {
+            el._showClockView();
+          }
+
         });
 
         el._refs.calendar.querySelector(".eon-date-header .eon-date-month").addEventListener(el._misc.downTrigger, function (e) {
-          if (this.dataset.disabled != "true") {
+          if (eon.util.isTrue(el.monthPicking)) {
             e.stopPropagation();
             e.preventDefault();
             el._showMonthsGrid();
@@ -437,7 +532,7 @@
         });
 
         el._refs.calendar.querySelector(".eon-date-header .eon-date-year").addEventListener(el._misc.downTrigger, function (e) {
-          if (this.dataset.disabled != "true") {
+          if (eon.util.isTrue(el.yearPicking)) {
             e.stopPropagation();
             e.preventDefault();
             el._showYearsGrid();
@@ -499,6 +594,8 @@
         el._misc.max.active = false;
         el._misc.modal = {};
 
+        el._misc.clock = {};
+
         el._misc.weekDays = {};
         el._misc.current = {};
         el._misc.selected = {};
@@ -508,6 +605,7 @@
         el._misc.descriptionText = "";
 
         el._misc.downTrigger = "click";
+        el._misc.heightRatio = 0.703703;
 
       },
       /*
@@ -520,11 +618,6 @@
 
         // Input related references
         el._refs.subInputsWrapper = el.template.querySelector(".eon-date-subInputs");
-        el._refs.subInputs = {};
-
-        el._refs.subInputs.first = el.template.querySelector(".eon-date-subInputs .first input");
-        el._refs.subInputs.second = el.template.querySelector(".eon-date-subInputs .second input");
-        el._refs.subInputs.third = el.template.querySelector(".eon-date-subInputs .third input");
 
         el._refs.underline = el.template.querySelector(".eon-date-underline");
 
@@ -576,11 +669,16 @@
         var dayFormat = el.mask.match(/[d|D]{1,2}/)[0];
         var monthFormat = el.mask.match(/[M]{1,4}/)[0];
         var yearFormat = el.mask.match(/[y|Y]{2,4}/)[0];
+        var hoursFormat = "hh";
+        var minutesFormat = "mm";
 
         el._misc.mask["day"] = {};
         el._misc.mask["month"] = {};
         el._misc.mask["year"] = {};
+        el._misc.mask["hours"] = {};
+        el._misc.mask["minutes"] = {};
 
+        // Saving corresponding mask for day, month and year
         if (dayFormat && monthFormat && yearFormat) {
 
           var yearOrder = el.mask.indexOf(yearFormat);
@@ -629,6 +727,14 @@
           el._refs.subInputs.third.placeholder = "YYYY";
         }
 
+        // Saving masks for hours and minutes
+        el._misc.mask.hours.format = hoursFormat;
+        el._misc.mask.minutes.format = minutesFormat;
+
+        // Setting hours and minutes placeholders
+        el._refs.subInputs.hours.placeholder = hoursFormat;
+        el._refs.subInputs.minutes.placeholder = minutesFormat;
+
         var firstSection = el._misc.mask[el._misc.mask.order[0]];
         var secondSection = el._misc.mask[el._misc.mask.order[1]];
         var thirdSection = el._misc.mask[el._misc.mask.order[2]];
@@ -642,14 +748,14 @@
         thirdSection.start = secondSection.end + el._misc.separator.length;
         thirdSection.end = thirdSection.start + el._misc.mask[el._misc.mask.order[2]].format.length;
 
-        el._refs.subInputs.first.parentNode.dataset.field = el._misc.mask.order[0];
-        el._refs.subInputs.first.parentNode.dataset.order = "0";
+        el._refs.fields.first.dataset.field = el._misc.mask.order[0];
+        el._refs.fields.first.dataset.order = "0";
 
-        el._refs.subInputs.second.parentNode.dataset.field = el._misc.mask.order[1];
-        el._refs.subInputs.second.parentNode.dataset.order = "1";
+        el._refs.fields.second.dataset.field = el._misc.mask.order[1];
+        el._refs.fields.second.dataset.order = "1";
 
-        el._refs.subInputs.third.parentNode.dataset.field = el._misc.mask.order[2];
-        el._refs.subInputs.third.parentNode.dataset.order = "2";
+        el._refs.fields.third.dataset.field = el._misc.mask.order[2];
+        el._refs.fields.third.dataset.order = "2";
 
         var separators = el.querySelectorAll(".eon-date-subInputs .eon-date-separator");
 
@@ -703,6 +809,20 @@
           }
         }, true);
 
+        el._refs.subInputs.hours.addEventListener("focus", function (e) {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el._handleFocus(el._refs.subInputs.hours);
+            el._assignFocusStyle();
+          }
+        }, true);
+
+        el._refs.subInputs.minutes.addEventListener("focus", function (e) {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el._handleFocus(el._refs.subInputs.minutes);
+            el._assignFocusStyle();
+          }
+        }, true);
+
       },
       /*
       @function (private) _setupBlurEvents
@@ -713,33 +833,38 @@
         var el = this;
 
         el._refs.subInputs.first.addEventListener("blur", function () {
-
-          if ((el._refs.subInputs.first.dataset.field == "day" || el._refs.subInputs.first.dataset.field == "month") && el._refs.subInputs.first.textContent.length == 1 && el._refs.subInputs.first.textContent.length < el._misc.mask[el._misc.mask.order[0]].format.length) {
-            el._refs.subInputs.first.textContent = "0" + el._refs.subInputs.first.textContent;
+          if ((el._refs.fields.first.dataset.field == "day" || el._refs.fields.first.dataset.field == "month") && el._refs.subInputs.first.value.length == 1 && el._refs.subInputs.first.value.length < el._misc.mask[el._misc.mask.order[0]].format.length) {
+            el._refs.subInputs.first.value = "0" + el._refs.subInputs.first.value;
           }
-
           el._revertFocusStyle();
-
         }, true);
 
         el._refs.subInputs.second.addEventListener("blur", function () {
-
-          if ((el._refs.subInputs.second.dataset.field == "day" || el._refs.subInputs.second.dataset.field == "month") && el._refs.subInputs.second.textContent.length == 1 && el._refs.subInputs.second.textContent.length < el._misc.mask[el._misc.mask.order[0]].format.length) {
-            el._refs.subInputs.second.textContent = "0" + el._refs.subInputs.second.textContent;
+          if ((el._refs.fields.second.dataset.field == "day" || el._refs.fields.second.dataset.field == "month") && el._refs.subInputs.second.value.length == 1 && el._refs.subInputs.second.value.length < el._misc.mask[el._misc.mask.order[1]].format.length) {
+            el._refs.subInputs.second.value = "0" + el._refs.subInputs.second.value;
           }
-
           el._revertFocusStyle();
-
         }, true);
 
         el._refs.subInputs.third.addEventListener("blur", function () {
-
-          if ((el._refs.subInputs.third.dataset.field == "day" || el._refs.subInputs.third.dataset.field == "month") && el._refs.subInputs.third.textContent.length == 1 && el._refs.subInputs.third.textContent.length < el._misc.mask[el._misc.mask.order[0]].format.length) {
-            el._refs.subInputs.third.textContent = "0" + el._refs.subInputs.third.textContent;
+          if ((el._refs.fields.third.dataset.field == "day" || el._refs.fields.third.dataset.field == "month") && el._refs.subInputs.third.value.length == 1 && el._refs.subInputs.third.value.length < el._misc.mask[el._misc.mask.order[2]].format.length) {
+            el._refs.subInputs.third.value = "0" + el._refs.subInputs.third.value;
           }
-
           el._revertFocusStyle();
+        }, true);
 
+        el._refs.subInputs.hours.addEventListener("blur", function () {
+          if (el._refs.subInputs.hours.value.length == 1 && el._refs.subInputs.hours.value.length < 2) {
+            el._refs.subInputs.hours.value = "0" + el._refs.subInputs.hours.value;
+          }
+          el._revertFocusStyle();
+        }, true);
+
+        el._refs.subInputs.minutes.addEventListener("blur", function () {
+          if (el._refs.subInputs.minutes.value.length == 1 && el._refs.subInputs.minutes.value.length < 2) {
+            el._refs.subInputs.minutes.value = "0" + el._refs.subInputs.minutes.value;
+          }
+          el._revertFocusStyle();
         }, true);
 
       },
@@ -763,6 +888,14 @@
           el._handleKeyDown(el._refs.subInputs.third, e);
         }, true);
 
+        el._refs.subInputs.hours.addEventListener("keydown", function (e) {
+          el._handleKeyDown(el._refs.subInputs.hours, e);
+        }, true);
+
+        el._refs.subInputs.minutes.addEventListener("keydown", function (e) {
+          el._handleKeyDown(el._refs.subInputs.minutes, e);
+        }, true);
+
       },
       /*
       @function (private) _setupOnKeyUpEvents
@@ -782,6 +915,14 @@
 
         el._refs.subInputs.third.addEventListener("keyup", function (e) {
           el._handleKeyUp(el._refs.subInputs.third, e);
+        }, true);
+
+        el._refs.subInputs.hours.addEventListener("keyup", function (e) {
+          el._handleKeyUp(el._refs.subInputs.hours, e);
+        }, true);
+
+        el._refs.subInputs.minutes.addEventListener("keyup", function (e) {
+          el._handleKeyUp(el._refs.subInputs.minutes, e);
         }, true);
 
       },
@@ -819,17 +960,23 @@
 
         if (el.min != "") {
 
-          if (el.min.indexOf("/") > -1) {
+          var minDate = el.min.split[" "][1] ? el.min.split[" "][0] : el.min;
+          var minTime = el.min.split[" "][1] ? el.min.split[" "][1] : null;
 
-            var splitMin = el.min.split("/");
-
-            el._misc.min.day = parseInt(splitMin[0]);
-            el._misc.min.month = parseInt(splitMin[1]) - 1;
-            el._misc.min.year = parseInt(splitMin[2]);
-
-            el._misc.min.active = true;
-
+          if (minDate.indexOf("/") > -1) {
+            var splitMinDate = minDate.split("/");
+            el._misc.min.day = parseInt(splitMinDate[0]);
+            el._misc.min.month = parseInt(splitMinDate[1]) - 1;
+            el._misc.min.year = parseInt(splitMinDate[2]);
           }
+
+          if (minTime && minTime.indexOf(":")) {
+            var splitMinTime = minDate.split("/");
+            el._misc.min.hours = parseInt(splitMinTime[0]);
+            el._misc.min.minutes = parseInt(splitMinTime[1]);
+          }
+
+          el._misc.min.active = true;
 
         }
 
@@ -844,17 +991,23 @@
 
         if (el.max != "") {
 
-          if (el.max.indexOf('/') > -1) {
+          var maxDate = el.max.split[" "][1] ? el.max.split[" "][0] : el.max;
+          var maxTime = el.max.split[" "][1] ? el.max.split[" "][1] : null;
 
-            var splitMax = el.max.split("/");
-
-            el._misc.max.day = parseInt(splitMax[0]);
-            el._misc.max.month = parseInt(splitMax[1]) - 1;
-            el._misc.max.year = parseInt(splitMax[2]);
-
-            el._misc.max.active = true;
-
+          if (maxDate.indexOf("/") > -1) {
+            var splitMaxDate = maxDate.split("/");
+            el._misc.max.day = parseInt(splitMaxDate[0]);
+            el._misc.max.month = parseInt(splitMaxDate[1]) - 1;
+            el._misc.max.year = parseInt(splitMaxDate[2]);
           }
+
+          if (maxTime && maxTime.indexOf(":")) {
+            var splitMaxTime = maxTime.split("/");
+            el._misc.max.hours = parseInt(splitMaxTime[0]);
+            el._misc.max.minutes = parseInt(splitMaxTime[1]);
+          }
+
+          el._misc.max.active = true;
 
         }
 
@@ -937,7 +1090,7 @@
 
         var el = this;
 
-        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('d') > -1) {
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && eon.util.isTrue(el.dayPicking)) {
 
           var week;
           var day;
@@ -994,7 +1147,7 @@
 
         var el = this;
 
-        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('m') > -1) {
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && eon.util.isTrue(el.monthPicking)) {
 
           var row;
           var month;
@@ -1047,7 +1200,7 @@
 
         var el = this;
 
-        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && el.selectable.indexOf('y') > -1) {
+        if (el.type.toLowerCase() != "calendar" || el.type.toLowerCase() == "calendar" && eon.util.isTrue(el.yearPicking)) {
 
           var row;
           var year;
@@ -1094,6 +1247,137 @@
 
           yearsGrid.appendChild(rowsFragment);
 
+        }
+
+      },
+      setupClock: function () {
+        var el = this;
+
+        if (!eon.util.isTrue(el.time)) {
+
+          el._refs.toggle.style.display = "none";
+
+        } else {
+
+          el._refs.hoursUp.addEventListener("click", function () {
+            if (el._misc.clock.currentAMHours < 12) {
+
+              el._misc.clock.currentAMHours++;
+              el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._getPMHours(el._misc.clock.currentAMHours) : el._misc.clock.currentAMHours;
+              el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+
+              if (el.type == "calendar") {
+                el._updateWithCurrentValues();
+              }
+
+            }
+          });
+
+          el._refs.hoursDown.addEventListener("click", function () {
+            if (el._misc.clock.currentAMHours > 1) {
+
+              el._misc.clock.currentAMHours--;
+              el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._getPMHours(el._misc.clock.currentAMHours) : el._misc.clock.currentAMHours;
+              el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+
+              if (el.type == "calendar") {
+                el._updateWithCurrentValues();
+              }
+
+            }
+          });
+
+          el._refs.minutesUp.addEventListener("click", function () {
+            if (el._misc.clock.currentMinutes < 60) {
+
+              el._misc.clock.currentMinutes++;
+              el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+
+              if (el.type == "calendar") {
+                el._updateWithCurrentValues();
+              }
+
+            }
+          });
+
+          el._refs.minutesDown.addEventListener("click", function () {
+            if (el._misc.clock.currentMinutes > 0) {
+
+              el._misc.clock.currentMinutes--;
+              el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+
+              if (el.type == "calendar") {
+                el._updateWithCurrentValues();
+              }
+
+            }
+          });
+
+          el._refs.amButton.addEventListener("click", function () {
+
+            el._misc.clock.isPM = false;
+            el._misc.clock.currentPMHours = el._misc.clock.currentAMHours;
+
+            el._refs.amButton.classList.add("eon-bg2-active");
+            el._refs.pmButton.classList.remove("eon-bg2-active");
+
+            if (el.type == "calendar") {
+              el._updateWithCurrentValues();
+            }
+
+          });
+
+          el._refs.pmButton.addEventListener("click", function () {
+
+            el._misc.clock.isPM = true;
+            el._misc.clock.currentPMHours = el._getPMHours(el._misc.clock.currentAMHours);
+            console.log('el._misc.clock.currentPMHours', el._misc.clock.currentPMHours);
+            el._refs.amButton.classList.remove("eon-bg2-active");
+            el._refs.pmButton.classList.add("eon-bg2-active");
+
+            if (el.type == "calendar") {
+              el._updateWithCurrentValues();
+            }
+
+          });
+
+          // el._refs.scrollTest.addEventListener("scroll", function (e) {
+          //   var value = Math.round(el._refs.scrollTest.scrollTop / el._refs.scrollTest.offsetHeight);
+          //   el._refs.currentMinutes.innerHTML = ("0" + value).slice(-2);
+          // });
+
+        }
+
+      },
+      setCurrentTime: function () {
+        var now = new Date();
+        this._setTime(now.getHours(), now.getMinutes());
+      },
+      setTime: function (hours, minutes) {
+        var el = this;
+
+        el._misc.clock = el._misc.clock || {};
+
+        el._misc.clock.isPM = false;
+        el._misc.clock.currentPMHours = parseInt(hours);
+        el._misc.clock.currentMinutes = parseInt(minutes);
+
+        el._misc.clock.isPM = el._misc.clock.currentPMHours > 12 ? true : false;
+        el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._misc.clock.currentAMHours + 12 : el._misc.clock.currentPMHours;
+        el._misc.clock.currentAMHours = el._misc.clock.isPM ? el._misc.clock.currentPMHours - 12 : el._misc.clock.currentPMHours;
+
+        el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+        el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+
+        el._refs.subInputs.hours.value = ("0" + el._misc.clock.currentPMHours).slice(-2);
+        el._refs.subInputs.minutes.value = ("0" + el._misc.clock.currentMinutes).slice(-2);
+
+        if (el._misc.clock.isPM) {
+          el._refs.amButton.classList.remove("eon-bg2-active");
+          el._refs.pmButton.classList.add("eon-bg2-active");
+        } else {
+          el._refs.amButton.classList.add("eon-bg2-active");
+          el._refs.pmButton.classList.remove("eon-bg2-active");
         }
 
       },
@@ -1168,13 +1452,20 @@
 
         } else {
 
+          var width = (parseInt(el._refs.main.offsetWidth) * 1.5);
+          var height = width * el._misc.heightRatio;
+
           el._refs.overlay.classList.remove("eon-date-device");
           el._refs.overlay.classList.remove("eon-bg1-modal");
 
-          el._refs.calendar.style.top = el._refs.main.getBoundingClientRect().top + 1 + el._refs.main.offsetHeight + "px";
-          el._refs.calendar.style.left = el._refs.main.getBoundingClientRect().left + "px";
-          el._refs.calendar.style.width = el._refs.main.offsetWidth + "px";
-          el._refs.calendar.style.height = "auto";
+          // el._refs.calendar.style.top = el._refs.main.getBoundingClientRect().top + 1 + el._refs.main.offsetHeight + "px";
+          el._refs.calendar.style.top = el._refs.main.getBoundingClientRect().top + el._refs.main.offsetHeight / 2 - height / 2 + "px";
+          // el._refs.calendar.style.left = el._refs.main.getBoundingClientRect().left + "px";
+          el._refs.calendar.style.left = el._refs.main.getBoundingClientRect().left + el._refs.main.offsetWidth / 2 - width / 2 + "px";
+          // el._refs.calendar.style.width = el._refs.main.offsetWidth + "px";
+          // el._refs.calendar.style.height = "auto";
+          el._refs.calendar.style.width = width + "px";
+          el._refs.body.style.height = height + "px";
 
         }
 
@@ -1297,6 +1588,7 @@
           el._misc.preventUpdate = true;
 
           el.value = eon.time.generateOutput(obj, el.valueFormat);
+          el._refresh();
 
 
         } else {
@@ -1323,33 +1615,20 @@
       initValue: function () {
 
         var el = this;
-        var dateObj;
-
-        // If no value was provided by the user we create one
-        if (el.value == "") {
-
-          var date = new Date();
-
-          dateObj = {
-            day: el.day != "" ? parseInt(el.day) : parseInt(date.getDate()),
-            month: el.month != "" ? parseInt(el.month) : parseInt(date.getMonth()) + 1,
-            year: el.year != "" ? parseInt(el.year) : parseInt(date.getFullYear())
-          }
-
-        } else {
-
-          dateObj = eon.time.getDateObjectFromString(el.value, el.valueFormat);
-
-        }
+        var dateObj = el.value == "" ? eon.time.getDateValueObjectFromDate(new Date(), el.time) : eon.time.getDateValueObjectFromString(el.value, el.valueFormat, el.time);
 
         if (el._exceedsMinDate(dateObj)) {
 
+          dateObj.minutes = el._misc.min.minutes;
+          dateObj.hours = el._misc.min.hour;
           dateObj.day = el._misc.min.day;
           dateObj.month = el._misc.min.month + 1;
           dateObj.year = el._misc.min.year;
 
         } else if (el._exceedsMaxDate(dateObj)) {
 
+          dateObj.minutes = el._misc.max.minutes;
+          dateObj.hours = el._misc.max.hour;
           dateObj.day = el._misc.max.day;
           dateObj.month = el._misc.max.month + 1;
           dateObj.year = el._misc.max.year;
@@ -1359,7 +1638,7 @@
         dateObj = el._formatObj(dateObj);
 
         el.value = eon.time.generateOutput(dateObj, el.valueFormat);
-
+        el._refresh();
         el._updateValue();
 
       },
@@ -1522,6 +1801,37 @@
 
       },
       /*
+      @function (private) {Number} _getPMHours
+      @description Receives a number of hours for AM
+      @param {Number} AMHours
+      */
+      getPMHours: function (AMHours) {
+        var PMHours;
+        AMHours = parseInt(AMHours);
+        if (AMHours <= 12) {
+          PMHours = AMHours + 12;
+          PMHours = PMHours == 24 ? 0 : PMHours;
+        }
+        return PMHours;
+      },
+      /*
+      @function (private) {Number} _getAMHours
+      @description Receives a number of hours for PM
+      @param {Number} PMHours
+      */
+      getAMHours: function (PMHours) {
+        var AMHours;
+        PMHours = parseInt(PMHours);
+        if (PMHours > 12) {
+          AMHours = PMHours - 12;
+        } else if (PMHours == 0) {
+          AMHours = 12;
+        } else {
+          AMHours = PMHours;
+        }
+        return AMHours;
+      },
+      /*
       @function (private) {String} _getStringFromKeyCode
       @description Receives a keyCode and returns the string value (intended for numeric)
       @param {String} keyCode
@@ -1596,6 +1906,18 @@
         var dayInput = subInputs.querySelector('[data-field="day"] input');
         var monthInput = subInputs.querySelector('[data-field="month"] input');
         var yearInput = subInputs.querySelector('[data-field="year"] input');
+        
+        if (el._refs.subInputs.hours.value != "" && parseInt(el._refs.subInputs.hours.value) > 23) {
+          el._refs.subInputs.hours.value = "23";
+        } else if (el._refs.subInputs.hours.value.length == 2 && parseInt(el._refs.subInputs.hours.value) < 0) {
+          el._refs.subInputs.hours.value = "00";
+        }
+        
+        if (el._refs.subInputs.minutes.value != "" && parseInt(el._refs.subInputs.minutes.value) > 59) {
+          el._refs.subInputs.minutes.value = "59";
+        } else if (el._refs.subInputs.minutes.value.length == 2 && parseInt(el._refs.subInputs.minutes.value) < 0) {
+          el._refs.subInputs.hours.value = "00";
+        }
 
         if (dayInput.value != "" && parseInt(dayInput.value) > 31) {
           dayInput.value = "31";
@@ -1664,12 +1986,20 @@
         var el = this;
 
         if (el._misc.min.active) {
-          var exceedsDay = dateObj.day < el._misc.min.day && dateObj.month == el._misc.min.month && dateObj.year == el._misc.min.year;
-          var exceedsMonth = dateObj.month < el._misc.min.month && dateObj.year == el._misc.min.year;
-          var exceedsYear = dateObj.year < el._misc.min.year;
+
+          var sameHour = dateObj.hours && dateObj.hours == el._misc.min.hours;
+          var sameDay = dateObj.day && dateObj.day == el._misc.min.day;
+          var sameMonth = dateObj.month && dateObj.month == el._misc.min.month;
+          var sameYear = dateObj.year && dateObj.year == el._misc.min.year;
+
+          var exceedsMinutes = dateObj.minutes && dateObj.minutes < el._misc.min.minutes && sameHour && sameDay && sameMonth && sameYear;
+          var exceedsHour = dateObj.hours && dateObj.hours < el._misc.min.hours && sameDay && sameMonth && sameYear;
+          var exceedsDay = dateObj.day && dateObj.day < el._misc.min.day && sameMonth && sameYear;
+          var exceedsMonth = dateObj.month && dateObj.month < el._misc.min.month && sameYear;
+          var exceedsYear = dateObj.year && dateObj.year < el._misc.min.year;
         }
 
-        return exceedsDay || exceedsMonth || exceedsYear ? true : false;
+        return exceedsMinutes || exceedsHour || exceedsDay || exceedsMonth || exceedsYear ? true : false;
 
       },
       /*
@@ -1682,12 +2012,20 @@
         var el = this;
 
         if (el._misc.max.active) {
-          var exceedsDay = dateObj.day > el._misc.min.day && dateObj.month == el._misc.min.month && dateObj.year == el._misc.min.year;
-          var exceedsMonth = dateObj.month > el._misc.max.month && dateObj.year == el._misc.max.year;
-          var exceedsYear = dateObj.year > el._misc.max.year;
+
+          var sameHour = dateObj.hours && dateObj.hours == el._misc.min.hours;
+          var sameDay = dateObj.day && dateObj.day == el._misc.min.day;
+          var sameMonth = dateObj.month && dateObj.month == el._misc.min.month;
+          var sameYear = dateObj.year && dateObj.year == el._misc.min.year;
+
+          var exceedsMinutes = dateObj.minutes && dateObj.minutes > el._misc.min.minutes && sameHour && sameDay && sameMonth && sameYear;
+          var exceedsHour = dateObj.hours && dateObj.hours > el._misc.min.hours && sameDay && sameMonth && sameYear;
+          var exceedsDay = dateObj.day && dateObj.day > el._misc.min.day && sameMonth && sameYear;
+          var exceedsMonth = dateObj.month && dateObj.month > el._misc.min.month && sameYear;
+          var exceedsYear = dateObj.year && dateObj.year > el._misc.min.year;
         }
 
-        return exceedsDay || exceedsMonth || exceedsYear ? true : false;
+        return exceedsMinutes || exceedsHour || exceedsDay || exceedsMonth || exceedsYear ? true : false;
 
       },
       /*
@@ -1726,23 +2064,23 @@
           var month = Number(el._misc.current.month) && Number(el._misc.current.month) > 0 ? el._misc.current.month : new Date().toLocaleString([], { month: "numeric" }) - 1;
 
           el._fillDaysGrid(year, month);
-          el._updateHeaderSelectors("daysGrid", el._misc.current.year, el._misc.current.month);
+          el._updateHeaderSelectors("days", el._misc.current.year, el._misc.current.month);
           el._showDaysGrid();
 
         } else if (el._refs.monthsGrid) {
 
-          el._updateHeaderSelectors("monthsGrid");
+          el._updateHeaderSelectors("months");
           el._showMonthsGrid();
 
         } else if (el._refs.yearsGrid) {
 
-          el._updateHeaderSelectors("yearsGrid");
+          el._updateHeaderSelectors("years");
           el._showYearsGrid();
         }
 
         if (el._refs.yearsGrid) {
 
-          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.selected.year + "']");
+          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.current.year + "']");
 
           if (yearButton && yearButton.dataset.disabled != "true") {
             el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
@@ -1752,7 +2090,7 @@
 
         if (el._refs.monthsGrid) {
 
-          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.selected.year + "'][data-index='" + el._misc.selected.month + "']");
+          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.current.year + "'][data-index='" + el._misc.current.month + "']");
 
           if (monthButton && monthButton.dataset.disabled != "true") {
             el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
@@ -1762,7 +2100,7 @@
 
         if (el._refs.daysGrid) {
 
-          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.selected.year + "'][month='" + parseInt(el._misc.selected.month) + "'][day='" + parseInt(el._misc.selected.day) + "']");
+          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.current.year + "'][month='" + parseInt(el._misc.current.month) + "'][day='" + parseInt(el._misc.current.day) + "']");
 
           if (dayButton && dayButton.dataset.disabled != "true") {
             el._highlight(dayButton, el.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
@@ -1782,9 +2120,7 @@
 
         var el = this;
 
-        var backButton = el._refs.calendar.querySelector(".eon-date-back");
-
-        if (headerType == "daysGrid") {
+        if (headerType == "days") {
 
           year = (!year) ? el._misc.current.year : year;
           month = (!month) ? el._misc.current.month : month;
@@ -1795,13 +2131,13 @@
           el._refs.yearSelector.classList.remove("eon-date-hidden");
 
           // Depending on the selectable we enabled/disable the hover class
-          el._refs.yearSelector.classList[!el.selectable.indexOf("y") > -1 ? "remove" : "add"]("eon-fg1-hoverable");
-          el._refs.monthSelector.classList[!el.selectable.indexOf("m") > -1 ? "remove" : "add"]("eon-fg1-hoverable");
+          el._refs.yearSelector.classList[!eon.util.isTrue(el.yearPicking) ? "remove" : "add"]("eon-fg1-hoverable");
+          el._refs.monthSelector.classList[!eon.util.isTrue(el.monthPicking) ? "remove" : "add"]("eon-fg1-hoverable");
 
           el._refs.monthSelector.innerHTML = eon.time.getMonthName(el.locale, month, "long");
           el._refs.monthSelector.classList.remove("eon-date-hidden");
 
-          backButton.classList.add("eon-date-hidden");
+          el._refs.toggle.classList.remove("eon-date-hidden");
 
           el._refs.previous.dataset.disabled = (el._isMinMonth(year, month)) ? "true" : "false";
           el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
@@ -1811,7 +2147,10 @@
           el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
           el._refs.next.classList[el._refs.next.dataset.disabled != "true" ? "add" : "remove"]("eon-fg1-hoverable");
 
-        } else if (headerType == "monthsGrid") {
+          el._refs.toggleIcon.classList.remove("vicon-calendar");
+          el._refs.toggleIcon.classList.add("vicon-clock");
+
+        } else if (headerType == "months") {
 
           year = (!year) ? el._misc.current.year : year;
 
@@ -1821,8 +2160,10 @@
           el._refs.monthSelector.classList.add("eon-date-hidden");
 
           // Depending on the selectable we enabled/disable the hover class
-          el._refs.yearSelector.classList[!el.selectable.indexOf("y") > -1 ? "remove" : "add"]("eon-fg1-hoverable");
-          el._refs.monthSelector.classList[!el.selectable.indexOf("m") > -1 ? "remove" : "add"]("eon-fg1-hoverable");
+          el._refs.yearSelector.classList[!eon.util.isTrue(el.yearPicking) ? "remove" : "add"]("eon-fg1-hoverable");
+          el._refs.monthSelector.classList[!eon.util.isTrue(el.monthPicking) ? "remove" : "add"]("eon-fg1-hoverable");
+
+          el._refs.toggle.classList.add("eon-date-hidden");
 
           el._refs.previous.dataset.disabled = (year <= el._misc.min.year) ? "true" : "false";
           el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
@@ -1830,17 +2171,7 @@
           el._refs.next.dataset.disabled = (year >= el._misc.max.year) ? "true" : "false";
           el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
 
-          if (el._refs.daysGrid) {
-
-            backButton.classList.remove("eon-date-hidden");
-            backButton.dataset.grid = "days";
-
-          } else {
-
-            backButton.classList.add("eon-date-hidden");
-          }
-
-        } else if (headerType == "yearsGrid") {
+        } else if (headerType == "years") {
 
           year = (!year) ? el._misc.selector.range.start + "-" + el._misc.selector.range.end : year;
 
@@ -1851,26 +2182,34 @@
 
           el._refs.monthSelector.classList.add("eon-date-hidden");
 
+          el._refs.toggle.classList.add("eon-date-hidden");
+
           el._refs.previous.dataset.disabled = (el._misc.selector.range.start <= el._misc.min.year) ? "true" : "false";
           el._refs.previous.classList[el._refs.previous.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
 
           el._refs.next.dataset.disabled = (el._misc.selector.range.end >= el._misc.max.year) ? "true" : "false";
           el._refs.next.classList[el._refs.next.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
 
-          if (el._refs.daysGrid) {
+        }
 
-            backButton.classList.remove("eon-date-hidden");
-            backButton.dataset.grid = "days";
+        else if (headerType == "time") {
 
-          } else if (el._refs.monthsGrid) {
+          // 
+          el._refs.monthSelector.classList.add("eon-date-hidden");
+          el._refs.yearSelector.classList.add("eon-date-hidden");
+          el._refs.toggle.classList.add("eon-date-hidden");
 
-            backButton.classList.remove("eon-date-hidden");
-            backButton.dataset.grid = "months";
+          el._refs.previous.classList.add("eon-date-hidden");
+          el._refs.next.classList.add("eon-date-hidden");
 
-          } else {
+          el._refs.toggle.classList.remove("eon-date-hidden");
+          el._refs.toggleIcon.classList.remove("vicon-clock");
 
-            backButton.classList.add("eon-date-hidden");
-          }
+          el._refs.toggleIcon.classList.add("vicon-calendar");
+
+          // 
+
+
         }
 
       },
@@ -1903,15 +2242,17 @@
 
         var format = el.valueFormat;
 
-        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : undefined;
-        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : undefined;
-        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : undefined;
+        var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : null;
+        var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : null;
+        var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : null;
 
         var finalObj = {};
 
-        finalObj.day = obj.day ? el._format(obj.day, dayFormat) : undefined;
-        finalObj.month = obj.month ? el._format(obj.month, monthFormat) : undefined;
-        finalObj.year = obj.year ? el._format(obj.year, yearFormat) : undefined;
+        finalObj.minutes = obj.minutes != null ? ("0" + obj.minutes).slice(-2) : null;
+        finalObj.hours = obj.hours != null ? ("0" + obj.hours).slice(-2) : null;
+        finalObj.day = obj.day != null ? el._format(obj.day, dayFormat) : null;
+        finalObj.month = obj.month != null ? el._format(obj.month, monthFormat) : null;
+        finalObj.year = obj.year != null ? el._format(obj.year, yearFormat) : null;
 
         return finalObj;
 
@@ -1926,7 +2267,7 @@
         var calendar = el._refs.calendar;
 
         if (calendar.offsetWidth != 0) {
-          calendar.style.height = (parseFloat(calendar.offsetWidth) * 0.839) + "px";
+          el._refs.body.style.height = (parseFloat(calendar.offsetWidth) * el._misc.heightRatio) + "px";
         }
 
       },
@@ -1979,32 +2320,9 @@
 
         calendar.querySelector(".eon-date-header").style.fontSize = headerFontSize + "px";
 
-        calendar.querySelector(".eon-date-back i").style.fontSize = navigation + "px";
+        calendar.querySelector(".eon-date-toggle i").style.fontSize = navigation + "px";
         calendar.querySelector(".eon-date-previous i").style.fontSize = navigation + "px";
         calendar.querySelector(".eon-date-next i").style.fontSize = navigation + "px";
-      },
-      /*
-      @function (private) _goBack
-      @description It shows the corresponding grid
-      @param {Object} backButton
-      */
-      goBack: function (backButton) {
-
-        var el = this;
-
-        if (backButton.dataset.grid == "days") {
-
-          el._showDaysGrid();
-
-        } else if (backButton.dataset.grid == "months") {
-
-          el._showMonthsGrid();
-
-        } else if (backButton.dataset.grid == "years") {
-
-          el._showYearsGrid();
-        }
-
       },
       /*
       @function (private) _goToPrevious
@@ -2038,7 +2356,7 @@
 
 
           el._fillDaysGrid(previous.year, previous.month);
-          el._updateHeaderSelectors("daysGrid", previous.year, previous.month);
+          el._updateHeaderSelectors("days", previous.year, previous.month);
         }
       },
       /*
@@ -2071,7 +2389,7 @@
           var next = el._getNextByMonth(el._misc.current.year, el._misc.current.month);
 
           el._fillDaysGrid(next.year, next.month);
-          el._updateHeaderSelectors("daysGrid", next.year, next.month);
+          el._updateHeaderSelectors("days", next.year, next.month);
         }
       },
       /*
@@ -2087,7 +2405,7 @@
 
           el._misc.current.year = el._misc.current.year - 1;
 
-          el._updateHeaderSelectors("monthsGrid");
+          el._updateHeaderSelectors("months");
           el._fillMonthsGrid();
         }
       },
@@ -2104,7 +2422,7 @@
 
           el._misc.current.year = parseInt(el._misc.current.year) + 1;
 
-          el._updateHeaderSelectors("monthsGrid");
+          el._updateHeaderSelectors("months");
           el._fillMonthsGrid();
         }
       },
@@ -2122,7 +2440,7 @@
           el._misc.selector.range.end = el._misc.selector.range.start + 11;
 
           el._fillYearsGrid();
-          el._updateHeaderSelectors("yearsGrid");
+          el._updateHeaderSelectors("years");
         }
       },
       /*
@@ -2139,7 +2457,7 @@
           el._misc.selector.range.start = el._misc.selector.range.end - 11;
 
           el._fillYearsGrid();
-          el._updateHeaderSelectors("yearsGrid");
+          el._updateHeaderSelectors("years");
         }
       },
       /*
@@ -2289,7 +2607,8 @@
           }
         }
 
-        var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.selected.day) + '"][month="' + parseInt(el._misc.selected.month) + '"][year="' + parseInt(el._misc.selected.year) + '"]');
+        // var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.selected.day) + '"][month="' + parseInt(el._misc.selected.month) + '"][year="' + parseInt(el._misc.selected.year) + '"]');
+        var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.current.day) + '"][month="' + parseInt(el._misc.current.month) + '"][year="' + parseInt(el._misc.current.year) + '"]');
 
         if (currentDay) {
           el._highlight(currentDay);
@@ -2329,7 +2648,8 @@
           months[i].classList[months[i].dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
         }
 
-        var currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.selected.month) + '"][data-year ="' + parseInt(el._misc.selected.year) + '"]');
+        // var currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.selected.month) + '"][data-year ="' + parseInt(el._misc.selected.year) + '"]');
+        var currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.current.month) + '"][data-year ="' + parseInt(el._misc.current.year) + '"]');
 
         if (currentMonthCell) {
           el._highlight(currentMonthCell, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
@@ -2368,7 +2688,8 @@
           }
         }
 
-        selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.selected.year + '"]')
+        // selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.selected.year + '"]');
+        selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.current.year + '"]');
 
         if (selectedYearCell) {
           el._highlight(selectedYearCell, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
@@ -2385,20 +2706,17 @@
 
           var el = this;
 
-          // We have to add 1 to the month because the indexes are set starting from 0 to match it with the way js Date works
-          var dateObj = el._formatObj({ day: dayButton.getAttribute("day"), month: (parseInt(dayButton.getAttribute("month")) + 1), year: dayButton.getAttribute("year") });
-          var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
-
-          el._misc.selected.day = parseInt(dayButton.getAttribute("day"));
-          el._misc.selected.month = parseInt(dayButton.getAttribute("month"));
-          el._misc.selected.year = parseInt(dayButton.getAttribute("year"));
+          el._misc.current.day = parseInt(dayButton.getAttribute("day"));
+          el._misc.current.month = parseInt(dayButton.getAttribute("month"));
+          el._misc.current.year = parseInt(dayButton.getAttribute("year"));
 
           el._highlight(dayButton, el._refs.calendar.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
-          el._shrink();
 
-          el.value = formattedValue;
+          if (el.type == "calendar") {
+            el._updateWithCurrentValues();
+          }
 
-          eon.triggerCallback("onDaySelected", el, el, [dateObj]);
+          eon.triggerCallback("onDaySelected", el, el, []);
 
         }
       },
@@ -2414,28 +2732,19 @@
         if (monthButton.dataset.disabled != "true") {
 
           el._misc.current.month = parseInt(monthButton.dataset.index);
-          el._misc.selected.month = parseInt(monthButton.dataset.index);
-          el._misc.selected.year = parseInt(el._misc.current.year);
 
-          if (el._refs.daysGrid) {
-
+          if (eon.util.isTrue(el.dayPicking)) {
             el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
             el._showDaysGrid();
-
-          } else {
-
-            // We have to add 1 to the month because the indexes are set starting from 0 to match it with the way js Date works
-            var dateObj = el._formatObj({ day: undefined, month: (parseInt(monthButton.dataset.index) + 1), year: el._misc.current.year });
-            var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
-
-            el._misc.preventUpdate = true;
-            el.value = formattedValue;
-
           }
 
           el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
 
-          eon.triggerCallback("onMonthSelected", el, el, [(parseInt(monthButton.dataset.index) + 1), el._misc.current.year]);
+          if (el.type == "calendar") {
+            el._updateWithCurrentValues();
+          }
+
+          eon.triggerCallback("onMonthSelected", el, el, []);
 
         }
       },
@@ -2451,42 +2760,50 @@
         if (yearButton.dataset.disabled != "true") {
 
           el._misc.current.year = parseInt(yearButton.dataset.year);
-          el._misc.selected.year = parseInt(yearButton.dataset.year);
 
-          if (el._refs.daysGrid) {
+          if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
+            el._misc.current.month = el._misc.min.month;
+          }
 
-            if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
-              el._misc.current.month = el._misc.min.month;
-              el._misc.selected.month = el._misc.min.month;
-            }
-
+          if (eon.util.isTrue(el.dayPicking)) {
             el._fillDaysGrid(el._misc.current.year, el._misc.current.month);
             el._showDaysGrid();
-
-          } else if (el._refs.monthsGrid) {
-
-            if (el._isMinMonth(el._misc.current.year, el._misc.current.month)) {
-              el._misc.current.month = el._misc.min.month;
-              el._misc.selected.month = el._misc.min.month;
-            }
-
+          } else if (eon.util.isTrue(el.monthPicking)) {
+            el._fillMonthsGrid();
             el._showMonthsGrid();
-
-          } else {
-
-            var dateObj = el._formatObj({ day: undefined, month: undefined, year: yearButton.dataset.year });
-            var formattedValue = eon.time.generateOutput(dateObj, el.valueFormat);
-
-            el._misc.preventUpdate = true;
-
-            el.value = formattedValue;
-
           }
+
+          el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+
+          if (el.type == "calendar") {
+            el._updateWithCurrentValues();
+          }
+
+          eon.triggerCallback("onYearSelected", el, el, []);
+
         }
 
-        el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+      },
+      /*
+      @function (private) _showDaysGrid
+      @description Shows the daysGrid and hides the other ones, it also updates the headerSelectors
+      */
+      accept: function () {
+        this._updateWithCurrentValues();
+        this._shrink();
+      },
+      updateWithCurrentValues: function () {
+        var el = this;
+        // We have to add 1 to the month because the indexes are set starting from 0 to match it with the way js Date works
+        var dateObj = el._formatObj({
+          day: el._misc.current.day,
+          month: el._misc.current.month + 1,
+          year: el._misc.current.year,
+          hours: el._misc.clock.currentPMHours,
+          minutes: el._misc.clock.currentMinutes
+        });
 
-        eon.triggerCallback("onYearSelected", el, el, [(parseInt(yearButton.dataset.year))]);
+        el.value = eon.time.generateOutput(dateObj, el.valueFormat);
       },
       /*
       @function (private) _showDaysGrid
@@ -2496,30 +2813,17 @@
 
         var el = this;
 
+        el._hideCurrentView();
+
         el._refs.daysGrid.style.zIndex = 0;
         el._refs.daysGrid.style.opacity = 1;
 
-        if (el._refs.monthsGrid) {
-          el._hideMonthsGrid();
-        }
+        el._updateHeaderSelectors("days");
 
-        if (el._refs.yearsGrid) {
-          el._hideYearsGrid();
-        }
-
-        el._updateHeaderSelectors("daysGrid");
         el._misc.selector.type = "month";
-      },
-      /*
-      @function (private) _hideDaysGrid
-      @description Hides the days grid
-      */
-      hideDaysGrid: function () {
 
-        var el = this;
-
-        el._refs.daysGrid.style.zIndex = -1;
-        el._refs.daysGrid.style.opacity = 0;
+        el._misc.previousView = el._misc.currentView;
+        el._misc.currentView = el._refs.daysGrid;
       },
       /*
       @function (private) _showMonthsGrid
@@ -2529,32 +2833,19 @@
 
         var el = this;
 
+        el._hideCurrentView();
+
         el._refs.monthsGrid.style.zIndex = 0;
         el._refs.monthsGrid.style.opacity = 1;
 
-        if (el._refs.daysGrid) {
-          el._hideDaysGrid();
-        }
-
-        if (el._refs.yearsGrid) {
-          el._hideYearsGrid();
-        }
-
-        el._updateHeaderSelectors("monthsGrid");
+        el._updateHeaderSelectors("months");
         el._fillMonthsGrid();
 
         el._misc.selector.type = "year";
-      },
-      /*
-      @function (private) _hideMonthsGrid
-      @description Hides the monthsGrid
-      */
-      hideMonthsGrid: function () {
 
-        var el = this;
+        el._misc.previousView = el._misc.currentView;
+        el._misc.currentView = el._refs.monthsGrid;
 
-        el._refs.monthsGrid.style.zIndex = -1;
-        el._refs.monthsGrid.style.opacity = 0;
       },
       /*
       @function (private) _showYearsGrid
@@ -2564,35 +2855,58 @@
 
         var el = this;
 
+        el._hideCurrentView();
+
         el._refs.yearsGrid.style.zIndex = 1;
         el._refs.yearsGrid.style.opacity = 1;
-
-        if (el._refs.monthsGrid) {
-          el._hideMonthsGrid();
-        }
-
-        if (el._refs.daysGrid) {
-          el._hideDaysGrid();
-        }
 
         el._misc.selector.range.start = parseInt(el._misc.current.year) - 6;
         el._misc.selector.range.end = parseInt(el._misc.current.year) + 5;
 
         el._fillYearsGrid();
-        el._updateHeaderSelectors("yearsGrid");
+        el._updateHeaderSelectors("years");
 
         el._misc.selector.type = "yearsRange";
+
+        el._misc.previousView = el._misc.currentView;
+        el._misc.currentView = el._refs.yearsGrid;
+
       },
       /*
-      @function (private) _hideYearsGrid
-      @description Hides the yearsGrid
+      @function (private) showClockView
+      @description Shows the clock view
       */
-      hideYearsGrid: function () {
+      showClockView: function () {
 
         var el = this;
 
-        el._refs.yearsGrid.style.zIndex = -1;
-        el._refs.yearsGrid.style.opacity = 0;
+        el._hideCurrentView();
+        // el._setCurrentTime();
+
+        el._refs.clockView.style.zIndex = 1;
+        el._refs.clockView.style.opacity = 1;
+
+        el._updateHeaderSelectors("time");
+
+        el._misc.selector.type = "time";
+
+        el._misc.previousView = el._misc.currentView;
+        el._misc.currentView = el._refs.clockView;
+
+      },
+      /*
+      @function (private) _hideCurrentView
+      @description Hides the currentView
+      */
+      hideCurrentView: function () {
+
+        var el = this;
+
+        if (el._misc.currentView) {
+          el._misc.currentView.style.zIndex = -1;
+          el._misc.currentView.style.opacity = 0;
+        }
+
       },
       /*
       @function (private) {Object} _getPreviousByMonth
@@ -2774,17 +3088,17 @@
 
         if (eon.util.isTrue(el.readonly)) {
 
-          el._refs.subInputs.first.setAttribute("readonly", "true");
-          el._refs.subInputs.second.setAttribute("readonly", "true");
-          el._refs.subInputs.third.setAttribute("readonly", "true");
+          el._refs.fields.first.setAttribute("readonly", "true");
+          el._refs.fields.second.setAttribute("readonly", "true");
+          el._refs.fields.third.setAttribute("readonly", "true");
 
           el._refs.calendarButton.classList.remove("eon-fg2-hoverable");
 
         } else {
 
-          el._refs.subInputs.first.removeAttribute("readonly");
-          el._refs.subInputs.second.removeAttribute("readonly");
-          el._refs.subInputs.third.removeAttribute("readonly");
+          el._refs.fields.first.removeAttribute("readonly");
+          el._refs.fields.second.removeAttribute("readonly");
+          el._refs.fields.third.removeAttribute("readonly");
 
           el._refs.calendarButton.classList.add("eon-fg2-hoverable");
 
@@ -2813,49 +3127,30 @@
           var monthInput = subInputsWrapper.querySelector('[data-field="month"] input');
           var yearInput = subInputsWrapper.querySelector('[data-field="year"] input');
 
-          var value = el.value;
-
-          var valueObj, day, month, year;
-
-          if (value.constructor == Date) {
-
-            day = value.toLocaleString([], {
-              day: "numeric"
-            });
-
-            month = value.toLocaleString([], {
-              month: "numeric"
-            });
-
-            year = value.toLocaleString([], {
-              year: "numeric"
-            });
-
-            valueObj = {
-              day: day,
-              month: month,
-              year: year
-            }
-
-          } else {
-
-            valueObj = eon.time.getDateObjectFromString(el.value, el.valueFormat);
-
-          }
+          var valueObj = el.value.constructor == Date ? eon.time.getDateValueObjectFromDate(el.value, el.time) : eon.time.getDateValueObjectFromString(el.value, el.valueFormat, el.time);
 
           el._misc.current.day = valueObj.day;
           el._misc.current.month = valueObj.month - 1;
           el._misc.current.year = valueObj.year;
 
-          el._misc.selected.day = el._misc.current.day;
-          el._misc.selected.month = el._misc.current.month;
-          el._misc.selected.year = el._misc.current.year;
-
           dayInput.value = el._format(valueObj.day, el._misc.mask.day.format);
           monthInput.value = el._format(valueObj.month, el._misc.mask.month.format);
           yearInput.value = el._format(valueObj.year, el._misc.mask.year.format);
 
-          el._refresh();
+          if (eon.util.isTrue(el.time)) {
+
+            el._misc.clock.currentPMHours = valueObj.hours;
+            el._misc.clock.currentAMHours = el._getAMHours(el._misc.clock.currentPMHours);
+            el._misc.clock.currentMinutes = valueObj.minutes;
+
+            el._refs.subInputs.hours.value = ("0" + el._misc.clock.currentPMHours).slice(-2);
+            el._refs.subInputs.minutes.value = ("0" + el._misc.clock.currentMinutes).slice(-2);
+
+            // Picker Clock
+            el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+            el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+
+          }
 
         }
 
@@ -2895,6 +3190,7 @@
 
         if (el.default != "") {
           el.value = el.default;
+          el._refresh();
         } else {
           el.clear();
         }
@@ -2948,6 +3244,15 @@
       el._setupOverlay();
       el._setupType();
       el._setupDescription();
+      el._setupClock();
+
+      el._refs.okButton.addEventListener("click", function () {
+        el._accept();
+      });
+
+      if (el.time == "true") {
+        el._setCurrentTime();
+      }
 
       el._setupLabelAnimation();
 
