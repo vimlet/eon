@@ -225,8 +225,17 @@
         reflect: true,
       },
       /*
-      @property {String} time
-      @description Whether the component allows the user to pick the time for the date
+      @property {Boolean} date
+      @description Whether the component allows the user to pick the date for the component
+      */
+      date: {
+        value: "true",
+        reflect: true,
+        reflectDefault: true
+      },
+      /*
+      @property {Boolean} time
+      @description Whether the component allows the user to pick the time for the component
       */
       time: {
         value: "false",
@@ -295,7 +304,7 @@
       @description Indicates the format of the value
       */
       valueFormat: {
-        value: "YYYY-MM-DD hh:mm",
+        value: "YYYY-MM-DD",
         reflect: true
       },
       /*
@@ -380,6 +389,14 @@
         value: false,
         reflect: true,
         reflectDefault: false
+      },
+      /*
+      @property {Number} calendarMaxWidth
+      @description Maximum allowed width for the calendar
+      */
+      calendarMaxWidth: {
+        value: 330,
+        reflect: true
       }
     },
     privateFunctions: {
@@ -1331,7 +1348,7 @@
 
             el._misc.clock.isPM = true;
             el._misc.clock.currentPMHours = el._getPMHours(el._misc.clock.currentAMHours);
-            console.log('el._misc.clock.currentPMHours', el._misc.clock.currentPMHours);
+
             el._refs.amButton.classList.remove("eon-bg2-active");
             el._refs.pmButton.classList.add("eon-bg2-active");
 
@@ -1341,10 +1358,10 @@
 
           });
 
-          // el._refs.scrollTest.addEventListener("scroll", function (e) {
-          //   var value = Math.round(el._refs.scrollTest.scrollTop / el._refs.scrollTest.offsetHeight);
-          //   el._refs.currentMinutes.innerHTML = ("0" + value).slice(-2);
-          // });
+          if (!eon.util.isTrue(el.date)) {
+            el._refs.calendarButton.classList.remove("vicon-calendar");
+            el._refs.calendarButton.classList.add("vicon-clock");
+          }
 
         }
 
@@ -1453,7 +1470,10 @@
         } else {
 
           var width = (parseInt(el._refs.main.offsetWidth) * 1.5);
-          var height = width * el._misc.heightRatio;
+          var height;
+
+          width = width > el.calendarMaxWidth ? el.calendarMaxWidth : width;
+          height = width * el._misc.heightRatio;
 
           el._refs.overlay.classList.remove("eon-date-device");
           el._refs.overlay.classList.remove("eon-bg1-modal");
@@ -1636,8 +1656,9 @@
         }
 
         dateObj = el._formatObj(dateObj);
-
+        
         el.value = eon.time.generateOutput(dateObj, el.valueFormat);
+        
         el._refresh();
         el._updateValue();
 
@@ -1653,11 +1674,15 @@
         var el = this;
 
         text = text ? text + "" : "";
+        
+        if (format) {
 
-        if (text.length > 0 && text.length < format.length) {
-          for (var i = 0; i < (format.length - text.length); i++) {
-            text = "0" + text;
+          if (text.length > 0 && text.length < format.length) {
+            for (var i = 0; i < (format.length - text.length); i++) {
+              text = "0" + text;
+            }
           }
+
         }
 
         return text;
@@ -1906,13 +1931,13 @@
         var dayInput = subInputs.querySelector('[data-field="day"] input');
         var monthInput = subInputs.querySelector('[data-field="month"] input');
         var yearInput = subInputs.querySelector('[data-field="year"] input');
-        
+
         if (el._refs.subInputs.hours.value != "" && parseInt(el._refs.subInputs.hours.value) > 23) {
           el._refs.subInputs.hours.value = "23";
         } else if (el._refs.subInputs.hours.value.length == 2 && parseInt(el._refs.subInputs.hours.value) < 0) {
           el._refs.subInputs.hours.value = "00";
         }
-        
+
         if (el._refs.subInputs.minutes.value != "" && parseInt(el._refs.subInputs.minutes.value) > 59) {
           el._refs.subInputs.minutes.value = "59";
         } else if (el._refs.subInputs.minutes.value.length == 2 && parseInt(el._refs.subInputs.minutes.value) < 0) {
@@ -2058,52 +2083,60 @@
 
         var el = this;
 
-        if (el._refs.daysGrid) {
+        if (!eon.util.isTrue(el.date) && eon.util.isTrue(el.time)) {
 
-          var year = Number(el._misc.current.year) && Number(el._misc.current.year) > 0 ? el._misc.current.year : new Date().toLocaleString([], { year: "numeric" });
-          var month = Number(el._misc.current.month) && Number(el._misc.current.month) > 0 ? el._misc.current.month : new Date().toLocaleString([], { month: "numeric" }) - 1;
+          el._showClockView();
 
-          el._fillDaysGrid(year, month);
-          el._updateHeaderSelectors("days", el._misc.current.year, el._misc.current.month);
-          el._showDaysGrid();
+        } else if (eon.util.isTrue(el.date)) {
 
-        } else if (el._refs.monthsGrid) {
+          if (el._refs.daysGrid) {
 
-          el._updateHeaderSelectors("months");
-          el._showMonthsGrid();
+            var year = Number(el._misc.current.year) && Number(el._misc.current.year) > 0 ? el._misc.current.year : new Date().toLocaleString([], { year: "numeric" });
+            var month = Number(el._misc.current.month) && Number(el._misc.current.month) > 0 ? el._misc.current.month : new Date().toLocaleString([], { month: "numeric" }) - 1;
 
-        } else if (el._refs.yearsGrid) {
+            el._fillDaysGrid(year, month);
+            el._updateHeaderSelectors("days", el._misc.current.year, el._misc.current.month);
+            el._showDaysGrid();
 
-          el._updateHeaderSelectors("years");
-          el._showYearsGrid();
-        }
+          } else if (el._refs.monthsGrid) {
 
-        if (el._refs.yearsGrid) {
+            el._updateHeaderSelectors("months");
+            el._showMonthsGrid();
 
-          var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.current.year + "']");
+          } else if (el._refs.yearsGrid) {
 
-          if (yearButton && yearButton.dataset.disabled != "true") {
-            el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+            el._updateHeaderSelectors("years");
+            el._showYearsGrid();
           }
 
-        }
+          if (el._refs.yearsGrid) {
 
-        if (el._refs.monthsGrid) {
+            var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.current.year + "']");
 
-          var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.current.year + "'][data-index='" + el._misc.current.month + "']");
+            if (yearButton && yearButton.dataset.disabled != "true") {
+              el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+            }
 
-          if (monthButton && monthButton.dataset.disabled != "true") {
-            el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
           }
 
-        }
+          if (el._refs.monthsGrid) {
 
-        if (el._refs.daysGrid) {
+            var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.current.year + "'][data-index='" + el._misc.current.month + "']");
 
-          var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.current.year + "'][month='" + parseInt(el._misc.current.month) + "'][day='" + parseInt(el._misc.current.day) + "']");
+            if (monthButton && monthButton.dataset.disabled != "true") {
+              el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+            }
 
-          if (dayButton && dayButton.dataset.disabled != "true") {
-            el._highlight(dayButton, el.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
+          }
+
+          if (el._refs.daysGrid) {
+
+            var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.current.year + "'][month='" + parseInt(el._misc.current.month) + "'][day='" + parseInt(el._misc.current.day) + "']");
+
+            if (dayButton && dayButton.dataset.disabled != "true") {
+              el._highlight(dayButton, el.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
+            }
+
           }
 
         }
@@ -2194,20 +2227,25 @@
 
         else if (headerType == "time") {
 
-          // 
-          el._refs.monthSelector.classList.add("eon-date-hidden");
-          el._refs.yearSelector.classList.add("eon-date-hidden");
-          el._refs.toggle.classList.add("eon-date-hidden");
+          if (!eon.util.isTrue(el.date)) {
 
-          el._refs.previous.classList.add("eon-date-hidden");
-          el._refs.next.classList.add("eon-date-hidden");
+            el._refs.calendar.querySelector(".eon-date-header").style.display = "none";
 
-          el._refs.toggle.classList.remove("eon-date-hidden");
-          el._refs.toggleIcon.classList.remove("vicon-clock");
+          } else {
 
-          el._refs.toggleIcon.classList.add("vicon-calendar");
+            el._refs.monthSelector.classList.add("eon-date-hidden");
+            el._refs.yearSelector.classList.add("eon-date-hidden");
+            el._refs.toggle.classList.add("eon-date-hidden");
 
-          // 
+            el._refs.previous.classList.add("eon-date-hidden");
+            el._refs.next.classList.add("eon-date-hidden");
+
+            el._refs.toggle.classList.remove("eon-date-hidden");
+            el._refs.toggleIcon.classList.remove("vicon-clock");
+
+            el._refs.toggleIcon.classList.add("vicon-calendar");
+
+          }
 
 
         }
@@ -2802,7 +2840,7 @@
           hours: el._misc.clock.currentPMHours,
           minutes: el._misc.clock.currentMinutes
         });
-
+        
         el.value = eon.time.generateOutput(dateObj, el.valueFormat);
       },
       /*

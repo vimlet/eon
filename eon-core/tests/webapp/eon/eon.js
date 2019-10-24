@@ -6566,23 +6566,23 @@ eon.time = eon.time || {};
     var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : null;
     var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : null;
 
-    var splittedTime = value.indexOf(" ") ? value.split(" ")[1] : null;
-    var splittedDate = value.indexOf(" ") ? value.split(" ")[0].split(separator) : value.split(separator);
-    var splittedFormat = minutesFormat && hoursFormat ? format.split(" ")[0].split(separator) : format.split(separator);
-
-    var dayIndex = splittedFormat.indexOf(dayFormat);
-    var monthIndex = splittedFormat.indexOf(monthFormat);
-    var yearIndex = splittedFormat.indexOf(yearFormat);
+    var timeValue = value.indexOf(":") > -1 && value.indexOf(" ") > -1 ? value.split(" ")[1] : value;
+    var dateValue = value.indexOf(" ") > -1 ? value.split(" ")[0].split(separator) : value.split(separator);
+    var splittedDateFormat = minutesFormat && hoursFormat ? format.split(" ")[0].split(separator) : format.split(separator);
+    
+    var dayIndex = splittedDateFormat.indexOf(dayFormat);
+    var monthIndex = splittedDateFormat.indexOf(monthFormat);
+    var yearIndex = splittedDateFormat.indexOf(yearFormat);
 
     var valueObj = {
-      day: splittedDate[dayIndex] != "Invalid Date" ? splittedDate[dayIndex] : null,
-      month: splittedDate[monthIndex] != "Invalid Date" ? splittedDate[monthIndex] : null,
-      year: splittedDate[yearIndex] != "Invalid Date" ? splittedDate[yearIndex] : null
+      day: dateValue[dayIndex] != "Invalid Date" ? dateValue[dayIndex] : null,
+      month: dateValue[monthIndex] != "Invalid Date" ? dateValue[monthIndex] : null,
+      year: dateValue[yearIndex] != "Invalid Date" ? dateValue[yearIndex] : null
     }
 
     if (eon.util.isTrue(includeTime)) {
-      valueObj.minutes = splittedTime ? splittedTime.split(":")[1] : null;
-      valueObj.hours = splittedTime ? splittedTime.split(":")[0] : null;
+      valueObj.minutes = timeValue ? timeValue.split(":")[1] : null;
+      valueObj.hours = timeValue ? timeValue.split(":")[0] : null;
     }
 
     return valueObj;
