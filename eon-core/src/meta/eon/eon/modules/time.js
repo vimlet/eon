@@ -67,30 +67,25 @@ eon.time = eon.time || {};
 
     if (date) {
 
-      var dayFormat = format.match(/[d|D]{1,2}/)
-        ? format.match(/[d|D]{1,2}/)[0]
-        : undefined;
-      var monthFormat = format.match(/[M]{1,4}/)
-        ? format.match(/[M]{1,4}/)[0]
-        : undefined;
-      var yearFormat = format.match(/[y|Y]{2,4}/)
-        ? format.match(/[y|Y]{2,4}/)[0]
-        : undefined;
+      var dayFormat = format.match(/[d|D]{1,2}/) ? format.match(/[d|D]{1,2}/)[0] : null;
+      var monthFormat = format.match(/[M]{1,4}/) ? format.match(/[M]{1,4}/)[0] : null;
+      var yearFormat = format.match(/[y|Y]{2,4}/) ? format.match(/[y|Y]{2,4}/)[0] : null;
+      var hoursFormat = (format.match(/[h]{1,2}/)) ? format.match(/[h]{1,2}/)[0] : null;
+      var minutesFormat = (format.match(/[m]{1,2}/)) ? format.match(/[m]{1,2}/)[0] : null;
       var dayType, monthType, yearType, dayString, monthString, yearString;
+
       if (yearFormat) {
         yearType = yearFormat.length > 1 ? "numeric" : "2-digit";
-        yearString = formatedMonth = date.toLocaleString([locale], {
-          year: yearType
-        });
+        yearString = formatedMonth = date.toLocaleString([locale], { year: yearType });
         format = format.replace(yearFormat, yearString);
       }
+
       if (dayFormat) {
         dayType = dayFormat.length > 1 ? "2-digit" : "numeric";
-        dayString = formatedMonth = date.toLocaleString([locale], {
-          day: dayType
-        });
+        dayString = formatedMonth = date.toLocaleString([locale], { day: dayType });
         format = format.replace(dayFormat, dayString);
       }
+
       if (monthFormat) {
         switch (monthFormat.length) {
           case 1:
@@ -109,6 +104,14 @@ eon.time = eon.time || {};
           month: monthType
         });
         format = format.replace(monthFormat, monthString);
+      }
+
+      if (hoursFormat) {
+        format.replace(hoursFormat, date.getHours());
+      }
+
+      if (minutesFormat) {
+        format.replace(minutesFormat, date.getMinutes());
       }
 
       return format;
@@ -146,7 +149,7 @@ eon.time = eon.time || {};
     var timeValue = value.indexOf(":") > -1 && value.indexOf(" ") > -1 ? value.split(" ")[1] : value;
     var dateValue = value.indexOf(" ") > -1 ? value.split(" ")[0].split(separator) : value.split(separator);
     var splittedDateFormat = minutesFormat && hoursFormat ? format.split(" ")[0].split(separator) : format.split(separator);
-    
+
     var dayIndex = splittedDateFormat.indexOf(dayFormat);
     var monthIndex = splittedDateFormat.indexOf(monthFormat);
     var yearIndex = splittedDateFormat.indexOf(yearFormat);
@@ -154,12 +157,9 @@ eon.time = eon.time || {};
     var valueObj = {
       day: dateValue[dayIndex] != "Invalid Date" ? dateValue[dayIndex] : null,
       month: dateValue[monthIndex] != "Invalid Date" ? dateValue[monthIndex] : null,
-      year: dateValue[yearIndex] != "Invalid Date" ? dateValue[yearIndex] : null
-    }
-
-    if (eon.util.isTrue(includeTime)) {
-      valueObj.minutes = timeValue ? timeValue.split(":")[1] : null;
-      valueObj.hours = timeValue ? timeValue.split(":")[0] : null;
+      year: dateValue[yearIndex] != "Invalid Date" ? dateValue[yearIndex] : null,
+      hours: timeValue ? timeValue.split(":")[0] : null,
+      minutes: timeValue ? timeValue.split(":")[1] : null
     }
 
     return valueObj;
@@ -169,16 +169,13 @@ eon.time = eon.time || {};
   eon.time.getDateValueObjectFromDate = function (date, includeTime) {
 
     var valueObj = {
-      day: date.toLocaleString([], { day: "numeric" }),
-      month: date.toLocaleString([], { month: "numeric" }),
-      year: date.toLocaleString([], { year: "numeric" })
+      day: parseInt(date.toLocaleString([], { day: "numeric" })),
+      month: parseInt(date.toLocaleString([], { month: "numeric" })),
+      year: parseInt(date.toLocaleString([], { year: "numeric" })),
+      hours: date.getHours(),
+      minutes: date.getMinutes()
     }
 
-    if (eon.util.isTrue(includeTime)) {
-      valueObj.hours = date.getHours();
-      valueObj.minutes = date.getMinutes();
-    }
-    
     return valueObj;
 
   };
@@ -209,7 +206,7 @@ eon.time = eon.time || {};
       var minutes = formatFn(dateObj.minutes, minutesFormat);
       format = format.replace(minutesFormat, minutes);
     }
-    
+
     if (dateObj.hours != null && hoursFormat) {
       var hours = formatFn(dateObj.hours, hoursFormat);
       format = format.replace(hoursFormat, hours);
