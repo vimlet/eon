@@ -6872,7 +6872,7 @@ eon.registry.isReady = function (el) {
 // Trigger global onReady
 eon.onImportsReady(function () {
 
-  if (eon.registry.elementStatus.declared.length === 0) {
+  if (eon.registry.elementStatus.declared.length === 0 && !eon.pendingBuilds) {
     eon.triggerCallback("onReady", eon);
   }
 
