@@ -9210,32 +9210,34 @@ eon.time = eon.time || {};
 
   };
 
-  eon.time.getDateValueObjectFromString = function (value, format, includeTime) {
+  eon.time.getDateValueObjectFromString = function (value, format) {
 
     var separator = eon.time.getFormatSeparator(format);
-
+    
     var minutesFormat = (format.match(/[m]{1,2}/)) ? format.match(/[m]{1,2}/)[0] : null;
     var hoursFormat = (format.match(/[h]{1,2}/)) ? format.match(/[h]{1,2}/)[0] : null;
     var dayFormat = (format.match(/[d|D]{1,2}/)) ? format.match(/[d|D]{1,2}/)[0] : null;
     var monthFormat = (format.match(/[M]{1,4}/)) ? format.match(/[M]{1,4}/)[0] : null;
     var yearFormat = (format.match(/[y|Y]{2,4}/)) ? format.match(/[y|Y]{2,4}/)[0] : null;
+    var valueObj = {};
 
-    var timeValue = value.indexOf(":") > -1 && value.indexOf(" ") > -1 ? value.split(" ")[1] : value;
-    var dateValue = value.indexOf(" ") > -1 ? value.split(" ")[0].split(separator) : value.split(separator);
-    var splittedDateFormat = minutesFormat && hoursFormat ? format.split(" ")[0].split(separator) : format.split(separator);
-
-    var dayIndex = splittedDateFormat.indexOf(dayFormat);
-    var monthIndex = splittedDateFormat.indexOf(monthFormat);
-    var yearIndex = splittedDateFormat.indexOf(yearFormat);
-
-    var valueObj = {
-      day: dateValue[dayIndex] != "Invalid Date" ? dateValue[dayIndex] : null,
-      month: dateValue[monthIndex] != "Invalid Date" ? dateValue[monthIndex] : null,
-      year: dateValue[yearIndex] != "Invalid Date" ? dateValue[yearIndex] : null,
-      hours: timeValue ? timeValue.split(":")[0] : null,
-      minutes: timeValue ? timeValue.split(":")[1] : null
+    if (value.indexOf(":") > -1) {
+      var timeValue = value.indexOf(" ") > -1 ? value.split(" ")[1] : value;
+      valueObj.hours = timeValue.split(":")[0];
+      valueObj.minutes = timeValue.split(":")[1];
     }
 
+    if (value.indexOf(separator) > -1) {
+      var dateValue = value.indexOf(" ") > -1 ? value.split(" ")[0].split(separator) : value.split(separator);
+      var splittedDateFormat = minutesFormat && hoursFormat ? format.split(" ")[0].split(separator) : format.split(separator);
+      var dayIndex = splittedDateFormat.indexOf(dayFormat);
+      var monthIndex = splittedDateFormat.indexOf(monthFormat);
+      var yearIndex = splittedDateFormat.indexOf(yearFormat);
+      valueObj.day = dateValue[dayIndex] != "Invalid Date" ? dateValue[dayIndex] : null;
+      valueObj.month = dateValue[monthIndex] != "Invalid Date" ? dateValue[monthIndex] : null;
+      valueObj.year = dateValue[yearIndex] != "Invalid Date" ? dateValue[yearIndex] : null;
+    }
+    
     return valueObj;
 
   };
@@ -10788,7 +10790,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
         // Takes the data value
         var value = propertyValue;
         // Turns that value into an object with day,month and year properties
-        var valueObj = eon.time.getDateObjectFromString(value, format);
+        var valueObj = eon.time.getDateValueObjectFromString(value, format);
         // Takes the object and applies the schema format to see if both values (the value and the schema value) are the same,
         // that would mean if follows the same format
         var schemaValue = eon.time.generateOutput(valueObj, format);
@@ -10813,7 +10815,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
             // Checks if there is a minimum specified in the schema
             if (propertySchema.hasOwnProperty("minimum")) {
 
-                var minDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
+                var minDateObj = eon.time.getDateValueObjectFromString(propertySchema.minimum, format);
 
                 var minYear = minDateObj.year != undefined ? minDateObj.year : 0;
                 var minMonth = minDateObj.month != undefined ? (minDateObj.month - 1) : 0;
@@ -10828,7 +10830,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
             // Checks if there is a maximum specified in the schema
             if (propertySchema.hasOwnProperty("maximum")) {
 
-                var maxDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
+                var maxDateObj = eon.time.getDateValueObjectFromString(propertySchema.minimum, format);
 
                 var maxYear = maxDateObj.year != undefined ? maxDateObj.year : 0;
                 var maxMonth = maxDateObj.month != undefined ? (maxDateObj.month - 1) : 0;

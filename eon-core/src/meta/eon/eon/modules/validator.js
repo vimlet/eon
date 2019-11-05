@@ -120,7 +120,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
         // Takes the data value
         var value = propertyValue;
         // Turns that value into an object with day,month and year properties
-        var valueObj = eon.time.getDateObjectFromString(value, format);
+        var valueObj = eon.time.getDateValueObjectFromString(value, format);
         // Takes the object and applies the schema format to see if both values (the value and the schema value) are the same,
         // that would mean if follows the same format
         var schemaValue = eon.time.generateOutput(valueObj, format);
@@ -145,7 +145,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
             // Checks if there is a minimum specified in the schema
             if (propertySchema.hasOwnProperty("minimum")) {
 
-                var minDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
+                var minDateObj = eon.time.getDateValueObjectFromString(propertySchema.minimum, format);
 
                 var minYear = minDateObj.year != undefined ? minDateObj.year : 0;
                 var minMonth = minDateObj.month != undefined ? (minDateObj.month - 1) : 0;
@@ -160,7 +160,7 @@ eon.validator.validateDateField = function (property, schema, data, errorObj) {
             // Checks if there is a maximum specified in the schema
             if (propertySchema.hasOwnProperty("maximum")) {
 
-                var maxDateObj = eon.time.getDateObjectFromString(propertySchema.minimum, format);
+                var maxDateObj = eon.time.getDateValueObjectFromString(propertySchema.minimum, format);
 
                 var maxYear = maxDateObj.year != undefined ? maxDateObj.year : 0;
                 var maxMonth = maxDateObj.month != undefined ? (maxDateObj.month - 1) : 0;

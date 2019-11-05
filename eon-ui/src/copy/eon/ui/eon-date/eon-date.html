@@ -418,6 +418,14 @@
         value: 220,
         reflect: true
       },
+      /*
+      @property {Boolean} stepped
+      @description Whether the picker will show the hours view when a day is picked
+      */
+      stepped: {
+        value: true,
+        reflect: true
+      },
     },
     privateFunctions: {
       /*
@@ -1006,6 +1014,10 @@
 
           el._misc.min.active = true;
 
+        } else {
+
+          el._misc.min.active = false;
+
         }
 
       },
@@ -1028,6 +1040,10 @@
           el._misc.max.minutes = parseInt(maxObj.minutes);
 
           el._misc.max.active = true;
+
+        } else {
+
+          el._misc.max.active = false;
 
         }
 
@@ -1282,12 +1298,26 @@
           el._refs.hoursUp.addEventListener("click", function () {
             if (el._misc.clock.currentAMHours < 12) {
 
-              el._misc.clock.currentAMHours++;
-              el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._getPMHours(el._misc.clock.currentAMHours) : el._misc.clock.currentAMHours;
-              el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+              var dateObj = {
+                hours: parseInt(el._misc.clock.currentPMHours) + 1,
+                minutes: el._misc.clock.currentMinutes,
+                day: el._misc.current.day,
+                month: el._misc.current.month + 1,
+                year: el._misc.current.year,
+              };
 
-              if (el.type == "calendar") {
-                el._updateWithCurrentValues();
+              if (!el._exceedsMaxDate(dateObj)) {
+
+                el._misc.clock.currentAMHours++;
+                el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._getPMHours(el._misc.clock.currentAMHours) : el._misc.clock.currentAMHours;
+                el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+
+                eon.triggerCallback("onTimeSelected", el, el, []);
+
+                if (el.type == "calendar") {
+                  el._updateWithCurrentValues();
+                }
+
               }
 
             }
@@ -1296,12 +1326,26 @@
           el._refs.hoursDown.addEventListener("click", function () {
             if (el._misc.clock.currentAMHours > 1) {
 
-              el._misc.clock.currentAMHours--;
-              el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._getPMHours(el._misc.clock.currentAMHours) : el._misc.clock.currentAMHours;
-              el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+              var dateObj = {
+                hours: parseInt(el._misc.clock.currentPMHours) - 1,
+                minutes: el._misc.clock.currentMinutes,
+                day: el._misc.current.day,
+                month: el._misc.current.month + 1,
+                year: el._misc.current.year,
+              };
 
-              if (el.type == "calendar") {
-                el._updateWithCurrentValues();
+              if (!el._exceedsMinDate(dateObj)) {
+
+                el._misc.clock.currentAMHours--;
+                el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._getPMHours(el._misc.clock.currentAMHours) : el._misc.clock.currentAMHours;
+                el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+
+                eon.triggerCallback("onTimeSelected", el, el, []);
+
+                if (el.type == "calendar") {
+                  el._updateWithCurrentValues();
+                }
+
               }
 
             }
@@ -1310,11 +1354,25 @@
           el._refs.minutesUp.addEventListener("click", function () {
             if (el._misc.clock.currentMinutes < 60) {
 
-              el._misc.clock.currentMinutes++;
-              el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+              var dateObj = {
+                hours: el._misc.clock.currentPMHours,
+                minutes: parseInt(el._misc.clock.currentMinutes) + 1,
+                day: el._misc.current.day,
+                month: el._misc.current.month + 1,
+                year: el._misc.current.year,
+              };
 
-              if (el.type == "calendar") {
-                el._updateWithCurrentValues();
+              if (!el._exceedsMaxDate(dateObj)) {
+
+                el._misc.clock.currentMinutes++;
+                el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+
+                eon.triggerCallback("onTimeSelected", el, el, []);
+
+                if (el.type == "calendar") {
+                  el._updateWithCurrentValues();
+                }
+
               }
 
             }
@@ -1323,11 +1381,25 @@
           el._refs.minutesDown.addEventListener("click", function () {
             if (el._misc.clock.currentMinutes > 0) {
 
-              el._misc.clock.currentMinutes--;
-              el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+              var dateObj = {
+                hours: el._misc.clock.currentPMHours,
+                minutes: parseInt(el._misc.clock.currentMinutes) - 1,
+                day: el._misc.current.day,
+                month: el._misc.current.month + 1,
+                year: el._misc.current.year,
+              };
 
-              if (el.type == "calendar") {
-                el._updateWithCurrentValues();
+              if (!el._exceedsMinDate(dateObj)) {
+
+                el._misc.clock.currentMinutes--;
+                el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+
+                eon.triggerCallback("onTimeSelected", el, el, []);
+
+                if (el.type == "calendar") {
+                  el._updateWithCurrentValues();
+                }
+
               }
 
             }
@@ -1335,28 +1407,56 @@
 
           el._refs.amButton.addEventListener("click", function () {
 
-            el._misc.clock.isPM = false;
-            el._misc.clock.currentPMHours = el._misc.clock.currentAMHours;
+            var dateObj = {
+              hours: el._misc.clock.currentAMHours,
+              minutes: el._misc.clock.currentMinutes,
+              day: el._misc.current.day,
+              month: el._misc.current.month + 1,
+              year: el._misc.current.year,
+            };
 
-            el._refs.amButton.classList.add("eon-bg2-active");
-            el._refs.pmButton.classList.remove("eon-bg2-active");
+            if (!el._exceedsMinDate(dateObj)) {
 
-            if (el.type == "calendar") {
-              el._updateWithCurrentValues();
+              el._misc.clock.isPM = false;
+              el._misc.clock.currentPMHours = el._misc.clock.currentAMHours;
+
+              el._refs.amButton.classList.add("eon-bg2-active");
+              el._refs.pmButton.classList.remove("eon-bg2-active");
+
+              eon.triggerCallback("onTimeSelected", el, el, []);
+
+              if (el.type == "calendar") {
+                el._updateWithCurrentValues();
+              }
+
             }
 
           });
 
           el._refs.pmButton.addEventListener("click", function () {
 
-            el._misc.clock.isPM = true;
-            el._misc.clock.currentPMHours = el._getPMHours(el._misc.clock.currentAMHours);
+            var dateObj = {
+              hours: el._getPMHours(el._misc.clock.currentAMHours),
+              minutes: el._misc.clock.currentMinutes,
+              day: el._misc.current.day,
+              month: el._misc.current.month + 1,
+              year: el._misc.current.year,
+            };
 
-            el._refs.amButton.classList.remove("eon-bg2-active");
-            el._refs.pmButton.classList.add("eon-bg2-active");
+            if (!el._exceedsMaxDate(dateObj)) {
 
-            if (el.type == "calendar") {
-              el._updateWithCurrentValues();
+              el._misc.clock.isPM = true;
+              el._misc.clock.currentPMHours = el._getPMHours(el._misc.clock.currentAMHours);
+
+              el._refs.amButton.classList.remove("eon-bg2-active");
+              el._refs.pmButton.classList.add("eon-bg2-active");
+
+              eon.triggerCallback("onTimeSelected", el, el, []);
+
+              if (el.type == "calendar") {
+                el._updateWithCurrentValues();
+              }
+
             }
 
           });
@@ -1511,6 +1611,8 @@
         el._assignFocusStyle();
 
         el._refresh();
+        el._updateValue();
+        el._validate();
 
         document.body.appendChild(el._refs.overlay);
 
@@ -1584,6 +1686,8 @@
         var day = inputs[el._misc.mask.order.indexOf("day")].value;
         var month = inputs[el._misc.mask.order.indexOf("month")].value;
         var year = inputs[el._misc.mask.order.indexOf("year")].value;
+        var hours = el._refs.subInputs.hours.value;
+        var minutes = el._refs.subInputs.minutes.value;
 
         var validDate = false;
         var date;
@@ -1592,7 +1696,9 @@
 
           day: day,
           month: month,
-          year: year
+          year: year,
+          hours: hours,
+          minutes: minutes
 
         }
 
@@ -1600,7 +1706,11 @@
         if (year != "") {
           if (month != "" && parseInt(month) > 0 && parseInt(month) <= 12) {
             if (day != "" && day > 0 && day <= eon.time.getDaysInMonth(year, parseInt(month) - 1)) {
-              validDate = true;
+              if (hours != "" && parseInt(hours) >= 0 && parseInt(hours) < 24) {
+                if (minutes != "" && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
+                  validDate = true;
+                }
+              }
             }
           }
         }
@@ -1613,6 +1723,9 @@
           el._misc.current.day = parseInt(day);
           el._misc.current.month = parseInt(month) - 1;
           el._misc.current.year = parseInt(year);
+          el._misc.clock.currentPMHours = parseInt(hours);
+          el._misc.clock.currentAMHours = el._getAMHours(parseInt(hours));
+          el._misc.current.currentMinutes = parseInt(minutes);
 
           el._misc.preventUpdate = true;
 
@@ -1704,7 +1817,7 @@
       @param {Number} month
       */
       isMinMonth: function (year, month) {
-        return (year == this._misc.min.year && month <= this._misc.min.month || year < this._misc.min.year);
+        return (year == this._misc.min.year && month <= (this._misc.min.month - 1) || year < this._misc.min.year);
       },
       /*
       @function (private) {Boolean} _isMaxMonth
@@ -1713,7 +1826,7 @@
       @param {Number} month
       */
       isMaxMonth: function (year, month) {
-        return (year == this._misc.max.year && month >= this._misc.max.month || year > this._misc.max.year);
+        return (year == this._misc.max.year && month >= (this._misc.max.month - 1) || year > this._misc.max.year);
       },
       /*
       @function (private) _handleFocus
@@ -1990,25 +2103,20 @@
 
         var el = this;
 
-        if (dayInput.value != "" && monthInput.value != "" && yearInput.value != "" && yearInput.value.length == el._misc.mask.year.format.length) {
+        var dateObj = {
+          hours: el._refs.subInputs.hours.value != "" ? parseInt(el._refs.subInputs.hours.value) : null,
+          minutes: el._refs.subInputs.minutes.value != "" ? parseInt(el._refs.subInputs.minutes.value) : null,
+          day: dayInput.value != "" ? parseInt(dayInput.value) : null,
+          month: monthInput.value != "" ? parseInt(monthInput.value) : null,
+          year: yearInput.value != "" ? parseInt(yearInput.value) : null,
+        };
 
-          var dayInputValue = parseInt(dayInput.value);
-          var monthInputValue = parseInt(monthInput.value);
-          var yearInputValue = parseInt(yearInput.value);
-
-          if ((dayInputValue < el._misc.min.day && monthInputValue <= el._misc.min.month && yearInputValue == el._misc.min.year) || (monthInputValue < el._misc.min.month && yearInputValue == el._misc.min.year) || yearInputValue < el._misc.min.year) {
-
-            dayInput.value = el._misc.min.day;
-            monthInput.value = el._misc.min.month;
-            yearInput.value = el._misc.min.year;
-
-          } else if ((dayInputValue > el._misc.max.day && monthInputValue >= el._misc.max.month && yearInputValue == el._misc.max.year) || (monthInputValue > el._misc.max.month && yearInputValue == el._misc.max.year) || yearInputValue > el._misc.max.year) {
-
-            dayInput.value = el._misc.max.day;
-            monthInput.value = el._misc.max.month;
-            yearInput.value = el._misc.max.year;
-          }
+        if (el._exceedsMinDate(dateObj)) {
+          el.value = el.min;
+        } else if (el._exceedsMaxDate(dateObj)) {
+          el.value = el.max;
         }
+
       },
       /*
       @function (private) {Boolean} _exceedsMinDate
@@ -2026,23 +2134,23 @@
 
           if (eon.util.isTrue(el.time) && !eon.util.isTrue(el.date)) {
 
-            sameHour = dateObj.hours && dateObj.hours == el._misc.min.hours;
+            sameHour = el._isNumber(dateObj.hours) && dateObj.hours == el._misc.min.hours;
 
-            exceedsMinutes = dateObj.minutes && dateObj.minutes < el._misc.min.minutes && sameHour;
-            exceedsHour = dateObj.hours && dateObj.hours < el._misc.min.hours;
+            exceedsMinutes = el._isNumber(dateObj.minutes) && dateObj.minutes < el._misc.min.minutes && sameHour;
+            exceedsHour = el._isNumber(dateObj.hours) && dateObj.hours < el._misc.min.hours;
 
           } else {
 
-            sameHour = dateObj.hours && dateObj.hours == el._misc.min.hours;
-            sameDay = dateObj.day && dateObj.day == el._misc.min.day;
-            sameMonth = dateObj.month && dateObj.month == el._misc.min.month;
-            sameYear = dateObj.year && dateObj.year == el._misc.min.year;
+            sameHour = el._isNumber(dateObj.hours) && dateObj.hours == el._misc.min.hours;
+            sameDay = el._isNumber(dateObj.day) && dateObj.day == el._misc.min.day;
+            sameMonth = el._isNumber(dateObj.month) && dateObj.month == el._misc.min.month;
+            sameYear = el._isNumber(dateObj.year) && dateObj.year == el._misc.min.year;
 
-            exceedsMinutes = dateObj.minutes && dateObj.minutes < el._misc.min.minutes && sameHour && sameDay && sameMonth && sameYear;
-            exceedsHour = dateObj.hours && dateObj.hours < el._misc.min.hours && sameDay && sameMonth && sameYear;
-            exceedsDay = dateObj.day && dateObj.day < el._misc.min.day && sameMonth && sameYear;
-            exceedsMonth = dateObj.month && dateObj.month < el._misc.min.month && sameYear;
-            exceedsYear = dateObj.year && dateObj.year < el._misc.min.year;
+            exceedsMinutes = el._isNumber(dateObj.minutes) && dateObj.minutes < el._misc.min.minutes && sameHour && sameDay && sameMonth && sameYear;
+            exceedsHour = el._isNumber(dateObj.hours) && dateObj.hours < el._misc.min.hours && sameDay && sameMonth && sameYear;
+            exceedsDay = el._isNumber(dateObj.day) && dateObj.day < el._misc.min.day && sameMonth && sameYear;
+            exceedsMonth = el._isNumber(dateObj.month) && dateObj.month < el._misc.min.month && sameYear;
+            exceedsYear = el._isNumber(dateObj.year) && dateObj.year < el._misc.min.year;
 
           }
 
@@ -2067,23 +2175,23 @@
 
           if (eon.util.isTrue(el.time) && !eon.util.isTrue(el.date)) {
 
-            sameHour = dateObj.hours && dateObj.hours == el._misc.max.hours;
+            sameHour = el._isNumber(dateObj.hours) && dateObj.hours == el._misc.max.hours;
 
-            exceedsMinutes = dateObj.minutes && dateObj.minutes > el._misc.max.minutes && sameHour;
-            exceedsHour = dateObj.hours && dateObj.hours > el._misc.max.hours;
+            exceedsMinutes = el._isNumber(dateObj.minutes) && dateObj.minutes > el._misc.max.minutes && sameHour;
+            exceedsHour = el._isNumber(dateObj.hours) && dateObj.hours > el._misc.max.hours;
 
           } else {
 
-            sameHour = dateObj.hours && dateObj.hours == el._misc.max.hours;
-            sameDay = dateObj.day && dateObj.day == el._misc.max.day;
-            sameMonth = dateObj.month && dateObj.month == el._misc.max.month;
-            sameYear = dateObj.year && dateObj.year == el._misc.max.year;
+            sameHour = el._isNumber(dateObj.hours) && dateObj.hours == el._misc.max.hours;
+            sameDay = el._isNumber(dateObj.day) && dateObj.day == el._misc.max.day;
+            sameMonth = el._isNumber(dateObj.month) && dateObj.month == el._misc.max.month;
+            sameYear = el._isNumber(dateObj.year) && dateObj.year == el._misc.max.year;
 
-            exceedsMinutes = dateObj.minutes && dateObj.minutes > el._misc.max.minutes && sameHour && sameDay && sameMonth && sameYear;
-            exceedsHour = dateObj.hours && dateObj.hours > el._misc.max.hours && sameDay && sameMonth && sameYear;
-            exceedsDay = dateObj.day && dateObj.day > el._misc.max.day && sameMonth && sameYear;
-            exceedsMonth = dateObj.month && dateObj.month > el._misc.max.month && sameYear;
-            exceedsYear = dateObj.year && dateObj.year > el._misc.max.year;
+            exceedsMinutes = el._isNumber(dateObj.minutes) && dateObj.minutes > el._misc.max.minutes && sameHour && sameDay && sameMonth && sameYear;
+            exceedsHour = el._isNumber(dateObj.hours) && dateObj.hours > el._misc.max.hours && sameDay && sameMonth && sameYear;
+            exceedsDay = el._isNumber(dateObj.day) && dateObj.day > el._misc.max.day && sameMonth && sameYear;
+            exceedsMonth = el._isNumber(dateObj.month) && dateObj.month > el._misc.max.month && sameYear;
+            exceedsYear = el._isNumber(dateObj.year) && dateObj.year > el._misc.max.year;
 
           }
 
@@ -2799,6 +2907,10 @@
             el._updateWithCurrentValues();
           }
 
+          if (eon.util.isTrue(el.stepped)) {
+            el._showClockView();
+          }
+
           eon.triggerCallback("onDaySelected", el, el, []);
 
         }
@@ -3084,6 +3196,15 @@
         return nextMonthDaysToDisplay;
       },
       /*
+      @function (private) _isNumber
+      @description 
+      @param
+      */
+      isNumber: function (value) {
+        value = Number(value);
+        return value === 0 || value;
+      },
+      /*
       @function (private) _updateLabel
       @description Updates the label node with the new label
       */
@@ -3212,6 +3333,15 @@
 
           var valueObj = el.value.constructor == Date ? eon.time.getDateValueObjectFromDate(el.value, el.time) : eon.time.getDateValueObjectFromString(el.value, el.valueFormat, el.time);
 
+          valueObj.day = valueObj.day ? valueObj.day : parseInt(dayInput.value);
+          valueObj.month = valueObj.month ? parseInt(valueObj.month) : parseInt(monthInput.value);
+          valueObj.year = valueObj.year ? valueObj.year : parseInt(yearInput.value);
+
+          valueObj.hours = el._isNumber(valueObj.hours) ? valueObj.hours : parseInt(el._refs.subInputs.hours.value);
+          valueObj.hours = isNaN(valueObj.hours) ? 0 : valueObj.hours;
+          valueObj.minutes = el._isNumber(valueObj.minutes) ? valueObj.minutes : parseInt(el._refs.subInputs.minutes.value);
+          valueObj.minutes = isNaN(valueObj.minutes) ? 0 : valueObj.minutes;
+
           el._misc.current.day = valueObj.day;
           el._misc.current.month = valueObj.month - 1;
           el._misc.current.year = valueObj.year;
@@ -3233,7 +3363,20 @@
             el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
             el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
 
+            // PM switch update
+            el._misc.clock.isPM = parseInt(el._misc.clock.currentPMHours) > 12;
+
+            if (el._misc.clock.isPM) {
+              el._refs.amButton.classList.remove("eon-bg2-active");
+              el._refs.pmButton.classList.add("eon-bg2-active");
+            } else {
+              el._refs.amButton.classList.add("eon-bg2-active");
+              el._refs.pmButton.classList.remove("eon-bg2-active");
+            }
+
           }
+
+          eon.triggerCallback("onValueChanged", el, el, []);
 
         }
 
@@ -3252,6 +3395,26 @@
 
         el.classList[classListFn]("eon-date-error");
 
+      },
+
+      /*
+      @function (private) _updateMin
+      @description Updates the minimum value of the element
+      */
+      updateMin: function () {
+        this._setupMinDate();
+        this._updateWithCurrentValues();
+        this._handleCorrection();
+      },
+
+      /*
+      @function (private) _updateMax
+      @description Updates the maximum value of the element
+      */
+      updateMax: function () {
+        this._setupMaxDate();
+        this._updateWithCurrentValues();
+        this._handleCorrection();
       }
 
     },
@@ -3310,6 +3473,8 @@
       eon.createCallback("onDaySelected", this);
       eon.createCallback("onMonthSelected", this);
       eon.createCallback("onYearSelected", this);
+      eon.createCallback("onTimeSelected", this);
+      eon.createCallback("onValueChanged", this);
 
       if (eon.util.isTouchScreen()) {
         el.dataset.touch = "true";
@@ -3363,6 +3528,12 @@
           break;
         case "invalid":
           this._updateInvalid();
+          break;
+        case "min":
+          this._updateMin();
+          break;
+        case "max":
+          this._updateMax();
           break;
       }
 
