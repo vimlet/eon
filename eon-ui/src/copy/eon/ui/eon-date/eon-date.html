@@ -10,7 +10,7 @@
     <div class="eon-date-subInputs">
 
       <!-- DATE -->
-      <div class="eon-date-dateWrapper">
+      <div class="eon-date-dateWrapper" eon-ref="dateWrapper">
         <div class="eon-date-subInput" eon-ref="fields.first">
           <input eon-ref="subInputs.first" placeholder="" type="number" autocomplete="off" autocorrect="off"
             autocapitalize="off" spellcheck="false"></input>
@@ -27,8 +27,10 @@
         </div>
       </div>
 
+      <i class="eon-date-button eon-fg2 eon-fg2-hoverable vicon vicon-calendar" eon-ref="calendarButton"></i>
+
       <!-- TIME -->
-      <div class="eon-date-timeWrapper">
+      <div class="eon-date-timeWrapper" eon-ref="timeWrapper">
         <div class="eon-date-subInput" data-field="hours" eon-ref="fields.hours" data-order="3">
           <input eon-ref="subInputs.hours" placeholder="" type="number" autocomplete="off" autocorrect="off"
             autocapitalize="off" spellcheck="false"></input>
@@ -40,9 +42,9 @@
         </div>
       </div>
 
-    </div>
+      <i class="eon-date-button eon-fg2 eon-fg2-hoverable vicon vicon-clock-outline" eon-ref="timeButton"></i>
 
-    <i class="eon-date-button eon-fg2 eon-fg2-hoverable vicon vicon-calendar"></i>
+    </div>
 
   </div>
 
@@ -79,22 +81,22 @@
         <div class="eon-date-clock">
 
           <!-- CLOCK HOURS -->
-          <div class="eon-date-hour eon-sect3">
+          <div class="eon-date-hour eon-sect3" data-field="hours">
             <div class="eon-date-hoursUp eon-fg1-hoverable" eon-ref="hoursUp">
               <i class="vicon vicon-chevron-up"></i>
             </div>
-            <div class="eon-date-currentHour eon-bg9" eon-ref="currentHours">11</div>
+            <input class="eon-date-currentHour eon-bg9 eon-fg1" eon-ref="currentHours"></input>
             <div class="eon-date-hoursDown eon-fg1-hoverable" eon-ref="hoursDown">
               <i class="vicon vicon-chevron-down"></i>
             </div>
           </div>
 
           <!-- CLOCK MINUTES -->
-          <div class="eon-date-minutes eon-sect3">
+          <div class="eon-date-minutes eon-sect3" data-field="minutes">
             <div class="eon-date-minutesUp eon-fg1-hoverable" eon-ref="minutesUp">
               <i class="vicon vicon-chevron-up"></i>
             </div>
-            <div class="eon-date-currentMinutes eon-bg9" eon-ref="currentMinutes">30</div>
+            <input class="eon-date-currentMinutes eon-bg9 eon-fg1" eon-ref="currentMinutes"></input>
             <div class="eon-date-minutesDown eon-fg1-hoverable" eon-ref="minutesDown">
               <i class="vicon vicon-chevron-down"></i>
             </div>
@@ -253,6 +255,15 @@
         value: "false",
         reflect: true,
         reflectDefault: true
+      },
+      /*
+      @property {Boolean} timeIcon
+      @description Whether there will be a direct time icon in the components input
+      */
+      timeIcon: {
+        value: "false",
+        reflect: true,
+        reflectTrue: true
       },
       /*
       @property {String} label
@@ -514,6 +525,23 @@
 
           el._refs.overlay.appendChild(calendarFragment);
 
+          if (!eon.util.isTrue(el.date)) {
+            el._refs.calendarButton.parentNode.removeChild(el._refs.calendarButton);
+            el._refs.dateWrapper.parentNode.removeChild(el._refs.dateWrapper);
+          }
+
+          // Clock button on inputs
+          if (eon.util.isTrue(el.date) && !eon.util.isTrue(el.timeIcon)) {
+
+            el._refs.timeButton.parentNode.removeChild(el._refs.timeButton);
+            el._refs.calendarButton.parentNode.appendChild(el._refs.calendarButton);
+
+          } else if (eon.util.isTrue(el.date) && eon.util.isTrue(el.timeIcon)) {
+
+            el._refs.toggle.parentNode.removeChild(el._refs.toggle);
+
+          }
+
         }
 
       },
@@ -537,6 +565,13 @@
 
         el._refs.calendarButton.addEventListener('click', function (e) {
           if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el._expand(true);
+          }
+        }, false);
+
+        el._refs.timeButton.addEventListener('click', function (e) {
+          if (!eon.util.isTrue(el.readonly) && !eon.util.isTrue(el.disabled)) {
+            el._showClockView();
             el._expand();
           }
         }, false);
@@ -969,6 +1004,38 @@
           el._handleKeyUp(el._refs.subInputs.minutes, e);
         }, true);
 
+        // Clock view
+        el._refs.currentHours.addEventListener("input", function (e) {
+
+          if (el._refs.currentHours.value.length >= 2) {
+
+            el._refs.currentHours.value = ("0" + parseInt(el._refs.currentHours.value)).substring(0, 2);
+            el._refs.subInputs.hours.value = el._misc.clock.isPM ? el._getPMHours(el._refs.currentHours.value) : el._refs.currentHours.value;
+
+            el._misc.clock.currentPMHours = parseInt(el._refs.subInputs.hours.value);
+            el._misc.clock.currentAMHours = el._getAMHours(el._misc.clock.currentPMHours);
+
+            el._handleCorrection();
+            el._validate();
+          }
+
+        }, true);
+
+        el._refs.currentMinutes.addEventListener("input", function (e) {
+
+          if (el._refs.currentMinutes.value.length >= 2) {
+
+            el._refs.currentMinutes.value = el._refs.currentMinutes.value.substring(("0" + parseInt(el._refs.currentMinutes.value)), 0, 2);
+            el._refs.subInputs.minutes.value = el._refs.currentMinutes.value;
+            
+            el._misc.clock.currentMinutes = el._refs.subInputs.minutes.value;
+
+            el._handleCorrection();
+            el._validate();
+          }
+
+        }, true);
+
       },
       /*
       @function (private) _setupPasteEvents
@@ -1286,12 +1353,16 @@
         }
 
       },
+      /*
+      @function (private) _setupClock
+      @description Sets up the clock
+      */
       setupClock: function () {
         var el = this;
 
         if (!eon.util.isTrue(el.time)) {
 
-          el._refs.toggle.style.display = "none";
+          el._refs.toggle.parentNode.removeChild(el._refs.toggle);
 
         } else {
 
@@ -1310,7 +1381,7 @@
 
                 el._misc.clock.currentAMHours++;
                 el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._getPMHours(el._misc.clock.currentAMHours) : el._misc.clock.currentAMHours;
-                el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+                el._refs.currentHours.value = ("0" + el._misc.clock.currentAMHours).slice(-2);
 
                 eon.triggerCallback("onTimeSelected", el, el, []);
 
@@ -1338,7 +1409,7 @@
 
                 el._misc.clock.currentAMHours--;
                 el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._getPMHours(el._misc.clock.currentAMHours) : el._misc.clock.currentAMHours;
-                el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+                el._refs.currentHours.value = ("0" + el._misc.clock.currentAMHours).slice(-2);
 
                 eon.triggerCallback("onTimeSelected", el, el, []);
 
@@ -1365,7 +1436,7 @@
               if (!el._exceedsMaxDate(dateObj)) {
 
                 el._misc.clock.currentMinutes++;
-                el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+                el._refs.currentMinutes.value = ("0" + el._misc.clock.currentMinutes).slice(-2);
 
                 eon.triggerCallback("onTimeSelected", el, el, []);
 
@@ -1392,7 +1463,7 @@
               if (!el._exceedsMinDate(dateObj)) {
 
                 el._misc.clock.currentMinutes--;
-                el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+                el._refs.currentMinutes.value = ("0" + el._misc.clock.currentMinutes).slice(-2);
 
                 eon.triggerCallback("onTimeSelected", el, el, []);
 
@@ -1461,18 +1532,23 @@
 
           });
 
-          if (!eon.util.isTrue(el.date)) {
-            el._refs.calendarButton.classList.remove("vicon-calendar");
-            el._refs.calendarButton.classList.add("vicon-clock-outline");
-          }
-
         }
 
       },
+      /*
+      @function (private) _setCurrentTime
+      @description Sets the current time
+      */
       setCurrentTime: function () {
         var now = new Date();
         this._setTime(now.getHours(), now.getMinutes());
       },
+      /*
+      @function (private) _setTime
+      @description Sets a given time
+      @param {Number} hours
+      @param {Number} minutes
+      */
       setTime: function (hours, minutes) {
         var el = this;
 
@@ -1486,8 +1562,8 @@
         el._misc.clock.currentPMHours = el._misc.clock.isPM ? el._misc.clock.currentAMHours + 12 : el._misc.clock.currentPMHours;
         el._misc.clock.currentAMHours = el._misc.clock.isPM ? el._misc.clock.currentPMHours - 12 : el._misc.clock.currentPMHours;
 
-        el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
-        el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
+        el._refs.currentHours.value = ("0" + el._misc.clock.currentAMHours).slice(-2);
+        el._refs.currentMinutes.value = ("0" + el._misc.clock.currentMinutes).slice(-2);
 
         el._refs.subInputs.hours.value = ("0" + el._misc.clock.currentPMHours).slice(-2);
         el._refs.subInputs.minutes.value = ("0" + el._misc.clock.currentMinutes).slice(-2);
@@ -1603,14 +1679,17 @@
       @function (private) _expand
       @description Shows the calendar
       */
-      expand: function () {
+      expand: function (needsRefresh) {
 
         var el = this;
 
         el._assignCalendarStyle();
         el._assignFocusStyle();
 
-        el._refresh();
+        if (needsRefresh) {
+          el._refresh();
+        }
+
         el._updateValue();
         el._validate();
 
@@ -1681,7 +1760,7 @@
 
         var el = this;
 
-        var inputs = el.querySelectorAll(".eon-date-subInputs .eon-date-subInput input");
+        var inputs = el._refs.dateWrapper.querySelectorAll(".eon-date-subInput input");
 
         var day = inputs[el._misc.mask.order.indexOf("day")].value;
         var month = inputs[el._misc.mask.order.indexOf("month")].value;
@@ -1703,14 +1782,21 @@
         }
 
         //If all the three fields have text typed in and their content is valid we set the boolean to true
-        if (year != "") {
-          if (month != "" && parseInt(month) > 0 && parseInt(month) <= 12) {
-            if (day != "" && day > 0 && day <= eon.time.getDaysInMonth(year, parseInt(month) - 1)) {
-              if (hours != "" && parseInt(hours) >= 0 && parseInt(hours) < 24) {
-                if (minutes != "" && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
-                  validDate = true;
-                }
+        if (eon.util.isTrue(el.date)) {
+          if (year != "") {
+            if (month != "" && parseInt(month) > 0 && parseInt(month) <= 12) {
+              if (day != "" && day > 0 && day <= eon.time.getDaysInMonth(year, parseInt(month) - 1)) {
+                validDate = true;
               }
+            }
+          }
+        }
+
+        //If all the time fields have text typed in and their content is valid we set the boolean to true
+        if (eon.util.isTrue(el.time)) {
+          if (hours != "" && parseInt(hours) >= 0 && parseInt(hours) < 24) {
+            if (minutes != "" && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
+              validDate = true;
             }
           }
         }
@@ -1730,7 +1816,7 @@
           el._misc.preventUpdate = true;
 
           el.value = eon.time.generateOutput(obj, el.valueFormat);
-          el._refresh();
+          // el._refresh();
 
 
         } else {
@@ -1904,7 +1990,7 @@
 
             if (e.keyCode == "8") {
 
-              var subInputs = el.querySelector(".eon-date-subInputs");
+              var subInputs = el._refs.subInputs;
               var previousSubInputOrder = parseInt(subInput.parentNode.dataset.order) - 1;
               var previousSubInput = subInputs.querySelector('[data-order="' + previousSubInputOrder + '"] input');
               var caretPosition = subInput.selectionStart;
@@ -1921,7 +2007,7 @@
           }
         } else {
 
-          var subInputs = el.querySelector(".eon-date-subInputs");
+          var subInputs = el._refs.subInputs;
 
           var nextSubInputOrder = parseInt(subInput.dataset.order) + 1;
           var nextSubInput = subInputs.querySelector('[data-order="' + nextSubInputOrder + '"] input');
@@ -2000,7 +2086,7 @@
 
           if (el._isNumeric(e) || e.keyCode == "8" || e.keyCode == "46") {
 
-            var subInputs = el.querySelector(".eon-date-subInputs");
+            var subInputs = el._refs.subInputs;
 
             var nextSubInputOrder = parseInt(subInput.parentNode.dataset.order) + 1;
             var nextSubInput = subInputs.querySelector('[data-order="' + nextSubInputOrder + '"] input');
@@ -2048,11 +2134,25 @@
 
         var el = this;
 
-        var subInputs = el.querySelector(".eon-date-subInputs");
+        var subInputs = el._refs.subInputsWrapper;
 
         var dayInput = subInputs.querySelector('[data-field="day"] input');
         var monthInput = subInputs.querySelector('[data-field="month"] input');
         var yearInput = subInputs.querySelector('[data-field="year"] input');
+
+        // Clock view hours
+        if (el._refs.currentHours.value != "" && parseInt(el._refs.currentHours.value) > 23) {
+          el._refs.currentHours.value = "23";
+        } else if (el._refs.currentHours.value.length == 2 && parseInt(el._refs.currentHours.value) < 0) {
+          el._refs.currentHours.value = "00";
+        }
+
+        // Clock view minutes
+        if (el._refs.currentMinutes.value != "" && parseInt(el._refs.currentMinutes.value) > 59) {
+          el._refs.currentMinutes.value = "59";
+        } else if (el._refs.currentMinutes.value.length == 2 && parseInt(el._refs.currentMinutes.value) < 0) {
+          el._refs.currentMinutes.value = "00";
+        }
 
         if (el._refs.subInputs.hours.value != "" && parseInt(el._refs.subInputs.hours.value) > 23) {
           el._refs.subInputs.hours.value = "23";
@@ -2063,7 +2163,7 @@
         if (el._refs.subInputs.minutes.value != "" && parseInt(el._refs.subInputs.minutes.value) > 59) {
           el._refs.subInputs.minutes.value = "59";
         } else if (el._refs.subInputs.minutes.value.length == 2 && parseInt(el._refs.subInputs.minutes.value) < 0) {
-          el._refs.subInputs.hours.value = "00";
+          el._refs.subInputs.minutes.value = "00";
         }
 
         if (dayInput.value != "" && parseInt(dayInput.value) > 31) {
@@ -2511,7 +2611,7 @@
 
         calendar.querySelector(".eon-date-header").style.fontSize = headerFontSize + "px";
 
-        calendar.querySelector(".eon-date-toggle i").style.fontSize = navigation + "px";
+        el._refs.toggle.style.fontSize = navigation + "px";
         calendar.querySelector(".eon-date-previous i").style.fontSize = navigation + "px";
         calendar.querySelector(".eon-date-next i").style.fontSize = navigation + "px";
       },
@@ -2941,6 +3041,8 @@
 
           eon.triggerCallback("onMonthSelected", el, el, []);
 
+          el._showClockView();
+
         }
       },
       /*
@@ -2997,7 +3099,7 @@
           hours: el._misc.clock.currentPMHours,
           minutes: el._misc.clock.currentMinutes
         });
-
+        
         el.value = eon.time.generateOutput(dateObj, el.valueFormat);
       },
       /*
@@ -3326,10 +3428,9 @@
 
           var format = el.valueFormat;
 
-          var subInputsWrapper = el._refs.subInputsWrapper;
-          var dayInput = subInputsWrapper.querySelector('[data-field="day"] input');
-          var monthInput = subInputsWrapper.querySelector('[data-field="month"] input');
-          var yearInput = subInputsWrapper.querySelector('[data-field="year"] input');
+          var dayInput = el._refs.dateWrapper.querySelector('[data-field="day"] input');
+          var monthInput = el._refs.dateWrapper.querySelector('[data-field="month"] input');
+          var yearInput = el._refs.dateWrapper.querySelector('[data-field="year"] input');
 
           var valueObj = el.value.constructor == Date ? eon.time.getDateValueObjectFromDate(el.value, el.time) : eon.time.getDateValueObjectFromString(el.value, el.valueFormat, el.time);
 
@@ -3351,7 +3452,7 @@
           yearInput.value = el._format(valueObj.year, el._misc.mask.year.format);
 
           if (eon.util.isTrue(el.time)) {
-
+            
             el._misc.clock.currentPMHours = valueObj.hours;
             el._misc.clock.currentAMHours = el._getAMHours(el._misc.clock.currentPMHours);
             el._misc.clock.currentMinutes = valueObj.minutes;
@@ -3360,8 +3461,8 @@
             el._refs.subInputs.minutes.value = ("0" + el._misc.clock.currentMinutes).slice(-2);
 
             // Picker Clock
-            el._refs.currentMinutes.innerHTML = ("0" + el._misc.clock.currentMinutes).slice(-2);
-            el._refs.currentHours.innerHTML = ("0" + el._misc.clock.currentAMHours).slice(-2);
+            el._refs.currentMinutes.value = ("0" + el._misc.clock.currentMinutes).slice(-2);
+            el._refs.currentHours.value = ("0" + el._misc.clock.currentAMHours).slice(-2);
 
             // PM switch update
             el._misc.clock.isPM = parseInt(el._misc.clock.currentPMHours) > 12;
