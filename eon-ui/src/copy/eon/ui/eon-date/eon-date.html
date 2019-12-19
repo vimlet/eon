@@ -426,7 +426,7 @@
       @description Minimum allowed width for the calendar
       */
       pickerMinWidth: {
-        value: 220,
+        value: 250,
         reflect: true
       },
       /*
@@ -1009,7 +1009,15 @@
 
           if (el._refs.currentHours.value.length >= 2) {
 
-            el._refs.currentHours.value = ("0" + parseInt(el._refs.currentHours.value)).substring(0, 2);
+            el._refs.currentHours.value = parseInt(el._refs.currentHours.value) > 12 ? 12 : el._refs.currentHours.value;
+            el._refs.currentHours.value = parseInt(el._refs.currentHours.value) < 1 ? 1 : el._refs.currentHours.value;
+
+            if (parseInt(el._refs.currentHours.value) <= 9) {
+              el._refs.currentHours.value = "0" + parseInt(el._refs.currentHours.value);
+            } else {
+              el._refs.currentHours.value = ("" + parseInt(el._refs.currentHours.value)).substring(0, 2);
+            }
+
             el._refs.subInputs.hours.value = el._misc.clock.isPM ? el._getPMHours(el._refs.currentHours.value) : el._refs.currentHours.value;
 
             el._misc.clock.currentPMHours = parseInt(el._refs.subInputs.hours.value);
@@ -1025,9 +1033,15 @@
 
           if (el._refs.currentMinutes.value.length >= 2) {
 
-            el._refs.currentMinutes.value = el._refs.currentMinutes.value.substring(("0" + parseInt(el._refs.currentMinutes.value)), 0, 2);
-            el._refs.subInputs.minutes.value = el._refs.currentMinutes.value;
+            if (parseInt(el._refs.currentMinutes.value) <= 9) {
+              el._refs.currentMinutes.value = "0" + parseInt(el._refs.currentMinutes.value);
+              el._refs.currentMinutes.value = parseInt(el._refs.currentMinutes.value) < 0 ? 0 : el._refs.currentMinutes.value;
+            } else {
+              el._refs.currentMinutes.value = ("" + parseInt(el._refs.currentMinutes.value)).substring(0, 2);
+              el._refs.currentMinutes.value = parseInt(el._refs.currentMinutes.value) > 59 ? 59 : el._refs.currentMinutes.value;
+            }
             
+            el._refs.subInputs.minutes.value = el._refs.currentMinutes.value;
             el._misc.clock.currentMinutes = el._refs.subInputs.minutes.value;
 
             el._handleCorrection();
@@ -1702,6 +1716,8 @@
 
         el._animateExpand();
 
+        eon.triggerCallback("onOpened", el, el, []);
+
       },
       /*
       @function (private) _animateExpand
@@ -1738,6 +1754,8 @@
         el._misc.modal.active = false;
 
         el._animateShrink();
+
+        eon.triggerCallback("onClosed", el, el, []);
 
       },
       /*
@@ -1990,7 +2008,7 @@
 
             if (e.keyCode == "8") {
 
-              var subInputs = el._refs.subInputs;
+              var subInputs = el._refs.subInputsWrapper;
               var previousSubInputOrder = parseInt(subInput.parentNode.dataset.order) - 1;
               var previousSubInput = subInputs.querySelector('[data-order="' + previousSubInputOrder + '"] input');
               var caretPosition = subInput.selectionStart;
@@ -2007,7 +2025,7 @@
           }
         } else {
 
-          var subInputs = el._refs.subInputs;
+          var subInputs = el._refs.subInputsWrapper;
 
           var nextSubInputOrder = parseInt(subInput.dataset.order) + 1;
           var nextSubInput = subInputs.querySelector('[data-order="' + nextSubInputOrder + '"] input');
@@ -2086,7 +2104,7 @@
 
           if (el._isNumeric(e) || e.keyCode == "8" || e.keyCode == "46") {
 
-            var subInputs = el._refs.subInputs;
+            var subInputs = el._refs.subInputsWrapper;
 
             var nextSubInputOrder = parseInt(subInput.parentNode.dataset.order) + 1;
             var nextSubInput = subInputs.querySelector('[data-order="' + nextSubInputOrder + '"] input');
@@ -2166,28 +2184,33 @@
           el._refs.subInputs.minutes.value = "00";
         }
 
-        if (dayInput.value != "" && parseInt(dayInput.value) > 31) {
-          dayInput.value = "31";
-        } else if (dayInput.value.length == 2 && parseInt(dayInput.value) == 0) {
-          dayInput.value = "1";
-        }
+        // Date
+        if (eon.util.isTrue(el.date)) {
 
-        if (monthInput.value != "" && parseInt(monthInput.value) > 12) {
-          monthInput.value = "12";
-        } else if (monthInput.value.length == 2 && parseInt(monthInput.value) == 0) {
-          monthInput.value = "1";
-        }
-
-        if (yearInput.value != "" && parseInt(yearInput.value) > 9999) {
-          yearInput.value = "9999";
-        } else if (parseInt(yearInput.value) == 0) {
-          yearInput.value = "1";
-        }
-
-        if (dayInput.value != "" && monthInput.value != "" && yearInput.value != "" && (yearInput.value.length == el._misc.mask.year.format.length)) {
-          if (parseInt(dayInput.value) > eon.time.getDaysInMonth(parseInt(yearInput.value), parseInt(monthInput.value) - 1)) {
-            dayInput.value = eon.time.getDaysInMonth(parseInt(yearInput.value), parseInt(monthInput.value) - 1);
+          if (dayInput.value != "" && parseInt(dayInput.value) > 31) {
+            dayInput.value = "31";
+          } else if (dayInput.value.length == 2 && parseInt(dayInput.value) == 0) {
+            dayInput.value = "1";
           }
+
+          if (monthInput.value != "" && parseInt(monthInput.value) > 12) {
+            monthInput.value = "12";
+          } else if (monthInput.value.length == 2 && parseInt(monthInput.value) == 0) {
+            monthInput.value = "1";
+          }
+
+          if (yearInput.value != "" && parseInt(yearInput.value) > 9999) {
+            yearInput.value = "9999";
+          } else if (parseInt(yearInput.value) == 0) {
+            yearInput.value = "1";
+          }
+
+          if (dayInput.value != "" && monthInput.value != "" && yearInput.value != "" && (yearInput.value.length == el._misc.mask.year.format.length)) {
+            if (parseInt(dayInput.value) > eon.time.getDaysInMonth(parseInt(yearInput.value), parseInt(monthInput.value) - 1)) {
+              dayInput.value = eon.time.getDaysInMonth(parseInt(yearInput.value), parseInt(monthInput.value) - 1);
+            }
+          }
+
         }
 
         el._handleLimits(dayInput, monthInput, yearInput);
@@ -2206,9 +2229,9 @@
         var dateObj = {
           hours: el._refs.subInputs.hours.value != "" ? parseInt(el._refs.subInputs.hours.value) : null,
           minutes: el._refs.subInputs.minutes.value != "" ? parseInt(el._refs.subInputs.minutes.value) : null,
-          day: dayInput.value != "" ? parseInt(dayInput.value) : null,
-          month: monthInput.value != "" ? parseInt(monthInput.value) : null,
-          year: yearInput.value != "" ? parseInt(yearInput.value) : null,
+          day: dayInput && dayInput.value != "" ? parseInt(dayInput.value) : null,
+          month: monthInput && monthInput.value != "" ? parseInt(monthInput.value) : null,
+          year: yearInput && yearInput.value != "" ? parseInt(yearInput.value) : null,
         };
 
         if (el._exceedsMinDate(dateObj)) {
@@ -3097,7 +3120,7 @@
           hours: el._misc.clock.currentPMHours,
           minutes: el._misc.clock.currentMinutes
         });
-        
+
         el.value = eon.time.generateOutput(dateObj, el.valueFormat);
       },
       /*
@@ -3450,7 +3473,7 @@
           yearInput.value = el._format(valueObj.year, el._misc.mask.year.format);
 
           if (eon.util.isTrue(el.time)) {
-            
+
             el._misc.clock.currentPMHours = valueObj.hours;
             el._misc.clock.currentAMHours = el._getAMHours(el._misc.clock.currentPMHours);
             el._misc.clock.currentMinutes = valueObj.minutes;
@@ -3574,6 +3597,8 @@
       eon.createCallback("onYearSelected", this);
       eon.createCallback("onTimeSelected", this);
       eon.createCallback("onValueChanged", this);
+      eon.createCallback("onOpened", this);
+      eon.createCallback("onClosed", this);
 
       if (eon.util.isTouchScreen()) {
         el.dataset.touch = "true";
