@@ -25,7 +25,7 @@ eon.domReady(function () {
 
         onTransformed: function () {
             
-            if (!this.__binded) {
+            if (!this.__bound) {
                 eon.interpolation.bindWildVariable(this);
             }
 

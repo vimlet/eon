@@ -149,6 +149,13 @@ eon.util.getBrowserScrollBarWidth = function () {
     outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
     outer.classList.add("eonScrollWidthChecker");
 
+    // Rules for the scroll width
+    if (!eon.scrollWidthCheckerRule && eon.util.getBrowser() != "IE" && eon.util.getBrowser() != "Edge") {
+      eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar { visibility: hidden; }", 0);
+      eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar-corner { visibility: hidden; }", 0);
+      eon.scrollWidthCheckerRule = true;
+    }
+
     document.body.appendChild(outer);
 
     var widthNoScroll = outer.getBoundingClientRect().width;

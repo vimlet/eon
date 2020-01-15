@@ -4498,8 +4498,8 @@ eon.interpolation.bindVariable = function (el, sources, variable, config) {
 
   }
 
-  // Marks the variable as binded so on its onTransformed callback it knows its not a wild variable that has not been binded
-  variable.__binded = true;
+  // Marks the variable as bound so on its onTransformed callback it knows its not a wild variable that has not been bound
+  variable.__bound = true;
 
 };
 
@@ -4561,7 +4561,7 @@ eon.interpolation.interpolate = function () {
 */
 eon.interpolation.bindWildVariable = function (variable) {
 
-  var isLocale, scope, bindString, bindValue, isUndefined, root, interpolations, bindedInterpolations;
+  var isLocale, scope, bindString, bindValue, isUndefined, root, interpolations, boundInterpolations;
 
   bindString = variable.getAttribute("bind");
   scope = eon.interpolation.globalScope;
@@ -4590,17 +4590,17 @@ eon.interpolation.bindWildVariable = function (variable) {
     variableBind = bindString;
   }
 
-  bindedInterpolations = eon.object.readFromPath(interpolations, variableBind);
+  boundInterpolations = eon.object.readFromPath(interpolations, variableBind);
 
-  if (!bindedInterpolations) {
-    bindedInterpolations = [];
-    eon.object.assignToPath(interpolations, variableBind, bindedInterpolations);
+  if (!boundInterpolations) {
+    boundInterpolations = [];
+    eon.object.assignToPath(interpolations, variableBind, boundInterpolations);
   }
 
-  bindedInterpolations.push(variable)
+  boundInterpolations.push(variable)
   variable.textContent = bindValue;
 
-  variable.__binded = true;
+  variable.__bound = true;
 
 };
 
@@ -8233,7 +8233,7 @@ eon.domReady(function () {
 
         onTransformed: function () {
             
-            if (!this.__binded) {
+            if (!this.__bound) {
                 eon.interpolation.bindWildVariable(this);
             }
 

@@ -13,9 +13,6 @@ document.head.appendChild(eon.style);
 eon.style.sheet.insertRule(".eon-until-rendered { opacity: 0; }", 0);
 // Hide eon-script
 eon.style.sheet.insertRule("eon-script { display: none; }", 0);
-// Rules for the scroll width
-eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar { visibility: hidden; }", 0);
-eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar-corner { visibility: hidden; }", 0);
 
 // ############################################################################################
 // RESPONSIVE
