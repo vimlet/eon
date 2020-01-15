@@ -2361,8 +2361,8 @@
 
           if (el._refs.daysGrid) {
 
-            var year = Number(el._misc.current.year) && Number(el._misc.current.year) > 0 ? el._misc.current.year : new Date().toLocaleString([], { year: "numeric" });
-            var month = Number(el._misc.current.month) && Number(el._misc.current.month) > 0 ? el._misc.current.month : new Date().toLocaleString([], { month: "numeric" }) - 1;
+            var year = Number(el._misc.current.year) > 0 ? el._misc.current.year : new Date().toLocaleString([], { year: "numeric" });
+            var month = Number(el._misc.current.month) >= 0 ? el._misc.current.month : new Date().toLocaleString([], { month: "numeric" }) - 1;
 
             el._fillDaysGrid(year, month);
             el._updateHeaderSelectors("days", el._misc.current.year, el._misc.current.month);
@@ -3384,6 +3384,8 @@
 
             el._refs.calendarButton.classList.remove("eon-fg2");
             el._refs.calendarButton.classList.add("eon-fg2-disabled");
+            el._refs.timeButton.classList.remove("eon-fg2");
+            el._refs.timeButton.classList.add("eon-fg2-disabled");
 
             el._refs.data.classList.add("eon-fg2-disabled");
             el._refs.main.classList.add("eon-fg2-disabled");
@@ -3396,6 +3398,8 @@
 
             el._refs.calendarButton.classList.add("eon-fg2");
             el._refs.calendarButton.classList.remove("eon-fg2-disabled");
+            el._refs.timeButton.classList.add("eon-fg2");
+            el._refs.timeButton.classList.remove("eon-fg2-disabled");
 
             el._refs.data.classList.remove("eon-fg2-disabled");
             el._refs.main.classList.remove("eon-fg2-disabled");
@@ -3415,19 +3419,27 @@
 
         if (eon.util.isTrue(el.readonly)) {
 
-          el._refs.fields.first.setAttribute("readonly", "true");
-          el._refs.fields.second.setAttribute("readonly", "true");
-          el._refs.fields.third.setAttribute("readonly", "true");
+          el._refs.subInputs.first.setAttribute("readonly", "true");
+          el._refs.subInputs.second.setAttribute("readonly", "true");
+          el._refs.subInputs.third.setAttribute("readonly", "true");
+
+          el._refs.subInputs.hours.setAttribute("readonly", "true");
+          el._refs.subInputs.minutes.setAttribute("readonly", "true");
 
           el._refs.calendarButton.classList.remove("eon-fg2-hoverable");
+          el._refs.timeButton.classList.remove("eon-fg2-hoverable");
 
         } else {
 
-          el._refs.fields.first.removeAttribute("readonly");
-          el._refs.fields.second.removeAttribute("readonly");
-          el._refs.fields.third.removeAttribute("readonly");
+          el._refs.subInputs.first.removeAttribute("readonly");
+          el._refs.subInputs.second.removeAttribute("readonly");
+          el._refs.subInputs.third.removeAttribute("readonly");
+
+          el._refs.subInputs.hours.removeAttribute("readonly");
+          el._refs.subInputs.minutes.removeAttribute("readonly");
 
           el._refs.calendarButton.classList.add("eon-fg2-hoverable");
+          el._refs.timeButton.classList.add("eon-fg2-hoverable");
 
           if (el.type != "calendar") {
             el._shrink();
