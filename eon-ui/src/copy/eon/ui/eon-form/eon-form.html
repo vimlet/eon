@@ -299,7 +299,7 @@
           // var fields = Object.keys(data);
           var fields = Object.keys(error);
           var field, element;
-          
+
           for (var i = 0; i < fields.length; i++) {
 
             field = fields[i];
@@ -392,21 +392,21 @@
 
       },
 
-      loopSetObject: function (obj, rootKey) {
+      loopSetObject: function (obj, asInitial, rootKey) {
 
         var el = this;
         var value, isArrayValue, isObjectValue, node, nodes;
-        
+
         // Loops through the data keys and searches for the elements with that key as its name
         for (var key in obj) {
 
           value = obj[key];
           key = rootKey ? rootKey + "." + key : key;
           nodes = el.querySelectorAll("[name='" + key + "']");
-          
+
           isArrayValue = (Object.prototype.toString.call(value) === '[object Array]');
           isObjectValue = (Object.prototype.toString.call(value) === '[object Object]');
-          
+
           if (nodes.length > 0) {
 
             // if its a radio, checkbox or toggle we loop through the nodes to see if they are in the value array
@@ -414,6 +414,8 @@
 
               for (var i = 0; i < nodes.length; i++) {
                 nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                nodes[i].initialValue = asInitial ? nodes[i].checked : nodes[i].initialValue;
+                nodes[i].__dirty = false;
               }
 
               // if its a radio group we take the radio children and loop through them
@@ -423,6 +425,8 @@
 
               for (var i = 0; i < nodes.length; i++) {
                 nodes[i].checked = (value == nodes[i].value) ? true : false;
+                nodes[i].initialValue = asInitial ? nodes[i].checked : nodes[i].initialValue;
+                nodes[i].__dirty = false;
               }
 
             } else {
@@ -430,6 +434,8 @@
               for (var i = 0; i < nodes.length; i++) {
 
                 nodes[i].value = value;
+                nodes[i].initialValue = asInitial ? nodes[i].value : nodes[i].initialValue;
+                nodes[i].__dirty = false;
 
               }
 
@@ -437,7 +443,7 @@
 
           } else if (isObjectValue) {
 
-            el._loopSetObject(value, key);
+            el._loopSetObject(value, asInitial, key);
 
           }
 
@@ -484,8 +490,37 @@
           }
 
         });
-        
+
         return data;
+      },
+      /*
+      @function {Object} getData 
+      @description Return form values as an object
+      */
+      getDirtyData: function () {
+        var el = this;
+        var data = {};
+
+        // Walk form recursively
+        el._walkRecursive(el, el, function (node) {
+
+          // Only add elements if they have name, value and not disabled
+          if (node.__dirty && typeof node.name == "string" && node.name !== "" && !eon.util.isTrue(node.disabled)) {
+            eon.object.assignToPath(data, node.name, el._getNodeValue(data, node));
+          }
+
+        });
+
+        return data;
+      },
+      /*
+      @function {Object} setInitialData 
+      @description Sets the provided initial data to the form elements
+      @param {Object} data [Form data]
+      */
+      setInitialData: function (data) {
+        var el = this;
+        el._loopSetObject(data, true);
       },
       /*
       @function {Object} setData 
@@ -548,8 +583,8 @@
           }
 
           if (node.invalid) {
-              node.invalid = false;
-            }
+            node.invalid = false;
+          }
 
           // Other HTML form elements
           else if (node instanceof HTMLTextAreaElement

@@ -98,9 +98,6 @@ document.head.appendChild(eon.style);
 eon.style.sheet.insertRule(".eon-until-rendered { opacity: 0; }", 0);
 // Hide eon-script
 eon.style.sheet.insertRule("eon-script { display: none; }", 0);
-// Rules for the scroll width
-eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar { visibility: hidden; }", 0);
-eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar-corner { visibility: hidden; }", 0);
 
 // ############################################################################################
 // RESPONSIVE
@@ -6965,6 +6962,13 @@ eon.util.getBrowserScrollBarWidth = function () {
     outer.style.width = "100px";
     outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
     outer.classList.add("eonScrollWidthChecker");
+
+    // Rules for the scroll width
+    if (!eon.scrollWidthCheckerRule && eon.util.getBrowser() != "IE" && eon.util.getBrowser() != "Edge") {
+      eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar { visibility: hidden; }", 0);
+      eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar-corner { visibility: hidden; }", 0);
+      eon.scrollWidthCheckerRule = true;
+    }
 
     document.body.appendChild(outer);
 

@@ -50,6 +50,14 @@
         reflect: true
       },
       /*
+        @property {String} initialValue
+        @description Value of the element when the element to be compared against the value to set the component as dirty
+      */
+      initialValue: {
+        value: "",
+        reflect: true
+      },
+      /*
       @property {Number} default
       @description Value of the element when the element is reset, if will also be the value of the element if no value is provided
       */
@@ -303,10 +311,12 @@
           if (parseInt(newValue) != parseInt(value)) {
             setTimeout(function () {
               el.value = newValue;
+              el.__dirty = el.initialValue != newValue ? true : false;
             }, 0);
 
           } else {
             el[valueKey] = newValue;
+            el.__dirty = el.initialValue != newValue ? true : false;
           }
 
           el._refs.input.value = newValue;

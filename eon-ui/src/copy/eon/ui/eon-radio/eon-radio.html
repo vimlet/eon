@@ -25,6 +25,14 @@
         reflect: true
       },
       /*
+        @property {String} initialValue
+        @description Value of the element when the element to be compared against the value to set the component as dirty
+      */
+      initialValue: {
+        value: "",
+        reflect: true
+      },
+      /*
         @property {String} label 
         @description Radio label
       */
@@ -170,11 +178,16 @@
         @description Call method to update check status  
       */
       setCheck: function () {
-        if (eon.util.isTrue(this.checked)) {
-          this._handleCheck();
+        var el = this;
+
+        if (eon.util.isTrue(el.checked)) {
+          el._handleCheck();
         } else {
-          this._handleUncheck();
+          el._handleUncheck();
         }
+
+        el.__dirty = eon.util.isTrue(el.initialValue) != eon.util.isTrue(el.checked) ? true : false;
+
       },
       /*
         @function (private) _handleCheck
