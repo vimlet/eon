@@ -37,6 +37,14 @@
         reflect: true
       },
       /*
+        @property {String} initialValue
+        @description Value of the element when the element to be compared against the value to set the component as dirty
+      */
+      initialValue: {
+        value: "",
+        reflect: true
+      },
+      /*
         @property (private) {Boolean} disabled 
         @description Sets its value to true when the selected element is disabled
       */
@@ -88,6 +96,15 @@
         }
 
       },
+      /*
+        @function (private) _updateValue
+        @description Updates the value
+      */
+      updateValue: function () {
+        var el = this;
+        el.__dirty = el.initialValue != el.value ? true : false;
+      },
+
     },
 
     onRender: function () {
@@ -113,6 +130,9 @@
       switch (key) {
         case "label":
           this._updateLabel();
+          break;
+        case "value":
+          this._updateValue();
           break;
       }
 
