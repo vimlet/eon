@@ -197,7 +197,14 @@
           el._refs.input.removeAttribute("readonly");
         }
       },
-
+      /*
+        @function (private) _updateInitialValue
+        @description Updates the value
+      */
+      updateInitialValue: function () {
+        var el = this;
+        el.checked = eon.util.isTrue(el.initialValue);
+      },
       /*
         @function (private) _updateCheck
         @description Updates checked status
@@ -231,6 +238,8 @@
       var el = this;
 
       el.checked = el.default != "" && el.checked == "" ? el.default : el.checked;
+      el.checked = el.initialValue != "" ? el.initialValue : el.checked;
+
       el._refs.nameLabel.innerHTML = el.label;
 
       // Needed to avoid ripple bad performance
@@ -264,6 +273,9 @@
           break;
         case "readonly":
           this._updateReadonly();
+          break;
+        case "initialValue":
+          this._updateInitialValue();
           break;
         case "checked":
           this._updateCheck();

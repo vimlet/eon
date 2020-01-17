@@ -294,11 +294,19 @@
         el._refs.description = el.template.querySelector(".eon-number-description");
       },
       /*
-        @function (private) _setValue
+        @function (private) _updateInitialValue
+        @description Updates the value
+      */
+      updateInitialValue: function () {
+        var el = this;
+        el.value = el.initialValue;
+      },
+      /*
+        @function (private) _updateValue
         @description Set new input number value
         @param {Boolean} privateValueKey [Whether the value key will be the private or the public one]
       */
-      setValue: function (privateValueKey) {
+      updateValue: function (privateValueKey) {
         var el = this;
         var value = el.value;
         var valueKey = privateValueKey ? "__value" : "value";
@@ -559,9 +567,14 @@
       var el = this;
 
       el._setupLabelAnimation();
+
       // Sets a default value set by the user
       el.value = el.default != "" && el.value == "" ? el.default : el.value;
-      el._setValue();
+      el.value = el.initialValue != "" ? el.initialValue : el.value;
+      
+      el.initialValue = el.initialValue == "" ? el.value : el.initialValue;
+      
+      el._updateValue();
       el._updateReadonly();
       el._setFocusingListeners();
       el._setupDescription();
@@ -597,8 +610,11 @@
         case "label":
           this._refs.label.innerHTML = newVal;
           break;
+        case "initialValue":
+          this._updateInitialValue();
+          break;
         case "value":
-          this._setValue(true);
+          this._updateValue(true);
           break;
         case "invalid":
           this._updateInvalid();

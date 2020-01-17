@@ -1869,7 +1869,10 @@
       initValue: function () {
 
         var el = this;
-        var dateObj = el.value == "" ? eon.time.getDateValueObjectFromDate(new Date(), el.time) : eon.time.getDateValueObjectFromString(el.value, el.valueFormat, el.time);
+        var dateObj;
+        
+        el.value = el.initialValue != "" ? el.initialValue : el.value;
+        dateObj= el.value == "" ? eon.time.getDateValueObjectFromDate(new Date(), el.time) : eon.time.getDateValueObjectFromString(el.value, el.valueFormat, el.time);
 
         if (el._exceedsMinDate(dateObj)) {
 
@@ -3458,6 +3461,14 @@
 
       },
       /*
+        @function (private) _updateInitialValue
+        @description Updates the value
+      */
+      updateInitialValue: function () {
+        var el = this;
+        el.value = el.initialValue;
+      },
+      /*
       @function (private) _updateValue
       @description Allows the user tu set a new value to the element
       @param {Object} value
@@ -3668,6 +3679,9 @@
           break;
         case "readonly":
           this._updateReadOnly();
+          break;
+        case "initialValue":
+          this._updateInitialValue();
           break;
         case "value":
           this._updateValue();
