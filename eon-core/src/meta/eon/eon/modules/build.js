@@ -1,36 +1,39 @@
-/*
-@function processBuild
-@description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
-@param {String} filePath
-*/
-eon.processBuild = function (filePath) {
+  /*
+  @function processBuild
+  @description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
+  @param {String} filePath
+  */
+ eon.processBuild = function (filePath) {
 
-    if (filePath) {
+    if (filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
+      
+      eon.pendingBuilds = eon.pendingBuilds ? eon.pendingBuilds + 1 : 1;
 
-        eon.pendingBuilds = eon.pendingBuilds ? eon.pendingBuilds + 1 : 1;
+      eon.ajax(filePath, null, function (success, obj) {
+        
+        if (success) {
 
-        eon.ajax(filePath, null, function (success, obj) {
+          eon.processedBuilds = eon.processedBuilds || [];
+          eon.processedBuilds.push(filePath);
 
-            if (success) {
+          if (obj.xhr.status === 200) {
 
-                if (obj.xhr.status === 200) {
+            var script = document.createElement("script");
+            script.innerHTML = obj.responseText + "eon.pendingBuilds--;eon.declareBuildComponents();eon.resumeImports();";
+            document.head.appendChild(script);
 
-                    var script = document.createElement("script");
-                    script.innerHTML = obj.responseText + "eon.pendingBuilds--;eon.resumeImports();";
-                    document.head.appendChild(script);
+          }
 
-                }
+        } else {
+          eon.pendingBuilds--;
+          eon.resumeImports();
+        }
 
-            } else {
-                eon.pendingBuilds--;
-                eon.resumeImports();
-            }
-
-        });
+      });
 
     }
 
-}
+  }
 
 /*
 @function declareBuildComponents

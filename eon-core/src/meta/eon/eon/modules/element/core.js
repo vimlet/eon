@@ -468,10 +468,10 @@ both attribute and property keys are provided since they can be different when h
 */
 eon.handleReflectDefaultProperty = function (el, key, property) {
 
-    var value = el.hasOwnProperty("__" + property) ? el["__" + property] : "";
-
     // This is done in the onInit callback since we cannot set an attribute in the onCreated one
     el.onInit(function () {
+
+        var value = el.hasOwnProperty("__" + property) ? el["__" + property] : "";
 
         // Only sets the attribute if the value is not of object type
         if (typeof value !== "object") {
