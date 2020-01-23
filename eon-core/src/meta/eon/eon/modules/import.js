@@ -28,7 +28,7 @@ eon.imports.errors = eon.imports.errors || {};
 */
 eon.import = function (param) {
 
-    if (eon.pendingBuilds && eon.pendingBuilds > 0) {
+    if (eon.buildsQueue && eon.buildsQueue.length > 0) {
 
         eon.importsQueue = eon.importsQueue || [];
 
@@ -63,7 +63,7 @@ eon.import = function (param) {
 */
 eon.resumeImports = function () {
 
-    if (!eon.pendingBuilds || eon.pendingBuilds == 0) {
+    if (!eon.buildsQueue || eon.buildsQueue.length == 0) {
 
         eon.importsQueue = eon.importsQueue || [];
 

@@ -3292,7 +3292,7 @@ eon.imports.errors = eon.imports.errors || {};
 */
 eon.import = function (param) {
 
-    if (eon.pendingBuilds && eon.pendingBuilds > 0) {
+    if (eon.buildsQueue && eon.buildsQueue.length > 0) {
 
         eon.importsQueue = eon.importsQueue || [];
 
@@ -3327,7 +3327,7 @@ eon.import = function (param) {
 */
 eon.resumeImports = function () {
 
-    if (!eon.pendingBuilds || eon.pendingBuilds == 0) {
+    if (!eon.buildsQueue || eon.buildsQueue.length == 0) {
 
         eon.importsQueue = eon.importsQueue || [];
 
@@ -4218,7 +4218,7 @@ eon.registry.isReady = function (el) {
 // Trigger global onReady
 eon.onImportsReady(function () {
 
-  if (eon.registry.elementStatus.declared.length === 0 && !eon.pendingBuilds) {
+  if (eon.registry.elementStatus.declared.length === 0 && !eon.buildsQueue) {
     eon.triggerCallback("onReady", eon);
   }
 
@@ -5542,10 +5542,10 @@ both attribute and property keys are provided since they can be different when h
 */
 eon.handleReflectDefaultProperty = function (el, key, property) {
 
-    var value = el.hasOwnProperty("__" + property) ? el["__" + property] : "";
-
     // This is done in the onInit callback since we cannot set an attribute in the onCreated one
     el.onInit(function () {
+
+        var value = el.hasOwnProperty("__" + property) ? el["__" + property] : "";
 
         // Only sets the attribute if the value is not of object type
         if (typeof value !== "object") {
@@ -8389,36 +8389,52 @@ eon.domReady(function () {
 
 
 /*
-@function processBuild
-@description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
-@param {String} filePath
+  @function processBuild
+  @description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
+  @param {String} filePath
 */
 eon.processBuild = function (filePath) {
 
-    if (filePath) {
+  if (filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
+    // Initiate the buildsQueue
+    eon.buildsQueue = eon.buildsQueue ? eon.buildsQueue : [];
+    // If its not already in the queue then push the given filePath
+    if (eon.buildsQueue.indexOf(filePath) == -1) {
+      eon.buildsQueue.push(filePath);
+    }
+    // Request the file only if its the first on queue, otherwise it will be called once our first build is finished processing
+    if (eon.buildsQueue.length <= 1) {
 
-        eon.pendingBuilds = eon.pendingBuilds ? eon.pendingBuilds + 1 : 1;
+      eon.ajax(filePath, null, function (success, obj) {
 
-        eon.ajax(filePath, null, function (success, obj) {
+        if (success) {
 
-            if (success) {
+          eon.processedBuilds = eon.processedBuilds || [];
+          eon.processedBuilds.push(filePath);
 
-                if (obj.xhr.status === 200) {
+          if (obj.xhr.status === 200) {
 
-                    var script = document.createElement("script");
-                    script.innerHTML = obj.responseText + "eon.pendingBuilds--;eon.resumeImports();";
-                    document.head.appendChild(script);
+            var script = document.createElement("script");
+            // Create the script and fill it with its content, also remove the build path from the queue and process the next
+            // build thats waiting on the builds queue and resume the imports
+            script.innerHTML = obj.responseText + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
+            script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.processBuild(eon.buildsQueue[0]);}; eon.declareBuildComponents(); eon.resumeImports();";
 
-                }
+            document.head.appendChild(script);
 
-            } else {
-                eon.pendingBuilds--;
-                eon.resumeImports();
-            }
+          }
 
-        });
+        } else {
+          // Remove the build path from the queue and process the next build thats waiting on the buildQueue and resume the imports
+          eon.buildsQueue.splice(eon.buildsQueue.indexOf(filePath), 1);
+          eon.resumeImports();
+        }
+
+      });
 
     }
+
+  }
 
 }
 
@@ -8428,52 +8444,52 @@ eon.processBuild = function (filePath) {
 */
 eon.declareBuildComponents = function () {
 
-    eon.declaredComponents = eon.declaredComponents || {};
+  eon.declaredComponents = eon.declaredComponents || {};
 
-    if (eon.build) {
+  if (eon.build) {
 
-        var names = Object.keys(eon.build);
+    var names = Object.keys(eon.build);
 
-        for (var i = 0; i < names.length; i++) {
+    for (var i = 0; i < names.length; i++) {
 
-            var name = names[i];
+      var name = names[i];
 
-            if (!eon.declared.all[name]) {
+      if (!eon.declared.all[name]) {
 
-                eon.declared.build[name] = true;
+        eon.declared.build[name] = true;
 
-                var path = eon.build[name].path;
+        var path = eon.build[name].path;
 
-                path = (path.indexOf(".html") > -1) ? path : path + "/" + name + ".html";
-                path = path.charAt(0) === "@" ? eon.getBasePathUrl(path) : path;
+        path = (path.indexOf(".html") > -1) ? path : path + "/" + name + ".html";
+        path = path.charAt(0) === "@" ? eon.getBasePathUrl(path) : path;
 
-                // Every time a new import is requested we reset the onReady and onImportsReady triggered state
-                eon.imports.ready = false;
+        // Every time a new import is requested we reset the onReady and onImportsReady triggered state
+        eon.imports.ready = false;
 
-                eon.__onImportsReady__triggered = false;
-                eon.__onReady__triggered = false;
+        eon.__onImportsReady__triggered = false;
+        eon.__onReady__triggered = false;
 
-                eon.imports.total++;
+        eon.imports.total++;
 
-                // Avoid duplicated imports while waiting XMLHttpRequest callback.
-                eon.imports.templates[name] = null;
+        // Avoid duplicated imports while waiting XMLHttpRequest callback.
+        eon.imports.templates[name] = null;
 
-                // Saves the paths of the imported elements
-                eon.imports.paths[name] = path.substring(0, path.length - path.match(/[^\/]*$/g)[0].length);
+        // Saves the paths of the imported elements
+        eon.imports.paths[name] = path.substring(0, path.length - path.match(/[^\/]*$/g)[0].length);
 
-                if (document.readyState === 'loading') {  // Loading hasn't finished yet
-                    document.addEventListener('DOMContentLoaded', function () {
-                        eon.declareBuildComponent(name);
-                    });
-                } else {  // `DOMContentLoaded` has already fired
-                    eon.declareBuildComponent(name);
-                }
-
-            }
-
+        if (document.readyState === 'loading') {  // Loading hasn't finished yet
+          document.addEventListener('DOMContentLoaded', function () {
+            eon.declareBuildComponent(name);
+          });
+        } else {  // `DOMContentLoaded` has already fired
+          eon.declareBuildComponent(name);
         }
 
+      }
+
     }
+
+  }
 
 }
 
@@ -8483,11 +8499,11 @@ eon.declareBuildComponents = function () {
 */
 eon.declareBuildComponent = function (name) {
 
-    eon.declare(name);
-    eon.prepareComponent(name, eon.build[name].content);
+  eon.declare(name);
+  eon.prepareComponent(name, eon.build[name].content);
 
-    // Removes it from eon.build so that in the next for loop we iterate less time
-    delete eon.build[name];
+  // Removes it from eon.build so that in the next for loop we iterate less time
+  delete eon.build[name];
 }
 
   
