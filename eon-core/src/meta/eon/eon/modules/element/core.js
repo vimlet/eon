@@ -99,7 +99,12 @@ eon.createElement = function (name, config) {
 @param {Object} el
 */
 eon.hideElement = function (el) {
-    el.classList.add("eon-until-rendered");
+    if (el.__templateMask) {
+        el.classList.add("eon-mask-on");
+        el.appendChild(el.__templateMask);
+    } else {
+        el.classList.add("eon-until-rendered");
+    }
 };
 
 /*
@@ -108,7 +113,12 @@ eon.hideElement = function (el) {
 @param {Object} el
 */
 eon.unhideElement = function (el) {
-    el.classList.remove("eon-until-rendered");
+    if (el.__templateMask) {
+        el.classList.remove("eon-mask-on");
+        el.removeChild(el.__templateMask);
+    } else {
+        el.classList.remove("eon-until-rendered");
+    }
 };
 
 /*
@@ -539,9 +549,9 @@ eon.createPropDescriptor = function (el, config, key, value, reflect) {
     propDescriptor.get = function () {
         return el["__" + key];
     };
-    
+
     propDescriptor.set = function (value) {
-        
+
         if (reflect) {
             // Trigger onAttributeChanged, note this will trigger also onPropertyChanged if needed
             // Only sets the attribute if the value is not of object type
@@ -796,7 +806,7 @@ eon.setupEonThemeListener = function (el, config) {
     // When eon theme changes it also changes the element's theme attribute and 
     // if the theme file is not imported it also imports it
     eon._onThemeChanged(function (previousTheme, newTheme) {
-        
+
         var elementName = el.nodeName.toLowerCase();
         var elementTheme = document.body.hasAttribute("theme") !== "" ? document.body.getAttribute("theme") : el.theme;
 
@@ -931,6 +941,7 @@ eon.generateElementTemplate = function (el) {
     }
 
     el.template = clone.content;
+    el.__templateMask = el.template.querySelector("eon-mask");
 };
 
 /*

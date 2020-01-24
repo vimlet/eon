@@ -11,6 +11,8 @@ document.head.appendChild(eon.style);
 
 // Hides initial elements
 eon.style.sheet.insertRule(".eon-until-rendered { opacity: 0; }", 0);
+// Hides initial elements
+eon.style.sheet.insertRule(".eon-mask-on > *:not(eon-mask) { display: none !important; }", 0);
 // Hide eon-script
 eon.style.sheet.insertRule("eon-script { display: none; }", 0);
 
