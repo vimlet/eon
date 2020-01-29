@@ -113,9 +113,16 @@ eon.hideElement = function (el) {
 @param {Object} el
 */
 eon.unhideElement = function (el) {
+
     if (el.__templateMask) {
+
+      if (el.hasAttribute("autohide-mask") && el.getAttribute("autohide-mask") == "false") {
+        el.removeAttribute("autohide-mask");
+      } else {
         el.classList.remove("eon-mask-on");
         el.removeChild(el.__templateMask);
+      }
+
     } else {
         el.classList.remove("eon-until-rendered");
     }
@@ -941,7 +948,33 @@ eon.generateElementTemplate = function (el) {
     }
 
     el.template = clone.content;
-    el.__templateMask = el.template.querySelector("eon-mask");
+    
+    eon.setupEonMask(el);
+
+};
+
+/*
+@function  setupEonMask
+@description Searches for the mask in the template
+@param {Object} el
+*/
+eon.setupEonMask = function (el) {
+  el.__templateMask = el.template.querySelector("eon-mask");
+
+  el.hideEonMask = function () {
+    if (el.__templateMask && el.__templateMask.parentNode.isEqualNode(el)) {
+      el.classList.remove("eon-mask-on");
+      el.removeChild(el.__templateMask);
+    }
+  };
+
+  el.showEonMask = function () {
+    if (el.__templateMask) {
+      el.classList.add("eon-mask-on");
+      el.appendChild(el.__templateMask);
+    }
+  };
+
 };
 
 /*
