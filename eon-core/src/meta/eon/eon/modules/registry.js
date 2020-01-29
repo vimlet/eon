@@ -158,7 +158,7 @@ eon.registry.addToReadyQueue = function (el, fn) {
 */
 eon.registry.triggerRenders = function () {
 
-  if (eon.registry.registeredElements === eon.registry.elementStatus.transformed.length) {
+  if (eon.registry.registeredElements === eon.registry.elementStatus.transformed.length && (!eon.buildsQueue || eon.buildsQueue.length == 0)) {
 
     eon.registry.transformedQueueBreak = true;
     
@@ -371,7 +371,7 @@ eon.registry.isReady = function (el) {
 // Trigger global onReady
 eon.onImportsReady(function () {
 
-  if (eon.registry.elementStatus.declared.length === 0 && !eon.buildsQueue) {
+  if (eon.registry.elementStatus.declared.length === 0 && (!eon.buildsQueue || eon.buildsQueue.length == 0)) {
     eon.triggerCallback("onReady", eon);
   }
 
