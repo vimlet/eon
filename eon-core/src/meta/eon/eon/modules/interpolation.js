@@ -583,7 +583,15 @@ eon.interpolation.interpolateValues = function (el, source, obj, interpolations,
 
           // For each attribute found previously sets its value
           for (var j = 0; j < attributes.length; j++) {
-            attributes[j].component.setAttribute(attributes[j].attribute, obj[key]);
+            
+            hasAttribute = attributes[j].component.hasAttribute(attributes[j].attribute);
+            attributeValue = attributes[j].component.getAttribute(attributes[j].attribute);
+            hasDifferentValue = hasAttribute && attributeValue != obj[key];
+
+            if (!hasAttribute || (hasAttribute && hasDifferentValue)) {
+              attributes[j].component.setAttribute(attributes[j].attribute, obj[key]);
+            }
+
           }
 
         }

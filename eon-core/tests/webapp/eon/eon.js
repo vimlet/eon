@@ -4007,7 +4007,7 @@ eon.registry.addToReadyQueue = function (el, fn) {
 */
 eon.registry.triggerRenders = function () {
 
-  if (eon.registry.registeredElements === eon.registry.elementStatus.transformed.length) {
+  if (eon.registry.registeredElements === eon.registry.elementStatus.transformed.length && (!eon.buildsQueue || eon.buildsQueue.length == 0)) {
 
     eon.registry.transformedQueueBreak = true;
     
@@ -4220,7 +4220,7 @@ eon.registry.isReady = function (el) {
 // Trigger global onReady
 eon.onImportsReady(function () {
 
-  if (eon.registry.elementStatus.declared.length === 0 && !eon.buildsQueue) {
+  if (eon.registry.elementStatus.declared.length === 0 && (!eon.buildsQueue || eon.buildsQueue.length == 0)) {
     eon.triggerCallback("onReady", eon);
   }
 
@@ -4811,7 +4811,15 @@ eon.interpolation.interpolateValues = function (el, source, obj, interpolations,
 
           // For each attribute found previously sets its value
           for (var j = 0; j < attributes.length; j++) {
-            attributes[j].component.setAttribute(attributes[j].attribute, obj[key]);
+            
+            hasAttribute = attributes[j].component.hasAttribute(attributes[j].attribute);
+            attributeValue = attributes[j].component.getAttribute(attributes[j].attribute);
+            hasDifferentValue = hasAttribute && attributeValue != obj[key];
+
+            if (!hasAttribute || (hasAttribute && hasDifferentValue)) {
+              attributes[j].component.setAttribute(attributes[j].attribute, obj[key]);
+            }
+
           }
 
         }
@@ -5189,9 +5197,16 @@ eon.hideElement = function (el) {
 @param {Object} el
 */
 eon.unhideElement = function (el) {
+
     if (el.__templateMask) {
+
+      if (el.hasAttribute("autohide-mask") && el.getAttribute("autohide-mask") == "false") {
+        el.removeAttribute("autohide-mask");
+      } else {
         el.classList.remove("eon-mask-on");
         el.removeChild(el.__templateMask);
+      }
+
     } else {
         el.classList.remove("eon-until-rendered");
     }
@@ -6017,7 +6032,33 @@ eon.generateElementTemplate = function (el) {
     }
 
     el.template = clone.content;
-    el.__templateMask = el.template.querySelector("eon-mask");
+    
+    eon.setupEonMask(el);
+
+};
+
+/*
+@function  setupEonMask
+@description Searches for the mask in the template
+@param {Object} el
+*/
+eon.setupEonMask = function (el) {
+  el.__templateMask = el.template.querySelector("eon-mask");
+
+  el.hideEonMask = function () {
+    if (el.__templateMask && el.__templateMask.parentNode.isEqualNode(el)) {
+      el.classList.remove("eon-mask-on");
+      el.removeChild(el.__templateMask);
+    }
+  };
+
+  el.showEonMask = function () {
+    if (el.__templateMask) {
+      el.classList.add("eon-mask-on");
+      el.appendChild(el.__templateMask);
+    }
+  };
+
 };
 
 /*
