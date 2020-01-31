@@ -1048,7 +1048,7 @@
               el._refs.currentMinutes.value = ("" + parseInt(el._refs.currentMinutes.value)).substring(0, 2);
               el._refs.currentMinutes.value = parseInt(el._refs.currentMinutes.value) > 59 ? 59 : el._refs.currentMinutes.value;
             }
-            
+
             el._refs.subInputs.minutes.value = el._refs.currentMinutes.value;
             el._misc.clock.currentMinutes = el._refs.subInputs.minutes.value;
 
@@ -1652,7 +1652,7 @@
       @function (private) _assignCalendarStyle
       @description Assigns the calendar's width and position relative to the date
       */
-      assignCalendarStyle: function () {
+      assignCalendarStyle: function (origin) {
 
         var el = this;
 
@@ -1689,6 +1689,11 @@
           left = (left + width) > window.innerWidth ? left - ((left + width) - window.innerWidth) - 5 : left;
           left = left < 5 ? 5 : left;
 
+          if (origin) {
+            top = origin.getBoundingClientRect().top + origin.offsetHeight;
+            left = origin.getBoundingClientRect().left;
+          }
+
           el._refs.calendar.style.top = top + "px";
           el._refs.calendar.style.left = left + "px";
           el._refs.calendar.style.width = width + "px";
@@ -1701,18 +1706,18 @@
       @function (private) _expand
       @description Shows the calendar
       */
-      expand: function (needsRefresh) {
+      expand: function (needsRefresh, origin) {
 
         var el = this;
 
-        el._assignCalendarStyle();
+        el._assignCalendarStyle(origin);
         el._assignFocusStyle();
 
         if (needsRefresh) {
           el._refresh();
         }
 
-        el._updateValue();
+        // el._updateValue();
         el._validate();
 
         document.body.appendChild(el._refs.overlay);
@@ -1870,9 +1875,9 @@
 
         var el = this;
         var dateObj;
-        
+
         el.value = el.initialValue != "" ? el.initialValue : el.value;
-        dateObj= el.value == "" ? eon.time.getDateValueObjectFromDate(new Date(), el.time) : eon.time.getDateValueObjectFromString(el.value, el.valueFormat, el.time);
+        dateObj = el.value == "" ? eon.time.getDateValueObjectFromDate(new Date(), el.time) : eon.time.getDateValueObjectFromString(el.value, el.valueFormat, el.time);
 
         if (el._exceedsMinDate(dateObj)) {
 

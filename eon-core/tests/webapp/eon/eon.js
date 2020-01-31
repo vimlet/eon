@@ -4438,6 +4438,7 @@ eon.interpolation.bindAttribute = function (el, sources, attributeName, attribut
 
   scope.__attributeBindings = scope.__attributeBindings || {};
   root = sourceName != "locale" ? scope[sourceName] : scope;
+  el.__boundAttributes = el.__boundAttributes || {};
 
   // Reads if there is already a value on the source if there is not then it assigns an empty string
   bindValue = eon.object.readFromPath(root, bindString);
@@ -4467,12 +4468,18 @@ eon.interpolation.bindAttribute = function (el, sources, attributeName, attribut
   // Since we want the whole path wether its been or not specified by the user we add "data." if needed
   bindString = !isLocale && bindString.split(".")[0] != "data" ? "data." + bindString : bindString;
 
+  el.__boundAttributes[bindString] = {
+    scope: scope,
+    isGlobal: isGlobal,
+    data: {
+      attribute: attributeFinalName,
+      component: el
+    }
+  };
+
   // Saves the component as well as the attribute so that when the value changes we have enough information the also change the attribute
   scope.__attributeBindings[bindString] = scope.__attributeBindings[bindString] ? scope.__attributeBindings[bindString] : [];
-  scope.__attributeBindings[bindString].push({
-    attribute: attributeFinalName,
-    component: el
-  });
+  scope.__attributeBindings[bindString].push(el.__boundAttributes[bindString].data);
 
 };
 
@@ -4964,6 +4971,52 @@ eon.interpolation.forwardDataDiffing = function (source, keyPath, data, checked,
       }
     }
   }
+}
+
+/*
+@function pauseBind
+@description The component stops being part of the binding
+@param {Object} el
+*/
+eon.interpolation.pauseBind = function (el) {
+
+  if (el.__boundAttributes) {
+    var boundAttributes = Object.keys(el.__boundAttributes);
+    var attributeObj, index;
+
+    for (var i = 0; i < boundAttributes.length; i++) {
+      attributeObj = el.__boundAttributes[boundAttributes[i]];
+      index = attributeObj.scope.__attributeBindings[boundAttributes[i]].indexOf(attributeObj.data);
+      attributeObj.scope.__attributeBindings[boundAttributes[i]].splice(index, 1);
+    }
+
+    el.__pausedBind = true;
+  }
+
+}
+
+/*
+@function pauseBind
+@description Resumes the binding for the component
+@param {Object} el
+*/
+eon.interpolation.resumeBind = function (el) {
+
+  if (el.__pausedBind) {
+
+    var boundAttributes = Object.keys(el.__boundAttributes);
+    var attributeObj;
+
+    for (var i = 0; i < boundAttributes.length; i++) {
+      attributeObj = el.__boundAttributes[boundAttributes[i]];
+      attributeObj.scope.__attributeBindings[boundAttributes[i]].push(attributeObj.data);
+      if (el.getAttribute(attributeObj.data.attribute) != eon.object.readFromPath(attributeObj.scope, boundAttributes[i])) {
+        el.setAttribute(attributeObj.data.attribute, eon.object.readFromPath(attributeObj.scope, boundAttributes[i]))
+      }
+    }
+
+  }
+  
 }
 
 eon.createCallback("onThemeChanged", eon);
