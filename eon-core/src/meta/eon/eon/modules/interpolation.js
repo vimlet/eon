@@ -422,6 +422,11 @@ eon.interpolation.bindWildVariable = function (variable) {
   variable.textContent = bindValue;
 
   variable.__bound = true;
+  // Data so that the variable is able to pause/resume its binding
+  variable.__boundData = {
+    interpolations: interpolations,
+    variableBind: variableBind
+  };
 
 };
 
@@ -580,7 +585,7 @@ eon.interpolation.interpolateValues = function (el, source, obj, interpolations,
 
         // If the variables are contain inside a component we add the to the interpolations array
         if (source.component) {
-
+          
           Array.prototype.push.apply(interpolations[key], source.component.template.querySelectorAll(
             'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
           ));
@@ -746,12 +751,13 @@ eon.interpolation.forwardDataDiffing = function (source, keyPath, data, checked,
 }
 
 /*
-@function pauseBind
-@description The component stops being part of the binding
-@param {Object} el
-*/
-eon.interpolation.pauseBind = function (el) {
+  @function pauseBind
+  @description The component stops being part of the binding
+  @param {Object} el
+  */
+ eon.interpolation.pauseBind = function (el) {
 
+  // For component attributes
   if (el.__boundAttributes) {
     var boundAttributes = Object.keys(el.__boundAttributes);
     var attributeObj, index;
@@ -762,20 +768,33 @@ eon.interpolation.pauseBind = function (el) {
       attributeObj.scope.__attributeBindings[boundAttributes[i]].splice(index, 1);
     }
 
+    el.__pausedAttributeBinds = true;
+  }
+
+  // For variable bindings
+  if (el.nodeName.toLowerCase() == "eon-variable" && el.__boundData) {
+    var boundData = el.__boundData;
+    var boundInterpolations = eon.object.readFromPath(boundData.interpolations, boundData.variableBind);
+    var index = boundInterpolations.indexOf(el);
+
+    boundInterpolations.splice(index, 1);
+    eon.object.assignToPath(boundData.interpolations, boundData.variableBind, boundInterpolations);
+    
     el.__pausedBind = true;
+    console.log("PAUSE", boundData.variableBind, boundInterpolations);
   }
 
 }
 
 /*
-@function pauseBind
+@function resumeBind
 @description Resumes the binding for the component
 @param {Object} el
 */
 eon.interpolation.resumeBind = function (el) {
 
-  if (el.__pausedBind) {
-
+  // For component attributes
+  if (el.__pausedAttributeBinds) {
     var boundAttributes = Object.keys(el.__boundAttributes);
     var attributeObj;
 
@@ -787,6 +806,22 @@ eon.interpolation.resumeBind = function (el) {
       }
     }
 
+    el.__pausedAttributeBinds = false;
+
   }
-  
+
+  // For variable bindings
+  if (el.nodeName.toLowerCase() == "eon-variable" && el.__pausedBind) {
+    var boundData = el.__boundData;
+    var boundInterpolations = eon.object.readFromPath(boundData.interpolations, boundData.variableBind);
+    var index = boundInterpolations.indexOf(el);
+
+    if (index == -1) {
+      boundInterpolations.push(el);
+      eon.object.assignToPath(boundData.interpolations, boundData.variableBind, boundInterpolations);
+    }
+    
+    el.__pausedBind = false;
+  }
+
 }

@@ -36,10 +36,12 @@ eon.constructClass = function (baseElement) {
   // Trigger callbacks
   classAdapter.prototype.connectedCallback = function () {
     var el = this;
+    eon.interpolation.resumeBind(el);
     eon.triggerCallback("onAttached", classAdapter, el);
   };
   classAdapter.prototype.disconnectedCallback = function () {
     var el = this;
+    eon.interpolation.pauseBind(el);
     eon.triggerCallback("onDetached", classAdapter, el);
   };
   classAdapter.prototype.attributeChangedCallback = function (
