@@ -2407,37 +2407,46 @@
           }
 
           if (el._refs.yearsGrid) {
-
-            var yearButton = el._refs.yearsGrid.querySelector("[data-year='" + el._misc.current.year + "']");
-
-            if (yearButton && yearButton.dataset.disabled != "true") {
-              el._highlight(yearButton, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
-            }
-
+            el._highlight(el._getYearButton(el._misc.current.year), el.querySelector(".eon-date-yearsGrid .eon-date-current"));
           }
 
           if (el._refs.monthsGrid) {
-
-            var monthButton = el._refs.monthsGrid.querySelector("[data-year='" + el._misc.current.year + "'][data-index='" + el._misc.current.month + "']");
-
-            if (monthButton && monthButton.dataset.disabled != "true") {
-              el._highlight(monthButton, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
-            }
-
+            el._highlight(el._getMonthButton(el._misc.current.year, el._misc.current.month), el.querySelector(".eon-date-monthsGrid .eon-date-current"));
           }
 
           if (el._refs.daysGrid) {
-
-            var dayButton = el._refs.daysGrid.querySelector("[year='" + el._misc.current.year + "'][month='" + parseInt(el._misc.current.month) + "'][day='" + parseInt(el._misc.current.day) + "']");
-
-            if (dayButton && dayButton.dataset.disabled != "true") {
-              el._highlight(dayButton, el.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
-            }
-
+            el._highlight(el._getDayButton(el._misc.current.year, el._misc.current.month, el._misc.current.day), el.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
           }
 
         }
 
+      },
+      /*
+      @function (private) _getYearButton
+      @description Returns the year button
+      @param {Number} year
+      */
+      getYearButton: function (year) {
+        return this._refs.yearsGrid.querySelector("[data-year='" + year + "']");
+      },
+      /*
+      @function (private) _getMonthButton
+      @description Returns the month button
+      @param {Number} year
+      @param {String} month
+      */
+      getMonthButton: function (year, month) {
+        return this._refs.monthsGrid.querySelector("[data-year='" + year + "'][data-index='" + month + "']");
+      },
+      /*
+      @function (private) _getDayButton
+      @description Returns the day button
+      @param {Number} year
+      @param {String} month
+      @param {String} day
+      */
+      getDayButton: function (year, month, day) {
+        return this._refs.daysGrid.querySelector("[year='" + year + "'][month='" + parseInt(month) + "'][day='" + parseInt(day) + "']");
       },
       /*
       @function (private) _updateHeaderSelectors
@@ -2558,13 +2567,18 @@
 
         var el = this;
 
-        if (previous) {
-          previous.classList.remove("eon-date-current", "eon-bg2-active");
-          previous.classList.add("eon-bg2-hoverable", "eon-fg1-hoverable");
+        if (selected && selected.dataset.disabled != "true") {
+
+          if (previous) {
+            previous.classList.remove("eon-date-current", "eon-bg2-active");
+            previous.classList.add("eon-bg2-hoverable", "eon-fg1-hoverable");
+          }
+
+          selected.classList.add("eon-date-current", "eon-bg2-active");
+          selected.classList.remove("eon-bg2-hoverable", "eon-fg1-hoverable");
+
         }
 
-        selected.classList.add("eon-date-current", "eon-bg2-active");
-        selected.classList.remove("eon-bg2-hoverable", "eon-fg1-hoverable");
       },
       /*
       @function (private) {Object} _formatObj
@@ -2949,12 +2963,10 @@
           }
         }
 
-        // var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.selected.day) + '"][month="' + parseInt(el._misc.selected.month) + '"][year="' + parseInt(el._misc.selected.year) + '"]');
         var currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.current.day) + '"][month="' + parseInt(el._misc.current.month) + '"][year="' + parseInt(el._misc.current.year) + '"]');
 
-        if (currentDay) {
-          el._highlight(currentDay);
-        }
+        el._highlight(currentDay);
+
       },
       /*
       @function (private) _fillMonthsGrid
@@ -2993,9 +3005,8 @@
         // var currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.selected.month) + '"][data-year ="' + parseInt(el._misc.selected.year) + '"]');
         var currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.current.month) + '"][data-year ="' + parseInt(el._misc.current.year) + '"]');
 
-        if (currentMonthCell) {
-          el._highlight(currentMonthCell, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
-        }
+        el._highlight(currentMonthCell, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+
       },
       /*
       @function (private) _fillYearsGrid
@@ -3033,9 +3044,8 @@
         // selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.selected.year + '"]');
         selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.current.year + '"]');
 
-        if (selectedYearCell) {
-          el._highlight(selectedYearCell, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
-        }
+        el._highlight(selectedYearCell, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+
       },
       /*
       @function (private) _selectDay
@@ -3376,11 +3386,11 @@
       updatePickerLabel: function () {
 
         var el = this;
-        
+
         if (el.label != "") {
           el._refs.pickerLabel.innerHTML = el.label;
         }
-        
+
         el._refs.pickerLabel.style.display = eon.util.isTrue(el.pickerLabel) ? "flex" : "none";
 
       },
@@ -3562,6 +3572,18 @@
 
           }
 
+          if (el._refs.yearsGrid) {
+            el._highlight(el._getYearButton(el._misc.current.year), el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+          }
+
+          if (el._refs.monthsGrid) {
+            el._highlight(el._getMonthButton(el._misc.current.year, el._misc.current.month), el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+          }
+
+          if (el._refs.daysGrid) {
+            el._highlight(el._getDayButton(el._misc.current.year, el._misc.current.month, el._misc.current.day), el.querySelector(".eon-date-daysGrid .eon-date-grid .eon-date-current"));
+          }
+          
           eon.triggerCallback("onValueChanged", el, el, []);
 
         }

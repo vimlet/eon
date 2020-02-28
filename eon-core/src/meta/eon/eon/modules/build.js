@@ -64,7 +64,7 @@ eon.declareBuildComponents = function () {
 
       var name = names[i];
 
-      if (!eon.declared.all[name]) {
+      if (!eon.declared.all[name] && !eon.declared.build[name]) {
 
         eon.declared.build[name] = true;
 
