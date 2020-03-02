@@ -57,6 +57,14 @@
         reflect: true
       },
       /*
+        @property {Boolean} muted
+        @description Mute video
+      */
+      muted: {
+        value: false,
+        reflect: true
+      },
+      /*
         @property {Boolean} captions
         @description Whether or not the video should have text tracks
       */
@@ -302,6 +310,12 @@
         if (eon.util.isTrue(el.autoPlay)) {
           el._refs.video.autoplay = el.autoPlay;
         }
+        if (eon.util.isTrue(el.muted)) {
+          el._refs.video.playsinline = true;
+          el._refs.video.muted = true;
+          el._refs.video.setAttribute("muted", "");
+        }
+
         el._refs.video.loop = el.loop;
         // Video fit class
         fitClass = el.objectFit == "cover" ? "eon-video-cover" : "eon-video-fit";
@@ -699,6 +713,7 @@
       */
       playBtnListener: function () {
         var el = this;
+
         el._refs.play.addEventListener('click', function (e) {
           if (e.button == 0 && el._misc.controlsHidden == false) {
             el._togglePlay();
@@ -1022,6 +1037,7 @@
       el._refs.wrapper = el.template.querySelector(".eon-video-wrapper");
       el.template.insertBefore(vid, el._refs.wrapper);
 
+      eon.createCallback("onPlayStart", el);
       eon.createCallback("onEnd", el);
       eon.createCallback("onDataLoaded", el, "ready");
 
@@ -1049,10 +1065,17 @@
     },
     onTransformed: function () {
       var el = this;
+      
       // Initialize HTML video
       el._setUpHTMLVideo();
       // Initialize eon-video inner configuration
       el._setUp();
+
+       // On vide start playing
+       el._refs.video.addEventListener("play", function(){
+          eon.triggerCallback("onPlayStart", el, el);
+        });
+        
       // Set up playing monitors on video data loaded
       el._refs.video.addEventListener("loadeddata", function () {
         if (!el._misc.reloaded) {
@@ -1065,6 +1088,8 @@
           }
           el._timeListener();
           el._fullScreenListener();
+         
+          
           eon.triggerCallback("onDataLoaded", el, el);
         }
       });
