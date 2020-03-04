@@ -201,6 +201,13 @@
         value: {}
       },
       /*
+       @property {Object} bodyScroll 
+       @description Whether or not the document body content can be scrolled
+      */
+      bodyScroll: {
+        value: true
+      },
+      /*
         @property {Boolean} defaultStyle 
         @description Sets spacers to the content section.
         Values: true, false.
@@ -385,6 +392,22 @@
 
         });
 
+      },
+      /*
+      @function (private) _addMainListeners
+      @description Adds drag listeners
+      */
+      addMainListeners: function () {
+        var el = this;
+        el._addOverlay();
+
+        var downFunction = function (e) {
+          if (e.button == 0 && el._refs.close.isOnPath == false) {
+            el._moveToFront();
+          }
+        }
+
+        el.addEventListener("mousedown", downFunction);
       },
       /*
       @function (private) _addDragListeners
@@ -901,12 +924,10 @@
           } else if (!eon.util.isTrue(el.modal)) {
             el._refs.overlay.style.pointerEvents = "none";
           }
-
+        } else {
+          // Appends the overlay
+          document.body.appendChild(el._refs.overlay);
         }
-
-
-        // Appends the overlay
-        document.body.appendChild(el._refs.overlay);
       },
 
       /*
@@ -1168,45 +1189,37 @@
 
         if (!el.classList.contains("eon-dialog-visible") && el.closeRendered) {
           eon.triggerCallback("onOpen", el);
-
           el.closeRendered = false;
-
-          el._assignSize(); //
+          
           el._addOverlay();
-
-          el.addEventListener("mousedown", function (e) {
-            if (e.button == 0 && el._refs.close.isOnPath == false) {
-              el._moveToFront();
-            }
-          });
-
-          el.classList.remove("eon-dialog-hide");
-
-          // To see the opening animation of the dialog
-          setTimeout(function () {
-            // The dialog will already have the final size.
-            el._registerInitialSize();
-            el._handleDialogSize();
-            el._limitPosition();
-            el._setPosition();
-            el.classList.add("eon-dialog-visible");
-
-            // Fixes scale issues because it does not update DOM elements size 
-            setTimeout(function () {
-              // Forces scroll update
-              if (eon.util.isTrue(el.allowScroll)) {
-                el._refs.scroll.update();
-              }
-              el.openRendered = true;
-              eon.triggerCallback("onOpenRendered", el);
-
-            }, 300);
-          }, 0);
-
-          el.parentNode.insertBefore(el._refs.placeholder, el);
           document.body.appendChild(el);
 
-          eon.triggerCallback("onOpened", el);
+          el._assignSize();
+          el._limitPosition();
+          
+          el.classList.remove("eon-dialog-hide");
+          
+          // Needed to start the opening animation after the dialog is displayed only
+          setTimeout(function () {
+            el._setPosition();
+            el._handleDialogSize();
+            el.classList.add("eon-dialog-visible");
+          }, 1)
+          
+          // Needed to avoid the animation interruption
+          setTimeout(function () {
+            el.parentNode.insertBefore(el._refs.placeholder, el);
+  
+            //The dialog will already have the final size.
+            el._registerInitialSize(); // defer
+            // Fixes scale issues because it does not update DOM elements size 
+            // Forces scroll update
+            if (eon.util.isTrue(el.allowScroll)) {
+              el._refs.scroll.update();
+            }
+            el.openRendered = true;
+            eon.triggerCallback("onOpened", el);
+          }, 200);
         }
       },
 
@@ -1218,10 +1231,19 @@
         var el = this;
         // ** TODO Check if the dialog is completely opened
         if (el.openRendered) {
+          // TODO:
+          if (document.body.querySelectorAll(".eon-dialog-visible").length == 1) {
+            document.body.classList.remove("eon-dialog-hidden");
+          }
           // Since entering this function means a change in the dialog, we no longer consider its the first time the the dialog is open
           el._misc.firstOpen = false;
 
           eon.triggerCallback("onClose", el);
+
+          if (!eon.util.isTrue(el.bodyScroll)) {
+            document.body.style.width = "auto";
+            document.body.style.overflow = "scroll";
+          }
 
           el.classList.remove("eon-dialog-visible");
           el.classList.remove("eon-dialog-scaled");
@@ -1233,7 +1255,6 @@
             el._refs.placeholder.parentNode.insertBefore(el, el._refs.placeholder);
             el._refs.placeholder.parentNode.removeChild(el._refs.placeholder);
 
-            eon.triggerCallback("onCloseRendered", el);
             el.closeRendered = true;
           }, 100);
 
@@ -1266,10 +1287,8 @@
       // Create callbacks
       eon.createCallback("onOpen", el);
       eon.createCallback("onOpened", el);
-      eon.createCallback("onOpenRendered", el);
       eon.createCallback("onClose", el);
       eon.createCallback("onClosed", el);
-      eon.createCallback("onCloseRendered", el);
 
       el._createRefs();
 
@@ -1304,6 +1323,8 @@
       el._verifyDeviceVersion();
       el._addHeading();
       el._addDragListeners();
+      el._addMainListeners();
+
       el._addResizes();
       el._addMaximize();
       el._addMinimize();
