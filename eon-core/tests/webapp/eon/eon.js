@@ -3292,30 +3292,36 @@ eon.imports.errors = eon.imports.errors || {};
 @description Imports the requested custom element file, admits arrays and strings
 @param {Object} param
 */
-eon.import = function (param) {
+eon.import = function (param, buildPath) {
 
-    if (eon.buildsQueue && eon.buildsQueue.length > 0) {
+    if (eon.build && buildPath) {
 
-        eon.importsQueue = eon.importsQueue || [];
-
-        eon.importsQueue.push({
-            fn: function () {
-                eon.import(param);
-            },
-            triggered: false
-        });
+        eon.importBuild(buildPath);
 
     } else {
 
-        if (param.constructor === Array) {
+        if (eon.buildsQueue && eon.buildsQueue.length > 0) {
 
-            for (var i = 0; i < param.length; i++) {
-                eon.requestImport(param[i]);
+            eon.importsQueue = eon.importsQueue || [];
+
+            eon.importsQueue.push({
+                fn: function () {
+                    eon.import(param);
+                },
+                triggered: false
+            });
+
+        } else {
+
+            if (param.constructor === Array) {
+
+                for (var i = 0; i < param.length; i++) {
+                    eon.requestImport(param[i]);
+                }
+
+            } else if (param.constructor === String) {
+                eon.requestImport(param);
             }
-
-        } else if (param.constructor === String) {
-
-            eon.requestImport(param);
 
         }
 
@@ -4610,7 +4616,7 @@ eon.interpolation.interpolate = function () {
 */
 eon.interpolation.bindWildVariable = function (variable) {
 
-  var isLocale, scope, bindString, bindValue, isUndefined, root, interpolations, source, boundInterpolations;
+  var isLocale, scope, bindString, bindValue, isUndefined, root, interpolations, boundInterpolations;
 
   bindString = variable.getAttribute("bind");
   scope = eon.interpolation.globalScope;
@@ -4638,34 +4644,18 @@ eon.interpolation.bindWildVariable = function (variable) {
   } else {
     variableBind = bindString;
   }
-  
-  // Creates the source object
-  source = {
-    scope: scope,
-    isLocale: isLocale,
-    isGlobale: true,
-    config: {},
-    obj: root
-  };
-  
-  // Creates listeners, defines properties and interpolates values
-  eon.interpolation.setupListenerCallback(source, source.config);
-  eon.interpolation.defineProperties(source, sourceName);
-  eon.interpolation.interpolateValues(source.scope, source, source.obj, interpolations);
 
   boundInterpolations = eon.object.readFromPath(interpolations, variableBind);
 
-  if (boundInterpolations.indexOf(variable) == -1) {
-    boundInterpolations.push(variable)
-    variable.textContent = bindValue;
+  if (!boundInterpolations) {
+    boundInterpolations = [];
+    eon.object.assignToPath(interpolations, variableBind, boundInterpolations);
   }
 
+  boundInterpolations.push(variable)
+  variable.textContent = bindValue;
+
   variable.__bound = true;
-  // Data so that the variable is able to pause/resume its binding
-  variable.__boundData = {
-    interpolations: interpolations,
-    variableBind: variableBind
-  };
 
 };
 
@@ -8544,13 +8534,13 @@ eon.domReady(function () {
 
 
 /*
-  @function processBuild
+  @function importBuild
   @description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
   @param {String} filePath
 */
-eon.processBuild = function (filePath) {
+eon.importBuild = function (filePath) {
 
-  if (filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
+  if (eon.build && filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
     // Initiate the buildsQueue
     eon.buildsQueue = eon.buildsQueue ? eon.buildsQueue : [];
     // If its not already in the queue then push the given filePath
@@ -8573,7 +8563,7 @@ eon.processBuild = function (filePath) {
             // Create the script and fill it with its content, also remove the build path from the queue and process the next
             // build thats waiting on the builds queue and resume the imports
             script.innerHTML = obj.responseText + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
-            script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.processBuild(eon.buildsQueue[0]);}; eon.declareBuildComponents(); eon.resumeImports();";
+            script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.importBuild(eon.buildsQueue[0]);}; eon.declareBuildComponents(); eon.resumeImports();";
 
             document.head.appendChild(script);
 
@@ -8609,7 +8599,7 @@ eon.declareBuildComponents = function () {
 
       var name = names[i];
 
-      if (!eon.declared.all[name]) {
+      if (!eon.declared.all[name] && !eon.declared.build[name]) {
 
         eon.declared.build[name] = true;
 

@@ -26,30 +26,36 @@ eon.imports.errors = eon.imports.errors || {};
 @description Imports the requested custom element file, admits arrays and strings
 @param {Object} param
 */
-eon.import = function (param) {
+eon.import = function (param, buildPath) {
 
-    if (eon.buildsQueue && eon.buildsQueue.length > 0) {
+    if (eon.build && buildPath) {
 
-        eon.importsQueue = eon.importsQueue || [];
-
-        eon.importsQueue.push({
-            fn: function () {
-                eon.import(param);
-            },
-            triggered: false
-        });
+        eon.importBuild(buildPath);
 
     } else {
 
-        if (param.constructor === Array) {
+        if (eon.buildsQueue && eon.buildsQueue.length > 0) {
 
-            for (var i = 0; i < param.length; i++) {
-                eon.requestImport(param[i]);
+            eon.importsQueue = eon.importsQueue || [];
+
+            eon.importsQueue.push({
+                fn: function () {
+                    eon.import(param);
+                },
+                triggered: false
+            });
+
+        } else {
+
+            if (param.constructor === Array) {
+
+                for (var i = 0; i < param.length; i++) {
+                    eon.requestImport(param[i]);
+                }
+
+            } else if (param.constructor === String) {
+                eon.requestImport(param);
             }
-
-        } else if (param.constructor === String) {
-
-            eon.requestImport(param);
 
         }
 
