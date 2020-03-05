@@ -1,11 +1,11 @@
 /*
-  @function processBuild
+  @function importBuild
   @description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
   @param {String} filePath
 */
-eon.processBuild = function (filePath) {
+eon.importBuild = function (filePath) {
 
-  if (filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
+  if (eon.build && filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
     // Initiate the buildsQueue
     eon.buildsQueue = eon.buildsQueue ? eon.buildsQueue : [];
     // If its not already in the queue then push the given filePath
@@ -28,7 +28,7 @@ eon.processBuild = function (filePath) {
             // Create the script and fill it with its content, also remove the build path from the queue and process the next
             // build thats waiting on the builds queue and resume the imports
             script.innerHTML = obj.responseText + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
-            script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.processBuild(eon.buildsQueue[0]);}; eon.declareBuildComponents(); eon.resumeImports();";
+            script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.importBuild(eon.buildsQueue[0]);}; eon.declareBuildComponents(); eon.resumeImports();";
 
             document.head.appendChild(script);
 

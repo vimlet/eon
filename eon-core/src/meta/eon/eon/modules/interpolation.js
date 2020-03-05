@@ -382,7 +382,7 @@ eon.interpolation.interpolate = function () {
 */
 eon.interpolation.bindWildVariable = function (variable) {
 
-  var isLocale, scope, bindString, bindValue, isUndefined, root, interpolations, source, boundInterpolations;
+  var isLocale, scope, bindString, bindValue, isUndefined, root, interpolations, boundInterpolations;
 
   bindString = variable.getAttribute("bind");
   scope = eon.interpolation.globalScope;
@@ -410,34 +410,18 @@ eon.interpolation.bindWildVariable = function (variable) {
   } else {
     variableBind = bindString;
   }
-  
-  // Creates the source object
-  source = {
-    scope: scope,
-    isLocale: isLocale,
-    isGlobale: true,
-    config: {},
-    obj: root
-  };
-  
-  // Creates listeners, defines properties and interpolates values
-  eon.interpolation.setupListenerCallback(source, source.config);
-  eon.interpolation.defineProperties(source, sourceName);
-  eon.interpolation.interpolateValues(source.scope, source, source.obj, interpolations);
 
   boundInterpolations = eon.object.readFromPath(interpolations, variableBind);
 
-  if (boundInterpolations.indexOf(variable) == -1) {
-    boundInterpolations.push(variable)
-    variable.textContent = bindValue;
+  if (!boundInterpolations) {
+    boundInterpolations = [];
+    eon.object.assignToPath(interpolations, variableBind, boundInterpolations);
   }
 
+  boundInterpolations.push(variable)
+  variable.textContent = bindValue;
+
   variable.__bound = true;
-  // Data so that the variable is able to pause/resume its binding
-  variable.__boundData = {
-    interpolations: interpolations,
-    variableBind: variableBind
-  };
 
 };
 
