@@ -342,6 +342,15 @@
 
             value = node.value != "" ? node.value : false;
 
+          } else if (node.nodeName.toLowerCase() == "app-places") {
+            var location = node.getLocation();
+            if (location) {
+              value = {
+                address: node.value,
+                latitude: location.latitude,
+                longitude: location.longitude
+              };
+            }
           } else {
 
             value = node.value;
@@ -439,6 +448,14 @@
                 nodes[i].__dirty = false;
               }
 
+            } else if (nodes[0].nodeName.toLowerCase() == "app-places") {
+              nodes[0].value = value.address;
+              nodes[0]._misc.location = {
+                latitude: value.latitude,
+                longitude: value.longitude,
+                address: value.address
+              }
+              // else just assign the value to the node	
             } else {
 
               for (var i = 0; i < nodes.length; i++) {
@@ -508,7 +525,7 @@
         return data;
       },
       /*
-      @function {Object} getData 
+      @function {Object} getDirtyData 
       @description Return form values as an object
       */
       getDirtyData: function () {
