@@ -100,6 +100,14 @@ async function readImports(filePath) {
     if (fs.existsSync(filePath)) {
 
         fileContent = (await readFile(filePath)).toString();
+        
+        // Removes the // comments
+        fileContent = fileContent.replace(/^\s*\/\/(?:(?!(\r\n|\r|\n))[\s\S])*/gm, "");
+        // Removes the /**/ comments
+        fileContent = fileContent.replace(/^\s*\/\*(?:(?!\*\/)[\s\S])*\*\//gm, "");
+        // Removes the <!-- --> comments
+        fileContent = fileContent.replace(/^\s*\<\!--(?:(?!--\>)[\s\S])*--\>/gm, "");
+        
         matches = fileContent.match(/eon\.import\s*\([^\)]*\)/gs)
         matches = matches || [];
 
@@ -215,7 +223,6 @@ async function outputBuild(build, outputPath) {
     txt += "eon.build = Object.assign(eon.build,";
     txt += JSON.stringify(build);
     txt += ");";
-    txt += "eon.declareBuildComponents();";
 
     fs.writeFileSync(outputPath, txt);
 
