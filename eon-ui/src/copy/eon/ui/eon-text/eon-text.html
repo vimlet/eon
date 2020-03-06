@@ -230,12 +230,13 @@
       focus: function () {
         var el = this;
         el.onReady(function () {
-          if (el.type != "area") {
+          if (el.type != "area") {            
             el._refs.input.focus();
           } else {
-            if (el._misc.area.isNative) {
+            // if (el._misc.area.isNative) {
+            //   el._refs.editableArea.focus();
+            // }
               el._refs.editableArea.focus();
-            }
           }
         });
       }
@@ -660,7 +661,8 @@
 
         } else {
           value = el.value.toString();
-          valueLength = Array.prototype.slice.apply(value.match(/\n/g) || []).length > 1 ? value.length - 1 : value.length;
+          valueLength = Array.prototype.slice.apply(value.match(/\n/g) || []).length > 1 ? value.length - 1 :
+            value.length;
         }
         return valueLength;
       },
@@ -678,8 +680,12 @@
       getSelectionCoords: function () {
         var win = window;
         var doc = win.document;
-        var sel = doc.selection, range, rects, rect;
-        var left = 0, top = 0, right = 0, bottom = 0;
+        var sel = doc.selection,
+          range, rects, rect;
+        var left = 0,
+          top = 0,
+          right = 0,
+          bottom = 0;
 
         if (sel) {
           if (sel.type != "Control") {
@@ -736,7 +742,12 @@
             }
           }
         }
-        return { left: left, top: top, right: right, bottom: bottom };
+        return {
+          left: left,
+          top: top,
+          right: right,
+          bottom: bottom
+        };
       },
       /*
         @function (private) {Object} _getSelectionRange
@@ -761,8 +772,8 @@
       placeCaretAtEnd: function (div) {
         div.focus();
 
-        if (typeof window.getSelection != "undefined"
-          && typeof document.createRange != "undefined") {
+        if (typeof window.getSelection != "undefined" &&
+          typeof document.createRange != "undefined") {
           var range = document.createRange();
           range.selectNodeContents(div);
           range.collapse(false);
@@ -784,7 +795,8 @@
         var el = this;
 
         if (el.counter != "false") {
-          el.querySelector(".eon-text-counter").innerHTML = el.maxLength != "" ? (parseInt(el.maxLength) - el._getValueLength()) : el._getValueLength();
+          el.querySelector(".eon-text-counter").innerHTML = el.maxLength != "" ? (parseInt(el.maxLength) - el
+            ._getValueLength()) : el._getValueLength();
         }
       },
       /*
@@ -865,22 +877,21 @@
       updateValue: function () {
         var el = this;
 
-        if (el.type == "area") {
-          // This is set to true when the value propertyChanged is triggered from the textarea change, 
-          // in those scenarios we dont want to update the area again
-          if (!el._misc.area.preventUpdate) {
-            el._refs.editableArea.innerText = el.value;
-            el._updateCounter();
-          }
+        el.onReady(function () {
+          if (el.type == "area") {
+            // This is set to true when the value propertyChanged is triggered from the textarea change, 
+            // in those scenarios we dont want to update the area again
+            if (!el._misc.area.preventUpdate) {
+              el._refs.editableArea.innerText = el.value;
+              el._updateCounter();
+            }
 
-          el._misc.area.preventUpdate = false;
+            el._misc.area.preventUpdate = false;
 
-        } else {
-
-          el.onReady(function () {
+          } else {
             el._refs.input.value = el.value;
-          });
-        }
+          }
+        });
 
         el.__dirty = el.initialValue != el.value ? true : false;
 
@@ -914,6 +925,8 @@
 
       el._misc.descriptionText = "";
 
+      el.value = el.value == "" && el._misc.initialText != "" ? el._misc.initialText : el.value;
+
       el._misc.area = {};
       el._misc.area.inputEventTriggered = false;
       el._misc.area.verticalSize = 0;
@@ -926,12 +939,8 @@
       eon.createCallback("onFocus", this);
     },
     onInit: function () {
-      var el = this;
-
-      el.value = el.value == "" && el._misc.initialText != "" ? el._misc.initialText : el.value;
-
-      el._setupRefs();
-      el._setupLabelAnimation();
+      this._setupRefs();
+      this._setupLabelAnimation();
     },
     onBubbleRender: function () {
       this._setup();

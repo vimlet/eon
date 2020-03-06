@@ -28,7 +28,6 @@
   eon.element({
 
     name: "eon-label",
-    style: "eon-label.css",
 
     themed: true,
 
@@ -84,6 +83,14 @@
         value: "",
         reflect: true,
         reflectDefault: true
+      },
+      /*
+      @property {string} placeholder
+      @description Sets the placeholder for the input while there is no value
+      */
+      placeholder: {
+        value: "",
+        reflect: true
       },
       /*
       @property {Number} blurSave
@@ -150,13 +157,14 @@
       @description Sets a label if provided by the user
       */
       setupLabel: function () {
-
         var el = this;
 
         if (el.label) {
           el._refs.label.innerHTML = el.label;
         }
-
+        if (el.placeholder) {
+          el.value = el.placeholder;
+        }
       },
       /*
       @function (private) _setupFontSize
@@ -179,6 +187,8 @@
       setupInput: function () {
 
         var el = this;
+
+        el._refs.input.placeholder = el.placeholder;
 
         el._refs.input.addEventListener("focus", function () {
           el.classList.add("eon-label-focus");
@@ -238,18 +248,15 @@
       @description Finishes the user editing
       */
       finishEditing: function () {
+        var value = !this._refs.input.value ? this.placeholder : this._refs.input.value;
+        this._refs.value.innerHTML = value;
 
-        var el = this;
+        this._refs.input.blur();
 
-        el._refs.value.innerHTML = el._refs.input.value;
+        this._refs.main.classList.remove("eon-label-editing", "eon-bg2");
+        this.classList.remove("eon-label-focus");
 
-        el._refs.input.blur();
-
-        el._refs.main.classList.remove("eon-label-editing", "eon-bg2");
-        el.classList.remove("eon-label-focus");
-
-        el._updateValue(el._refs.input.value);
-
+        this._updateValue(value, true);
       },
       /*
       @function (private) _updateValue
@@ -258,7 +265,7 @@
       updateValue: function (value) {
 
         var el = this;
-
+  
         value = value ? value : el.value;
 
         el._refs.value.innerHTML = value;
