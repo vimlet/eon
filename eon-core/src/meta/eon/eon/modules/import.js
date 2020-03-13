@@ -149,6 +149,8 @@ eon.requestImport = function (href) {
 
         });
 
+    } else if (!eon.imports.ready && eon.imports.count === eon.imports.total && eon.imports.total === Object.keys(eon.imports.config).length) {
+        eon.finishImports();
     }
 
 };
@@ -237,18 +239,7 @@ eon.prepareComponent = function (elementName, content) {
                 // If there are no more dependencies to handle trigger onImportsReady
                 if (!hasPendingImports && !eon.imports.ready && eon.imports.count === eon.imports.total && eon.imports.total === Object.keys(eon.imports.config).length) {
 
-                    eon.imports.ready = true;
-
-                    // Here we will register the main theme, the one declared by the user or our default one
-                    eon.importMainTheme(eon.theme);
-                    // Reads the themeSchema and imports the requested files
-                    eon.importSchemaThemes();
-
-                    eon.triggerCallback("onImportsReady", eon);
-                    // Once the imports are done, if all the registered elements are ready then it we trigger the onReady callback
-                    if (eon.registry.registeredElements === eon.registry.elementStatus.ready.length) {
-                        eon.triggerCallback("onReady", eon);
-                    }
+                    eon.finishImports();
 
                 } else {
                     eon.__onScriptsReady__triggered = false;
@@ -260,6 +251,27 @@ eon.prepareComponent = function (elementName, content) {
 
     });
 };
+
+/*
+@function finishImports
+@description 
+*/
+eon.finishImports = function () {
+
+    eon.imports.ready = true;
+
+    // Here we will register the main theme, the one declared by the user or our default one
+    eon.importMainTheme(eon.theme);
+    // Reads the themeSchema and imports the requested files
+    eon.importSchemaThemes();
+
+    eon.triggerCallback("onImportsReady", eon);
+    // Once the imports are done, if all the registered elements are ready then it we trigger the onReady callback
+    if (eon.registry.registeredElements === eon.registry.elementStatus.ready.length) {
+        eon.triggerCallback("onReady", eon);
+    }
+
+}
 
 /*
 @function handleDependencies

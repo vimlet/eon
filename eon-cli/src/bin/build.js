@@ -219,8 +219,8 @@ async function outputBuild(build, outputPath) {
     var txt = "";
 
     txt += "var eon = eon || {};\n";
-    txt += "eon.build = eon.build || {};";
-    txt += "eon.build = Object.assign(eon.build,";
+    txt += "eon.builds = eon.builds || {};";
+    txt += "eon.builds = Object.assign(eon.builds,";
     txt += JSON.stringify(build);
     txt += ");";
 

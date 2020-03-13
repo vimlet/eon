@@ -4,7 +4,7 @@
   @param {String} filePath
 */
 eon.importBuild = function (filePath) {
-
+  
   if (eon.build && filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
     // Initiate the buildsQueue
     eon.buildsQueue = eon.buildsQueue ? eon.buildsQueue : [];
@@ -14,34 +14,7 @@ eon.importBuild = function (filePath) {
     }
     // Request the file only if its the first on queue, otherwise it will be called once our first build is finished processing
     if (eon.buildsQueue.length <= 1) {
-
-      eon.ajax(filePath, null, function (success, obj) {
-
-        if (success) {
-
-          eon.processedBuilds = eon.processedBuilds || [];
-          eon.processedBuilds.push(filePath);
-
-          if (obj.xhr.status === 200) {
-
-            var script = document.createElement("script");
-            // Create the script and fill it with its content, also remove the build path from the queue and process the next
-            // build thats waiting on the builds queue and resume the imports
-            script.innerHTML = obj.responseText + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
-            script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.importBuild(eon.buildsQueue[0]);}; eon.declareBuildComponents(); eon.resumeImports();";
-
-            document.head.appendChild(script);
-
-          }
-
-        } else {
-          // Remove the build path from the queue and process the next build thats waiting on the buildQueue and resume the imports
-          eon.buildsQueue.splice(eon.buildsQueue.indexOf(filePath), 1);
-          eon.resumeImports();
-        }
-
-      });
-
+      eon.requestBuild(filePath);
     }
 
   }
@@ -49,16 +22,50 @@ eon.importBuild = function (filePath) {
 }
 
 /*
+@function requestBuild
+@description Request the build
+*/
+eon.requestBuild = function (filePath) {
+
+  eon.ajax(filePath, null, function (success, obj) {
+
+    if (success) {
+
+      eon.processedBuilds = eon.processedBuilds || [];
+      eon.processedBuilds.push(filePath);
+
+      if (obj.xhr.status === 200) {
+
+        var script = document.createElement("script");
+        // Create the script and fill it with its content, also remove the build path from the queue and process the next
+        // build thats waiting on the builds queue and resume the imports
+        script.innerHTML = obj.responseText + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
+        script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.requestBuild(eon.buildsQueue[0]);}; eon.declareBuildComponents(); eon.resumeImports();";
+
+        document.head.appendChild(script);
+
+      }
+
+    } else {
+      // Remove the build path from the queue and process the next build thats waiting on the buildQueue and resume the imports
+      eon.buildsQueue.splice(eon.buildsQueue.indexOf(filePath), 1);
+      eon.resumeImports();
+    }
+
+  });
+}
+
+/*
 @function declareBuildComponents
 @description Loops through eon.build and declares each component
 */
 eon.declareBuildComponents = function () {
-
+  
   eon.declaredComponents = eon.declaredComponents || {};
 
   if (eon.build) {
 
-    var names = Object.keys(eon.build);
+    var names = Object.keys(eon.builds);
 
     for (var i = 0; i < names.length; i++) {
 
@@ -68,7 +75,7 @@ eon.declareBuildComponents = function () {
 
         eon.declared.build[name] = true;
 
-        var path = eon.build[name].path;
+        var path = eon.builds[name].path;
 
         path = (path.indexOf(".html") > -1) ? path : path + "/" + name + ".html";
         path = path.charAt(0) === "@" ? eon.getBasePathUrl(path) : path;
@@ -110,8 +117,10 @@ eon.declareBuildComponents = function () {
 eon.declareBuildComponent = function (name) {
 
   eon.declare(name);
-  eon.prepareComponent(name, eon.build[name].content);
+  eon.prepareComponent(name, eon.builds[name].content);
+  // If this is the last component to be declared it will trigger the renders
+  eon.registry.triggerRenders();
 
   // Removes it from eon.build so that in the next for loop we iterate less time
-  delete eon.build[name];
+  delete eon.builds[name];
 }
