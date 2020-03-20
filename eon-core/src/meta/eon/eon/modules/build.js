@@ -40,7 +40,7 @@ eon.requestBuild = function (filePath) {
         // Create the script and fill it with its content, also remove the build path from the queue and process the next
         // build thats waiting on the builds queue and resume the imports
         script.innerHTML = obj.responseText + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
-        script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.requestBuild(eon.buildsQueue[0]);}; eon.declareBuildComponents(); eon.resumeImports();";
+        script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.requestBuild(eon.buildsQueue[0]);}; eon.processBuilds(); eon.resumeImports();";
 
         document.head.appendChild(script);
 
@@ -56,16 +56,57 @@ eon.requestBuild = function (filePath) {
 }
 
 /*
+  @function processBuilds
+  @description
+  */
+ eon.processBuilds = function () {
+
+  eon.declareBuildThemes();
+  eon.declareBuildComponents();
+
+}
+
+/*
+@function declareBuildThemes
+@description Loops through the themes and appends them
+*/
+eon.declareBuildThemes = function () {
+
+  if (eon.build) {
+
+    var themes = Object.keys(eon.builds.themes);
+    var names, style;
+
+    for (var i = 0; i < themes.length; i++) {
+      
+      names = Object.keys(eon.builds.themes[themes[i]]);
+      style = document.createElement("style");
+
+      for (var j = 0; j < names.length; j++) {
+        
+        style.textContent = style.textContent + eon.builds.themes[themes[i]][names[j]];
+        document.head.appendChild(style);
+        eon.registry.registerTheme(names[j], themes[i]);
+        
+      }
+
+    }
+
+  }
+
+}
+
+/*
 @function declareBuildComponents
-@description Loops through eon.build and declares each component
+@description Loops through eon.builds components and declares them
 */
 eon.declareBuildComponents = function () {
-  
+
   eon.declaredComponents = eon.declaredComponents || {};
 
   if (eon.build) {
 
-    var names = Object.keys(eon.builds);
+    var names = Object.keys(eon.builds.components);
 
     for (var i = 0; i < names.length; i++) {
 
@@ -75,7 +116,7 @@ eon.declareBuildComponents = function () {
 
         eon.declared.build[name] = true;
 
-        var path = eon.builds[name].path;
+        var path = eon.builds.components[name].path;
 
         path = (path.indexOf(".html") > -1) ? path : path + "/" + name + ".html";
         path = path.charAt(0) === "@" ? eon.getBasePathUrl(path) : path;
@@ -111,16 +152,16 @@ eon.declareBuildComponents = function () {
 }
 
 /*
-@function declareBuildComponent
-@description Declares a single build component
-*/
-eon.declareBuildComponent = function (name) {
+  @function declareBuildComponent
+  @description Declares a single build component
+  */
+ eon.declareBuildComponent = function (name) {
 
   eon.declare(name);
-  eon.prepareComponent(name, eon.builds[name].content);
+  eon.prepareComponent(name, eon.builds.components[name].content);
   // If this is the last component to be declared it will trigger the renders
   eon.registry.triggerRenders();
 
   // Removes it from eon.build so that in the next for loop we iterate less time
-  delete eon.builds[name];
+  delete eon.builds.components[name];
 }

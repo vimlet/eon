@@ -1,6 +1,7 @@
 var fs = require("fs");
 var path = require("path");
 var util = require("util");
+var glob = require("@vimlet/commons-glob");
 var readFile = util.promisify(fs.readFile);
 
 var jsdom = require("jsdom");
@@ -16,7 +17,7 @@ module.exports = async function (base, eonPath, input, output, prefix) {
     var filePath, outputPath;
 
     if (input) {
-        
+
         // Creates the build config with the data provided by the user
         var buildConfig = {
             base: base,
@@ -28,7 +29,10 @@ module.exports = async function (base, eonPath, input, output, prefix) {
 
         filePath = base + "/" + input;
         outputPath = output ? base + "/" + output : base + "/eon-build.js";
-        build = {};
+        build = {
+            components: {},
+            themes: {}
+        };
 
         await includeFileImports(build, buildConfig, path.join(process.cwd(), filePath));
         await outputBuild(build, outputPath);
@@ -37,8 +41,11 @@ module.exports = async function (base, eonPath, input, output, prefix) {
 
         for (var i = 0; i < config.build.length; i++) {
 
-            build = {};
             outputPath = config.build[i].output ? config.build[i].base + "/" + config.build[i].output : config.build[i].base + "/eon-build.js";
+            build = {
+                components: {},
+                themes: {}
+            };
 
             if (config.build[i].input) {
 
@@ -50,13 +57,14 @@ module.exports = async function (base, eonPath, input, output, prefix) {
                 await includeImports(build, config.build[i].base, eonPath, config.build[i].base, config.build[i].imports);
 
             }
-            
+
+            await includeThemes(build, config.build[i]);
             await outputBuild(build, outputPath);
 
         }
 
     }
-    
+
 };
 
 async function readConfig(configPath) {
@@ -100,14 +108,14 @@ async function readImports(filePath) {
     if (fs.existsSync(filePath)) {
 
         fileContent = (await readFile(filePath)).toString();
-        
+
         // Removes the // comments
         fileContent = fileContent.replace(/^\s*\/\/(?:(?!(\r\n|\r|\n))[\s\S])*/gm, "");
         // Removes the /**/ comments
         fileContent = fileContent.replace(/^\s*\/\*(?:(?!\*\/)[\s\S])*\*\//gm, "");
         // Removes the <!-- --> comments
         fileContent = fileContent.replace(/^\s*\<\!--(?:(?!--\>)[\s\S])*--\>/gm, "");
-        
+
         matches = fileContent.match(/eon\.import\s*\([^\)]*\)/gs)
         matches = matches || [];
 
@@ -171,7 +179,7 @@ async function includeImports(build, basePath, eonPath, dirname, imports) {
         var htmlFile = "";
         var cssFile = "";
         var style = "";
-        
+
         if (cssFileExists) {
             cssFile = (await readFile(cssPath)).toString();
             style = "<style>" + cssFile + "</style>"
@@ -181,7 +189,7 @@ async function includeImports(build, basePath, eonPath, dirname, imports) {
 
             htmlFile = (await readFile(inputPath)).toString();
 
-            build[componentName] = {
+            build.components[componentName] = {
                 content: htmlFile + style,
                 path: entryHTML
             };
@@ -191,6 +199,59 @@ async function includeImports(build, basePath, eonPath, dirname, imports) {
         }
 
     }));
+
+}
+
+async function includeThemes(build, buildConfig) {
+
+    if (buildConfig.themes) {
+
+        var filePath, files;
+
+        for (var i = 0; i < buildConfig.themes.length; i++) {
+
+            filePath = buildConfig.base + "/" + buildConfig.location + "/" + buildConfig.themes[i];
+            filePath = filePath.replace(/\\/g, "/");
+
+            if (glob.isPattern(filePath)) {
+
+                files = await glob.files(filePath);
+
+                for (var j = 0; j < files.length; j++) {
+
+                    filePath = files[j].match;
+                    filePath = filePath.replace(/\\/g, "/");
+
+                    await includeTheme(build, filePath);
+
+                }
+
+            } else {
+
+                await includeTheme(build, filePath);
+
+            }
+
+        }
+
+    }
+
+}
+
+async function includeTheme(build, filePath) {
+
+    var themeRegex = /.*\/([^\\]+)\//;
+    var fileNameRegex = /[^\/]+$/;
+    var themeName, themeContent;
+
+    fileName = filePath.match(fileNameRegex)[0];
+    fileName = fileName.split('.')[0];
+
+    themeContent = (await readFile(filePath)).toString();
+    themeName = filePath.match(themeRegex)[1];
+    
+    build.themes[themeName] = build.themes[themeName] || {};
+    build.themes[themeName][fileName] = themeContent;
 
 }
 
@@ -219,14 +280,17 @@ async function outputBuild(build, outputPath) {
     var txt = "";
 
     txt += "var eon = eon || {};\n";
-    txt += "eon.builds = eon.builds || {};";
-    txt += "eon.builds = Object.assign(eon.builds,";
-    txt += JSON.stringify(build);
+    txt += "eon.builds = eon.builds || {components: {}, themes:{}};";
+    txt += "eon.builds.components = Object.assign(eon.builds.components,";
+    txt += JSON.stringify(build.components);
+    txt += ");";
+    txt += "eon.builds.themes = Object.assign(eon.builds.themes,";
+    txt += JSON.stringify(build.themes);
     txt += ");";
 
     fs.writeFileSync(outputPath, txt);
 
     console.log("File " + outputPath + " created, includes:");
-    console.log(Object.keys(build));
+    console.log(Object.keys(build.components), Object.keys(build.themes));
 
 }
