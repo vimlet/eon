@@ -332,22 +332,28 @@ eon.importSchemaThemes = function () {
             themeElements = eon.themeSchema[theme];
 
             // Imports the main theme file
-            eon.importMainTheme(theme);
+            if (!eon.registry.isThemeRegistered("main", theme)) {
+                eon.importMainTheme(theme);
+            }
 
             // Loops through the elements
             for (var j = 0; j < themeElements.length; j++) {
 
-                eon.registry.registerTheme(themeElements[j], theme);
-                themePath = eon.basePath + "/theme/" + theme + "/" + themeElements[j].toLowerCase() + ".css";
+                if (!eon.registry.isThemeRegistered(themeElements[j], theme)) {
 
-                themeLink = document.createElement("link");
-                themeLink.setAttribute("rel", "stylesheet");
-                themeLink.setAttribute("href", themePath);
+                    eon.registry.registerTheme(themeElements[j], theme);
+                    themePath = eon.basePath + "/theme/" + theme + "/" + themeElements[j].toLowerCase() + ".css";
 
-                // Cache
-                eon.cache.add(themePath, { name: themeElements[j].toLowerCase() });
+                    themeLink = document.createElement("link");
+                    themeLink.setAttribute("rel", "stylesheet");
+                    themeLink.setAttribute("href", themePath);
 
-                documentHead.appendChild(themeLink);
+                    // Cache
+                    eon.cache.add(themePath, { name: themeElements[j].toLowerCase() });
+
+                    documentHead.appendChild(themeLink);
+
+                }
 
             }
 
