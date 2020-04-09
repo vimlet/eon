@@ -225,6 +225,11 @@ if (!eon.polyfills.pep) {
   eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
 }
 
+// Decompress builds
+if (!eon.polyfills.decompress) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/decompress/lzjs.min.js");
+}
+
 
 
     
@@ -8590,9 +8595,10 @@ eon.requestBuild = function (filePath) {
       if (obj.xhr.status === 200) {
 
         var script = document.createElement("script");
+        var content = eon.buildDecompress ? lzjs.decompressFromBase64(obj.responseText) : obj.responseText;
         // Create the script and fill it with its content, also remove the build path from the queue and process the next
         // build thats waiting on the builds queue and resume the imports
-        script.innerHTML = obj.responseText + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
+        script.innerHTML = content + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
         script.innerHTML = script.innerHTML + "if (eon.buildsQueue[0]) {eon.requestBuild(eon.buildsQueue[0]);}; eon.processBuilds(); eon.resumeImports();";
 
         document.head.appendChild(script);

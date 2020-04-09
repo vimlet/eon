@@ -107,5 +107,10 @@ if (!eon.polyfills.pep) {
   eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/pointer-events/pep.js");
 }
 
+// Decompress builds
+if (!eon.polyfills.decompress) {
+  eon.polyfills.injectPolyfill(eon.basePath + "/polyfill/decompress/lzjs.min.js");
+}
+
 
 

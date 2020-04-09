@@ -13,6 +13,7 @@ eon.polyfills.promises = true;
 eon.polyfills.localeString = true;
 eon.polyfills.classList = true;
 eon.polyfills.pep = true;
+eon.polyfills.decompress = true;
 
 // ############################################################################################
 // POLYFILL DETECTION

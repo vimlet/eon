@@ -3,6 +3,9 @@ var path = require("path");
 var util = require("util");
 var glob = require("@vimlet/commons-glob");
 var readFile = util.promisify(fs.readFile);
+var lzjs = require('lzjs');
+var minify = require("html-minifier").minify;
+var terser = require("terser");
 
 var jsdom = require("jsdom");
 var { JSDOM } = jsdom;
@@ -50,16 +53,16 @@ module.exports = async function (base, eonPath, input, output, prefix) {
             if (config.build[i].input) {
 
                 filePath = config.build[i].base + "/" + config.build[i].input;
-                await includeFileImports(build, config.build[i], path.join(process.cwd(), filePath));
+                await includeFileImports(build, config.build[i], path.join(process.cwd(), filePath), config.buildMinify);
 
             } else if (config.build[i].imports) {
 
-                await includeImports(build, config.build[i].base, eonPath, config.build[i].base, config.build[i].imports);
+                await includeImports(build, config.build[i].base, eonPath, config.build[i].base, config.build[i].imports, config.buildMinify);
 
             }
 
-            await includeThemes(build, config.build[i]);
-            await outputBuild(build, outputPath);
+            await includeThemes(build, config.build[i], config.buildMinify);
+            await outputBuild(build, outputPath, config.buildCompress);
 
         }
 
@@ -81,7 +84,7 @@ async function readConfig(configPath) {
 
 }
 
-async function includeFileImports(build, buildConfig, filePath) {
+async function includeFileImports(build, buildConfig, filePath, buildMinify) {
     var imports = await readImports(filePath);
 
     // If there is a prefix, we loop through imports to add the prefix to each import
@@ -92,12 +95,12 @@ async function includeFileImports(build, buildConfig, filePath) {
         }
     }
 
-    await includeImports(build, buildConfig.base, buildConfig.location, path.dirname(filePath), imports);
+    await includeImports(build, buildConfig.base, buildConfig.location, path.dirname(filePath), imports, buildMinify);
 }
 
-async function includeFileDependencies(build, basePath, eonPath, filePath) {
+async function includeFileDependencies(build, basePath, eonPath, filePath, buildMinify) {
     var dependencies = await readDependencies(filePath);
-    await includeImports(build, basePath, eonPath, path.dirname(filePath), dependencies, true);
+    await includeImports(build, basePath, eonPath, path.dirname(filePath), dependencies, buildMinify);
 }
 
 async function readImports(filePath) {
@@ -166,7 +169,7 @@ async function readDependencies(filePath) {
     return config.dependencies || [];
 }
 
-async function includeImports(build, basePath, eonPath, dirname, imports) {
+async function includeImports(build, basePath, eonPath, dirname, imports, buildMinify) {
 
     await Promise.all(imports.map(async (entry) => {
 
@@ -179,6 +182,7 @@ async function includeImports(build, basePath, eonPath, dirname, imports) {
         var htmlFile = "";
         var cssFile = "";
         var style = "";
+        var content = "";
 
         if (cssFileExists) {
             cssFile = (await readFile(cssPath)).toString();
@@ -188,13 +192,31 @@ async function includeImports(build, basePath, eonPath, dirname, imports) {
         if (htmlFileExists) {
 
             htmlFile = (await readFile(inputPath)).toString();
+            content = htmlFile + style;
 
+            if (buildMinify) {
+                content = minify(content, {
+                    removeComments: true,
+                    minifyJS: function (text, inline) {
+                        var result = terser.minify(text, {});
+                        if (result.error) {
+                            return text;
+                        } else {
+                            return result.code;
+                        }
+                    },
+                    minifyCSS: true,
+                    collapseWhitespace: true,
+                    conservativeCollapse: true
+                });
+            }
+            
             build.components[componentName] = {
-                content: htmlFile + style,
+                content: content,
                 path: entryHTML
             };
 
-            await includeFileDependencies(build, basePath, eonPath, inputPath);
+            await includeFileDependencies(build, basePath, eonPath, inputPath, buildMinify);
 
         }
 
@@ -202,7 +224,7 @@ async function includeImports(build, basePath, eonPath, dirname, imports) {
 
 }
 
-async function includeThemes(build, buildConfig) {
+async function includeThemes(build, buildConfig, buildMinify) {
 
     if (buildConfig.themes) {
 
@@ -222,13 +244,13 @@ async function includeThemes(build, buildConfig) {
                     filePath = files[j].match;
                     filePath = filePath.replace(/\\/g, "/");
 
-                    await includeTheme(build, filePath);
+                    await includeTheme(build, filePath, buildMinify);
 
                 }
 
             } else {
 
-                await includeTheme(build, filePath);
+                await includeTheme(build, filePath, buildMinify);
 
             }
 
@@ -238,7 +260,7 @@ async function includeThemes(build, buildConfig) {
 
 }
 
-async function includeTheme(build, filePath) {
+async function includeTheme(build, filePath, buildMinify) {
 
     var themeRegex = /.*\/([^\\]+)\//;
     var fileNameRegex = /[^\/]+$/;
@@ -249,6 +271,23 @@ async function includeTheme(build, filePath) {
 
     themeContent = (await readFile(filePath)).toString();
     themeName = filePath.match(themeRegex)[1];
+
+    if (buildMinify) {
+        themeContent = minify(themeContent, {
+            removeComments: true,
+            minifyJS: function (text, inline) {
+                var result = terser.minify(text, {});
+                if (result.error) {
+                    return text;
+                } else {
+                    return result.code;
+                }
+            },
+            minifyCSS: true,
+            collapseWhitespace: true,
+            conservativeCollapse: true
+        });
+    }
     
     build.themes[themeName] = build.themes[themeName] || {};
     build.themes[themeName][fileName] = themeContent;
@@ -275,7 +314,7 @@ async function hasEonRoot(inputPath) {
     return inputPath.charAt(0) === "@";
 }
 
-async function outputBuild(build, outputPath) {
+async function outputBuild(build, outputPath, buildCompress) {
 
     var txt = "";
 
@@ -287,10 +326,15 @@ async function outputBuild(build, outputPath) {
     txt += "eon.builds.themes = Object.assign(eon.builds.themes,";
     txt += JSON.stringify(build.themes);
     txt += ");";
+    
+    if (buildCompress != "false" && buildCompress != false) {
+        txt = lzjs.compressToBase64(txt);
+    }
 
     fs.writeFileSync(outputPath, txt);
 
     console.log("File " + outputPath + " created, includes:");
-    console.log(Object.keys(build.components), Object.keys(build.themes));
+    console.log("Components:", Object.keys(build.components));
+    console.log("Themes:", Object.keys(build.themes));
 
 }
