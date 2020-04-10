@@ -8595,7 +8595,7 @@ eon.requestBuild = function (filePath) {
       if (obj.xhr.status === 200) {
 
         var script = document.createElement("script");
-        var content = eon.buildDecompress ? lzjs.decompressFromBase64(obj.responseText) : obj.responseText;
+        var content = eon.buildDecompress != "false" && eon.buildDecompress != false  ? lzjs.decompressFromBase64(obj.responseText) : obj.responseText;
         // Create the script and fill it with its content, also remove the build path from the queue and process the next
         // build thats waiting on the builds queue and resume the imports
         script.innerHTML = content + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
