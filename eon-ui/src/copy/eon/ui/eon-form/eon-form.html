@@ -401,7 +401,7 @@
 
       },
 
-      loopSetObject: function (obj, asInitial, rootKey) {
+      loopSetObject: function (obj, options, rootKey) {
 
         var el = this;
         var value, isArrayValue, isObjectValue, node, nodes;
@@ -423,13 +423,16 @@
 
               for (var i = 0; i < nodes.length; i++) {
 
-                if (asInitial) {
-                  nodes[i].initialValue = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
-                } else {
-                  nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                if (!(options.respectDirty && nodes[i].__dirty)) {
+                  if (options.asInitial) {
+                    nodes[i].initialValue = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                  } else {
+                    nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                  }
+
+                  nodes[i].__dirty = false;
                 }
 
-                nodes[i].__dirty = false;
               }
 
               // if its a radio group we take the radio children and loop through them
@@ -439,13 +442,16 @@
 
               for (var i = 0; i < nodes.length; i++) {
 
-                if (asInitial) {
-                  nodes[i].initialValue = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
-                } else {
-                  nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                if (!(options.respectDirty && nodes[i].__dirty)) {
+                  if (options.asInitial) {
+                    nodes[i].initialValue = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                  } else {
+                    nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                  }
+
+                  nodes[i].__dirty = false;
                 }
 
-                nodes[i].__dirty = false;
               }
 
             } else if (nodes[0].nodeName.toLowerCase() == "app-places") {
@@ -460,13 +466,15 @@
 
               for (var i = 0; i < nodes.length; i++) {
 
-                if (asInitial) {
-                  nodes[i].initialValue = value;
-                } else {
-                  nodes[i].initialValue = value;
-                }
+                if (!(options.respectDirty && nodes[i].__dirty)) {
+                  if (options.asInitial) {
+                    nodes[i].initialValue = value;
+                  } else {
+                    nodes[i].value = value;
+                  }
 
-                nodes[i].__dirty = false;
+                  nodes[i].__dirty = false;
+                }
 
               }
 
@@ -474,7 +482,7 @@
 
           } else if (isObjectValue) {
 
-            el._loopSetObject(value, asInitial, key);
+            el._loopSetObject(value, options, key);
 
           }
 
@@ -525,10 +533,10 @@
         return data;
       },
       /*
-      @function {Object} getDirtyData 
+      @function {Object} getDirty 
       @description Return form values as an object
       */
-      getDirtyData: function () {
+      getDirty: function () {
         var el = this;
         var data = {};
 
@@ -545,22 +553,46 @@
         return data;
       },
       /*
+      @function {Object} setDirty 
+      @description Sets all de element forms dirty value to the given one
+      */
+      setDirty: function (dirtyValue) {
+        var el = this;
+        // Walk form recursively
+        el._walkRecursive(el, el, function (node) {
+
+          node.__dirty = dirtyValue;
+          // If we want to reset the darta to false we also set the initialValue to the current value
+          node.initialValue = !dirtyValue ? node.value : node.initialValue;
+
+        });
+
+      },
+      /*
+      @function {Object} resetDirty 
+      @description Sets all de element forms dirty value to false
+      */
+      resetDirty: function () {
+        var el = this;
+        el.setDirty(false);
+      },
+      /*
       @function {Object} setInitialData 
-      @description Sets the provided initial data to the form elements
+      @description Sets the provided data as the initial value to the form elements
       @param {Object} data [Form data]
       */
-      setInitialData: function (data) {
+      setInitialData: function (data, respectDirty) {
         var el = this;
-        el._loopSetObject(data, true);
+        el._loopSetObject(data, { respectDirty: respectDirty, asInitial: true });
       },
       /*
       @function {Object} setData 
       @description Sets the provided data to the form elements
       @param {Object} data [Form data]
       */
-      setData: function (data) {
+      setData: function (data, respectDirty) {
         var el = this;
-        el._loopSetObject(data);
+        el._loopSetObject(data, { respectDirty: respectDirty, asInitial: false });
       },
 
       /*

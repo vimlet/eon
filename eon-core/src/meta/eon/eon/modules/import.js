@@ -120,9 +120,9 @@ eon.requestImport = function (href) {
         // Declare element
         eon.declare(elementName);
 
-        eon.ajax(href, { cacheBusting: eon.cacheBusting || eon.importCacheBusting }, function (success, obj) {
+        eon.ajax(href, { contentType: "text/plain", cacheBusting: eon.cacheBusting || eon.importCacheBusting }, function (error, obj) {
 
-            if (success) {
+            if (!error) {
 
                 // Cache
                 eon.cache.add(obj.url, { name: elementName });

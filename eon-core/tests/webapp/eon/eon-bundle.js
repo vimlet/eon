@@ -6051,9 +6051,9 @@ eon.requestImport = function (href) {
         // Declare element
         eon.declare(elementName);
 
-        eon.ajax(href, { cacheBusting: eon.cacheBusting || eon.importCacheBusting }, function (success, obj) {
+        eon.ajax(href, { contentType: "text/plain", cacheBusting: eon.cacheBusting || eon.importCacheBusting }, function (error, obj) {
 
-            if (success) {
+            if (!error) {
 
                 // Cache
                 eon.cache.add(obj.url, { name: elementName });
@@ -9843,6 +9843,7 @@ eon.ajax = function (url, options, cb) {
   options.method = options.method ? options.method.toUpperCase() : "GET";
   options.querySeparator = options.querySeparator || "?";
   options.paramSeparator = options.paramSeparator || "&";
+  options.contentType = options.contentType || "application/json";
   options.payload = options.payload || null;
   options.async = options.async || null;
   options.user = options.user || null;
@@ -9852,17 +9853,23 @@ eon.ajax = function (url, options, cb) {
   url = options.cacheBusting ? eon.getCacheBustedUrl(url) : url;
 
   var xhr = options.xhr || new XMLHttpRequest();
+
   xhr.onreadystatechange = function () {
     if (this.readyState === 4) {
-      var success = this.status >= 200 && this.status < 300;
+      var success;
+      if(options.errorOnRedirect) {
+        success = this.status >= 200 && this.status < 300;
+      } else {
+        success = this.status >= 200 && this.status < 400;
+      }
       if (cb) {
-        cb(success, {
+        cb(!success, {
           url: url,
           method: options.method,
           xhr: this,
           status: this.status,
           response: this.response,
-          responseText: this.responseText
+          responseText:  options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
         });
       }
     }
@@ -9882,10 +9889,15 @@ eon.ajax = function (url, options, cb) {
     xhr.open(options.method, url, options.async, options.user, options.password);
   } else {
     xhr.open(options.method, url);
-  }
+  }  
 
-  if (options.contentType) {
-    xhr.setRequestHeader("Content-Type", options.contentType);
+  xhr.setRequestHeader("Content-Type", options.contentType);
+  
+  if(options.contentType == "application/json") {
+    xhr.responseType = "json";
+    if(typeof options.payload == "object") {
+      options.payload = JSON.stringify(options.payload);
+    }
   }
 
   if (options.headers) {
@@ -9893,6 +9905,7 @@ eon.ajax = function (url, options, cb) {
       xhr.setRequestHeader(header, options.headers[header]);
     }
   }
+
   xhr.send(options.payload);
 };
 
@@ -9900,9 +9913,9 @@ eon.setLocale = function (url, options) {
 
   options = options ? options : {};
 
-  eon.ajax(url, options, function (success, obj) {
+  eon.ajax(url, options, function (error, obj) {
 
-    if (success) {
+    if (!error) {
 
       var jsonObj = JSON.parse(obj.responseText);
 
@@ -11244,10 +11257,10 @@ eon.importBuild = function (filePath) {
 @description Request the build
 */
 eon.requestBuild = function (filePath) {
+  
+  eon.ajax(filePath, { contentType: "text/plain" }, function (error, obj) {
 
-  eon.ajax(filePath, null, function (success, obj) {
-
-    if (success) {
+    if (!error) {
 
       eon.processedBuilds = eon.processedBuilds || [];
       eon.processedBuilds.push(filePath);

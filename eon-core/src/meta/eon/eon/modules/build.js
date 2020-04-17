@@ -26,10 +26,10 @@ eon.importBuild = function (filePath) {
 @description Request the build
 */
 eon.requestBuild = function (filePath) {
+  
+  eon.ajax(filePath, { contentType: "text/plain" }, function (error, obj) {
 
-  eon.ajax(filePath, null, function (success, obj) {
-
-    if (success) {
+    if (!error) {
 
       eon.processedBuilds = eon.processedBuilds || [];
       eon.processedBuilds.push(filePath);
