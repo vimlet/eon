@@ -424,13 +424,29 @@
               for (var i = 0; i < nodes.length; i++) {
 
                 if (!(options.respectDirty && nodes[i].__dirty)) {
-                  if (options.asInitial) {
-                    nodes[i].initialValue = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+
+                  if (value === null) {
+
+                    nodes[i].clear();
+                    nodes[i].__dirty = !options.makeDirty ? false : eon.util.isTrue(nodes[i].initialValue) != eon.util.isTrue(nodes[i].checked) ? true : false;
+
                   } else {
-                    nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+
+                    if (options.asInitial) {
+
+                      nodes[i].initialValue = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                      nodes[i].__dirty = eon.util.isTrue(nodes[i].initialValue) != eon.util.isTrue(nodes[i].checked) ? true : false;
+
+                    } else {
+
+                      nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                      nodes[i].initialValue = !options.makeDirty ? nodes[i].checked : nodes[i].initialValue;
+                      nodes[i].__dirty = !options.makeDirty ? false : eon.util.isTrue(nodes[i].initialValue) != eon.util.isTrue(nodes[i].checked) ? true : false;
+
+                    }
+
                   }
 
-                  nodes[i].__dirty = false;
                 }
 
               }
@@ -443,13 +459,29 @@
               for (var i = 0; i < nodes.length; i++) {
 
                 if (!(options.respectDirty && nodes[i].__dirty)) {
-                  if (options.asInitial) {
-                    nodes[i].initialValue = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+
+                  if (value === null) {
+
+                    nodes[i].clear();
+                    nodes[i].__dirty = !options.makeDirty ? false : eon.util.isTrue(nodes[i].initialValue) != eon.util.isTrue(nodes[i].checked) ? true : false;
+
                   } else {
-                    nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+
+                    if (options.asInitial) {
+
+                      nodes[i].initialValue = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                      nodes[i].__dirty = eon.util.isTrue(nodes[i].initialValue) != eon.util.isTrue(nodes[i].checked) ? true : false;
+
+                    } else {
+
+                      nodes[i].checked = ((isArrayValue && value.indexOf(nodes[i].value) > -1) || eon.util.isTrue(value)) ? true : false;
+                      nodes[i].initialValue = !options.makeDirty ? nodes[i].checked : nodes[i].initialValue;
+                      nodes[i].__dirty = !options.makeDirty ? false : eon.util.isTrue(nodes[i].initialValue) != eon.util.isTrue(nodes[i].checked) ? true : false;
+
+                    }
+
                   }
 
-                  nodes[i].__dirty = false;
                 }
 
               }
@@ -467,13 +499,29 @@
               for (var i = 0; i < nodes.length; i++) {
 
                 if (!(options.respectDirty && nodes[i].__dirty)) {
-                  if (options.asInitial) {
-                    nodes[i].initialValue = value;
+
+                  if (value === null) {
+
+                    nodes[i].clear();
+                    nodes[i].__dirty = !options.makeDirty ? false : nodes[i].initialValue != nodes[i].value ? true : false;
+
                   } else {
-                    nodes[i].value = value;
+
+                    if (options.asInitial) {
+
+                      nodes[i].initialValue = value;
+                      nodes[i].__dirty = nodes[i].initialValue != nodes[i].value ? true : false;
+
+                    } else {
+
+                      nodes[i].value = value;
+                      nodes[i].initialValue = !options.makeDirty ? nodes[i].value : nodes[i].initialValue;
+                      nodes[i].__dirty = !options.makeDirty ? false : nodes[i].initialValue != nodes[i].value ? true : false;
+
+                    }
+
                   }
 
-                  nodes[i].__dirty = false;
                 }
 
               }
@@ -590,9 +638,9 @@
       @description Sets the provided data to the form elements
       @param {Object} data [Form data]
       */
-      setData: function (data, respectDirty) {
+      setData: function (data, respectDirty, makeDirty) {
         var el = this;
-        el._loopSetObject(data, { respectDirty: respectDirty, asInitial: false });
+        el._loopSetObject(data, { respectDirty: respectDirty, asInitial: false, makeDirty: makeDirty });
       },
 
       /*
