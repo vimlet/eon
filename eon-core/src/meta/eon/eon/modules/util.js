@@ -226,7 +226,7 @@ eon.ajax = function (url, options, cb) {
           method: options.method,
           xhr: this,
           status: this.status,
-          response: this.response,
+          response: options.contentType == "application/json" && typeof this.response != "object" ? JSON.parse(this.response) : this.response,
           responseText:  options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
         });
       }
