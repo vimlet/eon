@@ -6606,7 +6606,7 @@ eon.time = eon.time || {};
   };
 
   eon.time.getMonthName = function (locale, month, format) {
-    var dummyDate = new Date(2000, month, 15);
+    var dummyDate = new Date(2000, parseInt(month), 15);
     format = format ? format : "long";
     return dummyDate.toLocaleString(locale, { month: format });
   };
@@ -6616,18 +6616,24 @@ eon.time = eon.time || {};
     var dummyDate;
     format = format ? format : "long";
     for (var i = 1; i <= 7; i++) {
-      dummyDate = new Date(2000, 4, i);
+      dummyDate = new Date(2000, 4, parseInt(i));
       dayNames.push(dummyDate.toLocaleString(locale, { weekday: format }));
     }
     return dayNames;
   };
 
   eon.time.getWeekDay = function (year, month, day) {
+    year = typeof year == "string" ? parseInt(year.replace(/[^\x00-\x7F]/g, "")) : year;
+    month = typeof month == "string" ? parseInt(month.replace(/[^\x00-\x7F]/g, "")) : month;
+    day = typeof day == "string" ? parseInt(day.replace(/[^\x00-\x7F]/g, "")) : day;
     return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(year, month, day).getDay()];
   };
 
   eon.time.getFirstWeekDay = function (locale, year, month, format) {
-    var dummyDate = new Date(year, month, 1);
+    var dummyDate;
+    year = typeof year == "string" ? parseInt(year.replace(/[^\x00-\x7F]/g, "")) : year;
+    month = typeof month == "string" ? parseInt(month.replace(/[^\x00-\x7F]/g, "")) : month;
+    dummyDate= new Date(year, month, 1);
     format = format ? format : "long";
     return dummyDate.toLocaleString(locale, {
       weekday: format
@@ -6636,8 +6642,14 @@ eon.time = eon.time || {};
 
   eon.time.getFirstWeekMonday = function (locale, year, month, format) {
     var monDay, monthDays;
-    var firstWeekDay = eon.time.getFirstWeekDay(locale, year, month, format);
-    var weekPosition = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].indexOf(firstWeekDay);
+    var firstWeekDay, weekPosition;
+
+    year = typeof year == "string" ? parseInt(year.replace(/[^\x00-\x7F]/g, "")) : year;
+    month = typeof month == "string" ? parseInt(month.replace(/[^\x00-\x7F]/g, "")) : month;
+
+    firstWeekDay = eon.time.getFirstWeekDay(locale, year, month, format);
+    weekPosition = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].indexOf(firstWeekDay);
+
     // Check first month reached
     if (month === 0) {
       month = 11;
@@ -6757,14 +6769,18 @@ eon.time = eon.time || {};
   };
 
   eon.time.getDateValueObjectFromDate = function (date, includeTime) {
-
+    
     var valueObj = {
-      day: parseInt(date.toLocaleString([], { day: "numeric" })),
-      month: parseInt(date.toLocaleString([], { month: "numeric" })),
-      year: parseInt(date.toLocaleString([], { year: "numeric" })),
+      day: date.toLocaleString([], { day: "numeric" }),
+      month: date.toLocaleString([], { month: "numeric" }),
+      year: date.toLocaleString([], { year: "numeric" }),
       hours: date.getHours(),
       minutes: date.getMinutes()
     }
+
+    valueObj.day = typeof valueObj.day == "string" ? parseInt(valueObj.day.replace(/[^\x00-\x7F]/g, "")) : valueObj.day;
+    valueObj.year = typeof valueObj.year == "string" ? parseInt(valueObj.year.replace(/[^\x00-\x7F]/g, "")) : valueObj.year;
+    valueObj.month = typeof valueObj.month == "string" ? parseInt(valueObj.month.replace(/[^\x00-\x7F]/g, "")) : valueObj.month;
 
     return valueObj;
 
@@ -7208,7 +7224,7 @@ eon.ajax = function (url, options, cb) {
           method: options.method,
           xhr: this,
           status: this.status,
-          response: this.response,
+          response: options.contentType == "application/json" && typeof this.response != "object" ? JSON.parse(this.response) : this.response,
           responseText:  options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
         });
       }
