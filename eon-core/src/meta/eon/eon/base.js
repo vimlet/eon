@@ -9,7 +9,7 @@ eon.pollyfillCacheBusting = "pollyfillCacheBusting" in eon ? eon.pollyfillCacheB
 eon.buildCacheBusting = "buildCacheBusting" in eon ? eon.buildCacheBusting : false;
 
 eon.getCacheBustedUrl = function (url) {
-  return url + "?ecb=" + (+ new Date);
+  return url + "?cache=" + (+ new Date);
 };
 
 eon.getCurrentScript = function() {
