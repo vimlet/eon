@@ -27,7 +27,7 @@ eon.importBuild = function (filePath) {
 */
 eon.requestBuild = function (filePath) {
   
-  eon.ajax(filePath, { contentType: "text/plain" }, function (error, obj) {
+  eon.ajax(filePath, { contentType: "text/plain", cacheBusting: eon.cacheBusting || eon.buildCacheBusting }, function (error, obj) {
 
     if (!error) {
 
