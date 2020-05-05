@@ -165,14 +165,10 @@ function handleRemoteVersions(value, noSave, cb) {
       }
     }
 
-    // Adds ignore file to the eon.json
-    var ignoreArray = ["custom"];
-    eonJsonObject.ignore = ignoreArray;
-
     // Generate eon.json if it does not exist.
     if (neweonJson && packageVersion && !noSave) {
       var neweonJsonPath = path.join(".", "eon.json");
-
+      eonJsonObject.ignore = ["custom"];
       fs.createFileSync(neweonJsonPath);
       fs.writeFileSync(neweonJsonPath, JSON.stringify(eonJsonObject, null, 2));
     }

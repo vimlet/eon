@@ -226,7 +226,7 @@ eon.ajax = function (url, options, cb) {
           method: options.method,
           xhr: this,
           status: this.status,
-          response: options.contentType == "application/json" && typeof this.response != "object" ? JSON.parse(this.response) : this.response,
+          response: options.contentType == "application/json" && this.response && typeof this.response != "object" ? JSON.parse(this.response) : this.response,
           responseText:  options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
         });
       }
@@ -253,7 +253,7 @@ eon.ajax = function (url, options, cb) {
   
   if(options.contentType == "application/json") {
     xhr.responseType = "json";
-    if(typeof options.payload == "object") {
+    if(options.payload && typeof options.payload == "object") {
       options.payload = JSON.stringify(options.payload);
     }
   }
