@@ -68,10 +68,10 @@ eon.requestBuild = function (filePath) {
 }
 
 /*
-@function declareBuildThemes
-@description Loops through the themes and appends them
-*/
-eon.declareBuildThemes = function () {
+  @function declareBuildThemes
+  @description Loops through the themes and appends them
+  */
+ eon.declareBuildThemes = function () {
 
   if (eon.build) {
 
@@ -79,16 +79,21 @@ eon.declareBuildThemes = function () {
     var names, style;
 
     for (var i = 0; i < themes.length; i++) {
-      
+
       names = Object.keys(eon.builds.themes[themes[i]]);
       style = document.createElement("style");
 
       for (var j = 0; j < names.length; j++) {
+
+        eon.registry.elementThemes[themes[i]] = eon.registry.elementThemes[themes[i]] || {};
+
+        if (!eon.registry.elementThemes[themes[i]][names[j]]) {
         
-        style.textContent = style.textContent + eon.builds.themes[themes[i]][names[j]];
-        document.head.appendChild(style);
-        eon.registry.registerTheme(names[j], themes[i]);
-        
+          style.textContent = style.textContent + eon.builds.themes[themes[i]][names[j]];
+          document.head.appendChild(style);
+          eon.registry.registerTheme(names[j], themes[i]);
+          
+        }
       }
 
     }
