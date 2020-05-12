@@ -873,8 +873,7 @@
       */
       verifyDeviceVersion: function () {
         var el = this;
-        var mobileCondition = ((document.documentElement.clientWidth <= eon.mobileWidth || document.documentElement.clientHeight <= eon.mobileWidth) && eon.util.isTouchScreen()) || navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i);
-
+        var mobileCondition = (document.documentElement.clientWidth <= eon.mobileWidth || document.documentElement.clientHeight <= eon.mobileWidth) || navigator.userAgent.match(/Tablet|Android|iPhone|iPad|iPod/i);
         el.dataset.mobile = mobileCondition ? "true" : "false";
       },
 
@@ -984,7 +983,7 @@
       */
       center: function () {
         var el = this;
-        el.style.opacity = 0;
+        // el.style.opacity = 0;
 
         if (el.multiposition == "scaled") {
           el.classList.add("eon-dialog-scaled");
@@ -992,7 +991,7 @@
 
         setTimeout(function () {
           el._assignCenterPosition();
-          el.style.opacity = 1;
+          // el.style.opacity = 1;
           el._misc.centered = true;
         }, 0);
       },
@@ -1005,9 +1004,9 @@
         var el = this;
         var centerWidth = (document.documentElement.clientWidth - el.offsetWidth) / 2;
         var centerHeight = (document.documentElement.clientHeight - el.offsetHeight) / 2;
-
-        el.style.left = centerWidth + "px";
-        el.style.top = centerHeight + "px";
+        console.log("TAMARAA", document.documentElement.clientWidth, el.offsetWidth);
+        // el.style.left = centerWidth + "px";
+        // el.style.top = centerHeight + "px";
       },
 
 
@@ -1094,7 +1093,6 @@
           } else {
             el._handleWindowEdges();
           }
-
         }
 
       },
@@ -1106,7 +1104,7 @@
       handleDialogSize: function () {
         var el = this;
         // When the dialog width is bigger than window set it a percentage width
-        if (el.offsetWidth >= (document.documentElement.clientWidth - 40) && !el._misc.sizeControl) {
+        if (el.offsetWidth >= (document.documentElement.clientWidth - 40) && !el._misc.sizeControl && !eon.util.isTrue(el.dataset.mobile)) {
           el.style.width = "calc(100% - 40px)";
           el._misc.sizeControl = true;
         }
@@ -1150,7 +1148,7 @@
           var left = parseInt(el.style.left);
           var width, height;
 
-          el.style.opacity = 0;
+          // el.style.opacity = 0;
 
           if (exceedsWindowHeight) {
             el.style.top = 0;
@@ -1172,7 +1170,7 @@
               el.style.top = document.documentElement.clientHeight - el._misc.windowPadding - height + "px";
             }
 
-            el.style.opacity = 1;
+            // el.style.opacity = 1;
           }, 0);
         }
       }
@@ -1231,7 +1229,6 @@
         var el = this;
         // ** TODO Check if the dialog is completely opened
         if (el.openRendered) {
-          // TODO:
           if (document.body.querySelectorAll(".eon-dialog-visible").length == 1) {
             document.body.classList.remove("eon-dialog-hidden");
           }
@@ -1260,7 +1257,7 @@
 
           if (el._refs.overlay && el._refs.overlay.parentNode) {
             el._refs.overlay.parentNode.removeChild(el._refs.overlay);
-            el.style.opacity = 0;
+            // el.style.opacity = 0;
           }
 
           if (el.dataset.status == "maximized") {
@@ -1331,7 +1328,7 @@
     },
 
     onWindowResize: function (e) {
-
+      console.log("onWindowResize");
       this._verifyDeviceVersion();
       this._handleWindowResize(e);
     },

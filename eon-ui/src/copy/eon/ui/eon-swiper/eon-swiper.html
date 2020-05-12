@@ -1,3 +1,6 @@
+<template>
+  <div class="eon-swiper-wrapper" eon-ref="wrapper"></div>
+</template>
 <script>
   eon.element({
 
@@ -399,6 +402,21 @@
         el.initialSlide = !el.initialSlide ? 0 : parseInt(el.initialSlide);
         // Format exclude sliders nodes property
         el.excludedSliders = el._formatArrayProperty(el.excludedSliders);
+
+        // Append slides
+        el.slides = [];
+        var fragment = document.createDocumentFragment();
+        var srcNodes = el.getSourceElements();
+        while (srcNodes.length) {
+          var current = srcNodes.shift();
+          el._append(current);
+          fragment.appendChild(current);
+        }
+        el._refs.wrapper.appendChild(fragment);
+
+        el._refs.wrapper.addEventListener("transitionend",function(e){
+          eon.triggerCallback("onTransitionEnd", el, el);
+        });
       },
       /*
         @function (private) {Number} _getNumProperty
@@ -417,17 +435,11 @@
         // }
       },
       /*
-        @function (private) _buildWrapper
+        @function (private) _build
         @description Swiper structure and slides configuration
-        @param {Object} fragment [Swiper temporal structure]
       */
-      buildWrapper: function (fragment) {
+      build: function () {
         var el = this;
-        el.slides = [];
-        // Create swiper wrapper container
-        var wrapper = document.createElement("div");
-        wrapper.classList.add("eon-swiper-wrapper");
-        el._refs.wrapper = wrapper;
         // Get axis
         if (el.direction == "horizontal") {
           el.classList.add("eon-swiper-horizontal");
@@ -438,10 +450,8 @@
           el._misc.sizeProperty = "offsetHeight";
           el._misc.styleSizeProperty = "height";
         }
-        fragment.appendChild(wrapper);
         // Get maximum slide value
         el._misc.maxTranslation = -Math.abs((el.slides.length - 1) * el._getNumProperty(el._misc.styleSizeProperty));
-
       },
       /*
         @function (private) _buildPagination
@@ -1273,7 +1283,7 @@
       },
       /*
         @function (private) _append
-        @description Use internally when a slide is appended via html api
+        @description Create slide thumbnails and update wrapper translate properties
         @param {Object} slide [Target slide element]
       */
       append: function (slide) {
@@ -1568,6 +1578,7 @@
       eon.createCallback("onPrevCalled", el);
       eon.createCallback("onNextCalled", el);
       eon.createCallback("onSwipeEnd", el);
+      eon.createCallback("onTransitionEnd", el);
       // ** Internally used
       eon.createCallback("onPagingReady", el, "ready");
       eon.createCallback("onSlidesReady", el, "ready");
@@ -1591,7 +1602,7 @@
       var fragment = document.createDocumentFragment();
       setTimeout(function() {
         // Build main swiper structure
-        el._buildWrapper(fragment);
+        el._build();
         // Build swiper pagination controller
         el._buildPagination(fragment);
         // Insert gallery navigation
