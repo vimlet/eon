@@ -2709,9 +2709,10 @@ eon.cacheBusting = "cacheBusting" in eon ? eon.cacheBusting : false;
 eon.importCacheBusting = "importCacheBusting" in eon ? eon.importCacheBusting : false;
 eon.themeCacheBusting = "themeCacheBusting" in eon ? eon.themeCacheBusting : false;
 eon.pollyfillCacheBusting = "pollyfillCacheBusting" in eon ? eon.pollyfillCacheBusting : false;
+eon.buildCacheBusting = "buildCacheBusting" in eon ? eon.buildCacheBusting : false;
 
 eon.getCacheBustedUrl = function (url) {
-  return url + "?ecb=" + (+ new Date);
+  return url + "?cache=" + (+ new Date);
 };
 
 eon.getCurrentScript = function() {
@@ -9884,7 +9885,7 @@ eon.ajax = function (url, options, cb) {
           method: options.method,
           xhr: this,
           status: this.status,
-          response: options.contentType == "application/json" && typeof this.response != "object" ? JSON.parse(this.response) : this.response,
+          response: options.contentType == "application/json" && this.response && typeof this.response != "object" ? JSON.parse(this.response) : this.response,
           responseText:  options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
         });
       }
@@ -9911,7 +9912,7 @@ eon.ajax = function (url, options, cb) {
   
   if(options.contentType == "application/json") {
     xhr.responseType = "json";
-    if(typeof options.payload == "object") {
+    if(options.payload && typeof options.payload == "object") {
       options.payload = JSON.stringify(options.payload);
     }
   }
@@ -11274,7 +11275,7 @@ eon.importBuild = function (filePath) {
 */
 eon.requestBuild = function (filePath) {
   
-  eon.ajax(filePath, { contentType: "text/plain" }, function (error, obj) {
+  eon.ajax(filePath, { contentType: "text/plain", cacheBusting: eon.cacheBusting || eon.buildCacheBusting }, function (error, obj) {
 
     if (!error) {
 
@@ -11315,10 +11316,10 @@ eon.requestBuild = function (filePath) {
 }
 
 /*
-@function declareBuildThemes
-@description Loops through the themes and appends them
-*/
-eon.declareBuildThemes = function () {
+  @function declareBuildThemes
+  @description Loops through the themes and appends them
+  */
+ eon.declareBuildThemes = function () {
 
   if (eon.build) {
 
@@ -11326,16 +11327,21 @@ eon.declareBuildThemes = function () {
     var names, style;
 
     for (var i = 0; i < themes.length; i++) {
-      
+
       names = Object.keys(eon.builds.themes[themes[i]]);
       style = document.createElement("style");
 
       for (var j = 0; j < names.length; j++) {
+
+        eon.registry.elementThemes[themes[i]] = eon.registry.elementThemes[themes[i]] || {};
+
+        if (!eon.registry.elementThemes[themes[i]][names[j]]) {
         
-        style.textContent = style.textContent + eon.builds.themes[themes[i]][names[j]];
-        document.head.appendChild(style);
-        eon.registry.registerTheme(names[j], themes[i]);
-        
+          style.textContent = style.textContent + eon.builds.themes[themes[i]][names[j]];
+          document.head.appendChild(style);
+          eon.registry.registerTheme(names[j], themes[i]);
+          
+        }
       }
 
     }
