@@ -1531,7 +1531,7 @@
                 eon.triggerCallback("onTimeSelected", el, el, []);
 
                 el._misc.cleared = false;
-                
+
                 if (el.type == "calendar") {
                   el._updateWithCurrentValues();
                 }
@@ -1676,7 +1676,7 @@
       */
       setTime: function (hours, minutes) {
         var el = this;
-        
+
         el._misc.clock = el._misc.clock || {};
 
         el._misc.clock.isPM = false;
@@ -1895,81 +1895,81 @@
       */
       validate: function () {
 
-var el = this;
+        var el = this;
 
-if (!el._misc.cleared && el.value != "") {
+        if (!el._misc.cleared && el.value != "") {
 
-  var inputs = el._refs.dateWrapper.querySelectorAll(".eon-date-subInput input");
+          var inputs = el._refs.dateWrapper.querySelectorAll(".eon-date-subInput input");
 
-  var day = inputs[el._misc.mask.order.indexOf("day")].value;
-  var month = inputs[el._misc.mask.order.indexOf("month")].value;
-  var year = inputs[el._misc.mask.order.indexOf("year")].value;
-  var hours = el._refs.subInputs.hours.value;
-  var minutes = el._refs.subInputs.minutes.value;
+          var day = inputs[el._misc.mask.order.indexOf("day")].value;
+          var month = inputs[el._misc.mask.order.indexOf("month")].value;
+          var year = inputs[el._misc.mask.order.indexOf("year")].value;
+          var hours = el._refs.subInputs.hours.value;
+          var minutes = el._refs.subInputs.minutes.value;
 
-  var validDate = false;
-  var date;
+          var validDate = false;
+          var date;
 
-  var obj = {
+          var obj = {
 
-    day: day,
-    month: month,
-    year: year,
-    hours: hours,
-    minutes: minutes
+            day: day,
+            month: month,
+            year: year,
+            hours: hours,
+            minutes: minutes
 
-  }
+          }
 
-  //If all the three fields have text typed in and their content is valid we set the boolean to true
-  if (eon.util.isTrue(el.date)) {
-    if (year != "") {
-      if (month != "" && parseInt(month) > 0 && parseInt(month) <= 12) {
-        if (day != "" && day > 0 && day <= eon.time.getDaysInMonth(year, parseInt(month) - 1)) {
-          validDate = true;
+          //If all the three fields have text typed in and their content is valid we set the boolean to true
+          if (eon.util.isTrue(el.date)) {
+            if (year != "") {
+              if (month != "" && parseInt(month) > 0 && parseInt(month) <= 12) {
+                if (day != "" && day > 0 && day <= eon.time.getDaysInMonth(year, parseInt(month) - 1)) {
+                  validDate = true;
+                }
+              }
+            }
+          }
+
+          //If all the time fields have text typed in and their content is valid we set the boolean to true
+          if (eon.util.isTrue(el.time)) {
+            if (hours != "" && parseInt(hours) >= 0 && parseInt(hours) < 24) {
+              if (minutes != "" && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
+                validDate = true;
+              }
+            }
+          }
+
+          //If its valid we remove the error classes, and update everything according to the new date
+          if (validDate) {
+
+            el.invalid = false;
+
+            el._misc.current.day = parseInt(day);
+            el._misc.current.month = parseInt(month) - 1;
+            el._misc.current.year = parseInt(year);
+            el._misc.clock.currentPMHours = parseInt(hours);
+            el._misc.clock.currentAMHours = el._getAMHours(parseInt(hours));
+            el._misc.current.currentMinutes = parseInt(minutes);
+
+            el._misc.preventUpdate = true;
+
+            el.value = eon.time.generateOutput(obj, el.valueFormat);
+            // el._refresh();
+
+
+          } else {
+
+            el.invalid = true;
+
+            el._misc.preventUpdate = true;
+            el.value = "";
+
+          }
+
         }
-      }
-    }
-  }
 
-  //If all the time fields have text typed in and their content is valid we set the boolean to true
-  if (eon.util.isTrue(el.time)) {
-    if (hours != "" && parseInt(hours) >= 0 && parseInt(hours) < 24) {
-      if (minutes != "" && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
-        validDate = true;
-      }
-    }
-  }
-
-  //If its valid we remove the error classes, and update everything according to the new date
-  if (validDate) {
-
-    el.invalid = false;
-
-    el._misc.current.day = parseInt(day);
-    el._misc.current.month = parseInt(month) - 1;
-    el._misc.current.year = parseInt(year);
-    el._misc.clock.currentPMHours = parseInt(hours);
-    el._misc.clock.currentAMHours = el._getAMHours(parseInt(hours));
-    el._misc.current.currentMinutes = parseInt(minutes);
-
-    el._misc.preventUpdate = true;
-
-    el.value = eon.time.generateOutput(obj, el.valueFormat);
-    // el._refresh();
-
-
-  } else {
-
-    el.invalid = true;
-
-    el._misc.preventUpdate = true;
-    el.value = "";
-
-  }
-
-}
-
-},
+      },
       /*
       @function (private) _initDefault
       @description If a value has been provided by the user we set it for our element
@@ -2489,7 +2489,7 @@ if (!el._misc.cleared && el.value != "") {
       @description Shows the picker and the corresponding grid
       */
       refresh: function () {
-        
+
         var el = this;
 
         if (!eon.util.isTrue(el.date) && eon.util.isTrue(el.time)) {
@@ -2693,53 +2693,58 @@ if (!el._misc.cleared && el.value != "") {
       */
       highlight: function (selected, previous) {
 
-var el = this;
+        var el = this;
 
-if (selected && selected.dataset.disabled != "true") {
+        if (selected && selected.dataset.disabled != "true") {
 
-  el._removeHighlight(previous);
+          el._removeHighlight(previous);
 
-  selected.classList.add("eon-date-current", "eon-bg2-active");
-  selected.classList.remove("eon-bg2-hoverable", "eon-fg1-hoverable");
+          selected.classList.add("eon-date-current", "eon-bg2-active");
+          selected.classList.remove("eon-bg2-hoverable", "eon-fg1-hoverable");
 
-  el._markToday();
+          el._markToday();
 
-}
+        }
 
-},
-/*
-@function (private) _removeHighlight
-@description Removes the highlight for the given button
-@param {Object} previous
-*/
-removeHighlight: function (previous) {
+      },
+      /*
+      @function (private) _removeHighlight
+      @description Removes the highlight for the given button
+      @param {Object} previous
+      */
+      removeHighlight: function (previous) {
 
-var el = this;
+        var el = this;
 
-if (previous) {
-    previous.classList.remove("eon-date-current", "eon-bg2-active");
-    previous.classList.add("eon-bg2-hoverable", "eon-fg1-hoverable");
-  }
+        if (previous) {
+          previous.classList.remove("eon-date-current", "eon-bg2-active");
+          previous.classList.add("eon-bg2-hoverable", "eon-fg1-hoverable");
+        }
 
-},
-/*
-@function (private) _markToday
-@description Marks today button
-*/
-markToday: function () {
-var el = this;
-var previousToday = el._refs.daysGrid.querySelector(".eon-date-today");
-var today = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.today.day) + '"][month="' + parseInt(el._misc.today.month) + '"][year="' + parseInt(el._misc.today.year) + '"]');
+      },
+      /*
+      @function (private) _markToday
+      @description Marks today button
+      */
+      markToday: function () {
+        var el = this;
 
-if (previousToday) {
-  previousToday.classList.remove("eon-date-today");
-}
+        if (el._refs.daysGrid) {
 
-if (today && !today.classList.contains("eon-date-current")) {
-  today.classList.add("eon-date-today");
-}
+          var previousToday = el._refs.daysGrid.querySelector(".eon-date-today");
+          var today = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.today.day) + '"][month="' + parseInt(el._misc.today.month) + '"][year="' + parseInt(el._misc.today.year) + '"]');
 
-},
+          if (previousToday) {
+            previousToday.classList.remove("eon-date-today");
+          }
+
+          if (today && !today.classList.contains("eon-date-current")) {
+            today.classList.add("eon-date-today");
+          }
+
+        }
+
+      },
       /*
       @function (private) {Object} _formatObj
       @description Receives an object with a day/year/month and returns an object with the same values with the provided format
@@ -2985,247 +2990,247 @@ if (today && !today.classList.contains("eon-date-current")) {
       */
       fillDaysGrid: function (year, month) {
 
-var el = this;
+        var el = this;
 
-var gridWeeks = el._refs.calendar.querySelector(".eon-date-grid").children;
+        var gridWeeks = el._refs.calendar.querySelector(".eon-date-grid").children;
 
-var monthDays = eon.time.getDaysInMonth(year, month);
-var monthFirstWeekDay = eon.time.getFirstWeekDay("en", year, month, "long");
+        var monthDays = eon.time.getDaysInMonth(year, month);
+        var monthFirstWeekDay = eon.time.getFirstWeekDay("en", year, month, "long");
 
-var previous = el._getPreviousByMonth(year, month);
-var next = el._getNextByMonth(year, month);
+        var previous = el._getPreviousByMonth(year, month);
+        var next = el._getNextByMonth(year, month);
 
-var previousMonthDaysToDisplay = el._getPreviousMonthDaysToDisplay(year, month);
-var nextMonthDaysToDisplay = el._getNextMonthDaysToDisplay(year, month, monthDays,
-  previousMonthDaysToDisplay);
+        var previousMonthDaysToDisplay = el._getPreviousMonthDaysToDisplay(year, month);
+        var nextMonthDaysToDisplay = el._getNextMonthDaysToDisplay(year, month, monthDays,
+          previousMonthDaysToDisplay);
 
-var week = gridWeeks[0];
+        var week = gridWeeks[0];
 
-var currentWeek = 0;
-var weekDaysCount = 0;
-var dummyDay, day, currentDay;
+        var currentWeek = 0;
+        var weekDaysCount = 0;
+        var dummyDay, day, currentDay;
 
-var areLimits = (el._misc.min.active == true || el._misc.max.active == true);
+        var areLimits = (el._misc.min.active == true || el._misc.max.active == true);
 
-if (areLimits) {
-  var isPreviousMonthMin = el._isMinMonth(previous.year, previous.month);
-  var isMinMonth = el._isMinMonth(year, month);
-  var isNextMonthMin = el._isMinMonth(next.year, next.month);
+        if (areLimits) {
+          var isPreviousMonthMin = el._isMinMonth(previous.year, previous.month);
+          var isMinMonth = el._isMinMonth(year, month);
+          var isNextMonthMin = el._isMinMonth(next.year, next.month);
 
-  var isPreviousMonthMax = el._isMaxMonth(previous.year, previous.month);
-  var isMaxMonth = el._isMaxMonth(year, month);
-  var isNextMonthMax = el._isMaxMonth(next.year, next.month);
+          var isPreviousMonthMax = el._isMaxMonth(previous.year, previous.month);
+          var isMaxMonth = el._isMaxMonth(year, month);
+          var isNextMonthMax = el._isMaxMonth(next.year, next.month);
 
-  var disableDayAsMin, disableDayAsMax;
-}
+          var disableDayAsMin, disableDayAsMax;
+        }
 
-el._misc.current.year = year;
-el._misc.current.month = month;
+        el._misc.current.year = year;
+        el._misc.current.month = month;
 
-//Create previous Month Days
-for (var i = 0; i < previousMonthDaysToDisplay.length; i++) {
-  if (el._misc.weekDays.keys[i] == monthFirstWeekDay) {
-    break;
-  } else {
+        //Create previous Month Days
+        for (var i = 0; i < previousMonthDaysToDisplay.length; i++) {
+          if (el._misc.weekDays.keys[i] == monthFirstWeekDay) {
+            break;
+          } else {
 
-    day = week.children[weekDaysCount];
+            day = week.children[weekDaysCount];
 
-    if (day) {
+            if (day) {
 
-      day.innerHTML = previousMonthDaysToDisplay[i];
-      day.classList.add("eon-date-previousMonth", "eon-fg2-disabled");
-      day.classList.remove("eon-date-current", "eon-bg2-active");
+              day.innerHTML = previousMonthDaysToDisplay[i];
+              day.classList.add("eon-date-previousMonth", "eon-fg2-disabled");
+              day.classList.remove("eon-date-current", "eon-bg2-active");
 
-      day.setAttribute("year", previous.year);
-      day.setAttribute("month", previous.month);
-      day.setAttribute("day", previousMonthDaysToDisplay[i]);
+              day.setAttribute("year", previous.year);
+              day.setAttribute("month", previous.month);
+              day.setAttribute("day", previousMonthDaysToDisplay[i]);
 
-      if (areLimits) {
+              if (areLimits) {
 
-        disableDayAsMin = (isPreviousMonthMin && previousMonthDaysToDisplay[i] < el._misc.min.day ||
-          isMinMonth || isNextMonthMin) ? true : false;
-        disableDayAsMax = (isPreviousMonthMax && previousMonthDaysToDisplay[i] > el._misc.max.day) ?
-          true : false;
+                disableDayAsMin = (isPreviousMonthMin && previousMonthDaysToDisplay[i] < el._misc.min.day ||
+                  isMinMonth || isNextMonthMin) ? true : false;
+                disableDayAsMax = (isPreviousMonthMax && previousMonthDaysToDisplay[i] > el._misc.max.day) ?
+                  true : false;
 
-        day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin ||
-          disableDayAsMax)) ? "true" : "false";
-      }
+                day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin ||
+                  disableDayAsMax)) ? "true" : "false";
+              }
 
-    }
+            }
 
-    weekDaysCount++;
-  }
-}
+            weekDaysCount++;
+          }
+        }
 
-//Create actual month days
-for (var i = 1; i <= monthDays; i++) {
+        //Create actual month days
+        for (var i = 1; i <= monthDays; i++) {
 
-  day = week.children[weekDaysCount];
+          day = week.children[weekDaysCount];
 
-  if (day) {
-    day.classList.remove("eon-date-previousMonth", "eon-fg2-disabled", "eon-date-nextMonth",
-      "eon-fg2-disabled", "eon-date-current", "eon-bg2-active");
-    day.innerHTML = i;
+          if (day) {
+            day.classList.remove("eon-date-previousMonth", "eon-fg2-disabled", "eon-date-nextMonth",
+              "eon-fg2-disabled", "eon-date-current", "eon-bg2-active");
+            day.innerHTML = i;
 
-    day.setAttribute("year", year);
-    day.setAttribute("month", parseInt(month));
-    day.setAttribute("day", i);
+            day.setAttribute("year", year);
+            day.setAttribute("month", parseInt(month));
+            day.setAttribute("day", i);
 
-    weekDaysCount++;
+            weekDaysCount++;
 
-    if (weekDaysCount == 7) {
+            if (weekDaysCount == 7) {
 
-      week = gridWeeks[currentWeek + 1];
-      weekDaysCount = 0;
+              week = gridWeeks[currentWeek + 1];
+              weekDaysCount = 0;
 
-      currentWeek++;
-    }
+              currentWeek++;
+            }
 
-    if (areLimits) {
+            if (areLimits) {
 
-      disableDayAsMin = (isMinMonth && i < el._misc.min.day || isNextMonthMin) ? true : false;
-      disableDayAsMax = (isPreviousMonthMax || isMaxMonth && i > el._misc.max.day) ? true : false;
+              disableDayAsMin = (isMinMonth && i < el._misc.min.day || isNextMonthMin) ? true : false;
+              disableDayAsMax = (isPreviousMonthMax || isMaxMonth && i > el._misc.max.day) ? true : false;
 
-      day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin ||
-        disableDayAsMax)) ? "true" : "false";
-      day.classList[day.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
-    }
+              day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin ||
+                disableDayAsMax)) ? "true" : "false";
+              day.classList[day.dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+            }
 
-  }
-}
+          }
+        }
 
-//Create next month days
-for (var i = 0; i < nextMonthDaysToDisplay.length; i++) {
+        //Create next month days
+        for (var i = 0; i < nextMonthDaysToDisplay.length; i++) {
 
-  day = week.children[weekDaysCount];
+          day = week.children[weekDaysCount];
 
-  if (day) {
+          if (day) {
 
-    day.innerHTML = nextMonthDaysToDisplay[i];
-    day.classList.add("eon-date-nextMonth", "eon-fg2-disabled");
-    day.classList.remove("eon-date-current", "eon-bg2-active");
+            day.innerHTML = nextMonthDaysToDisplay[i];
+            day.classList.add("eon-date-nextMonth", "eon-fg2-disabled");
+            day.classList.remove("eon-date-current", "eon-bg2-active");
 
-    day.setAttribute("year", next.year);
-    day.setAttribute("month", parseInt(next.month));
-    day.setAttribute("day", nextMonthDaysToDisplay[i]);
+            day.setAttribute("year", next.year);
+            day.setAttribute("month", parseInt(next.month));
+            day.setAttribute("day", nextMonthDaysToDisplay[i]);
 
-    weekDaysCount++;
+            weekDaysCount++;
 
-    if (weekDaysCount == 7) {
+            if (weekDaysCount == 7) {
 
-      week = gridWeeks[currentWeek + 1];
-      weekDaysCount = 0;
+              week = gridWeeks[currentWeek + 1];
+              weekDaysCount = 0;
 
-      currentWeek++;
-    }
+              currentWeek++;
+            }
 
-    if (areLimits) {
+            if (areLimits) {
 
-      disableDayAsMin = (isNextMonthMin && nextMonthDaysToDisplay[i] < el._misc.min.day) ? true : false;
-      disableDayAsMax = (isNextMonthMax && nextMonthDaysToDisplay[i] > el._misc.max.day || isMaxMonth ||
-        isPreviousMonthMax) ? true : false;
+              disableDayAsMin = (isNextMonthMin && nextMonthDaysToDisplay[i] < el._misc.min.day) ? true : false;
+              disableDayAsMax = (isNextMonthMax && nextMonthDaysToDisplay[i] > el._misc.max.day || isMaxMonth ||
+                isPreviousMonthMax) ? true : false;
 
-      day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin ||
-        disableDayAsMax)) ? "true" : "false";
-    }
+              day.dataset.disabled = ((disableDayAsMin && disableDayAsMax) || (disableDayAsMin ||
+                disableDayAsMax)) ? "true" : "false";
+            }
 
-  }
-}
+          }
+        }
 
-if (!el._misc.cleared && el.value != "") {
-  currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.current.day) + '"][month="' + parseInt(el._misc.current.month) + '"][year="' + parseInt(el._misc.current.year) + '"]');
-  el._highlight(currentDay);
-}
+        if (!el._misc.cleared && el.value != "") {
+          currentDay = el._refs.daysGrid.querySelector('[day="' + parseInt(el._misc.current.day) + '"][month="' + parseInt(el._misc.current.month) + '"][year="' + parseInt(el._misc.current.year) + '"]');
+          el._highlight(currentDay);
+        }
 
-// Marks today
-el._markToday();
+        // Marks today
+        el._markToday();
 
-},
-/*
-@function (private) _fillMonthsGrid
-@description When the monthsGrid is about the be showed, we handle the ones that the user can click on, and also point out the current month if needed
-*/
-fillMonthsGrid: function () {
+      },
+      /*
+      @function (private) _fillMonthsGrid
+      @description When the monthsGrid is about the be showed, we handle the ones that the user can click on, and also point out the current month if needed
+      */
+      fillMonthsGrid: function () {
 
-var el = this;
-var monthsGrid = el._refs.calendar.querySelector(".eon-date-monthsGrid");
-var months = monthsGrid.querySelectorAll('[data-index]');
-var month, disableMonthAsMin, disableMonthAsMax, currentMonthCell;
+        var el = this;
+        var monthsGrid = el._refs.calendar.querySelector(".eon-date-monthsGrid");
+        var months = monthsGrid.querySelectorAll('[data-index]');
+        var month, disableMonthAsMin, disableMonthAsMax, currentMonthCell;
 
-for (var i = 0; i < 12; i++) {
+        for (var i = 0; i < 12; i++) {
 
-  year = el._misc.current.year;
-  month = months[i].dataset.index;
+          year = el._misc.current.year;
+          month = months[i].dataset.index;
 
-  months[i].dataset.year = year;
-  months[i].classList.remove("eon-date-current");
-  months[i].classList.remove("eon-bg2-active");
+          months[i].dataset.year = year;
+          months[i].classList.remove("eon-date-current");
+          months[i].classList.remove("eon-bg2-active");
 
-  if (el._misc.current.year == el._misc.min.year || el._misc.current.year == el._misc.max.year) {
+          if (el._misc.current.year == el._misc.min.year || el._misc.current.year == el._misc.max.year) {
 
-    disableMonthAsMin = (year == el._misc.min.year && month < el._misc.min.month || year < el._misc.min
-      .year) ? true : false;
-    disableMonthAsMax = (year == el._misc.max.year && month > el._misc.max.month || year > el._misc.max
-      .year) ? true : false;
+            disableMonthAsMin = (year == el._misc.min.year && month < el._misc.min.month || year < el._misc.min
+              .year) ? true : false;
+            disableMonthAsMax = (year == el._misc.max.year && month > el._misc.max.month || year > el._misc.max
+              .year) ? true : false;
 
-    months[i].dataset.disabled = ((disableMonthAsMin || disableMonthAsMax) || (disableMonthAsMin &&
-      disableMonthAsMax)) ? "true" : "false";
+            months[i].dataset.disabled = ((disableMonthAsMin || disableMonthAsMax) || (disableMonthAsMin &&
+              disableMonthAsMax)) ? "true" : "false";
 
-  } else {
-    months[i].dataset.disabled = "false";
-  }
+          } else {
+            months[i].dataset.disabled = "false";
+          }
 
-  months[i].classList[months[i].dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
-}
+          months[i].classList[months[i].dataset.disabled == "true" ? "add" : "remove"]("eon-fg2-disabled");
+        }
 
-if (!el._misc.cleared && el.value != "") {
-  currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.current.month) +
-    '"][data-year ="' + parseInt(el._misc.current.year) + '"]');
-  el._highlight(currentMonthCell, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
-}
+        if (!el._misc.cleared && el.value != "") {
+          currentMonthCell = monthsGrid.querySelector('[data-index ="' + parseInt(el._misc.current.month) +
+            '"][data-year ="' + parseInt(el._misc.current.year) + '"]');
+          el._highlight(currentMonthCell, el.querySelector(".eon-date-monthsGrid .eon-date-current"));
+        }
 
-},
-/*
-@function (private) _fillYearsGrid
-@description Fills the grid with the year corresponding to the years range
-*/
-fillYearsGrid: function () {
+      },
+      /*
+      @function (private) _fillYearsGrid
+      @description Fills the grid with the year corresponding to the years range
+      */
+      fillYearsGrid: function () {
 
-var el = this;
-var yearsGrid = el._refs.calendar.querySelector(".eon-date-yearsGrid");
-var yearsGridRow = yearsGrid.children;
-var year = el._misc.selector.range.start;
-var row;
-var selectedYearCell;
+        var el = this;
+        var yearsGrid = el._refs.calendar.querySelector(".eon-date-yearsGrid");
+        var yearsGridRow = yearsGrid.children;
+        var year = el._misc.selector.range.start;
+        var row;
+        var selectedYearCell;
 
-for (var i = 0; i < yearsGridRow.length; i++) {
+        for (var i = 0; i < yearsGridRow.length; i++) {
 
-  row = yearsGridRow[i];
+          row = yearsGridRow[i];
 
-  for (var j = 0; j < 4; j++) {
-    row.children[j].innerHTML = year;
-    row.children[j].dataset.year = year;
-    row.children[j].classList.remove("eon-date-current");
-    row.children[j].classList.remove("eon-bg2-active");
-    row.children[j].classList.add("eon-bg2-hoverable");
+          for (var j = 0; j < 4; j++) {
+            row.children[j].innerHTML = year;
+            row.children[j].dataset.year = year;
+            row.children[j].classList.remove("eon-date-current");
+            row.children[j].classList.remove("eon-bg2-active");
+            row.children[j].classList.add("eon-bg2-hoverable");
 
-    disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
-    disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
-    row.children[j].dataset.disabled = ((disableYearAsMin || disableYearAsMax) || (disableYearAsMin &&
-      disableYearAsMax)) ? "true" : "false";
-    row.children[j].classList[row.children[j].dataset.disabled == "true" ? "add" : "remove"](
-      "eon-fg2-disabled");
+            disableYearAsMin = (parseInt(year) < el._misc.min.year) ? true : false;
+            disableYearAsMax = (parseInt(year) > el._misc.max.year) ? true : false;
+            row.children[j].dataset.disabled = ((disableYearAsMin || disableYearAsMax) || (disableYearAsMin &&
+              disableYearAsMax)) ? "true" : "false";
+            row.children[j].classList[row.children[j].dataset.disabled == "true" ? "add" : "remove"](
+              "eon-fg2-disabled");
 
-    year++;
-  }
-}
+            year++;
+          }
+        }
 
-if (!el._misc.cleared && el.value != "") {
-  selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.current.year + '"]');
-  el._highlight(selectedYearCell, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
-}
+        if (!el._misc.cleared && el.value != "") {
+          selectedYearCell = yearsGrid.querySelector('[data-year ="' + el._misc.current.year + '"]');
+          el._highlight(selectedYearCell, el.querySelector(".eon-date-yearsGrid .eon-date-current"));
+        }
 
-},
+      },
       /*
       @function (private) _selectDay
       @description Selects the day clicked and runs its default behavior if the user didn't specify a custom callback
@@ -3240,7 +3245,7 @@ if (!el._misc.cleared && el.value != "") {
           el._misc.current.day = parseInt(dayButton.getAttribute("day"));
           el._misc.current.month = parseInt(dayButton.getAttribute("month"));
           el._misc.current.year = parseInt(dayButton.getAttribute("year"));
-          
+
           el._highlight(dayButton, el._refs.calendar.querySelector(
             ".eon-date-daysGrid .eon-date-grid .eon-date-current"));
 
@@ -3346,7 +3351,7 @@ if (!el._misc.cleared && el.value != "") {
           hours: el._misc.clock.currentPMHours,
           minutes: el._misc.clock.currentMinutes
         });
-        
+
         el.value = eon.time.generateOutput(dateObj, el.valueFormat);
       },
       /*
