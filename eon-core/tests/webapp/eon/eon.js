@@ -4587,7 +4587,6 @@ eon.interpolation.bindVariable = function (el, sources, variable, config) {
 @description Takes the sources queue and loops it create listeners, define setters/getters and interpolate values
 */
 eon.interpolation.interpolate = function () {
-
   var sources, sourceTypeKeys;
   var sourceKeys, source, scope, interpolations;
 
@@ -4611,7 +4610,7 @@ eon.interpolation.interpolate = function () {
         interpolations = source.isLocale ? source.scope.__bindings.locale : source.scope.__bindings.data;
 
         eon.interpolation.setupListenerCallback(source, source.config);
-        eon.interpolation.defineProperties(source, sourceKeys[j]);
+        eon.interpolation.define(source.scope, source.scope, sourceKeys[j], "", source.scope[sourceKeys[j]], source.isLocale);
         eon.interpolation.interpolateValues(scope, source, source.obj, interpolations);
 
       }
@@ -4622,7 +4621,7 @@ eon.interpolation.interpolate = function () {
     if (sources.element.data) {
 
       eon.interpolation.setupListenerCallback(sources.element.data, source.config);
-      eon.interpolation.defineProperties(sources.element.data, "data");
+      eon.interpolation.define(sources.element.data.scope, sources.element.data.scope, "data", "", sources.element.data.scope["data"], sources.element.data.isLocale);
 
     }
 
@@ -4684,28 +4683,7 @@ eon.interpolation.bindWildVariable = function (variable) {
 };
 
 /*
-@function defineProperties
-@description Creates the descriptor for the data object itself and for all its properties
-@param {Object} source
-@param {String} sourceName
-*/
-eon.interpolation.defineProperties = function (source, sourceName) {
-
-  var scope = source.scope;
-
-  // Defines its own descriptor, in case the whole "data" object changes
-  Object.defineProperty(
-    scope,
-    sourceName,
-    eon.interpolation.createPropDescriptor(scope, scope, sourceName, "", scope[sourceName], source.isLocale)
-  );
-
-  // Loops through all the keys of the object
-  eon.interpolation.createObjectPropDescriptors(scope, scope[sourceName], sourceName, source.isLocale);
-}
-
-/*
-@function {Object} createPropDescriptor
+@function define
 @description Simple property descriptor creation that in case its changed it will trigger our internal callback
 @param {Object} scope
 @param {Object} keyOwnerObj
@@ -4713,60 +4691,51 @@ eon.interpolation.defineProperties = function (source, sourceName) {
 @param {String} keyPath
 @param {Value} value
 */
-eon.interpolation.createPropDescriptor = function (scope, keyOwnerObj, key, keyPath, value, isLocale) {
+eon.interpolation.define = function (scope, keyOwnerObj, key, keyPath, val, isLocale) {
   var propDescriptor = {};
+  var value = val && val.constructor === Object ? JSON.parse(JSON.stringify(val)) : val;
+  var newKeyPath;
 
-  // Update property value
-  keyOwnerObj["__" + key] = value;
-
-  // Redirect get and set to __key
+  // Redirect get and set
   propDescriptor.get = function () {
-    return keyOwnerObj["__" + key];
+    return value;
   };
 
-  propDescriptor.set = function (value) {
+  propDescriptor.set = function (newValue) {
     // Trigger callback
     var callbackName = isLocale ? "_onLocaleChanged" : "_onDataChanged";
-    eon.triggerCallback(callbackName, scope, scope, [keyPath + key, keyOwnerObj["__" + key], value]);
+    eon.triggerCallback(callbackName, scope, scope, [keyPath + key, value, newValue]);
 
     // Update property value
-    keyOwnerObj["__" + key] = value;
+    value = newValue;
   };
 
-  return propDescriptor;
+  Object.defineProperty(
+    keyOwnerObj,
+    key,
+    propDescriptor
+  );
+
+  if (val && val.constructor === Object) {
+    newKeyPath = keyPath + key;
+    eon.interpolation.defineObject(scope, value, newKeyPath, isLocale);
+  }
+
 }
 
 /*
-@function createObjectPropDescriptors
+@function defineObject
 @description When the property we want to observer is an object we create its descriptor and ones for its properties
 @param {Object} el
 @param {Object} obj
 @param {String} keyPath
 */
-eon.interpolation.createObjectPropDescriptors = function (el, obj, keyPath, isLocale) {
-  var value, newKeyPath;
+eon.interpolation.defineObject = function (el, obj, keyPath, isLocale) {
 
   keyPath = keyPath + ".";
 
   for (var key in obj) {
-    // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
-      value = obj[key];
-
-      obj["__" + key] = value;
-
-      Object.defineProperty(
-        obj,
-        key,
-        eon.interpolation.createPropDescriptor(el, obj, key, keyPath, value, isLocale)
-      );
-
-      // If the value is an Object then we update the keyPath and create the propDescriptors
-      if (value && value.constructor === Object) {
-        newKeyPath = keyPath + key;
-        eon.interpolation.createObjectPropDescriptors(el, value, newKeyPath, isLocale);
-      }
-    }
+    eon.interpolation.define(el, obj, key, keyPath, obj[key], isLocale);
   }
 }
 
@@ -4816,64 +4785,61 @@ eon.interpolation.interpolateValues = function (el, source, obj, interpolations,
   var newRoot, key, i, variableBind, variable;
 
   for (key in obj) {
-    // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
-      // If the property is an object the call ourselfs again to loop through our keys
-      if (obj[key] && obj[key].constructor === Object) {
+    // If the property is an object the call ourselfs again to loop through our keys
+    if (obj[key] && obj[key].constructor === Object) {
 
-        newRoot = bind ? bind + "." + key : key;
+      newRoot = bind ? bind + "." + key : key;
 
-        interpolations[key] = interpolations[key] ? interpolations[key] : {};
+      interpolations[key] = interpolations[key] ? interpolations[key] : {};
 
-        eon.interpolation.interpolateValues(el, source, obj[key], interpolations[key], newRoot);
+      eon.interpolation.interpolateValues(el, source, obj[key], interpolations[key], newRoot);
 
-      } else {
+    } else {
 
-        var attributes;
+      var attributes;
 
-        variableBind = root ? root + "." + key : key;
-        variableBind = source.isLocale ? "locale." + variableBind : variableBind;
+      variableBind = root ? root + "." + key : key;
+      variableBind = source.isLocale ? "locale." + variableBind : variableBind;
 
-        interpolations[key] = interpolations[key] ? interpolations[key] : [];
+      interpolations[key] = interpolations[key] ? interpolations[key] : [];
 
-        // If the variables are contain inside a component we add the to the interpolations array
-        if (source.component) {
-          
-          Array.prototype.push.apply(interpolations[key], source.component.template.querySelectorAll(
-            'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
-          ));
+      // If the variables are contain inside a component we add the to the interpolations array
+      if (source.component) {
 
-          variableBind = !source.isLocale && variableBind.split(".")[0] != "data" ? "data." + variableBind : variableBind;
-          attributes = source.scope.__attributeBindings[variableBind] || [];
+        Array.prototype.push.apply(interpolations[key], source.component.template.querySelectorAll(
+          'eon-variable[bind="' + variableBind + '"][global="' + source.isGlobal + '"]'
+        ));
 
-          // For each attribute found previously sets its value
-          for (var j = 0; j < attributes.length; j++) {
-            
-            hasAttribute = attributes[j].component.hasAttribute(attributes[j].attribute);
-            attributeValue = attributes[j].component.getAttribute(attributes[j].attribute);
-            hasDifferentValue = hasAttribute && attributeValue != obj[key];
+        variableBind = !source.isLocale && variableBind.split(".")[0] != "data" ? "data." + variableBind : variableBind;
+        attributes = source.scope.__attributeBindings[variableBind] || [];
 
-            if (!hasAttribute || (hasAttribute && hasDifferentValue)) {
-              attributes[j].component.setAttribute(attributes[j].attribute, obj[key]);
-            }
+        // For each attribute found previously sets its value
+        for (var j = 0; j < attributes.length; j++) {
 
-          }
+          hasAttribute = attributes[j].component.hasAttribute(attributes[j].attribute);
+          attributeValue = attributes[j].component.getAttribute(attributes[j].attribute);
+          hasDifferentValue = hasAttribute && attributeValue != obj[key];
 
-        }
-
-        // For each variable found previously sets its value
-        for (i = 0; i < interpolations[key].length; i++) {
-
-          variable = interpolations[key][i];
-
-          if (!variable.__assignedInterpolationValue) {
-            variable.textContent = obj[key];
-            variable.__assignedInterpolationValue = true;
+          if (!hasAttribute || (hasAttribute && hasDifferentValue)) {
+            attributes[j].component.setAttribute(attributes[j].attribute, obj[key]);
           }
 
         }
 
       }
+
+      // For each variable found previously sets its value
+      for (i = 0; i < interpolations[key].length; i++) {
+
+        variable = interpolations[key][i];
+
+        if (!variable.__assignedInterpolationValue) {
+          variable.textContent = obj[key];
+          variable.__assignedInterpolationValue = true;
+        }
+
+      }
+
     }
   }
 };
@@ -4900,7 +4866,7 @@ eon.interpolation.handleObjectChange = function (source, keyPath, oldData, newDa
 
   // Checks differences between the new and the old data, escaping the already checked ones
   eon.interpolation.forwardDataDiffing(source, keyPath, newData, checked, config, isLocale);
-  eon.interpolation.createObjectPropDescriptors(scope, newData, keyPath, config);
+  eon.interpolation.defineObject(scope, newData, keyPath, config);
 }
 
 // Handles the value change of the variable element and triggers onDataChanged
@@ -4951,22 +4917,18 @@ eon.interpolation.backwardDataDiffing = function (source, keyPath, oldData, newD
   var newVal;
   // Loops through the oldData
   for (var key in oldData) {
+    // If the property is an object, we enter this function again for that object
+    if (oldData[key] && oldData[key].constructor === Object) {
+      checked[key] = eon.interpolation.backwardDataDiffing(source, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config, isLocale);
+    } else {
+      // If there is no such property on the new Data we set it as an empty string
+      newVal = newData ? newData[key] : "";
 
-    // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
-      // If the property is an object, we enter this function again for that object
-      if (oldData[key] && oldData[key].constructor === Object) {
-        checked[key] = eon.interpolation.backwardDataDiffing(source, keyPath + "." + key, oldData[key], newData ? newData[key] : newData, {}, config, isLocale);
-      } else {
-        // If there is no such property on the new Data we set it as an empty string
-        newVal = newData ? newData[key] : "";
+      // Handles the variable change
+      eon.interpolation.handleVariableChange(source, keyPath + "." + key, oldData[key], newVal, config, isLocale);
 
-        // Handles the variable change
-        eon.interpolation.handleVariableChange(source, keyPath + "." + key, oldData[key], newVal, config, isLocale);
-
-        if (newData && newData.hasOwnProperty(key)) {
-          checked[key] = newData[key];
-        }
+      if (newData && newData.hasOwnProperty(key)) {
+        checked[key] = newData[key];
       }
     }
   }
@@ -4987,17 +4949,14 @@ eon.interpolation.forwardDataDiffing = function (source, keyPath, data, checked,
   var oldVal;
   // Loops through data
   for (var key in data) {
-    // We only want take into account the keys that are not used for the descriptor
-    if (key.indexOf("__") == -1) {
-      // If the property is an object, we enter this function again for that object
-      if (data[key] && data[key].constructor === Object) {
-        eon.interpolation.forwardDataDiffing(source, keyPath + "." + key, data[key], checked ? checked[key] : checked, config, isLocale);
-      } else {
-        oldVal = checked ? checked[key] : "";
-        // To only trigger variable change for properties that are not already checked/triggered
-        if ((checked && !checked.hasOwnProperty(key)) || !checked) {
-          eon.interpolation.handleVariableChange(source, keyPath + "." + key, oldVal, data[key], config, isLocale);
-        }
+    // If the property is an object, we enter this function again for that object
+    if (data[key] && data[key].constructor === Object) {
+      eon.interpolation.forwardDataDiffing(source, keyPath + "." + key, data[key], checked ? checked[key] : checked, config, isLocale);
+    } else {
+      oldVal = checked ? checked[key] : "";
+      // To only trigger variable change for properties that are not already checked/triggered
+      if ((checked && !checked.hasOwnProperty(key)) || !checked) {
+        eon.interpolation.handleVariableChange(source, keyPath + "." + key, oldVal, data[key], config, isLocale);
       }
     }
   }
@@ -5008,7 +4967,7 @@ eon.interpolation.forwardDataDiffing = function (source, keyPath, data, checked,
   @description The component stops being part of the binding
   @param {Object} el
   */
- eon.interpolation.pauseBind = function (el) {
+eon.interpolation.pauseBind = function (el) {
 
   // For component attributes
   if (el.__boundAttributes) {
@@ -5032,9 +4991,9 @@ eon.interpolation.forwardDataDiffing = function (source, keyPath, data, checked,
 
     boundInterpolations.splice(index, 1);
     eon.object.assignToPath(boundData.interpolations, boundData.variableBind, boundInterpolations);
-    
+
     el.__pausedBind = true;
-    
+
   }
 
 }
@@ -5073,7 +5032,7 @@ eon.interpolation.resumeBind = function (el) {
       boundInterpolations.push(el);
       eon.object.assignToPath(boundData.interpolations, boundData.variableBind, boundInterpolations);
     }
-    
+
     el.__pausedBind = false;
   }
 
