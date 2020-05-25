@@ -10928,7 +10928,7 @@ eon.validator.validateStringField = function (property, schema, data, errorObj) 
         var exceedsMaxLength = propertyValue.length > parseInt(propertySchema.maxLength);
 
         // MinLength
-        var hasMinLength = propertySchema.hasOwnProperty("minLength") && (parseInt(propertySchema.maxLength) > 0);
+        var hasMinLength = propertySchema.hasOwnProperty("minLength") && (parseInt(propertySchema.minLength) > 0);
         var exceedsMinLength = propertyValue.length < parseInt(propertySchema.minLength);
 
         // Pattern
