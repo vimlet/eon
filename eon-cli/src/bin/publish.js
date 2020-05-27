@@ -3,7 +3,7 @@ var path = require("path");
 var fs = require("fs-extra");
 var url = require("url");
 var rimraf = require("rimraf");
-var Sync = require("sync");
+var Sync = require("@vimlet/node-sync");
 
 var packagePath;
 

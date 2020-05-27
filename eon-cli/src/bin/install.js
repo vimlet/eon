@@ -6,7 +6,7 @@ var os = require("os");
 var fs = require("fs-extra");
 var url = require("url");
 var rimraf = require("rimraf");
-var Sync = require("sync");
+var Sync = require("@vimlet/node-sync");
 
 var gh_owner = "vimlet";
 var gh_repo = "eon";

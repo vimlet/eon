@@ -5,7 +5,7 @@ var os = require("os");
 var fs = require("fs-extra");
 var url = require("url");
 var readlineSync = require("readline-sync");
-var Sync = require("sync");
+var Sync = require("@vimlet/node-sync");
 var install = require("./install");
 
 var releaseURL = "https://github.com/vimlet/eon-examples/releases/download/eon-init/";
