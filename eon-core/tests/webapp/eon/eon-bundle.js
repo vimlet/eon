@@ -11324,10 +11324,8 @@ eon.declareBuildComponents = function () {
     for (var i = 0; i < names.length; i++) {
 
       var name = names[i];
-
+      
       if (!eon.declared.all[name] && !eon.declared.build[name]) {
-
-        eon.declared.build[name] = true;
 
         var path = eon.builds.components[name].path;
 
@@ -11349,10 +11347,9 @@ eon.declareBuildComponents = function () {
         eon.imports.paths[name] = path.substring(0, path.length - path.match(/[^\/]*$/g)[0].length);
 
         if (document.readyState === 'loading') {  // Loading hasn't finished yet
-          document.addEventListener('DOMContentLoaded', function () {
-            eon.declareBuildComponent(name);
-          });
-        } else {  // `DOMContentLoaded` has already fired
+          eon.declareOnDOMContentLoaded(name);
+        } else {  // DOMContentLoaded has already fired
+          
           eon.declareBuildComponent(name);
         }
 
@@ -11365,10 +11362,24 @@ eon.declareBuildComponents = function () {
 }
 
 /*
+  @function declareOnDOMContentLoaded
+  @description If the document is loading we delay the component declaration
+*/
+eon.declareOnDOMContentLoaded = function (name) {
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!eon.declared.all[name] && !eon.declared.build[name]) {
+      eon.declareBuildComponent(name);
+    }
+  });
+}
+
+/*
   @function declareBuildComponent
   @description Declares a single build component
   */
  eon.declareBuildComponent = function (name) {
+
+  eon.declared.build[name] = true;
 
   eon.declare(name);
   eon.prepareComponent(name, eon.builds.components[name].content);
