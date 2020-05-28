@@ -1,11 +1,11 @@
 var commons = require("@vimlet/commons");
-var btoa = require("btoa");
-var path = require("path");
-var os = require("os");
 var fs = require("fs-extra");
 var url = require("url");
+var btoa = require("btoa");
+
+var path = require("path");
+var os = require("os");
 var rimraf = require("rimraf");
-var Sync = require("sync");
 
 module.exports = function (result) {
 

@@ -1,7 +1,6 @@
 var path = require("path");
 var fs = require("fs-extra");
 var rimraf = require("rimraf");
-var Sync = require("sync");
 
 var eonJsonObject = {};
 var actualPackages = {};
@@ -11,94 +10,102 @@ var localVersionPath;
 var localCustomPath;
 var versionJsonObject = {};
 
-module.exports = function () {
+module.exports = async function () {
   eonJsonObject = {};
   actualPackages = {};
+  await prune();
+};
 
-  Sync(function () {
+function prune() {
+  return new Promise(async (resolve, reject) => {
     try {
       // Reads eon.jason
-      readeonJson.sync(null);
+      await readeonJson();
       // Reads version.json
-      readLocalVersions.sync(null);
+      await readLocalVersions();
       // Deletes unnecessary packages     
       deletePackages();
+
+      resolve();
 
     } catch (error) {
       console.error("\x1b[91m", "\nError: " + error);
       console.error("\x1b[0m"); // Reset color + newLine
     }
   });
-};
-
-function readeonJson(cb) {
-  // Reads the eon.json to search the required versions
-  if (fs.existsSync("eon.json")) {
-    try {
-      eonJsonObject = JSON.parse(fs.readFileSync("eon.json").toString());
-    } catch (error) {
-      cb("Unexpected syntax while reading eon.json\n\n" + error);
-    }
-
-    // If the project does not have eon.json
-    // looks for a field "eon" in the package.json
-  } else if (fs.existsSync("package.json")) {
-    try {
-      var packageJsonObject = JSON.parse(fs.readFileSync("package.json").toString());
-
-      if (packageJsonObject.eon) {
-        eonJsonObject = packageJsonObject.eon;
-      }
-
-    } catch (error) {
-      cb("Unexpected syntax while reading package.json\n\n" + error);
-    }
-  }
-
-  cb();
 }
 
-function readLocalVersions(cb) {
-  localPath = eonJsonObject.path ? eonJsonObject.path : "eon";
-  localVersionPath = path.join(localPath, "version.json");
-  localCustomPath = path.join(localPath, "custom");
-
-  var foundPackages = {
-    dependencies: {}
-  };
-
-  // In case of core and ui look for the file version.json inside the eon directory
-  if (fs.existsSync(localVersionPath)) {
-    try {
-      versionJsonObject = JSON.parse(fs.readFileSync(localVersionPath).toString());
-      foundPackages.core = versionJsonObject.core;
-      foundPackages.ui = versionJsonObject.ui;
-    } catch (error) {
-      cb("Unexpected syntax while reading version.json\n\n" + error);
-    }
-  }
-
-  var currentCustomPath;
-  var currentCustomJsonObject;
-
-  // In case of custom packages, look for the file version.json within the specific directory of each custom component
-  if (fs.existsSync(localCustomPath)) {
-    fs.readdirSync(localCustomPath).forEach(function (file) {
-      currentCustomPath = path.join(localCustomPath, file, "custom.json");
-      if (fs.existsSync(currentCustomPath)) {
-        try {
-          currentCustomJsonObject = JSON.parse(fs.readFileSync(currentCustomPath).toString());
-          foundPackages.dependencies[file] = currentCustomJsonObject.version;
-        } catch (error) {
-          cb("Unexpected syntax while reading custom.json\n\n" + error);
-        }
+function readeonJson() {
+  return new Promise((resolve, reject) => {
+    // Reads the eon.json to search the required versions
+    if (fs.existsSync("eon.json")) {
+      try {
+        eonJsonObject = JSON.parse(fs.readFileSync("eon.json").toString());
+      } catch (error) {
+        reject("Unexpected syntax while reading eon.json\n\n" + error);
       }
-    });
-  }
 
-  actualPackages = foundPackages;
-  cb();
+      // If the project does not have eon.json
+      // looks for a field "eon" in the package.json
+    } else if (fs.existsSync("package.json")) {
+      try {
+        var packageJsonObject = JSON.parse(fs.readFileSync("package.json").toString());
 
+        if (packageJsonObject.eon) {
+          eonJsonObject = packageJsonObject.eon;
+        }
+
+      } catch (error) {
+        reject("Unexpected syntax while reading package.json\n\n" + error);
+      }
+    }
+
+    resolve();
+  });
+}
+
+function readLocalVersions() {
+  return new Promise((resolve, reject) => {
+    localPath = eonJsonObject.path ? eonJsonObject.path : "eon";
+    localVersionPath = path.join(localPath, "version.json");
+    localCustomPath = path.join(localPath, "custom");
+
+    var foundPackages = {
+      dependencies: {}
+    };
+
+    // In case of core and ui look for the file version.json inside the eon directory
+    if (fs.existsSync(localVersionPath)) {
+      try {
+        versionJsonObject = JSON.parse(fs.readFileSync(localVersionPath).toString());
+        foundPackages.core = versionJsonObject.core;
+        foundPackages.ui = versionJsonObject.ui;
+      } catch (error) {
+        reject("Unexpected syntax while reading version.json\n\n" + error);
+      }
+    }
+
+    var currentCustomPath;
+    var currentCustomJsonObject;
+
+    // In case of custom packages, look for the file version.json within the specific directory of each custom component
+    if (fs.existsSync(localCustomPath)) {
+      fs.readdirSync(localCustomPath).forEach(function (file) {
+        currentCustomPath = path.join(localCustomPath, file, "custom.json");
+        if (fs.existsSync(currentCustomPath)) {
+          try {
+            currentCustomJsonObject = JSON.parse(fs.readFileSync(currentCustomPath).toString());
+            foundPackages.dependencies[file] = currentCustomJsonObject.version;
+          } catch (error) {
+            reject("Unexpected syntax while reading custom.json\n\n" + error);
+          }
+        }
+      });
+    }
+
+    actualPackages = foundPackages;
+    resolve();
+  });
 }
 
 function deletePackages() {

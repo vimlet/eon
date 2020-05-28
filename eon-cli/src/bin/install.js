@@ -6,7 +6,6 @@ var os = require("os");
 var fs = require("fs-extra");
 var url = require("url");
 var rimraf = require("rimraf");
-var Sync = require("sync");
 
 var gh_owner = "vimlet";
 var gh_repo = "eon";
@@ -25,36 +24,41 @@ var localVersionPath;
 var localCustomPath;
 var versionJsonObject = {};
 
-module.exports = function (result, cb) {
-  // PATCH: This timeout fixes eon.json read error after template download and extract
-  setTimeout(function () {
-    eonJsonObject = {};
-    actualPackages = {};
-    singlePackageMode = false;
-    var noSave = result["no-save"];
-    localPath = result.path;
-
-    Sync(function () {
-      try {
-        // supportGitCredentials();
-        handleRemoteVersions.sync(null, result.install, noSave);
-        // Find installed packages
-        handleLocalVersions.sync(null);
-        // Install or update wanted packages        
-        installPackages.sync(null);
-        if (cb) {
-          cb(null, true);
-        }
-      } catch (error) {
-        console.error("\x1b[91m", "\nError: " + error);
-        console.error("\x1b[0m"); // Reset color + newLine
-        if (cb) {
-          cb(error);
-        }
-      }
-    });
-  }, 0);
+module.exports = async function (result) {
+  await install(result);
 };
+
+function install (result) {
+  return new Promise(async (resolve, reject) => {
+    // PATCH: This timeout fixes eon.json read error after template download and extract
+    setTimeout(async function () {
+      eonJsonObject = {};
+      actualPackages = {};
+      singlePackageMode = false;
+      var noSave = result["no-save"];
+      localPath = result.path;
+  
+        try {
+          // supportGitCredentials();
+          await handleRemoteVersions(result.install, noSave);
+          // Find installed packages
+          await handleLocalVersions();
+          // Install or update wanted packages        
+          await installPackages();
+
+          resolve();
+
+        } catch (error) {
+          console.error("\x1b[91m", "\nError: " + error);
+          console.error("\x1b[0m"); // Reset color + newLine
+
+          reject(error);
+
+        }
+    }, 0);
+
+  });
+}
 
 function supportGitCredentials() {
   // Support credentials from .git/config    
@@ -73,21 +77,23 @@ function supportGitCredentials() {
 }
 
 // Finds the required version of the packages
-function handleRemoteVersions(value, noSave, cb) {
-  Sync(function () {
-
+function handleRemoteVersions(value, noSave) {
+  return new Promise(async (resolve, reject) => {
     // Reads the eon.json to search the required versions
     if (fs.existsSync("eon.json")) {
+
       try {
         eonJsonObject = JSON.parse(fs.readFileSync("eon.json").toString());
       } catch (error) {
-        cb("Unexpected syntax while reading eon.json\n\n" + error);
+        reject("Unexpected syntax while reading eon.json\n\n" + error);
       }
 
       // If the project does not have eon.json
       // looks for a field "eon" in the package.json
     } else if (fs.existsSync("package.json")) {
+
       try {
+
         var packageJsonObject = JSON.parse(fs.readFileSync("package.json").toString());
 
         // When existing package.json but not exists eon field will create the eon.json
@@ -98,7 +104,7 @@ function handleRemoteVersions(value, noSave, cb) {
         }
 
       } catch (error) {
-        cb("Unexpected syntax while reading package.json\n\n" + error);
+        reject("Unexpected syntax while reading package.json\n\n" + error);
       }
 
     } else {
@@ -117,14 +123,15 @@ function handleRemoteVersions(value, noSave, cb) {
     // General installation            
     if (value === true || value === "true") {
       try {
-        var packageVersion = getLatestEonRelease.sync(null);
+        
+        var packageVersion = await getLatestEonRelease();
 
         if (!eonJsonObject.eon || eonJsonObject.eon === "latest") {
           eonJsonObject.eon = packageVersion;
         }
 
       } catch (error) {
-        cb(error);
+        reject(error);
       }
     } else {
       // Get name and version from value package@version
@@ -137,10 +144,10 @@ function handleRemoteVersions(value, noSave, cb) {
         try {
 
           if (valueArray.length === 2) {
-            checkPackageExists.sync(null, packageName, valueArray[1]);
+            await checkPackageExists(packageName, valueArray[1]);
             packageVersion = valueArray[1];
           } else {
-            packageVersion = getLatestEonRelease.sync(null);
+            packageVersion = await getLatestEonRelease();
           }
 
           eonJsonObject[packageName] = packageVersion;
@@ -149,7 +156,7 @@ function handleRemoteVersions(value, noSave, cb) {
           }
 
         } catch (error) {
-          cb(error);
+          reject(error);
         }
 
       } else {
@@ -174,22 +181,24 @@ function handleRemoteVersions(value, noSave, cb) {
     }
 
     // Call callback
-    cb();
+    resolve();
+    
   });
 
 }
 
 // Check if the required version exists
-function checkPackageExists(name, version, cb) {
+function checkPackageExists(name, version) {
+  return new Promise(async (resolve, reject) => {
   var url = "https://api.github.com/repos/" + gh_owner + "/" + gh_repo + "/releases/tags/" + version;
 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
     if (this.readyState === 4) {
       if (this.status === 200) {
-        cb(null);
+        resolve();
       } else {
-        cb('Version "' + version + '" not valid');
+        reject('Version "' + version + '" not valid');
       }
     }
   };
@@ -197,32 +206,35 @@ function checkPackageExists(name, version, cb) {
   xhttp.open("GET", url, true);
   xhttp.setRequestHeader("User-Agent", "vimlet");
   xhttp.send();
+});
 }
 
 
 // Search on GitHub the latest version of the required package
-function getLatestEonRelease(cb) {
-  var url = "https://api.github.com/repos/" + gh_owner + "/" + gh_repo + "/releases/latest";
+function getLatestEonRelease() {
+  return new Promise(async (resolve, reject) => {
+    var url = "https://api.github.com/repos/" + gh_owner + "/" + gh_repo + "/releases/latest";
 
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function () {
-    if (this.readyState === 4) {
-      if (this.status === 200) {
-        var responseObject = JSON.parse(xhttp.responseText);
-        cb(null, responseObject.tag_name);
-      } else {
-        cb("Request status " + this.status);
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+      if (this.readyState === 4) {
+        if (this.status === 200) {
+          var responseObject = JSON.parse(xhttp.responseText);
+          resolve(responseObject.tag_name);
+        } else {
+          reject("Request status " + this.status);
+        }
       }
-    }
-  };
-
-  xhttp.open("GET", url, true);
-  xhttp.setRequestHeader("User-Agent", "vimlet");
-  //TODO:
-  // if(gh_credentials) {
-  //     xhttp.setRequestHeader("Authorization", "Basic " + btoa(gh_credentials));  
-  // }
-  xhttp.send();
+    };
+  
+    xhttp.open("GET", url, true);
+    xhttp.setRequestHeader("User-Agent", "vimlet");
+    //TODO:
+    // if(gh_credentials) {
+    //     xhttp.setRequestHeader("Authorization", "Basic " + btoa(gh_credentials));  
+    // }
+    xhttp.send();
+  });
 }
 
 function getLatestDependencyRelease(packageName) {
@@ -230,8 +242,8 @@ function getLatestDependencyRelease(packageName) {
 }
 
 // Finds the current version of the packages
-function handleLocalVersions(cb) {
-
+function handleLocalVersions() {
+  return new Promise(async (resolve, reject) => {
   var foundPackages = {
     dependencies: {}
   };
@@ -242,7 +254,7 @@ function handleLocalVersions(cb) {
       versionJsonObject = JSON.parse(fs.readFileSync(localVersionPath).toString());
       foundPackages.eon = versionJsonObject.eon;
     } catch (error) {
-      cb("Unexpected syntax while reading version.json\n\n" + error);
+      reject("Unexpected syntax while reading version.json\n\n" + error);
     }
   }
 
@@ -258,22 +270,23 @@ function handleLocalVersions(cb) {
           currentCustomJsonObject = JSON.parse(fs.readFileSync(currentCustomPath).toString());
           foundPackages.dependencies[file] = currentCustomJsonObject.version;
         } catch (error) {
-          cb("Unexpected syntax while reading custom.json\n\n" + error);
+          reject("Unexpected syntax while reading custom.json\n\n" + error);
         }
       }
     });
   }
 
   actualPackages = foundPackages;
-  cb();
+  resolve();
+});
 }
 
 
 
 // Install required packages
-function installPackages(cb) {
-
-  Sync(function () {
+function installPackages() {
+  return new Promise(async (resolve, reject) => {
+  // Sync(function () {
 
     // Update current eon.json 
     // TODO: Update dependencies too
@@ -320,17 +333,17 @@ function installPackages(cb) {
       cleanLocal("eon");
 
       try {
-        var url = getGitHubDownloadURL.sync(null, eonCoreFileName, eonJsonObject.eon);
-        downloadAndExtract.sync(null, url, localPath, eonJsonObject.eon);
+        var url = await getGitHubDownloadURL(eonCoreFileName, eonJsonObject.eon);
+        await downloadAndExtract(url, localPath, eonJsonObject.eon);
       } catch (error) {
-        cb(error);
+        reject(error);
       }
 
       try {
-        var url = getGitHubDownloadURL.sync(null, eonUIFileName, eonJsonObject.eon);
-        downloadAndExtract.sync(null, url, localPath, eonJsonObject.eon);
+        var url = await getGitHubDownloadURL(eonUIFileName, eonJsonObject.eon);
+        await downloadAndExtract(url, localPath, eonJsonObject.eon);
       } catch (error) {
-        cb(error);
+        reject(error);
       }
 
       updateeonVersion("eon", eonJsonObject.eon);
@@ -339,9 +352,8 @@ function installPackages(cb) {
     if (isSinglePackageDependency) {
       // Clean old if exist and install
       cleanLocal(singlePackageName);
-      //TODO: coming soon
       console.log("coming soon!");
-      // downloadAndExtract(packageUrl, path.join(localCustomPath, singlePackageName), eonJsonObject.dependencies[singlePackageName]);
+      // await downloadAndExtract(packageUrl, path.join(localCustomPath, singlePackageName), eonJsonObject.dependencies[singlePackageName]);
     }
 
     if (isMultiplePackageDependency) {
@@ -351,13 +363,14 @@ function installPackages(cb) {
           // Clean old if exist and install
           cleanLocal(dependencyKey);
           console.log("coming soon!");
-          // downloadAndExtract(packageUrl, path.join(localCustomPath, dependencyKey), eonJsonObject.dependencies[dependencyKey]);
+          // await downloadAndExtract(packageUrl, path.join(localCustomPath, dependencyKey), eonJsonObject.dependencies[dependencyKey]);
         }
       });
     }
 
     // Call callback
-    cb();
+    resolve();
+
   });
 
 }
@@ -375,8 +388,9 @@ function formatSummaryMessage(package, actual, required) {
 }
 
 // Searches on GitHub the url to download the required version file
-function getGitHubDownloadURL(name, version, cb) {
-  var url = "https://api.github.com/repos/" + gh_owner + "/" + gh_repo + "/releases/tags/" + version;
+function getGitHubDownloadURL(name, version, ) {
+  return new Promise ((resolve, reject) => {
+    var url = "https://api.github.com/repos/" + gh_owner + "/" + gh_repo + "/releases/tags/" + version;
 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
@@ -387,12 +401,12 @@ function getGitHubDownloadURL(name, version, cb) {
         for (var i = 0; i < responseObject.assets.length; i++) {
           asset = responseObject.assets[i];
           if (asset.name.toLowerCase() == name.toLowerCase()) {
-            cb(null, asset.browser_download_url);
+            resolve(asset.browser_download_url);
             break;
           }
         }
       } else {
-        cb("Request status " + this.status);
+        reject("Request status " + this.status);
       }
     }
   };
@@ -404,6 +418,7 @@ function getGitHubDownloadURL(name, version, cb) {
   //     xhttp.setRequestHeader("Authorization", "Basic " + btoa(gh_credentials));  
   // }
   xhttp.send();
+  });
 }
 
 // Remove the current file 
@@ -442,8 +457,9 @@ function cleanLocal(name) {
 }
 
 // Download and extract required packages
-function downloadAndExtract(file_url, extractPath, version, cb) {
-  // Create local eon storage path
+function downloadAndExtract(file_url, extractPath, version) {
+  return new Promise ((resolve, reject) => {
+    // Create local eon storage path
   var downloadPath = path.join(os.homedir(), ".eon", "eon-" + version);
   var fileName = path.basename(url.parse(file_url).pathname);
 
@@ -463,20 +479,28 @@ function downloadAndExtract(file_url, extractPath, version, cb) {
       if (!error) {
         // Extract
         commons.compress.unpack(dest, extractPath, {}, function (error) {
-          cb(error);
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
         });
       } else {
-        cb(error);
+        reject(error);
       }
     });
 
   } else {
     // Extract
     commons.compress.unpack(dest, extractPath, {}, function (error) {
-      cb(error);
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
     });
   }
-
+  });
 }
 
 // Updates core and ui version of the version.json file
