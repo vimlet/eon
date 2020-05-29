@@ -35,7 +35,7 @@ function init() {
                 await install({
                     install: true
                 });
-                console.log("WHAT");
+                
                 console.log("\x1b[96m", "\nTo start the server, type \"npm start\"");
                 console.log("\x1b[0m"); // Reset color + newLine
 
