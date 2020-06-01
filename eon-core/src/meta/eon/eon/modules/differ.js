@@ -97,7 +97,7 @@ eon.differ.compareArray = function (arr1, arr2, options) {
   for (var i = 0; i < arr1.length; i++) {
 
     if (options.arrayOrder) {
-        if (!arr2[i] || Object.keys(differ.compare(arr2[i],arr1[i])).length > 0) {
+      if (!arr2[i] || Object.keys(differ.compare(arr2[i], arr1[i])).length > 0) {
         return false;
       }
     } else {
@@ -109,7 +109,7 @@ eon.differ.compareArray = function (arr1, arr2, options) {
         arr2.splice(index2, 1);
       }
     }
-    
+
   }
 
   if (!options.arrayOrder && arr2.length > 0) {
@@ -118,3 +118,43 @@ eon.differ.compareArray = function (arr1, arr2, options) {
 
   return true;
 }
+
+// State creation
+eon.createState = function (data) {
+  var state = {};
+  var stateOptions = data.options || {};
+
+  // Public function to be called by the user
+  state.sync = function () {
+    // Gets the remote data
+    data.getRemote(function (remoteError, remoteData) {
+      // If there is no error in getting the remote data..
+      if (!remoteError) {
+        state.__remote = remoteData;
+
+        // Get the local data
+        data.getLocal(function (localError, localData) {
+          // If there is no error in getting the local data..
+          if (!localError) {
+            state.__local = localData;
+
+            // If the user provided a handleDiff function we called it sending the corresponding diff data
+            if (data.handleDiff) {
+              var diff = eon.differ.getDiff(state.__local, state.__remote, stateOptions.diffing);
+              data.handleDiff(diff);
+            }
+
+            // If the user provided a handleMutations function we called it sending the corresponding mutations
+            if (data.handleMutations) {
+              var mutations = eon.differ.getMutations(state.__local, state.__remote, stateOptions.diffing);
+              data.handleMutations(mutations.created, mutations.updated, mutations.deleted);
+            }
+
+          }
+        });
+      }
+    });
+  };
+
+  return state;
+};
