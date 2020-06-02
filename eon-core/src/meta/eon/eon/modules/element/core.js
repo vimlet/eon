@@ -746,7 +746,7 @@ eon.transform = function (el, config) {
         eon.appendElementTemplate(el);
 
         // Registers the main theme of this theme if its not yet registered
-        eon.importMainTheme(theme);
+        eon.importMainTheme(theme, config);
 
         // If the element has not yet registered its theme it will proceed on importing it
         eon.importElementTheme(config, name, theme);

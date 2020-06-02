@@ -7,7 +7,7 @@ eon.domReady(function () {
     eon.element({
 
         name: "eon-variable",
-
+        embedded: true,
         display: "inline-block",
 
         properties: {

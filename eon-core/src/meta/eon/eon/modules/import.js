@@ -368,29 +368,41 @@ eon.importSchemaThemes = function () {
 @description Imports the main css file of the specified theme
 @param {String} theme
 */
-eon.importMainTheme = function (theme) {
+eon.importMainTheme = function (theme, config) {
 
-    if (theme && !eon.registry.isThemeRegistered("main", theme)) {
-
+    function importMainTheme (theme) {
+  
+      if (theme && !eon.registry.isThemeRegistered("main", theme)) {
+  
         var documentHead = document.querySelector("head");
         var mainLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/main.css";
-
+  
         themePath = eon.cacheBusting || eon.themeBoostedCache ? eon.getCacheBustedUrl(themePath) : themePath;
-
+  
         eon.registry.registerTheme("main", theme);
-
+  
         mainLink.setAttribute("rel", "stylesheet");
         mainLink.setAttribute("href", themePath);
-
+  
         // Cache
         eon.cache.add(themePath);
-
+  
         documentHead.appendChild(mainLink);
-
+  
     }
-
-};
+  
+    }
+  
+    if (config && config.embedded) {
+      eon.onReady(function () {
+        importMainTheme(theme);
+      })
+    } else {
+      importMainTheme(theme);
+    }
+  
+  };
 
 /*
 @function importElementTheme

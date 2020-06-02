@@ -7,6 +7,7 @@ eon.domReady(function () {
   eon.element({
 
     name: "eon-placeholder",
+    embedded: true,
 
     properties: {
       /*
