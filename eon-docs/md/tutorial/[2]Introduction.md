@@ -118,6 +118,16 @@ Although the import function can be called multiple times its recommend to use t
 </script>
 ```
 
+There is a `@` shortcut to the eon path available to use, which might be usefull for projects with a more complex structure
+
+```[html]
+<script>
+  eon.import([
+    "@ui/eon-button"
+    ]);
+</script>
+```
+
 [Usage]<>
 
 Eon imported components can be used **declaratively** using HTML tags or **programmatically** creating and appending elements to the DOM with javascript.

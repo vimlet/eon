@@ -195,6 +195,125 @@ store.delete(id).result(function (error, data) {
 
 Eon uses a specific strategy to handle the components data. The Eon components are not aware of the data source, they get their data from its own instance of the `eon.store` data type. Meanwhile, the store receives its data updates from an `eon-endpoint` instance operation. This approach allows components to access data in the same way, regardless of the endpoint technology being used.
 
+[Diffing and Mutations]<>
+
+When trying compare two different objects, one might find out that the process might be a bit tedious, thats why in Eon provides many ways to approach this issue:
+
+- Get one object that is the result of the differences between the two objects:
+```[javascript]
+var obj1 = {
+  lastName: "Smith",
+  age: 20,
+  height: "1,70"
+};
+
+var obj2 = {
+  name: "John",
+  lastName: "Doe"
+};
+
+var diff = eon.differ.getDiff(obj1, obj2);
+
+// Diff object returned, the name property was added and the lastName has been updated
+//{
+//  lastName: "Doe",
+//  name: "John"
+// }
+```
+
+- Get a mutations object with the created, updated and deleted properties
+```[javascript]
+var obj1 = {
+  lastName: "Smith",
+  age: 20,
+  height: "1,70"
+};
+
+var obj2 = {
+  name: "John",
+  lastName: "Doe"
+};
+
+eon.differ.getMutations(obj1, obj2);
+
+// Mutations object returned
+//{
+//  created: {name: "John"}
+//  deleted: {age: null, height: null}
+//  updated: {lastName: "Doe"}
+//}
+
+```
+
+There is also an optional third parameter available for any of the functions mentioned to have some specific options regarding what to take into consideration when comparing
+```[javascript]
+// Whether a change in the order of an arrays items should be considered a change or not
+var options = {
+  arrayOrder: true
+}
+
+eon.differ.getDiff(obj1, obj2, options);
+eon.differ.getMutations(obj1, obj2, options);
+```
+
+[State]<>
+State makes use of the advantages of diffing and mutations to provide an useful tool, which can be used to both specify the data source and how to handle whether the diffing or the mutations data.
+```[javascript]
+// You can use it to handle the diffs or the mutations between both sources of information
+var state = eon.createState({
+  getLocal: function (cb) {
+    cb(null, myData);
+  },
+  getRemote: function (cb) {
+    eon.ajax("/rest/form", {
+      method: "GET",
+    }, function (error, data) {
+      cb(error, data.response);
+    });
+  },
+  // Diff
+  // handleDiff: function (data) {
+  //   handleDiff(data);
+  // },
+  // Mutations
+  handleMutations: function (created, updated, deleted) {
+    if (created) {
+      handleCreated(created); 
+    }
+
+    if (updated) {
+      handleUpdated(created);
+    }
+
+    if (deleted) {
+      handleDeleted(deleted);          
+    }
+  },
+});
+
+state.sync();
+```
+Everytime you call the sync function it will compare the two sources and call the corresponding functions.
+
+[Ajax]<>
+Eon ajax is based on `XMLHttpRequest` , it keeps its options and funcionality with slight improvements to create a more consistent way of making request to your server
+
+```[javascript]
+// Call passing a few of the many options available
+    eon.ajax(url, {
+      method: "GET",
+      querySeparator:"?",
+      paramSeparator: "&",
+      contentType: "application/json",
+      payload: {id: 1}
+    }, function (error, obj) {
+      if (!error) {
+        // Since the default contentType is "application/json" the response will automatically be a JSON object while responseText will return plain text
+        handleJsonObjectResponse(obj.response);
+      }
+    });
+```
+
 
 
 
