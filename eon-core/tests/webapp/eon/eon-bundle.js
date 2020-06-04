@@ -6300,29 +6300,41 @@ eon.importSchemaThemes = function () {
 @description Imports the main css file of the specified theme
 @param {String} theme
 */
-eon.importMainTheme = function (theme) {
+eon.importMainTheme = function (theme, config) {
 
-    if (theme && !eon.registry.isThemeRegistered("main", theme)) {
-
+    function importMainTheme (theme) {
+  
+      if (theme && !eon.registry.isThemeRegistered("main", theme)) {
+  
         var documentHead = document.querySelector("head");
         var mainLink = document.createElement("link");
         var themePath = eon.basePath + "/theme/" + theme + "/main.css";
-
+  
         themePath = eon.cacheBusting || eon.themeBoostedCache ? eon.getCacheBustedUrl(themePath) : themePath;
-
+  
         eon.registry.registerTheme("main", theme);
-
+  
         mainLink.setAttribute("rel", "stylesheet");
         mainLink.setAttribute("href", themePath);
-
+  
         // Cache
         eon.cache.add(themePath);
-
+  
         documentHead.appendChild(mainLink);
-
+  
     }
-
-};
+  
+    }
+  
+    if (config && config.embedded) {
+      eon.onReady(function () {
+        importMainTheme(theme);
+      })
+    } else {
+      importMainTheme(theme);
+    }
+  
+  };
 
 /*
 @function importElementTheme
@@ -8564,7 +8576,7 @@ eon.transform = function (el, config) {
         eon.appendElementTemplate(el);
 
         // Registers the main theme of this theme if its not yet registered
-        eon.importMainTheme(theme);
+        eon.importMainTheme(theme, config);
 
         // If the element has not yet registered its theme it will proceed on importing it
         eon.importElementTheme(config, name, theme);
@@ -11130,7 +11142,7 @@ eon.domReady(function () {
     eon.element({
 
         name: "eon-variable",
-
+        embedded: true,
         display: "inline-block",
 
         properties: {
@@ -11169,6 +11181,7 @@ eon.domReady(function () {
   eon.element({
 
     name: "eon-placeholder",
+    embedded: true,
 
     properties: {
       /*
@@ -11392,22 +11405,57 @@ eon.declareOnDOMContentLoaded = function (name) {
 
 eon.differ = eon.differ || {};
 
+/*
+@function getDiff
+@description Returns the diff between the two objects
+@param {Object} obj1
+@param {Object} obj2
+@param {Object} options
+*/
 eon.differ.getDiff = function (obj1, obj2, options) {
   return eon.differ.compare(obj1, obj2, options);
 }
 
+/*
+@function getCreated
+@description Returns the createdmutations
+@param {Object} obj1
+@param {Object} obj2
+@param {Object} options
+*/
 eon.differ.getCreated = function (obj1, obj2, options) {
   return eon.differ.compare(obj1, obj2, options, "created");
 };
 
+/*
+@function getUpdated
+@description Returns the updated
+@param {Object} obj1
+@param {Object} obj2
+@param {Object} options
+*/
 eon.differ.getUpdated = function (obj1, obj2, options) {
   return eon.differ.compare(obj1, obj2, options, "updated");
 };
 
+/*
+@function getDeleted
+@description Returns the deleted mutations
+@param {Object} obj1
+@param {Object} obj2
+@param {Object} options
+*/
 eon.differ.getDeleted = function (obj1, obj2, options) {
   return eon.differ.compare(obj1, obj2, options, "deleted");
 };
 
+/*
+@function getMutations
+@description Returns the created, updated and deleted mutations
+@param {Object} obj1
+@param {Object} obj2
+@param {Object} options
+*/
 eon.differ.getMutations = function (obj1, obj2, options) {
   var mutations = {
     created: eon.differ.getCreated(obj1, obj2, options),
@@ -11417,7 +11465,14 @@ eon.differ.getMutations = function (obj1, obj2, options) {
   return mutations;
 }
 
-// Loops through the two objects to compare them
+/*
+@function compare
+@description Loops through the two objects to compare them
+@param {Object} obj1
+@param {Object} obj2
+@param {Object} options
+@param {String} type
+*/
 eon.differ.compare = function (obj1, obj2, options, type) {
   var diffs = {};
 
@@ -11445,16 +11500,26 @@ eon.differ.compare = function (obj1, obj2, options, type) {
   return diffs;
 }
 
-// Compares values
+// 
+/*
+@function compareEntry
+@description Compares values
+@param {Object} item1
+@param {Object} item2
+@param {String} key
+@param {Object} diffs
+@param {Object} options
+@param {String} type
+*/
 eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
   var type1 = Object.prototype.toString.call(item1);
   var type2 = Object.prototype.toString.call(item2);
   var differentType = (type1 !== type2);
-  var differentArrays = type1 === '[object Array]' && !eon.differ.compareArray(item1, item2, options);
+  var differentArrays = type1 === '[object Array]' && !eon.differ.compareArray(item1, item2, options, type);
   var different = type1 != '[object Function]' && item1 !== item2;
   var isUndefined = type2 === '[object Undefined]';
 
-  if (!type || type == "deleted") {
+  if (type == "deleted") {
     if (isUndefined) {
       diffs[key] = null;
       return;
@@ -11478,38 +11543,93 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
 
 }
 
-// Compares Array, it can accept an option for the arrayOrder, in case it matters
-eon.differ.compareArray = function (arr1, arr2, options) {
-  options.arrayOrder = "arrayOrder" in options ? options.arrayOrder : true;
-
+/*
+@function compareArray
+@description Compares Array, it can accept an option for the arrayOrder, in case it matters
+@param {Object} arr1
+@param {Object} arr2
+@param {Object} options
+*/
+function compareArray(arr1, arr2, options, type) {
   if (arr1.length !== arr2.length) {
     return false;
   }
-
   for (var i = 0; i < arr1.length; i++) {
-
-    if (options.arrayOrder) {
-        if (!arr2[i] || Object.keys(differ.compare(arr2[i],arr1[i])).length > 0) {
+    if (typeof arr1[i] === 'object' && !Array.isArray(arr1[i])) {
+      if (typeof arr2[i] === 'object' && !Array.isArray(arr2[i])) {
+        var tDiff = differ.compare(arr1[i], arr2[i], options, type);
+        if (Object.keys(tDiff).length > 0) {
+          return false;
+        }
+      } else {
         return false;
       }
     } else {
-      var element = arr1[i];
-      var index2 = arr2.indexOf(element);
-      if (index2 < 0) {
-        return false;
+      if (options.arrayOrder) {
+
+        if (!arr2[i] || arr2[i] != arr1[i]) {
+          return false;
+        }
       } else {
-        arr2.splice(index2, 1);
+        var element = arr1[i];
+        var index2 = arr2.indexOf(element);
+        if (index2 < 0) {
+          return false;
+        } else {
+          arr2.splice(index2, 1);
+        }
       }
     }
-    
+    if (!options.arrayOrder && arr2.length > 0) {
+      return false;
+    }
   }
-
-  if (!options.arrayOrder && arr2.length > 0) {
-    return false;
-  }
-
   return true;
 }
+
+/*
+@function createState
+@description Returns a state object
+@param {Object} data
+*/
+eon.createState = function (data) {
+  var state = {};
+  var stateOptions = data.options || {};
+
+  // Public function to be called by the user
+  state.sync = function () {
+    // Gets the remote data
+    data.getRemote(function (remoteError, remoteData) {
+      // If there is no error in getting the remote data..
+      if (!remoteError) {
+        state.__remote = remoteData;
+
+        // Get the local data
+        data.getLocal(function (localError, localData) {
+          // If there is no error in getting the local data..
+          if (!localError) {
+            state.__local = localData;
+
+            // If the user provided a handleDiff function we called it sending the corresponding diff data
+            if (data.handleDiff) {
+              var diff = eon.differ.getDiff(state.__local, state.__remote, stateOptions.diffing);
+              data.handleDiff(diff);
+            }
+
+            // If the user provided a handleMutations function we called it sending the corresponding mutations
+            if (data.handleMutations) {
+              var mutations = eon.differ.getMutations(state.__local, state.__remote, stateOptions.diffing);
+              data.handleMutations(mutations.created, mutations.updated, mutations.deleted);
+            }
+
+          }
+        });
+      }
+    });
+  };
+
+  return state;
+};
 
   
     // ############################################################################################

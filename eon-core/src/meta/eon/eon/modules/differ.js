@@ -110,7 +110,7 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
   var type1 = Object.prototype.toString.call(item1);
   var type2 = Object.prototype.toString.call(item2);
   var differentType = (type1 !== type2);
-  var differentArrays = type1 === '[object Array]' && !eon.differ.compareArray(item1, item2, options);
+  var differentArrays = type1 === '[object Array]' && !eon.differ.compareArray(item1, item2, options, type);
   var different = type1 != '[object Function]' && item1 !== item2;
   var isUndefined = type2 === '[object Undefined]';
 
@@ -145,35 +145,40 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
 @param {Object} arr2
 @param {Object} options
 */
-eon.differ.compareArray = function (arr1, arr2, options) {
-  options.arrayOrder = "arrayOrder" in options ? options.arrayOrder : true;
-
+function compareArray(arr1, arr2, options, type) {
   if (arr1.length !== arr2.length) {
     return false;
   }
-
   for (var i = 0; i < arr1.length; i++) {
-
-    if (options.arrayOrder) {
-      if (!arr2[i] || Object.keys(differ.compare(arr2[i], arr1[i])).length > 0) {
+    if (typeof arr1[i] === 'object' && !Array.isArray(arr1[i])) {
+      if (typeof arr2[i] === 'object' && !Array.isArray(arr2[i])) {
+        var tDiff = differ.compare(arr1[i], arr2[i], options, type);
+        if (Object.keys(tDiff).length > 0) {
+          return false;
+        }
+      } else {
         return false;
       }
     } else {
-      var element = arr1[i];
-      var index2 = arr2.indexOf(element);
-      if (index2 < 0) {
-        return false;
+      if (options.arrayOrder) {
+
+        if (!arr2[i] || arr2[i] != arr1[i]) {
+          return false;
+        }
       } else {
-        arr2.splice(index2, 1);
+        var element = arr1[i];
+        var index2 = arr2.indexOf(element);
+        if (index2 < 0) {
+          return false;
+        } else {
+          arr2.splice(index2, 1);
+        }
       }
     }
-
+    if (!options.arrayOrder && arr2.length > 0) {
+      return false;
+    }
   }
-
-  if (!options.arrayOrder && arr2.length > 0) {
-    return false;
-  }
-
   return true;
 }
 
