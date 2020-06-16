@@ -110,8 +110,8 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
   var type1 = Object.prototype.toString.call(item1);
   var type2 = Object.prototype.toString.call(item2);
   var differentType = (type1 !== type2);
-  var differentArrays = type1 === '[object Array]' && !eon.differ.compareArray(item1, item2, options, type);
-  var different = type1 != '[object Function]' && item1 !== item2;
+  var differentArrays = type1 === '[object Array]' && eon.differ.areDifferentArrays(item1, item2, options);
+  var different = type1 != '[object Function]' && type1 != '[object Object]' && type1 != '[object Array]' && item1 !== item2;
   var isUndefined = type2 === '[object Undefined]';
 
   if (type == "deleted") {
@@ -145,41 +145,46 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
 @param {Object} arr2
 @param {Object} options
 */
-function compareArray(arr1, arr2, options, type) {
+eon.differ.areDifferentArrays = function(arr1, arr2, options, type) {
   if (arr1.length !== arr2.length) {
-    return false;
+    return true;
   }
+
   for (var i = 0; i < arr1.length; i++) {
     if (typeof arr1[i] === 'object' && !Array.isArray(arr1[i])) {
       if (typeof arr2[i] === 'object' && !Array.isArray(arr2[i])) {
-        var tDiff = differ.compare(arr1[i], arr2[i], options, type);
+        var tDiff = eon.differ.compare(arr1[i], arr2[i], options, type);
         if (Object.keys(tDiff).length > 0) {
-          return false;
+          return true;
         }
       } else {
-        return false;
+        return true;
       }
     } else {
       if (options.arrayOrder) {
 
         if (!arr2[i] || arr2[i] != arr1[i]) {
-          return false;
+          return true;
         }
       } else {
         var element = arr1[i];
         var index2 = arr2.indexOf(element);
+        
         if (index2 < 0) {
-          return false;
+          return true;
         } else {
           arr2.splice(index2, 1);
         }
       }
     }
-    if (!options.arrayOrder && arr2.length > 0) {
-      return false;
+    
+    if (options.arrayOrder && arr2.length > 0) {
+      return true;
     }
+
   }
-  return true;
+  
+  return false;
 }
 
 /*

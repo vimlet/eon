@@ -8890,14 +8890,14 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
 @param {Object} arr2
 @param {Object} options
 */
-function compareArray(arr1, arr2, options, type) {
+eon.differ.compareArray = function(arr1, arr2, options, type) {
   if (arr1.length !== arr2.length) {
     return false;
   }
   for (var i = 0; i < arr1.length; i++) {
     if (typeof arr1[i] === 'object' && !Array.isArray(arr1[i])) {
       if (typeof arr2[i] === 'object' && !Array.isArray(arr2[i])) {
-        var tDiff = differ.compare(arr1[i], arr2[i], options, type);
+        var tDiff = eon.differ.compare(arr1[i], arr2[i], options, type);
         if (Object.keys(tDiff).length > 0) {
           return false;
         }

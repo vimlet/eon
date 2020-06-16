@@ -150,11 +150,11 @@ eon.util.getBrowserScrollBarWidth = function () {
     outer.classList.add("eonScrollWidthChecker");
 
     // Rules for the scroll width
-    if (!eon.scrollWidthCheckerRule && eon.util.getBrowser() != "IE" && eon.util.getBrowser() != "Edge") {
-      eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar { visibility: hidden; }", 0);
-      eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar-corner { visibility: hidden; }", 0);
-      eon.scrollWidthCheckerRule = true;
-    }
+    // if (!eon.scrollWidthCheckerRule && eon.util.getBrowser() != "IE" && eon.util.getBrowser() != "Edge") {
+    //   eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar { visibility: hidden; }", 0);
+    //   eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar-corner { visibility: hidden; }", 0);
+    //   eon.scrollWidthCheckerRule = true;
+    // }
 
     document.body.appendChild(outer);
 

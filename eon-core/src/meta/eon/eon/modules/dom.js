@@ -161,7 +161,7 @@ document.$1 = document.$1 || eon.$1;
   });
 
   // Register global focus
-  eon.domReady(function () {
+  eon.declareOnDOMContentLoaded = function () {
     document.body.addEventListener(
       "focus",
       function (e) {
