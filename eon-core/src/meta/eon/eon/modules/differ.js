@@ -139,7 +139,7 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
 }
 
 /*
-@function compareArray
+@function areDifferentArrays
 @description Compares Array, it can accept an option for the arrayOrder, in case it matters
 @param {Object} arr1
 @param {Object} arr2
