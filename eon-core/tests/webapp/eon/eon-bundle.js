@@ -5757,7 +5757,7 @@ document.$1 = document.$1 || eon.$1;
   });
 
   // Register global focus
-  eon.domReady(function () {
+  eon.declareOnDOMContentLoaded = function () {
     document.body.addEventListener(
       "focus",
       function (e) {
@@ -9779,13 +9779,6 @@ eon.util.getBrowserScrollBarWidth = function () {
     outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
     outer.classList.add("eonScrollWidthChecker");
 
-    // Rules for the scroll width
-    if (!eon.scrollWidthCheckerRule && eon.util.getBrowser() != "IE" && eon.util.getBrowser() != "Edge") {
-      eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar { visibility: hidden; }", 0);
-      eon.style.sheet.insertRule(".eonScrollWidthChecker::-webkit-scrollbar-corner { visibility: hidden; }", 0);
-      eon.scrollWidthCheckerRule = true;
-    }
-
     document.body.appendChild(outer);
 
     var widthNoScroll = outer.getBoundingClientRect().width;
@@ -10055,55 +10048,6 @@ eon.cache.add = function (request, options, cb) {
       }
     }
   }
-};
-
-eon.history = eon.history || {};
-
-eon.history.location = {};
-
-eon.history.location.origin = window.location.origin;
-eon.history.location.href = window.location.href;
-eon.history.location.state = window.location.hash || window.location.pathname.split("/")[1];
-eon.history.location.params = eon.util.queryToObject(window.location.href);
-eon.history.current = window.location.pathname.substring(1);
-eon.history.states = {};
-eon.history.cancelNavigation = false;
-
-eon.history.push = function (obj, url, title) {
-  if (!eon.history.cancelNavigation) {
-    history.pushState(obj, url, title);
-    eon.history.getURLInformation();
-    eon.history.states[eon.history.current] = url;
-  }
-};
-eon.history.replace = function (obj, url, title) {
-  if (!eon.history.cancelNavigation) {
-    history.replaceState(obj, url, title);
-    delete eon.history.states[eon.history.current];
-    eon.history.getURLInformation();
-    eon.history.states[eon.history.current] = url;
-  }
-};
-
-// Create on URL hash changed callback
-eon.createCallback("onHashChanged", eon.history);
-
-// Wrap window on pop state event
-window.onpopstate = function () {
-  eon.history.getURLInformation();
-  eon.triggerCallback("onHashChanged", eon.history, eon.history, [eon.history]);
-};
-
-/*
-  @function getURLInformation
-  @description Save window location object information
-*/
-eon.history.getURLInformation = function () {
-  eon.history.location.origin = window.location.origin;
-  eon.history.location.state = window.location.history || window.location.pathname.substring(1);
-  eon.history.location.params = eon.util.queryToObject(window.location.href);
-  eon.history.current = window.location.hash ? window.location.pathname.substring(1) + window.location.hash
-    : window.location.pathname.substring(1);
 };
 
 eon.store = function () {
@@ -11515,8 +11459,8 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
   var type1 = Object.prototype.toString.call(item1);
   var type2 = Object.prototype.toString.call(item2);
   var differentType = (type1 !== type2);
-  var differentArrays = type1 === '[object Array]' && !eon.differ.compareArray(item1, item2, options, type);
-  var different = type1 != '[object Function]' && item1 !== item2;
+  var differentArrays = type1 === '[object Array]' && eon.differ.areDifferentArrays(item1, item2, options);
+  var different = type1 != '[object Function]' && type1 != '[object Object]' && type1 != '[object Array]' && item1 !== item2;
   var isUndefined = type2 === '[object Undefined]';
 
   if (type == "deleted") {
@@ -11544,47 +11488,52 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
 }
 
 /*
-@function compareArray
+@function areDifferentArrays
 @description Compares Array, it can accept an option for the arrayOrder, in case it matters
 @param {Object} arr1
 @param {Object} arr2
 @param {Object} options
 */
-eon.differ.compareArray = function(arr1, arr2, options, type) {
+eon.differ.areDifferentArrays = function(arr1, arr2, options, type) {
   if (arr1.length !== arr2.length) {
-    return false;
+    return true;
   }
+
   for (var i = 0; i < arr1.length; i++) {
     if (typeof arr1[i] === 'object' && !Array.isArray(arr1[i])) {
       if (typeof arr2[i] === 'object' && !Array.isArray(arr2[i])) {
         var tDiff = eon.differ.compare(arr1[i], arr2[i], options, type);
         if (Object.keys(tDiff).length > 0) {
-          return false;
+          return true;
         }
       } else {
-        return false;
+        return true;
       }
     } else {
       if (options.arrayOrder) {
 
         if (!arr2[i] || arr2[i] != arr1[i]) {
-          return false;
+          return true;
         }
       } else {
         var element = arr1[i];
         var index2 = arr2.indexOf(element);
+        
         if (index2 < 0) {
-          return false;
+          return true;
         } else {
           arr2.splice(index2, 1);
         }
       }
     }
-    if (!options.arrayOrder && arr2.length > 0) {
-      return false;
+    
+    if (options.arrayOrder && arr2.length > 0) {
+      return true;
     }
+
   }
-  return true;
+  
+  return false;
 }
 
 /*
