@@ -292,8 +292,10 @@ function installPackages() {
     // TODO: Update dependencies too
     if (fs.existsSync("eon.json")) {
       var eonJsonFileObject = JSON.parse(fs.readFileSync("eon.json").toString());
-      eonJsonFileObject.eon = eonJsonObject.eon;
-      fs.writeFileSync("eon.json", JSON.stringify(eonJsonFileObject, null, 2));
+      if (eonJsonFileObject.eon != "latest" && eonJsonFileObject.eon != eonJsonObject.eon) {
+        eonJsonFileObject.eon = eonJsonObject.eon;
+        fs.writeFileSync("eon.json", JSON.stringify(eonJsonFileObject, null, 2));
+      }
     }
 
     var summaryMessage = "";
