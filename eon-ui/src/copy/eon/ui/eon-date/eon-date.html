@@ -53,7 +53,7 @@
 
     <div class="eon-date-picker-label" eon-ref="pickerLabel"></div>
 
-    <div class="eon-date-header">
+    <div class="eon-date-header" eon-ref="pickerHeader">
       <div class="eon-date-leftNavigation">
         <div class="eon-date-previous eon-unselectable eon-fg1-hoverable">
           <i class="vicon vicon-chevron-left"></i>
@@ -113,7 +113,7 @@
 
     </div>
 
-    <div class="eon-date-footer">
+    <div class="eon-date-footer" eon-ref="pickerFooter">
 
       <div class="eon-date-footerButton eon-fg1-hoverable" eon-ref="clearButton">
         CLEAR
@@ -757,7 +757,7 @@
 
         el._misc.downTrigger = "click";
         el._misc.heightRatio = 0.703703;
-        el._misc.headerFotterHeight = 50;
+        // el._misc.headerFotterHeight = 50;
 
       },
       /*
@@ -1782,7 +1782,7 @@
           width = width > el.pickerMaxWidth ? el.pickerMaxWidth : width;
           width = width < el.pickerMinWidth ? el.pickerMinWidth : width;
           height = width * el._misc.heightRatio;
-          pickerTotalHeight = height + ((el._misc.headerFotterHeight) * 2);
+          pickerTotalHeight = height + el._refs.pickerLabel.offsetHeight + el._refs.pickerHeader.offsetHeight  + el._refs.pickerFooter.offsetHeight;
 
           el._refs.overlay.classList.remove("eon-date-device");
           el._refs.overlay.classList.remove("eon-bg1-modal");
@@ -1817,11 +1817,10 @@
 
         var el = this;
 
-        el._assignCalendarStyle(origin);
         el._assignFocusStyle();
-        
+
         if (needsRefresh) {
-          el._updateValue();
+          el._refresh();
         }
 
         el._validate();
@@ -1833,7 +1832,7 @@
 
         el._misc.modal.active = true;
 
-        el._animateExpand();
+        el._animateExpand(origin);
 
         eon.triggerCallback("onOpened", el, el, []);
 
@@ -1842,13 +1841,17 @@
       @function (private) _animateExpand
       @description Expands the items dropdown with transition
       */
-      animateExpand: function () {
+      animateExpand: function (origin) {
 
         var el = this;
 
         setTimeout(function () {
+
           el._refs.overlay.removeEventListener("transitionend", el._misc.calendarShrinkFn);
           el._refs.overlay.classList.add("eon-date-opaque");
+
+          el._assignCalendarStyle(origin);
+          
         }, 0);
 
       },
@@ -2537,7 +2540,6 @@
 
         }
 
-
       },
       /*
       @function (private) _getYearButton
@@ -2695,7 +2697,7 @@
       highlight: function (selected, previous) {
 
         var el = this;
-        
+
         if (selected && selected.dataset.disabled != "true") {
 
           el._removeHighlight(previous);
