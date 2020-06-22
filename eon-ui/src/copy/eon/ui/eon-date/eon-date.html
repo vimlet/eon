@@ -188,10 +188,18 @@
       },
       /*
         @property {String} initialValue
-        @description Value of the element when the element to be compared against the value to set the component as dirty
+        @description Value of the element to be compared against the value to set the component as dirty
       */
       initialValue: {
         value: "",
+        reflect: true
+      },
+      /*
+        @property {String} autoInit
+        @description Whether the element will be assigned  today value when its empty or not
+      */
+      autoInit: {
+        value: "true",
         reflect: true
       },
       /*
@@ -1782,7 +1790,7 @@
           width = width > el.pickerMaxWidth ? el.pickerMaxWidth : width;
           width = width < el.pickerMinWidth ? el.pickerMinWidth : width;
           height = width * el._misc.heightRatio;
-          pickerTotalHeight = height + el._refs.pickerLabel.offsetHeight + el._refs.pickerHeader.offsetHeight  + el._refs.pickerFooter.offsetHeight;
+          pickerTotalHeight = height + el._refs.pickerLabel.offsetHeight + el._refs.pickerHeader.offsetHeight + el._refs.pickerFooter.offsetHeight;
 
           el._refs.overlay.classList.remove("eon-date-device");
           el._refs.overlay.classList.remove("eon-bg1-modal");
@@ -1851,7 +1859,7 @@
           el._refs.overlay.classList.add("eon-date-opaque");
 
           el._assignCalendarStyle(origin);
-          
+
         }, 0);
 
       },
@@ -1989,32 +1997,34 @@
         var el = this;
         var dateObj;
 
-        el.value = el.initialValue != "" ? el.initialValue : el.value;
-        dateObj = el.value == "" ? eon.time.getDateValueObjectFromDate(new Date(), el.time) : eon.time
-          .getDateValueObjectFromString(el.value, el.valueFormat, el.time);
+        if (eon.util.isTrue(el.autoInit)) {
+          el.value = el.initialValue != "" ? el.initialValue : el.value;
+          dateObj = el.value == "" ? eon.time.getDateValueObjectFromDate(new Date(), el.time) : eon.time
+            .getDateValueObjectFromString(el.value, el.valueFormat, el.time);
 
-        if (el._exceedsMinDate(dateObj)) {
+          if (el._exceedsMinDate(dateObj)) {
 
-          dateObj.minutes = el._misc.min.minutes;
-          dateObj.hours = el._misc.min.hours;
-          dateObj.day = el._misc.min.day;
-          dateObj.month = el._misc.min.month;
-          dateObj.year = el._misc.min.year;
+            dateObj.minutes = el._misc.min.minutes;
+            dateObj.hours = el._misc.min.hours;
+            dateObj.day = el._misc.min.day;
+            dateObj.month = el._misc.min.month;
+            dateObj.year = el._misc.min.year;
 
-        } else if (el._exceedsMaxDate(dateObj)) {
+          } else if (el._exceedsMaxDate(dateObj)) {
 
-          dateObj.minutes = el._misc.max.minutes;
-          dateObj.hours = el._misc.max.hours;
-          dateObj.day = el._misc.max.day;
-          dateObj.month = el._misc.max.month;
-          dateObj.year = el._misc.max.year;
+            dateObj.minutes = el._misc.max.minutes;
+            dateObj.hours = el._misc.max.hours;
+            dateObj.day = el._misc.max.day;
+            dateObj.month = el._misc.max.month;
+            dateObj.year = el._misc.max.year;
 
+          }
+
+          dateObj = el._formatObj(dateObj);
+
+          el.value = eon.time.generateOutput(dateObj, el.valueFormat);
+          el.initialValue = el.value;
         }
-
-        dateObj = el._formatObj(dateObj);
-
-        el.value = eon.time.generateOutput(dateObj, el.valueFormat);
-        el.initialValue = el.value;
 
         el._refresh();
         el._updateValue();

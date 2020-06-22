@@ -178,7 +178,7 @@ eon.differ.areDifferentArrays = function(arr1, arr2, options, type) {
       }
     }
     
-    if (options.arrayOrder && arr2.length > 0) {
+    if (!options.arrayOrder && arr2.length > 0) {
       return true;
     }
 
@@ -212,13 +212,13 @@ eon.createState = function (data) {
 
             // If the user provided a handleDiff function we called it sending the corresponding diff data
             if (data.handleDiff) {
-              var diff = eon.differ.getDiff(state.__local, state.__remote, stateOptions.diffing);
+              var diff = eon.differ.getDiff(state.__local, state.__remote, stateOptions);
               data.handleDiff(diff);
             }
 
             // If the user provided a handleMutations function we called it sending the corresponding mutations
             if (data.handleMutations) {
-              var mutations = eon.differ.getMutations(state.__local, state.__remote, stateOptions.diffing);
+              var mutations = eon.differ.getMutations(state.__local, state.__remote, stateOptions);
               data.handleMutations(mutations.created, mutations.updated, mutations.deleted);
             }
 
