@@ -3097,7 +3097,7 @@ document.$1 = document.$1 || eon.$1;
   });
 
   // Register global focus
-  eon.declareOnDOMContentLoaded = function () {
+  document.addEventListener('DOMContentLoaded', function () {
     document.body.addEventListener(
       "focus",
       function (e) {
@@ -7178,7 +7178,7 @@ eon.ajax = function (url, options, cb) {
   xhr.onreadystatechange = function () {
     if (this.readyState === 4) {
       var success;
-      if(options.errorOnRedirect) {
+      if (options.errorOnRedirect) {
         success = this.status >= 200 && this.status < 300;
       } else {
         success = this.status >= 200 && this.status < 400;
@@ -7190,7 +7190,7 @@ eon.ajax = function (url, options, cb) {
           xhr: this,
           status: this.status,
           response: options.contentType == "application/json" && this.response && typeof this.response != "object" ? JSON.parse(this.response) : this.response,
-          responseText:  options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
+          responseText: options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
         });
       }
     }
@@ -7210,13 +7210,13 @@ eon.ajax = function (url, options, cb) {
     xhr.open(options.method, url, options.async, options.user, options.password);
   } else {
     xhr.open(options.method, url);
-  }  
+  }
 
   xhr.setRequestHeader("Content-Type", options.contentType);
-  
-  if(options.contentType == "application/json") {
+
+  if (options.contentType == "application/json") {
     xhr.responseType = "json";
-    if(options.payload && typeof options.payload == "object") {
+    if (options.payload && typeof options.payload == "object") {
       options.payload = JSON.stringify(options.payload);
     }
   }
@@ -7301,6 +7301,22 @@ eon.util.mapToObject = function (map) {
   }
 
   return obj;
+};
+
+/**
+ * Get Map Js Object representation
+ * @param  {[type]}  [description]
+ */
+eon.util.fitInViewport = function (left, top, width, height) {
+
+  top = (top + height) > window.innerHeight ? top - ((top + height) - window.innerHeight) - 5 : top;
+  top = top < 5 ? 5 : top;
+
+  left = (left + width) > window.innerWidth ? left - ((left + width) - window.innerWidth) - 5 : left;
+  left = left < 5 ? 5 : left;
+
+  return { left: left, top: top };
+
 };
 
 
@@ -8762,6 +8778,10 @@ eon.differ.compare = function (obj1, obj2, options, type) {
 
   options = options || {};
 
+  if (!options.hasOwnProperty("arrayOrder")) {
+    options.arrayOrder = true;
+  }
+
   obj1 = JSON.parse(JSON.stringify(obj1));
   obj2 = JSON.parse(JSON.stringify(obj2));
 
@@ -8866,11 +8886,10 @@ eon.differ.areDifferentArrays = function(arr1, arr2, options, type) {
         }
       }
     }
-    
-    if (options.arrayOrder && arr2.length > 0) {
-      return true;
-    }
+  }
 
+  if (!options.arrayOrder && arr2.length > 0) {
+    return true;
   }
   
   return false;
@@ -8901,13 +8920,13 @@ eon.createState = function (data) {
 
             // If the user provided a handleDiff function we called it sending the corresponding diff data
             if (data.handleDiff) {
-              var diff = eon.differ.getDiff(state.__local, state.__remote, stateOptions.diffing);
+              var diff = eon.differ.getDiff(state.__local, state.__remote, stateOptions);
               data.handleDiff(diff);
             }
 
             // If the user provided a handleMutations function we called it sending the corresponding mutations
             if (data.handleMutations) {
-              var mutations = eon.differ.getMutations(state.__local, state.__remote, stateOptions.diffing);
+              var mutations = eon.differ.getMutations(state.__local, state.__remote, stateOptions);
               data.handleMutations(mutations.created, mutations.updated, mutations.deleted);
             }
 

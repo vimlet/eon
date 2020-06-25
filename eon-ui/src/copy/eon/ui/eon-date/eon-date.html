@@ -1827,7 +1827,7 @@
 
           var width = el.pickerWidth != "auto" ? parseInt(el.pickerWidth) : (parseInt(el._refs.main.offsetWidth) *
             1.5);
-          var height, pickerTotalHeight, left, top;
+          var height, pickerTotalHeight, left, top, coords;
 
           width = width > el.pickerMaxWidth ? el.pickerMaxWidth : width;
           width = width < el.pickerMinWidth ? el.pickerMinWidth : width;
@@ -1845,15 +1845,10 @@
             left = origin.getBoundingClientRect().left;
           }
 
-          top = (top + pickerTotalHeight) > window.innerHeight ? top - ((top + pickerTotalHeight) - window
-            .innerHeight) - 5 : top;
-          top = top < 5 ? 5 : top;
+          coords = eon.util.fitInViewport(left, top, width, pickerTotalHeight);
 
-          left = (left + width) > window.innerWidth ? left - ((left + width) - window.innerWidth) - 5 : left;
-          left = left < 5 ? 5 : left;
-
-          el._refs.calendar.style.top = top + "px";
-          el._refs.calendar.style.left = left + "px";
+          el._refs.calendar.style.top = coords.top + "px";
+          el._refs.calendar.style.left = coords.left + "px";
           el._refs.calendar.style.width = width + "px";
           el._refs.body.style.height = height + "px";
 

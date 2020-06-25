@@ -208,7 +208,7 @@ eon.ajax = function (url, options, cb) {
   xhr.onreadystatechange = function () {
     if (this.readyState === 4) {
       var success;
-      if(options.errorOnRedirect) {
+      if (options.errorOnRedirect) {
         success = this.status >= 200 && this.status < 300;
       } else {
         success = this.status >= 200 && this.status < 400;
@@ -220,7 +220,7 @@ eon.ajax = function (url, options, cb) {
           xhr: this,
           status: this.status,
           response: options.contentType == "application/json" && this.response && typeof this.response != "object" ? JSON.parse(this.response) : this.response,
-          responseText:  options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
+          responseText: options.contentType == "application/json" ? JSON.stringify(this.response) : this.responseText
         });
       }
     }
@@ -240,13 +240,13 @@ eon.ajax = function (url, options, cb) {
     xhr.open(options.method, url, options.async, options.user, options.password);
   } else {
     xhr.open(options.method, url);
-  }  
+  }
 
   xhr.setRequestHeader("Content-Type", options.contentType);
-  
-  if(options.contentType == "application/json") {
+
+  if (options.contentType == "application/json") {
     xhr.responseType = "json";
-    if(options.payload && typeof options.payload == "object") {
+    if (options.payload && typeof options.payload == "object") {
       options.payload = JSON.stringify(options.payload);
     }
   }
@@ -331,4 +331,20 @@ eon.util.mapToObject = function (map) {
   }
 
   return obj;
+};
+
+/**
+ * Get Map Js Object representation
+ * @param  {[type]}  [description]
+ */
+eon.util.fitInViewport = function (left, top, width, height) {
+
+  top = (top + height) > window.innerHeight ? top - ((top + height) - window.innerHeight) - 5 : top;
+  top = top < 5 ? 5 : top;
+
+  left = (left + width) > window.innerWidth ? left - ((left + width) - window.innerWidth) - 5 : left;
+  left = left < 5 ? 5 : left;
+
+  return { left: left, top: top };
+
 };
