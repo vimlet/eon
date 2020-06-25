@@ -73,6 +73,10 @@ eon.differ.compare = function (obj1, obj2, options, type) {
 
   options = options || {};
 
+  if (!options.hasOwnProperty("arrayOrder")) {
+    options.arrayOrder = true;
+  }
+
   obj1 = JSON.parse(JSON.stringify(obj1));
   obj2 = JSON.parse(JSON.stringify(obj2));
 
@@ -177,11 +181,10 @@ eon.differ.areDifferentArrays = function(arr1, arr2, options, type) {
         }
       }
     }
-    
-    if (!options.arrayOrder && arr2.length > 0) {
-      return true;
-    }
+  }
 
+  if (!options.arrayOrder && arr2.length > 0) {
+    return true;
   }
   
   return false;
