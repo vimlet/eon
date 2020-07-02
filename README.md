@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://vimlet.com/eon">
+<a href="https://eonjs.org/">
 <img src="https://vimlet.com/resources/img/eon-h-flat.png" height="100"></img>
 </a>
 </p>

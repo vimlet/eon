@@ -28,7 +28,7 @@ eon.getCurrentScript = function() {
     path = path.slice(1, path.length);
   
     var basePath = "";
-    for (i = 0; i < path.length; i++) {
+    for (var i = 0; i < path.length; i++) {
       basePath += "/";
       basePath += path[i];
     }
