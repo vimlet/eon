@@ -150,11 +150,11 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
 @param {Object} options
 */
 eon.differ.areDifferentArrays = function(arr1, arr2, options, type) {
-  if (arr1.length !== arr2.length) {
+  if (!arr2 || Object.prototype.toString.call(arr2) != '[object Array]'|| arr1.length !== arr2.length ) {
     return true;
   }
 
-  for (var i = 0; i < arr1.length; i++) {
+  for (var i = 0; i < arr1.length; i++) { 
     if (typeof arr1[i] === 'object' && !Array.isArray(arr1[i])) {
       if (typeof arr2[i] === 'object' && !Array.isArray(arr2[i])) {
         var tDiff = eon.differ.compare(arr1[i], arr2[i], options, type);
