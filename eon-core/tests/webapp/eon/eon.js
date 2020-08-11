@@ -71,7 +71,7 @@ eon.getCurrentScript = function() {
     path = path.slice(1, path.length);
   
     var basePath = "";
-    for (i = 0; i < path.length; i++) {
+    for (var i = 0; i < path.length; i++) {
       basePath += "/";
       basePath += path[i];
     }
@@ -8782,8 +8782,8 @@ eon.differ.compare = function (obj1, obj2, options, type) {
     options.arrayOrder = true;
   }
 
-  obj1 = JSON.parse(JSON.stringify(obj1));
-  obj2 = JSON.parse(JSON.stringify(obj2));
+  obj1 = obj1 ? JSON.parse(JSON.stringify(obj1)) : {};
+  obj2 = obj2 ? JSON.parse(JSON.stringify(obj2)) : {};
 
   for (var key in obj1) {
     if (obj1.hasOwnProperty(key)) {
@@ -8855,11 +8855,11 @@ eon.differ.compareEntry = function (item1, item2, key, diffs, options, type) {
 @param {Object} options
 */
 eon.differ.areDifferentArrays = function(arr1, arr2, options, type) {
-  if (arr1.length !== arr2.length) {
+  if (!arr2 || Object.prototype.toString.call(arr2) != '[object Array]'|| arr1.length !== arr2.length ) {
     return true;
   }
 
-  for (var i = 0; i < arr1.length; i++) {
+  for (var i = 0; i < arr1.length; i++) { 
     if (typeof arr1[i] === 'object' && !Array.isArray(arr1[i])) {
       if (typeof arr2[i] === 'object' && !Array.isArray(arr2[i])) {
         var tDiff = eon.differ.compare(arr1[i], arr2[i], options, type);
@@ -8938,6 +8938,56 @@ eon.createState = function (data) {
 
   return state;
 };
+
+/*
+@function iterate
+@description 
+@param {Array} iterable
+@param {Number} batch
+@param {Number} delay
+*/
+eon.iterate = function (iterable, batch, delay) {
+    batch = batch || iterable.length;
+
+    if (batch == 0) {
+      batch = iterable.length;
+    }
+
+    var current = 0;
+    var nextCount = 0;
+    var doneCount = 0;
+
+    var done = function () {
+      doneCount++;
+      if (doneCount == batch) {
+        if (delay != null) {
+          setTimeout(function () {
+            nextCount = 0;
+            doneCount = 0;
+            next();
+          }, delay);
+        } else {
+          nextCount = 0;
+          doneCount = 0;
+          next();
+        }
+      }
+    };
+
+    var next = function () {
+      if (current < iterable.length) {
+        if (nextCount < batch) {
+          var e = iterable[current];
+          current++;
+          nextCount++;
+          e.run(done);
+          next();
+        }
+      }
+    };
+
+    next();
+  };
 
   
     // ############################################################################################
