@@ -35,11 +35,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     themeDescriptor.set = function (value) {
 
-      eon.domReady(function(){
-
+      // eon.domReady(function(){
         document.body.setAttribute("theme", value);
 
-        if (!eon.registry.isThemeRegistered("main", value)) {
+        var themesKeys = eon.registry.elementThemes[eon.__theme] ? Object.keys(eon.registry.elementThemes[eon.__theme]) : [];
+
+        if (!eon.registry.isThemeRegistered("main", value) && themesKeys.length) {
             eon.importMainTheme(value);
         }
 
@@ -47,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         eon.triggerCallback("_onThemeChanged", eon, null, [eon.__theme, value]);
         eon.triggerCallback("onThemeChanged", eon, null, [eon.__theme, value]);
         eon.__theme = value;
-      });
+      // });
 
     };
   

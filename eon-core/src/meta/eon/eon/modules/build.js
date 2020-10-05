@@ -3,18 +3,22 @@
   @description Takes either the eon.build and declares its components or it does it after requesting a build file provided by the user
   @param {String} filePath
 */
-eon.importBuild = function (filePath) {
-  
-  if (eon.build && filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
-    // Initiate the buildsQueue
-    eon.buildsQueue = eon.buildsQueue ? eon.buildsQueue : [];
-    // If its not already in the queue then push the given filePath
-    if (eon.buildsQueue.indexOf(filePath) == -1) {
-      eon.buildsQueue.push(filePath);
-    }
-    // Request the file only if its the first on queue, otherwise it will be called once our first build is finished processing
-    if (eon.buildsQueue.length <= 1) {
-      eon.requestBuild(filePath);
+eon.importBuild = function (filePath, theme) {
+
+  if ((eon.build && !theme) || (eon.build && theme && theme == eon.theme)) {
+
+    if (filePath && (!eon.processedBuilds || eon.processedBuilds.indexOf(filePath) == -1)) {
+      // Initiate the buildsQueue
+      eon.buildsQueue = eon.buildsQueue ? eon.buildsQueue : [];
+      // If its not already in the queue then push the given filePath
+      if (eon.buildsQueue.indexOf(filePath) == -1) {
+        eon.buildsQueue.push(filePath);
+      }
+      // Request the file only if its the first on queue, otherwise it will be called once our first build is finished processing
+      if (eon.buildsQueue.length <= 1) {
+        eon.requestBuild(filePath);
+      }
+
     }
 
   }
@@ -26,7 +30,7 @@ eon.importBuild = function (filePath) {
 @description Request the build
 */
 eon.requestBuild = function (filePath) {
-  
+
   eon.ajax(filePath, { contentType: "text/plain", cacheBusting: eon.cacheBusting || eon.buildCacheBusting }, function (error, obj) {
 
     if (!error) {
@@ -37,7 +41,7 @@ eon.requestBuild = function (filePath) {
       if (obj.xhr.status === 200) {
 
         var script = document.createElement("script");
-        var content = eon.buildDecompress != "false" && eon.buildDecompress != false  ? lzjs.decompressFromBase64(obj.responseText) : obj.responseText;
+        var content = eon.buildDecompress != "false" && eon.buildDecompress != false ? lzjs.decompressFromBase64(obj.responseText) : obj.responseText;
         // Create the script and fill it with its content, also remove the build path from the queue and process the next
         // build thats waiting on the builds queue and resume the imports
         script.innerHTML = content + "eon.buildsQueue.splice(eon.buildsQueue.indexOf('" + filePath + "'), 1);";
@@ -60,7 +64,7 @@ eon.requestBuild = function (filePath) {
   @function processBuilds
   @description
   */
- eon.processBuilds = function () {
+eon.processBuilds = function () {
 
   eon.declareBuildThemes();
   eon.declareBuildComponents();
@@ -71,7 +75,7 @@ eon.requestBuild = function (filePath) {
   @function declareBuildThemes
   @description Loops through the themes and appends them
   */
- eon.declareBuildThemes = function () {
+eon.declareBuildThemes = function () {
 
   if (eon.build) {
 
@@ -88,11 +92,11 @@ eon.requestBuild = function (filePath) {
         eon.registry.elementThemes[themes[i]] = eon.registry.elementThemes[themes[i]] || {};
 
         if (!eon.registry.elementThemes[themes[i]][names[j]]) {
-        
+
           style.textContent = style.textContent + eon.builds.themes[themes[i]][names[j]];
           document.head.appendChild(style);
           eon.registry.registerTheme(names[j], themes[i]);
-          
+
         }
       }
 
@@ -117,7 +121,7 @@ eon.declareBuildComponents = function () {
     for (var i = 0; i < names.length; i++) {
 
       var name = names[i];
-      
+
       if (!eon.declared.all[name] && !eon.declared.build[name]) {
 
         var path = eon.builds.components[name].path;
@@ -142,7 +146,7 @@ eon.declareBuildComponents = function () {
         if (document.readyState === 'loading') {  // Loading hasn't finished yet
           eon.declareOnDOMContentLoaded(name);
         } else {  // DOMContentLoaded has already fired
-          
+
           eon.declareBuildComponent(name);
         }
 
@@ -170,7 +174,7 @@ eon.declareOnDOMContentLoaded = function (name) {
   @function declareBuildComponent
   @description Declares a single build component
   */
- eon.declareBuildComponent = function (name) {
+eon.declareBuildComponent = function (name) {
 
   eon.declared.build[name] = true;
 
