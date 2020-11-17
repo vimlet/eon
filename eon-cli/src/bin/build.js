@@ -327,7 +327,7 @@ async function outputBuild(build, outputPath, buildCompress) {
     txt += JSON.stringify(build.themes);
     txt += ");";
     
-    if (buildCompress == "true" && buildCompress == true) {
+    if (buildCompress == "true" || buildCompress == true) {
         txt = lzjs.compressToBase64(txt);
     }
 
