@@ -476,10 +476,10 @@
           // Only do stuff if it has offsetParent, that means the eon-scroll is not hidden by display none, in which case we 
           // do not want to take the resize into account
           if (el.offsetParent) {
-              el._handleVerticalResize();
-              el._handleHorizontalResize();
+            el._handleVerticalResize();
+            el._handleHorizontalResize();
           }
-          
+
         }
 
         eon.addResizeListener(el, el.nodeName.toLowerCase(), el._misc.resize.fn);
@@ -604,6 +604,7 @@
             if (!el._refs.verticalScroll.classList.contains("eon-scroll-active")) {
               // Then activate it
               el._refs.verticalScroll.classList.add("eon-scroll-active");
+              eon.triggerCallback("onVerticalStatusChange", el, el, [true]);
               // If the horizontal scroll is active 
               if (el._misc.horizontal.created && el._refs.horizontalScroll.classList.contains("eon-scroll-active")) {
                 // Then check if the square is already created, if it is
@@ -630,6 +631,7 @@
           } else {
             // Then deactive the scroll
             el._refs.verticalScroll.classList.remove("eon-scroll-active");
+            eon.triggerCallback("onVerticalStatusChange", el, el, [false]);
             // If the square is active
             if (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) {
               // Then deactivate it
@@ -676,6 +678,7 @@
             if (!el._refs.horizontalScroll.classList.contains("eon-scroll-active")) {
               // Then activate it
               el._refs.horizontalScroll.classList.add("eon-scroll-active");
+              eon.triggerCallback("onHorizontalStatusChange", el, el, [true]);
               // If the vertical scroll is active 
               if (el._misc.vertical.created && el._refs.verticalScroll.classList.contains("eon-scroll-active")) {
                 // Then check if the square is already created, if it is
@@ -702,6 +705,7 @@
           } else {
             // Then deactive the scroll
             el._refs.horizontalScroll.classList.remove("eon-scroll-active");
+            eon.triggerCallback("onHorizontalStatusChange", el, el, [false]);
 
             // If the square is active
             if (el._misc.square.created && el._refs.square.classList.contains("eon-scroll-active")) {
@@ -907,6 +911,8 @@
         // Assigns the sizes for the scroll
         el._assignVerticalScrollSize();
         el._updateVerticalScrollBar();
+
+        eon.triggerCallback("onVerticalStatusChange", el, el, [true]);
       },
       /*
         @function (private) _createHorizontalScroll
@@ -958,6 +964,8 @@
         // Assigns the sizes for the scroll
         el._assignHorizontalScrollSize();
         el._updateHorizontalScrollBar();
+
+        eon.triggerCallback("onHorizontalStatusChange", el, el, [true]);
       },
       /*
         @function (private) _createVerticalScrollArrows
@@ -1232,8 +1240,10 @@
 
           if ((el._refs.verticalBar.getBoundingClientRect().height > el._refs.verticalRail.getBoundingClientRect().height) && !eon.util.isTrue(el.static)) {
             el._refs.verticalScroll.classList.remove("eon-scroll-active");
+            eon.triggerCallback("onVerticalStatusChange", el, el, [false]);
           } else {
             el._refs.verticalScroll.classList.add("eon-scroll-active");
+            eon.triggerCallback("onVerticalStatusChange", el, el, [true]);
           }
 
         }
@@ -1249,8 +1259,10 @@
 
           if ((el._refs.horizontalBar.getBoundingClientRect().width > el._refs.horizontalRail.getBoundingClientRect().width) && !eon.util.isTrue(el.static)) {
             el._refs.horizontalScroll.classList.remove("eon-scroll-active");
+            eon.triggerCallback("onHorizontalStatusChange", el, el, [false]);
           } else {
             el._refs.horizontalScroll.classList.add("eon-scroll-active");
+            eon.triggerCallback("onHorizontalStatusChange", el, el, [true]);
           }
 
         }
@@ -1798,6 +1810,8 @@
       eon.createCallback("onScrolled", el);
       eon.createCallback("onHorizontalScrollCreated", el);
       eon.createCallback("onVerticalScrollCreated", el);
+      eon.createCallback("onHorizontalStatusChange", el);
+      eon.createCallback("onVerticalStatusChange", el);
 
       el._setupMisc();
       el._createContent();

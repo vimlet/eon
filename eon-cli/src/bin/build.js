@@ -272,7 +272,7 @@ async function includeTheme(build, filePath, buildMinify) {
     themeContent = (await readFile(filePath)).toString();
     themeName = filePath.match(themeRegex)[1];
 
-    if (buildMinify) {
+    if (buildMinify != "false" && buildMinify != false) {
         themeContent = minify(themeContent, {
             removeComments: true,
             minifyJS: function (text, inline) {
@@ -327,7 +327,7 @@ async function outputBuild(build, outputPath, buildCompress) {
     txt += JSON.stringify(build.themes);
     txt += ");";
     
-    if (buildCompress != "false" && buildCompress != false) {
+    if (buildCompress == "true" && buildCompress == true) {
         txt = lzjs.compressToBase64(txt);
     }
 
