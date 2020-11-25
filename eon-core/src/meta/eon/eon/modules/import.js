@@ -234,7 +234,7 @@ eon.prepareComponent = function (elementName, content) {
                 var hasPendingImports = eon.handleDependencies();
 
                 // Handle interpolation
-                eon.parseTemplate(elementName);
+                eon.parseTemplates();
 
                 // If there are no more dependencies to handle trigger onImportsReady
                 if (!hasPendingImports && !eon.imports.ready && eon.imports.count === eon.imports.total && eon.imports.total === Object.keys(eon.imports.config).length) {
@@ -302,15 +302,20 @@ eon.handleDependencies = function () {
 
 
 /*
-@function parseTemplate
-@description Parses the component template
-@param {String} name
+@function parseTemplates
+@description Parses the components templates
 */
-eon.parseTemplate = function (name) {
-    if (eon.imports.config[name].parse) {
-        eon.interpolation.prepare(eon.imports.templates[name]);
+eon.parseTemplates = function () {
+    var elementNames = Object.keys(eon.imports.config);
+
+    for (var i = 0; i < elementNames.length; i++) {
+      if (eon.imports.config[elementNames[i]].parse) {
+        eon.interpolation.prepare(eon.imports.templates[elementNames[i]]);
+      }
+
     }
-};
+
+  };
 
 
 /*
