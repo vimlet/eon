@@ -438,9 +438,16 @@ eon.interpolation.define = function (scope, keyOwnerObj, key, keyPath, val, isLo
   var value = val && val.constructor === Object ? JSON.parse(JSON.stringify(val)) : val;
   var newKeyPath;
 
+  // Creates a private non enumerable variable to keep the value
+  Object.defineProperty(keyOwnerObj, "__" + key, {
+    configurable: true,
+    enumerable: false,
+    value: value
+  });
+
   // Redirect get and set
   propDescriptor.get = function () {
-    return value;
+    return keyOwnerObj["__" + key];
   };
 
   propDescriptor.set = function (newValue) {
@@ -449,7 +456,7 @@ eon.interpolation.define = function (scope, keyOwnerObj, key, keyPath, val, isLo
     eon.triggerCallback(callbackName, scope, scope, [keyPath + key, value, newValue]);
 
     // Update property value
-    value = newValue;
+    keyOwnerObj["__" + key] = newValue;
   };
 
   Object.defineProperty(

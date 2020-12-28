@@ -13,17 +13,17 @@
 ![Codacy grade](https://img.shields.io/codacy/grade/a08a454edeac4b12b6c58b7aac866a2b.svg)
 ![GitHub](https://img.shields.io/github/license/vimlet/eon.svg)
 
-eon is an **ultra light and fast web framework** that focuses on user experience and developer experience, allowing you to create intuitive interfaces across any device with little effort. eon harness state of the art technologies to provide a smooth developing experience without compromising **compatibility and performance**, so you can stay highly productive while retaining full control of your user interface. 
+Eon is an **ultra light and fast web framework** that focuses on user experience and developer experience, allowing you to create intuitive interfaces across any device with little effort. Eon harness state of the art technologies to provide a smooth developing experience without compromising **compatibility and performance**, so you can stay highly productive while retaining full control of your user interface. 
 
-Bundled with eon there is a comprehensive library of **flexible and themeable** components that will suit most of your needs but you can also create your own with ease. 
+Bundled with Eon there is a comprehensive library of **flexible and themeable** components that will suit most of your needs but you can also create your own with ease. 
 
-At is heart eon takes care of the hassles of user interface creation, effectively simplifying a plethora of issues that any interface designer faces in a daily basis (compatibility, performance, responsiveness, data binding, extensibility...) so you can stay focused on what really matters, your app!
+At is heart Eon takes care of the hassles of user interface creation, effectively simplifying a plethora of issues that any interface designer faces in a daily basis (compatibility, performance, responsiveness, data binding, extensibility...) so you can stay focused on what really matters, your app!
 
 ## Features
 
 * **Light:** Core of less than 16kb (minified and gzipped).
 * **Fast:** With its asynchronous patterns and natively supported specs.
-* **Intuitive:** The DOM is your API; HTML and JavaScript are enough to work with eon.
+* **Intuitive:** The DOM is your API; HTML and JavaScript are enough to work with Eon.
 * **Semantic:** Non-verbose declarative and programmatic API.
 * **Templating:** Data binding capabilities.
 * **Compatible:** Designed for all modern browsers.
@@ -54,7 +54,7 @@ Once it's downloaded, simply import it into your head.
     <script src="eon/eon.js"></script>
 </head>
 ```
-*Ensure that you use the path to your eon location folder*
+*Ensure that you use the path to your Eon location folder*
 
 ### Importing components
 
@@ -85,9 +85,9 @@ eon.onReady(function () {
 });
 ```
 
-Keep reading the full [documentation](https://vimlet.com/vimlet/eon/master/eon-framework/docs/release/index.html)
+Keep reading the full [documentation](https://eonjs.org/docs/#!version=latest&mode=tutorial&file=entries%2FTutorial%2FWelcome.md)
 
 ## License
 
-eon is released under MIT License. See [LICENSE](https://github.com/vimlet/eon/blob/master/eon-framework/LICENSE) for details.
+Eon is released under MIT License. See [LICENSE](https://github.com/vimlet/eon/blob/master/LICENSE) for details.
 

@@ -520,8 +520,10 @@ eon.handleProperty = function (el, config, reflectProperties, observeProperties,
 
     // Complex property
     if (typeof value === "object" && value.hasOwnProperty("value")) {
-        if (typeof value.value === "object") {
+        if (value.value.constructor === Object) {
             value = Object.assign({}, value.value);
+        } else if (value.value.constructor === Array) {
+            value = value.value.slice();
         } else {
             value = value.value;
         }
@@ -634,7 +636,7 @@ eon.importPublic = function (el, config) {
             // If the element has one of the reflected attributes we send that value as the value of the property
             eon.handleProperty(el, config, el.__reflectProperties, el.__observeProperties, {
                 key: keys[i],
-                value: el.hasAttribute(attributeKey) ? el.getAttribute(attributeKey) : config.properties[keys[i]]
+                value: el.hasAttribute(attributeKey) ? el.getAttribute(attributeKey) : config.properties[keys[i]].value
             });
         }
     }
