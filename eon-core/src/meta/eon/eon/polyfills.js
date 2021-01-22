@@ -46,11 +46,11 @@ eon.polyfills.needObjectAssignPolyfill = function () {
 };
 
 eon.polyfills.needLocaleStringPolyfill = function () {
-  return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "short" }) !== "Wed");
-};
+  return (new Date(1994, 1, 9).toLocaleString("en", { weekday: "long" }) != "Wednesday");
+}
 
 eon.polyfills.needPromisesPolyfill = function () {
-  if(typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1){
+  if (typeof Promise !== "undefined" && Promise.toString().indexOf("[native code]") !== -1) {
     return false;
   }
   return true;
