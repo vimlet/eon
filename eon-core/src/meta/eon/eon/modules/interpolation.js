@@ -24,30 +24,32 @@ eon.createCallback("onLocaleChanged", eon.interpolation.globalScope);
 */
 eon.interpolation.prepare = function (template) {
 
-  // Extend vimlet.meta
-  if (!vimlet.meta.sandbox) {
-    vimlet.meta.sandbox = {
-      "bind": function (keyPath, rootPath, global) {
-        var params = eon.interpolation.getVariableParams(keyPath, rootPath, global);
-        this.echo('<eon-variable bind="' + params.keyPath + '" global="' + params.global + '"></eon-variable>');
-      }
-    };
+  if (template) {
+    // Extend vimlet.meta
+    if (!vimlet.meta.sandbox) {
+      vimlet.meta.sandbox = {
+        "bind": function (keyPath, rootPath, global) {
+          var params = eon.interpolation.getVariableParams(keyPath, rootPath, global);
+          this.echo('<eon-variable bind="' + params.keyPath + '" global="' + params.global + '"></eon-variable>');
+        }
+      };
+    }
+
+    if (!vimlet.meta.shortcut) {
+      vimlet.meta.shortcut = {
+        "@": function (s) {
+          var params = eon.interpolation.getStringParams(s);
+          return "bind.apply(undefined, [ " + params.keyPath + ", " + params.rootPath + ", " + params.global + "]);";
+        }
+      };
+    }
+
+
+    vimlet.meta.tags = eon.interpolation.tags;
+    vimlet.meta.parse(window, template.innerHTML, null, function (result) {
+      template.innerHTML = result;
+    });
   }
-
-  if (!vimlet.meta.shortcut) {
-    vimlet.meta.shortcut = {
-      "@": function (s) {
-        var params = eon.interpolation.getStringParams(s);
-        return "bind.apply(undefined, [ " + params.keyPath + ", " + params.rootPath + ", " + params.global + "]);";
-      }
-    };
-  }
-
-
-  vimlet.meta.tags = eon.interpolation.tags;
-  vimlet.meta.parse(window, template.innerHTML, null, function (result) {
-    template.innerHTML = result;
-  });
 
   return template;
 };
@@ -110,7 +112,7 @@ eon.interpolation.getVariableParams = function (keyPath, rootPath, global) {
 */
 eon.interpolation.bind = function (el, config) {
 
-  if (el.nodeName.toLowerCase() != "eon-variable") {
+  if (el.nodeName.toLowerCase() != "eon-variable" && el.data) {
 
     var sources = {};
 
