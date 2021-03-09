@@ -250,17 +250,26 @@
         el._misc.descriptionText = description;
         el._refs.description.innerHTML = description;
       },
+      // @function select (public)
+      select: function () {
+        var el = this;
+        if (el.type != "area") {
+          el._refs.input.select();
+        } else {
+          el._selectArea();
+        }
+      },
       // @function focus (public) [Give focus to vc-text]
       focus: function () {
         var el = this;
         el.onReady(function () {
-          if (el.type != "area") {            
+          if (el.type != "area") {
             el._refs.input.focus();
           } else {
             // if (el._misc.area.isNative) {
             //   el._refs.editableArea.focus();
             // }
-              el._refs.editableArea.focus();
+            el._refs.editableArea.focus();
           }
         });
       }
@@ -928,7 +937,9 @@
       */
       updatePlaceholder: function () {
         var placeHolderElement = this.type != "area" ? this._refs.input : this._refs.editableArea;
-        placeHolderElement.setAttribute("placeholder", this.placeholder);
+        if (placeHolderElement) {
+          placeHolderElement.setAttribute("placeholder", this.placeholder);
+        }
       },
       /*
         @function (private) _updateInvalid
@@ -939,6 +950,24 @@
         var classListFn = eon.util.isTrue(el.invalid) ? "add" : "remove";
 
         el.classList[classListFn]("eon-text-error");
+      },
+      // @function _selectArea (private) [Select text in text area]
+      selectArea: function () {
+        var el = this;
+        setTimeout(function () {
+          var sel, range;
+          if (window.getSelection && document.createRange) {
+            range = document.createRange();
+            range.selectNodeContents(el._refs.editableArea);
+            sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+          } else if (document.body.createTextRange) {
+            range = document.body.createTextRange();
+            range.moveToElementText(el._refs.editableArea);
+            range.select();
+          }
+        }, 0);
       }
     },
     onCreated: function () {

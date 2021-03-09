@@ -400,7 +400,7 @@
 
         }
 
-        // This listener is meant for devices, it does not matter where the user touches we will open de dropdown
+        // This listener is meant for devices, it does not matter where the user touches we will open the dropdown
         if (window.innerWidth <= eon.tabletWidth) {
 
           el._refs.main.querySelector("input").addEventListener("touchstart", function (e) {
@@ -1428,16 +1428,26 @@
           this._updateInvalid();
           break;
       }
-
     },
+
     onWindowResize: function () {
-
       var el = this;
+      var throttled = false;
+      var delay = 10;
 
-      if (el._misc.modal.active && !el._misc.modal.inputFocus) {
-        el.shrink();
+      // Decrease resize calls
+      if (!throttled) {
+        throttled = true;
+
+        if (el._misc.modal.active && !el._misc.modal.inputFocus) {
+          el.shrink();
+        }
+
+        // Set a timeout to un-throttle
+        setTimeout(function () {
+          throttled = false;
+        }, delay);
       }
-
     }
   });
 </script>
