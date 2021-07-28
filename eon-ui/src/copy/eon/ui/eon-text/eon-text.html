@@ -844,6 +844,19 @@
         }
       },
       /*
+        @function (private) _updateType
+        @description 
+      */
+      updateType: function (newType) {
+        var el = this;
+
+        el.onReady(function () {
+          if (el._refs.input) {
+            el._refs.input.type = newType;
+          }
+        });
+      },
+      /*
         @function (private) _updateDisabled
         @description Updates disabled status
       */
@@ -909,13 +922,13 @@
       */
       updateValue: function () {
         var el = this;
-
         el.onReady(function () {
           if (el.type == "area") {
             // This is set to true when the value propertyChanged is triggered from the textarea change, 
             // in those scenarios we dont want to update the area again
             if (!el._misc.area.preventUpdate) {
               el._refs.editableArea.innerText = el.value;
+              el._refs.editableArea.value = el.value;
               el._updateCounter();
             }
 
@@ -977,9 +990,6 @@
       el._misc.initialText = el.source.textContent.replace(/\s/g, '').length > 0 ? el._misc.initialText : "";
 
       el._misc.descriptionText = "";
-
-      el.value = el.value == "" && el._misc.initialText != "" ? el._misc.initialText : el.value;
-
       el._misc.area = {};
       el._misc.area.inputEventTriggered = false;
       el._misc.area.verticalSize = 0;
@@ -992,6 +1002,7 @@
       eon.createCallback("onFocus", this);
     },
     onInit: function () {
+      this.value = this.value == "" && this._misc.initialText != "" ? this._misc.initialText : this.value;
       this._setupRefs();
       this._setupLabelAnimation();
     },
@@ -999,9 +1010,14 @@
       this._setup();
     },
     onPropertyChanged: function (key, oldVal, newVal) {
+      var el = this;
+
       switch (key) {
         case "label":
           this._updateLabel();
+          break;
+        case "type":
+          this._updateType(newVal);
           break;
         case "counter":
           this._updateCounter();
@@ -1016,7 +1032,9 @@
           this._updateInitialValue();
           break;
         case "value":
-          this._updateValue();
+          setTimeout(function() {            
+            el._updateValue();
+          }, 0);
           break;
         case "placeholder":
           this._updatePlaceholder();
